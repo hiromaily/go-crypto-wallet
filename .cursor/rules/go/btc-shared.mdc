@@ -93,7 +93,7 @@ type BCHSpecificResult struct {  // ❌ NEVER DO THIS
 // internal/infrastructure/api/btc/btc/address.go
 func (b *Bitcoin) GetAddressInfo(addr string) (*AddressInfo, error) {
     // ... BTC logic ...
-    
+
     // Handle BCH label difference  // ❌ NEVER DO THIS
     if isBCH {
         // ...

@@ -1,3 +1,8 @@
+---
+paths:
+  - "internal/application/usecase/**/*.go"
+---
+
 # Claude Rules - Use Case Pattern
 
 ## Overview

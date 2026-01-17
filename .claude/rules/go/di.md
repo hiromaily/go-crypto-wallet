@@ -1,4 +1,10 @@
-# Claude Rules - Dependency Injection
+---
+paths:
+  - "internal/di/container.go"
+  - "pkg/di/container.go"
+---
+
+# Dependency Injection
 
 ## Overview
 

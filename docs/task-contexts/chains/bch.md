@@ -194,20 +194,49 @@ flowchart TD
 
 ## Files NOT to Use for BCH Implementation
 
-These BTC files should **NEVER** be referenced for BCH:
+> **⚠️ CRITICAL WARNING FOR AI AGENTS ⚠️**
+>
+> The following files are **BTC-ONLY** and must **NEVER** be modified or referenced for BCH tasks.
+> BCH uses completely different transaction formats and signing mechanisms.
+
+### 🚫 PSBT Files (MOST COMMONLY MISTAKEN)
+
+**`internal/infrastructure/api/btc/btc/psbt.go`** - This file is the most common mistake!
+
+| Feature | BTC | BCH |
+|---------|-----|-----|
+| Transaction Format | **PSBT (BIP174)** | **Raw TX Hex** |
+| Signing Mechanism | walletprocesspsbt | signrawtransaction |
+| Sighash | SigHashAll (0x01) | **SigHashAll + ForkID (0x41)** |
+
+**DO NOT:**
+
+- Import or call any function from `psbt.go` for BCH
+- Modify `psbt.go` to add BCH support
+- Reference PSBT examples when implementing BCH
+
+### 🚫 Other Prohibited Files
 
 ```
 # Descriptor files (BCH has no descriptor support)
 internal/infrastructure/api/btc/btc/descriptor*.go
 internal/application/usecase/*/btc/*descriptor*.go
 
-# PSBT files (BCH uses raw transactions)
+# PSBT files (BCH uses raw transactions) - SEE WARNING ABOVE
 internal/infrastructure/api/btc/btc/psbt.go
 
 # MuSig2 files (BCH has no Schnorr)
 internal/infrastructure/api/btc/btc/musig2.go
 internal/application/usecase/*/btc/*musig2*.go
 ```
+
+### Why These Files Are Prohibited
+
+| File | BTC Feature | BCH Alternative |
+|------|-------------|-----------------|
+| `psbt.go` | PSBT format (BIP174) | Raw TX Hex via `createrawtransaction` |
+| `descriptor*.go` | Descriptor wallets | Address export/import workflow |
+| `musig2.go` | Schnorr/MuSig2 | Traditional P2SH multisig |
 
 ## Files Safe to Use for BCH Implementation
 
@@ -504,6 +533,33 @@ func (b *BitcoinCash) ExistingBTCMethod() (*Result, error) {
 
 ---
 
-**Document Version:** 2.0
+## Related Rules and Documentation
+
+### Claude/Cursor Rules (MUST READ for BCH tasks)
+
+| Rule File | Purpose |
+|-----------|---------|
+| `.claude/rules/bch/btc-only-files.md` | Complete list of BTC-only files that must NEVER be used for BCH |
+| `.claude/rules/bch/e2e-script.md` | BCH E2E script development rules |
+
+### Design Documents
+
+| Document | Purpose |
+|----------|---------|
+| `docs/crypto/bch/interface-separation.md` | Interface separation requirements between BTC and BCH |
+
+### Related GitHub Issues
+
+| Issue | Description |
+|-------|-------------|
+| #435 | BCH: Use case layer incorrectly uses BTC-only APIs (PSBT, Descriptor, MuSig2) |
+| #434 | BCH: Implement SIGHASH_FORKID support for transaction signing |
+| #431 | BCH E2E Pattern 1 (P2PKH Single-sig) |
+| #432 | BCH E2E Pattern 2 (P2SH 2-of-3 Multisig) |
+| #433 | BCH E2E Pattern 3 (P2SH 3-of-3 Multisig) |
+
+---
+
+**Document Version:** 2.1
 **Last Updated:** 2026-01-17
 **Purpose:** AI Agent Task Context for BCH Implementation

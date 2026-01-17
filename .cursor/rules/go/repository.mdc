@@ -1,9 +1,13 @@
 ---
-description: Claude Rules - Repository Pattern
-alwaysApply: true
+description: Repository Pattern
+globs: 
+  - "internal/application/ports/repository/**/*.go"
+  - "internal/infrastructure/repository/**/*.go"
+alwaysApply: false
 ---
 
-# Claude Rules - Repository Pattern
+
+# Repository Pattern
 
 ## Overview
 

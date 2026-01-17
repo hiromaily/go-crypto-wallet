@@ -1,3 +1,27 @@
+// Package btc provides Bitcoin (BTC) infrastructure implementations.
+//
+// IMPORTANT: PSBT (Partially Signed Bitcoin Transaction) - BTC ONLY
+//
+// This file implements PSBT functionality which is ONLY applicable to Bitcoin (BTC).
+// BCH (Bitcoin Cash) does NOT support PSBT.
+//
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │ WARNING: DO NOT USE THIS FILE FOR BCH (Bitcoin Cash) IMPLEMENTATIONS        │
+// │                                                                             │
+// │ BCH uses Raw Transaction Hex format, NOT PSBT.                              │
+// │ BCH signing requires SIGHASH_FORKID (0x40) which is not handled here.       │
+// │                                                                             │
+// │ For BCH implementations, see:                                               │
+// │   - internal/infrastructure/api/btc/bch/                                    │
+// │   - docs/task-contexts/chains/bch.md                                        │
+// └─────────────────────────────────────────────────────────────────────────────┘
+//
+// PSBT is defined in BIP174 and provides a standard format for unsigned/partially
+// signed transactions that can be passed between parties for multi-signature workflows.
+//
+// BCH Protocol Differences (DO NOT apply PSBT to BCH):
+//   - BCH: Raw TX Hex + ECDSA + SIGHASH_FORKID (0x41)
+//   - BTC: PSBT (BIP174) + ECDSA/Schnorr + standard sighash types
 package btc
 
 import (

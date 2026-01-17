@@ -1,0 +1,264 @@
+---
+description: BCH: BTC-Only Files Warning
+alwaysApply: true
+  # Infrastructure Layer - BTC Only (PSBT, Descriptor, MuSig2)
+  - "internal/infrastructure/api/btc/btc/psbt.go"
+  - "internal/infrastructure/api/btc/btc/musig2.go"
+  - "internal/infrastructure/api/btc/btc/descriptor.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_service.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_bech32.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_info.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_multisig.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_p2pkh.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_p2sh.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_taproot.go"
+  - "internal/infrastructure/api/btc/btc/descriptor_taproot_multikey.go"
+  # Use Case Layer - BTC Only (PSBT-based transaction flow)
+  - "internal/application/usecase/watch/btc/create_transaction.go"
+  - "internal/application/usecase/watch/btc/send_transaction.go"
+  - "internal/application/usecase/watch/btc/import_descriptor.go"
+  - "internal/application/usecase/watch/btc/musig2_aggregate.go"
+  - "internal/application/usecase/keygen/btc/sign_transaction.go"
+  - "internal/application/usecase/keygen/btc/generate_descriptor.go"
+  - "internal/application/usecase/keygen/btc/export_descriptor.go"
+  - "internal/application/usecase/keygen/btc/musig2_sign.go"
+  - "internal/application/usecase/keygen/btc/musig2_nonce.go"
+  - "internal/application/usecase/keygen/btc/create_musig2_address.go"
+  - "internal/application/usecase/sign/btc/sign_transaction.go"
+  - "internal/application/usecase/sign/btc/musig2_sign.go"
+  - "internal/application/usecase/sign/btc/musig2_nonce.go"
+---
+
+
+# BCH: BTC-Only Files Warning
+
+## ⛔ WARNING: YOU ARE ACCESSING A BTC-ONLY FILE
+
+**If you are working on a BCH (Bitcoin Cash) task, STOP IMMEDIATELY.**
+
+These files contain BTC-specific implementations (PSBT, Descriptor, MuSig2) that are **NOT compatible with BCH**.
+
+## Overview
+
+This rule identifies files that are **BTC-ONLY** and must **NEVER** be used, modified, or referenced when working on BCH (Bitcoin Cash) tasks.
+
+## Applicable Files (Glob Patterns)
+
+This rule applies when working on **any BCH-related task** (`chain:bch` label or BCH keywords in the task).
+
+---
+
+## ⛔ COMPLETE LIST OF PROHIBITED FILES FOR BCH
+
+**The following 24 files must NEVER be used, modified, or called when working on BCH tasks.**
+
+### Infrastructure Layer - BTC Only (11 files)
+
+```
+internal/infrastructure/api/btc/btc/psbt.go
+internal/infrastructure/api/btc/btc/musig2.go
+internal/infrastructure/api/btc/btc/descriptor.go
+internal/infrastructure/api/btc/btc/descriptor_service.go
+internal/infrastructure/api/btc/btc/descriptor_bech32.go
+internal/infrastructure/api/btc/btc/descriptor_info.go
+internal/infrastructure/api/btc/btc/descriptor_multisig.go
+internal/infrastructure/api/btc/btc/descriptor_p2pkh.go
+internal/infrastructure/api/btc/btc/descriptor_p2sh.go
+internal/infrastructure/api/btc/btc/descriptor_taproot.go
+internal/infrastructure/api/btc/btc/descriptor_taproot_multikey.go
+```
+
+### Use Case Layer - BTC Only (13 files)
+
+```
+internal/application/usecase/watch/btc/create_transaction.go
+internal/application/usecase/watch/btc/send_transaction.go
+internal/application/usecase/watch/btc/import_descriptor.go
+internal/application/usecase/watch/btc/musig2_aggregate.go
+internal/application/usecase/keygen/btc/sign_transaction.go
+internal/application/usecase/keygen/btc/generate_descriptor.go
+internal/application/usecase/keygen/btc/export_descriptor.go
+internal/application/usecase/keygen/btc/musig2_sign.go
+internal/application/usecase/keygen/btc/musig2_nonce.go
+internal/application/usecase/keygen/btc/create_musig2_address.go
+internal/application/usecase/sign/btc/sign_transaction.go
+internal/application/usecase/sign/btc/musig2_sign.go
+internal/application/usecase/sign/btc/musig2_nonce.go
+```
+
+### Prohibited Interface Methods (in `internal/application/ports/api/btc/interface.go`)
+
+```
+CreatePSBT
+ParsePSBT
+ValidatePSBT
+SignPSBTWithKey
+WalletProcessPsbt
+FinalizePSBT
+ExtractTransaction
+IsPSBTComplete
+GetPSBTFee
+ImportDescriptors
+GetDescriptorInfo
+ListDescriptors
+```
+
+---
+
+## ⚠️ CRITICAL: BTC-Only Files - DO NOT USE FOR BCH
+
+### PSBT Files (BTC Only - BCH uses Raw TX Hex)
+
+BCH does NOT support PSBT (Partially Signed Bitcoin Transaction, BIP174).
+BCH uses Raw Transaction Hex format instead.
+
+```
+# Infrastructure Layer - PSBT Implementation
+internal/infrastructure/api/btc/btc/psbt.go                    # ❌ NEVER use for BCH
+
+# Use Case Layer - PSBT-based Transaction Flow
+internal/application/usecase/watch/btc/create_transaction.go   # ⚠️ Uses PSBT - needs BCH override
+internal/application/usecase/keygen/btc/sign_transaction.go    # ⚠️ Uses PSBT - needs BCH override
+internal/application/usecase/sign/btc/sign_transaction.go      # ⚠️ Uses PSBT - needs BCH override
+internal/application/usecase/watch/btc/send_transaction.go     # ⚠️ Uses PSBT - needs BCH override
+```
+
+### Descriptor Files (BTC Only - BCH does NOT support Descriptors)
+
+BCH does NOT support Output Descriptors.
+BCH uses traditional address import methods.
+
+```
+# Infrastructure Layer - Descriptor Implementation
+internal/infrastructure/api/btc/btc/descriptor.go              # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_service.go      # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_bech32.go       # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_info.go         # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_multisig.go     # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_p2pkh.go        # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_p2sh.go         # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_taproot.go      # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_taproot_multikey.go  # ❌ NEVER use for BCH
+
+# Use Case Layer - Descriptor Operations
+internal/application/usecase/watch/btc/import_descriptor.go    # ❌ NEVER use for BCH
+internal/application/usecase/keygen/btc/generate_descriptor.go # ❌ NEVER use for BCH
+internal/application/usecase/keygen/btc/export_descriptor.go   # ❌ NEVER use for BCH
+```
+
+### MuSig2/Schnorr Files (BTC Only - BCH uses ECDSA only)
+
+BCH does NOT support MuSig2 or Schnorr signatures.
+BCH uses ECDSA signatures only.
+
+```
+# Infrastructure Layer - MuSig2 Implementation
+internal/infrastructure/api/btc/btc/musig2.go                  # ❌ NEVER use for BCH
+
+# Use Case Layer - MuSig2 Operations
+internal/application/usecase/watch/btc/musig2_aggregate.go     # ❌ NEVER use for BCH
+internal/application/usecase/keygen/btc/musig2_sign.go         # ❌ NEVER use for BCH
+internal/application/usecase/keygen/btc/musig2_nonce.go        # ❌ NEVER use for BCH
+internal/application/usecase/sign/btc/musig2_sign.go           # ❌ NEVER use for BCH
+internal/application/usecase/sign/btc/musig2_nonce.go          # ❌ NEVER use for BCH
+internal/application/usecase/keygen/btc/create_musig2_address.go  # ❌ NEVER use for BCH
+```
+
+### Taproot/SegWit Address Files (BTC Only)
+
+BCH does NOT support SegWit or Taproot addresses.
+BCH uses P2PKH (CashAddr `q...`) and P2SH (CashAddr `p...`) only.
+
+```
+# Taproot-specific files
+internal/infrastructure/api/btc/btc/descriptor_taproot.go      # ❌ NEVER use for BCH
+internal/infrastructure/api/btc/btc/descriptor_taproot_multikey.go  # ❌ NEVER use for BCH
+
+# Bech32/Bech32m encoding (SegWit/Taproot addresses)
+internal/infrastructure/api/btc/btc/descriptor_bech32.go       # ❌ NEVER use for BCH
+```
+
+## Interface Methods - BTC Only
+
+The `Bitcoiner` interface in `internal/application/ports/api/btc/interface.go` contains methods that are BTC-only:
+
+### PSBT Methods (Lines 112-121) - DO NOT CALL FOR BCH
+
+```go
+// ❌ NEVER call these methods for BCH
+CreatePSBT(...)           // BCH: Use CreateRawTransaction instead
+ParsePSBT(...)            // BCH: Not applicable
+ValidatePSBT(...)         // BCH: Not applicable
+SignPSBTWithKey(...)      // BCH: Use SignRawTransactionWithKey instead
+WalletProcessPsbt(...)    // BCH: Not applicable
+FinalizePSBT(...)         // BCH: Not applicable
+ExtractTransaction(...)   // BCH: Not applicable
+IsPSBTComplete(...)       // BCH: Not applicable
+GetPSBTFee(...)           // BCH: Not applicable
+```
+
+### Descriptor Methods (Lines 67, 73-75) - DO NOT CALL FOR BCH
+
+```go
+// ❌ NEVER call these methods for BCH
+ImportDescriptors(...)    // BCH: Use ImportAddress instead
+GetDescriptorInfo(...)    // BCH: Not applicable
+ListDescriptors(...)      // BCH: Not applicable
+```
+
+## Decision Flowchart
+
+```
+Working on BCH task?
+       │
+       ├── YES ──► Is the file in BTC-Only list above?
+       │              │
+       │              ├── YES ──► ❌ DO NOT USE THIS FILE
+       │              │           Create BCH-specific implementation instead
+       │              │
+       │              └── NO ──► ✅ OK to use (verify BCH compatibility)
+       │
+       └── NO ──► ✅ Normal BTC workflow
+```
+
+## What BCH Should Use Instead
+
+| BTC Feature | BCH Alternative |
+|-------------|-----------------|
+| PSBT | Raw Transaction Hex |
+| `CreatePSBT()` | `CreateRawTransaction()` |
+| `SignPSBTWithKey()` | `SignRawTransactionWithKey()` + SIGHASH_FORKID |
+| Descriptor import | `ImportAddress()` / `ImportAddressWithLabel()` |
+| MuSig2/Schnorr | Traditional P2SH multisig with ECDSA |
+| Bech32/Bech32m addresses | CashAddr format (`q...`, `p...`) |
+| Taproot (P2TR) | Not supported - use P2PKH or P2SH |
+
+## BCH Signing Requirements
+
+When signing BCH transactions, you MUST use:
+
+```go
+// BCH requires SIGHASH_FORKID (0x40) combined with sighash type
+// SIGHASH_ALL (0x01) + SIGHASH_FORKID (0x40) = 0x41
+
+const (
+    SigHashAll     = 0x01
+    SigHashForkID  = 0x40
+    BCHSigHashType = SigHashAll | SigHashForkID  // 0x41
+)
+```
+
+## Related Documentation
+
+- `docs/task-contexts/chains/bch.md` - Full BCH technical context
+- `internal/infrastructure/api/btc/bch/` - BCH-specific implementations
+- GitHub Issue #435 - Use case layer separation tracking
+
+## Summary Table
+
+| Category | File Count | Action for BCH |
+|----------|------------|----------------|
+| PSBT | 1 infra + 4 use case | Never use, create BCH alternatives |
+| Descriptor | 9 infra + 3 use case | Never use |
+| MuSig2 | 1 infra + 6 use case | Never use |
+| **Total** | **24 files** | **All prohibited for BCH** |

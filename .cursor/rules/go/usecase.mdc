@@ -1,7 +1,10 @@
 ---
 description: Claude Rules - Use Case Pattern
-alwaysApply: true
+globs: 
+  - "internal/application/usecase/**/*.go"
+alwaysApply: false
 ---
+
 
 # Claude Rules - Use Case Pattern
 

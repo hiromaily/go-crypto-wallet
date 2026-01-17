@@ -1,9 +1,13 @@
 ---
-description: Claude Rules - Dependency Injection
-alwaysApply: true
+description: Dependency Injection
+globs: 
+  - "internal/di/container.go"
+  - "pkg/di/container.go"
+alwaysApply: false
 ---
 
-# Claude Rules - Dependency Injection
+
+# Dependency Injection
 
 ## Overview
 
