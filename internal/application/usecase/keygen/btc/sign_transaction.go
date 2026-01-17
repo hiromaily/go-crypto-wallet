@@ -14,6 +14,7 @@ import (
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	usecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/shared"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
@@ -118,7 +119,7 @@ func (u *signTransactionUseCase) sign(
 ) (string, bool, error) {
 	// Infer sender account from action type
 	// This is a simplified approach since PSBT doesn't store the account concept
-	senderAccount, err := inferSenderAccount(actionType)
+	senderAccount, err := usecaseshared.InferSenderAccount(actionType)
 	if err != nil {
 		return "", false, err
 	}
@@ -136,23 +137,6 @@ func (u *signTransactionUseCase) sign(
 	)
 
 	return signedPSBT, isSigned, nil
-}
-
-// inferSenderAccount infers the sender account from the transaction action type.
-// This is a pragmatic approach since PSBT doesn't encode the account concept.
-func inferSenderAccount(actionType domainTx.ActionType) (domainAccount.AccountType, error) {
-	switch actionType {
-	case domainTx.ActionTypeDeposit:
-		return domainAccount.AccountTypeClient, nil
-	case domainTx.ActionTypePayment:
-		return domainAccount.AccountTypePayment, nil
-	case domainTx.ActionTypeTransfer:
-		// Transfer could be from various accounts
-		// Default to payment for now
-		return domainAccount.AccountTypePayment, nil
-	default:
-		return "", fmt.Errorf("unsupported action type: %s", actionType)
-	}
 }
 
 // signWithAccount signs a PSBT with keys from the specified account.
