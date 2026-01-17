@@ -12,6 +12,7 @@
 # - lint.mk:         Linting and code quality checks
 # - build.mk:        Build-related targets
 # - test.mk:         Testing targets
+# - release.mk:      Release and versioning targets
 # - db.mk:           Database-specific targets
 # - ai.mk:           AI-related targets
 # - btc.mk:          Bitcoin-specific targets
@@ -48,6 +49,7 @@ include make/build.mk
 include make/test.mk
 include make/codegen.mk
 include make/lint.mk
+include make/release.mk
 
 # 3. Blockchain-specific
 include make/btc.mk
