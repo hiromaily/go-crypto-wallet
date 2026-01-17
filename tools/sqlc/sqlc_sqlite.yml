@@ -1,0 +1,9 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "./queries/*.sql"
+    schema: "./schemas_sqlite/*.sql"
+    gen:
+      go:
+        package: "sqlcgen"
+        out: "../../internal/infrastructure/database/sqlite/sqlcgen"
