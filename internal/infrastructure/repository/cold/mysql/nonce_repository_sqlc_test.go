@@ -29,7 +29,7 @@ func getTestDB(t *testing.T) *sql.DB {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	dbConn, err := mysql.NewMySQL(&conf.MySQL)
+	dbConn, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}

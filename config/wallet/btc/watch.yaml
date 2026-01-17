@@ -50,17 +50,15 @@ tracer:
 # Database configuration - choose between mysql or sqlite
 database:
   type: "mysql" # mysql, sqlite
-mysql:
-  host: "127.0.0.1:3306"
-  dbname: "watch"
-  user: "hiromaily"
-  pass: "hiromaily"
-  debug: true
-# SQLite configuration (used when database.type = "sqlite")
-# Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
-# sqlite:
-#   path: "./data/db/watch.db"
-#   debug: true
+  mysql:
+    host: "127.0.0.1:3306"
+    dbname: "watch"
+    user: "hiromaily"
+    pass: "hiromaily"
+    debug: true
+  sqlite:
+    path: "./data/sqlite/btc/watch.db"
+    debug: true
 file_path:
   tx: "./data/tx/btc/"
   address: "./data/address/btc/"

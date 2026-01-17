@@ -40,12 +40,18 @@ logger:
 # only available for watch only wallet, but definition is required as none
 tracer:
   type: "none" # none, jaeger, datadog
-mysql:
-  host: "127.0.0.1:3306"
-  dbname: "keygen_bip86_test"
-  user: "hiromaily"
-  pass: "hiromaily"
-  debug: true
+# Database configuration - choose between mysql or sqlite
+database:
+  type: "mysql" # mysql, sqlite
+  mysql:
+    host: "127.0.0.1:3306"
+    dbname: "keygen_bip86_test"
+    user: "hiromaily"
+    pass: "hiromaily"
+    debug: true
+  sqlite:
+    path: "./data/sqlite/btc/keygen_bip86_test.db"
+    debug: true
 file_path:
   tx: "./data/tx/btc/bip86_test/"
   address: "./data/address/btc/bip86_test/"
