@@ -8,11 +8,25 @@
 # Generate Go code from SQL queries using sqlc
 # Schemas: tools/sqlc/schemas/*.sql
 # Queries: tools/sqlc/queries/*.sql
-# Output: internal/infrastructure/database/sqlc/
+# Output: internal/infrastructure/database/mysql/sqlcgen/
 #------------------------------------------------------------------------------
 .PHONY: sqlc
 sqlc:
 	cd tools/sqlc && sqlc generate
+
+# Generate Go code from SQL queries for SQLite using sqlc
+# Schemas: tools/sqlc/schemas_sqlite/*.sql
+# Queries: tools/sqlc/queries/*.sql
+# Output: internal/infrastructure/database/sqlite/sqlcgen/
+#------------------------------------------------------------------------------
+.PHONY: sqlc-sqlite
+sqlc-sqlite:
+	cd tools/sqlc && sqlc generate -f sqlc_sqlite.yml
+
+# Generate sqlc code for all database backends (MySQL and SQLite)
+#------------------------------------------------------------------------------
+.PHONY: sqlc-all
+sqlc-all: sqlc sqlc-sqlite
 
 ###############################################################################
 # mockery

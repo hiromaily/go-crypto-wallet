@@ -1,22 +1,31 @@
 ###############################################################################
 # sqlc Format, Validation, and Lint Targets
+# Validates both MySQL and SQLite configurations
 ###############################################################################
 
 # Compile SQL queries and schemas to check for syntax and type errors
 # `sqlc compile` - Statically check SQL for syntax and type errors
+# Runs for both MySQL (default) and SQLite configurations
 .PHONY: sqlc-compile
 sqlc-compile:
-	@echo "Compiling SQL queries and schemas..."
+	@echo "Compiling MySQL SQL queries and schemas..."
 	@cd tools/sqlc && sqlc compile
-	@echo "✓ SQL compilation successful"
+	@echo "✓ MySQL SQL compilation successful"
+	@echo "Compiling SQLite SQL queries and schemas..."
+	@cd tools/sqlc && sqlc compile -f sqlc_sqlite.yml
+	@echo "✓ SQLite SQL compilation successful"
 
 # Vet SQL queries for potential issues
 # `sqlc vet` - Examines queries for potential problems
+# Runs for both MySQL (default) and SQLite configurations
 .PHONY: sqlc-vet
 sqlc-vet:
-	@echo "Vetting SQL queries..."
+	@echo "Vetting MySQL SQL queries..."
 	@cd tools/sqlc && sqlc vet
-	@echo "✓ SQL queries passed vetting"
+	@echo "✓ MySQL SQL queries passed vetting"
+	@echo "Vetting SQLite SQL queries..."
+	@cd tools/sqlc && sqlc vet -f sqlc_sqlite.yml
+	@echo "✓ SQLite SQL queries passed vetting"
 
 # Verify schema, queries, and configuration
 # `sqlc verify` - Verify schema, queries, and configuration for this project
@@ -30,9 +39,10 @@ sqlc-verify:
 
 # Validate SQL queries and schemas (combines compile and vet)
 # This target runs compile and vet checks for local validation
+# Validates both MySQL and SQLite configurations
 .PHONY: sqlc-validate
 sqlc-validate: sqlc-compile sqlc-vet
-	@echo "✓ All sqlc validation checks passed"
+	@echo "✓ All sqlc validation checks passed (MySQL + SQLite)"
 
 # Lint SQL queries (alias for vet)
 # This target runs vet to check queries for potential issues
