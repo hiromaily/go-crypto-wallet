@@ -91,7 +91,7 @@ func (c *pkgContainer) NewDatabaseClient() *sql.DB {
 // NewMySQLClient creates a new MySQL client
 func (c *pkgContainer) NewMySQLClient() *sql.DB {
 	if c.mysqlClient == nil {
-		dbConn, err := mysql.NewMySQL(&c.config.MySQL)
+		dbConn, err := mysql.NewMySQL(&c.config.Database.MySQL)
 		if err != nil {
 			panic(err)
 		}
@@ -103,7 +103,7 @@ func (c *pkgContainer) NewMySQLClient() *sql.DB {
 // NewSQLiteClient creates a new SQLite client
 func (c *pkgContainer) NewSQLiteClient() *sql.DB {
 	if c.sqliteClient == nil {
-		dbConn, err := sqlite.NewSQLite(&c.config.SQLite)
+		dbConn, err := sqlite.NewSQLite(&c.config.Database.SQLite)
 		if err != nil {
 			panic(err)
 		}

@@ -231,11 +231,16 @@ bitcoin:
   http_post_mode: true
   disable_tls: true
   network_type: "regtest"
-mysql:
-  host: "localhost:3306"
-  dbname: "testdb"
-  user: "dbuser"
-  pass: "dbpass"
+database:
+  type: "mysql"
+  mysql:
+    host: "localhost:3306"
+    dbname: "testdb"
+    user: "dbuser"
+    pass: "dbpass"
+  sqlite:
+    path: "./data/sqlite/btc/test.db"
+    debug: false
 logger:
   service: "test-service"
   format: "json"
@@ -264,18 +269,18 @@ file_path:
 			"Other nested values should remain unchanged")
 	})
 
-	t.Run("Override nested mysql.host with WALLET_MYSQL_HOST", func(t *testing.T) {
-		// Set env var for nested key: mysql.host -> WALLET_MYSQL_HOST
-		t.Setenv("WALLET_MYSQL_HOST", "mysql-server:3307")
+	t.Run("Override nested database.mysql.host with WALLET_DATABASE_MYSQL_HOST", func(t *testing.T) {
+		// Set env var for nested key: database.mysql.host -> WALLET_DATABASE_MYSQL_HOST
+		t.Setenv("WALLET_DATABASE_MYSQL_HOST", "mysql-server:3307")
 
 		var conf WalletRoot
 		err := loadConfig(yamlPath, &conf)
 
 		require.NoError(t, err, "loadConfig() should not return error")
-		assert.Equal(t, "mysql-server:3307", conf.MySQL.Host,
-			"Nested key mysql.host should be overridden by WALLET_MYSQL_HOST")
+		assert.Equal(t, "mysql-server:3307", conf.Database.MySQL.Host,
+			"Nested key database.mysql.host should be overridden by WALLET_DATABASE_MYSQL_HOST")
 		// Verify other nested values are not affected
-		assert.Equal(t, "testdb", conf.MySQL.DB,
+		assert.Equal(t, "testdb", conf.Database.MySQL.DB,
 			"Other nested values should remain unchanged")
 	})
 
