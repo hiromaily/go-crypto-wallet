@@ -1,21 +1,17 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/app"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 // sign wallet as cold wallet
@@ -39,48 +35,6 @@ var (
 	container di.Container
 )
 
-func initializeSignWallet() error {
-	// Validate coin type for sign wallet (BTC/BCH only)
-	if err := app.ValidateCoinTypeForSign(opts.CoinTypeCode); err != nil {
-		return err
-	}
-
-	// Validate config path is provided
-	if opts.ConfigPath == "" {
-		return errors.New("--config flag is required")
-	}
-
-	// Load wallet config
-	conf, err := config.NewWallet(opts.ConfigPath, walletType, domainCoin.CoinTypeCode(opts.CoinTypeCode))
-	if err != nil {
-		return fmt.Errorf("failed to load wallet config: %w", err)
-	}
-
-	// Load account config (optional)
-	accountConf := &config.AccountRoot{}
-	if opts.AccountConfigPath != "" {
-		accountConf, err = config.NewAccount(opts.AccountConfigPath)
-		if err != nil {
-			return fmt.Errorf("failed to load account config: %w", err)
-		}
-	}
-
-	// Override config with CLI values
-	conf.CoinTypeCode = domainCoin.CoinTypeCode(opts.CoinTypeCode)
-
-	// Override Bitcoin host for specific wallet
-	if opts.BTCWallet != "" {
-		conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, opts.BTCWallet)
-		log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
-	}
-
-	// Create DI container and wallet
-	container = di.NewContainer(conf, accountConf, walletType)
-	walleter = container.NewSigner(authName)
-
-	return nil
-}
-
 func main() {
 	rootCmd := &cobra.Command{
 		Use:     appName,
@@ -91,7 +45,18 @@ func main() {
 			if cmd.Name() == "help" {
 				return nil
 			}
-			return initializeSignWallet()
+
+			// Initialize the application
+			application, err := app.NewApp(walletType, opts)
+			if err != nil {
+				return err
+			}
+
+			// Store container and create wallet
+			container = application.Container
+			walleter = container.NewSigner(authName)
+
+			return nil
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			if walleter != nil {
@@ -101,7 +66,7 @@ func main() {
 	}
 
 	// Add global flags with sign-specific coin help
-	app.AddGlobalFlagsWithCoinOptions(rootCmd, &opts, "coin type code: btc, bch")
+	app.AddGlobalFlags(rootCmd, &opts, "coin type code: btc, bch")
 
 	// Add subcommands
 	sign.AddCommands(rootCmd, &walleter, func() di.Container { return container }, appVersion)

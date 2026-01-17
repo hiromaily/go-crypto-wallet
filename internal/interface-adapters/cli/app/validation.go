@@ -16,13 +16,9 @@ func ValidateCoinType(coinTypeCode string) error {
 
 // ValidateCoinTypeForSign validates coin type for sign wallet (BTC/BCH only).
 func ValidateCoinTypeForSign(coinTypeCode string) error {
-	if !domainCoin.IsCoinTypeCode(coinTypeCode) {
-		return errors.New("coin args is invalid. `btc`, `bch` is allowed")
-	}
-	// Sign wallet only supports BTC and BCH
 	code := domainCoin.CoinTypeCode(coinTypeCode)
 	if code != domainCoin.BTC && code != domainCoin.BCH {
-		return errors.New("sign wallet only supports btc and bch")
+		return errors.New("coin args is invalid for sign wallet, only `btc` and `bch` are allowed")
 	}
 	return nil
 }
