@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/btcsuite/btcd/btcutil"
@@ -230,16 +231,16 @@ func (*signTransactionUseCase) parseRawTxContent(content string) (string, []sign
 			continue
 		}
 
-		var vout uint32
-		var amount int64
-		_, err := fmt.Sscanf(parts[1], "%d", &vout)
+		vout64, err := strconv.ParseUint(parts[1], 10, 32)
 		if err != nil {
-			logger.Warn("invalid vout in prevtx", "vout", parts[1])
+			logger.Warn("invalid vout in prevtx", "vout", parts[1], "error", err)
 			continue
 		}
-		_, err = fmt.Sscanf(parts[4], "%d", &amount)
+		vout := uint32(vout64)
+
+		amount, err := strconv.ParseInt(parts[4], 10, 64)
 		if err != nil {
-			logger.Warn("invalid amount in prevtx", "amount", parts[4])
+			logger.Warn("invalid amount in prevtx", "amount", parts[4], "error", err)
 			continue
 		}
 
@@ -272,17 +273,18 @@ func (*signTransactionUseCase) convertPrevTxsToDTO(prevTxs []signPrevTx) []dtobt
 
 // formatSignedTxContent formats the signed transaction content for BCH
 func (*signTransactionUseCase) formatSignedTxContent(txHex string, prevTxs []signPrevTx) string {
-	content := txHex + "\n"
-	var contentSb275 strings.Builder
+	var builder strings.Builder
+	builder.WriteString(txHex)
+	builder.WriteString("\n")
+
 	for _, prev := range prevTxs {
-		contentSb275.WriteString(fmt.Sprintf("prevtx:%s:%d:%s:%s:%d\n",
+		fmt.Fprintf(&builder, "prevtx:%s:%d:%s:%s:%d\n",
 			prev.TxID,
 			prev.Vout,
 			prev.ScriptPubKey,
 			prev.RedeemScript,
 			prev.Amount,
-		))
+		)
 	}
-	content += contentSb275.String()
-	return content
+	return builder.String()
 }

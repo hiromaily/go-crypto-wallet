@@ -362,7 +362,7 @@ func (u *createTransactionUseCase) createTxOutputs(
 	if isChange {
 		senderDecodedAddr, decodeErr := btcutil.DecodeAddress(senderAddr, u.bchClient.GetChainConf())
 		if decodeErr != nil {
-			return nil, fmt.Errorf("fail to call btcutil.DecodeAddress(%s): %w", receiverAddr, decodeErr)
+			return nil, fmt.Errorf("fail to call btcutil.DecodeAddress(%s): %w", senderAddr, decodeErr)
 		}
 		txPrevOutputs[senderDecodedAddr] = inputTotal - requiredAmount
 	}
@@ -520,19 +520,20 @@ func (u *createTransactionUseCase) generateRawTxHexFile(
 // Format: txHex followed by prevTx metadata (JSON-like format for each prevTx)
 func (*createTransactionUseCase) formatRawTxContent(txHex string, prevTxs []dtobtc.PreviousTx) string {
 	// Simple format: hex on first line, then prevTx info
-	content := txHex + "\n"
-	var contentSb524 strings.Builder
+	var builder strings.Builder
+	builder.WriteString(txHex)
+	builder.WriteString("\n")
+
 	for _, prev := range prevTxs {
-		contentSb524.WriteString(fmt.Sprintf("prevtx:%s:%d:%s:%s:%d\n",
+		fmt.Fprintf(&builder, "prevtx:%s:%d:%s:%s:%d\n",
 			prev.TxID,
 			prev.Vout,
 			prev.ScriptPubKey,
 			prev.RedeemScript,
 			prev.Amount,
-		))
+		)
 	}
-	content += contentSb524.String()
-	return content
+	return builder.String()
 }
 
 // createUserPayment gets payment data from payment_request table
@@ -561,12 +562,13 @@ func (u *createTransactionUseCase) createUserPayment() ([]shared.UserPayment, []
 		}
 		userPayments[idx].Amount = amt
 
+		// Validate address format (decoded address stored in ValidRecAddr for potential future use)
+		// Note: createPaymentTxOutputs re-decodes addresses to aggregate payments to same address
 		userPayments[idx].ValidRecAddr, err = u.bchClient.DecodeAddress(userPayments[idx].ReceiverAddr)
 		if err != nil {
-			logger.Error("unexpected error occurred converting receiverAddr from string type to address type")
-			return nil, nil, errors.New(
-				"unexpected error occurred converting receiverAddr from string type to address type",
-			)
+			logger.Error("invalid receiver address format", "address", userPayments[idx].ReceiverAddr)
+			return nil, nil, fmt.Errorf(
+				"invalid receiver address format (%s): %w", userPayments[idx].ReceiverAddr, err)
 		}
 
 		userPayments[idx].ValidAmount, err = u.bchClient.FloatToAmount(userPayments[idx].Amount)
