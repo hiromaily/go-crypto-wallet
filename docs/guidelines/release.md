@@ -196,7 +196,7 @@ If you need to delete a tag (e.g., wrong version):
 git tag -d v6.1.0
 
 # Delete remote tag
-git push origin :refs/tags/v6.1.0
+git push origin --delete v6.1.0
 ```
 
 **Note**: If a release was created, delete it first on GitHub.
