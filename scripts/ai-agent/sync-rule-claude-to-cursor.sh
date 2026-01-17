@@ -151,8 +151,8 @@ convert_file() {
 						continue
 					fi
 					if [[ "$in_paths_array" == "true" ]]; then
-						# Collect indented lines starting with -
-						if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]]; then
+						# Collect indented lines starting with - (array item) or # (comment)
+						if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]] || [[ "$line" =~ ^[[:space:]]+# ]]; then
 							if [[ -n "$array_items" ]]; then
 								array_items="${array_items}
 ${line}"
@@ -226,8 +226,8 @@ alwaysApply: true"
 			fi
 
 			if [[ "$skip_array" == "true" ]]; then
-				# Skip indented lines starting with - (array elements)
-				if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]]; then
+				# Skip indented lines starting with - (array elements) or # (comments)
+				if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]] || [[ "$line" =~ ^[[:space:]]+# ]]; then
 					continue
 				else
 					# End of array

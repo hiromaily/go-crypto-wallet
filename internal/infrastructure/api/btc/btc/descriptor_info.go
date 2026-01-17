@@ -1,5 +1,8 @@
 package btc
 
+// Descriptor Info - BTC ONLY (BCH does NOT support descriptors)
+// See descriptor_service.go for full warning.
+
 import (
 	"encoding/json"
 	"fmt"

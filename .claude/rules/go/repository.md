@@ -1,4 +1,10 @@
-# Claude Rules - Repository Pattern
+---
+paths:
+  - "internal/application/ports/repository/**/*.go"
+  - "internal/infrastructure/repository/**/*.go"
+---
+
+# Repository Pattern
 
 ## Overview
 

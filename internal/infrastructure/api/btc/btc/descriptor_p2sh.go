@@ -1,5 +1,8 @@
 package btc
 
+// Descriptor P2SH-SegWit - BTC ONLY (BCH does NOT support descriptors or SegWit)
+// See descriptor_service.go for full warning.
+
 import "github.com/btcsuite/btcd/btcutil/hdkeychain"
 
 // GenerateP2SHSegWitDescriptor generates a P2SH-SegWit descriptor following BIP380.

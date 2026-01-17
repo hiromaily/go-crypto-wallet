@@ -1,5 +1,8 @@
 package btc
 
+// Descriptor Bech32 - BTC ONLY (BCH does NOT support descriptors or Bech32)
+// See descriptor_service.go for full warning.
+
 import "github.com/btcsuite/btcd/btcutil/hdkeychain"
 
 // GenerateBech32Descriptor generates a Bech32 (wpkh) descriptor following BIP380.

@@ -1,5 +1,8 @@
 package btc
 
+// Descriptor Taproot Multikey - BTC ONLY (BCH does NOT support descriptors or Taproot)
+// See descriptor_service.go for full warning.
+
 import (
 	"errors"
 	"fmt"

@@ -1,5 +1,23 @@
 package btc
 
+// MuSig2 (Schnorr Multi-Signature) - BTC ONLY
+//
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │ WARNING: DO NOT USE THIS FILE FOR BCH (Bitcoin Cash) IMPLEMENTATIONS        │
+// │                                                                             │
+// │ BCH does NOT support:                                                       │
+// │   - Schnorr signatures (BIP340)                                             │
+// │   - MuSig2 aggregated signatures (BIP327)                                   │
+// │   - Taproot (BIP341)                                                        │
+// │                                                                             │
+// │ BCH uses traditional ECDSA signatures only.                                 │
+// │ For BCH multisig, use P2SH with traditional OP_CHECKMULTISIG.               │
+// │                                                                             │
+// │ For BCH implementations, see:                                               │
+// │   - internal/infrastructure/api/btc/bch/                                    │
+// │   - docs/task-contexts/chains/bch.md                                        │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
 import (
 	"errors"
 	"fmt"

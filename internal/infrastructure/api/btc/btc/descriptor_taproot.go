@@ -1,5 +1,8 @@
 package btc
 
+// Descriptor Taproot - BTC ONLY (BCH does NOT support descriptors or Taproot)
+// See descriptor_service.go for full warning.
+
 import "github.com/btcsuite/btcd/btcutil/hdkeychain"
 
 // GenerateTaprootDescriptor generates a Taproot (tr) descriptor following BIP380.

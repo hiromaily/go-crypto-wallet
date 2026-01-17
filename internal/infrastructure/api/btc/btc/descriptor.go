@@ -1,5 +1,23 @@
 package btc
 
+// Descriptor Parser - BTC ONLY
+//
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │ WARNING: DO NOT USE THIS FILE FOR BCH (Bitcoin Cash) IMPLEMENTATIONS        │
+// │                                                                             │
+// │ BCH does NOT support output descriptors (BIP380).                           │
+// │ BCH uses legacy wallet with address export/import workflow instead.         │
+// │                                                                             │
+// │ For BCH address management:                                                 │
+// │   - Export addresses from keygen wallet                                     │
+// │   - Import addresses to watch wallet                                        │
+// │   - Do NOT use importdescriptors RPC                                        │
+// │                                                                             │
+// │ For BCH implementations, see:                                               │
+// │   - internal/infrastructure/api/btc/bch/                                    │
+// │   - docs/task-contexts/chains/bch.md                                        │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
 import (
 	"bytes"
 	"crypto/sha256"

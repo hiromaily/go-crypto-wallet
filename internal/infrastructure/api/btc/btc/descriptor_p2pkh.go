@@ -1,5 +1,8 @@
 package btc
 
+// Descriptor P2PKH - BTC ONLY (BCH does NOT support descriptors)
+// See descriptor_service.go for full warning.
+
 import "github.com/btcsuite/btcd/btcutil/hdkeychain"
 
 // GenerateP2PKHDescriptor generates a P2PKH (legacy) descriptor following BIP380.
