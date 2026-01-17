@@ -67,7 +67,7 @@ Commit messages are validated by `lefthook` on every commit.
 
 ### Scopes (Optional)
 
-The following are suggested scopes, but other alphanumeric scopes are also permitted.
+The following are suggested scopes, but other alphanumeric scopes (including hyphens and underscores) are also permitted.
 
 | Scope | Description |
 |-------|-------------|
@@ -145,10 +145,10 @@ Your commit message: <your-invalid-commit-message>
 ### PR Title Format
 
 ```
-<type>: <description> (Closes #<issue_number>)
+<type>: <description>
 ```
 
-Example: `feat: add taproot address support (Closes #123)`
+Example: `feat: add taproot address support`
 
 ### PR Description Template
 
