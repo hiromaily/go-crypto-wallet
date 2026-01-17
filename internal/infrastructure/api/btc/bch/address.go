@@ -104,19 +104,17 @@ func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, 
 		"raw_count", len(labels))
 
 	// retrieve - use BCH DecodeAddress for proper CashAddr handling
-	// CRITICAL: Explicitly call BitcoinCash.DecodeAddress to ensure BCH version is used
+	// With GetBalanceByAccount override, b is *BitcoinCash so b.DecodeAddress calls BCH version
 	resAddrs := make([]btcutil.Address, 0, len(labels))
 	for key := range labels {
 		// key is address string
-		// Directly call bchutil.DecodeAddress to avoid any method resolution ambiguity
-		logger.Debug("decoding BCH address", "address", key)
-		address, decodeErr := bchutil.DecodeAddress(key, b.GetChainConf())
-		if decodeErr != nil {
+		address, err := b.DecodeAddress(key)
+		if err != nil {
 			logger.Error(
-				"fail to decode BCH address",
+				"failed to decode address",
 				"address", key,
 				"label", labelName,
-				"error", decodeErr)
+				"error", err)
 			continue
 		}
 
