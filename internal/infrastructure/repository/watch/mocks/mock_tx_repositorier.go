@@ -7,7 +7,7 @@ package mocks
 import (
 	"database/sql"
 
-	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -335,19 +335,19 @@ func (_c *MockTxRepositorier_Update_Call) RunAndReturn(run func(txItem *transact
 }
 
 // WithTx provides a mock function for the type MockTxRepositorier
-func (_mock *MockTxRepositorier) WithTx(tx *sql.Tx) repowatch.TxRepositorier {
+func (_mock *MockTxRepositorier) WithTx(tx *sql.Tx) watch.TxRepositorier {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WithTx")
 	}
 
-	var r0 repowatch.TxRepositorier
-	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) repowatch.TxRepositorier); ok {
+	var r0 watch.TxRepositorier
+	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) watch.TxRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(repowatch.TxRepositorier)
+			r0 = ret.Get(0).(watch.TxRepositorier)
 		}
 	}
 	return r0
@@ -377,12 +377,12 @@ func (_c *MockTxRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *MockTxRepos
 	return _c
 }
 
-func (_c *MockTxRepositorier_WithTx_Call) Return(txRepositorier repowatch.TxRepositorier) *MockTxRepositorier_WithTx_Call {
+func (_c *MockTxRepositorier_WithTx_Call) Return(txRepositorier watch.TxRepositorier) *MockTxRepositorier_WithTx_Call {
 	_c.Call.Return(txRepositorier)
 	return _c
 }
 
-func (_c *MockTxRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) repowatch.TxRepositorier) *MockTxRepositorier_WithTx_Call {
+func (_c *MockTxRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) watch.TxRepositorier) *MockTxRepositorier_WithTx_Call {
 	_c.Call.Return(run)
 	return _c
 }

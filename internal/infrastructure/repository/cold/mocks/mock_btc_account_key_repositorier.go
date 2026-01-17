@@ -5,6 +5,8 @@
 package mocks
 
 import (
+	"context"
+
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
@@ -175,8 +177,8 @@ func (_c *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call) RunAndReturn(run f
 }
 
 // GetMaxIndex provides a mock function for the type MockBTCAccountKeyRepositorier
-func (_mock *MockBTCAccountKeyRepositorier) GetMaxIndex(accountType account.AccountType) (int64, error) {
-	ret := _mock.Called(accountType)
+func (_mock *MockBTCAccountKeyRepositorier) GetMaxIndex(ctx context.Context, accountType account.AccountType) (int64, error) {
+	ret := _mock.Called(ctx, accountType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetMaxIndex")
@@ -184,16 +186,16 @@ func (_mock *MockBTCAccountKeyRepositorier) GetMaxIndex(accountType account.Acco
 
 	var r0 int64
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) (int64, error)); ok {
-		return returnFunc(accountType)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AccountType) (int64, error)); ok {
+		return returnFunc(ctx, accountType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) int64); ok {
-		r0 = returnFunc(accountType)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AccountType) int64); ok {
+		r0 = returnFunc(ctx, accountType)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
-	if returnFunc, ok := ret.Get(1).(func(account.AccountType) error); ok {
-		r1 = returnFunc(accountType)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, account.AccountType) error); ok {
+		r1 = returnFunc(ctx, accountType)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -206,19 +208,25 @@ type MockBTCAccountKeyRepositorier_GetMaxIndex_Call struct {
 }
 
 // GetMaxIndex is a helper method to define mock.On call
+//   - ctx context.Context
 //   - accountType account.AccountType
-func (_e *MockBTCAccountKeyRepositorier_Expecter) GetMaxIndex(accountType interface{}) *MockBTCAccountKeyRepositorier_GetMaxIndex_Call {
-	return &MockBTCAccountKeyRepositorier_GetMaxIndex_Call{Call: _e.mock.On("GetMaxIndex", accountType)}
+func (_e *MockBTCAccountKeyRepositorier_Expecter) GetMaxIndex(ctx interface{}, accountType interface{}) *MockBTCAccountKeyRepositorier_GetMaxIndex_Call {
+	return &MockBTCAccountKeyRepositorier_GetMaxIndex_Call{Call: _e.mock.On("GetMaxIndex", ctx, accountType)}
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetMaxIndex_Call) Run(run func(accountType account.AccountType)) *MockBTCAccountKeyRepositorier_GetMaxIndex_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetMaxIndex_Call) Run(run func(ctx context.Context, accountType account.AccountType)) *MockBTCAccountKeyRepositorier_GetMaxIndex_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 account.AccountType
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(account.AccountType)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 account.AccountType
+		if args[1] != nil {
+			arg1 = args[1].(account.AccountType)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -229,7 +237,7 @@ func (_c *MockBTCAccountKeyRepositorier_GetMaxIndex_Call) Return(n int64, err er
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetMaxIndex_Call) RunAndReturn(run func(accountType account.AccountType) (int64, error)) *MockBTCAccountKeyRepositorier_GetMaxIndex_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetMaxIndex_Call) RunAndReturn(run func(ctx context.Context, accountType account.AccountType) (int64, error)) *MockBTCAccountKeyRepositorier_GetMaxIndex_Call {
 	_c.Call.Return(run)
 	return _c
 }

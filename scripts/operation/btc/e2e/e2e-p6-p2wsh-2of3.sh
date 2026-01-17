@@ -223,16 +223,39 @@ EOF
 main() {
 	while [ $# -gt 0 ]; do
 		case "$1" in
-		--cleanup) CLEANUP_ONLY=true; shift ;;
-		--reset) RESET_STATE=true; shift ;;
-		--verbose) VERBOSE=true; set -x; shift ;;
-		--non-interactive) NON_INTERACTIVE=true; shift ;;
-		-h | --help) show_help; exit 0 ;;
-		*) log_error "Unknown option: $1"; show_help; exit 1 ;;
+		--cleanup)
+			CLEANUP_ONLY=true
+			shift
+			;;
+		--reset)
+			RESET_STATE=true
+			shift
+			;;
+		--verbose)
+			VERBOSE=true
+			set -x
+			shift
+			;;
+		--non-interactive)
+			NON_INTERACTIVE=true
+			shift
+			;;
+		-h | --help)
+			show_help
+			exit 0
+			;;
+		*)
+			log_error "Unknown option: $1"
+			show_help
+			exit 1
+			;;
 		esac
 	done
 
-	if [ "$CLEANUP_ONLY" = "true" ]; then btc_cleanup; exit 0; fi
+	if [ "$CLEANUP_ONLY" = "true" ]; then
+		btc_cleanup
+		exit 0
+	fi
 	if [ "$RESET_STATE" = "true" ]; then btc_full_reset "${BTC_DOCKER_VOLUME_NAME}" "watch keygen sign1 sign2"; fi
 
 	log_info "Starting Bitcoin E2E Workflow - Pattern 6: P2WSH Native SegWit 2-of-3 Multisig"

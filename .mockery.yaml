@@ -15,17 +15,17 @@ log-level: info
 
 packages:
   # Bitcoin API - interface in application/ports, implementation in infrastructure
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc:
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc:
     config:
-      dir: "internal/infrastructure/api/bitcoin/mocks"
+      dir: "internal/infrastructure/api/btc/mocks"
       pkgname: "mocks"
     interfaces:
       Bitcoiner:
 
   # Ripple API - interface in application/ports, implementation in infrastructure
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple:
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp:
     config:
-      dir: "internal/infrastructure/api/ripple/mocks"
+      dir: "internal/infrastructure/api/xrp/mocks"
       pkgname: "mocks"
     interfaces:
       Rippler:
@@ -34,20 +34,18 @@ packages:
       RippleAdminer:
 
   # File storage - interface in application/ports, implementation in infrastructure
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/file:
     config:
       dir: "internal/infrastructure/storage/file/transaction/mocks"
       pkgname: "mocks"
     interfaces:
       TransactionFileRepositorier:
+      AddressFileRepositorier:
 
-  # Persistence interfaces (application ports)
-  # NOTE: Interfaces are in application/ports, implementations are in infrastructure/repository
-  # Mocks are placed with implementations (infrastructure layer)
-  # TODO: Consider architectural refactoring to better separate abstraction and implementation
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence:
+  # Watch wallet persistence interfaces
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch:
     config:
-      dir: "internal/infrastructure/repository/mocks"
+      dir: "internal/infrastructure/repository/watch/mocks"
       pkgname: "mocks"
     interfaces:
       AddressRepositorier:
@@ -58,6 +56,13 @@ packages:
       TxRepositorier:
       ETHDetailTXRepositorier:
       XRPDetailTXRepositorier:
+
+  # Cold wallet persistence interfaces
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold:
+    config:
+      dir: "internal/infrastructure/repository/cold/mocks"
+      pkgname: "mocks"
+    interfaces:
       SeedRepositorier:
       BTCAccountKeyRepositorier:
       ETHAccountKeyRepositorier:

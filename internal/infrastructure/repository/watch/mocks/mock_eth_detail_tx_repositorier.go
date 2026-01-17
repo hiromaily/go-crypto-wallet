@@ -7,7 +7,7 @@ package mocks
 import (
 	"database/sql"
 
-	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	mock "github.com/stretchr/testify/mock"
@@ -539,19 +539,19 @@ func (_c *MockETHDetailTXRepositorier_UpdateTxTypeBySentHashTx_Call) RunAndRetur
 }
 
 // WithTx provides a mock function for the type MockETHDetailTXRepositorier
-func (_mock *MockETHDetailTXRepositorier) WithTx(tx *sql.Tx) repowatch.ETHDetailTXRepositorier {
+func (_mock *MockETHDetailTXRepositorier) WithTx(tx *sql.Tx) watch.ETHDetailTXRepositorier {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WithTx")
 	}
 
-	var r0 repowatch.ETHDetailTXRepositorier
-	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) repowatch.ETHDetailTXRepositorier); ok {
+	var r0 watch.ETHDetailTXRepositorier
+	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) watch.ETHDetailTXRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(repowatch.ETHDetailTXRepositorier)
+			r0 = ret.Get(0).(watch.ETHDetailTXRepositorier)
 		}
 	}
 	return r0
@@ -581,12 +581,12 @@ func (_c *MockETHDetailTXRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *Mo
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_WithTx_Call) Return(eTHDetailTXRepositorier repowatch.ETHDetailTXRepositorier) *MockETHDetailTXRepositorier_WithTx_Call {
+func (_c *MockETHDetailTXRepositorier_WithTx_Call) Return(eTHDetailTXRepositorier watch.ETHDetailTXRepositorier) *MockETHDetailTXRepositorier_WithTx_Call {
 	_c.Call.Return(eTHDetailTXRepositorier)
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) repowatch.ETHDetailTXRepositorier) *MockETHDetailTXRepositorier_WithTx_Call {
+func (_c *MockETHDetailTXRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) watch.ETHDetailTXRepositorier) *MockETHDetailTXRepositorier_WithTx_Call {
 	_c.Call.Return(run)
 	return _c
 }
