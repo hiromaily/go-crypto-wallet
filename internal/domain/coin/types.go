@@ -92,7 +92,30 @@ func IsCoinTypeCode(val string) bool {
 }
 
 // IsBTCGroup returns true if the coin is part of the Bitcoin group (BTC, BCH).
+//
+// Deprecated: Use IsBTCCompatible for clarity. This function is kept for backward compatibility.
 func IsBTCGroup(val CoinTypeCode) bool {
+	return IsBTCCompatible(val)
+}
+
+// IsBTCOnly returns true only for BTC.
+// Use this to guard BTC-specific features that BCH does not support:
+//   - PSBT (BIP174)
+//   - Descriptors (BIP380-386)
+//   - SegWit (BIP141)
+//   - Taproot (BIP340, BIP341, BIP342)
+//   - MuSig2 (BIP327)
+func IsBTCOnly(val CoinTypeCode) bool {
+	return val == BTC
+}
+
+// IsBTCCompatible returns true for coins sharing Bitcoin base functionality (BTC, BCH).
+// Use this for features common to both BTC and BCH:
+//   - Raw transaction creation/signing
+//   - P2PKH addresses
+//   - P2SH multisig
+//   - Basic UTXO operations
+func IsBTCCompatible(val CoinTypeCode) bool {
 	return val == BTC || val == BCH
 }
 
