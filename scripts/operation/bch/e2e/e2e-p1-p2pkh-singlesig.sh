@@ -111,8 +111,8 @@ generate_test_utxos() {
 	log_info "Reading payment address from exported file..."
 	# Get first payment address from the exported CSV file
 	# CSV format: coin,account,P2PKH,P2SH-segwit,bech32,taproot,pubkey,index
-	# For BCH, use field 3 (P2PKH format)
-	payment_address=$(grep -v '^#' "${ADDRESS_FILE_PAYMENT}" 2>/dev/null | head -n1 | cut -d',' -f3)
+	# For BCH, use field 4 (P2SH-segwit/legacy format) which matches the imported address format
+	payment_address=$(grep -v '^#' "${ADDRESS_FILE_PAYMENT}" 2>/dev/null | head -n1 | cut -d',' -f4)
 
 	if [ -z "$payment_address" ]; then
 		log_error "Failed to extract payment address from ${ADDRESS_FILE_PAYMENT}"
@@ -172,7 +172,7 @@ transaction_flow_phase() {
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
 		keygen -c "${BCH_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(keygen -c "${BCH_CONFIG_KEYGEN}" sign --file "${tx_unsigned}")
+	tx_file_signed=$(keygen -c "${BCH_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
 		keygen -c "${BCH_CONFIG_KEYGEN}" api walletlock
 	fi

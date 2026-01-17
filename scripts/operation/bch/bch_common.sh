@@ -334,15 +334,15 @@ bch_wait_for_balance() {
 	log_info "Waiting for blockchain sync and balance update..."
 
 	while [ "$elapsed" -lt "$max_wait" ]; do
-		# Check balance using Bitcoin Cash RPC directly
-		local balance_json
-		balance_json=$(bch_cli "bch-watch" -rpcwallet=watch getbalances 2>&1 || true)
-		local trusted_balance
-		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
+		# Check balance using Bitcoin Cash RPC
+		# BCH watch wallet uses watch-only addresses, so we need to include them
+		# getbalance "*" minconf include_watchonly
+		local balance
+		balance=$(bch_cli "bch-watch" -rpcwallet=watch getbalance "*" 1 true 2>&1 || echo "0")
 
-		# Check if we have any trusted (mature) balance
-		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo 0)" -eq 1 ]; then
-			log_info "Payment account balance verified: ${trusted_balance} BCH (took ${elapsed}s)"
+		# Check if we have any balance
+		if [ -n "$balance" ] && [ "$(echo "$balance > 0" | bc -l 2>/dev/null || echo 0)" -eq 1 ]; then
+			log_info "Payment account balance verified: ${balance} BCH (took ${elapsed}s)"
 			balance_found=true
 			break
 		fi
@@ -380,6 +380,12 @@ bch_generate_test_utxos() {
 	bch_cli "bch-watch" generatetoaddress "$block_count" "$payment_address" >/dev/null
 
 	log_info "Test UTXOs generated successfully"
+
+	# Rescan blockchain to detect the newly generated UTXOs
+	# This is necessary because addresses were imported before blocks were generated
+	log_info "Rescanning blockchain to detect UTXOs..."
+	bch_cli "bch-watch" -rpcwallet=watch rescanblockchain 0 >/dev/null 2>&1
+	log_info "Blockchain rescan completed"
 }
 
 # Extract file path from command output
