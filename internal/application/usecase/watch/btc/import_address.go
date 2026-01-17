@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -82,21 +83,63 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		}
 
 		// Import address into Bitcoin Core
-		err = u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), input.Rescan)
-		if err != nil {
-			// Check if error is recoverable (address already exists)
-			if isRecoverableImportError(err) {
-				logger.Warn(
-					"address already exists in wallet, skipping",
-					"address", targetAddr,
-					"account_type", addrFmt.AccountType.String())
-				importStats.skipped++
-				continue
+		// Use ImportMulti if redeem script is available (for P2SH multisig)
+		// Otherwise use legacy ImportAddressWithLabel
+		if addrFmt.RedeemScript != "" {
+			// P2SH multisig address with redeem script - use importmulti
+			logger.Debug("importing multisig address with redeem script",
+				"address", targetAddr,
+				"account", addrFmt.AccountType.String())
+
+			requests := []dtobtc.ImportMultiRequest{
+				{
+					ScriptPubKey: map[string]string{"address": targetAddr},
+					Timestamp:    "now", // Skip rescanning for faster import
+					RedeemScript: addrFmt.RedeemScript,
+					WatchOnly:    true,
+					Label:        addrFmt.AccountType.String(),
+				},
 			}
 
-			// All other errors are critical - fail the import
-			return fmt.Errorf("failed to import address %s (account: %s): %w",
-				targetAddr, addrFmt.AccountType.String(), err)
+			responses, err := u.btcClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: input.Rescan})
+			if err != nil {
+				return fmt.Errorf("failed to call ImportMulti for address %s: %w", targetAddr, err)
+			}
+
+			if len(responses) == 0 || !responses[0].Success {
+				errMsg := "unknown error"
+				if len(responses) > 0 && responses[0].Error != nil {
+					errMsg = responses[0].Error.Message
+				}
+				// Check if error is recoverable
+				if isRecoverableImportError(fmt.Errorf("%s", errMsg)) {
+					logger.Warn(
+						"address already exists in wallet, skipping",
+						"address", targetAddr,
+						"account_type", addrFmt.AccountType.String())
+					importStats.skipped++
+					continue
+				}
+				return fmt.Errorf("failed to import multisig address %s: %s", targetAddr, errMsg)
+			}
+		} else {
+			// Regular address - use legacy import
+			err = u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), input.Rescan)
+			if err != nil {
+				// Check if error is recoverable (address already exists)
+				if isRecoverableImportError(err) {
+					logger.Warn(
+						"address already exists in wallet, skipping",
+						"address", targetAddr,
+						"account_type", addrFmt.AccountType.String())
+					importStats.skipped++
+					continue
+				}
+
+				// All other errors are critical - fail the import
+				return fmt.Errorf("failed to import address %s (account: %s): %w",
+					targetAddr, addrFmt.AccountType.String(), err)
+			}
 		}
 
 		importStats.success++

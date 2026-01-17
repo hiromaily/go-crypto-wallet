@@ -361,6 +361,73 @@ type ImportDescriptorError struct {
 	Message string `json:"message"`
 }
 
+// ImportMultiRequest represents a single import request for importmulti RPC.
+//
+// This matches the format expected by Bitcoin/BCH importmulti RPC.
+// Used for importing addresses with redeem scripts (P2SH multisig).
+//
+// Reference: Bitcoin Core RPC documentation - importmulti
+type ImportMultiRequest struct {
+	// ScriptPubKey specifies the output to import
+	// Can be a string (hex) or object with "address" field
+	ScriptPubKey any `json:"scriptPubKey"`
+
+	// Timestamp indicates when to start scanning for transactions
+	// Values:
+	//   - "now": Skip rescanning (fastest)
+	//   - 0: Scan from genesis block
+	//   - unix timestamp: Scan from specific time
+	Timestamp any `json:"timestamp"`
+
+	// RedeemScript is the hex-encoded redeem script for P2SH addresses
+	// Required for spending from P2SH multisig addresses
+	RedeemScript string `json:"redeemscript,omitempty"`
+
+	// PubKeys is an array of public keys that must occur in the output
+	PubKeys []string `json:"pubkeys,omitempty"`
+
+	// Keys is an array of private keys (for non-watchonly imports)
+	Keys []string `json:"keys,omitempty"`
+
+	// Internal indicates if matching outputs should be treated as change
+	Internal bool `json:"internal,omitempty"`
+
+	// WatchOnly indicates if matching outputs should be watched even when not spendable
+	// Must be true for watch-only wallets
+	WatchOnly bool `json:"watchonly,omitempty"`
+
+	// Label is the label to assign to the address
+	Label string `json:"label,omitempty"`
+}
+
+// ImportMultiOptions represents options for importmulti RPC.
+type ImportMultiOptions struct {
+	// Rescan indicates whether to rescan the blockchain after all imports
+	// Set to false to skip rescanning (faster)
+	Rescan bool `json:"rescan"`
+}
+
+// ImportMultiResponse represents the response for a single importmulti request.
+type ImportMultiResponse struct {
+	// Success indicates whether the import succeeded
+	Success bool `json:"success"`
+
+	// Warnings contains any warnings generated during import
+	Warnings []string `json:"warnings,omitempty"`
+
+	// Error contains error information if Success is false
+	Error *ImportMultiError `json:"error,omitempty"`
+}
+
+// ImportMultiError contains detailed error information for failed imports.
+type ImportMultiError struct {
+	// Code is the JSON-RPC error code
+	Code int `json:"code"`
+
+	// Message is the human-readable error message
+	Message string `json:"message"`
+}
+
 // DescriptorInfo represents the result of getdescriptorinfo RPC.
 //
 // Used to analyze descriptors and calculate BIP380 checksums.

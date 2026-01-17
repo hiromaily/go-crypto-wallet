@@ -26,6 +26,7 @@ func CreateLine(accountKeyItem *domainBitcoin.BtcAccountKey) []string {
 		taprootAddr,
 		accountKeyItem.FullPublicKey,
 		accountKeyItem.MultisigAddress,
+		accountKeyItem.RedeemScript, // Add redeem script for P2SH multisig
 		strconv.Itoa(int(accountKeyItem.Idx)),
 	}
 }
@@ -43,9 +44,9 @@ func CreateEthLine(accountKeyItem *sqlcgen.EthAccountKey) []string {
 
 // ConvertLine converts line to AddressFormat
 func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*appdto.AddressFormat, error) {
-	// Support both old format (8 fields) and new format (9 fields with Taproot)
-	if len(line) != 8 && len(line) != 9 {
-		return nil, fmt.Errorf("csv format is invalid: expected 8 or 9 fields, got %d", len(line))
+	// Support: old format (8 fields), with Taproot (9 fields), with RedeemScript (10 fields)
+	if len(line) != 8 && len(line) != 9 && len(line) != 10 {
+		return nil, fmt.Errorf("csv format is invalid: expected 8, 9, or 10 fields, got %d", len(line))
 	}
 
 	// validate
@@ -56,18 +57,26 @@ func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*appdto.A
 		return nil, fmt.Errorf("account is invalid: %s", line[1])
 	}
 
-	// For backward compatibility with old CSV format (without Taproot)
+	// For backward compatibility with old CSV formats
 	taprootAddress := ""
+	redeemScript := ""
 	fullPublicKeyIdx := 5
 	multisigAddressIdx := 6
 	idxIdx := 7
 
 	if len(line) == 9 {
-		// New format with Taproot address
+		// Format with Taproot address (no redeemScript)
 		taprootAddress = line[5]
 		fullPublicKeyIdx = 6
 		multisigAddressIdx = 7
 		idxIdx = 8
+	} else if len(line) == 10 {
+		// New format with Taproot address and RedeemScript
+		taprootAddress = line[5]
+		fullPublicKeyIdx = 6
+		multisigAddressIdx = 7
+		redeemScript = line[8]
+		idxIdx = 9
 	}
 
 	return &appdto.AddressFormat{
@@ -79,6 +88,7 @@ func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*appdto.A
 		TaprootAddress:    taprootAddress,
 		FullPublicKey:     line[fullPublicKeyIdx],
 		MultisigAddress:   line[multisigAddressIdx],
+		RedeemScript:      redeemScript,
 		Idx:               line[idxIdx],
 	}, nil
 }

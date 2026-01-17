@@ -237,7 +237,7 @@ transaction_flow_phase() {
 
 	# Create unsigned transaction
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(watch -c "${BCH_CONFIG_WATCH}" create payment 2>&1) || {
+	tx_file=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
 		log_error "Output: $tx_file"
 
@@ -276,7 +276,7 @@ transaction_flow_phase() {
 
 	# Send transaction
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch -c "${BCH_CONFIG_WATCH}" send --file "${tx_signed2}")
+	tx_result=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send --file "${tx_signed2}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
