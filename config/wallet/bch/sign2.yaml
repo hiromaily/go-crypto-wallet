@@ -12,7 +12,7 @@
 #
 # See pkg/config/README.md for full documentation.
 # =============================================================================
-# coin_type: "bch" # btc, bch
+coin_type: "bch" # btc, bch
 address_type: "bch-cashaddr" # p2sh-segwit, bech32, bch-cashaddr
 bitcoin:
   host: "127.0.0.1:31332"
