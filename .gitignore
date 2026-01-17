@@ -28,6 +28,7 @@ bin/
 # data directory
 data/address/*
 data/certs/*
+data/db/*
 data/descriptor/*
 data/dump/*
 data/fullpubkey/*
