@@ -82,7 +82,9 @@ func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, 
 	rawResult, err := b.Client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
 	if err != nil {
 		logger.Debug("getaddressesbylabel RPC failed", "label", labelName, "error", err)
-		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressesbylabel) for label %s in bch: %w", labelName, err)
+		return nil, fmt.Errorf(
+			"fail to call json.RawRequest(getaddressesbylabel) for label %s in bch: %w",
+			labelName, err)
 	}
 
 	// unmarshal response
