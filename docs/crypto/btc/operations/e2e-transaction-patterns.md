@@ -182,9 +182,9 @@ BCH supports **fewer patterns** than BTC due to lack of SegWit, Taproot, and Sch
 
 | Pattern | Key Type | Signature Pattern | Address Format | E2E Script Support |
 |---------|----------|-------------------|----------------|-------------------|
-| **1** | **CashAddr P2PKH** | **Single-sig** | **`bitcoincash:q...`** | **🔶 Manual testing** |
-| **2** | **CashAddr P2SH** | **2-of-3 Multisig** | **`bitcoincash:p...`** | **❌ Not implemented** |
-| **3** | **CashAddr P2SH** | **3-of-3 Multisig** | **`bitcoincash:p...`** | **✅ e2e-workflow.sh** |
+| **1** | **CashAddr P2PKH** | **Single-sig** | **`bitcoincash:q...`** | **✅ e2e/e2e-p1-p2pkh-singlesig.sh** |
+| **2** | **CashAddr P2SH** | **2-of-3 Multisig** | **`bitcoincash:p...`** | **✅ e2e/e2e-p2-p2sh-2of3.sh** |
+| **3** | **CashAddr P2SH** | **3-of-3 Multisig** | **`bitcoincash:p...`** | **✅ e2e/e2e-p3-p2sh-3of3.sh** |
 
 **BCH Limitations:**
 
@@ -780,16 +780,25 @@ Descriptor: tr(musig([fingerprint1/86'/1'/1']xpub1,[fingerprint2]xpub2,[fingerpr
 
 ## Details of Each Pattern for BCH
 
-### BCH Pattern 3: BCH CashAddr P2SH 3-of-3 Multisig (Current E2E)
+### BCH Pattern 3: BCH CashAddr P2SH 3-of-3 Multisig
 
-**Implemented in `scripts/operation/bch/e2e-workflow.sh`**
+**✅ Fully implemented and verified in `scripts/operation/bch/e2e/e2e-p3-p2sh-3of3.sh`**
 
 ```
 Address Type: CashAddr P2SH (BIP44 + BIP11)
 Signing Requirements: 3-of-3 (Keygen + Sign1 + Sign2)
-Address Format: bitcoincash:p... (P2SH multisig)
+Address Format: bchreg:p... (P2SH multisig in regtest)
 Key Derivation: m/44'/1'/account'/change/index (testnet/regtest)
 ```
+
+**Implementation Status:**
+- ✅ Infrastructure and wallet setup
+- ✅ HD key generation and fullpubkey export/import
+- ✅ 3-of-3 multisig address creation
+- ✅ Payment request creation and database storage
+- ✅ **UTXO retrieval** (Fixed in PR #426 - CashAddr format normalization)
+- ✅ Transaction creation and signing workflow
+- ⚠️ PSBT generation (Known issue with BCH label format)
 
 **Workflow:**
 
@@ -883,7 +892,9 @@ For more BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-tra
 | `scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh` | BTC | P2TR Taproot Single-sig (Pattern 9) | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh` | BTC | P2TR MuSig2 (Pattern 10) | N-of-N (framework) |
 | `scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh` | BTC | P2TR Tapscript (Pattern 11) | 2-of-3 (framework) |
-| `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
+| `scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh` | BCH | CashAddr P2PKH Single-sig (Pattern 1) | Single-sig |
+| `scripts/operation/bch/e2e/e2e-p2-p2sh-2of3.sh` | BCH | CashAddr P2SH 2-of-3 Multisig (Pattern 2) | 2-of-3 |
+| `scripts/operation/bch/e2e/e2e-p3-p2sh-3of3.sh` | BCH | CashAddr P2SH 3-of-3 Multisig (Pattern 3) | 3-of-3 |
 
 ### Planned E2E Scripts
 
@@ -932,13 +943,22 @@ No additional E2E scripts planned at this time. All 11 Bitcoin patterns are impl
 
 ---
 
-**Document Version:** 1.9
+**Document Version:** 1.10
 **Last Updated:** 2026-01-17
 **Maintainer:** go-crypto-wallet team
 
 ---
 
 ## Changelog
+
+### Version 1.10 (2026-01-17)
+
+- ✅ Fixed BCH Pattern 3 (3-of-3 Multisig) UTXO retrieval issue (Closes #423, PR #426)
+- Resolved CashAddr format mismatch in `ListUnspentByAccount` address comparison
+- Updated BCH Pattern Matrix to show all 3 patterns with correct E2E script paths
+- Updated E2E Script Reference with proper BCH script locations
+- Added implementation status details for BCH Pattern 3
+- All BCH patterns now have dedicated E2E scripts in `scripts/operation/bch/e2e/`
 
 ### Version 1.9 (2026-01-17)
 

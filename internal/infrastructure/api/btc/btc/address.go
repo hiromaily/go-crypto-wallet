@@ -10,24 +10,58 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// FlexibleLabels handles both string arrays (BTC) and object arrays (BCH) for the labels field
+type FlexibleLabels []string
+
+// UnmarshalJSON implements custom unmarshaling for labels field
+// BTC format: ["label1", "label2"]
+// BCH format: [{"name": "label1", "purpose": "..."}, {"name": "label2", "purpose": "..."}]
+func (f *FlexibleLabels) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as string array (BTC format)
+	var stringLabels []string
+	if err := json.Unmarshal(data, &stringLabels); err == nil {
+		*f = FlexibleLabels(stringLabels)
+		return nil
+	}
+
+	// Try to unmarshal as object array (BCH format)
+	var objectLabels []struct {
+		Name    string `json:"name"`
+		Purpose string `json:"purpose"`
+	}
+	if err := json.Unmarshal(data, &objectLabels); err == nil {
+		// Extract just the name fields
+		labels := make([]string, len(objectLabels))
+		for i, obj := range objectLabels {
+			labels[i] = obj.Name
+		}
+		*f = FlexibleLabels(labels)
+		return nil
+	}
+
+	// If both fail, return empty (labels might be null or invalid)
+	*f = FlexibleLabels([]string{})
+	return nil
+}
+
 // GetAddressInfoResult is response type of RPC `getaddressinfo`
 type GetAddressInfoResult struct {
-	Address             string   `json:"address"`
-	ScriptPubKey        string   `json:"scriptPubKey"`
-	Ismine              bool     `json:"ismine"`
-	Solvable            bool     `json:"solvable,omitempty"`
-	Desc                string   `json:"desc,omitempty"`
-	Iswatchonly         bool     `json:"iswatchonly"`
-	Isscript            bool     `json:"isscript"`
-	Iswitness           bool     `json:"iswitness,omitempty"`
-	Pubkey              string   `json:"pubkey,omitempty"`
-	Iscompressed        bool     `json:"iscompressed,omitempty"`
-	Ischange            bool     `json:"ischange"`
-	Timestamp           int64    `json:"timestamp,omitempty"`
-	HDKeyPath           string   `json:"hdkeypath,omitempty"`
-	HDSeedID            string   `json:"hdseedid,omitempty"`
-	HDMasterFingerprint string   `json:"hdmasterfingerprint,omitempty"`
-	Labels              []string `json:"labels"`
+	Address             string         `json:"address"`
+	ScriptPubKey        string         `json:"scriptPubKey"`
+	Ismine              bool           `json:"ismine"`
+	Solvable            bool           `json:"solvable,omitempty"`
+	Desc                string         `json:"desc,omitempty"`
+	Iswatchonly         bool           `json:"iswatchonly"`
+	Isscript            bool           `json:"isscript"`
+	Iswitness           bool           `json:"iswitness,omitempty"`
+	Pubkey              string         `json:"pubkey,omitempty"`
+	Iscompressed        bool           `json:"iscompressed,omitempty"`
+	Ischange            bool           `json:"ischange"`
+	Timestamp           int64          `json:"timestamp,omitempty"`
+	HDKeyPath           string         `json:"hdkeypath,omitempty"`
+	HDSeedID            string         `json:"hdseedid,omitempty"`
+	HDMasterFingerprint string         `json:"hdmasterfingerprint,omitempty"`
+	Labels              FlexibleLabels `json:"labels"`
 }
 
 // ValidateAddressResult is response type of RPC `validateaddress`
