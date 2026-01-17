@@ -22,9 +22,10 @@ import (
 var (
 	walletType = domainWallet.WalletTypeSign
 	appName    = walletType.String()
-	appVersion = "5.0.0"
+	// appVersion is set via ldflags at build time: -X main.appVersion=<version>
+	appVersion = "dev"
+	// authName is set via ldflags at build time: -X main.authName=<name>
 	// used as account name like client, deposit, payment
-	// this value is supposed to be embedded when building
 	authName = ""
 
 	// CLI options
