@@ -68,6 +68,15 @@ config/wallet/btc/keygen.yaml
 config/wallet/btc/sign.yaml
 ```
 
+**Important**: All wallet commands require the `--config` flag to specify the configuration file:
+
+```bash
+# Example usage
+./watch --config config/wallet/btc/watch.yaml --coin btc create deposit
+./keygen --config config/wallet/btc/keygen.yaml --coin btc sign --file tx.psbt
+./sign --config config/wallet/btc/sign.yaml --coin btc sign --file tx.psbt
+```
+
 See `docs/crypto/btc/operation_example.md` for configuration details.
 
 ---

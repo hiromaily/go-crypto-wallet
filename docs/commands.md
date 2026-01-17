@@ -411,13 +411,20 @@ API commands are coin-specific and dynamically configured based on the `--coin` 
 
 All wallet commands support the following global flags:
 
-- `--conf <path>` or `-c <path>` - Path to the configuration file
+- `--config <path>` or `-c <path>` - Path to the configuration file (required)
+- `--account-config <path>` - Path to the account configuration file for multisig settings (optional)
 - `--coin <string>` - Coin type code: `btc`, `bch`, `eth`, `xrp`, `hyt` (default: `btc`)
 - `--wallet <string>` or `-w <string>` - Specify wallet.dat in Bitcoin Core (BTC/BCH only)
 
 **Example:**
 
 ```bash
-watch --coin eth --conf config/wallet/eth/watch.yaml create deposit
-keygen --coin btc --wallet keygen sign signature --file tx.json
+# Watch wallet
+watch --config config/wallet/eth/watch.yaml --coin eth create deposit
+
+# Keygen wallet with account config for multisig
+keygen --config config/wallet/btc/keygen.yaml --account-config config/wallet/account/account.yaml --coin btc create multisig --account payment
+
+# Sign wallet
+sign --config config/wallet/btc/sign.yaml --coin btc sign signature --file tx.json
 ```

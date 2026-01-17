@@ -158,27 +158,27 @@ If missing, run the migration script (already included in Phase 1a).
 This example walks through creating a Taproot wallet from scratch:
 
 ```bash
-# 1. Set environment variables
-export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc/keygen.yaml
-export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
-export BTC_ACCOUNT_CONF=./config/wallet/account/account.yaml
+# Config paths
+KEYGEN_CONF=./config/wallet/btc/keygen.yaml
+WATCH_CONF=./config/wallet/btc/watch.yaml
+ACCOUNT_CONF=./config/wallet/account/account.yaml
 
-# 2. Generate seed (Keygen wallet - OFFLINE)
-./keygen --coin btc create seed
+# 1. Generate seed (Keygen wallet - OFFLINE)
+./keygen --config $KEYGEN_CONF --coin btc create seed
 
-# 3. Generate Taproot keys (Keygen wallet - OFFLINE)
-./keygen --coin btc create hdkey --account client --count 10
+# 2. Generate Taproot keys (Keygen wallet - OFFLINE)
+./keygen --config $KEYGEN_CONF --coin btc create hdkey --account client --count 10
 
-# 4. Export addresses (Keygen wallet - OFFLINE)
-./keygen --coin btc export address --account client
+# 3. Export addresses (Keygen wallet - OFFLINE)
+./keygen --config $KEYGEN_CONF --coin btc export address --account client
 # Output: ./data/address/btc/client_1234567890.csv
 
-# 5. Import addresses to Watch wallet (Watch wallet - ONLINE)
-./watch --coin btc import address --account client \
+# 4. Import addresses to Watch wallet (Watch wallet - ONLINE)
+./watch --config $WATCH_CONF --coin btc import address --account client \
   --filepath ./data/address/btc/client_1234567890.csv
 
-# 6. Check imported addresses
-./watch --coin btc api getaddressesbylabel --label client
+# 5. Check imported addresses
+./watch --config $WATCH_CONF --coin btc api getaddressesbylabel --label client
 ```
 
 ### Expected Output
@@ -202,27 +202,29 @@ Testnet: tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c
 **Scenario:** Customer deposits funds to your Taproot address
 
 ```bash
+# Config paths
+KEYGEN_CONF=./config/wallet/btc/keygen.yaml
+WATCH_CONF=./config/wallet/btc/watch.yaml
+
 # 1. Generate client account Taproot addresses (Keygen - OFFLINE)
-export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc/keygen.yaml
-./keygen --coin btc create hdkey --account client --count 100
+./keygen --config $KEYGEN_CONF --coin btc create hdkey --account client --count 100
 
 # 2. Export addresses (Keygen - OFFLINE)
-./keygen --coin btc export address --account client
+./keygen --config $KEYGEN_CONF --coin btc export address --account client
 # Output: ./data/address/btc/client_1234567890.csv
 
 # 3. Transfer address file to Watch wallet (secure transfer)
 # Copy client_1234567890.csv to Watch wallet system
 
 # 4. Import addresses (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
-./watch --coin btc import address --account client \
+./watch --config $WATCH_CONF --coin btc import address --account client \
   --filepath ./data/address/btc/client_1234567890.csv
 
 # 5. Monitor for incoming transactions
-./watch --coin btc monitor transaction
+./watch --config $WATCH_CONF --coin btc monitor transaction
 
 # 6. Create deposit transaction when funds are confirmed
-./watch --coin btc create transaction --account deposit
+./watch --config $WATCH_CONF --coin btc create transaction --account deposit
 # Output: ./data/tx/btc/deposit_1_unsigned_0_1234567890.tx
 ```
 
@@ -231,24 +233,26 @@ export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
 **Scenario:** Send funds from deposit account to payment account
 
 ```bash
+# Config paths
+KEYGEN_CONF=./config/wallet/btc/keygen.yaml
+WATCH_CONF=./config/wallet/btc/watch.yaml
+
 # 1. Create unsigned transaction (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
-./watch --coin btc create transaction --account deposit
+./watch --config $WATCH_CONF --coin btc create transaction --account deposit
 # Output: ./data/tx/btc/deposit_1_unsigned_0_1234567890.tx
 
 # 2. Transfer transaction file to Keygen wallet (secure transfer)
 # Copy deposit_1_unsigned_0_1234567890.tx to Keygen system
 
 # 3. Sign transaction with Schnorr signature (Keygen - OFFLINE)
-export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc/keygen.yaml
-./keygen --coin btc sign \
+./keygen --config $KEYGEN_CONF --coin btc sign \
   --file ./data/tx/btc/deposit_1_unsigned_0_1234567890.tx
 # Output: ./data/tx/btc/deposit_1_signed_0_1234567890.tx
 
 # 4. Transfer signed transaction back to Watch wallet
 
 # 5. Send transaction (Watch - ONLINE)
-./watch --coin btc send transaction --account deposit \
+./watch --config $WATCH_CONF --coin btc send transaction --account deposit \
   --file ./data/tx/btc/deposit_1_signed_0_1234567890.tx
 ```
 
@@ -257,39 +261,43 @@ export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc/keygen.yaml
 **Scenario:** Send funds from payment account (requires 2-of-3 signatures)
 
 ```bash
+# Config paths
+KEYGEN_CONF=./config/wallet/btc/keygen.yaml
+SIGN_CONF=./config/wallet/btc/sign.yaml
+WATCH_CONF=./config/wallet/btc/watch.yaml
+
 # 1. Create unsigned transaction (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
-./watch --coin btc create transaction --account payment
+./watch --config $WATCH_CONF --coin btc create transaction --account payment
 # Output: ./data/tx/btc/payment_5_unsigned_0_1234567890.tx
 
 # 2. First signature (Keygen - OFFLINE)
-export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc/keygen.yaml
-./keygen --coin btc sign \
+./keygen --config $KEYGEN_CONF --coin btc sign \
   --file ./data/tx/btc/payment_5_unsigned_0_1234567890.tx
 # Output: ./data/tx/btc/payment_5_unsigned_1_1234567890.tx (still unsigned - needs more sigs)
 
 # 3. Second signature (Sign wallet - OFFLINE)
-export BTC_SIGN_WALLET_CONF=./config/wallet/btc/sign.yaml
-./sign --coin btc sign \
+./sign --config $SIGN_CONF --coin btc sign \
   --file ./data/tx/btc/payment_5_unsigned_1_1234567890.tx
 # Output: ./data/tx/btc/payment_5_signed_0_1234567890.tx (now fully signed)
 
 # 4. Send transaction (Watch - ONLINE)
-./watch --coin btc send transaction --account payment \
+./watch --config $WATCH_CONF --coin btc send transaction --account payment \
   --file ./data/tx/btc/payment_5_signed_0_1234567890.tx
 ```
 
 ### Example 4: Creating Payment Request with Taproot
 
 ```bash
+# Config path
+WATCH_CONF=./config/wallet/btc/watch.yaml
+
 # 1. Create payment request (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
-./watch --coin btc create payment-request \
+./watch --config $WATCH_CONF --coin btc create payment-request \
   --address bc1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr \
   --amount 0.001
 
 # 2. Monitor payment status
-./watch --coin btc monitor transaction
+./watch --config $WATCH_CONF --coin btc monitor transaction
 ```
 
 ## Migration Guide
@@ -401,7 +409,7 @@ sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
 1. **Test on Testnet First**
    ```bash
    # Always test new workflows on testnet
-   export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen_testnet.toml
+   ./keygen --config ./config/wallet/btc/keygen_testnet.yaml --coin btc ...
    ```
 
 2. **Keep Audit Logs**
