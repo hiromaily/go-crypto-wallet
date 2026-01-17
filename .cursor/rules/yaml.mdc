@@ -41,7 +41,7 @@ The `yaml-lint` command checks:
 Wallet configuration files for BTC, BCH, ETH, XRP:
 
 ```yaml
-# Example: config/wallet/btc_watch.yaml
+# Example: config/wallet/btc/watch.yaml
 bitcoin:
   network: testnet
   host: "127.0.0.1:18332"

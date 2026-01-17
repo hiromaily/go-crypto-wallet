@@ -22,6 +22,7 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 
 ### Always Do
 
+- **Check current branch before starting any task** (see `git-workflow` skill)
 - Read relevant documentation before making changes
 - Run verification commands after code changes
 - Wrap errors with context using `fmt.Errorf("context: %w", err)`

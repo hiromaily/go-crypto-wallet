@@ -34,6 +34,7 @@ Refer to @docs/standards/testing.md
 Refer to @docs/standards/workflow.md
 
 Key rules:
+- **Check current branch FIRST** before starting any task (never work on `main`)
 - Create feature branches for changes
 - Follow conventional commit messages
 - Run file-type-appropriate verification commands before committing (see table below; `*.md` requires none)

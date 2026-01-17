@@ -51,8 +51,8 @@ Each script must include header comments in the following format:
 #   - Descriptor: [descriptor format]
 #
 # Required Config Settings:
-#   - config/wallet/btc_watch.yaml:  address_type: "[type]"
-#   - config/wallet/btc_keygen.yaml: address_type: "[type]"
+#   - config/wallet/btc/watch.yaml:  address_type: "[type]"
+#   - config/wallet/btc/keygen.yaml: address_type: "[type]"
 ```
 
 ### Environment Variable Section
@@ -75,15 +75,15 @@ Use the appropriate configuration file based on the pattern:
 
 | Pattern | Account Config |
 |---------|----------------|
-| Single-sig | `config/wallet/account.yaml` |
-| 2-of-3 Multisig | `config/wallet/account_2of3.yaml` |
-| 3-of-3 Multisig | `config/wallet/account_3of3.yaml` |
+| Single-sig | `config/wallet/account/account.yaml` |
+| 2-of-3 Multisig | `config/wallet/account/account_2of3.yaml` |
+| 3-of-3 Multisig | `config/wallet/account/account_3of3.yaml` |
 
 ## Configuration File Policy (Important)
 
 ### ❌ Do NOT Edit Config Files Directly
 
-Do **not** edit configuration files (`btc_watch.yaml`, `btc_keygen.yaml`, etc.) directly.
+Do **not** edit configuration files (`btc/watch.yaml`, `btc/keygen.yaml`, etc.) directly.
 Use **environment variables** to override settings when different values are needed.
 
 ### ✅ Override via Environment Variables

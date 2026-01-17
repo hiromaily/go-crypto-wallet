@@ -7,6 +7,63 @@ description: Git branch management, commit conventions, and PR creation workflow
 
 Standard Git workflow for all tasks in this repository.
 
+## ⚠️ MANDATORY: Check Branch Before Starting ANY Task
+
+**This is the FIRST step for ANY task that involves code changes.**
+
+Before writing any code or making any changes, you MUST check the current branch:
+
+```bash
+git branch --show-current
+```
+
+### Decision Flow
+
+```
+Current Branch?
+    │
+    ├─ main → ❌ DO NOT work here
+    │         → Create a new branch first (see "Creating a New Branch")
+    │
+    ├─ Feature branch for this task → ✅ Continue working
+    │
+    └─ Different feature branch → ⚠️ Ask user which branch to use
+```
+
+### If on `main` Branch
+
+**NEVER make changes directly on `main`.** Always create a new branch first:
+
+```bash
+# 1. Ensure main is up to date
+git fetch origin
+git reset --hard origin/main
+
+# 2. Create new branch
+git checkout -b {type}/issue-{number}-{description}
+```
+
+### If on Wrong Feature Branch
+
+Ask the user:
+> "You are currently on branch `{current-branch}`. Should I:
+> 1. Continue working on this branch?
+> 2. Switch to `main` and create a new branch for this task?"
+
+### Example Check Output
+
+```bash
+$ git branch --show-current
+main
+# → Must create new branch before any work!
+
+$ git branch --show-current
+feature/issue-123-add-taproot
+# → OK to continue if this is the correct branch for the task
+```
+
+---
+
 ## Branch Management
 
 ### Creating a New Branch
