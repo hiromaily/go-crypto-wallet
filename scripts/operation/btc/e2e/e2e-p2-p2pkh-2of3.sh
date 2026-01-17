@@ -69,7 +69,7 @@ key_generation_phase() {
 	log_substep "Creating seeds for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
-		"sign${i}" --conf "${!config_var}" --coin "${BTC_COIN}" create seed || {
+		"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" create seed || {
 			log_warn "Sign${i} seed already exists, continuing..."
 		}
 	done
@@ -77,24 +77,24 @@ key_generation_phase() {
 	log_substep "Creating HD keys for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
-		"sign${i}" --conf "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" create hdkey
+		"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" create hdkey
 	done
 
 	log_substep "Importing private keys into sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			"sign${i}" --conf "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+			"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 		fi
-		"sign${i}" --conf "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" import privkey
+		"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" import privkey
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			"sign${i}" --conf "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletlock
+			"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletlock
 		fi
 	done
 
 	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(sign1 --conf "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(sign2 --conf "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
+	file_fullpubkey_auth1=$(sign1 -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
+	file_fullpubkey_auth2=$(sign2 -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
 
 	export FULLPUBKEY_FILE1="${file_fullpubkey_auth1##*\[fileName\]: }"
 	export FULLPUBKEY_FILE2="${file_fullpubkey_auth2##*\[fileName\]: }"
@@ -202,7 +202,7 @@ transaction_flow_phase() {
 	log_info "Signed transaction (1st): $tx_signed1"
 
 	log_substep "Signing with sign1 wallet (2nd signature - completing 2-of-3)"
-	tx_file_signed2=$(sign1 --conf "${BTC_CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_file_signed2=$(sign1 -c "${BTC_CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
 	tx_signed2=$(btc_extract_file_path "$tx_file_signed2")
 	log_info "Signed transaction (2nd): $tx_signed2"
 
@@ -234,16 +234,39 @@ EOF
 main() {
 	while [ $# -gt 0 ]; do
 		case "$1" in
-		--cleanup) CLEANUP_ONLY=true; shift ;;
-		--reset) RESET_STATE=true; shift ;;
-		--verbose) VERBOSE=true; set -x; shift ;;
-		--non-interactive) NON_INTERACTIVE=true; shift ;;
-		-h | --help) show_help; exit 0 ;;
-		*) log_error "Unknown option: $1"; show_help; exit 1 ;;
+		--cleanup)
+			CLEANUP_ONLY=true
+			shift
+			;;
+		--reset)
+			RESET_STATE=true
+			shift
+			;;
+		--verbose)
+			VERBOSE=true
+			set -x
+			shift
+			;;
+		--non-interactive)
+			NON_INTERACTIVE=true
+			shift
+			;;
+		-h | --help)
+			show_help
+			exit 0
+			;;
+		*)
+			log_error "Unknown option: $1"
+			show_help
+			exit 1
+			;;
 		esac
 	done
 
-	if [ "$CLEANUP_ONLY" = "true" ]; then btc_cleanup; exit 0; fi
+	if [ "$CLEANUP_ONLY" = "true" ]; then
+		btc_cleanup
+		exit 0
+	fi
 	if [ "$RESET_STATE" = "true" ]; then btc_full_reset "${BTC_DOCKER_VOLUME_NAME}" "watch keygen sign1 sign2"; fi
 
 	log_info "Starting Bitcoin E2E Workflow - Pattern 2: P2PKH 2-of-3 Multisig"

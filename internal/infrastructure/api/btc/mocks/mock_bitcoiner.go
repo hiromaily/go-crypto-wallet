@@ -2574,6 +2574,74 @@ func (_c *MockBitcoiner_ImportDescriptors_Call) RunAndReturn(run func(requests [
 	return _c
 }
 
+// ImportMulti provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) ImportMulti(requests []btc.ImportMultiRequest, options *btc.ImportMultiOptions) ([]btc.ImportMultiResponse, error) {
+	ret := _mock.Called(requests, options)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ImportMulti")
+	}
+
+	var r0 []btc.ImportMultiResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func([]btc.ImportMultiRequest, *btc.ImportMultiOptions) ([]btc.ImportMultiResponse, error)); ok {
+		return returnFunc(requests, options)
+	}
+	if returnFunc, ok := ret.Get(0).(func([]btc.ImportMultiRequest, *btc.ImportMultiOptions) []btc.ImportMultiResponse); ok {
+		r0 = returnFunc(requests, options)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]btc.ImportMultiResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func([]btc.ImportMultiRequest, *btc.ImportMultiOptions) error); ok {
+		r1 = returnFunc(requests, options)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBitcoiner_ImportMulti_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ImportMulti'
+type MockBitcoiner_ImportMulti_Call struct {
+	*mock.Call
+}
+
+// ImportMulti is a helper method to define mock.On call
+//   - requests []btc.ImportMultiRequest
+//   - options *btc.ImportMultiOptions
+func (_e *MockBitcoiner_Expecter) ImportMulti(requests interface{}, options interface{}) *MockBitcoiner_ImportMulti_Call {
+	return &MockBitcoiner_ImportMulti_Call{Call: _e.mock.On("ImportMulti", requests, options)}
+}
+
+func (_c *MockBitcoiner_ImportMulti_Call) Run(run func(requests []btc.ImportMultiRequest, options *btc.ImportMultiOptions)) *MockBitcoiner_ImportMulti_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []btc.ImportMultiRequest
+		if args[0] != nil {
+			arg0 = args[0].([]btc.ImportMultiRequest)
+		}
+		var arg1 *btc.ImportMultiOptions
+		if args[1] != nil {
+			arg1 = args[1].(*btc.ImportMultiOptions)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_ImportMulti_Call) Return(importMultiResponses []btc.ImportMultiResponse, err error) *MockBitcoiner_ImportMulti_Call {
+	_c.Call.Return(importMultiResponses, err)
+	return _c
+}
+
+func (_c *MockBitcoiner_ImportMulti_Call) RunAndReturn(run func(requests []btc.ImportMultiRequest, options *btc.ImportMultiOptions) ([]btc.ImportMultiResponse, error)) *MockBitcoiner_ImportMulti_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ImportPrivKey provides a mock function for the type MockBitcoiner
 func (_mock *MockBitcoiner) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
 	ret := _mock.Called(privKeyWIF)

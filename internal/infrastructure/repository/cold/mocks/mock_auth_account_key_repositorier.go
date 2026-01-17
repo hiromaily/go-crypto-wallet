@@ -5,6 +5,8 @@
 package mocks
 
 import (
+	"context"
+
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
@@ -107,8 +109,8 @@ func (_c *MockAuthAccountKeyRepositorier_GetByAccount_Call) RunAndReturn(run fun
 }
 
 // GetOne provides a mock function for the type MockAuthAccountKeyRepositorier
-func (_mock *MockAuthAccountKeyRepositorier) GetOne(authType account.AuthType) (*auth.AuthAccountKey, error) {
-	ret := _mock.Called(authType)
+func (_mock *MockAuthAccountKeyRepositorier) GetOne(ctx context.Context, authType account.AuthType) (*auth.AuthAccountKey, error) {
+	ret := _mock.Called(ctx, authType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
@@ -116,18 +118,18 @@ func (_mock *MockAuthAccountKeyRepositorier) GetOne(authType account.AuthType) (
 
 	var r0 *auth.AuthAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AuthType) (*auth.AuthAccountKey, error)); ok {
-		return returnFunc(authType)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AuthType) (*auth.AuthAccountKey, error)); ok {
+		return returnFunc(ctx, authType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AuthType) *auth.AuthAccountKey); ok {
-		r0 = returnFunc(authType)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AuthType) *auth.AuthAccountKey); ok {
+		r0 = returnFunc(ctx, authType)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*auth.AuthAccountKey)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(account.AuthType) error); ok {
-		r1 = returnFunc(authType)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, account.AuthType) error); ok {
+		r1 = returnFunc(ctx, authType)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -140,19 +142,25 @@ type MockAuthAccountKeyRepositorier_GetOne_Call struct {
 }
 
 // GetOne is a helper method to define mock.On call
+//   - ctx context.Context
 //   - authType account.AuthType
-func (_e *MockAuthAccountKeyRepositorier_Expecter) GetOne(authType interface{}) *MockAuthAccountKeyRepositorier_GetOne_Call {
-	return &MockAuthAccountKeyRepositorier_GetOne_Call{Call: _e.mock.On("GetOne", authType)}
+func (_e *MockAuthAccountKeyRepositorier_Expecter) GetOne(ctx interface{}, authType interface{}) *MockAuthAccountKeyRepositorier_GetOne_Call {
+	return &MockAuthAccountKeyRepositorier_GetOne_Call{Call: _e.mock.On("GetOne", ctx, authType)}
 }
 
-func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) Run(run func(authType account.AuthType)) *MockAuthAccountKeyRepositorier_GetOne_Call {
+func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) Run(run func(ctx context.Context, authType account.AuthType)) *MockAuthAccountKeyRepositorier_GetOne_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 account.AuthType
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(account.AuthType)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 account.AuthType
+		if args[1] != nil {
+			arg1 = args[1].(account.AuthType)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -163,7 +171,7 @@ func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) Return(authAccountKey *aut
 	return _c
 }
 
-func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) RunAndReturn(run func(authType account.AuthType) (*auth.AuthAccountKey, error)) *MockAuthAccountKeyRepositorier_GetOne_Call {
+func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) RunAndReturn(run func(ctx context.Context, authType account.AuthType) (*auth.AuthAccountKey, error)) *MockAuthAccountKeyRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }

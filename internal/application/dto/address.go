@@ -15,5 +15,6 @@ type AddressFormat struct {
 	TaprootAddress    string
 	FullPublicKey     string
 	MultisigAddress   string
+	RedeemScript      string // Hex-encoded redeem script for P2SH multisig
 	Idx               string
 }

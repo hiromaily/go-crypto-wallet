@@ -150,3 +150,69 @@ func (b *Bitcoin) ImportDescriptors(
 
 	return responses, nil
 }
+
+// ImportMulti imports addresses/scripts with optional redeem scripts (legacy wallets).
+//
+// This is used for BCH and older Bitcoin Core versions that don't support descriptors.
+// Allows importing P2SH addresses with redeem scripts for multisig support.
+//
+// Parameters:
+//   - requests: List of import requests
+//   - options: Import options (rescan, etc.)
+//
+// Returns:
+//   - List of responses (one per request, in the same order)
+//   - Error if the RPC call fails
+//
+// Notes:
+//   - Use "now" timestamp to skip rescanning (fastest)
+//   - Set watchonly=true for watch-only wallets
+//   - Include redeemscript for P2SH multisig addresses
+//
+// Reference: Bitcoin Core RPC documentation - importmulti
+func (b *Bitcoin) ImportMulti(
+	requests []dtobtc.ImportMultiRequest,
+	options *dtobtc.ImportMultiOptions,
+) ([]dtobtc.ImportMultiResponse, error) {
+	if len(requests) == 0 {
+		return nil, errors.New("no addresses to import")
+	}
+
+	// Marshal requests to JSON
+	bRequests, err := json.Marshal(requests)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal import requests: %w", err)
+	}
+
+	// Prepare RPC parameters
+	jsonRawMsg := []json.RawMessage{bRequests}
+
+	// Add options if provided
+	if options != nil {
+		bOptions, err := json.Marshal(options)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal import options: %w", err)
+		}
+		jsonRawMsg = append(jsonRawMsg, bOptions)
+	}
+
+	// Call importmulti RPC
+	rawResponse, err := b.Client.RawRequest("importmulti", jsonRawMsg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call client.RawRequest(importmulti): %w", err)
+	}
+
+	// Parse response
+	var responses []dtobtc.ImportMultiResponse
+	if err := json.Unmarshal(rawResponse, &responses); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal import responses: %w", err)
+	}
+
+	// Verify response count matches request count
+	if len(responses) != len(requests) {
+		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
+			len(responses), len(requests))
+	}
+
+	return responses, nil
+}
