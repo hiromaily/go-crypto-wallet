@@ -178,11 +178,22 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 
 ### BCH Pattern Matrix
 
+BCH supports **fewer patterns** than BTC due to lack of SegWit, Taproot, and Schnorr signatures.
+
 | Pattern | Key Type | Signature Pattern | Address Format | E2E Script Support |
 |---------|----------|-------------------|----------------|-------------------|
-| 1 | CashAddr | Single-sig | `bitcoincash:q...` | 🔶 Manual testing |
-| **2** | **CashAddr** | **3-of-3 Multisig** | **`bitcoincash:p...`** | **✅ e2e-workflow.sh** |
-| 3 | CashAddr | 2-of-3 Multisig | `bitcoincash:p...` | ❌ Not supported |
+| **1** | **CashAddr P2PKH** | **Single-sig** | **`bitcoincash:q...`** | **🔶 Manual testing** |
+| **2** | **CashAddr P2SH** | **2-of-3 Multisig** | **`bitcoincash:p...`** | **❌ Not implemented** |
+| **3** | **CashAddr P2SH** | **3-of-3 Multisig** | **`bitcoincash:p...`** | **✅ e2e-workflow.sh** |
+
+**BCH Limitations:**
+
+- ❌ No SegWit (no P2WPKH, P2WSH, P2SH-P2WPKH patterns)
+- ❌ No Taproot (no P2TR patterns)
+- ❌ No Schnorr signatures (ECDSA only)
+- ❌ No MuSig2 (no signature aggregation)
+
+For detailed BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-transaction-patterns).
 
 ---
 
@@ -764,28 +775,47 @@ Descriptor: tr(musig([fingerprint1/86'/1'/1']xpub1,[fingerprint2]xpub2,[fingerpr
 
 ## Details of Each Pattern for BCH
 
-### BCH Pattern 2: BCH CashAddr 3-of-3 Multisig (Current E2E)
+### BCH Pattern 3: BCH CashAddr P2SH 3-of-3 Multisig (Current E2E)
 
-**Currently WIP implemented in `scripts/operation/bch/e2e-workflow.sh`**
+**Implemented in `scripts/operation/bch/e2e-workflow.sh`**
 
 ```
-Address Type: CashAddr P2SH
+Address Type: CashAddr P2SH (BIP44 + BIP11)
 Signing Requirements: 3-of-3 (Keygen + Sign1 + Sign2)
 Address Format: bitcoincash:p... (P2SH multisig)
+Key Derivation: m/44'/1'/account'/change/index (testnet/regtest)
 ```
 
 **Workflow:**
 
 1. Generate Seed in Keygen/Sign1/Sign2
-2. Generate HD Key in Keygen
+2. Generate HD Key in Keygen (10 keys per account)
 3. Generate HD Key in Sign1/Sign2
 4. Export fullpubkey from Sign1/Sign2
 5. Import fullpubkey to Keygen
-6. Create Multisig address in Keygen
-7. Export address from Keygen
-8. Import address to Watch
+6. Create 3-of-3 Multisig addresses in Keygen
+7. Export addresses from Keygen (CashAddr format)
+8. Import addresses to Watch wallet
 9. Generate Test UTXO (regtest)
-10. Create unsigned transaction → Sign 3 times → Broadcast
+10. Create unsigned transaction → Sign 3 times (ECDSA) → Broadcast
+
+**Signing Flow:**
+
+```
+Watch Wallet (create unsigned tx)
+    ↓
+Keygen Wallet (1st ECDSA signature)
+    ↓
+Sign1 Wallet (2nd ECDSA signature)
+    ↓
+Sign2 Wallet (3rd ECDSA signature)
+    ↓
+Watch Wallet (broadcast)
+```
+
+**Note:** Unlike BTC's SegWit patterns, BCH transactions don't benefit from witness data separation, resulting in larger transaction sizes. BCH compensates with very low fees (~1 sat/byte).
+
+For more BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-transaction-patterns)
 
 ---
 
@@ -897,13 +927,21 @@ No additional E2E scripts planned at this time. All 11 Bitcoin patterns are impl
 
 ---
 
-**Document Version:** 1.8
-**Last Updated:** 2026-01-16
+**Document Version:** 1.9
+**Last Updated:** 2026-01-17
 **Maintainer:** go-crypto-wallet team
 
 ---
 
 ## Changelog
+
+### Version 1.9 (2026-01-17)
+
+- Updated BCH Pattern Matrix with accurate pattern numbering (1, 2, 3)
+- Added BCH limitations section (no SegWit, Taproot, Schnorr, MuSig2)
+- Updated BCH Pattern 3 (3-of-3 Multisig) with detailed workflow and signing flow
+- Added cross-reference link to BCH Technical Reference
+- Renamed "BCH Pattern 2" to "BCH Pattern 3" to reflect correct pattern numbering
 
 ### Version 1.8 (2026-01-16)
 
