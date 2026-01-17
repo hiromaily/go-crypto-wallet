@@ -156,14 +156,14 @@ wait_for_port() {
 wait_for_migrations() {
 	local max_wait=${1:-120}
 	local counter=0
-	local migration_containers="wallet-db-migrate-watch wallet-db-migrate-keygen wallet-db-migrate-sign wallet-db-migrate-sign2"
+	local migration_containers=("wallet-db-migrate-watch" "wallet-db-migrate-keygen" "wallet-db-migrate-sign" "wallet-db-migrate-sign2")
 
 	log_info "Waiting for database migrations to complete..."
 
 	while [ $counter -lt $max_wait ]; do
 		local all_completed=true
 
-		for container in $migration_containers; do
+		for container in "${migration_containers[@]}"; do
 			# Check if container exists first
 			if ! docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
 				continue
