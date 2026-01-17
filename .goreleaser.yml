@@ -9,51 +9,38 @@ before:
   hooks:
     - go mod tidy
 
+# YAML anchors for DRY configuration
+.common_build: &common_build
+  env:
+    - CGO_ENABLED=0
+  goos:
+    - linux
+    - darwin
+  goarch:
+    - amd64
+    - arm64
+  ldflags:
+    - -s -w
+    - -X main.appVersion={{.Version}}
+
 builds:
   # Watch wallet (online)
   - id: watch
+    <<: *common_build
     main: ./cmd/watch
     binary: watch
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - -s -w
-      - -X main.appVersion={{.Version}}
 
   # Keygen wallet (offline cold wallet)
   - id: keygen
+    <<: *common_build
     main: ./cmd/keygen
     binary: keygen
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - -s -w
-      - -X main.appVersion={{.Version}}
 
   # Sign wallet - auth1 (offline cold wallet)
   - id: sign-auth1
+    <<: *common_build
     main: ./cmd/sign
     binary: sign-auth1
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
-      - arm64
     ldflags:
       - -s -w
       - -X main.appVersion={{.Version}}
@@ -61,16 +48,9 @@ builds:
 
   # Sign wallet - auth2 (offline cold wallet)
   - id: sign-auth2
+    <<: *common_build
     main: ./cmd/sign
     binary: sign-auth2
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
-      - arm64
     ldflags:
       - -s -w
       - -X main.appVersion={{.Version}}
