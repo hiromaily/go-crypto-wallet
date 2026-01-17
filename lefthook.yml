@@ -1,3 +1,44 @@
+# Validate commit message follows Conventional Commits format
+# https://www.conventionalcommits.org/
+commit-msg:
+  commands:
+    conventional-commits:
+      run: |
+        # Conventional Commits regex pattern
+        # Format: type(scope)?: description
+        # Types: feat, fix, docs, refactor, test, ci, chore, build, perf, style, revert
+        pattern="^(feat|fix|docs|refactor|test|ci|chore|build|perf|style|revert)(\([a-zA-Z0-9_-]+\))?(!)?: .{1,}"
+        
+        # Also allow merge commits and revert commits
+        merge_pattern="^Merge (branch|pull request|remote-tracking branch)"
+        revert_pattern="^Revert \""
+        
+        commit_msg=$(cat "$1")
+        first_line=$(echo "$commit_msg" | head -n 1)
+        
+        if echo "$first_line" | grep -qE "$pattern"; then
+          exit 0
+        elif echo "$first_line" | grep -qE "$merge_pattern"; then
+          exit 0
+        elif echo "$first_line" | grep -qE "$revert_pattern"; then
+          exit 0
+        else
+          echo "ERROR: Commit message does not follow Conventional Commits format."
+          echo ""
+          echo "Expected format: <type>(<scope>): <description>"
+          echo ""
+          echo "Types: feat, fix, docs, refactor, test, ci, chore, build, perf, style, revert"
+          echo ""
+          echo "Examples:"
+          echo "  feat(btc): add taproot address support"
+          echo "  fix: resolve database connection timeout"
+          echo "  docs: update architecture guide"
+          echo "  refactor(api): reorganize endpoint handlers"
+          echo ""
+          echo "Your commit message: $first_line"
+          exit 1
+        fi
+
 pre-commit:
   parallel: true
   jobs:
