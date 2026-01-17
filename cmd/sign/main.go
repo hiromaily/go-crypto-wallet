@@ -12,19 +12,16 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/app"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 // sign wallet as cold wallet
-//  - generate one key and seed for only auth accounts
-//  - sing on unsigned transaction as second or more signature
-//   (multisig addresses require signature)
-
-// TODO: bitcoin functionalities
-// - encrypt wallet itself by `encryptwallet` command
-// - passphrase would be required when using secret key to sign unsigned transaction
+//   - generate one key and seed for only auth accounts
+//   - sign on unsigned transaction as second or more signature
+//     (multisig addresses require signature)
 
 var (
 	walletType = domainWallet.WalletTypeSign
@@ -34,79 +31,54 @@ var (
 	// this value is supposed to be embedded when building
 	authName = ""
 
-	// Global flags
-	confPath        string
-	accountConfPath string
-	btcWallet       string
-	coinTypeCode    string
+	// CLI options
+	opts app.Options
 
-	// Wallet instance
+	// Wallet instance (initialized in PersistentPreRunE)
 	walleter  wallets.Signer
 	container di.Container
 )
 
-func initializeWallet() error {
-	// validate coinTypeCode
-	if !domainCoin.IsCoinTypeCode(coinTypeCode) {
-		return errors.New("coin args is invalid. `btc`, `bch` is allowed")
+func initializeSignWallet() error {
+	// Validate coin type for sign wallet (BTC/BCH only)
+	if err := app.ValidateCoinTypeForSign(opts.CoinTypeCode); err != nil {
+		return err
 	}
 
-	// set config path if environment variable is existing
-	if confPath == "" {
-		setConfigPathFromEnv()
+	// Validate config path is provided
+	if opts.ConfigPath == "" {
+		return errors.New("--config flag is required")
 	}
 
-	// account conf path for multisig
-	if accountConfPath == "" {
-		setAccountConfPathFromEnv()
-	}
-
-	// config
-	conf, err := config.NewWallet(confPath, walletType, domainCoin.CoinTypeCode(coinTypeCode))
+	// Load wallet config
+	conf, err := config.NewWallet(opts.ConfigPath, walletType, domainCoin.CoinTypeCode(opts.CoinTypeCode))
 	if err != nil {
 		return fmt.Errorf("failed to load wallet config: %w", err)
 	}
 
+	// Load account config (optional)
 	accountConf := &config.AccountRoot{}
-	if accountConfPath != "" {
-		accountConf, err = config.NewAccount(accountConfPath)
+	if opts.AccountConfigPath != "" {
+		accountConf, err = config.NewAccount(opts.AccountConfigPath)
 		if err != nil {
 			return fmt.Errorf("failed to load account config: %w", err)
 		}
 	}
 
-	// override config
-	conf.CoinTypeCode = domainCoin.CoinTypeCode(coinTypeCode)
+	// Override config with CLI values
+	conf.CoinTypeCode = domainCoin.CoinTypeCode(opts.CoinTypeCode)
 
-	// override conf.Bitcoin.Host
-	if btcWallet != "" {
-		conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
+	// Override Bitcoin host for specific wallet
+	if opts.BTCWallet != "" {
+		conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, opts.BTCWallet)
 		log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
 	}
 
-	// create wallet
+	// Create DI container and wallet
 	container = di.NewContainer(conf, accountConf, walletType)
 	walleter = container.NewSigner(authName)
 
 	return nil
-}
-
-func setConfigPathFromEnv() {
-	switch coinTypeCode {
-	case domainCoin.BTC.String():
-		confPath = os.Getenv("BTC_SIGN_WALLET_CONF")
-	case domainCoin.BCH.String():
-		confPath = os.Getenv("BCH_SIGN_WALLET_CONF")
-	}
-}
-
-func setAccountConfPathFromEnv() {
-	switch coinTypeCode {
-	case domainCoin.BTC.String():
-		accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
-	case domainCoin.BCH.String():
-		accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
-	}
 }
 
 func main() {
@@ -115,11 +87,11 @@ func main() {
 		Short:   "Sign wallet for additional signatures on multisig transactions",
 		Version: appVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// Skip initialization for help
+			// Skip initialization for help command
 			if cmd.Name() == "help" {
 				return nil
 			}
-			return initializeWallet()
+			return initializeSignWallet()
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			if walleter != nil {
@@ -128,10 +100,8 @@ func main() {
 		},
 	}
 
-	// Global flags
-	rootCmd.PersistentFlags().StringVarP(&confPath, "conf", "c", "", "config file path")
-	rootCmd.PersistentFlags().StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`")
-	rootCmd.PersistentFlags().StringVarP(&btcWallet, "wallet", "w", "", "specify wallet.dat in bitcoin core")
+	// Add global flags with sign-specific coin help
+	app.AddGlobalFlagsWithCoinOptions(rootCmd, &opts, "coin type code: btc, bch")
 
 	// Add subcommands
 	sign.AddCommands(rootCmd, &walleter, func() di.Container { return container }, appVersion)

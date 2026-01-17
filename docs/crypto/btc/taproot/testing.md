@@ -196,59 +196,59 @@ go test -v -tags=integration ./internal/infrastructure/api/btc/btc/
 ### 1. Keygen Wallet - Generate Taproot Keys
 
 ```bash
-# Configure for Taproot
-export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc/keygen_bip86_test.yaml
+# Config path (Taproot configuration)
+KEYGEN_CONF=./config/wallet/btc/keygen_bip86_test.yaml
 
 # Generate seed
-./keygen --coin btc create seed
+./keygen --config $KEYGEN_CONF --coin btc create seed
 
 # Generate HD wallet keys
-./keygen --coin btc create hdkey --account client --count 10
+./keygen --config $KEYGEN_CONF --coin btc create hdkey --account client --count 10
 
 # Export addresses
-./keygen --coin btc export address --account client
+./keygen --config $KEYGEN_CONF --coin btc export address --account client
 ```
 
 ### 2. Watch Wallet - Import Taproot Addresses
 
 ```bash
-# Configure for Taproot
-export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
+# Config path
+WATCH_CONF=./config/wallet/btc/watch.yaml
 
 # Import Taproot addresses
-./watch --coin btc import address --account client \
+./watch --config $WATCH_CONF --coin btc import address --account client \
   --filepath ./data/address/btc/bip86_test/client_1234567890.csv
 
 # Create unsigned transaction
-./watch --coin btc create transaction --account deposit
+./watch --config $WATCH_CONF --coin btc create transaction --account deposit
 ```
 
 ### 3. Keygen Wallet - Sign Taproot Transaction
 
 ```bash
 # Sign transaction (Schnorr signature)
-./keygen --coin btc sign --file ./data/tx/btc/deposit_1_unsigned_0_1234567890.tx
+./keygen --config $KEYGEN_CONF --coin btc sign --file ./data/tx/btc/deposit_1_unsigned_0_1234567890.tx
 ```
 
 ### 4. Sign Wallet - Multisig Taproot Signing
 
 ```bash
-# Configure for Taproot
-export BTC_SIGN_WALLET_CONF=./config/wallet/btc/sign.yaml
+# Config path
+SIGN_CONF=./config/wallet/btc/sign.yaml
 
 # Sign multisig transaction (Schnorr signature)
-./sign --coin btc sign --file ./data/tx/btc/payment_5_unsigned_1_1234567890.tx
+./sign --config $SIGN_CONF --coin btc sign --file ./data/tx/btc/payment_5_unsigned_1_1234567890.tx
 ```
 
 ### 5. Watch Wallet - Send Taproot Transaction
 
 ```bash
 # Send signed transaction
-./watch --coin btc send transaction --account deposit \
+./watch --config $WATCH_CONF --coin btc send transaction --account deposit \
   --hex 020000000001...
 
 # Monitor transaction
-./watch --coin btc monitor transaction
+./watch --config $WATCH_CONF --coin btc monitor transaction
 ```
 
 ## Test Coverage Summary
