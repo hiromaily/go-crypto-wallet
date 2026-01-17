@@ -6,7 +6,8 @@ import (
 
 // AddGlobalFlags adds common persistent flags to a cobra command.
 // These flags are shared across keygen, sign, and watch wallets.
-func AddGlobalFlags(cmd *cobra.Command, opts *Options) {
+// It accepts an optional coinHelp string to customize the help text for the --coin flag.
+func AddGlobalFlags(cmd *cobra.Command, opts *Options, coinHelp ...string) {
 	cmd.PersistentFlags().StringVarP(
 		&opts.ConfigPath,
 		"config", "c", "",
@@ -17,34 +18,15 @@ func AddGlobalFlags(cmd *cobra.Command, opts *Options) {
 		"account-config", "",
 		"account config file path for multisig settings",
 	)
-	cmd.PersistentFlags().StringVar(
-		&opts.CoinTypeCode,
-		"coin", "btc",
-		"coin type code: btc, bch, eth, xrp, hyt",
-	)
-	cmd.PersistentFlags().StringVarP(
-		&opts.BTCWallet,
-		"wallet", "w", "",
-		"specify wallet.dat in bitcoin core",
-	)
-}
 
-// AddGlobalFlagsWithCoinOptions adds common persistent flags with customized coin help text.
-func AddGlobalFlagsWithCoinOptions(cmd *cobra.Command, opts *Options, coinHelp string) {
-	cmd.PersistentFlags().StringVarP(
-		&opts.ConfigPath,
-		"config", "c", "",
-		"config file path (required)",
-	)
-	cmd.PersistentFlags().StringVar(
-		&opts.AccountConfigPath,
-		"account-config", "",
-		"account config file path for multisig settings",
-	)
+	helpText := "coin type code: btc, bch, eth, xrp, hyt"
+	if len(coinHelp) > 0 && coinHelp[0] != "" {
+		helpText = coinHelp[0]
+	}
 	cmd.PersistentFlags().StringVar(
 		&opts.CoinTypeCode,
 		"coin", "btc",
-		coinHelp,
+		helpText,
 	)
 	cmd.PersistentFlags().StringVarP(
 		&opts.BTCWallet,

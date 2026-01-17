@@ -32,8 +32,14 @@ type Options struct {
 
 // NewApp creates a new App instance by loading configuration and initializing the DI container.
 func NewApp(walletType domainWallet.WalletType, opts Options) (*App, error) {
-	// Validate coin type
-	if err := ValidateCoinType(opts.CoinTypeCode); err != nil {
+	// Validate coin type based on wallet type
+	var err error
+	if walletType == domainWallet.WalletTypeSign {
+		err = ValidateCoinTypeForSign(opts.CoinTypeCode)
+	} else {
+		err = ValidateCoinType(opts.CoinTypeCode)
+	}
+	if err != nil {
 		return nil, err
 	}
 
