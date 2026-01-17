@@ -1,6 +1,5 @@
 ---
 paths:
-  # Infrastructure Layer - BTC Only (PSBT, Descriptor, MuSig2)
   - "internal/infrastructure/api/btc/btc/psbt.go"
   - "internal/infrastructure/api/btc/btc/musig2.go"
   - "internal/infrastructure/api/btc/btc/descriptor.go"
@@ -12,7 +11,6 @@ paths:
   - "internal/infrastructure/api/btc/btc/descriptor_p2sh.go"
   - "internal/infrastructure/api/btc/btc/descriptor_taproot.go"
   - "internal/infrastructure/api/btc/btc/descriptor_taproot_multikey.go"
-  # Use Case Layer - BTC Only (PSBT-based transaction flow)
   - "internal/application/usecase/watch/btc/create_transaction.go"
   - "internal/application/usecase/watch/btc/send_transaction.go"
   - "internal/application/usecase/watch/btc/import_descriptor.go"
