@@ -76,7 +76,7 @@ import (
 type Container interface {
 	NewWalleter() wallets.Watcher
 	NewKeygener() wallets.Keygener
-	NewSigner(authName string) wallets.Signer
+	NewSigner(authName string) (wallets.Signer, error)
 
 	// Watch Use Cases
 	NewWatchCreateTransactionUseCase() any
@@ -241,16 +241,16 @@ func (c *container) NewWalleter() wallets.Watcher {
 }
 
 // NewSigner is to register for Signer interface
-func (c *container) NewSigner(authName string) wallets.Signer {
+func (c *container) NewSigner(authName string) (wallets.Signer, error) {
 	// validate
 	if !domainAccount.ValidateAuthType(authName) {
 		if authName == "" {
-			panic("authName is empty. Sign wallet binary must be built with ldflags.\n" +
+			return nil, errors.New("authName is empty. Sign wallet binary must be built with ldflags.\n" +
 				"Use 'make build-sign' or 'make build-all' to create sign1/sign2 binaries with proper authName.\n" +
 				"Example: go build -ldflags \"-X main.authName=auth1\" -o sign1 ./cmd/sign/")
 		}
-		panic(fmt.Sprintf("authName '%s' is invalid. Valid values: auth1-auth15. "+
-			"Sign wallet binary must be built with a valid authName via ldflags.", authName))
+		return nil, fmt.Errorf("authName '%s' is invalid. Valid values: auth1-auth15. "+
+			"Sign wallet binary must be built with a valid authName via ldflags", authName)
 	}
 
 	// store authName for accessor methods
@@ -263,11 +263,11 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 
 	switch c.conf.CoinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
-		return c.newBTCSigner(authType)
+		return c.newBTCSigner(authType), nil
 	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
-		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
 	default:
-		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
 	}
 }
 
