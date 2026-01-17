@@ -13,16 +13,9 @@ commit-msg:
         merge_pattern="^Merge (branch|pull request|remote-tracking branch)"
         revert_pattern="^Revert \""
 
-        commit_msg=$(cat "$1")
-        first_line=$(echo "$commit_msg" | head -n 1)
+        first_line=$(head -n 1 "$1")
 
-        if echo "$first_line" | grep -qE "$pattern"; then
-          exit 0
-        elif echo "$first_line" | grep -qE "$merge_pattern"; then
-          exit 0
-        elif echo "$first_line" | grep -qE "$revert_pattern"; then
-          exit 0
-        else
+        if ! echo "$first_line" | grep -qE "${pattern}|${merge_pattern}|${revert_pattern}"; then
           echo "ERROR: Commit message does not follow Conventional Commits format."
           echo ""
           echo "Expected format: <type>(<scope>): <description>"

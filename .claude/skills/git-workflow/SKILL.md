@@ -170,6 +170,8 @@ fix!: remove deprecated API endpoint
 
 ### Scope (Optional)
 
+The following are suggested scopes, but other alphanumeric scopes are also permitted.
+
 | Scope | Description |
 |-------|-------------|
 | `btc` | Bitcoin-related |
@@ -226,6 +228,14 @@ ERROR: Commit message does not follow Conventional Commits format.
 Expected format: <type>(<scope>): <description>
 
 Types: feat, fix, docs, refactor, test, ci, chore, build, perf, style, revert
+
+Examples:
+  feat(btc): add taproot address support
+  fix: resolve database connection timeout
+  docs: update architecture guide
+  refactor(api): reorganize endpoint handlers
+
+Your commit message: <your-invalid-commit-message>
 ```
 
 ## Pull Request Creation
