@@ -42,13 +42,12 @@ func (r *NonceRepositorySqlc) SaveNonce(
 	})
 	if err != nil {
 		// Check for duplicate key error
-		// SQLite error code: SQLITE_CONSTRAINT_PRIMARYKEY=1555 or SQLITE_CONSTRAINT_UNIQUE=2067
+		// Note: modernc.org/sqlite's Code() returns the extended error code directly
+		// (not the primary code), so we check for specific constraint violations
 		var sqliteErr *sqlite.Error
 		if errors.As(err, &sqliteErr) {
-			code := sqliteErr.Code()
-			if code == sqlitelib.SQLITE_CONSTRAINT ||
-				code == sqlitelib.SQLITE_CONSTRAINT_UNIQUE ||
-				code == sqlitelib.SQLITE_CONSTRAINT_PRIMARYKEY {
+			switch sqliteErr.Code() {
+			case sqlitelib.SQLITE_CONSTRAINT_UNIQUE, sqlitelib.SQLITE_CONSTRAINT_PRIMARYKEY:
 				return multisig.ErrNonceDuplicate
 			}
 		}
