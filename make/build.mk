@@ -33,7 +33,7 @@ build-keygen:
 
 .PHONY: build-sign
 build-sign:
-	go build -ldflags "$(LDFLAGS) -X main.authName=auth1" -v -o ${GOPATH}/bin/sign ./cmd/sign/
+	go build -ldflags "$(LDFLAGS) -X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 	go build -ldflags "$(LDFLAGS) -X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 
 # Build from inside docker container

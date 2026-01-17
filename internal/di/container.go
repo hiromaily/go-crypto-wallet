@@ -244,7 +244,13 @@ func (c *container) NewWalleter() wallets.Watcher {
 func (c *container) NewSigner(authName string) wallets.Signer {
 	// validate
 	if !domainAccount.ValidateAuthType(authName) {
-		panic("authName is invalid. this should be embedded when building: " + authName)
+		if authName == "" {
+			panic("authName is empty. Sign wallet binary must be built with ldflags.\n" +
+				"Use 'make build-sign' or 'make build-all' to create sign1/sign2 binaries with proper authName.\n" +
+				"Example: go build -ldflags \"-X main.authName=auth1\" -o sign1 ./cmd/sign/")
+		}
+		panic(fmt.Sprintf("authName '%s' is invalid. Valid values: auth1-auth15. "+
+			"Sign wallet binary must be built with a valid authName via ldflags.", authName))
 	}
 
 	// store authName for accessor methods
