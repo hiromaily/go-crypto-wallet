@@ -159,7 +159,7 @@ func validateRippleConfig(t *testing.T, conf *WalletRoot) {
 func validateCommonConfig(t *testing.T, conf *WalletRoot) {
 	t.Helper()
 	assert.NotEmpty(t, conf.Logger.Service, "Logger.Service should not be empty")
-	assert.NotEmpty(t, conf.MySQL.Host, "MySQL.Host should not be empty")
+	assert.NotEmpty(t, conf.Database.MySQL.Host, "Database.MySQL.Host should not be empty")
 }
 
 // TestNewWallet_YAML tests the NewWallet function with YAML configuration files.
@@ -212,13 +212,15 @@ tracer:
 
 database:
   type: mysql
-
-mysql:
-  host: localhost:3306
-  dbname: test_db
-  user: root
-  pass: root
-  debug: false
+  mysql:
+    host: localhost:3306
+    dbname: test_db
+    user: root
+    pass: root
+    debug: false
+  sqlite:
+    path: ./data/sqlite/btc/test.db
+    debug: false
 
 file_path:
   tx: /tmp/tx
@@ -237,7 +239,7 @@ file_path:
 	// Verify that viper properly loaded the YAML file
 	assert.NotEmpty(t, conf.Bitcoin.Host, "Bitcoin.Host should not be empty")
 	assert.NotEmpty(t, conf.Logger.Service, "Logger.Service should not be empty")
-	assert.NotEmpty(t, conf.MySQL.Host, "MySQL.Host should not be empty")
+	assert.NotEmpty(t, conf.Database.MySQL.Host, "Database.MySQL.Host should not be empty")
 
 	// Verify nested structures are loaded correctly
 	assert.NotZero(t, conf.Bitcoin.Block.ConfirmationNum, "Bitcoin.Block.ConfirmationNum should not be zero")

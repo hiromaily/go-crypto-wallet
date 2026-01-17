@@ -37,7 +37,7 @@ func NewBTCTxRepositorySqlc() repowatch.BTCTxRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
@@ -59,7 +59,7 @@ func NewTxRepositorySqlc() repowatch.TxRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
@@ -81,7 +81,7 @@ func NewAddressRepositorySqlc() repowatch.AddressRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
@@ -103,7 +103,7 @@ func NewPaymentRequestRepositorySqlc() repowatch.PaymentRequestRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
@@ -125,7 +125,7 @@ func NewBTCTxInputRepositorySqlc() repowatch.TxInputRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
@@ -147,7 +147,7 @@ func NewBTCTxOutputRepositorySqlc() repowatch.TxOutputRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
@@ -169,7 +169,7 @@ func NewETHDetailTXRepositorySqlc() repowatch.ETHDetailTXRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
@@ -191,7 +191,7 @@ func NewXrpDetailTxRepositorySqlc() repowatch.XRPDetailTXRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	db, err := mysql.NewMySQL(&conf.MySQL)
+	db, err := mysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}

@@ -41,22 +41,19 @@ tracer:
 # Database configuration - choose between mysql or sqlite
 database:
   type: "mysql" # mysql, sqlite
-mysql:
-  host: "127.0.0.1:3306"
-  dbname: "keygen"
-  user: "hiromaily"
-  pass: "hiromaily"
-  debug: true
-# SQLite configuration (used when database.type = "sqlite")
-# Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
-# sqlite:
-#   path: "./data/db/keygen.db"
-#   debug: true
+  mysql:
+    host: "127.0.0.1:3306"
+    dbname: "keygen"
+    user: "hiromaily"
+    pass: "hiromaily"
+    debug: true
+  sqlite:
+    path: "./data/sqlite/btc/keygen.db"
+    debug: true
 file_path:
   tx: "./data/tx/btc/"
   address: "./data/address/btc/"
   full_pubkey: "./data/fullpubkey/btc/"
-
 # default seed of key used when dev mode
 # key:
 #   seed: "Ve5Kkaba4SQGavc/pWXazZuYD4mE53+qV9tLeRTS5t4="

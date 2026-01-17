@@ -32,7 +32,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 		log.Fatalf("fail to create config: %v", err)
 	}
 	_ = logger.NewSlogLogger(conf.Logger.Format, conf.Logger.Level, conf.Logger.Service, "")
-	db, err := pkgmysql.NewMySQL(&conf.MySQL)
+	db, err := pkgmysql.NewMySQL(&conf.Database.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}

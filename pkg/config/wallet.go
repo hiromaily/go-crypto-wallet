@@ -25,8 +25,6 @@ type WalletRoot struct {
 	Logger       Logger                  `toml:"logger" yaml:"logger" mapstructure:"logger"`
 	Tracer       Tracer                  `toml:"tracer" yaml:"tracer" mapstructure:"tracer"`
 	Database     Database                `toml:"database" yaml:"database" mapstructure:"database"`
-	MySQL        MySQL                   `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
-	SQLite       SQLite                  `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
 	FilePath     FilePath                `toml:"file_path" yaml:"file_path" mapstructure:"file_path"`
 }
 
@@ -132,7 +130,9 @@ type TracerDetail struct {
 
 // Database config for database type selection
 type Database struct {
-	Type string `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite"`
+	Type   string `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite"`
+	MySQL  MySQL  `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
+	SQLite SQLite `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
 }
 
 // MySQL info
@@ -213,7 +213,7 @@ func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domain
 
 	switch coinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
-		if err := validate.StructExcept(c, "Ethereum", "Ripple", "MySQL", "SQLite"); err != nil {
+		if err := validate.StructExcept(c, "Ethereum", "Ripple"); err != nil {
 			return err
 		}
 		switch wtype {
@@ -226,11 +226,11 @@ func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domain
 		default:
 		}
 	case domainCoin.ETH, domainCoin.ERC20:
-		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple", "MySQL", "SQLite"); err != nil {
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
 			return err
 		}
 	case domainCoin.XRP:
-		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum", "MySQL", "SQLite"); err != nil {
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
 			return err
 		}
 	case domainCoin.LTC, domainCoin.HYT:
@@ -251,22 +251,22 @@ func (c *WalletRoot) validateDatabase() error {
 	switch c.Database.Type {
 	case "mysql":
 		// Validate MySQL configuration
-		if c.MySQL.Host == "" {
-			return errors.New("mysql.host is required when database.type is mysql")
+		if c.Database.MySQL.Host == "" {
+			return errors.New("database.mysql.host is required when database.type is mysql")
 		}
-		if c.MySQL.DB == "" {
-			return errors.New("mysql.dbname is required when database.type is mysql")
+		if c.Database.MySQL.DB == "" {
+			return errors.New("database.mysql.dbname is required when database.type is mysql")
 		}
-		if c.MySQL.User == "" {
-			return errors.New("mysql.user is required when database.type is mysql")
+		if c.Database.MySQL.User == "" {
+			return errors.New("database.mysql.user is required when database.type is mysql")
 		}
-		if c.MySQL.Pass == "" {
-			return errors.New("mysql.pass is required when database.type is mysql")
+		if c.Database.MySQL.Pass == "" {
+			return errors.New("database.mysql.pass is required when database.type is mysql")
 		}
 	case "sqlite":
 		// Validate SQLite configuration
-		if c.SQLite.Path == "" {
-			return errors.New("sqlite.path is required when database.type is sqlite")
+		if c.Database.SQLite.Path == "" {
+			return errors.New("database.sqlite.path is required when database.type is sqlite")
 		}
 	default:
 		return fmt.Errorf("unsupported database type: %s (must be mysql or sqlite)", c.Database.Type)
