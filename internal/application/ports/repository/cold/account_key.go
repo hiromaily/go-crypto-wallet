@@ -14,7 +14,7 @@ import (
 
 // BTCAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
 type BTCAccountKeyRepositorier interface {
-	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
+	GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error)
 	GetOneMaxID(accountType domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
@@ -33,7 +33,7 @@ type BTCAccountKeyRepositorier interface {
 
 // ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
 type ETHAccountKeyRepositorier interface {
-	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
+	GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error)
 	GetOneMaxID(accountType domainAccount.AccountType) (*domainEth.ETHAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
@@ -64,7 +64,7 @@ type XRPAccountKeyRepositorier interface {
 // It abstracts over key storage for different account types (e.g., regular accounts
 // and authorization accounts), allowing the same use case code to work with either.
 type HDWalletRepo interface {
-	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
+	GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error)
 	Insert(
 		keys []domainKey.WalletKey,
 		accountXpriv string,

@@ -144,7 +144,7 @@ func (s *stubDescriptorFileWriter) WriteFile(path string, data []byte) error {
 
 type stubAccountKeyRepo struct{}
 
-func (*stubAccountKeyRepo) GetMaxIndex(_ domainAccount.AccountType) (int64, error) {
+func (*stubAccountKeyRepo) GetMaxIndex(_ context.Context, _ domainAccount.AccountType) (int64, error) {
 	return 0, nil
 }
 

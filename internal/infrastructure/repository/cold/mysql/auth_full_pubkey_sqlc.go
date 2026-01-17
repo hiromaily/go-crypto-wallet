@@ -91,9 +91,9 @@ func convertFromAuthFullPubkey(key *domainAuth.AuthFullPubkey) *sqlcgen.AuthFull
 }
 
 // GetOne returns one record by authType (defaults to BIP49 for backward compatibility)
-func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error) {
-	ctx := context.Background()
-
+func (r *AuthFullPubkeyRepositorySqlc) GetOne(
+	ctx context.Context, authType domainAccount.AuthType,
+) (*domainAuth.AuthFullPubkey, error) {
 	authPubkey, err := r.queries.GetAuthFullPubkey(ctx, sqlcgen.GetAuthFullPubkeyParams{
 		Coin:        sqlcgen.AuthFullpubkeyCoin(r.coinTypeCode.String()),
 		AuthAccount: authType.String(),

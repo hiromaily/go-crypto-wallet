@@ -54,7 +54,7 @@ func (u *generateMuSig2NonceUseCase) Generate(
 	input signusecase.GenerateMuSig2NonceInput,
 ) (signusecase.GenerateMuSig2NonceOutput, error) {
 	// Get auth key from auth_account_key table (Sign wallet's key)
-	authKey, err := u.authKeyRepo.GetOne(input.AuthType)
+	authKey, err := u.authKeyRepo.GetOne(ctx, input.AuthType)
 	if err != nil {
 		return signusecase.GenerateMuSig2NonceOutput{}, fmt.Errorf(
 			"failed to get auth key for authType %s: %w",

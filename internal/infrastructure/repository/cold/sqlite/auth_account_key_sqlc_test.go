@@ -3,6 +3,7 @@
 package sqlite_test
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -112,7 +113,8 @@ func TestAuthAccountKeyRepositorySqlc_GetOne(t *testing.T) {
 	require.NoError(t, err)
 
 	// Retrieve
-	retrieved, err := repo.GetOne(domainAccount.AuthType("auth1"))
+	ctx := context.Background()
+	retrieved, err := repo.GetOne(ctx, domainAccount.AuthType("auth1"))
 	require.NoError(t, err, "GetOne should succeed")
 	require.NotNil(t, retrieved, "auth key should not be nil")
 
@@ -200,7 +202,8 @@ func TestAuthAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
 	assert.Equal(t, int64(1), rowsAffected, "should affect 1 row")
 
 	// Verify update
-	retrieved, err := repo.GetOne(domainAccount.AuthType("auth1"))
+	ctx := context.Background()
+	retrieved, err := repo.GetOne(ctx, domainAccount.AuthType("auth1"))
 	require.NoError(t, err)
 	assert.Equal(t, domainAddress.AddrStatusAddressExported, retrieved.AddrStatus, "status should be updated")
 }

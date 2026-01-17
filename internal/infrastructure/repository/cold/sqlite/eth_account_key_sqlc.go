@@ -46,9 +46,10 @@ func convertToETHAccountKey(sqlcKey *sqlcgen.EthAccountKey) (*domainEth.ETHAccou
 
 	if sqlcKey.UpdatedAt.Valid {
 		t, err := time.Parse("2006-01-02 15:04:05", sqlcKey.UpdatedAt.String)
-		if err == nil {
-			key.UpdatedAt = &t
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp in database: %w", err)
 		}
+		key.UpdatedAt = &t
 	}
 
 	return key, nil
@@ -74,9 +75,9 @@ func convertFromETHAccountKey(key *domainEth.ETHAccountKey) *sqlcgen.EthAccountK
 }
 
 // GetMaxIndex returns max idx
-func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
-	ctx := context.Background()
-
+func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(
+	ctx context.Context, accountType domainAccount.AccountType,
+) (int64, error) {
 	result, err := r.queries.GetMaxEthAccountKeyIndex(ctx, accountType.String())
 	if err != nil {
 		return 0, fmt.Errorf("failed to call GetMaxEthAccountKeyIndex(): %w", err)

@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -35,7 +36,7 @@ func NewAuthHDWalletRepo(
 }
 
 // GetMaxIndex returns index for auth keys (always 0 since only one auth key is allowed per account)
-func (w *AuthHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
+func (w *AuthHDWalletRepo) GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error) {
 	_, err := w.authKeyRepo.GetByAccount(w.authType, accountType)
 	if err != nil {
 		return 0, nil
@@ -105,8 +106,8 @@ func NewAccountHDWalletRepo(accountKeyRepo repocold.BTCAccountKeyRepositorier) r
 }
 
 // GetMaxIndex returns the next available index for account keys
-func (w *AccountHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
-	idx, err := w.accountKeyRepo.GetMaxIndex(accountType)
+func (w *AccountHDWalletRepo) GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error) {
+	idx, err := w.accountKeyRepo.GetMaxIndex(ctx, accountType)
 	if err != nil {
 		return 0, nil
 	}

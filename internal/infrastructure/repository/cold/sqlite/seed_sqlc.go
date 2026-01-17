@@ -34,6 +34,11 @@ func convertToSeed(sqlcSeed *sqlcgen.Seed) (*domainKey.Seed, error) {
 		return nil, fmt.Errorf("invalid coin type code from database: %s", sqlcSeed.Coin)
 	}
 
+	// Validate ID fits in int8 to prevent overflow
+	if sqlcSeed.ID < -128 || sqlcSeed.ID > 127 {
+		return nil, fmt.Errorf("seed ID %d out of int8 range", sqlcSeed.ID)
+	}
+
 	seed := &domainKey.Seed{
 		ID:           int8(sqlcSeed.ID),
 		CoinTypeCode: coinTypeCode,

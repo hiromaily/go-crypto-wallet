@@ -15,6 +15,7 @@ import (
 // AuthFullPubkeyRepositorySqlc is repository for auth_fullpubkey table using sqlc
 type AuthFullPubkeyRepositorySqlc struct {
 	queries      *sqlcgen.Queries
+	dbConn       *sql.DB
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -24,6 +25,7 @@ func NewAuthFullPubkeyRepositorySqlc(
 ) *AuthFullPubkeyRepositorySqlc {
 	return &AuthFullPubkeyRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
+		dbConn:       dbConn,
 		coinTypeCode: coinTypeCode,
 	}
 }
@@ -34,6 +36,11 @@ func convertToAuthFullPubkey(sqlcKey *sqlcgen.AuthFullpubkey) (*domainAuth.AuthF
 	purpose, err := domainAuth.PurposeFromUint8(uint8(sqlcKey.Purpose))
 	if err != nil {
 		return nil, fmt.Errorf("invalid purpose in database: %w", err)
+	}
+
+	// Validate ID fits in int16 to prevent overflow
+	if sqlcKey.ID < -32768 || sqlcKey.ID > 32767 {
+		return nil, fmt.Errorf("auth full pubkey ID %d out of int16 range", sqlcKey.ID)
 	}
 
 	key := &domainAuth.AuthFullPubkey{
@@ -85,9 +92,9 @@ func convertFromAuthFullPubkey(key *domainAuth.AuthFullPubkey) *sqlcgen.AuthFull
 }
 
 // GetOne returns one record by authType (defaults to BIP49 for backward compatibility)
-func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error) {
-	ctx := context.Background()
-
+func (r *AuthFullPubkeyRepositorySqlc) GetOne(
+	ctx context.Context, authType domainAccount.AuthType,
+) (*domainAuth.AuthFullPubkey, error) {
 	authPubkey, err := r.queries.GetAuthFullPubkey(ctx, sqlcgen.GetAuthFullPubkeyParams{
 		Coin:        r.coinTypeCode.String(),
 		AuthAccount: authType.String(),
@@ -135,13 +142,24 @@ func (r *AuthFullPubkeyRepositorySqlc) Insert(authType domainAccount.AuthType, f
 	return nil
 }
 
-// InsertBulk inserts multiple records
+// InsertBulk inserts multiple records with transaction atomicity
 func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*domainAuth.AuthFullPubkey) error {
 	ctx := context.Background()
 
+	// Begin transaction to ensure atomicity of bulk insert
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback() // Safe to call even if already committed
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
 	for _, item := range items {
 		sqlcItem := convertFromAuthFullPubkey(item)
-		_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
+		_, err := qtx.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
 			Coin:           sqlcItem.Coin,
 			AuthAccount:    sqlcItem.AuthAccount,
 			Purpose:        sqlcItem.Purpose,
@@ -153,6 +171,10 @@ func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*domainAuth.AuthFullPu
 		if err != nil {
 			return fmt.Errorf("failed to call InsertAuthFullPubkey(): %w", err)
 		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil

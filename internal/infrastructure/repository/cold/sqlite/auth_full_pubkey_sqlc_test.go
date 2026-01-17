@@ -3,6 +3,7 @@
 package sqlite_test
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -82,7 +83,8 @@ func TestAuthFullPubkeyRepositorySqlc_GetOne(t *testing.T) {
 	require.NoError(t, err)
 
 	// Retrieve
-	authPubkey, err := repo.GetOne(authType)
+	ctx := context.Background()
+	authPubkey, err := repo.GetOne(ctx, authType)
 	require.NoError(t, err, "GetOne should succeed")
 	require.NotNil(t, authPubkey, "auth pubkey should not be nil")
 

@@ -71,9 +71,9 @@ func convertFromETHAccountKey(key *domainEth.ETHAccountKey) *sqlcgen.EthAccountK
 }
 
 // GetMaxIndex returns max idx
-func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
-	ctx := context.Background()
-
+func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(
+	ctx context.Context, accountType domainAccount.AccountType,
+) (int64, error) {
 	result, err := r.queries.GetMaxEthAccountKeyIndex(ctx, sqlcgen.EthAccountKeyAccount(accountType.String()))
 	if err != nil {
 		return 0, fmt.Errorf("failed to call GetMaxEthAccountKeyIndex(): %w", err)

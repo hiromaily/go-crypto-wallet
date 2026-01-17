@@ -37,6 +37,11 @@ func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthA
 		return nil, fmt.Errorf("invalid addr status in database: %w", err)
 	}
 
+	// Validate ID fits in int16 to prevent overflow
+	if sqlcKey.ID < -32768 || sqlcKey.ID > 32767 {
+		return nil, fmt.Errorf("auth account key ID %d out of int16 range", sqlcKey.ID)
+	}
+
 	key := &domainAuth.AuthAccountKey{
 		ID:                 int16(sqlcKey.ID),
 		CoinTypeCode:       domainCoin.CoinTypeCode(sqlcKey.Coin),
@@ -62,9 +67,10 @@ func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthA
 	}
 	if sqlcKey.UpdatedAt.Valid {
 		t, err := time.Parse("2006-01-02 15:04:05", sqlcKey.UpdatedAt.String)
-		if err == nil {
-			key.UpdatedAt = &t
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp in database: %w", err)
 		}
+		key.UpdatedAt = &t
 	}
 
 	return key, nil
@@ -103,9 +109,9 @@ func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAcco
 }
 
 // GetOne returns one record by authType
-func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthAccountKey, error) {
-	ctx := context.Background()
-
+func (r *AuthAccountKeyRepositorySqlc) GetOne(
+	ctx context.Context, authType domainAccount.AuthType,
+) (*domainAuth.AuthAccountKey, error) {
 	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlcgen.GetAuthAccountKeyParams{
 		Coin:        r.coinTypeCode.String(),
 		AuthAccount: authType.String(),

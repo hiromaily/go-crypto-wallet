@@ -150,7 +150,7 @@ func (u *createMuSig2AddressUseCase) Create(
 	for _, authTypes := range u.multisigAccount.MultiAccounts()[input.AccountType] {
 		for _, authType := range authTypes {
 			// Get record from auth_fullpubkey table
-			fullPubKeyItem, err := u.authFullPubKeyRepo.GetOne(authType)
+			fullPubKeyItem, err := u.authFullPubKeyRepo.GetOne(ctx, authType)
 			if err != nil {
 				return fmt.Errorf("fail to call authFullPubKeyRepo.GetOne() %s: %w", authType.String(), err)
 			}

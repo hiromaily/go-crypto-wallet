@@ -16,6 +16,7 @@ import (
 // XRPAccountKeyRepositorySqlc is repository for xrp_account_key table using sqlc
 type XRPAccountKeyRepositorySqlc struct {
 	queries      *sqlcgen.Queries
+	dbConn       *sql.DB
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -25,6 +26,7 @@ func NewXRPAccountKeyRepositorySqlc(
 ) *XRPAccountKeyRepositorySqlc {
 	return &XRPAccountKeyRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
+		dbConn:       dbConn,
 		coinTypeCode: coinTypeCode,
 	}
 }
@@ -55,9 +57,10 @@ func convertToXRPAccountKey(sqlcKey *sqlcgen.XrpAccountKey) (*domainXrp.XRPAccou
 
 	if sqlcKey.UpdatedAt.Valid {
 		t, err := time.Parse("2006-01-02 15:04:05", sqlcKey.UpdatedAt.String)
-		if err == nil {
-			key.UpdatedAt = &t
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp in database: %w", err)
 		}
+		key.UpdatedAt = &t
 	}
 
 	return key, nil
@@ -129,11 +132,22 @@ func (r *XRPAccountKeyRepositorySqlc) GetSecret(
 	return secret, nil
 }
 
-// InsertBulk inserts multiple records
+// InsertBulk inserts multiple records with transaction atomicity
 func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*domainXrp.XRPAccountKey) error {
+	// Begin transaction to ensure atomicity of bulk insert
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback() // Safe to call even if already committed
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
 	for _, item := range items {
 		sqlcItem := convertFromXRPAccountKey(item)
-		_, err := r.queries.InsertXRPAccountKey(ctx, sqlcgen.InsertXRPAccountKeyParams{
+		_, err := qtx.InsertXRPAccountKey(ctx, sqlcgen.InsertXRPAccountKeyParams{
 			Coin:             sqlcItem.Coin,
 			Account:          sqlcItem.Account,
 			AccountID:        sqlcItem.AccountID,
@@ -152,21 +166,35 @@ func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*d
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 
-// UpdateAddrStatus updates addr_status
+// UpdateAddrStatus updates addr_status with transaction atomicity
 func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
 	ctx context.Context,
 	accountType domainAccount.AccountType,
 	addrStatus domainAddress.AddrStatus,
 	accountIDs []string,
 ) (int64, error) {
+	// Begin transaction to ensure atomicity of bulk update
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback() // Safe to call even if already committed
+	}()
+
+	qtx := r.queries.WithTx(tx)
 	var totalAffected int64
 
 	// Update one at a time since IN clause not supported for multiple updates
 	for _, accountID := range accountIDs {
-		result, err := r.queries.UpdateXRPAccountKeyAddrStatus(ctx, sqlcgen.UpdateXRPAccountKeyAddrStatusParams{
+		result, err := qtx.UpdateXRPAccountKeyAddrStatus(ctx, sqlcgen.UpdateXRPAccountKeyAddrStatusParams{
 			AddrStatus: int64(addrStatus.Int8()),
 			UpdatedAt:  sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true},
 			Coin:       r.coinTypeCode.String(),
@@ -182,6 +210,10 @@ func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
 			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 		}
 		totalAffected += affected
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return totalAffected, nil

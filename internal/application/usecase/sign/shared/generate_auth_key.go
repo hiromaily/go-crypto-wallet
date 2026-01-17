@@ -57,7 +57,7 @@ func (u *generateAuthKeyUseCase) Generate(
 			"account_type", accountType.String())
 
 		// Get latest index for this account
-		idxFrom, err := u.repo.GetMaxIndex(accountType)
+		idxFrom, err := u.repo.GetMaxIndex(ctx, accountType)
 		if err != nil {
 			logger.Info(err.Error())
 			continue

@@ -75,9 +75,10 @@ func convertToBtcAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BtcA
 	// Parse TEXT timestamp
 	if sqlcKey.UpdatedAt.Valid {
 		t, err := time.Parse("2006-01-02 15:04:05", sqlcKey.UpdatedAt.String)
-		if err == nil {
-			key.UpdatedAt = &t
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp in database: %w", err)
 		}
+		key.UpdatedAt = &t
 	}
 
 	return key, nil
@@ -120,9 +121,9 @@ func convertFromBtcAccountKey(key *domainBitcoin.BtcAccountKey) *sqlcgen.BtcAcco
 }
 
 // GetMaxIndex returns max idx
-func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
-	ctx := context.Background()
-
+func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(
+	ctx context.Context, accountType domainAccount.AccountType,
+) (int64, error) {
 	result, err := r.queries.GetMaxBtcAccountKeyIndex(ctx, sqlcgen.GetMaxBtcAccountKeyIndexParams{
 		Coin:    r.coinTypeCode.String(),
 		Account: accountType.String(),
@@ -280,16 +281,27 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddr(
 	return rowsAffected, nil
 }
 
-// UpdateAddrStatus updates addr_status
+// UpdateAddrStatus updates addr_status with transaction atomicity
 func (r *BTCAccountKeyRepositorySqlc) UpdateAddrStatus(
 	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, strWIFs []string,
 ) (int64, error) {
 	ctx := context.Background()
+
+	// Begin transaction to ensure atomicity of bulk update
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback() // Safe to call even if already committed
+	}()
+
+	qtx := r.queries.WithTx(tx)
 	var totalAffected int64
 
 	// sqlc doesn't support IN clauses with variable arguments, so update one at a time
 	for _, wif := range strWIFs {
-		result, err := r.queries.UpdateBtcAccountKeyAddrStatus(ctx, sqlcgen.UpdateBtcAccountKeyAddrStatusParams{
+		result, err := qtx.UpdateBtcAccountKeyAddrStatus(ctx, sqlcgen.UpdateBtcAccountKeyAddrStatusParams{
 			AddrStatus:         int64(addrStatus.Int8()),
 			UpdatedAt:          sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true},
 			Coin:               r.coinTypeCode.String(),
@@ -305,6 +317,10 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddrStatus(
 			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 		}
 		totalAffected += affected
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return totalAffected, nil
@@ -338,31 +354,27 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddr(
 	return rowsAffected, nil
 }
 
-// UpdateMultisigAddrs updates all multisig_address with transaction
+// UpdateMultisigAddrs updates all multisig_address with transaction atomicity
 func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddrs(
 	accountType domainAccount.AccountType, items []*domainBitcoin.BtcAccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
-	// transaction
-	dtx, err := r.dbConn.Begin()
+	// Begin transaction to ensure atomicity of bulk update
+	tx, err := r.dbConn.BeginTx(ctx, nil)
 	if err != nil {
-		return 0, fmt.Errorf("failed to call db.Begin(): %w", err)
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
-		if err != nil {
-			_ = dtx.Rollback() // Error already being handled
-		} else {
-			_ = dtx.Commit() // Error already being handled
-		}
+		_ = tx.Rollback() // Safe to call even if already committed
 	}()
 
-	qtx := r.queries.WithTx(dtx)
+	qtx := r.queries.WithTx(tx)
 	var totalAffected int64
 
 	for _, item := range items {
 		sqlcItem := convertFromBtcAccountKey(item)
-		result, updateErr := qtx.UpdateBtcAccountKeyMultisigAddr(ctx, sqlcgen.UpdateBtcAccountKeyMultisigAddrParams{
+		result, err := qtx.UpdateBtcAccountKeyMultisigAddr(ctx, sqlcgen.UpdateBtcAccountKeyMultisigAddrParams{
 			MultisigAddress: sqlcItem.MultisigAddress,
 			RedeemScript:    sqlcItem.RedeemScript,
 			AddrStatus:      sqlcItem.AddrStatus,
@@ -371,15 +383,19 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddrs(
 			Account:         accountType.String(),
 			FullPublicKey:   sqlcItem.FullPublicKey,
 		})
-		if updateErr != nil {
-			return 0, fmt.Errorf("failed to call UpdateBtcAccountKeyMultisigAddr(): %w", updateErr)
+		if err != nil {
+			return 0, fmt.Errorf("failed to call UpdateBtcAccountKeyMultisigAddr(): %w", err)
 		}
 
-		affected, affectedErr := result.RowsAffected()
-		if affectedErr != nil {
-			return 0, fmt.Errorf("failed to get RowsAffected(): %w", affectedErr)
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 		}
 		totalAffected += affected
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return totalAffected, nil

@@ -3,6 +3,7 @@
 package sqlite_test
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -112,7 +113,8 @@ func TestETHAccountKeyRepositorySqlc_GetMaxIndex(t *testing.T) {
 	err = repo.InsertBulk(accountKeys)
 	require.NoError(t, err)
 
-	maxIdx, err := repo.GetMaxIndex(domainAccount.AccountTypeClient)
+	ctx := context.Background()
+	maxIdx, err := repo.GetMaxIndex(ctx, domainAccount.AccountTypeClient)
 	require.NoError(t, err, "GetMaxIndex should succeed")
 	assert.Equal(t, int64(10), maxIdx, "max index should be 10")
 }
