@@ -1,0 +1,136 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+#
+# GoReleaser configuration for go-crypto-wallet
+# https://goreleaser.com/customization/
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  # Watch wallet (online)
+  - id: watch
+    main: ./cmd/watch
+    binary: watch
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.appVersion={{.Version}}
+
+  # Keygen wallet (offline cold wallet)
+  - id: keygen
+    main: ./cmd/keygen
+    binary: keygen
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.appVersion={{.Version}}
+
+  # Sign wallet - auth1 (offline cold wallet)
+  - id: sign-auth1
+    main: ./cmd/sign
+    binary: sign-auth1
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.appVersion={{.Version}}
+      - -X main.authName=auth1
+
+  # Sign wallet - auth2 (offline cold wallet)
+  - id: sign-auth2
+    main: ./cmd/sign
+    binary: sign-auth2
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.appVersion={{.Version}}
+      - -X main.authName=auth2
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+    # Use zip for windows
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+      - ARCHITECTURE.md
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: "🚀 Features"
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: "🐛 Bug Fixes"
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: "🔄 Refactoring"
+      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: "📦 Dependencies"
+      regexp: '^.*?(deps|build)(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: "Others"
+      order: 999
+
+release:
+  github:
+    owner: hiromaily
+    name: go-crypto-wallet
+  draft: false
+  prerelease: auto
+  mode: replace
+  name_template: "{{.Tag}}"
