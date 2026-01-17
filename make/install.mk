@@ -30,6 +30,8 @@ install-ssl:
 .PHONY: install-tools-by-gomod
 install-tools-by-gomod:
 	go get -tool github.com/ethereum/go-ethereum/cmd/abigen@latest
+	go get -tool github.com/vektra/mockery/v3@latest
+	go get -tool github.com/evilmartians/lefthook@latest
 	go get -tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go get -tool golang.org/x/vuln/cmd/govulncheck@latest
 	go get -tool honnef.co/go/tools/cmd/staticcheck@latest
@@ -37,8 +39,7 @@ install-tools-by-gomod:
 	go get -tool mvdan.cc/sh/v3/cmd/gosh@latest
 	go get -tool mvdan.cc/sh/v3/cmd/shfmt@latest
 	go get -tool github.com/mrtazz/checkmake/cmd/checkmake@latest
-	go get -tool github.com/vektra/mockery/v3@latest
-	go get -tool github.com/evilmartians/lefthook@latest
+	go get -tool github.com/google/yamlfmt/cmd/yamlfmt@latest
 
 # Note: somehow checkmake couldn't manage by go get -tool, so use go install instead.
 .PHONY: install-tools

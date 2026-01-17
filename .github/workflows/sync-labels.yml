@@ -1,5 +1,4 @@
 name: Sync Labels
-
 on:
   push:
     branches:
@@ -7,7 +6,6 @@ on:
     paths:
       - ".github/sync-labels.yml"
   workflow_dispatch: # Manual trigger
-
 jobs:
   sync-labels:
     name: Sync labels from labels.yml
@@ -18,7 +16,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-
       - name: Sync labels
         uses: EndBug/label-sync@v2
         with:

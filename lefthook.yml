@@ -46,7 +46,7 @@ pre-commit:
       root: "/"
       glob: "**/*.{yaml,yml}"
       run: |
-        make yaml-lint
+        make yaml-fmt
       stage_fixed: true
 
     # Atlas HCL files

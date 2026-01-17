@@ -4,37 +4,31 @@
 # Use case:
 #   - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 #   - High security scenarios requiring unanimous approval
-
 # Account types available in the wallet
 types:
   - client
   - deposit
   - payment
   - stored
-
 # Account type that receives deposits
 deposit_receiver: deposit
-
 # Account type that sends payments
 payment_sender: payment
-
 # Multisig account configurations
 # For 3-of-3 multisig: All 3 signatures required
 multisig:
   - type: deposit
-    required: 3  # 3-of-3 multisig
+    required: 3 # 3-of-3 multisig
     auth_users:
       - auth1
       - auth2
-
   - type: payment
-    required: 3  # 3-of-3 multisig
+    required: 3 # 3-of-3 multisig
     auth_users:
       - auth1
       - auth2
-
   - type: stored
-    required: 3  # 3-of-3 multisig
+    required: 3 # 3-of-3 multisig
     auth_users:
       - auth1
       - auth2

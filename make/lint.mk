@@ -79,6 +79,11 @@ mk-lint:
 ###############################################################################
 # YAML Linting
 ###############################################################################
+yaml-fmt:
+	go tool yamlfmt .github/workflows
+	go tool yamlfmt .devcontainer
+	go tool yamlfmt config
+
 .PHONY: yaml-lint
 yaml-lint:
 	yaml-lint .github/workflows

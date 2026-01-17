@@ -6,20 +6,16 @@
 #   - Pattern 3: P2SH-P2WPKH Single-sig
 #   - Pattern 5: P2WPKH Single-sig
 #   - Pattern 9: P2TR Single-sig
-
 # Account types available in the wallet
 types:
   - client
   - deposit
   - payment
   - stored
-
 # Account type that receives deposits
 deposit_receiver: deposit
-
 # Account type that sends payments
 payment_sender: payment
-
 # Multisig account configurations
 # For single-sig: No multisig accounts
 multisig: []

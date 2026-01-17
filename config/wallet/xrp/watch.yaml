@@ -11,14 +11,12 @@
 #
 # See pkg/config/README.md for full documentation.
 # =============================================================================
-
 ripple:
   # https://xrpl.org/get-started-with-the-rippled-api.html
   # websocket_public_url = "wss://127.0.0.1:6005"
   websocket_public_url: ""
   # websocket_admin_url = "ws://127.0.0.1:6006"
   network_type: "testnet" # mainnet, testnet, devnet
-
   api:
     url: "127.0.0.1:50051"
     is_secure: false
@@ -26,26 +24,21 @@ ripple:
       # generated from faucet https://xrpl.org/xrp-testnet-faucet.html
       sender_account: "rNsauxk2RYvZtEEnHHsp7zHSXDpJgwVSJW"
       sender_secret: "sh7PZkFPYmSgPm25UYZ2f46PwKJZ9"
-
 logger:
   service: "xrp-wallet"
   format: "json" # json, console
   level: "debug" # debug, info, warn, error
   is_stacktrace: false
-
 # only available for watch only wallet
 tracer:
   type: "none" # none, jaeger, datadog
-
   jaeger:
     service_name: "xrp-wallet"
     collector_endpoint: "http://127.0.0.1:14268/api/traces"
     sampling_probability: 0.5 # 0.001 to 1.0
-
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql"  # mysql, sqlite
-
+  type: "mysql" # mysql, sqlite
 mysql:
   # host = "192.168.10.101:3307"
   host: "127.0.0.1:3306"
@@ -53,13 +46,11 @@ mysql:
   user: "hiromaily"
   pass: "hiromaily"
   debug: false
-
 # SQLite configuration (used when database.type = "sqlite")
 # Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
 # sqlite:
 #   path: "./data/db/watch.db"
 #   debug: true
-
 file_path:
   tx: "./data/tx/xrp/"
   address: "./data/address/xrp/"

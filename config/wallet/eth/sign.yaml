@@ -12,43 +12,35 @@
 #
 # See pkg/config/README.md for full documentation.
 # =============================================================================
-
 ethereum:
   host: "127.0.0.1"
   port: 8545
   disable_tls: true
-  network_type: "goerli"  # mainnet, goerli, rinkeby, ropsten
+  network_type: "goerli" # mainnet, goerli, rinkeby, ropsten
   keydir: "./data/keystore"
-
 logger:
   service: "eth-sign"
-  format: "json"  # json, console
-  level: "debug"  # debug, info, warn, error
+  format: "json" # json, console
+  level: "debug" # debug, info, warn, error
   is_stacktrace: true
-
 # only available for watch only wallet
 tracer:
-  type: "none"  # none, jaeger, datadog
-
+  type: "none" # none, jaeger, datadog
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql"  # mysql, sqlite
-
+  type: "mysql" # mysql, sqlite
 mysql:
   host: "127.0.0.1:3306"
   dbname: "sign"
   user: "hiromaily"
   pass: "hiromaily"
   debug: true
-
 # SQLite configuration (used when database.type = "sqlite")
 # Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
 # sqlite:
 #   path: "./data/db/sign.db"
 #   debug: true
-
 file_path:
   tx: "./data/tx/eth/"
   address: "./data/address/eth/"
   full_pubkey: "./data/fullpubkey/eth/"
-

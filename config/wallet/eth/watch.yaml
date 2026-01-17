@@ -12,57 +12,48 @@
 #
 # See pkg/config/README.md for full documentation.
 # =============================================================================
-
 ethereum:
   host: "127.0.0.1"
   port: 8545
   disable_tls: true
-  network_type: "goerli"  # mainnet, goerli, rinkeby, ropsten
+  network_type: "goerli" # mainnet, goerli, rinkeby, ropsten
   keydir: "./data/keystore"
   #keydir: "${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/keystore"
   #keydir: "${HOME}/Library/Ethereum/goerli/keystore"
-  confirmation_num: 10  #block number for required confirmation
-
+  confirmation_num: 10 #block number for required confirmation
   erc20s:
     hyt:
       symbol: "hyt"
       name: "HY Token"
       contract_address: "0x66524a37Cb94A3092DC78cb15A9a21de5877656a"
       master_address: "0x328F371a76dfAc47b89Cc007bb048ec446c21494"
-      decimals: 18  # default
-
+      decimals: 18 # default
 logger:
   service: "eth-wallet"
-  format: "json"  # json, console
-  level: "debug"  # debug, info, warn, error
+  format: "json" # json, console
+  level: "debug" # debug, info, warn, error
   is_stacktrace: true
-
 # only available for watch only wallet
 tracer:
-  type: "none"  # none, jaeger, datadog
-
+  type: "none" # none, jaeger, datadog
   jaeger:
     service_name: "eth-wallet"
     collector_endpoint: "http://127.0.0.1:14268/api/traces"
-    sampling_probability: 0.5  # 0.001 to 1.0
-
+    sampling_probability: 0.5 # 0.001 to 1.0
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql"  # mysql, sqlite
-
+  type: "mysql" # mysql, sqlite
 mysql:
   host: "127.0.0.1:3306"
   dbname: "watch"
   user: "hiromaily"
   pass: "hiromaily"
   debug: true
-
 # SQLite configuration (used when database.type = "sqlite")
 # Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
 # sqlite:
 #   path: "./data/db/watch.db"
 #   debug: true
-
 file_path:
   tx: "./data/tx/eth/"
   address: "./data/address/eth/"

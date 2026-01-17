@@ -12,7 +12,6 @@
 #
 # See pkg/config/README.md for full documentation.
 # =============================================================================
-
 # coin_type: "btc"  # btc, bch
 # address_type options:
 #   - legacy:      P2PKH (Legacy addresses starting with 1) -> derives key_type: bip44
@@ -21,7 +20,6 @@
 #   - taproot:     Taproot (addresses starting with bc1p) -> derives key_type: bip86
 # Note: key_type is automatically derived from address_type (see AddrType.ToKeyType())
 address_type: "p2sh-segwit"
-
 bitcoin:
   # Using /wallet/<name> path requires pre-created wallet via `bitcoin-cli createwallet <name>`.
   # See: scripts/operation/btc/create-bitcoind-wallet.sh
@@ -31,35 +29,29 @@ bitcoin:
   pass: "xyz"
   http_post_mode: true
   disable_tls: true
-  network_type: "regtest"  # mainnet, testnet3, regtest, signet
-
+  network_type: "regtest" # mainnet, testnet3, regtest, signet
 logger:
   service: "btc-keygen"
-  format: "json"  # json, console
-  level: "debug"  # debug, info, warn, error
+  format: "json" # json, console
+  level: "debug" # debug, info, warn, error
   is_stacktrace: true
-
 # only available for watch only wallet, but definition is required as none
 tracer:
-  type: "none"  # none, jaeger, datadog
-
+  type: "none" # none, jaeger, datadog
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql"  # mysql, sqlite
-
+  type: "mysql" # mysql, sqlite
 mysql:
   host: "127.0.0.1:3306"
   dbname: "keygen"
   user: "hiromaily"
   pass: "hiromaily"
   debug: true
-
 # SQLite configuration (used when database.type = "sqlite")
 # Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
 # sqlite:
 #   path: "./data/db/keygen.db"
 #   debug: true
-
 file_path:
   tx: "./data/tx/btc/"
   address: "./data/address/btc/"

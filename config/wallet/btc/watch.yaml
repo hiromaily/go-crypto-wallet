@@ -12,7 +12,6 @@
 #
 # See pkg/config/README.md for full documentation.
 # =============================================================================
-
 # coin_type: "btc"  # btc, bch
 # address_type options:
 #   - legacy:      P2PKH (Legacy addresses starting with 1) -> derives key_type: bip44
@@ -21,7 +20,6 @@
 #   - taproot:     Taproot (addresses starting with bc1p) -> derives key_type: bip86
 # Note: key_type is automatically derived from address_type (see AddrType.ToKeyType())
 address_type: "p2sh-segwit"
-
 bitcoin:
   # Using /wallet/<name> path requires pre-created wallet via `bitcoin-cli createwallet <name>`.
   # See: scripts/operation/btc/create-bitcoind-wallet.sh
@@ -32,46 +30,37 @@ bitcoin:
   http_post_mode: true
   disable_tls: true
   network_type: "regtest" # mainnet, testnet3, regtest, signet
-
   block:
     confirmation_num: 3 # block number for required confirmation
-
   fee:
     adjustment_min: 0.5 # adjustable minimum fee magnification
     adjustment_max: 2.0 # adjustable maximum fee magnification
-
 logger:
   service: "btc-wallet"
   format: "json" # json, console
   level: "debug" # debug, info, warn, error
   is_stacktrace: true
-
 # only available for watch only wallet
 tracer:
   type: "none" # none, jaeger, datadog
-
   jaeger:
     service_name: "btc-wallet"
     collector_endpoint: "http://127.0.0.1:14268/api/traces"
     sampling_probability: 0.5 # 0.001 to 1.0
-
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql"  # mysql, sqlite
-
+  type: "mysql" # mysql, sqlite
 mysql:
   host: "127.0.0.1:3306"
   dbname: "watch"
   user: "hiromaily"
   pass: "hiromaily"
   debug: true
-
 # SQLite configuration (used when database.type = "sqlite")
 # Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
 # sqlite:
 #   path: "./data/db/watch.db"
 #   debug: true
-
 file_path:
   tx: "./data/tx/btc/"
   address: "./data/address/btc/"

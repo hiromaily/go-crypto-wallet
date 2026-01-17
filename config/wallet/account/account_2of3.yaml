@@ -5,20 +5,16 @@
 #   - Pattern 2: P2PKH 2-of-3 Multisig
 #   - Pattern 4: P2SH-P2WPKH 2-of-3 Multisig
 #   - Standard multisig scenarios with threshold approval
-
 # Account types available in the wallet
 types:
   - client
   - deposit
   - payment
   - stored
-
 # Account type that receives deposits
 deposit_receiver: deposit
-
 # Account type that sends payments
 payment_sender: payment
-
 # Multisig account configurations
 # For Pattern 2: 2-of-3 multisig (any 2 signatures out of 3 required)
 # - deposit: 2-of-3 multisig for security during fund aggregation
@@ -26,19 +22,17 @@ payment_sender: payment
 # - stored: 2-of-3 multisig for secure long-term storage
 multisig:
   - type: deposit
-    required: 2  # 2-of-3 multisig
+    required: 2 # 2-of-3 multisig
     auth_users:
       - auth1
       - auth2
-
   - type: payment
-    required: 2  # 2-of-3 multisig
+    required: 2 # 2-of-3 multisig
     auth_users:
       - auth1
       - auth2
-
   - type: stored
-    required: 2  # 2-of-3 multisig
+    required: 2 # 2-of-3 multisig
     auth_users:
       - auth1
       - auth2

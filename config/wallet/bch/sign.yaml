@@ -12,10 +12,8 @@
 #
 # See pkg/config/README.md for full documentation.
 # =============================================================================
-
 # coin_type: "bch" # btc, bch
 address_type: "bch-cashaddr" # p2sh-segwit, bech32, bch-cashaddr
-
 bitcoin:
   host: "127.0.0.1:19332"
   # Using /wallet/<name> path requires pre-created wallet via `bitcoin-cli createwallet <name>`.
@@ -27,38 +25,31 @@ bitcoin:
   http_post_mode: true
   disable_tls: true
   network_type: "testnet3" # mainnet, testnet3, regtest
-
 logger:
   service: "bch-sign"
   format: "json" # json, console
   level: "debug" # debug, info, warn, error
   is_stacktrace: true
-
 # only available for watch only wallet, but definition is required as none
 tracer:
   type: "none" # none, jaeger, datadog
-
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql"  # mysql, sqlite
-
+  type: "mysql" # mysql, sqlite
 mysql:
   host: "127.0.0.1:3306"
   dbname: "sign"
   user: "hiromaily"
   pass: "hiromaily"
   debug: true
-
 # SQLite configuration (used when database.type = "sqlite")
 # Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
 # sqlite:
 #   path: "./data/db/sign.db"
 #   debug: true
-
 file_path:
   tx: "./data/tx/bch/"
   address: "./data/address/bch/"
   full_pubkey: "./data/fullpubkey/bch/"
 # key:
 #   seed: "Hj3H3GB6KzFpy4Yt6CEuVdXIDX5VRXGrvgbVkW37xhc="
-

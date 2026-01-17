@@ -1,0 +1,54 @@
+name: Nightly E2E (only if scripts/e2e unchanged in last 24h)
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  e2e:
+    # TODO: Enable when E2E environment is ready
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Detect changes in scripts/e2e within last 24h
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET="scripts/e2e/"
+          COMMITS="$(git rev-list --since="24 hours ago" HEAD || true)"
+
+          # 24h以内にコミット自体が無ければ「変更なし」扱い
+          if [[ -z "${COMMITS}" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed=false
+          while read -r c; do
+            files="$(git show --name-only --pretty=format: "$c")"
+            if echo "$files" | grep -qE "^${TARGET}"; then
+              changed=true
+              break
+            fi
+          done <<< "${COMMITS}"
+
+          echo "changed=${changed}" >> "$GITHUB_OUTPUT"
+          echo "changed=${changed}"
+      - name: Run scripts/e2e
+        if: steps.changes.outputs.changed == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x scripts/e2e/* || true
+
+          # 例: ディレクトリ配下の *.sh を順に実行（必要に応じて調整）
+          for f in scripts/e2e/*.sh; do
+            echo "==> running: $f"
+            "$f"
+          done
