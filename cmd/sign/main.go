@@ -55,7 +55,10 @@ func main() {
 
 			// Store container and create wallet
 			container = application.Container
-			walleter = container.NewSigner(authName)
+			walleter, err = container.NewSigner(authName)
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
