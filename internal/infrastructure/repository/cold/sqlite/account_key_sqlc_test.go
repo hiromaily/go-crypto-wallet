@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -57,7 +57,7 @@ func cleanupBTCAccountKeyTable(t *testing.T, db *sql.DB) {
 
 // TestBTCAccountKeyRepositorySqlc_InsertBulk tests bulk insert
 func TestBTCAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -99,7 +99,7 @@ func TestBTCAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
 
 // TestBTCAccountKeyRepositorySqlc_GetMaxIndex tests getting max index
 func TestBTCAccountKeyRepositorySqlc_GetMaxIndex(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -146,7 +146,7 @@ func TestBTCAccountKeyRepositorySqlc_GetMaxIndex(t *testing.T) {
 
 // TestBTCAccountKeyRepositorySqlc_GetOneMaxID tests getting one by max ID
 func TestBTCAccountKeyRepositorySqlc_GetOneMaxID(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -194,7 +194,7 @@ func TestBTCAccountKeyRepositorySqlc_GetOneMaxID(t *testing.T) {
 
 // TestBTCAccountKeyRepositorySqlc_GetAllAddrStatus tests getting all by address status
 func TestBTCAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -244,7 +244,7 @@ func TestBTCAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
 
 // TestBTCAccountKeyRepositorySqlc_UpdateAddrStatus tests updating address status
 func TestBTCAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -282,7 +282,7 @@ func TestBTCAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
 
 // TestBTCAccountKeyRepositorySqlc_UpdateMultisigAddr tests updating multisig address
 func TestBTCAccountKeyRepositorySqlc_UpdateMultisigAddr(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -323,7 +323,7 @@ func TestBTCAccountKeyRepositorySqlc_UpdateMultisigAddr(t *testing.T) {
 
 // TestBTCAccountKeyRepositorySqlc_GetAllMultiAddr tests getting all by multisig address
 func TestBTCAccountKeyRepositorySqlc_GetAllMultiAddr(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 

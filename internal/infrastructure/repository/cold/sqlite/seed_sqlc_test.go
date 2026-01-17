@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
@@ -39,7 +39,7 @@ func cleanupSeedTable(t *testing.T, db *sql.DB) {
 
 // TestSeedRepositorySqlc_Insert tests inserting a seed
 func TestSeedRepositorySqlc_Insert(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -57,7 +57,7 @@ func TestSeedRepositorySqlc_Insert(t *testing.T) {
 
 // TestSeedRepositorySqlc_GetOne tests retrieving a seed
 func TestSeedRepositorySqlc_GetOne(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -84,7 +84,7 @@ func TestSeedRepositorySqlc_GetOne(t *testing.T) {
 
 // TestSeedRepositorySqlc_GetOne_NotFound tests retrieving when no seed exists
 func TestSeedRepositorySqlc_GetOne_NotFound(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 

@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -48,7 +48,7 @@ func cleanupETHAccountKeyTable(t *testing.T, db *sql.DB) {
 
 // TestETHAccountKeyRepositorySqlc_InsertBulk tests bulk insert
 func TestETHAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -82,7 +82,7 @@ func TestETHAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
 
 // TestETHAccountKeyRepositorySqlc_GetMaxIndex tests getting max index
 func TestETHAccountKeyRepositorySqlc_GetMaxIndex(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -121,7 +121,7 @@ func TestETHAccountKeyRepositorySqlc_GetMaxIndex(t *testing.T) {
 
 // TestETHAccountKeyRepositorySqlc_GetOneMaxID tests getting one by max ID
 func TestETHAccountKeyRepositorySqlc_GetOneMaxID(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -161,7 +161,7 @@ func TestETHAccountKeyRepositorySqlc_GetOneMaxID(t *testing.T) {
 
 // TestETHAccountKeyRepositorySqlc_GetAllAddrStatus tests getting all by address status
 func TestETHAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -203,7 +203,7 @@ func TestETHAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
 
 // TestETHAccountKeyRepositorySqlc_UpdateAddrStatus tests updating address status
 func TestETHAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 

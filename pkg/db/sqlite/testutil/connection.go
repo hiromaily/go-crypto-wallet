@@ -5,7 +5,10 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3" // SQLite driver
+	// Pure Go SQLite driver (CGO-free)
+	// Changed from mattn/go-sqlite3 to enable cross-compilation with CGO_ENABLED=0
+	// Required for GoReleaser builds (see Issue #419)
+	_ "modernc.org/sqlite"
 )
 
 // shared database connection
@@ -18,7 +21,7 @@ func GetDB() *sql.DB {
 	}
 
 	// Use in-memory database for tests
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}

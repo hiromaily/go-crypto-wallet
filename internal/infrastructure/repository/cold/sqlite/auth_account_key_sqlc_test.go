@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -56,7 +56,7 @@ func cleanupAuthAccountKeyTable(t *testing.T, db *sql.DB) {
 
 // TestAuthAccountKeyRepositorySqlc_Insert tests inserting auth account key
 func TestAuthAccountKeyRepositorySqlc_Insert(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -85,7 +85,7 @@ func TestAuthAccountKeyRepositorySqlc_Insert(t *testing.T) {
 
 // TestAuthAccountKeyRepositorySqlc_GetOne tests retrieving auth account key
 func TestAuthAccountKeyRepositorySqlc_GetOne(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -126,7 +126,7 @@ func TestAuthAccountKeyRepositorySqlc_GetOne(t *testing.T) {
 
 // TestAuthAccountKeyRepositorySqlc_GetByAccount tests retrieving by account
 func TestAuthAccountKeyRepositorySqlc_GetByAccount(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -166,7 +166,7 @@ func TestAuthAccountKeyRepositorySqlc_GetByAccount(t *testing.T) {
 
 // TestAuthAccountKeyRepositorySqlc_UpdateAddrStatus tests updating address status
 func TestAuthAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 

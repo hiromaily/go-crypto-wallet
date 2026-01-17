@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
@@ -48,7 +48,7 @@ func cleanupAuthFullPubkeyTable(t *testing.T, db *sql.DB) {
 
 // TestAuthFullPubkeyRepositorySqlc_Insert tests inserting auth full pubkey
 func TestAuthFullPubkeyRepositorySqlc_Insert(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -66,7 +66,7 @@ func TestAuthFullPubkeyRepositorySqlc_Insert(t *testing.T) {
 
 // TestAuthFullPubkeyRepositorySqlc_GetOne tests retrieving auth full pubkey
 func TestAuthFullPubkeyRepositorySqlc_GetOne(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -96,7 +96,7 @@ func TestAuthFullPubkeyRepositorySqlc_GetOne(t *testing.T) {
 
 // TestAuthFullPubkeyRepositorySqlc_GetOneByPurpose tests retrieving by purpose
 func TestAuthFullPubkeyRepositorySqlc_GetOneByPurpose(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -136,7 +136,7 @@ func TestAuthFullPubkeyRepositorySqlc_GetOneByPurpose(t *testing.T) {
 
 // TestAuthFullPubkeyRepositorySqlc_InsertBulk tests bulk insert
 func TestAuthFullPubkeyRepositorySqlc_InsertBulk(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 

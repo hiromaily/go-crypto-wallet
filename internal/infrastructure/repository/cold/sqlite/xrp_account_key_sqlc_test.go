@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -55,7 +55,7 @@ func cleanupXRPAccountKeyTable(t *testing.T, db *sql.DB) {
 
 // TestXRPAccountKeyRepositorySqlc_InsertBulk tests bulk insert
 func TestXRPAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -101,7 +101,7 @@ func TestXRPAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
 
 // TestXRPAccountKeyRepositorySqlc_GetAllAddrStatus tests getting all by address status
 func TestXRPAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -156,7 +156,7 @@ func TestXRPAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
 
 // TestXRPAccountKeyRepositorySqlc_UpdateAddrStatus tests updating address status
 func TestXRPAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
@@ -197,7 +197,7 @@ func TestXRPAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
 
 // TestXRPAccountKeyRepositorySqlc_GetSecret tests getting secret
 func TestXRPAccountKeyRepositorySqlc_GetSecret(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
