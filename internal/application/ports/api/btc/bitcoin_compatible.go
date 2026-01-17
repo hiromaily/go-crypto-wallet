@@ -14,20 +14,22 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 )
 
-// Bitcoiner is the full Bitcoin/BitcoinCash interface.
+// BitcoinCompatible defines methods common to both BTC and BCH.
+// BCH implementations should use this interface instead of the full Bitcoiner interface.
 //
-// This interface is maintained for backward compatibility with existing code.
-// For new code, consider using the more specific interfaces:
-//   - BitcoinCompatible: Methods common to BTC and BCH
-//   - BTCOnly: Methods specific to BTC (PSBT, Descriptors, MuSig2)
-//   - BCHer: Interface for BCH operations (embeds BitcoinCompatible)
-//   - FullBitcoiner: Composed interface (BitcoinCompatible + BTCOnly)
+// This interface excludes BTC-only features:
+//   - PSBT (Partially Signed Bitcoin Transactions) - BIP174
+//   - Descriptors - BIP380, BIP381, BIP382, BIP386
+//   - MuSig2 - BIP327 (Schnorr-based multisig)
 //
-// See:
-//   - bitcoin_compatible.go: BitcoinCompatible interface
-//   - btc_only.go: BTCOnly and FullBitcoiner interfaces
-//   - bch_only.go: BCHer interface
-type Bitcoiner interface {
+// BCH uses:
+//   - Raw Transaction Hex format (not PSBT)
+//   - SIGHASH_FORKID (0x41) for transaction signing
+//   - ImportAddress instead of ImportDescriptors
+//   - P2SH multisig (no P2WSH, P2TR)
+//
+//nolint:iface // This interface is a subset of Bitcoiner for BCH compatibility
+type BitcoinCompatible interface {
 	// public_account.go -> wrapper of GetAddressInfo to return account
 	GetAccount(addr string) (string, error)
 
@@ -69,31 +71,21 @@ type Bitcoiner interface {
 	GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error)
 	GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error)
 
-	// import.go
+	// import.go (traditional methods - works for both BTC and BCH)
 	ImportPrivKey(privKeyWIF *btcutil.WIF) error
 	ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) error
 	ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error
 	ImportAddress(pubkey string) error
 	ImportAddressWithoutReScan(pubkey string) error
 	ImportAddressWithLabel(addr, label string, rescan bool) error
-	ImportDescriptors(requests []dtobtc.ImportDescriptorsRequest) ([]dtobtc.ImportDescriptorsResponse, error)
-	ImportMulti(
-		requests []dtobtc.ImportMultiRequest,
-		options *dtobtc.ImportMultiOptions,
-	) ([]dtobtc.ImportMultiResponse, error)
-
-	// descriptor_info.go
-	GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error)
-	ListDescriptors(privateDescriptors bool) (*dtobtc.ListDescriptorsResult, error)
 
 	// label.go
 	SetLabel(addr, label string) error
-	// GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
 	// logging.go
 	Logging() (*dtobtc.LoggingResult, error)
 
-	// multisig.go
+	// multisig.go (P2SH works for both, but BCH should not use P2WSH or P2TR address types)
 	AddMultisigAddress(
 		requiredSigs int, addresses []string, accountName string, addressType domainBitcoin.AddressType,
 	) (*dtobtc.MultisigAddress, error)
@@ -102,7 +94,7 @@ type Bitcoiner interface {
 	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
 	GetBlockchainInfo() (*dtobtc.BlockchainInfo, error)
 
-	// transaction.go
+	// transaction.go (Raw TX operations - works for both BTC and BCH)
 	ToHex(tx *wire.MsgTx) (string, error)
 	ToMsgTx(txHex string) (*wire.MsgTx, error)
 	GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error)
@@ -120,17 +112,6 @@ type Bitcoiner interface {
 	SendTransactionByHex(hex string) (*chainhash.Hash, error)
 	SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error)
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
-
-	// psbt.go (BIP174 Partially Signed Bitcoin Transaction support)
-	CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, senderAccount domainAccount.AccountType) (string, error)
-	ParsePSBT(psbtBase64 string) (*dtobtc.ParsedPSBT, error)
-	ValidatePSBT(psbtBase64 string) error
-	SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error)
-	WalletProcessPsbt(psbtBase64 string, sign bool) (string, bool, error) // RPC-based signing for descriptor wallets
-	FinalizePSBT(psbtBase64 string) (string, error)
-	ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error)
-	IsPSBTComplete(psbtBase64 string) (bool, error)
-	GetPSBTFee(psbtBase64 string) (int64, error)
 
 	// unspent.go
 	ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error)

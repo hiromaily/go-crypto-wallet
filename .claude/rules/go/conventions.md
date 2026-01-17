@@ -85,6 +85,44 @@ if err != nil {
 }
 ```
 
+### Panic Usage
+
+**`panic()` is ONLY allowed in:**
+
+| Location | Allowed | Reason |
+|----------|---------|--------|
+| `cmd/*/main.go` | ✅ Yes | Application entry points |
+| `internal/di/` | ✅ Yes | Configuration/DI errors at startup |
+| `pkg/di/` | ✅ Yes | Configuration/DI errors at startup |
+| Other packages | ❌ No | Must return errors instead |
+
+**Rationale**: Panic should only occur during initialization/startup for unrecoverable configuration errors. All runtime errors must be handled via error returns.
+
+```go
+// ❌ BAD: panic in use case
+func (u *useCase) Execute() {
+    if invalid {
+        panic("invalid state") // Never do this
+    }
+}
+
+// ✅ GOOD: return error in use case
+func (u *useCase) Execute() error {
+    if invalid {
+        return errors.New("invalid state")
+    }
+    return nil
+}
+
+// ✅ GOOD: panic in DI layer for configuration errors
+func (c *container) NewFooUseCase() FooUseCase {
+    if !isSupported(c.conf.CoinType) {
+        panic(fmt.Sprintf("coin %s is not supported", c.conf.CoinType))
+    }
+    return newFooUseCase(...)
+}
+```
+
 ### Naming Conventions
 
 | Type | Convention | Example |

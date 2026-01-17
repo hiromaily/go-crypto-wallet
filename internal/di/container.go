@@ -920,13 +920,20 @@ func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePay
 }
 
 func (c *container) NewWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase {
-	if !domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
-		panic(fmt.Sprintf("descriptor import supported only for BTC group, got %s", c.conf.CoinTypeCode))
+	// Descriptors are BTC-only (BCH does not support descriptors)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf(
+			"descriptor import is BTC-only, not supported for %s. Use ImportAddress instead.",
+			c.conf.CoinTypeCode))
 	}
 	return c.newBTCWatchImportDescriptorUseCase()
 }
 
 func (c *container) NewWatchAggregateMuSig2SignaturesUseCase() watchusecase.AggregateMuSig2SignaturesUseCase {
+	// MuSig2 is BTC-only (BCH does not support Schnorr signatures)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("MuSig2 is BTC-only, not supported for %s. Use P2SH multisig instead.", c.conf.CoinTypeCode))
+	}
 	return c.newBTCWatchAggregateMuSig2SignaturesUseCase()
 }
 
@@ -941,15 +948,17 @@ func (c *container) NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUse
 }
 
 func (c *container) NewKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase {
-	if !domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
-		panic(fmt.Sprintf("descriptor generation is only supported for BTC group coins, got %s", c.conf.CoinTypeCode))
+	// Descriptors are BTC-only (BCH does not support descriptors)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("descriptor generation is BTC-only, not supported for %s", c.conf.CoinTypeCode))
 	}
 	return c.newBTCKeygenGenerateDescriptorUseCase()
 }
 
 func (c *container) NewKeygenExportDescriptorUseCase() keygenusecase.ExportDescriptorUseCase {
-	if !domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
-		panic(fmt.Sprintf("descriptor export is only supported for BTC group coins, got %s", c.conf.CoinTypeCode))
+	// Descriptors are BTC-only (BCH does not support descriptors)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("descriptor export is BTC-only, not supported for %s", c.conf.CoinTypeCode))
 	}
 	return c.newBTCKeygenExportDescriptorUseCase()
 }
@@ -974,6 +983,10 @@ func (c *container) NewKeygenCreateMultisigAddressUseCase() keygenusecase.Create
 }
 
 func (c *container) NewKeygenCreateMuSig2AddressUseCase() keygenusecase.CreateMuSig2AddressUseCase {
+	// MuSig2 is BTC-only (BCH does not support Schnorr signatures)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("MuSig2 is BTC-only, not supported for %s. Use P2SH multisig instead.", c.conf.CoinTypeCode))
+	}
 	return c.newBTCKeygenCreateMuSig2AddressUseCase()
 }
 
@@ -999,10 +1012,18 @@ func (c *container) NewKeygenSignTransactionUseCase() keygenusecase.SignTransact
 }
 
 func (c *container) NewKeygenGenerateMuSig2NonceUseCase() keygenusecase.GenerateMuSig2NonceUseCase {
+	// MuSig2 is BTC-only (BCH does not support Schnorr signatures)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("MuSig2 is BTC-only, not supported for %s", c.conf.CoinTypeCode))
+	}
 	return c.newBTCKeygenGenerateMuSig2NonceUseCase()
 }
 
 func (c *container) NewKeygenMuSig2SignUseCase() keygenusecase.MuSig2SignUseCase {
+	// MuSig2 is BTC-only (BCH does not support Schnorr signatures)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("MuSig2 is BTC-only, not supported for %s", c.conf.CoinTypeCode))
+	}
 	return c.newBTCKeygenMuSig2SignUseCase()
 }
 
@@ -1051,10 +1072,18 @@ func (c *container) NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyU
 }
 
 func (c *container) NewSignGenerateMuSig2NonceUseCase() signusecase.GenerateMuSig2NonceUseCase {
+	// MuSig2 is BTC-only (BCH does not support Schnorr signatures)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("MuSig2 is BTC-only, not supported for %s", c.conf.CoinTypeCode))
+	}
 	return c.newBTCSignGenerateMuSig2NonceUseCase()
 }
 
 func (c *container) NewSignMuSig2SignUseCase() signusecase.MuSig2SignUseCase {
+	// MuSig2 is BTC-only (BCH does not support Schnorr signatures)
+	if !domainCoin.IsBTCOnly(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("MuSig2 is BTC-only, not supported for %s", c.conf.CoinTypeCode))
+	}
 	return c.newBTCSignMuSig2SignUseCase()
 }
 
