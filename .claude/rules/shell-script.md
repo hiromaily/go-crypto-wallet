@@ -175,6 +175,47 @@ balance=$(echo "$balance_json" | jq -r '.amount // 0' 2>/dev/null || echo "0")
 
 ## Robust Comparisons
 
+### Variable Quoting in Test Conditions (SC2086)
+
+**Always quote variables in `[ ]` test conditions** to prevent globbing and word splitting.
+
+**Bad (Unquoted - can fail if variable is empty or contains spaces):**
+
+```bash
+# These can fail unexpectedly
+while [ $counter -lt $max ]; do
+if [ $removal_attempts -lt $max_attempts ]; then
+```
+
+**Good (Properly quoted):**
+
+```bash
+# Always quote variables in test conditions
+while [ "$counter" -lt "$max" ]; do
+if [ "$removal_attempts" -lt "$max_attempts" ]; then
+```
+
+**Why this matters:**
+
+- If `$counter` is empty, `[ -lt 5 ]` fails with "unary operator expected"
+- If `$counter` contains spaces, it splits into multiple arguments
+- Quoted variables ensure reliable behavior in all cases
+
+**This applies to all test operators:**
+
+```bash
+# Numeric comparisons - quote both sides
+[ "$a" -lt "$b" ]
+[ "$a" -gt "$b" ]
+[ "$a" -eq "$b" ]
+
+# String comparisons - quote both sides
+[ "$str" = "value" ]
+[ "$str" != "value" ]
+[ -z "$str" ]
+[ -n "$str" ]
+```
+
 ### Floating Point Comparisons with bc
 
 **Bad (Fragile):**
@@ -343,13 +384,14 @@ done
 removal_attempts=0
 max_removal_attempts=5
 
-while [ $removal_attempts -lt $max_removal_attempts ]; do
+# Note: Always quote variables in test conditions
+while [ "$removal_attempts" -lt "$max_removal_attempts" ]; do
     if docker volume rm "$volume_name" 2>/dev/null; then
         log_info "Volume removed successfully"
         break
     fi
     removal_attempts=$((removal_attempts + 1))
-    if [ $removal_attempts -lt $max_removal_attempts ]; then
+    if [ "$removal_attempts" -lt "$max_removal_attempts" ]; then
         log_warn "Retrying in 2 seconds... (attempt $removal_attempts/$max_removal_attempts)"
         sleep 2
     fi
@@ -364,7 +406,8 @@ wait_for_healthy() {
     local max_wait=${2:-60}
     local counter=0
 
-    while [ $counter -lt $max_wait ]; do
+    # Note: Always quote variables in test conditions
+    while [ "$counter" -lt "$max_wait" ]; do
         status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "not_found")
 
         if [ "$status" = "healthy" ]; then
