@@ -96,54 +96,15 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 			return err
 		}
 
-		// Import address into Bitcoin Core
-		// Use ImportMulti if redeem script is available (for P2SH multisig)
-		// Otherwise use legacy ImportAddressWithLabel
-		if addrFmt.RedeemScript != "" {
-			// P2SH multisig address with redeem script - use importmulti
-			logger.Debug("importing multisig address with redeem script",
-				"address", targetAddr,
-				"account", addrFmt.AccountType.String())
+		// Import single address
+		imported, err := u.importSingleAddress(targetAddr, addrFmt, input.Rescan, handleRecoverableError)
+		if err != nil {
+			return err
+		}
 
-			requests := []dtobtc.ImportMultiRequest{
-				{
-					ScriptPubKey: map[string]string{"address": targetAddr},
-					Timestamp:    "now", // Skip rescanning for faster import
-					RedeemScript: addrFmt.RedeemScript,
-					WatchOnly:    true,
-					Label:        addrFmt.AccountType.String(),
-				},
-			}
-
-			responses, err := u.btcClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: input.Rescan})
-			if err != nil {
-				return fmt.Errorf("failed to call ImportMulti for address %s: %w", targetAddr, err)
-			}
-
-			if len(responses) == 0 || !responses[0].Success {
-				errMsg := "unknown error"
-				if len(responses) > 0 && responses[0].Error != nil {
-					errMsg = responses[0].Error.Message
-				}
-				// Check if error is recoverable using helper
-				if handleRecoverableError(fmt.Errorf("%s", errMsg), targetAddr, addrFmt.AccountType) {
-					continue
-				}
-				return fmt.Errorf("failed to import multisig address %s: %s", targetAddr, errMsg)
-			}
-		} else {
-			// Regular address - use legacy import
-			err = u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), input.Rescan)
-			if err != nil {
-				// Check if error is recoverable using helper
-				if handleRecoverableError(err, targetAddr, addrFmt.AccountType) {
-					continue
-				}
-
-				// All other errors are critical - fail the import
-				return fmt.Errorf("failed to import address %s (account: %s): %w",
-					targetAddr, addrFmt.AccountType.String(), err)
-			}
+		// Skip if address was already imported
+		if !imported {
+			continue
 		}
 
 		importStats.success++
@@ -174,6 +135,87 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 	}
 
 	return nil
+}
+
+// importSingleAddress imports a single address into Bitcoin Core
+// Returns (imported=true, nil) if successfully imported
+// Returns (imported=false, nil) if address already exists (recoverable error)
+// Returns (imported=false, error) for critical errors
+func (u *importAddressUseCase) importSingleAddress(
+	targetAddr string,
+	addrFmt *appdto.AddressFormat,
+	rescan bool,
+	handleRecoverableError func(error, string, domainAccount.AccountType) bool,
+) (bool, error) {
+	// Use ImportMulti if redeem script is available (for P2SH multisig)
+	// Otherwise use legacy ImportAddressWithLabel
+	if addrFmt.RedeemScript != "" {
+		return u.importWithRedeemScript(targetAddr, addrFmt, rescan, handleRecoverableError)
+	}
+	return u.importLegacyAddress(targetAddr, addrFmt, rescan, handleRecoverableError)
+}
+
+// importWithRedeemScript imports P2SH multisig address with redeem script using ImportMulti
+func (u *importAddressUseCase) importWithRedeemScript(
+	targetAddr string,
+	addrFmt *appdto.AddressFormat,
+	rescan bool,
+	handleRecoverableError func(error, string, domainAccount.AccountType) bool,
+) (bool, error) {
+	logger.Debug("importing multisig address with redeem script",
+		"address", targetAddr,
+		"account", addrFmt.AccountType.String())
+
+	requests := []dtobtc.ImportMultiRequest{
+		{
+			ScriptPubKey: map[string]string{"address": targetAddr},
+			Timestamp:    "now", // Skip rescanning for faster import
+			RedeemScript: addrFmt.RedeemScript,
+			WatchOnly:    true,
+			Label:        addrFmt.AccountType.String(),
+		},
+	}
+
+	responses, err := u.btcClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: rescan})
+	if err != nil {
+		return false, fmt.Errorf("failed to call ImportMulti for address %s: %w", targetAddr, err)
+	}
+
+	if len(responses) == 0 || !responses[0].Success {
+		errMsg := "unknown error"
+		if len(responses) > 0 && responses[0].Error != nil {
+			errMsg = responses[0].Error.Message
+		}
+		// Check if error is recoverable using helper
+		if handleRecoverableError(fmt.Errorf("%s", errMsg), targetAddr, addrFmt.AccountType) {
+			return false, nil // Address already exists, skip
+		}
+		return false, fmt.Errorf("failed to import multisig address %s: %s", targetAddr, errMsg)
+	}
+
+	return true, nil
+}
+
+// importLegacyAddress imports regular address using legacy ImportAddressWithLabel
+func (u *importAddressUseCase) importLegacyAddress(
+	targetAddr string,
+	addrFmt *appdto.AddressFormat,
+	rescan bool,
+	handleRecoverableError func(error, string, domainAccount.AccountType) bool,
+) (bool, error) {
+	err := u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), rescan)
+	if err != nil {
+		// Check if error is recoverable using helper
+		if handleRecoverableError(err, targetAddr, addrFmt.AccountType) {
+			return false, nil // Address already exists, skip
+		}
+
+		// All other errors are critical - fail the import
+		return false, fmt.Errorf("failed to import address %s (account: %s): %w",
+			targetAddr, addrFmt.AccountType.String(), err)
+	}
+
+	return true, nil
 }
 
 // selectTargetAddress determines which address format to use based on account type and address type
