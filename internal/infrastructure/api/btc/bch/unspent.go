@@ -40,14 +40,31 @@ func (b *BitcoinCash) ListUnspentByAccount(
 	}
 
 	// Filter unspent outputs for the addresses we found
+	// For BCH, we need to normalize addresses because:
+	// - getaddressesbylabel returns CashAddr format with prefix (e.g., "bchreg:pr...")
+	// - EncodeAddress() may return legacy format without prefix (e.g., "pr...")
+	// - listunspent also returns CashAddr format with prefix
+	// Solution: Decode unspent address and compare using EncodeAddress() format
 	var unspentList []dtobtc.UnspentOutput
 	addrStrings := make(map[string]bool)
 	for _, addr := range addrs {
+		// Store both formats: with and without prefix
+		// EncodeAddress() returns the base format
 		addrStrings[addr.EncodeAddress()] = true
 	}
 
 	for _, unspent := range allUnspentList {
-		if addrStrings[unspent.Address] {
+		// Decode the unspent address to normalize it
+		unspentAddr, err := b.DecodeAddress(unspent.Address)
+		if err != nil {
+			logger.Error("failed to decode unspent address",
+				"address", unspent.Address,
+				"error", err)
+			continue
+		}
+
+		// Compare using the normalized format
+		if addrStrings[unspentAddr.EncodeAddress()] {
 			unspentList = append(unspentList, unspent)
 		}
 	}
