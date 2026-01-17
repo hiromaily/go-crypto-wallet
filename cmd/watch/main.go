@@ -23,7 +23,8 @@ import (
 var (
 	walletType = domainWallet.WalletTypeWatchOnly
 	appName    = walletType.String()
-	appVersion = "5.0.0"
+	// appVersion is set via ldflags at build time: -X main.appVersion=<version>
+	appVersion = "dev"
 
 	// CLI options
 	opts app.Options
