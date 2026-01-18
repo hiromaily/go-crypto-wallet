@@ -48,8 +48,8 @@ jobs:
               - 'tools/atlas/**/*.hcl'
               - 'tools/atlas/atlas.hcl'
   # Go linting
-  # PR: only-new-issues=true で差分のみチェック（高速化）
-  # Push to main: 全体チェック（マージ後の品質確認）
+  # PR: only-new-issues=true checks only changed code (faster)
+  # Push to main: full check for post-merge quality assurance
   go-lint:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}
