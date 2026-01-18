@@ -147,7 +147,7 @@ sqlite_init_db() {
 		log_info "  Timestamp: ${E2E_TIMESTAMP}"
 
 		# Initialize each wallet database
-		for wallet_type in watch keygen sign; do
+		for wallet_type in watch keygen sign sign2; do
 			local db_path schema_file
 			case "$wallet_type" in
 			watch)
@@ -160,6 +160,10 @@ sqlite_init_db() {
 				;;
 			sign)
 				db_path="${SQLITE_SIGN_DB_PATH}"
+				schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
+				;;
+			sign2)
+				db_path="${SQLITE_SIGN2_DB_PATH}"
 				schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
 				;;
 			esac
@@ -178,6 +182,7 @@ sqlite_init_db() {
 		log_info "  Watch:  ${SQLITE_WATCH_DB_PATH}"
 		log_info "  Keygen: ${SQLITE_KEYGEN_DB_PATH}"
 		log_info "  Sign:   ${SQLITE_SIGN_DB_PATH}"
+		log_info "  Sign2:  ${SQLITE_SIGN2_DB_PATH}"
 		return 0
 	fi
 

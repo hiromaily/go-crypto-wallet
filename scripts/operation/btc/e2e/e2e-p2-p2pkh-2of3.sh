@@ -97,8 +97,8 @@ key_generation_phase() {
 	done
 
 	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(sign1 -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(sign2 -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
+	file_fullpubkey_auth1=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
+	file_fullpubkey_auth2=$(btc_sign2_cmd -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
 
 	export FULLPUBKEY_FILE1="${file_fullpubkey_auth1##*\[fileName\]: }"
 	export FULLPUBKEY_FILE2="${file_fullpubkey_auth2##*\[fileName\]: }"
@@ -206,7 +206,7 @@ transaction_flow_phase() {
 	log_info "Signed transaction (1st): $tx_signed1"
 
 	log_substep "Signing with sign1 wallet (2nd signature - completing 2-of-3)"
-	tx_file_signed2=$(sign1 -c "${BTC_CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_file_signed2=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 sign signature --file "${tx_signed1}")
 	tx_signed2=$(btc_extract_file_path "$tx_file_signed2")
 	log_info "Signed transaction (2nd): $tx_signed2"
 
