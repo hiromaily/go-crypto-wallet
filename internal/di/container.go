@@ -44,6 +44,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/descriptor"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	infraKeyGen "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/generator"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
 	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
@@ -709,7 +710,7 @@ func (c *container) newKeyGenerator() portsWallet.Generator {
 	}
 
 	// Use factory to create generator based on key type
-	factory := infraKey.NewFactory()
+	factory := infraKeyGen.NewFactory()
 	keyType := c.getKeyType() // Get from config or default to BIP44
 	generator, err := factory.CreateGenerator(keyType, c.conf.CoinTypeCode, chainConf)
 	if err != nil {
@@ -1343,14 +1344,22 @@ func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressU
 }
 
 func (c *container) newBTCKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase {
+	// Create coin strategy once at DI initialization
+	chainConf := c.newBTC().GetChainConf()
+	coinStrategy, err := infraKey.CreateCoinKeyStrategy(c.conf.CoinTypeCode, chainConf)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create coin strategy for descriptor use case: %v", err))
+	}
+
 	return keygenusecasebtc.NewGenerateDescriptorUseCase(
-		apibtcimpl.NewDescriptorService(c.newBTC().GetChainConf()),
-		c.newBTC().GetChainConf(),
+		apibtcimpl.NewDescriptorService(chainConf),
+		chainConf,
 		c.newAuthFullPubKeyRepo(),
 		c.newAccountKeyRepo(),
 		c.newSeedRepo(),
 		c.conf.CoinTypeCode,
 		c.newMultiAccount(),
+		coinStrategy,
 	)
 }
 

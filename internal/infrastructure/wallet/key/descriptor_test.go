@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
+
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -51,7 +53,12 @@ func TestDescriptorGenerator_GetMasterFingerprint(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams)
+			// Create coin strategy
+			coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.RegressionNetParams)
+			if stratErr != nil {
+				t.Fatalf("Failed to create coin strategy: %v", stratErr)
+			}
+			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams, coinStrategy)
 			generator := NewDescriptorGenerator(hdKey, &chaincfg.RegressionNetParams)
 
 			fingerprint, err := generator.GetMasterFingerprint(seed)
@@ -114,7 +121,12 @@ func TestDescriptorGenerator_GetAccountXPub(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams)
+			// Create coin strategy
+			coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.RegressionNetParams)
+			if stratErr != nil {
+				t.Fatalf("Failed to create coin strategy: %v", stratErr)
+			}
+			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams, coinStrategy)
 			generator := NewDescriptorGenerator(hdKey, &chaincfg.RegressionNetParams)
 
 			xpub, err := generator.GetAccountXPub(seed, tt.accountType)
@@ -182,7 +194,12 @@ func TestDescriptorGenerator_GenerateAccountDescriptor(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams)
+			// Create coin strategy
+			coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.RegressionNetParams)
+			if stratErr != nil {
+				t.Fatalf("Failed to create coin strategy: %v", stratErr)
+			}
+			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams, coinStrategy)
 			generator := NewDescriptorGenerator(hdKey, &chaincfg.RegressionNetParams)
 
 			descriptor, err := generator.GenerateAccountDescriptor(seed, tt.accountType, tt.withChecksum)
@@ -288,7 +305,12 @@ func TestDescriptorGenerator_GenerateAccountDescriptorWithRange(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams)
+			// Create coin strategy
+			coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.RegressionNetParams)
+			if stratErr != nil {
+				t.Fatalf("Failed to create coin strategy: %v", stratErr)
+			}
+			hdKey := NewHDKey(tt.purpose, domainCoin.BTC, &chaincfg.RegressionNetParams, coinStrategy)
 			generator := NewDescriptorGenerator(hdKey, &chaincfg.RegressionNetParams)
 
 			descriptorStr, err := generator.GenerateAccountDescriptorWithRange(
@@ -332,7 +354,12 @@ func TestDescriptorGenerator_GenerateAccountDescriptorWithRange(t *testing.T) {
 func TestDescriptorGenerator_Integration(t *testing.T) {
 	// Integration test: generate descriptor, verify it has all required components
 	seed := getTestSeed(t)
-	hdKey := NewHDKey(PurposeTypeBIP49, domainCoin.BTC, &chaincfg.RegressionNetParams)
+	// Create coin strategy
+	coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.RegressionNetParams)
+	if stratErr != nil {
+		t.Fatalf("Failed to create coin strategy: %v", stratErr)
+	}
+	hdKey := NewHDKey(PurposeTypeBIP49, domainCoin.BTC, &chaincfg.RegressionNetParams, coinStrategy)
 	generator := NewDescriptorGenerator(hdKey, &chaincfg.RegressionNetParams)
 
 	// Generate complete descriptor with range and checksum

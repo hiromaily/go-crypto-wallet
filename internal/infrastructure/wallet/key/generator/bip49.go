@@ -1,19 +1,23 @@
-package key
+package generator
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/chaincfg"
 
-	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 
+	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
 )
 
 // BIP49Generator implements Generator interface for BIP49 (P2SH-SegWit addresses)
 type BIP49Generator struct {
-	hdKey *HDKey
+	hdKey *infraKey.HDKey
 }
 
 // Compile-time check that generator implements Generator interface
@@ -21,8 +25,15 @@ var _ portsWallet.Generator = (*BIP49Generator)(nil)
 
 // NewBIP49Generator returns BIP49Generator
 func NewBIP49Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP49Generator {
+	// Create coin-specific strategy
+	coinStrategy, err := strategy.CreateCoinKeyStrategy(coinTypeCode, conf)
+	if err != nil {
+		// Panic is acceptable in factory/initialization code for unsupported configurations
+		panic(fmt.Sprintf("failed to create coin strategy for %s: %v", coinTypeCode.String(), err))
+	}
+
 	return &BIP49Generator{
-		hdKey: NewHDKey(PurposeTypeBIP49, coinTypeCode, conf),
+		hdKey: infraKey.NewHDKey(infraKey.PurposeTypeBIP49, coinTypeCode, conf, coinStrategy),
 	}
 }
 

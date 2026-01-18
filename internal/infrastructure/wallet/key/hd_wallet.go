@@ -1,26 +1,16 @@
 package key
 
 import (
-	"crypto/ecdsa"
-	"encoding/hex"
-	"errors"
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcec/v2"
-	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/txscript"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"golang.org/x/crypto/ripemd160" //nolint:gosec
 
+	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/bch"
-	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -94,17 +84,31 @@ type HDKey struct {
 	coinType     domainCoin.CoinType
 	coinTypeCode domainCoin.CoinTypeCode
 	conf         *chaincfg.Params
+	strategy     portsWallet.CoinKeyStrategy // Strategy for coin-specific key generation
 }
 
 // NewHDKey returns Key
 func NewHDKey(
-	purpose PurposeType, coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params,
+	purpose PurposeType,
+	coinTypeCode domainCoin.CoinTypeCode,
+	conf *chaincfg.Params,
+	strategy portsWallet.CoinKeyStrategy,
 ) *HDKey {
+	// Validate that strategy is not nil
+	if strategy == nil {
+		panic(fmt.Sprintf(
+			"strategy cannot be nil for coin %s (purpose: %d)",
+			coinTypeCode.String(),
+			purpose,
+		))
+	}
+
 	keyData := HDKey{
 		purpose:      purpose,
 		coinType:     domainCoin.GetCoinType(coinTypeCode, conf),
 		coinTypeCode: coinTypeCode,
 		conf:         conf,
+		strategy:     strategy,
 	}
 
 	return &keyData
@@ -274,313 +278,28 @@ func (k *HDKey) createKeysWithIndex(
 	// Index
 	walletKeys := make([]domainKey.WalletKey, count)
 	for i := uint32(0); i < count; i++ {
-		var loopErr error
-		var child *hdkeychain.ExtendedKey
-		child, loopErr = change.Derive(idxFrom + i)
-		if loopErr != nil {
-			return nil, loopErr
+		// Derive child key
+		child, err := change.Derive(idxFrom + i)
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive child key at index %d: %w", idxFrom+i, err)
 		}
 
-		// privateKey
-		var privateKey *btcec.PrivateKey
-		privateKey, loopErr = child.ECPrivKey()
-		if loopErr != nil {
-			return nil, loopErr
+		// Get private key
+		privateKey, err := child.ECPrivKey()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get EC private key at index %d: %w", idxFrom+i, err)
 		}
 
-		switch k.coinTypeCode {
-		case domainCoin.BTC, domainCoin.BCH:
-			// WIF　(compressed: true) => bitcoin core expresses compressed address
-			var wif *btcutil.WIF
-			wif, loopErr = btcutil.NewWIF(privateKey, k.conf, true)
-			if loopErr != nil {
-				return nil, loopErr
-			}
-
-			var strP2PKHAddr, strP2SHSegWitAddr string
-			var bech32Addr *btcutil.AddressWitnessPubKeyHash
-			var redeemScript string
-			strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, loopErr = k.btcAddrs(wif, privateKey)
-			if loopErr != nil {
-				return nil, loopErr
-			}
-
-			// Generate Taproot address
-			var taprootAddr *btcutil.AddressTaproot
-			taprootAddr, loopErr = k.getTaprootAddr(privateKey)
-			if loopErr != nil {
-				return nil, loopErr
-			}
-
-			// address.String() is equal to address.EncodeAddress()
-			walletKeys[i] = domainKey.WalletKey{
-				WIF:            wif.String(),
-				P2PKHAddr:      strP2PKHAddr,
-				P2SHSegWitAddr: strP2SHSegWitAddr,
-				Bech32Addr:     bech32Addr.EncodeAddress(),
-				TaprootAddr:    taprootAddr.EncodeAddress(),
-				FullPubKey:     getFullPubKey(privateKey, true),
-				RedeemScript:   redeemScript,
-			}
-
-		case domainCoin.ETH:
-			var ethAddr, ethPubKey, ethPrivKey string
-			ethAddr, ethPubKey, ethPrivKey, loopErr = k.ethAddrs(privateKey)
-			if loopErr != nil {
-				return nil, loopErr
-			}
-
-			walletKeys[i] = domainKey.WalletKey{
-				WIF:            ethPrivKey,
-				P2PKHAddr:      ethAddr,
-				P2SHSegWitAddr: "",
-				Bech32Addr:     "",
-				TaprootAddr:    "",
-				FullPubKey:     ethPubKey,
-				RedeemScript:   "",
-			}
-		case domainCoin.XRP:
-			var xrpAddr, xrpPubKey, xrpPrivKey string
-			xrpAddr, xrpPubKey, xrpPrivKey, loopErr = k.xrpAddrs(privateKey)
-			if loopErr != nil {
-				return nil, loopErr
-			}
-
-			// eth address is used as passphrase for generating key by API `wallet_propose`
-			var ethAddr string
-			ethAddr, _, _, loopErr = k.ethAddrs(privateKey)
-			if loopErr != nil {
-				return nil, loopErr
-			}
-
-			walletKeys[i] = domainKey.WalletKey{
-				WIF:            xrpPrivKey,
-				P2PKHAddr:      xrpAddr,
-				P2SHSegWitAddr: ethAddr,
-				Bech32Addr:     "",
-				TaprootAddr:    "",
-				FullPubKey:     xrpPubKey,
-				RedeemScript:   "",
-			}
-		case domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
-			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
-		default:
-			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
+		// Use strategy to generate wallet key
+		walletKey, err := k.strategy.GenerateWalletKey(privateKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate wallet key at index %d: %w", idxFrom+i, err)
 		}
+
+		walletKeys[i] = *walletKey
 	}
 
 	return walletKeys, nil
-}
-
-func (k *HDKey) btcAddrs(
-	wif *btcutil.WIF, privKey *btcec.PrivateKey,
-) (string, string, *btcutil.AddressWitnessPubKeyHash, string, error) {
-	// P2SH address
-
-	// get P2PKH address as string for BTC/BCH
-	// - P2PKH Address, Pay To PubKey Hash
-	// - if only BTC, this logic would be enough
-	//  address, err := child.Address(conf)
-	//  address.String()
-	strP2PKHAddr, err := k.getP2PKHAddr(privKey)
-	if err != nil {
-		return "", "", nil, "", err
-	}
-
-	// P2SH-SegWit address
-	strP2SHSegWitAddr, redeemScript, err := k.getP2SHSegWitAddr(privKey)
-	if err != nil {
-		return "", "", nil, "", err
-	}
-
-	// Bech32 address
-	bech32Addr, err := k.getBech32Addr(wif)
-	if err != nil {
-		return "", "", nil, "", err
-	}
-	return strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, nil
-}
-
-// https://goethereumbook.org/wallet-generate/
-func (*HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
-	// private key
-	ethPrivKey := privKey.ToECDSA()
-	ethHexPrivKey := hexutil.Encode(crypto.FromECDSA(ethPrivKey))
-
-	// pubkey, address
-	ethPubkey := ethPrivKey.Public()
-	pubkeyECDSA, ok := ethPubkey.(*ecdsa.PublicKey)
-	if !ok {
-		return "", "", "", errors.New("fail to call cast pubkey to ecsda pubkey")
-	}
-	// pubkey
-	ethHexPubKey := hexutil.Encode(crypto.FromECDSAPub(pubkeyECDSA))[4:]
-
-	// address
-	address := crypto.PubkeyToAddress(*pubkeyECDSA).Hex()
-
-	return address, ethHexPubKey, ethHexPrivKey, nil
-}
-
-func (*HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
-	// private key (same as ethereum for now)
-	xrpPrivKey := privKey.ToECDSA()
-	// xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
-	xrpHexPrivKey, err := xrpaddr.NewAccountPrivateKey(crypto.FromECDSA(xrpPrivKey))
-	if err != nil {
-		return "", "", "", fmt.Errorf("fail to call xrpaddr.NewAccountPrivateKey(): %w", err)
-	}
-
-	serializedPubKey := privKey.PubKey().SerializeCompressed()
-	pubKeyHash := xrpaddr.Sha256RipeMD160(serializedPubKey)
-	if len(pubKeyHash) != ripemd160.Size {
-		return "", "", "", errors.New("pubKeyHash must be 20 bytes")
-	}
-	// address
-	address, err := xrpaddr.NewAccountID(pubKeyHash)
-	if err != nil {
-		return "", "", "", fmt.Errorf("fail to call rcrypto.NewAccountID(): %w", err)
-	}
-	// publicKey
-	publicKey, err := xrpaddr.NewAccountPublicKey(pubKeyHash)
-	if err != nil {
-		return "", "", "", fmt.Errorf("fail to call rcrypto.NewAccountPublicKey(): %w", err)
-	}
-
-	return address.String(), publicKey.String(), xrpHexPrivKey.String(), nil
-}
-
-// get Address(P2PKH) as string for BTC/BCH
-// P2PKH Address, Pay To PubKey Hash
-// https://bitcoin.org/en/glossary/p2pkh-address
-func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
-	serializedPubKey := privKey.PubKey().SerializeCompressed()
-	pkHash := btcutil.Hash160(serializedPubKey)
-
-	// *btcutil.AddressPubKeyHash
-	p2PKHAddr, err := btcutil.NewAddressPubKeyHash(pkHash, k.conf)
-	if err != nil {
-		return "", fmt.Errorf("fail to call btcutil.NewAddressPubKeyHash(): %w", err)
-	}
-
-	switch k.coinTypeCode {
-	case domainCoin.BTC:
-		return p2PKHAddr.String(), nil
-	case domainCoin.BCH:
-		return k.getP2PKHAddrBCH(p2PKHAddr)
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
-		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
-	default:
-		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
-	}
-}
-
-// getP2PKHAddrBCH get P2PKH Addr for BCH
-func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, error) {
-	addrBCH, err := bchutil.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
-	if err != nil {
-		return "", fmt.Errorf("fail to call btcutil.NewAddressPubKeyHash(): %w", err)
-	}
-
-	// get prefix
-	prefix, ok := bchutil.Prefixes[k.conf.Name]
-	if !ok {
-		return "", fmt.Errorf("invalid BCH *chaincfg : %s", k.conf.Name)
-	}
-	return fmt.Sprintf("%s:%s", prefix, addrBCH.String()), nil
-}
-
-// getP2SHSegWitAddr get P2SH-SegWit address (P2SH nested SegWit) and redeemScript as string
-//   - it's for only BTC
-//   - Though BCH would not require it, just in case
-//
-// FIXME: getting RedeemScript is not fixed yet
-//
-
-func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, error) {
-	// []byte
-	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
-	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(pubKeyHash, k.conf)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call btcutil.NewAddressWitnessPubKeyHash(): %w", err)
-	}
-
-	// FIXME: getting RedeemScript is not fixed yet
-	// get redeemScript
-	payToAddrScript, err := txscript.PayToAddrScript(segwitAddress)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call txscript.PayToAddrScript(): %w", err)
-	}
-
-	// For P2SH-SegWit (P2SH-wrapped witness), the redeemScript IS the witness program
-	// The witness program (OP_0 <hash>) is hashed to create the P2SH address
-	// When spending, the redeemScript reveals the witness program
-	// Redeem Script (witness program) => Hash of RedeemScript => P2SH ScriptPubKey
-
-	strRedeemScript := hex.EncodeToString(payToAddrScript)
-	switch k.coinTypeCode {
-	case domainCoin.BTC:
-		btcAddress, addrErr := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
-		if addrErr != nil {
-			return "", "", fmt.Errorf("fail to call btcutil.NewAddressScriptHash(): %w", addrErr)
-		}
-		return btcAddress.String(), strRedeemScript, nil
-	case domainCoin.BCH:
-		bchAddress, addrErr := bchutil.NewCashAddressScriptHash(payToAddrScript, k.conf)
-		if addrErr != nil {
-			return "", "", fmt.Errorf("fail to call bchaddr.NewCashAddressScriptHash(): %w", addrErr)
-		}
-		return bchAddress.String(), strRedeemScript, nil
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
-		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
-	default:
-		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
-	}
-}
-
-// getBech32Addr returns bech32 address
-func (k *HDKey) getBech32Addr(wif *btcutil.WIF) (*btcutil.AddressWitnessPubKeyHash, error) {
-	witnessProg := btcutil.Hash160(wif.SerializePubKey())
-	bech32Addr, err := btcutil.NewAddressWitnessPubKeyHash(witnessProg, k.conf)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call NewAddressWitnessPubKeyHash(): %w", err)
-	}
-	return bech32Addr, nil
-}
-
-// getTaprootAddr returns a Taproot address (BIP86) for the given private key
-// BIP86 uses key path spending without script path (no merkle root)
-func (k *HDKey) getTaprootAddr(privKey *btcec.PrivateKey) (*btcutil.AddressTaproot, error) {
-	// Get the internal public key
-	internalPubKey := privKey.PubKey()
-
-	// Compute the tweaked Taproot output key (BIP341) without script path
-	taprootKey := txscript.ComputeTaprootKeyNoScript(internalPubKey)
-
-	// Get the 32-byte x-only public key (Schnorr public key)
-	witnessProg := taprootKey.SerializeCompressed()[1:] // Remove the parity byte
-
-	// Create Taproot address
-	taprootAddr, err := btcutil.NewAddressTaproot(witnessProg, k.conf)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call NewAddressTaproot(): %w", err)
-	}
-
-	return taprootAddr, nil
-}
-
-// getFullPubKey returns full Public Key
-func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
-	var bPubKey []byte
-	if isCompressed {
-		// Compressed
-		bPubKey = privKey.PubKey().SerializeCompressed()
-	} else {
-		// Uncompressed
-		bPubKey = privKey.PubKey().SerializeUncompressed()
-	}
-	hexPubKey := hex.EncodeToString(bPubKey)
-	return hexPubKey
 }
 
 // DeriveAccountKey derives an account-level extended key from a coin-level extended public key.
