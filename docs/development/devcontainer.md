@@ -88,6 +88,7 @@ This project provides an optional DevContainer configuration that creates a stan
 ### Option 1: Using VS Code
 
 1. **Open the Project**
+
    ```bash
    cd go-crypto-wallet
    code .
@@ -109,6 +110,7 @@ This project provides an optional DevContainer configuration that creates a stan
 ### Option 2: Using Cursor
 
 1. **Open the Project**
+
    ```bash
    cd go-crypto-wallet
    cursor .
@@ -126,11 +128,13 @@ This project provides an optional DevContainer configuration that creates a stan
 ### Option 3: Using Claude Code (CLI)
 
 1. **Navigate to Project**
+
    ```bash
    cd go-crypto-wallet
    ```
 
 2. **Start Claude Code**
+
    ```bash
    claude-code
    ```
@@ -153,6 +157,7 @@ This project provides an optional DevContainer configuration that creates a stan
 ### Claude Code (Recommended)
 
 **Why DevContainer with Claude Code?**
+
 - Claude can execute terminal commands safely inside the container
 - All verification commands (`make go-lint`, `make check-build`) work out of the box
 - Database operations via Docker Compose work through the mounted socket
@@ -185,6 +190,7 @@ claude-code
 ```
 
 **Safety Features:**
+
 - If Claude accidentally breaks something, just rebuild the container
 - Host filesystem is protected
 - Git repository is mounted, so commits are preserved
@@ -193,6 +199,7 @@ claude-code
 ### GitHub Copilot
 
 **Using Copilot in DevContainer:**
+
 1. Install GitHub Copilot extension in VS Code/Cursor
 2. Copilot works normally inside the container
 3. Code suggestions are based on the container's Go environment
@@ -201,6 +208,7 @@ claude-code
 ### Other AI Tools
 
 **Compatible with:**
+
 - Tabnine
 - Codeium
 - Amazon CodeWhisperer
@@ -217,7 +225,7 @@ The DevContainer comes with all project tools pre-configured:
 | Tool | Version | Purpose |
 |------|---------|---------|
 | Go | 1.25.5 | Programming language |
-| golangci-lint | v2.7.2 | Code linting |
+| golangci-lint | v2.8.0 | Code linting |
 | Atlas | v1.0.0 | Database migrations |
 | GitHub CLI | Latest | GitHub operations |
 | Docker | Host | Docker Compose support |
@@ -226,6 +234,7 @@ The DevContainer comes with all project tools pre-configured:
 ### Pre-Configured Settings
 
 All VS Code settings from `.vscode/settings.json` are applied:
+
 - ✅ Go build tags: `integration`
 - ✅ golangci-lint integration
 - ✅ Format on save
@@ -238,6 +247,7 @@ All VS Code settings from `.vscode/settings.json` are applied:
 ### Pre-Installed Extensions
 
 All VS Code extensions from `.vscode/extensions.json` are automatically installed:
+
 - Go extension
 - Markdown linting
 - Shell script formatting
@@ -336,6 +346,7 @@ When you update `.devcontainer/devcontainer.json`:
 **Problem:** Container build fails or won't start
 
 **Solutions:**
+
 ```bash
 # 1. Check Docker is running
 docker ps
@@ -357,12 +368,13 @@ docker system prune -a
 **Problem:** `golangci-lint` or `atlas` command not found
 
 **Solutions:**
+
 ```bash
 # 1. Check if postCreateCommand ran
 cat /tmp/devcontainer-setup.log
 
 # 2. Manually install tools
-go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.8.0
 curl -sSfL https://atlasgo.sh | sh -s -- --version v1.0.0
 
 # 3. Add tools to PATH
@@ -377,6 +389,7 @@ export PATH=$PATH:$HOME/go/bin:$HOME/.local/bin
 **Problem:** `docker compose` commands fail
 
 **Solutions:**
+
 ```bash
 # 1. Verify Docker socket is mounted
 ls -la /var/run/docker.sock
@@ -398,6 +411,7 @@ docker ps
 **Problem:** Container is slow
 
 **Solutions:**
+
 ```bash
 # 1. Allocate more resources to Docker Desktop
 # Docker Desktop → Preferences → Resources
@@ -422,6 +436,7 @@ docker ps
 **Problem:** Can't push to GitHub from container
 
 **Solutions:**
+
 ```bash
 # 1. SSH keys are automatically forwarded
 # No action needed if you use SSH
@@ -441,6 +456,7 @@ git config --global credential.helper store
 **Problem:** VS Code extension doesn't work in container
 
 **Solutions:**
+
 ```bash
 # 1. Check extension supports remote development
 # Look for "Supports Remote Development" badge
@@ -482,6 +498,7 @@ Your files are **bind-mounted** from your host system. Changes in the container 
 ### Can I customize the DevContainer?
 
 **Yes.** Edit `.devcontainer/devcontainer.json`:
+
 - Change the base image
 - Add more tools in `postCreateCommand`
 - Add/remove VS Code extensions
@@ -497,6 +514,7 @@ Your files are **bind-mounted** from your host system. Changes in the container 
 ### Can I use DevContainer offline?
 
 **Partially.** After the first build, you can work offline. However:
+
 - Initial build requires internet (downloads image)
 - `go get` requires internet
 - `docker compose pull` requires internet
@@ -559,17 +577,20 @@ docker images | grep go-crypto-wallet | awk '{print $3}' | xargs docker rmi
 ## Additional Resources
 
 ### Official Documentation
+
 - [DevContainers Specification](https://containers.dev/)
 - [VS Code Remote Development](https://code.visualstudio.com/docs/remote/remote-overview)
 - [Docker Documentation](https://docs.docker.com/)
 
 ### Project-Specific Documentation
+
 - [Installation Guide](../Installation.md)
 - [Database Development](database.md)
 - [AI Agent Skills](../ai-agents/agent-skills.md)
 - [Architecture Overview](../architecture/)
 
 ### Getting Help
+
 - **Project Issues**: [GitHub Issues](https://github.com/hiromaily/go-crypto-wallet/issues)
 - **DevContainer Issues**: Include `[DevContainer]` in issue title
 - **VS Code Remote**: [VS Code Remote GitHub](https://github.com/microsoft/vscode-remote-release)

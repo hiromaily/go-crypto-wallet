@@ -12,7 +12,7 @@ modVer=$(shell cat go.mod | head -n 3 | tail -n 1 | awk '{print $2}' | cut -d'.'
 currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -f2)
 
 # Tool versions
-GOLANGCI_VERSION=v2.7.2
+GOLANGCI_VERSION=v2.8.0
 # Note: PROTOC_BIN is deprecated. Use 'buf' directly for Protocol Buffer operations.
 
 # ETH Variables

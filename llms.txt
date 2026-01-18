@@ -92,6 +92,6 @@ docs/          → Documentation
 - Go 1.25.5
 - btcsuite/btcd v0.25.0
 - ethereum/go-ethereum v1.16.7
-- golangci-lint v2.7.2
+- golangci-lint v2.8.0
 - Atlas v1.0.0 (DB migration)
 - MySQL 8.4+

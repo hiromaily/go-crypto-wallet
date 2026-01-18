@@ -36,7 +36,7 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 
 ### golangci-lint
 
-- **Required Version**: v2.7.2 (specified in `make/vars.mk`)
+- **Required Version**: v2.8.0 (specified in `make/vars.mk`)
 - **Check version**: `golangci-lint --version`
 - **Installation**: See [Coding Standards](coding-standards.md)
 - **Note**: Used for code linting and formatting
@@ -101,7 +101,7 @@ gh --version
 go version  # Should show go1.25.5
 
 # Development tools
-golangci-lint --version  # Should show v2.7.2
+golangci-lint --version  # Should show v2.8.0
 atlas version             # Should show v1.0.0
 
 # Optional tools

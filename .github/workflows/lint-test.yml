@@ -64,7 +64,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.7.2
+          version: v2.8.0
           working-directory: ./
   # Proto linting with buf
   proto-lint:
