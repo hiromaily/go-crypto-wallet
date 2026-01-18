@@ -2,17 +2,12 @@
 # Test Targets
 ###############################################################################
 
+# Run all unit tests with gotestsum
 .PHONY: gotest
 gotest:
-	go test -v ./...
+	go tool gotestsum --format testname -- -v ./...
 
-# What is this?
-.PHONY: gotest-addr
-gotest-addr:
-	go test -tags=integration -v -run pkg/wallets/api/btc/...
-	go test -tags=integration -v -run GetAddressInfo pkg/wallets/api/btc/...
-	go test -v pkg/wallets/api/btc/... -run GetAddressInfo
-
+# Run integration tests with gotestsum
 .PHONY: gotest-integration
 gotest-integration:
-	go test -v -tags=integration ./...
+	go tool gotestsum --format testname -- -v -tags=integration ./...
