@@ -743,8 +743,7 @@ btc_wait_for_balance() {
 		local trusted_balance
 		trusted_balance=$(
 			set +x 2>/dev/null
-			balance_json=$(btc_cli "btc-watch" -rpcwallet=watch getbalances 2>/dev/null || echo '{}')
-			echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0"
+			btc_cli "btc-watch" -rpcwallet=watch getbalances 2>/dev/null | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0"
 		)
 
 		# Check if we have any trusted (mature) balance

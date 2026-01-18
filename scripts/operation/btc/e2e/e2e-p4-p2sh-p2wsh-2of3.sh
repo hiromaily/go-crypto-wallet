@@ -120,22 +120,21 @@ multisig_setup_phase() {
 	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
 
 	log_substep "Exporting descriptors from keygen wallet"
-	file_descriptor_deposit=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --account-config "${BTC_ACCOUNT_CONF}" --coin "${BTC_COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_payment=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --account-config "${BTC_ACCOUNT_CONF}" --coin "${BTC_COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_stored=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --account-config "${BTC_ACCOUNT_CONF}" --coin "${BTC_COIN}" descriptor export --account stored --output data/descriptor/btc/stored_descriptors.json --format bitcoin-core --include-change)
-
-	descriptor_deposit="${file_descriptor_deposit##*exported to }"
-	descriptor_payment="${file_descriptor_payment##*exported to }"
-	descriptor_stored="${file_descriptor_stored##*exported to }"
+	declare -A descriptor_paths
+	for account in deposit payment stored; do
+		output_file="data/descriptor/btc/${account}_descriptors.json"
+		cmd_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --account-config "${BTC_ACCOUNT_CONF}" --coin "${BTC_COIN}" descriptor export --account "$account" --output "$output_file" --format bitcoin-core --include-change)
+		descriptor_paths[$account]="${cmd_output##*exported to }"
+	done
 
 	log_substep "Importing descriptors into watch wallet"
-	btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor --file "${descriptor_deposit}" --account deposit
-	btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor --file "${descriptor_payment}" --account payment
-	btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor --file "${descriptor_stored}" --account stored
+	for account in deposit payment stored; do
+		btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor --file "${descriptor_paths[$account]}" --account "$account"
+	done
 
 	log_info "All descriptors imported successfully"
 
-	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_payment}" 2>/dev/null)
+	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_paths[payment]}" 2>/dev/null)
 	if [ -z "$first_descriptor" ]; then
 		log_error "Failed to extract descriptor"
 		return 1
