@@ -53,6 +53,7 @@ database:
     debug: true
   sqlite:
     path: "./data/sqlite/bch/watch.db"
+    max_open_conns: 2
     debug: true
 file_path:
   tx: "./data/tx/bch/"

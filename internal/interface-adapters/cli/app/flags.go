@@ -19,13 +19,13 @@ func AddGlobalFlags(cmd *cobra.Command, opts *Options, coinHelp ...string) {
 		"account config file path for multisig settings",
 	)
 
-	helpText := "coin type code: btc, bch, eth, xrp, hyt"
+	helpText := "coin type code (required): btc, bch, eth, xrp, hyt"
 	if len(coinHelp) > 0 && coinHelp[0] != "" {
 		helpText = coinHelp[0]
 	}
 	cmd.PersistentFlags().StringVar(
 		&opts.CoinTypeCode,
-		"coin", "btc",
+		"coin", "",
 		helpText,
 	)
 	cmd.PersistentFlags().StringVarP(

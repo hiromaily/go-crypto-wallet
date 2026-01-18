@@ -48,6 +48,7 @@ database:
     debug: false
   sqlite:
     path: "./data/sqlite/xrp/watch.db"
+    max_open_conns: 2
     debug: true
 file_path:
   tx: "./data/tx/xrp/"

@@ -146,8 +146,15 @@ type MySQL struct {
 
 // SQLite info
 type SQLite struct {
-	Path  string `toml:"path" yaml:"path" mapstructure:"path"`
-	Debug bool   `toml:"debug" yaml:"debug" mapstructure:"debug"`
+	Path string `toml:"path" yaml:"path" mapstructure:"path"`
+	// MaxOpenConns sets the maximum number of open connections to the database.
+	// IMPORTANT: Do NOT set this to 1 for production use.
+	// With MaxOpenConns=1, a read query (e.g., SELECT) will hold the single connection,
+	// causing Begin() to block indefinitely waiting for a connection, resulting in a deadlock.
+	// Minimum recommended value is 2 to allow concurrent read + write operations.
+	// Default: 2 (if not specified or set to 0)
+	MaxOpenConns int  `toml:"max_open_conns" yaml:"max_open_conns" mapstructure:"max_open_conns"`
+	Debug        bool `toml:"debug" yaml:"debug" mapstructure:"debug"`
 }
 
 // FilePath if file path group

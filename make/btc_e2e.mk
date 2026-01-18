@@ -66,26 +66,27 @@ _btc-e2e-validate:
 	fi
 
 # Run E2E test with --reset flag (recommended for fresh start)
+# Note: build-all ensures binaries are up-to-date before running E2E tests
 .PHONY: btc-e2e-reset
-btc-e2e-reset: _btc-e2e-validate
+btc-e2e-reset: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --reset
 
 # Run complete E2E test
 .PHONY: btc-e2e
-btc-e2e: _btc-e2e-validate
+btc-e2e: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH)
 
 # Run E2E test with verbose output
 .PHONY: btc-e2e-verbose
-btc-e2e-verbose: _btc-e2e-validate
+btc-e2e-verbose: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --verbose
 
 # Run E2E test in non-interactive mode (for CI/CD)
 .PHONY: btc-e2e-ci
-btc-e2e-ci: _btc-e2e-validate
+btc-e2e-ci: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --non-interactive
 
-# Cleanup E2E test environment
+# Cleanup E2E test environment (no build needed for cleanup)
 .PHONY: btc-e2e-cleanup
 btc-e2e-cleanup: _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --cleanup
