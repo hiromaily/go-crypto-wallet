@@ -2410,14 +2410,30 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 		}
 		return errors.New("address has no HD key path (not from descriptor wallet?)")
 	}
-	if addressInfo.PubKey == "" {
-		return errors.New("address has no public key")
-	}
-
 	// Parse the public key
-	pubKeyBytes, err := hex.DecodeString(addressInfo.PubKey)
-	if err != nil {
-		return fmt.Errorf("failed to decode public key: %w", err)
+	// For P2TR (Taproot), Bitcoin Core doesn't return pubkey in getaddressinfo,
+	// so we extract the x-only pubkey (32 bytes) directly from the scriptPubKey
+	var pubKeyBytes []byte
+	if addressInfo.PubKey == "" {
+		if txscript.IsPayToTaproot(scriptPubKey) {
+			// P2TR scriptPubKey format: OP_1 (0x51) + OP_DATA_32 (0x20) + 32-byte x-only pubkey
+			// Total 34 bytes, pubkey is at bytes 2-33
+			if len(scriptPubKey) != 34 {
+				return fmt.Errorf("invalid P2TR scriptPubKey length: got %d, expected 34", len(scriptPubKey))
+			}
+			pubKeyBytes = scriptPubKey[2:34]
+			logger.Debug("Extracted x-only pubkey from P2TR scriptPubKey",
+				"input_index", inputIndex,
+				"pubkey_len", len(pubKeyBytes))
+		} else {
+			return errors.New("address has no public key")
+		}
+	} else {
+		var err error
+		pubKeyBytes, err = hex.DecodeString(addressInfo.PubKey)
+		if err != nil {
+			return fmt.Errorf("failed to decode public key: %w", err)
+		}
 	}
 
 	// Get the correct fingerprint from imported descriptors, not from Bitcoin Core's internal wallet
