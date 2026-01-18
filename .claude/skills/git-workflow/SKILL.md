@@ -240,10 +240,33 @@ Your commit message: <your-invalid-commit-message>
 
 ## Pull Request Creation
 
+### ⚠️ MANDATORY: Ask Before Creating PR
+
+**PRを作成する前に、必ずユーザーに確認してください。**
+
+複数のphaseに分かれたタスクでは、1つのbranchで複数のcommitが作成されます。
+すべてのcommitが完了するまでPRを作成しないでください。
+
+```
+After commits are pushed, ALWAYS ask:
+> "PRを作成しますか？または追加の作業がありますか？"
+```
+
+### When to Ask
+
+| Situation | Action |
+|-----------|--------|
+| Single commit task | Ask before creating PR |
+| Multi-phase task | Ask after ALL phases are complete |
+| User explicitly requests PR | Create PR without asking |
+
 ### Create PR
 
 ```bash
 git push -u origin {branch-name}
+
+# Ask user: "PRを作成しますか？"
+# Only proceed if user confirms
 
 gh pr create --title "{type}: {description}" --body "$(cat <<'EOF'
 ## Summary
@@ -374,8 +397,12 @@ git commit -m "{type}: {description}
 
 Closes #{number}"
 
-# 6. Push and create PR
+# 6. Push
 git push -u origin {branch-name}
+
+# 7. Ask user before creating PR (REQUIRED)
+#    "PRを作成しますか？または追加の作業がありますか？"
+#    Only create PR if user confirms
 gh pr create --title "{type}: {description}"
 ```
 
