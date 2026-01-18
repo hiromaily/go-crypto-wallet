@@ -68,6 +68,54 @@ btc_setup_wallets "btc-watch:watch btc-keygen:keygen"
 | `btc_insert_payment_requests` | Insert payment requests |
 | `btc_parse_args` | Parse common e2e script arguments |
 
+**Database Abstraction Functions:**
+
+| Function | Description |
+|----------|-------------|
+| `db_is_sqlite` | Check if using SQLite database |
+| `db_is_mysql` | Check if using MySQL database |
+| `db_query` | Execute database query (SELECT) |
+| `db_execute` | Execute database command (INSERT, UPDATE, DELETE) |
+| `sqlite_init_db` | Initialize SQLite database with schema |
+| `sqlite_clean_db` | Remove SQLite database file |
+| `sqlite_query` | Execute SQLite query directly |
+| `mysql_query` | Execute MySQL query via Docker |
+
+### Database Configuration
+
+The scripts support two database backends:
+
+#### MySQL (Default)
+
+Uses Docker MySQL container. Set `DB_TYPE=mysql` or leave unset.
+
+```bash
+# Run with MySQL (default)
+./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+```
+
+#### SQLite (Lightweight Testing)
+
+Uses local SQLite files. Set `DB_TYPE=sqlite` for:
+
+- Faster test startup (no Docker database container)
+- Parallel test execution (each test uses separate DB files)
+- Lighter CI/CD environments
+
+```bash
+# Run with SQLite
+DB_TYPE=sqlite ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+```
+
+**SQLite Environment Variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_TYPE` | `mysql` | Database type: `mysql` or `sqlite` |
+| `SQLITE_WATCH_DB_PATH` | `./data/sqlite/btc/watch.db` | Watch wallet database |
+| `SQLITE_KEYGEN_DB_PATH` | `./data/sqlite/btc/keygen.db` | Keygen wallet database |
+| `SQLITE_SIGN_DB_PATH` | `./data/sqlite/btc/sign.db` | Sign wallet database |
+
 ---
 
 # Bitcoin E2E Workflow
@@ -98,6 +146,8 @@ Verifies that all required tools and dependencies are available:
 
 Starts the required infrastructure containers:
 
+**With MySQL (default):**
+
 ```
 ┌─────────────────┐     ┌─────────────────┐
 │   wallet-db     │     │   btc-watch     │
@@ -117,10 +167,32 @@ Starts the required infrastructure containers:
                         └─────────────────┘
 ```
 
+**With SQLite (`DB_TYPE=sqlite`):**
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│   SQLite Files  │     │   btc-watch     │
+│   (Local)       │     │   (Bitcoin Node)│
+└─────────────────┘     └─────────────────┘
+ ├─ watch.db            ┌─────────────────┐
+ ├─ keygen.db           │   btc-keygen    │
+ └─ sign.db             │   (Bitcoin Node)│
+                        └─────────────────┘
+                        ... (sign nodes)
+```
+
+**MySQL Mode:**
+
 1. Start database container (`compose.yaml`)
 2. Wait for database to be healthy
 3. Start Bitcoin node containers (`compose.btc.yaml`)
 4. Wait for all Bitcoin nodes to be healthy
+
+**SQLite Mode:**
+
+1. Initialize SQLite database files with schema
+2. Start Bitcoin node containers (`compose.btc.yaml`)
+3. Wait for all Bitcoin nodes to be healthy
 
 ### Phase 3: Wallet Setup
 

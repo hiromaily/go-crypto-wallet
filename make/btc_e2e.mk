@@ -2,11 +2,15 @@
 # E2E Testing - Bitcoin Transaction Patterns
 ###############################################################################
 # Usage:
-#   make btc-e2e P=<pattern>           # Run E2E test
+#   make btc-e2e P=<pattern>           # Run E2E test (SQLite default)
 #   make btc-e2e-reset P=<pattern>     # Run with --reset flag (recommended)
 #   make btc-e2e-verbose P=<pattern>   # Run with --verbose flag
 #   make btc-e2e-ci P=<pattern>        # Run with --non-interactive flag
 #   make btc-e2e-cleanup P=<pattern>   # Run with --cleanup flag
+#
+# Database:
+#   DB=sqlite (default) - Use local SQLite files (faster, no Docker DB)
+#   DB=mysql            - Use Docker MySQL container
 #
 # Patterns:
 #   1:  P2PKH Single-sig
@@ -20,10 +24,17 @@
 #   9:  P2TR Taproot Single-sig
 #   10: P2TR MuSig2 N-of-N
 #   11: P2TR Tapscript M-of-N
+#
+# Examples:
+#   make btc-e2e-reset P=1           # SQLite (default)
+#   make btc-e2e-reset P=1 DB=mysql  # MySQL
 ###############################################################################
 
 # Default pattern
 P ?= 1
+
+# Default database type (sqlite or mysql)
+DB ?= sqlite
 
 # Script mapping for each pattern
 E2E_SCRIPT_1  := e2e-p1-p2pkh-singlesig.sh
@@ -42,6 +53,9 @@ E2E_SCRIPT_11 := e2e-p11-p2tr-tapscript.sh
 E2E_SCRIPT = $(E2E_SCRIPT_$(P))
 E2E_SCRIPT_PATH = ./scripts/operation/btc/e2e/$(E2E_SCRIPT)
 
+# Database type environment variable
+E2E_DB_TYPE = DB_TYPE=$(DB)
+
 # Validate pattern number
 .PHONY: _btc-e2e-validate
 _btc-e2e-validate:
@@ -53,27 +67,27 @@ _btc-e2e-validate:
 # Run E2E test with --reset flag (recommended for fresh start)
 .PHONY: btc-e2e-reset
 btc-e2e-reset: _btc-e2e-validate
-	$(E2E_SCRIPT_PATH) --reset
+	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --reset
 
 # Run complete E2E test
 .PHONY: btc-e2e
 btc-e2e: _btc-e2e-validate
-	$(E2E_SCRIPT_PATH)
+	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH)
 
 # Run E2E test with verbose output
 .PHONY: btc-e2e-verbose
 btc-e2e-verbose: _btc-e2e-validate
-	$(E2E_SCRIPT_PATH) --verbose
+	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --verbose
 
 # Run E2E test in non-interactive mode (for CI/CD)
 .PHONY: btc-e2e-ci
 btc-e2e-ci: _btc-e2e-validate
-	$(E2E_SCRIPT_PATH) --non-interactive
+	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --non-interactive
 
 # Cleanup E2E test environment
 .PHONY: btc-e2e-cleanup
 btc-e2e-cleanup: _btc-e2e-validate
-	$(E2E_SCRIPT_PATH) --cleanup
+	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --cleanup
 
 # Show available patterns
 .PHONY: btc-e2e-help
@@ -91,9 +105,14 @@ btc-e2e-help:
 	@echo "  P=10 : P2TR MuSig2 N-of-N"
 	@echo "  P=11 : P2TR Tapscript M-of-N"
 	@echo ""
+	@echo "Database Backend:"
+	@echo "  DB=sqlite (default) - Local SQLite files (faster, no Docker DB)"
+	@echo "  DB=mysql            - Docker MySQL container"
+	@echo ""
 	@echo "Usage:"
-	@echo "  make btc-e2e P=<pattern>         # Run E2E test"
-	@echo "  make btc-e2e-reset P=<pattern>   # Run with --reset flag"
-	@echo "  make btc-e2e-verbose P=<pattern> # Run with --verbose flag"
-	@echo "  make btc-e2e-ci P=<pattern>      # Run with --non-interactive flag"
-	@echo "  make btc-e2e-cleanup P=<pattern> # Run with --cleanup flag"
+	@echo "  make btc-e2e P=<pattern>              # Run E2E test (SQLite)"
+	@echo "  make btc-e2e-reset P=<pattern>        # Run with --reset flag"
+	@echo "  make btc-e2e-reset P=1 DB=mysql       # Run with MySQL"
+	@echo "  make btc-e2e-verbose P=<pattern>      # Run with --verbose flag"
+	@echo "  make btc-e2e-ci P=<pattern>           # Run with --non-interactive flag"
+	@echo "  make btc-e2e-cleanup P=<pattern>      # Run with --cleanup flag"

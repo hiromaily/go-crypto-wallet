@@ -42,7 +42,7 @@ tracer:
     sampling_probability: 0.5 # 0.001 to 1.0
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql" # mysql, sqlite
+  type: "sqlite" # mysql, sqlite
   mysql:
     host: "127.0.0.1:3306"
     dbname: "watch"
