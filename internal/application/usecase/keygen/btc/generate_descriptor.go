@@ -401,8 +401,14 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 		return apibtcimpl.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
 	}
 
+	// Create coin-specific strategy
+	coinStrategy, err := infraKey.CreateCoinKeyStrategy(u.coinTypeCode, u.chainConfig)
+	if err != nil {
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf("failed to create coin strategy: %w", err)
+	}
+
 	// Create HD key for this purpose
-	hdKey := infraKey.NewHDKey(purposeType, u.coinTypeCode, u.chainConfig)
+	hdKey := infraKey.NewHDKey(purposeType, u.coinTypeCode, u.chainConfig, coinStrategy)
 
 	// Create descriptor generator
 	descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)

@@ -1,6 +1,8 @@
 package key
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/chaincfg"
 
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
@@ -8,6 +10,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
 )
 
 // BIP84Generator implements Generator interface for BIP84 (Native SegWit Bech32 addresses)
@@ -20,8 +23,15 @@ var _ portsWallet.Generator = (*BIP84Generator)(nil)
 
 // NewBIP84Generator returns BIP84Generator
 func NewBIP84Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP84Generator {
+	// Create coin-specific strategy
+	coinStrategy, err := strategy.CreateCoinKeyStrategy(coinTypeCode, conf)
+	if err != nil {
+		// Panic is acceptable in factory/initialization code for unsupported configurations
+		panic(fmt.Sprintf("failed to create coin strategy for %s: %v", coinTypeCode.String(), err))
+	}
+
 	return &BIP84Generator{
-		hdKey: NewHDKey(PurposeTypeBIP84, coinTypeCode, conf),
+		hdKey: NewHDKey(PurposeTypeBIP84, coinTypeCode, conf, coinStrategy),
 	}
 }
 

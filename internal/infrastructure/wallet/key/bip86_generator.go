@@ -1,14 +1,16 @@
 package key
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/chaincfg"
 
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
-
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
 )
 
 // BIP86Generator implements Generator interface for BIP86 (Taproot addresses)
@@ -21,8 +23,15 @@ var _ portsWallet.Generator = (*BIP86Generator)(nil)
 
 // NewBIP86Generator returns BIP86Generator
 func NewBIP86Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP86Generator {
+	// Create coin-specific strategy
+	coinStrategy, err := strategy.CreateCoinKeyStrategy(coinTypeCode, conf)
+	if err != nil {
+		// Panic is acceptable in factory/initialization code for unsupported configurations
+		panic(fmt.Sprintf("failed to create coin strategy for %s: %v", coinTypeCode.String(), err))
+	}
+
 	return &BIP86Generator{
-		hdKey: NewHDKey(PurposeTypeBIP86, coinTypeCode, conf),
+		hdKey: NewHDKey(PurposeTypeBIP86, coinTypeCode, conf, coinStrategy),
 	}
 }
 

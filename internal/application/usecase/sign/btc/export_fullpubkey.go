@@ -106,7 +106,11 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 
 	// Get master fingerprint once (same for all BIP purposes)
 	// Use any purpose for fingerprint calculation since it's derived from seed
-	tempHdKey := infraKey.NewHDKey(infraKey.PurposeTypeBIP44, u.coinTypeCode, u.chainConfig)
+	coinStrategy, err := infraKey.CreateCoinKeyStrategy(u.coinTypeCode, u.chainConfig)
+	if err != nil {
+		return "", fmt.Errorf("failed to create coin strategy: %w", err)
+	}
+	tempHdKey := infraKey.NewHDKey(infraKey.PurposeTypeBIP44, u.coinTypeCode, u.chainConfig, coinStrategy)
 	tempDescGenerator := infraKey.NewDescriptorGenerator(tempHdKey, u.chainConfig)
 	fingerprint, err := tempDescGenerator.GetMasterFingerprintHex(seed)
 	if err != nil {
@@ -124,8 +128,14 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 	}
 
 	for _, purpose := range purposes {
+		// Create coin-specific strategy
+		purposeStrategy, stratErr := infraKey.CreateCoinKeyStrategy(u.coinTypeCode, u.chainConfig)
+		if stratErr != nil {
+			return "", fmt.Errorf("failed to create coin strategy for purpose %v: %w", purpose, stratErr)
+		}
+
 		// Create HDKey for this BIP purpose
-		hdKey := infraKey.NewHDKey(purpose, u.coinTypeCode, u.chainConfig)
+		hdKey := infraKey.NewHDKey(purpose, u.coinTypeCode, u.chainConfig, purposeStrategy)
 
 		// Derive extended public key from seed
 		descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)

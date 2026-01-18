@@ -3,6 +3,8 @@ package key
 import (
 	"testing"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
+
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -114,7 +116,11 @@ func TestBIP86vsHDKeyEquivalence(t *testing.T) {
 	accountType := domainAccount.AccountTypeClient
 
 	bip86Gen := NewBIP86Generator(domainCoin.BTC, conf)
-	hdKey := NewHDKey(PurposeTypeBIP86, domainCoin.BTC, conf)
+
+	// Create coin strategy for HDKey
+	coinStrategy, err := strategy.CreateCoinKeyStrategy(domainCoin.BTC, conf)
+	require.NoError(t, err, "Failed to create coin strategy")
+	hdKey := NewHDKey(PurposeTypeBIP86, domainCoin.BTC, conf, coinStrategy)
 
 	keys1, err := bip86Gen.CreateKey(seed, accountType, 0, 3)
 	require.NoError(t, err)

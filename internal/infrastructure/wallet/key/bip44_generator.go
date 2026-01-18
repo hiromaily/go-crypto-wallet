@@ -1,14 +1,16 @@
 package key
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/chaincfg"
 
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
-
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
 )
 
 // BIP44Generator implements Generator interface for BIP44 (Legacy P2PKH addresses)
@@ -21,8 +23,15 @@ var _ portsWallet.Generator = (*BIP44Generator)(nil)
 
 // NewBIP44Generator returns BIP44Generator
 func NewBIP44Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP44Generator {
+	// Create coin-specific strategy
+	coinStrategy, err := strategy.CreateCoinKeyStrategy(coinTypeCode, conf)
+	if err != nil {
+		// Panic is acceptable in factory/initialization code for unsupported configurations
+		panic(fmt.Sprintf("failed to create coin strategy for %s: %v", coinTypeCode.String(), err))
+	}
+
 	return &BIP44Generator{
-		hdKey: NewHDKey(PurposeTypeBIP44, coinTypeCode, conf),
+		hdKey: NewHDKey(PurposeTypeBIP44, coinTypeCode, conf, coinStrategy),
 	}
 }
 

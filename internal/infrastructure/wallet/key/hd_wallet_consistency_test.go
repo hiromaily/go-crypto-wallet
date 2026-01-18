@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
+
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,8 +72,12 @@ func testBitcoinConsistency(
 	t *testing.T, seed []byte, conf *chaincfg.Params, coinType domainCoin.CoinTypeCode,
 ) {
 	t.Helper()
+	// Create coin strategy
+	coinStrategy, err := strategy.CreateCoinKeyStrategy(coinType, conf)
+	require.NoError(t, err, "Failed to create coin strategy")
+
 	// Create HD wallet instance
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coinType, conf)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coinType, conf, coinStrategy)
 
 	// Test account types that are commonly used
 	accountTypes := []struct {
@@ -192,7 +198,12 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	seed := bip39.NewSeed(mnemonic, "")
 
 	t.Run("Mainnet_Client_Account", func(t *testing.T) {
-		hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
+		// Create coin strategy
+		coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.MainNetParams)
+		if stratErr != nil {
+			t.Fatalf("Failed to create coin strategy: %v", stratErr)
+		}
+		hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams, coinStrategy)
 		keys, err := hdKey.CreateKey(seed, domainAccount.AccountTypeClient, 0, 3)
 		require.NoError(t, err)
 		require.Len(t, keys, 3)
@@ -239,7 +250,12 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	// For now, the mainnet client account test above provides sufficient regression coverage
 	/*
 		t.Run("Mainnet_Deposit_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
+			// Create coin strategy
+			coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.MainNetParams)
+			if stratErr != nil {
+				t.Fatalf("Failed to create coin strategy: %v", stratErr)
+			}
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams, coinStrategy)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeDeposit, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -276,7 +292,12 @@ func TestHDWalletKnownVectors(t *testing.T) {
 		})
 
 		t.Run("Testnet_Client_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.TestNet3Params)
+			// Create coin strategy
+			coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.TestNet3Params)
+			if stratErr != nil {
+				t.Fatalf("Failed to create coin strategy: %v", stratErr)
+			}
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.TestNet3Params, coinStrategy)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -321,7 +342,12 @@ func TestHDWalletMultipleIndices(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
+	// Create coin strategy
+	coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.MainNetParams)
+	if stratErr != nil {
+		t.Fatalf("Failed to create coin strategy: %v", stratErr)
+	}
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams, coinStrategy)
 
 	// Generate keys in different batches and verify consistency
 	t.Run("Batch_Consistency", func(t *testing.T) {
@@ -366,7 +392,12 @@ func TestHDWalletAuthAccounts(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
+	// Create coin strategy
+	coinStrategy, stratErr := strategy.CreateCoinKeyStrategy(domainCoin.BTC, &chaincfg.MainNetParams)
+	if stratErr != nil {
+		t.Fatalf("Failed to create coin strategy: %v", stratErr)
+	}
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams, coinStrategy)
 
 	// Test multiple auth accounts
 	authAccounts := []domainAccount.AccountType{
