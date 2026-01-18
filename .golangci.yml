@@ -260,6 +260,11 @@ linters:
         linters:
           - gocyclo
         path: internal/infrastructure/wallet/key/descriptor_test\.go
+      # Exclude key generation from gocyclo (BTC/BCH/ETH key generation has many coin-specific paths)
+      - text: "cyclomatic complexity .* of func `\\(\\*HDKey\\).createKeysWithIndex`"
+        linters:
+          - gocyclo
+        path: internal/infrastructure/wallet/key/hd_wallet\.go
 
     # Exclude files from all linters.
     paths:

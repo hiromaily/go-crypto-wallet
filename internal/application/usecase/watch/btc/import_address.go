@@ -211,6 +211,52 @@ func (u *importAddressUseCase) importLegacyAddress(
 	rescan bool,
 	handleRecoverableError func(error, string, domainAccount.AccountType) bool,
 ) (bool, error) {
+	// For BCH P2PKH single-sig addresses, use ImportMulti with pubkey to make UTXOs solvable
+	if u.btcClient.CoinTypeCode() == domainCoin.BCH && addrFmt.FullPublicKey != "" {
+		logger.Debug("importing pubkey with address for BCH using ImportMulti",
+			"pubkey", addrFmt.FullPublicKey,
+			"address", targetAddr,
+			"account", addrFmt.AccountType.String())
+
+		// Set timestamp based on rescan parameter:
+		// - rescan=true: Use 0 to rescan from beginning
+		// - rescan=false: Use "now" to only watch new transactions
+		timestamp := "now"
+		if rescan {
+			timestamp = "0"
+		}
+
+		requests := []dtobtc.ImportMultiRequest{
+			{
+				ScriptPubKey: map[string]string{"address": targetAddr},
+				Timestamp:    timestamp,
+				PubKeys:      []string{addrFmt.FullPublicKey},
+				WatchOnly:    true,
+				Label:        addrFmt.AccountType.String(),
+			},
+		}
+
+		responses, err := u.btcClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: rescan})
+		if err != nil {
+			return false, fmt.Errorf("failed to call ImportMulti for BCH address %s: %w", targetAddr, err)
+		}
+
+		if len(responses) == 0 || !responses[0].Success {
+			errMsg := "unknown error"
+			if len(responses) > 0 && responses[0].Error != nil {
+				errMsg = responses[0].Error.Message
+			}
+			// Check if error is recoverable using helper
+			if handleRecoverableError(fmt.Errorf("%s", errMsg), targetAddr, addrFmt.AccountType) {
+				return false, nil // Address already exists, skip
+			}
+			return false, fmt.Errorf("failed to import BCH address %s: %s", targetAddr, errMsg)
+		}
+
+		return true, nil
+	}
+
+	// For BTC or other cases, use legacy ImportAddressWithLabel
 	err := u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), rescan)
 	if err != nil {
 		// Check if error is recoverable using helper

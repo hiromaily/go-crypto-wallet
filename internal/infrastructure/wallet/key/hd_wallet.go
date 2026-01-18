@@ -289,7 +289,7 @@ func (k *HDKey) createKeysWithIndex(
 		}
 
 		switch k.coinTypeCode {
-		case domainCoin.BTC, domainCoin.BCH:
+		case domainCoin.BTC:
 			// WIF　(compressed: true) => bitcoin core expresses compressed address
 			var wif *btcutil.WIF
 			wif, loopErr = btcutil.NewWIF(privateKey, k.conf, true)
@@ -321,6 +321,35 @@ func (k *HDKey) createKeysWithIndex(
 				TaprootAddr:    taprootAddr.EncodeAddress(),
 				FullPubKey:     getFullPubKey(privateKey, true),
 				RedeemScript:   redeemScript,
+			}
+
+		case domainCoin.BCH:
+			// WIF　(compressed: true) => bitcoin core expresses compressed address
+			var wif *btcutil.WIF
+			wif, loopErr = btcutil.NewWIF(privateKey, k.conf, true)
+			if loopErr != nil {
+				return nil, loopErr
+			}
+
+			// BCH only supports P2PKH (no SegWit, Bech32, or Taproot)
+			// Use blank identifier for unused return values (SegWit-related fields)
+			var strP2PKHAddr string
+			strP2PKHAddr, _, _, _, loopErr = k.btcAddrs(wif, privateKey)
+			if loopErr != nil {
+				return nil, loopErr
+			}
+
+			// BCH: Set SegWit-related fields to empty
+			// Note: strP2SHSegWitAddr and redeemScript should already be empty from btcAddrs() for BCH,
+			// but we explicitly set them here for clarity
+			walletKeys[i] = domainKey.WalletKey{
+				WIF:            wif.String(),
+				P2PKHAddr:      strP2PKHAddr,
+				P2SHSegWitAddr: "", // BCH doesn't support SegWit
+				Bech32Addr:     "", // BCH doesn't support Bech32
+				TaprootAddr:    "", // BCH doesn't support Taproot
+				FullPubKey:     getFullPubKey(privateKey, true),
+				RedeemScript:   "", // BCH single-sig doesn't use redeem scripts
 			}
 
 		case domainCoin.ETH:
@@ -387,17 +416,27 @@ func (k *HDKey) btcAddrs(
 		return "", "", nil, "", err
 	}
 
-	// P2SH-SegWit address
-	strP2SHSegWitAddr, redeemScript, err := k.getP2SHSegWitAddr(privKey)
-	if err != nil {
-		return "", "", nil, "", err
-	}
+	// P2SH-SegWit and Bech32 addresses are only for BTC (not BCH)
+	// BCH does not support SegWit, so skip these for BCH
+	var strP2SHSegWitAddr string
+	var redeemScript string
+	var bech32Addr *btcutil.AddressWitnessPubKeyHash
 
-	// Bech32 address
-	bech32Addr, err := k.getBech32Addr(wif)
-	if err != nil {
-		return "", "", nil, "", err
+	if k.coinTypeCode == domainCoin.BTC {
+		// P2SH-SegWit address
+		strP2SHSegWitAddr, redeemScript, err = k.getP2SHSegWitAddr(privKey)
+		if err != nil {
+			return "", "", nil, "", err
+		}
+
+		// Bech32 address
+		bech32Addr, err = k.getBech32Addr(wif)
+		if err != nil {
+			return "", "", nil, "", err
+		}
 	}
+	// For BCH: strP2SHSegWitAddr, redeemScript, and bech32Addr remain empty
+
 	return strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, nil
 }
 
@@ -526,6 +565,9 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		}
 		return btcAddress.String(), strRedeemScript, nil
 	case domainCoin.BCH:
+		// Note: This should not be called for BCH since BCH doesn't support SegWit
+		// BCH address generation is kept here for backward compatibility, but the caller
+		// should check coinTypeCode and skip calling this function for BCH
 		bchAddress, addrErr := bchutil.NewCashAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
 			return "", "", fmt.Errorf("fail to call bchaddr.NewCashAddressScriptHash(): %w", addrErr)
