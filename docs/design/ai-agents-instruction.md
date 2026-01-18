@@ -322,7 +322,7 @@ fix-issue command (simple interface)
 
 ## Related Documents
 
-- [AGENTS.md](../../AGENTS.md) - Entry point for all agents
+- [AGENTS.md](../../../AGENTS.md) - Entry point for all agents
 - [Task Classification](../standards/task-classification.md) - SSOT for labels
 - [label-context-mapping](../../.claude/skills/label-context-mapping/SKILL.md) - Mapping skill
 - [Commands Documentation](../commands/README.md) - Command reference

@@ -34,7 +34,7 @@ fix-issue command
 | Reference | Purpose |
 |-----------|---------|
 | [label-context-mapping](../skills/label-context-mapping/SKILL.md) | Label → Skill/Context mapping |
-| [task-classification.md](../../docs/standards/task-classification.md) | SSOT for label definitions |
+| [task-classification.md](../../../docs/standards/task-classification.md) | SSOT for label definitions |
 
 ## Example
 

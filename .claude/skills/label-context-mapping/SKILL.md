@@ -33,7 +33,7 @@ Central mapping from GitHub labels to Skills and Context documents.
 | Label | Skill | Verification |
 |-------|-------|--------------|
 | `lang:go` | `go-development` | `make go-lint && make tidy && make check-build && make gotest` |
-| `lang:typescript` | `typescript-development` | `yarn lint && yarn test` or `npm run lint-js && npm run fmt` |
+| `lang:typescript` | `typescript-development` | `npm run lint && npm run build && npm test` |
 | `lang:solidity` | `solidity-development` | `truffle compile && truffle test` |
 
 ### Scope Labels → Skills
