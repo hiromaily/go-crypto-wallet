@@ -31,8 +31,8 @@ func NewXRPDetailTxInputRepositorySqlc(
 	}
 }
 
-// convertToXRPDetailTx converts sqlcgen.XRPDetailTx to domain.XRPDetailTx entity
-func convertToXRPDetailTx(sqlcTx *sqlcgen.XRPDetailTx) (*domainXrp.XRPDetailTx, error) {
+// convertToXRPDetailTx converts sqlcgen.XrpDetailTx to domain.XRPDetailTx entity
+func convertToXRPDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XRPDetailTx, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(int8(sqlcTx.CurrentTxType))
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
@@ -72,9 +72,9 @@ func convertToXRPDetailTx(sqlcTx *sqlcgen.XRPDetailTx) (*domainXrp.XRPDetailTx, 
 	return tx, nil
 }
 
-// convertFromXRPDetailTx converts domain.XRPDetailTx entity to sqlcgen.XRPDetailTx
-func convertFromXRPDetailTx(tx *domainXrp.XRPDetailTx) *sqlcgen.XRPDetailTx {
-	sqlcTx := &sqlcgen.XRPDetailTx{
+// convertFromXRPDetailTx converts domain.XRPDetailTx entity to sqlcgen.XrpDetailTx
+func convertFromXRPDetailTx(tx *domainXrp.XRPDetailTx) *sqlcgen.XrpDetailTx {
+	sqlcTx := &sqlcgen.XrpDetailTx{
 		ID:                    tx.ID,
 		TxID:                  tx.TxID,
 		Uuid:                  tx.UUID,

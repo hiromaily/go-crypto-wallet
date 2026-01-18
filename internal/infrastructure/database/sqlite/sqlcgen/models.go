@@ -116,7 +116,7 @@ type EthAccountKey struct {
 	UpdatedAt     sql.NullString
 }
 
-type ETHDetailTx struct {
+type EthDetailTx struct {
 	ID                int64
 	TxID              int64
 	Uuid              string
@@ -189,7 +189,7 @@ type XrpAccountKey struct {
 	UpdatedAt        sql.NullString
 }
 
-type XRPDetailTx struct {
+type XrpDetailTx struct {
 	ID                    int64
 	TxID                  int64
 	Uuid                  string

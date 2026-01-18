@@ -31,8 +31,8 @@ func NewETHDetailTXInputRepositorySqlc(
 	}
 }
 
-// convertToETHDetailTx converts sqlcgen.ETHDetailTx to domain.ETHDetailTx entity
-func convertToETHDetailTx(sqlcTx *sqlcgen.ETHDetailTx) (*domainEth.ETHDetailTx, error) {
+// convertToETHDetailTx converts sqlcgen.EthDetailTx to domain.ETHDetailTx entity
+func convertToETHDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.ETHDetailTx, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(int8(sqlcTx.CurrentTxType))
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
@@ -73,9 +73,9 @@ func convertToETHDetailTx(sqlcTx *sqlcgen.ETHDetailTx) (*domainEth.ETHDetailTx, 
 	return tx, nil
 }
 
-// convertFromETHDetailTx converts domain.ETHDetailTx entity to sqlcgen.ETHDetailTx
-func convertFromETHDetailTx(tx *domainEth.ETHDetailTx) *sqlcgen.ETHDetailTx {
-	sqlcTx := &sqlcgen.ETHDetailTx{
+// convertFromETHDetailTx converts domain.ETHDetailTx entity to sqlcgen.EthDetailTx
+func convertFromETHDetailTx(tx *domainEth.ETHDetailTx) *sqlcgen.EthDetailTx {
+	sqlcTx := &sqlcgen.EthDetailTx{
 		ID:              tx.ID,
 		TxID:            tx.TxID,
 		Uuid:            tx.UUID,

@@ -10,12 +10,15 @@ import (
 	"database/sql"
 )
 
-const getEthAccountKeyByAddress = `-- name: GetEthAccountKeyByAddress :one
-SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at FROM eth_account_key WHERE address = ? LIMIT 1
+const getETHAccountKeyByAddress = `-- name: GetETHAccountKeyByAddress :one
+SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at
+FROM eth_account_key
+WHERE address = ?
+LIMIT 1
 `
 
-func (q *Queries) GetEthAccountKeyByAddress(ctx context.Context, address string) (EthAccountKey, error) {
-	row := q.db.QueryRowContext(ctx, getEthAccountKeyByAddress, address)
+func (q *Queries) GetETHAccountKeyByAddress(ctx context.Context, address string) (EthAccountKey, error) {
+	row := q.db.QueryRowContext(ctx, getETHAccountKeyByAddress, address)
 	var i EthAccountKey
 	err := row.Scan(
 		&i.ID,
@@ -30,17 +33,20 @@ func (q *Queries) GetEthAccountKeyByAddress(ctx context.Context, address string)
 	return i, err
 }
 
-const getEthAccountKeysByAddrStatus = `-- name: GetEthAccountKeysByAddrStatus :many
-SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at FROM eth_account_key WHERE account = ? AND addr_status = ?
+const getETHAccountKeysByAddrStatus = `-- name: GetETHAccountKeysByAddrStatus :many
+SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at
+FROM eth_account_key
+WHERE account = ?
+  AND addr_status = ?
 `
 
-type GetEthAccountKeysByAddrStatusParams struct {
+type GetETHAccountKeysByAddrStatusParams struct {
 	Account    EthAccountKeyAccount
 	AddrStatus int8
 }
 
-func (q *Queries) GetEthAccountKeysByAddrStatus(ctx context.Context, arg GetEthAccountKeysByAddrStatusParams) ([]EthAccountKey, error) {
-	rows, err := q.db.QueryContext(ctx, getEthAccountKeysByAddrStatus, arg.Account, arg.AddrStatus)
+func (q *Queries) GetETHAccountKeysByAddrStatus(ctx context.Context, arg GetETHAccountKeysByAddrStatusParams) ([]EthAccountKey, error) {
+	rows, err := q.db.QueryContext(ctx, getETHAccountKeysByAddrStatus, arg.Account, arg.AddrStatus)
 	if err != nil {
 		return nil, err
 	}
@@ -71,25 +77,30 @@ func (q *Queries) GetEthAccountKeysByAddrStatus(ctx context.Context, arg GetEthA
 	return items, nil
 }
 
-const getMaxEthAccountKeyIndex = `-- name: GetMaxEthAccountKeyIndex :one
-
-SELECT COALESCE(MAX(idx), 0) as max_idx FROM eth_account_key WHERE account = ?
+const getMaxETHAccountKeyIndex = `-- name: GetMaxETHAccountKeyIndex :one
+SELECT COALESCE(MAX(idx), 0) as max_idx
+FROM eth_account_key
+WHERE account = ?
 `
 
 // ETH Account Key Queries
-func (q *Queries) GetMaxEthAccountKeyIndex(ctx context.Context, account EthAccountKeyAccount) (interface{}, error) {
-	row := q.db.QueryRowContext(ctx, getMaxEthAccountKeyIndex, account)
+func (q *Queries) GetMaxETHAccountKeyIndex(ctx context.Context, account EthAccountKeyAccount) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getMaxETHAccountKeyIndex, account)
 	var max_idx interface{}
 	err := row.Scan(&max_idx)
 	return max_idx, err
 }
 
-const getOneEthAccountKeyByMaxID = `-- name: GetOneEthAccountKeyByMaxID :one
-SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at FROM eth_account_key WHERE account = ? ORDER BY id DESC LIMIT 1
+const getOneETHAccountKeyByMaxID = `-- name: GetOneETHAccountKeyByMaxID :one
+SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at
+FROM eth_account_key
+WHERE account = ?
+ORDER BY id DESC
+LIMIT 1
 `
 
-func (q *Queries) GetOneEthAccountKeyByMaxID(ctx context.Context, account EthAccountKeyAccount) (EthAccountKey, error) {
-	row := q.db.QueryRowContext(ctx, getOneEthAccountKeyByMaxID, account)
+func (q *Queries) GetOneETHAccountKeyByMaxID(ctx context.Context, account EthAccountKeyAccount) (EthAccountKey, error) {
+	row := q.db.QueryRowContext(ctx, getOneETHAccountKeyByMaxID, account)
 	var i EthAccountKey
 	err := row.Scan(
 		&i.ID,
@@ -104,13 +115,19 @@ func (q *Queries) GetOneEthAccountKeyByMaxID(ctx context.Context, account EthAcc
 	return i, err
 }
 
-const insertEthAccountKey = `-- name: InsertEthAccountKey :execresult
+const insertETHAccountKey = `-- name: InsertETHAccountKey :execresult
 INSERT INTO eth_account_key (
-  account, address, full_public_key, private_key, idx, addr_status
-) VALUES (?, ?, ?, ?, ?, ?)
+    account,
+    address,
+    full_public_key,
+    private_key,
+    idx,
+    addr_status
+  )
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
-type InsertEthAccountKeyParams struct {
+type InsertETHAccountKeyParams struct {
 	Account       EthAccountKeyAccount
 	Address       string
 	FullPublicKey string
@@ -119,8 +136,8 @@ type InsertEthAccountKeyParams struct {
 	AddrStatus    int8
 }
 
-func (q *Queries) InsertEthAccountKey(ctx context.Context, arg InsertEthAccountKeyParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertEthAccountKey,
+func (q *Queries) InsertETHAccountKey(ctx context.Context, arg InsertETHAccountKeyParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertETHAccountKey,
 		arg.Account,
 		arg.Address,
 		arg.FullPublicKey,
@@ -130,20 +147,23 @@ func (q *Queries) InsertEthAccountKey(ctx context.Context, arg InsertEthAccountK
 	)
 }
 
-const updateEthAccountKeyAddrStatus = `-- name: UpdateEthAccountKeyAddrStatus :execresult
-UPDATE eth_account_key SET addr_status = ?, updated_at = ?
-WHERE account = ? AND private_key = ?
+const updateETHAccountKeyAddrStatus = `-- name: UpdateETHAccountKeyAddrStatus :execresult
+UPDATE eth_account_key
+SET addr_status = ?,
+  updated_at = ?
+WHERE account = ?
+  AND private_key = ?
 `
 
-type UpdateEthAccountKeyAddrStatusParams struct {
+type UpdateETHAccountKeyAddrStatusParams struct {
 	AddrStatus int8
 	UpdatedAt  sql.NullTime
 	Account    EthAccountKeyAccount
 	PrivateKey string
 }
 
-func (q *Queries) UpdateEthAccountKeyAddrStatus(ctx context.Context, arg UpdateEthAccountKeyAddrStatusParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateEthAccountKeyAddrStatus,
+func (q *Queries) UpdateETHAccountKeyAddrStatus(ctx context.Context, arg UpdateETHAccountKeyAddrStatusParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateETHAccountKeyAddrStatus,
 		arg.AddrStatus,
 		arg.UpdatedAt,
 		arg.Account,

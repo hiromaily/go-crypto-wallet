@@ -13,8 +13,9 @@ import (
 const getXRPDetailTxBlobList = `-- name: GetXRPDetailTxBlobList :many
 SELECT xrp_detail_tx.tx_blob
 FROM xrp_detail_tx
-INNER JOIN tx ON tx.id = xrp_detail_tx.tx_id
-WHERE tx.coin = ? AND xrp_detail_tx.current_tx_type = ?
+  INNER JOIN tx ON tx.id = xrp_detail_tx.tx_id
+WHERE tx.coin = ?
+  AND xrp_detail_tx.current_tx_type = ?
 `
 
 type GetXRPDetailTxBlobListParams struct {
@@ -46,13 +47,14 @@ func (q *Queries) GetXRPDetailTxBlobList(ctx context.Context, arg GetXRPDetailTx
 }
 
 const getXRPDetailTxByID = `-- name: GetXRPDetailTxByID :one
-SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, xrp_tx_type, fee, flags, last_ledger_sequence, sequence, signing_pubkey, txn_signature, hash, earliest_ledger_version, signed_tx_id, tx_blob, sent_updated_at FROM xrp_detail_tx
+SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, xrp_tx_type, fee, flags, last_ledger_sequence, sequence, signing_pubkey, txn_signature, hash, earliest_ledger_version, signed_tx_id, tx_blob, sent_updated_at
+FROM xrp_detail_tx
 WHERE id = ?
 `
 
-func (q *Queries) GetXRPDetailTxByID(ctx context.Context, id int64) (XRPDetailTx, error) {
+func (q *Queries) GetXRPDetailTxByID(ctx context.Context, id int64) (XrpDetailTx, error) {
 	row := q.db.QueryRowContext(ctx, getXRPDetailTxByID, id)
-	var i XRPDetailTx
+	var i XrpDetailTx
 	err := row.Scan(
 		&i.ID,
 		&i.TxID,
@@ -80,19 +82,20 @@ func (q *Queries) GetXRPDetailTxByID(ctx context.Context, id int64) (XRPDetailTx
 }
 
 const getXRPDetailTxsByTxID = `-- name: GetXRPDetailTxsByTxID :many
-SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, xrp_tx_type, fee, flags, last_ledger_sequence, sequence, signing_pubkey, txn_signature, hash, earliest_ledger_version, signed_tx_id, tx_blob, sent_updated_at FROM xrp_detail_tx
+SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, xrp_tx_type, fee, flags, last_ledger_sequence, sequence, signing_pubkey, txn_signature, hash, earliest_ledger_version, signed_tx_id, tx_blob, sent_updated_at
+FROM xrp_detail_tx
 WHERE tx_id = ?
 `
 
-func (q *Queries) GetXRPDetailTxsByTxID(ctx context.Context, txID int64) ([]XRPDetailTx, error) {
+func (q *Queries) GetXRPDetailTxsByTxID(ctx context.Context, txID int64) ([]XrpDetailTx, error) {
 	rows, err := q.db.QueryContext(ctx, getXRPDetailTxsByTxID, txID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []XRPDetailTx
+	var items []XrpDetailTx
 	for rows.Next() {
-		var i XRPDetailTx
+		var i XrpDetailTx
 		if err := rows.Scan(
 			&i.ID,
 			&i.TxID,
@@ -131,11 +134,49 @@ func (q *Queries) GetXRPDetailTxsByTxID(ctx context.Context, txID int64) ([]XRPD
 
 const insertXRPDetailTx = `-- name: InsertXRPDetailTx :execresult
 INSERT INTO xrp_detail_tx (
-  tx_id, uuid, current_tx_type, sender_account, sender_address,
-  receiver_account, receiver_address, amount, xrp_tx_type, fee,
-  flags, last_ledger_sequence, sequence, signing_pubkey, txn_signature,
-  hash, earliest_ledger_version, signed_tx_id, tx_blob, sent_updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    tx_id,
+    uuid,
+    current_tx_type,
+    sender_account,
+    sender_address,
+    receiver_account,
+    receiver_address,
+    amount,
+    xrp_tx_type,
+    fee,
+    flags,
+    last_ledger_sequence,
+    sequence,
+    signing_pubkey,
+    txn_signature,
+    hash,
+    earliest_ledger_version,
+    signed_tx_id,
+    tx_blob,
+    sent_updated_at
+  )
+VALUES (
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?
+  )
 `
 
 type InsertXRPDetailTxParams struct {
@@ -188,8 +229,11 @@ func (q *Queries) InsertXRPDetailTx(ctx context.Context, arg InsertXRPDetailTxPa
 
 const updateXRPDetailTxAfterSent = `-- name: UpdateXRPDetailTxAfterSent :execresult
 UPDATE xrp_detail_tx
-SET current_tx_type = ?, signed_tx_id = ?, tx_blob = ?,
-    earliest_ledger_version = ?, sent_updated_at = ?
+SET current_tx_type = ?,
+  signed_tx_id = ?,
+  tx_blob = ?,
+  earliest_ledger_version = ?,
+  sent_updated_at = ?
 WHERE uuid = ?
 `
 

@@ -15,9 +15,9 @@ SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receive
 WHERE id = ?
 `
 
-func (q *Queries) GetETHDetailTXByID(ctx context.Context, id int64) (ETHDetailTx, error) {
+func (q *Queries) GetETHDetailTXByID(ctx context.Context, id int64) (EthDetailTx, error) {
 	row := q.db.QueryRowContext(ctx, getETHDetailTXByID, id)
-	var i ETHDetailTx
+	var i EthDetailTx
 	err := row.Scan(
 		&i.ID,
 		&i.TxID,
@@ -80,15 +80,15 @@ SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receive
 WHERE tx_id = ?
 `
 
-func (q *Queries) GetETHDetailTXsByTxID(ctx context.Context, txID int64) ([]ETHDetailTx, error) {
+func (q *Queries) GetETHDetailTXsByTxID(ctx context.Context, txID int64) ([]EthDetailTx, error) {
 	rows, err := q.db.QueryContext(ctx, getETHDetailTXsByTxID, txID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ETHDetailTx
+	var items []EthDetailTx
 	for rows.Next() {
-		var i ETHDetailTx
+		var i EthDetailTx
 		if err := rows.Scan(
 			&i.ID,
 			&i.TxID,
