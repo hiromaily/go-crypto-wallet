@@ -2,7 +2,9 @@
 
 Rules for automatically loading appropriate context documents when receiving a task.
 
-**SSOT Reference**: See [Task Classification](../docs/standards/task-classification.md) for the authoritative definition of labels and task types.
+**Key Skill**: Use [label-context-mapping](../skills/label-context-mapping/SKILL.md) for all label → skill/context mappings.
+
+**SSOT Reference**: See [Task Classification](../../docs/standards/task-classification.md) for the authoritative definition of labels and task types.
 
 ## Target Files
 
@@ -19,25 +21,20 @@ This rule applies when editing the following file types:
 
 ## Task Detection Priority
 
-1. **GitHub Issue Labels** (if working on an issue) → Highest priority
+1. **GitHub Issue Labels** (if working on an issue) → Use `label-context-mapping` skill
 2. **Explicit User Specification** → Second priority
-3. **Keyword Detection** → Fallback
+3. **Keyword Detection** → Fallback (see below)
 
-## Task Type from GitHub Labels
+## Label-Based Context Loading
 
-When working on a GitHub Issue, use labels to determine task type:
+When working on a GitHub Issue, load the `label-context-mapping` skill to determine:
+- Type label → Context document
+- Lang/Scope label → Development skill
+- Chain label → Chain context
 
-| Label | Task Type | Context File |
-|-------|-----------|--------------|
-| `bug` | bug | `docs/task-contexts/bug-fix.md` |
-| `enhancement` | feature-add | `docs/task-contexts/feature-add.md` |
-| `refactoring` | refactoring | `docs/task-contexts/refactoring.md` |
-| `documentation` | documentation | `docs/task-contexts/documentation.md` |
-| `security` | security | `docs/task-contexts/security.md` |
-| `technical-debt` | refactoring | `docs/task-contexts/refactoring.md` |
-| `test` | test | `docs/task-contexts/test.md` |
+See [label-context-mapping](../skills/label-context-mapping/SKILL.md) for complete mappings.
 
-## Task Type Detection (Keyword Fallback)
+## Keyword-Based Detection (Fallback)
 
 If no GitHub labels are available, determine task type from keywords:
 
@@ -208,7 +205,8 @@ Task Received
 
 ## Related Documents
 
-- [Task-Oriented Context Management](../../docs/task-oriented-context.md)
-- [Task Contexts](../../docs/task-contexts/README.md)
-- [Verification Matrix](../../docs/task-contexts/verification.md)
+- [label-context-mapping](../skills/label-context-mapping/SKILL.md) - Label → Skill/Context mapping
+- [Task Classification SSOT](../../docs/standards/task-classification.md) - Label definitions
+- [Task Contexts](../../docs/task-contexts/README.md) - Context file details
+- [Verification Matrix](../../docs/task-contexts/verification.md) - Verification commands
 - [AGENTS.md](../../AGENTS.md) - Project-wide guidelines

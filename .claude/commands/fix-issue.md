@@ -1,48 +1,40 @@
 # Fix Issue #{issue_number}
 
-Work on a GitHub issue using Skills determined by its labels.
+Work on a GitHub issue using the label-context-mapping skill.
 
 ## Process
 
 1. **Fetch issue**: `gh issue view {issue_number}`
-2. **Check labels**: Identify `lang:*` or `scope:*` label
-3. **Load Skills**:
+2. **Load label-context-mapping skill**: Determine what to load from labels
+   - See [label-context-mapping](../skills/label-context-mapping/SKILL.md)
+3. **Load determined Skills and Contexts**:
    - Always: `git-workflow`
-   - Based on label: See mapping below
-4. **Follow Skill workflows**
+   - Based on labels: Skills and contexts from mapping
+4. **Follow loaded skill workflows**
 
-## Label → Skill Mapping
+## How It Works
 
-### Language Labels
+```
+fix-issue command
+    │
+    ├─ 1. Fetch issue labels
+    │
+    ├─ 2. Load label-context-mapping skill
+    │      │
+    │      ├─ Type label → Context document
+    │      ├─ Lang/Scope label → Development skill
+    │      ├─ Chain label → Chain context
+    │      └─ Test label → Verification commands
+    │
+    └─ 3. Execute workflow from loaded skills + contexts
+```
 
-| Label | Skill |
-|-------|-------|
-| `lang:go` | `go-development` |
-| `lang:typescript` | `typescript-development` |
-| `lang:solidity` | `solidity-development` |
+## Key References
 
-### Scope Labels
-
-| Label | Skill |
-|-------|-------|
-| `scope:docs` | `docs-update` |
-| `scope:devops` | `devops` |
-| `scope:scripts` | `shell-scripts` |
-| `scope:makefile` | `makefile-update` |
-| `scope:db` | `db-migration` (+ `go-development` for SQLC) |
-
-## Verification by Skill
-
-| Skill | Commands |
-|-------|----------|
-| `go-development` | `make go-lint && make tidy && make check-build && make gotest` |
-| `typescript-development` | `npm run lint && npm run build && npm test` |
-| `solidity-development` | `truffle compile && truffle test` |
-| `docs-update` | Check markdown formatting |
-| `devops` | Validate YAML, test workflow |
-| `shell-scripts` | `make shfmt` |
-| `makefile-update` | `make mk-lint` |
-| `db-migration` | `make atlas-lint && make sqlc && make check-build` |
+| Reference | Purpose |
+|-----------|---------|
+| [label-context-mapping](../skills/label-context-mapping/SKILL.md) | Label → Skill/Context mapping |
+| [task-classification.md](../../docs/standards/task-classification.md) | SSOT for label definitions |
 
 ## Example
 
@@ -51,9 +43,12 @@ Work on a GitHub issue using Skills determined by its labels.
 ```
 
 If issue #123 has labels `bug`, `lang:go`, `chain:btc`:
-1. Load `git-workflow` Skill
-2. Load `go-development` Skill
-3. Create branch from main
-4. Implement fix
-5. Run Go verification commands
-6. Commit and create PR
+
+1. Load `label-context-mapping` skill
+2. Mapping determines:
+   - Context: `docs/task-contexts/bug-fix.md` (from `bug`)
+   - Skill: `go-development` (from `lang:go`)
+   - Chain context: `docs/task-contexts/chains/btc.md` (from `chain:btc`)
+3. Load `git-workflow` skill (always)
+4. Load `go-development` skill
+5. Follow workflow: branch → implement → verify → commit → PR
