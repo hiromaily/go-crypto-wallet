@@ -78,6 +78,7 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 |------|----------|
 | Project overview | [llms.txt](llms.txt) |
 | Architecture design | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| **AI Agent instruction design** | [docs/design/ai-agents-instruction.md](docs/design/ai-agents-instruction.md) |
 | **Standards (SSOT)** | [docs/standards/](docs/standards/) |
 | Coding conventions | [docs/standards/coding-conventions.md](docs/standards/coding-conventions.md) |
 | Security | [docs/standards/security.md](docs/standards/security.md) |
