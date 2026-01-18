@@ -38,9 +38,9 @@ type signTransactionUseCase struct {
 	multisigAccount *domainAccount.MultisigConfig
 }
 
-// NewSignTransactionUseCase creates a new BCH SignTransactionUseCase.
+// NewBCHSignTransactionUseCase creates a new BCH SignTransactionUseCase.
 // BCH uses Raw TX Hex with SIGHASH_FORKID instead of PSBT.
-func NewSignTransactionUseCase(
+func NewBCHSignTransactionUseCase(
 	bch apibtc.BCHer,
 	accountKeyRepo repocold.BTCAccountKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,

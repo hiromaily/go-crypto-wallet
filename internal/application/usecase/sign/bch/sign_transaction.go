@@ -43,7 +43,7 @@ type signTransactionUseCase struct {
 
 // NewSignTransactionUseCase creates a new BCH SignTransactionUseCase for Sign wallet.
 // BCH uses Raw TX Hex with SIGHASH_FORKID instead of PSBT.
-func NewSignTransactionUseCase(
+func NewBCHSignTransactionUseCase(
 	bchAPI apibtc.BCHer,
 	accountKeyRepo repocold.BTCAccountKeyRepositorier,
 	authKeyRepo repocold.AuthAccountKeyRepositorier,

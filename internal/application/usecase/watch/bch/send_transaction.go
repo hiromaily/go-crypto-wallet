@@ -31,8 +31,8 @@ type sendTransactionUseCase struct {
 	txFileRepo   file.TransactionFileRepositorier
 }
 
-// NewSendTransactionUseCase creates a new BCH SendTransactionUseCase.
-func NewSendTransactionUseCase(
+// NewBCHSendTransactionUseCase creates a new BCH SendTransactionUseCase.
+func NewBCHSendTransactionUseCase(
 	bchClient apibtc.BCHer,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.BTCTxRepositorier,

@@ -53,9 +53,9 @@ type createTransactionUseCase struct {
 	txDBHelper      *shared.TxDBHelper
 }
 
-// NewCreateTransactionUseCase creates a new BCH CreateTransactionUseCase.
+// NewCreateBCHTransactionUseCase creates a new BCH CreateTransactionUseCase.
 // BCH uses Raw Transaction Hex format instead of PSBT.
-func NewCreateTransactionUseCase(
+func NewCreateBCHTransactionUseCase(
 	bchClient apibtc.BCHer,
 	dbConn *sql.DB,
 	addrRepo repowatch.AddressRepositorier,
