@@ -1,5 +1,20 @@
 # Release targets
 # See docs/guidelines/release.md for detailed release documentation
+#
+# Quick Example (releasing v6.0.4):
+# ---------------------------------
+# Step 1: Create and push tag
+#   $ make release-tag VERSION=v6.0.4
+#   Creating tag v6.0.4...
+#   Pushing tag v6.0.4 to origin...
+#   ✅ Tag v6.0.4 pushed. GitHub Actions will now run GoReleaser.
+#
+# Step 2: Monitor GitHub Actions
+#   https://github.com/hiromaily/go-crypto-wallet/actions/workflows/release.yml
+#
+# Or manually:
+#   $ git tag -a v6.0.4 -m "Release v6.0.4"
+#   $ git push origin v6.0.4
 
 .PHONY: release-check
 release-check: ## Check release prerequisites
