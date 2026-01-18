@@ -8,9 +8,10 @@
 #   make btc-e2e-ci P=<pattern>        # Run with --non-interactive flag
 #   make btc-e2e-cleanup P=<pattern>   # Run with --cleanup flag
 #
-# Database:
-#   DB=sqlite (default) - Use local SQLite files (faster, no Docker DB)
-#   DB=mysql            - Use Docker MySQL container
+# Database Backend:
+#   DB=sqlite (default) - Use local SQLite files with SQLC schemas
+#                         Faster, no Docker MySQL container needed
+#   DB=mysql            - Use Docker MySQL container with Atlas migrations
 #
 # Patterns:
 #   1:  P2PKH Single-sig
@@ -106,12 +107,13 @@ btc-e2e-help:
 	@echo "  P=11 : P2TR Tapscript M-of-N"
 	@echo ""
 	@echo "Database Backend:"
-	@echo "  DB=sqlite (default) - Local SQLite files (faster, no Docker DB)"
-	@echo "  DB=mysql            - Docker MySQL container"
+	@echo "  DB=sqlite (default) - Local SQLite files with SQLC schemas"
+	@echo "                        No Docker MySQL container needed (faster)"
+	@echo "  DB=mysql            - Docker MySQL container with Atlas migrations"
 	@echo ""
 	@echo "Usage:"
-	@echo "  make btc-e2e P=<pattern>              # Run E2E test (SQLite)"
-	@echo "  make btc-e2e-reset P=<pattern>        # Run with --reset flag"
+	@echo "  make btc-e2e P=<pattern>              # Run E2E test (SQLite default)"
+	@echo "  make btc-e2e-reset P=<pattern>        # Run with --reset flag (recommended)"
 	@echo "  make btc-e2e-reset P=1 DB=mysql       # Run with MySQL"
 	@echo "  make btc-e2e-verbose P=<pattern>      # Run with --verbose flag"
 	@echo "  make btc-e2e-ci P=<pattern>           # Run with --non-interactive flag"

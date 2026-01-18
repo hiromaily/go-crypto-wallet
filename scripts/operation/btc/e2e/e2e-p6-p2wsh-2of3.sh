@@ -16,6 +16,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
+# E2E Pattern identifier for database file naming
+# Format: watch-e2e-p6-{timestamp}.db, keygen-e2e-p6-{timestamp}.db, etc.
+export E2E_PATTERN="p6"
+
 # Source BTC common utilities
 # shellcheck source=../btc_common.sh
 source "${SCRIPT_DIR}/../btc_common.sh"
