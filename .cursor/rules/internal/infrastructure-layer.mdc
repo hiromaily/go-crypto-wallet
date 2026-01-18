@@ -1,0 +1,116 @@
+---
+description: Infrastructure Layer Rules
+globs: ["internal/infrastructure/**/*.go"]
+alwaysApply: false
+---
+
+
+# Infrastructure Layer Rules
+
+## Overview
+
+Rules for working with the Infrastructure layer (`internal/infrastructure/`).
+This layer contains **implementations only** - no interface definitions.
+
+## Structure
+
+```
+internal/infrastructure/
+├── api/            # External API clients
+│   ├── btc/        # Bitcoin (btc/, bch/, mocks/, testutil/)
+│   ├── eth/        # Ethereum (eth/, erc20/, ethtx/, testutil/)
+│   └── xrp/        # Ripple (xrp/, mocks/, testutil/)
+├── contract/       # Smart contract utilities
+├── database/       # SQLC-generated code (DO NOT EDIT)
+│   ├── mysql/sqlcgen/
+│   └── sqlite/sqlcgen/
+├── repository/     # Repository implementations
+│   ├── cold/       # Cold wallet (mysql/, sqlite/, mocks/)
+│   └── watch/      # Watch wallet (mysql/, sqlite/, mocks/)
+├── storage/        # File storage implementations
+│   └── file/       # address/, descriptor/, fullpubkey/, transaction/
+└── wallet/key/     # Key generation (BIP32, BIP44, BIP84, BIP86, HD wallet)
+```
+
+## Critical Principle
+
+**Infrastructure contains NO interface definitions.**
+
+All interfaces are defined in `application/ports/`. Infrastructure packages only implement them.
+
+## Auto-Generated Files (DO NOT EDIT)
+
+```
+internal/infrastructure/database/mysql/sqlcgen/*.go
+internal/infrastructure/database/sqlite/sqlcgen/*.go
+internal/infrastructure/api/xrp/xrp/*.pb.go
+```
+
+## Type Conversion Pattern
+
+Infrastructure must convert between infrastructure types and domain entities:
+
+```go
+// Private conversion functions in repository
+func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error) {
+    return &domainAddress.Address{
+        ID:            sqlcAddr.ID,
+        CoinTypeCode:  domainCoin.CoinTypeCode(sqlcAddr.Coin),
+        AccountType:   domainAccount.AccountType(sqlcAddr.Account),
+        WalletAddress: sqlcAddr.WalletAddress,
+    }, nil
+}
+
+// Public method returns domain entity
+func (r *AddressRepositorySqlc) GetAll(...) ([]*domainAddress.Address, error) {
+    rows, err := r.queries.GetAllAddresses(...)
+    if err != nil {
+        return nil, fmt.Errorf("failed to call GetAllAddresses(): %w", err)
+    }
+    // Convert each row to domain entity
+    return convertAll(rows, convertToAddress)
+}
+```
+
+## Allowed/Forbidden
+
+| Action | Allowed |
+|--------|---------|
+| Import from `domain/` | Yes |
+| Import from `application/ports/` | Yes (to implement interfaces) |
+| Import from `application/dto/` | Yes (for API type mapping) |
+| Import from `application/usecase/` | No |
+| Import from `interface-adapters/` | No |
+| Define interfaces | No (define in `application/ports/`) |
+| Contain business logic | No (delegate to domain) |
+
+## Implementation Guidelines
+
+### Repository Implementations
+
+- Implement interfaces from `application/ports/repository/`
+- Use private `convertToXxx` and `convertFromXxx` functions
+- Return domain entities, not sqlcgen types
+
+### API Client Implementations
+
+- Implement interfaces from `application/ports/api/`
+- Map API responses to application DTOs
+- Handle network errors and retries
+
+### Storage Implementations
+
+- Implement interfaces from `application/ports/file/`
+- Handle file I/O errors properly
+
+## Testing
+
+- Use mocks in `mocks/` directories for unit tests
+- Use `testutil/` for test helpers
+- Integration tests with real systems when needed
+
+## Related Rules
+
+- @.claude/rules/internal/clean-architecture.md - Layer dependencies
+- @.claude/rules/go/repository.md - Repository pattern details
+- @.claude/rules/go/di.md - Dependency injection

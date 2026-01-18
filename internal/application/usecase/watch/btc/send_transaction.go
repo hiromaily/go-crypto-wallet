@@ -1,3 +1,14 @@
+// Package btc provides BTC-specific transaction sending use cases.
+//
+// WARNING: This file is for BTC (Bitcoin) ONLY.
+// If cointype is BCH (Bitcoin Cash), DO NOT modify this file.
+// Use the BCH-specific implementation instead:
+//
+//	internal/application/usecase/watch/bch/send_transaction.go
+//
+// Key differences:
+//   - BTC: Processes PSBT files, uses PSBTFinalizer interface
+//   - BCH: Processes raw hex files directly
 package btc
 
 import (

@@ -1,0 +1,63 @@
+---
+paths: ["internal/**/*.go"]
+---
+
+# Clean Architecture Rules
+
+## Overview
+
+Rules for maintaining Clean Architecture layer separation in the `internal/` directory.
+
+## Dependency Direction
+
+**CRITICAL**: Dependencies must flow in ONE direction only:
+
+```text
+Interface Adapters → Application Layer → Domain Layer ← Infrastructure Layer
+```
+
+### Layer Dependencies
+
+| Layer | Can Import From | Cannot Import From |
+|-------|-----------------|-------------------|
+| Domain | (none) | application, infrastructure, interface-adapters |
+| Application | domain | infrastructure, interface-adapters |
+| Infrastructure | domain, application/ports, application/dto | application/usecase, interface-adapters |
+| Interface Adapters | application | domain, infrastructure |
+
+## Violations to Avoid
+
+- Domain importing from infrastructure
+- Application importing from infrastructure directly (use interfaces)
+- Application importing from interface-adapters
+- Infrastructure importing from application/usecase
+- Interface-adapters importing from infrastructure or domain directly
+
+## Quick Checks
+
+When editing files, verify imports follow the dependency direction:
+
+```go
+// internal/domain/**/*.go
+// ❌ NEVER import these:
+import "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/..."
+import "github.com/hiromaily/go-crypto-wallet/internal/application/..."
+
+// internal/application/usecase/**/*.go
+// ❌ NEVER import these:
+import "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/..."
+import "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/..."
+
+// internal/interface-adapters/**/*.go
+// ❌ NEVER import these:
+import "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/..."
+import "github.com/hiromaily/go-crypto-wallet/internal/domain/..."
+```
+
+## Related Rules
+
+- @.claude/rules/internal/domain-layer.md - Domain layer specifics
+- @.claude/rules/internal/application-layer.md - Application layer specifics
+- @.claude/rules/internal/infrastructure-layer.md - Infrastructure layer specifics
+- @.claude/rules/internal/interface-adapters-layer.md - Interface adapters layer specifics
+- @.claude/rules/go/conventions.md - Go conventions
