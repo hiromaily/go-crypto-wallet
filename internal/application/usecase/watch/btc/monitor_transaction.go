@@ -14,8 +14,16 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// monitorTxBTCClient defines the minimal interface needed for BTC transaction monitoring.
+// This follows the Interface Segregation Principle - depend only on methods actually used.
+type monitorTxBTCClient interface {
+	apibtc.ChainConfigProvider // ConfirmationBlock
+	apibtc.BalanceChecker      // GetBalanceByAccount
+	apibtc.TransactionMonitor  // GetTransactionByTxID
+}
+
 type monitorTransactionUseCase struct {
-	btcClient   apibtc.Bitcoiner
+	btcClient   monitorTxBTCClient
 	dbConn      *sql.DB
 	txRepo      repowatch.BTCTxRepositorier
 	txInputRepo repowatch.TxInputRepositorier

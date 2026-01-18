@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/btcsuite/btcd/wire"
+
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -14,8 +16,17 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// sendTxBTCClient defines the minimal interface needed for BTC transaction sending.
+// This follows the Interface Segregation Principle - depend only on methods actually used.
+type sendTxBTCClient interface {
+	apibtc.TransactionSender
+	apibtc.PSBTFinalizer
+	// ToHex is needed to convert extracted transaction to hex for broadcast
+	ToHex(tx *wire.MsgTx) (string, error)
+}
+
 type sendTransactionUseCase struct {
-	btcClient    apibtc.Bitcoiner
+	btcClient    sendTxBTCClient
 	addrRepo     repowatch.AddressRepositorier
 	txRepo       repowatch.BTCTxRepositorier
 	txOutputRepo repowatch.TxOutputRepositorier
