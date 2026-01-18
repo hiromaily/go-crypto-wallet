@@ -15,20 +15,20 @@ import (
 // BTCAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
 type BTCAccountKeyRepositorier interface {
 	GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*domainBitcoin.BTCAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-	) ([]*domainBitcoin.BtcAccountKey, error)
-	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*domainBitcoin.BtcAccountKey, error)
-	InsertBulk(items []*domainBitcoin.BtcAccountKey) error
+	) ([]*domainBitcoin.BTCAccountKey, error)
+	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*domainBitcoin.BTCAccountKey, error)
+	InsertBulk(items []*domainBitcoin.BTCAccountKey) error
 	UpdateAddr(
 		accountType domainAccount.AccountType, addr, keyAddress string,
 	) (int64, error)
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, strWIFs []string,
 	) (int64, error)
-	UpdateMultisigAddr(accountType domainAccount.AccountType, item *domainBitcoin.BtcAccountKey) (int64, error)
-	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*domainBitcoin.BtcAccountKey) (int64, error)
+	UpdateMultisigAddr(accountType domainAccount.AccountType, item *domainBitcoin.BTCAccountKey) (int64, error)
+	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*domainBitcoin.BTCAccountKey) (int64, error)
 }
 
 // ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH

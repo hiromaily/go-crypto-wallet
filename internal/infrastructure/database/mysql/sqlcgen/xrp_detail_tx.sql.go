@@ -10,20 +10,20 @@ import (
 	"database/sql"
 )
 
-const getXrpDetailTxBlobList = `-- name: GetXrpDetailTxBlobList :many
+const getXRPDetailTxBlobList = `-- name: GetXRPDetailTxBlobList :many
 SELECT xrp_detail_tx.tx_blob
 FROM xrp_detail_tx
 INNER JOIN tx ON tx.id = xrp_detail_tx.tx_id
 WHERE tx.coin = ? AND xrp_detail_tx.current_tx_type = ?
 `
 
-type GetXrpDetailTxBlobListParams struct {
+type GetXRPDetailTxBlobListParams struct {
 	Coin          TxCoin
 	CurrentTxType int8
 }
 
-func (q *Queries) GetXrpDetailTxBlobList(ctx context.Context, arg GetXrpDetailTxBlobListParams) ([]string, error) {
-	rows, err := q.db.QueryContext(ctx, getXrpDetailTxBlobList, arg.Coin, arg.CurrentTxType)
+func (q *Queries) GetXRPDetailTxBlobList(ctx context.Context, arg GetXRPDetailTxBlobListParams) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getXRPDetailTxBlobList, arg.Coin, arg.CurrentTxType)
 	if err != nil {
 		return nil, err
 	}
@@ -45,14 +45,14 @@ func (q *Queries) GetXrpDetailTxBlobList(ctx context.Context, arg GetXrpDetailTx
 	return items, nil
 }
 
-const getXrpDetailTxByID = `-- name: GetXrpDetailTxByID :one
+const getXRPDetailTxByID = `-- name: GetXRPDetailTxByID :one
 SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, xrp_tx_type, fee, flags, last_ledger_sequence, sequence, signing_pubkey, txn_signature, hash, earliest_ledger_version, signed_tx_id, tx_blob, sent_updated_at FROM xrp_detail_tx
 WHERE id = ?
 `
 
-func (q *Queries) GetXrpDetailTxByID(ctx context.Context, id int64) (XrpDetailTx, error) {
-	row := q.db.QueryRowContext(ctx, getXrpDetailTxByID, id)
-	var i XrpDetailTx
+func (q *Queries) GetXRPDetailTxByID(ctx context.Context, id int64) (XRPDetailTx, error) {
+	row := q.db.QueryRowContext(ctx, getXRPDetailTxByID, id)
+	var i XRPDetailTx
 	err := row.Scan(
 		&i.ID,
 		&i.TxID,
@@ -79,20 +79,20 @@ func (q *Queries) GetXrpDetailTxByID(ctx context.Context, id int64) (XrpDetailTx
 	return i, err
 }
 
-const getXrpDetailTxsByTxID = `-- name: GetXrpDetailTxsByTxID :many
+const getXRPDetailTxsByTxID = `-- name: GetXRPDetailTxsByTxID :many
 SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, xrp_tx_type, fee, flags, last_ledger_sequence, sequence, signing_pubkey, txn_signature, hash, earliest_ledger_version, signed_tx_id, tx_blob, sent_updated_at FROM xrp_detail_tx
 WHERE tx_id = ?
 `
 
-func (q *Queries) GetXrpDetailTxsByTxID(ctx context.Context, txID int64) ([]XrpDetailTx, error) {
-	rows, err := q.db.QueryContext(ctx, getXrpDetailTxsByTxID, txID)
+func (q *Queries) GetXRPDetailTxsByTxID(ctx context.Context, txID int64) ([]XRPDetailTx, error) {
+	rows, err := q.db.QueryContext(ctx, getXRPDetailTxsByTxID, txID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []XrpDetailTx
+	var items []XRPDetailTx
 	for rows.Next() {
-		var i XrpDetailTx
+		var i XRPDetailTx
 		if err := rows.Scan(
 			&i.ID,
 			&i.TxID,
@@ -129,7 +129,7 @@ func (q *Queries) GetXrpDetailTxsByTxID(ctx context.Context, txID int64) ([]XrpD
 	return items, nil
 }
 
-const insertXrpDetailTx = `-- name: InsertXrpDetailTx :execresult
+const insertXRPDetailTx = `-- name: InsertXRPDetailTx :execresult
 INSERT INTO xrp_detail_tx (
   tx_id, uuid, current_tx_type, sender_account, sender_address,
   receiver_account, receiver_address, amount, xrp_tx_type, fee,
@@ -138,7 +138,7 @@ INSERT INTO xrp_detail_tx (
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
-type InsertXrpDetailTxParams struct {
+type InsertXRPDetailTxParams struct {
 	TxID                  int64
 	Uuid                  string
 	CurrentTxType         int8
@@ -161,8 +161,8 @@ type InsertXrpDetailTxParams struct {
 	SentUpdatedAt         sql.NullTime
 }
 
-func (q *Queries) InsertXrpDetailTx(ctx context.Context, arg InsertXrpDetailTxParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertXrpDetailTx,
+func (q *Queries) InsertXRPDetailTx(ctx context.Context, arg InsertXRPDetailTxParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertXRPDetailTx,
 		arg.TxID,
 		arg.Uuid,
 		arg.CurrentTxType,
@@ -186,14 +186,14 @@ func (q *Queries) InsertXrpDetailTx(ctx context.Context, arg InsertXrpDetailTxPa
 	)
 }
 
-const updateXrpDetailTxAfterSent = `-- name: UpdateXrpDetailTxAfterSent :execresult
+const updateXRPDetailTxAfterSent = `-- name: UpdateXRPDetailTxAfterSent :execresult
 UPDATE xrp_detail_tx
 SET current_tx_type = ?, signed_tx_id = ?, tx_blob = ?,
     earliest_ledger_version = ?, sent_updated_at = ?
 WHERE uuid = ?
 `
 
-type UpdateXrpDetailTxAfterSentParams struct {
+type UpdateXRPDetailTxAfterSentParams struct {
 	CurrentTxType         int8
 	SignedTxID            string
 	TxBlob                string
@@ -202,8 +202,8 @@ type UpdateXrpDetailTxAfterSentParams struct {
 	Uuid                  string
 }
 
-func (q *Queries) UpdateXrpDetailTxAfterSent(ctx context.Context, arg UpdateXrpDetailTxAfterSentParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateXrpDetailTxAfterSent,
+func (q *Queries) UpdateXRPDetailTxAfterSent(ctx context.Context, arg UpdateXRPDetailTxAfterSentParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateXRPDetailTxAfterSent,
 		arg.CurrentTxType,
 		arg.SignedTxID,
 		arg.TxBlob,
@@ -213,32 +213,32 @@ func (q *Queries) UpdateXrpDetailTxAfterSent(ctx context.Context, arg UpdateXrpD
 	)
 }
 
-const updateXrpDetailTxType = `-- name: UpdateXrpDetailTxType :execresult
+const updateXRPDetailTxType = `-- name: UpdateXRPDetailTxType :execresult
 UPDATE xrp_detail_tx
 SET current_tx_type = ?
 WHERE id = ?
 `
 
-type UpdateXrpDetailTxTypeParams struct {
+type UpdateXRPDetailTxTypeParams struct {
 	CurrentTxType int8
 	ID            int64
 }
 
-func (q *Queries) UpdateXrpDetailTxType(ctx context.Context, arg UpdateXrpDetailTxTypeParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateXrpDetailTxType, arg.CurrentTxType, arg.ID)
+func (q *Queries) UpdateXRPDetailTxType(ctx context.Context, arg UpdateXRPDetailTxTypeParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateXRPDetailTxType, arg.CurrentTxType, arg.ID)
 }
 
-const updateXrpDetailTxTypeBySentHash = `-- name: UpdateXrpDetailTxTypeBySentHash :execresult
+const updateXRPDetailTxTypeBySentHash = `-- name: UpdateXRPDetailTxTypeBySentHash :execresult
 UPDATE xrp_detail_tx
 SET current_tx_type = ?
 WHERE tx_blob = ?
 `
 
-type UpdateXrpDetailTxTypeBySentHashParams struct {
+type UpdateXRPDetailTxTypeBySentHashParams struct {
 	CurrentTxType int8
 	TxBlob        string
 }
 
-func (q *Queries) UpdateXrpDetailTxTypeBySentHash(ctx context.Context, arg UpdateXrpDetailTxTypeBySentHashParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateXrpDetailTxTypeBySentHash, arg.CurrentTxType, arg.TxBlob)
+func (q *Queries) UpdateXRPDetailTxTypeBySentHash(ctx context.Context, arg UpdateXRPDetailTxTypeBySentHashParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateXRPDetailTxTypeBySentHash, arg.CurrentTxType, arg.TxBlob)
 }

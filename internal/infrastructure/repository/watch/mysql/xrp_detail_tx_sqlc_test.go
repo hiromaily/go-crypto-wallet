@@ -22,8 +22,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// TestXrpDetailTxSqlc is integration test for XRPDetailTxInputRepositorySqlc
-func TestXrpDetailTxSqlc(t *testing.T) {
+// TestXRPDetailTxSqlc is integration test for XRPDetailTxInputRepositorySqlc
+func TestXRPDetailTxSqlc(t *testing.T) {
 	// Create XRP repositories
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/config/wallet/xrp/watch.yaml"
@@ -50,7 +50,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 
 	// Create test xrp detail tx
 	uuid := "xrp-uuid-sqlc-test"
-	xrpTx, err := domainXrp.NewXrpDetailTx(
+	xrpTx, err := domainXrp.NewXRPDetailTx(
 		txID,
 		uuid,
 		domainTx.TxTypeUnsigned,
@@ -65,7 +65,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 		12345,
 		1,
 	)
-	require.NoError(t, err, "fail to create XrpDetailTx")
+	require.NoError(t, err, "fail to create XRPDetailTx")
 	xrpTx.SigningPubkey = "pubkey-sqlc"
 
 	// Insert
@@ -150,7 +150,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTx1, err := domainXrp.NewXrpDetailTx(
+	bulkTx1, err := domainXrp.NewXRPDetailTx(
 		txID2,
 		"xrp-uuid-bulk-1",
 		domainTx.TxTypeUnsigned,
@@ -165,10 +165,10 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 		12346,
 		2,
 	)
-	require.NoError(t, err, "fail to create bulk XrpDetailTx 1")
+	require.NoError(t, err, "fail to create bulk XRPDetailTx 1")
 	bulkTx1.SigningPubkey = "pubkey-bulk-1"
 
-	bulkTx2, err := domainXrp.NewXrpDetailTx(
+	bulkTx2, err := domainXrp.NewXRPDetailTx(
 		txID2,
 		"xrp-uuid-bulk-2",
 		domainTx.TxTypeUnsigned,
@@ -183,10 +183,10 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 		12347,
 		3,
 	)
-	require.NoError(t, err, "fail to create bulk XrpDetailTx 2")
+	require.NoError(t, err, "fail to create bulk XRPDetailTx 2")
 	bulkTx2.SigningPubkey = "pubkey-bulk-2"
 
-	bulkTxs := []*domainXrp.XrpDetailTx{bulkTx1, bulkTx2}
+	bulkTxs := []*domainXrp.XRPDetailTx{bulkTx1, bulkTx2}
 
 	err = xrpDetailTxRepo.InsertBulk(bulkTxs)
 	require.NoError(t, err, "fail to call InsertBulk()")

@@ -148,10 +148,10 @@ func (*stubAccountKeyRepo) GetMaxIndex(_ context.Context, _ domainAccount.Accoun
 	return 0, nil
 }
 
-func (*stubAccountKeyRepo) GetOneMaxID(_ domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error) {
+func (*stubAccountKeyRepo) GetOneMaxID(_ domainAccount.AccountType) (*domainBitcoin.BTCAccountKey, error) {
 	// Return a mock account key with bip44 type for testing
 	// The export logic will use this key type to determine which descriptor to generate
-	return &domainBitcoin.BtcAccountKey{
+	return &domainBitcoin.BTCAccountKey{
 		ID:      1,
 		KeyType: "bip44",
 	}, nil
@@ -159,17 +159,17 @@ func (*stubAccountKeyRepo) GetOneMaxID(_ domainAccount.AccountType) (*domainBitc
 
 func (*stubAccountKeyRepo) GetAllAddrStatus(
 	_ domainAccount.AccountType, _ domainAddress.AddrStatus,
-) ([]*domainBitcoin.BtcAccountKey, error) {
+) ([]*domainBitcoin.BTCAccountKey, error) {
 	return nil, nil
 }
 
 func (*stubAccountKeyRepo) GetAllMultiAddr(
 	_ domainAccount.AccountType, _ []string,
-) ([]*domainBitcoin.BtcAccountKey, error) {
+) ([]*domainBitcoin.BTCAccountKey, error) {
 	return nil, nil
 }
 
-func (*stubAccountKeyRepo) InsertBulk(_ []*domainBitcoin.BtcAccountKey) error {
+func (*stubAccountKeyRepo) InsertBulk(_ []*domainBitcoin.BTCAccountKey) error {
 	return nil
 }
 
@@ -186,13 +186,13 @@ func (*stubAccountKeyRepo) UpdateAddrStatus(
 }
 
 func (*stubAccountKeyRepo) UpdateMultisigAddr(
-	_ domainAccount.AccountType, _ *domainBitcoin.BtcAccountKey,
+	_ domainAccount.AccountType, _ *domainBitcoin.BTCAccountKey,
 ) (int64, error) {
 	return 0, nil
 }
 
 func (*stubAccountKeyRepo) UpdateMultisigAddrs(
-	_ domainAccount.AccountType, _ []*domainBitcoin.BtcAccountKey,
+	_ domainAccount.AccountType, _ []*domainBitcoin.BTCAccountKey,
 ) (int64, error) {
 	return 0, nil
 }

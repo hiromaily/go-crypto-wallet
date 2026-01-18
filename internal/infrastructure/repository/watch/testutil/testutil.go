@@ -178,8 +178,8 @@ func NewETHDetailTXRepositorySqlc() repowatch.ETHDetailTXRepositorier {
 	return ethDetailTXRepoSqlc
 }
 
-// NewXrpDetailTxRepositorySqlc returns XRPDetailTxInputRepositorySqlc for test
-func NewXrpDetailTxRepositorySqlc() repowatch.XRPDetailTXRepositorier {
+// NewXRPDetailTxRepositorySqlc returns XRPDetailTxInputRepositorySqlc for test
+func NewXRPDetailTxRepositorySqlc() repowatch.XRPDetailTXRepositorier {
 	if xrpDetailTXRepoSqlc != nil {
 		return xrpDetailTXRepoSqlc
 	}

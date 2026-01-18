@@ -12,7 +12,7 @@ import (
 // This struct is shared between BTC and BCH use cases.
 type ParsedTx struct {
 	TxInputs       []btcjson.TransactionInput
-	TxRepoTxInputs []*domainBitcoin.BtcTxInput
+	TxRepoTxInputs []*domainBitcoin.BTCTxInput
 	PrevTxs        []dtobtc.PreviousTx
 	Addresses      []string // input, sender's address
 }

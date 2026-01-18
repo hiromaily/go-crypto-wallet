@@ -26,7 +26,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	// Insert
 	hex := "unsigned-hex-sqlc"
 	actionType := domainTx.ActionTypePayment
-	txItem := domainBitcoin.NewBtcTransaction(
+	txItem := domainBitcoin.NewBTCTransaction(
 		domainCoin.BTC,
 		actionType,
 		domainTx.TxTypeUnsigned,

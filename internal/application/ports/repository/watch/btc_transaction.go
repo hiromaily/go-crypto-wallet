@@ -7,12 +7,12 @@ import (
 
 // BTCTxRepositorier is BTCTxRepository interface
 type BTCTxRepositorier interface {
-	GetOne(id int64) (*domainBitcoin.BtcTransaction, error)
+	GetOne(id int64) (*domainBitcoin.BTCTransaction, error)
 	GetCountByUnsignedHex(actionType domainTx.ActionType, hex string) (int64, error)
 	GetTxIDBySentHash(actionType domainTx.ActionType, hash string) (int64, error)
 	GetSentHashTx(actionType domainTx.ActionType, txType domainTx.TxType) ([]string, error)
-	InsertUnsignedTx(actionType domainTx.ActionType, txItem *domainBitcoin.BtcTransaction) (int64, error)
-	Update(txItem *domainBitcoin.BtcTransaction) (int64, error)
+	InsertUnsignedTx(actionType domainTx.ActionType, txItem *domainBitcoin.BTCTransaction) (int64, error)
+	Update(txItem *domainBitcoin.BTCTransaction) (int64, error)
 	UpdateAfterTxSent(txID int64, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(actionType domainTx.ActionType, txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -21,16 +21,16 @@ type BTCTxRepositorier interface {
 
 // TxInputRepositorier is TxInputRepository interface
 type TxInputRepositorier interface {
-	GetOne(id int64) (*domainBitcoin.BtcTxInput, error)
-	GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxInput, error)
-	Insert(txItem *domainBitcoin.BtcTxInput) error
-	InsertBulk(txItems []*domainBitcoin.BtcTxInput) error
+	GetOne(id int64) (*domainBitcoin.BTCTxInput, error)
+	GetAllByTxID(id int64) ([]*domainBitcoin.BTCTxInput, error)
+	Insert(txItem *domainBitcoin.BTCTxInput) error
+	InsertBulk(txItems []*domainBitcoin.BTCTxInput) error
 }
 
 // TxOutputRepositorier is TxOutputRepository interface
 type TxOutputRepositorier interface {
-	GetOne(id int64) (*domainBitcoin.BtcTxOutput, error)
-	GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxOutput, error)
-	Insert(txItem *domainBitcoin.BtcTxOutput) error
-	InsertBulk(txItems []*domainBitcoin.BtcTxOutput) error
+	GetOne(id int64) (*domainBitcoin.BTCTxOutput, error)
+	GetAllByTxID(id int64) ([]*domainBitcoin.BTCTxOutput, error)
+	Insert(txItem *domainBitcoin.BTCTxOutput) error
+	InsertBulk(txItems []*domainBitcoin.BTCTxOutput) error
 }

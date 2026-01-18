@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// BtcTxInput represents a Bitcoin transaction input in the domain layer
-type BtcTxInput struct {
+// BTCTxInput represents a Bitcoin transaction input in the domain layer
+type BTCTxInput struct {
 	ID                 int64
 	TxID               int64
 	InputTxid          string
@@ -18,8 +18,8 @@ type BtcTxInput struct {
 	UpdatedAt          *time.Time
 }
 
-// NewBtcTxInput creates a new BtcTxInput entity
-func NewBtcTxInput(
+// NewBTCTxInput creates a new BTCTxInput entity
+func NewBTCTxInput(
 	txID int64,
 	inputTxid string,
 	inputVout uint32,
@@ -27,7 +27,7 @@ func NewBtcTxInput(
 	inputAccount string,
 	inputAmount string,
 	inputConfirmations uint64,
-) (*BtcTxInput, error) {
+) (*BTCTxInput, error) {
 	if inputTxid == "" {
 		return nil, errors.New("input txid cannot be empty")
 	}
@@ -39,7 +39,7 @@ func NewBtcTxInput(
 	}
 
 	now := time.Now()
-	return &BtcTxInput{
+	return &BTCTxInput{
 		TxID:               txID,
 		InputTxid:          inputTxid,
 		InputVout:          inputVout,

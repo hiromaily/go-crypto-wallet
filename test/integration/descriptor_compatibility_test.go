@@ -88,7 +88,7 @@ func (c bitcoinCLI) run(ctx context.Context, subCmd string, extraArgs ...string)
 	cmdArgs = append(cmdArgs, subCmd)
 	cmdArgs = append(cmdArgs, extraArgs...)
 
-	cmd := exec.CommandContext(ctx, c.bin, cmdArgs...) //nolint:gosec // G204: integration test with controlled inputs
+	cmd := exec.CommandContext(ctx, c.bin, cmdArgs...)
 	cmd.Env = os.Environ()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -134,7 +134,7 @@ func (c bitcoinCLI) deriveAddresses(ctx context.Context, descriptor string, star
 }
 
 func loadDescriptorRecords(path string) ([]descriptorRecord, error) {
-	data, err := os.ReadFile(path) //nolint:gosec
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

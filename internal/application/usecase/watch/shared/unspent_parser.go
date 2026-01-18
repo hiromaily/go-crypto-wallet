@@ -35,7 +35,7 @@ func ParseListUnspentTx(
 ) (*ParsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
-	txRepoTxInputs := make([]*domainBitcoin.BtcTxInput, 0, len(unspentList))
+	txRepoTxInputs := make([]*domainBitcoin.BTCTxInput, 0, len(unspentList))
 	prevTxs := make([]dtobtc.PreviousTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
@@ -59,7 +59,7 @@ func ParseListUnspentTx(
 			logger.Error("fail to convert input amount to decimal", "error", err)
 			continue
 		}
-		input, err := domainBitcoin.NewBtcTxInput(
+		input, err := domainBitcoin.NewBTCTxInput(
 			0, // TxID will be set later
 			txItem.TxID,
 			txItem.Vout,

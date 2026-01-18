@@ -66,7 +66,7 @@ func TestBTCAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
 
 	repo := coldsqlite.NewBTCAccountKeyRepositorySqlc(db, domainCoin.BTC)
 
-	accountKeys := []*domainBitcoin.BtcAccountKey{
+	accountKeys := []*domainBitcoin.BTCAccountKey{
 		{
 			CoinTypeCode:       domainCoin.BTC,
 			KeyType:            "bip44",
@@ -108,7 +108,7 @@ func TestBTCAccountKeyRepositorySqlc_GetMaxIndex(t *testing.T) {
 
 	repo := coldsqlite.NewBTCAccountKeyRepositorySqlc(db, domainCoin.BTC)
 
-	accountKeys := []*domainBitcoin.BtcAccountKey{
+	accountKeys := []*domainBitcoin.BTCAccountKey{
 		{
 			CoinTypeCode:       domainCoin.BTC,
 			KeyType:            "bip44",
@@ -155,7 +155,7 @@ func TestBTCAccountKeyRepositorySqlc_GetOneMaxID(t *testing.T) {
 
 	repo := coldsqlite.NewBTCAccountKeyRepositorySqlc(db, domainCoin.BTC)
 
-	accountKeys := []*domainBitcoin.BtcAccountKey{
+	accountKeys := []*domainBitcoin.BTCAccountKey{
 		{
 			CoinTypeCode:       domainCoin.BTC,
 			KeyType:            "bip44",
@@ -203,7 +203,7 @@ func TestBTCAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
 
 	repo := coldsqlite.NewBTCAccountKeyRepositorySqlc(db, domainCoin.BTC)
 
-	accountKeys := []*domainBitcoin.BtcAccountKey{
+	accountKeys := []*domainBitcoin.BTCAccountKey{
 		{
 			CoinTypeCode:       domainCoin.BTC,
 			KeyType:            "bip44",
@@ -253,7 +253,7 @@ func TestBTCAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
 
 	repo := coldsqlite.NewBTCAccountKeyRepositorySqlc(db, domainCoin.BTC)
 
-	accountKeys := []*domainBitcoin.BtcAccountKey{
+	accountKeys := []*domainBitcoin.BTCAccountKey{
 		{
 			CoinTypeCode:       domainCoin.BTC,
 			KeyType:            "bip44",
@@ -291,7 +291,7 @@ func TestBTCAccountKeyRepositorySqlc_UpdateMultisigAddr(t *testing.T) {
 
 	repo := coldsqlite.NewBTCAccountKeyRepositorySqlc(db, domainCoin.BTC)
 
-	accountKeys := []*domainBitcoin.BtcAccountKey{
+	accountKeys := []*domainBitcoin.BTCAccountKey{
 		{
 			CoinTypeCode:       domainCoin.BTC,
 			KeyType:            "bip44",
@@ -332,7 +332,7 @@ func TestBTCAccountKeyRepositorySqlc_GetAllMultiAddr(t *testing.T) {
 
 	repo := coldsqlite.NewBTCAccountKeyRepositorySqlc(db, domainCoin.BTC)
 
-	accountKeys := []*domainBitcoin.BtcAccountKey{
+	accountKeys := []*domainBitcoin.BTCAccountKey{
 		{
 			CoinTypeCode:       domainCoin.BTC,
 			KeyType:            "bip44",

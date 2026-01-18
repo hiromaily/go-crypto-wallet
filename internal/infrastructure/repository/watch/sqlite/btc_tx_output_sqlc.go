@@ -29,9 +29,9 @@ func NewBTCTxOutputRepositorySqlc(
 	}
 }
 
-// convertToBtcTxOutput converts sqlcgen.BtcTxOutput to domain.BtcTxOutput entity
-func convertToBtcTxOutput(sqlcOutput *sqlcgen.BtcTxOutput) (*domainBitcoin.BtcTxOutput, error) {
-	output := &domainBitcoin.BtcTxOutput{
+// convertToBTCTxOutput converts sqlcgen.BTCTxOutput to domain.BTCTxOutput entity
+func convertToBtcTxOutput(sqlcOutput *sqlcgen.BtcTxOutput) (*domainBitcoin.BTCTxOutput, error) {
+	output := &domainBitcoin.BTCTxOutput{
 		ID:            sqlcOutput.ID,
 		TxID:          sqlcOutput.TxID,
 		OutputAddress: sqlcOutput.OutputAddress,
@@ -51,8 +51,8 @@ func convertToBtcTxOutput(sqlcOutput *sqlcgen.BtcTxOutput) (*domainBitcoin.BtcTx
 	return output, nil
 }
 
-// convertFromBtcTxOutput converts domain.BtcTxOutput entity to sqlcgen.BtcTxOutput
-func convertFromBtcTxOutput(output *domainBitcoin.BtcTxOutput) *sqlcgen.BtcTxOutput {
+// convertFromBTCTxOutput converts domain.BTCTxOutput entity to sqlcgen.BtcTxOutput
+func convertFromBTCTxOutput(output *domainBitcoin.BTCTxOutput) *sqlcgen.BtcTxOutput {
 	sqlcOutput := &sqlcgen.BtcTxOutput{
 		ID:            output.ID,
 		TxID:          output.TxID,
@@ -74,7 +74,7 @@ func convertFromBtcTxOutput(output *domainBitcoin.BtcTxOutput) *sqlcgen.BtcTxOut
 }
 
 // GetOne get one record by ID
-func (r *TxOutputRepositorySqlc) GetOne(id int64) (*domainBitcoin.BtcTxOutput, error) {
+func (r *TxOutputRepositorySqlc) GetOne(id int64) (*domainBitcoin.BTCTxOutput, error) {
 	ctx := context.Background()
 
 	output, err := r.queries.GetBtcTxOutputByID(ctx, id)
@@ -86,7 +86,7 @@ func (r *TxOutputRepositorySqlc) GetOne(id int64) (*domainBitcoin.BtcTxOutput, e
 }
 
 // GetAllByTxID returns all records by tx ID
-func (r *TxOutputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxOutput, error) {
+func (r *TxOutputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBitcoin.BTCTxOutput, error) {
 	ctx := context.Background()
 
 	outputs, err := r.queries.GetBtcTxOutputsByTxID(ctx, id)
@@ -94,7 +94,7 @@ func (r *TxOutputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxO
 		return nil, fmt.Errorf("failed to call GetBtcTxOutputsByTxID(): %w", err)
 	}
 
-	result := make([]*domainBitcoin.BtcTxOutput, 0, len(outputs))
+	result := make([]*domainBitcoin.BTCTxOutput, 0, len(outputs))
 	for i := range outputs {
 		output, err := convertToBtcTxOutput(&outputs[i])
 		if err != nil {
@@ -107,10 +107,10 @@ func (r *TxOutputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxO
 }
 
 // Insert inserts one record
-func (r *TxOutputRepositorySqlc) Insert(txItem *domainBitcoin.BtcTxOutput) error {
+func (r *TxOutputRepositorySqlc) Insert(txItem *domainBitcoin.BTCTxOutput) error {
 	ctx := context.Background()
 
-	sqlcOutput := convertFromBtcTxOutput(txItem)
+	sqlcOutput := convertFromBTCTxOutput(txItem)
 	_, err := r.queries.InsertBtcTxOutput(ctx, sqlcgen.InsertBtcTxOutputParams{
 		TxID:          sqlcOutput.TxID,
 		OutputAddress: sqlcOutput.OutputAddress,
@@ -127,7 +127,7 @@ func (r *TxOutputRepositorySqlc) Insert(txItem *domainBitcoin.BtcTxOutput) error
 }
 
 // InsertBulk inserts multiple records
-func (r *TxOutputRepositorySqlc) InsertBulk(txItems []*domainBitcoin.BtcTxOutput) error {
+func (r *TxOutputRepositorySqlc) InsertBulk(txItems []*domainBitcoin.BTCTxOutput) error {
 	ctx := context.Background()
 
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -141,7 +141,7 @@ func (r *TxOutputRepositorySqlc) InsertBulk(txItems []*domainBitcoin.BtcTxOutput
 	qtx := r.queries.WithTx(tx)
 
 	for _, item := range txItems {
-		sqlcOutput := convertFromBtcTxOutput(item)
+		sqlcOutput := convertFromBTCTxOutput(item)
 		_, err := qtx.InsertBtcTxOutput(ctx, sqlcgen.InsertBtcTxOutputParams{
 			TxID:          sqlcOutput.TxID,
 			OutputAddress: sqlcOutput.OutputAddress,

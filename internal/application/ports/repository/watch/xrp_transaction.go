@@ -7,13 +7,13 @@ import (
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 )
 
-// XRPDetailTXRepositorier is XrpDetailTxRepository interface
+// XRPDetailTXRepositorier is XRPDetailTxRepository interface
 type XRPDetailTXRepositorier interface {
-	GetOne(id int64) (*domainXrp.XrpDetailTx, error)
-	GetAllByTxID(id int64) ([]*domainXrp.XrpDetailTx, error)
+	GetOne(id int64) (*domainXrp.XRPDetailTx, error)
+	GetAllByTxID(id int64) ([]*domainXrp.XRPDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *domainXrp.XrpDetailTx) error
-	InsertBulk(txItems []*domainXrp.XrpDetailTx) error
+	Insert(txItem *domainXrp.XRPDetailTx) error
+	InsertBulk(txItems []*domainXrp.XRPDetailTx) error
 	UpdateAfterTxSent(
 		uuid string, txType domainTx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64,
 	) (int64, error)

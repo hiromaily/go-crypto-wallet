@@ -37,23 +37,23 @@ func (_m *MockTxOutputRepositorier) EXPECT() *MockTxOutputRepositorier_Expecter 
 }
 
 // GetAllByTxID provides a mock function for the type MockTxOutputRepositorier
-func (_mock *MockTxOutputRepositorier) GetAllByTxID(id int64) ([]*bitcoin.BtcTxOutput, error) {
+func (_mock *MockTxOutputRepositorier) GetAllByTxID(id int64) ([]*bitcoin.BTCTxOutput, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllByTxID")
 	}
 
-	var r0 []*bitcoin.BtcTxOutput
+	var r0 []*bitcoin.BTCTxOutput
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) ([]*bitcoin.BtcTxOutput, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) ([]*bitcoin.BTCTxOutput, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) []*bitcoin.BtcTxOutput); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) []*bitcoin.BTCTxOutput); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*bitcoin.BtcTxOutput)
+			r0 = ret.Get(0).([]*bitcoin.BTCTxOutput)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -88,34 +88,34 @@ func (_c *MockTxOutputRepositorier_GetAllByTxID_Call) Run(run func(id int64)) *M
 	return _c
 }
 
-func (_c *MockTxOutputRepositorier_GetAllByTxID_Call) Return(btcTxOutputs []*bitcoin.BtcTxOutput, err error) *MockTxOutputRepositorier_GetAllByTxID_Call {
-	_c.Call.Return(btcTxOutputs, err)
+func (_c *MockTxOutputRepositorier_GetAllByTxID_Call) Return(bTCTxOutputs []*bitcoin.BTCTxOutput, err error) *MockTxOutputRepositorier_GetAllByTxID_Call {
+	_c.Call.Return(bTCTxOutputs, err)
 	return _c
 }
 
-func (_c *MockTxOutputRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*bitcoin.BtcTxOutput, error)) *MockTxOutputRepositorier_GetAllByTxID_Call {
+func (_c *MockTxOutputRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*bitcoin.BTCTxOutput, error)) *MockTxOutputRepositorier_GetAllByTxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetOne provides a mock function for the type MockTxOutputRepositorier
-func (_mock *MockTxOutputRepositorier) GetOne(id int64) (*bitcoin.BtcTxOutput, error) {
+func (_mock *MockTxOutputRepositorier) GetOne(id int64) (*bitcoin.BTCTxOutput, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *bitcoin.BtcTxOutput
+	var r0 *bitcoin.BTCTxOutput
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*bitcoin.BtcTxOutput, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) (*bitcoin.BTCTxOutput, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *bitcoin.BtcTxOutput); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) *bitcoin.BTCTxOutput); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*bitcoin.BtcTxOutput)
+			r0 = ret.Get(0).(*bitcoin.BTCTxOutput)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -150,18 +150,18 @@ func (_c *MockTxOutputRepositorier_GetOne_Call) Run(run func(id int64)) *MockTxO
 	return _c
 }
 
-func (_c *MockTxOutputRepositorier_GetOne_Call) Return(btcTxOutput *bitcoin.BtcTxOutput, err error) *MockTxOutputRepositorier_GetOne_Call {
-	_c.Call.Return(btcTxOutput, err)
+func (_c *MockTxOutputRepositorier_GetOne_Call) Return(bTCTxOutput *bitcoin.BTCTxOutput, err error) *MockTxOutputRepositorier_GetOne_Call {
+	_c.Call.Return(bTCTxOutput, err)
 	return _c
 }
 
-func (_c *MockTxOutputRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*bitcoin.BtcTxOutput, error)) *MockTxOutputRepositorier_GetOne_Call {
+func (_c *MockTxOutputRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*bitcoin.BTCTxOutput, error)) *MockTxOutputRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Insert provides a mock function for the type MockTxOutputRepositorier
-func (_mock *MockTxOutputRepositorier) Insert(txItem *bitcoin.BtcTxOutput) error {
+func (_mock *MockTxOutputRepositorier) Insert(txItem *bitcoin.BTCTxOutput) error {
 	ret := _mock.Called(txItem)
 
 	if len(ret) == 0 {
@@ -169,7 +169,7 @@ func (_mock *MockTxOutputRepositorier) Insert(txItem *bitcoin.BtcTxOutput) error
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*bitcoin.BtcTxOutput) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(*bitcoin.BTCTxOutput) error); ok {
 		r0 = returnFunc(txItem)
 	} else {
 		r0 = ret.Error(0)
@@ -183,16 +183,16 @@ type MockTxOutputRepositorier_Insert_Call struct {
 }
 
 // Insert is a helper method to define mock.On call
-//   - txItem *bitcoin.BtcTxOutput
+//   - txItem *bitcoin.BTCTxOutput
 func (_e *MockTxOutputRepositorier_Expecter) Insert(txItem interface{}) *MockTxOutputRepositorier_Insert_Call {
 	return &MockTxOutputRepositorier_Insert_Call{Call: _e.mock.On("Insert", txItem)}
 }
 
-func (_c *MockTxOutputRepositorier_Insert_Call) Run(run func(txItem *bitcoin.BtcTxOutput)) *MockTxOutputRepositorier_Insert_Call {
+func (_c *MockTxOutputRepositorier_Insert_Call) Run(run func(txItem *bitcoin.BTCTxOutput)) *MockTxOutputRepositorier_Insert_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *bitcoin.BtcTxOutput
+		var arg0 *bitcoin.BTCTxOutput
 		if args[0] != nil {
-			arg0 = args[0].(*bitcoin.BtcTxOutput)
+			arg0 = args[0].(*bitcoin.BTCTxOutput)
 		}
 		run(
 			arg0,
@@ -206,13 +206,13 @@ func (_c *MockTxOutputRepositorier_Insert_Call) Return(err error) *MockTxOutputR
 	return _c
 }
 
-func (_c *MockTxOutputRepositorier_Insert_Call) RunAndReturn(run func(txItem *bitcoin.BtcTxOutput) error) *MockTxOutputRepositorier_Insert_Call {
+func (_c *MockTxOutputRepositorier_Insert_Call) RunAndReturn(run func(txItem *bitcoin.BTCTxOutput) error) *MockTxOutputRepositorier_Insert_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockTxOutputRepositorier
-func (_mock *MockTxOutputRepositorier) InsertBulk(txItems []*bitcoin.BtcTxOutput) error {
+func (_mock *MockTxOutputRepositorier) InsertBulk(txItems []*bitcoin.BTCTxOutput) error {
 	ret := _mock.Called(txItems)
 
 	if len(ret) == 0 {
@@ -220,7 +220,7 @@ func (_mock *MockTxOutputRepositorier) InsertBulk(txItems []*bitcoin.BtcTxOutput
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*bitcoin.BtcTxOutput) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*bitcoin.BTCTxOutput) error); ok {
 		r0 = returnFunc(txItems)
 	} else {
 		r0 = ret.Error(0)
@@ -234,16 +234,16 @@ type MockTxOutputRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - txItems []*bitcoin.BtcTxOutput
+//   - txItems []*bitcoin.BTCTxOutput
 func (_e *MockTxOutputRepositorier_Expecter) InsertBulk(txItems interface{}) *MockTxOutputRepositorier_InsertBulk_Call {
 	return &MockTxOutputRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", txItems)}
 }
 
-func (_c *MockTxOutputRepositorier_InsertBulk_Call) Run(run func(txItems []*bitcoin.BtcTxOutput)) *MockTxOutputRepositorier_InsertBulk_Call {
+func (_c *MockTxOutputRepositorier_InsertBulk_Call) Run(run func(txItems []*bitcoin.BTCTxOutput)) *MockTxOutputRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*bitcoin.BtcTxOutput
+		var arg0 []*bitcoin.BTCTxOutput
 		if args[0] != nil {
-			arg0 = args[0].([]*bitcoin.BtcTxOutput)
+			arg0 = args[0].([]*bitcoin.BTCTxOutput)
 		}
 		run(
 			arg0,
@@ -257,7 +257,7 @@ func (_c *MockTxOutputRepositorier_InsertBulk_Call) Return(err error) *MockTxOut
 	return _c
 }
 
-func (_c *MockTxOutputRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*bitcoin.BtcTxOutput) error) *MockTxOutputRepositorier_InsertBulk_Call {
+func (_c *MockTxOutputRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*bitcoin.BTCTxOutput) error) *MockTxOutputRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }

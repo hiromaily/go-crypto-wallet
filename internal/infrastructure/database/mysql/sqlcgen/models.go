@@ -859,7 +859,7 @@ type EthAccountKey struct {
 }
 
 // table for eth transaction detail
-type EthDetailTx struct {
+type ETHDetailTx struct {
 	// ID
 	ID int64
 	// eth_tx table ID
@@ -993,7 +993,7 @@ type XrpAccountKey struct {
 }
 
 // table for xrp transaction detail
-type XrpDetailTx struct {
+type XRPDetailTx struct {
 	// ID
 	ID int64
 	// xrp_tx table ID

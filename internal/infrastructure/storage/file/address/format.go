@@ -11,8 +11,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
-// CreateLine creates line for csv from BtcAccountKey
-func CreateLine(accountKeyItem *domainBitcoin.BtcAccountKey) []string {
+// CreateLine creates line for csv from BTCAccountKey
+func CreateLine(accountKeyItem *domainBitcoin.BTCAccountKey) []string {
 	taprootAddr := ""
 	if accountKeyItem.TaprootAddress != nil {
 		taprootAddr = *accountKeyItem.TaprootAddress

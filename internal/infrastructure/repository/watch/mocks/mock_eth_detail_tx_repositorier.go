@@ -41,23 +41,23 @@ func (_m *MockETHDetailTXRepositorier) EXPECT() *MockETHDetailTXRepositorier_Exp
 }
 
 // GetAllByTxID provides a mock function for the type MockETHDetailTXRepositorier
-func (_mock *MockETHDetailTXRepositorier) GetAllByTxID(id int64) ([]*ethereum.EthDetailTx, error) {
+func (_mock *MockETHDetailTXRepositorier) GetAllByTxID(id int64) ([]*ethereum.ETHDetailTx, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllByTxID")
 	}
 
-	var r0 []*ethereum.EthDetailTx
+	var r0 []*ethereum.ETHDetailTx
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) ([]*ethereum.EthDetailTx, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) ([]*ethereum.ETHDetailTx, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) []*ethereum.EthDetailTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) []*ethereum.ETHDetailTx); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*ethereum.EthDetailTx)
+			r0 = ret.Get(0).([]*ethereum.ETHDetailTx)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -92,34 +92,34 @@ func (_c *MockETHDetailTXRepositorier_GetAllByTxID_Call) Run(run func(id int64))
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_GetAllByTxID_Call) Return(ethDetailTxs []*ethereum.EthDetailTx, err error) *MockETHDetailTXRepositorier_GetAllByTxID_Call {
-	_c.Call.Return(ethDetailTxs, err)
+func (_c *MockETHDetailTXRepositorier_GetAllByTxID_Call) Return(eTHDetailTxs []*ethereum.ETHDetailTx, err error) *MockETHDetailTXRepositorier_GetAllByTxID_Call {
+	_c.Call.Return(eTHDetailTxs, err)
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*ethereum.EthDetailTx, error)) *MockETHDetailTXRepositorier_GetAllByTxID_Call {
+func (_c *MockETHDetailTXRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*ethereum.ETHDetailTx, error)) *MockETHDetailTXRepositorier_GetAllByTxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetOne provides a mock function for the type MockETHDetailTXRepositorier
-func (_mock *MockETHDetailTXRepositorier) GetOne(id int64) (*ethereum.EthDetailTx, error) {
+func (_mock *MockETHDetailTXRepositorier) GetOne(id int64) (*ethereum.ETHDetailTx, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *ethereum.EthDetailTx
+	var r0 *ethereum.ETHDetailTx
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*ethereum.EthDetailTx, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) (*ethereum.ETHDetailTx, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *ethereum.EthDetailTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) *ethereum.ETHDetailTx); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.EthDetailTx)
+			r0 = ret.Get(0).(*ethereum.ETHDetailTx)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -154,12 +154,12 @@ func (_c *MockETHDetailTXRepositorier_GetOne_Call) Run(run func(id int64)) *Mock
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_GetOne_Call) Return(ethDetailTx *ethereum.EthDetailTx, err error) *MockETHDetailTXRepositorier_GetOne_Call {
-	_c.Call.Return(ethDetailTx, err)
+func (_c *MockETHDetailTXRepositorier_GetOne_Call) Return(eTHDetailTx *ethereum.ETHDetailTx, err error) *MockETHDetailTXRepositorier_GetOne_Call {
+	_c.Call.Return(eTHDetailTx, err)
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*ethereum.EthDetailTx, error)) *MockETHDetailTXRepositorier_GetOne_Call {
+func (_c *MockETHDetailTXRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*ethereum.ETHDetailTx, error)) *MockETHDetailTXRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -227,7 +227,7 @@ func (_c *MockETHDetailTXRepositorier_GetSentHashTx_Call) RunAndReturn(run func(
 }
 
 // Insert provides a mock function for the type MockETHDetailTXRepositorier
-func (_mock *MockETHDetailTXRepositorier) Insert(txItem *ethereum.EthDetailTx) error {
+func (_mock *MockETHDetailTXRepositorier) Insert(txItem *ethereum.ETHDetailTx) error {
 	ret := _mock.Called(txItem)
 
 	if len(ret) == 0 {
@@ -235,7 +235,7 @@ func (_mock *MockETHDetailTXRepositorier) Insert(txItem *ethereum.EthDetailTx) e
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*ethereum.EthDetailTx) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(*ethereum.ETHDetailTx) error); ok {
 		r0 = returnFunc(txItem)
 	} else {
 		r0 = ret.Error(0)
@@ -249,16 +249,16 @@ type MockETHDetailTXRepositorier_Insert_Call struct {
 }
 
 // Insert is a helper method to define mock.On call
-//   - txItem *ethereum.EthDetailTx
+//   - txItem *ethereum.ETHDetailTx
 func (_e *MockETHDetailTXRepositorier_Expecter) Insert(txItem interface{}) *MockETHDetailTXRepositorier_Insert_Call {
 	return &MockETHDetailTXRepositorier_Insert_Call{Call: _e.mock.On("Insert", txItem)}
 }
 
-func (_c *MockETHDetailTXRepositorier_Insert_Call) Run(run func(txItem *ethereum.EthDetailTx)) *MockETHDetailTXRepositorier_Insert_Call {
+func (_c *MockETHDetailTXRepositorier_Insert_Call) Run(run func(txItem *ethereum.ETHDetailTx)) *MockETHDetailTXRepositorier_Insert_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *ethereum.EthDetailTx
+		var arg0 *ethereum.ETHDetailTx
 		if args[0] != nil {
-			arg0 = args[0].(*ethereum.EthDetailTx)
+			arg0 = args[0].(*ethereum.ETHDetailTx)
 		}
 		run(
 			arg0,
@@ -272,13 +272,13 @@ func (_c *MockETHDetailTXRepositorier_Insert_Call) Return(err error) *MockETHDet
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_Insert_Call) RunAndReturn(run func(txItem *ethereum.EthDetailTx) error) *MockETHDetailTXRepositorier_Insert_Call {
+func (_c *MockETHDetailTXRepositorier_Insert_Call) RunAndReturn(run func(txItem *ethereum.ETHDetailTx) error) *MockETHDetailTXRepositorier_Insert_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockETHDetailTXRepositorier
-func (_mock *MockETHDetailTXRepositorier) InsertBulk(txItems []*ethereum.EthDetailTx) error {
+func (_mock *MockETHDetailTXRepositorier) InsertBulk(txItems []*ethereum.ETHDetailTx) error {
 	ret := _mock.Called(txItems)
 
 	if len(ret) == 0 {
@@ -286,7 +286,7 @@ func (_mock *MockETHDetailTXRepositorier) InsertBulk(txItems []*ethereum.EthDeta
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*ethereum.EthDetailTx) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*ethereum.ETHDetailTx) error); ok {
 		r0 = returnFunc(txItems)
 	} else {
 		r0 = ret.Error(0)
@@ -300,16 +300,16 @@ type MockETHDetailTXRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - txItems []*ethereum.EthDetailTx
+//   - txItems []*ethereum.ETHDetailTx
 func (_e *MockETHDetailTXRepositorier_Expecter) InsertBulk(txItems interface{}) *MockETHDetailTXRepositorier_InsertBulk_Call {
 	return &MockETHDetailTXRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", txItems)}
 }
 
-func (_c *MockETHDetailTXRepositorier_InsertBulk_Call) Run(run func(txItems []*ethereum.EthDetailTx)) *MockETHDetailTXRepositorier_InsertBulk_Call {
+func (_c *MockETHDetailTXRepositorier_InsertBulk_Call) Run(run func(txItems []*ethereum.ETHDetailTx)) *MockETHDetailTXRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*ethereum.EthDetailTx
+		var arg0 []*ethereum.ETHDetailTx
 		if args[0] != nil {
-			arg0 = args[0].([]*ethereum.EthDetailTx)
+			arg0 = args[0].([]*ethereum.ETHDetailTx)
 		}
 		run(
 			arg0,
@@ -323,7 +323,7 @@ func (_c *MockETHDetailTXRepositorier_InsertBulk_Call) Return(err error) *MockET
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*ethereum.EthDetailTx) error) *MockETHDetailTXRepositorier_InsertBulk_Call {
+func (_c *MockETHDetailTXRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*ethereum.ETHDetailTx) error) *MockETHDetailTXRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }
