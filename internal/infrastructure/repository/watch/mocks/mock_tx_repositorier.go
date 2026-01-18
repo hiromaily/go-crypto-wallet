@@ -334,7 +334,7 @@ func (_c *MockTxRepositorier_Update_Call) RunAndReturn(run func(txItem *transact
 }
 
 // WithTransaction provides a mock function for the type MockTxRepositorier
-func (_mock *MockTxRepositorier) WithTransaction(tx persistence.Transaction) watch.TxRepositorier {
+func (_mock *MockTxRepositorier) WithTransaction(tx persistence.Transaction) (watch.TxRepositorier, error) {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
@@ -342,6 +342,10 @@ func (_mock *MockTxRepositorier) WithTransaction(tx persistence.Transaction) wat
 	}
 
 	var r0 watch.TxRepositorier
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) (watch.TxRepositorier, error)); ok {
+		return returnFunc(tx)
+	}
 	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) watch.TxRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
@@ -349,7 +353,12 @@ func (_mock *MockTxRepositorier) WithTransaction(tx persistence.Transaction) wat
 			r0 = ret.Get(0).(watch.TxRepositorier)
 		}
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(persistence.Transaction) error); ok {
+		r1 = returnFunc(tx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockTxRepositorier_WithTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTransaction'
@@ -376,12 +385,12 @@ func (_c *MockTxRepositorier_WithTransaction_Call) Run(run func(tx persistence.T
 	return _c
 }
 
-func (_c *MockTxRepositorier_WithTransaction_Call) Return(txRepositorier watch.TxRepositorier) *MockTxRepositorier_WithTransaction_Call {
-	_c.Call.Return(txRepositorier)
+func (_c *MockTxRepositorier_WithTransaction_Call) Return(txRepositorier watch.TxRepositorier, err error) *MockTxRepositorier_WithTransaction_Call {
+	_c.Call.Return(txRepositorier, err)
 	return _c
 }
 
-func (_c *MockTxRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) watch.TxRepositorier) *MockTxRepositorier_WithTransaction_Call {
+func (_c *MockTxRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) (watch.TxRepositorier, error)) *MockTxRepositorier_WithTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

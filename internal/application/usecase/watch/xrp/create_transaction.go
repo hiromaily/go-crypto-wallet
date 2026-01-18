@@ -576,9 +576,18 @@ func (u *createTransactionUseCase) updateDB(
 	tx := database.NewSQLTransaction(dtx)
 
 	// Create transactional repositories that use the transaction
-	txRepoWithTx := u.txRepo.WithTransaction(tx)
-	txDetailRepoWithTx := u.txDetailRepo.WithTransaction(tx)
-	payReqRepoWithTx := u.payReqRepo.WithTransaction(tx)
+	txRepoWithTx, err := u.txRepo.WithTransaction(tx)
+	if err != nil {
+		return 0, fmt.Errorf("fail to create transactional txRepo: %w", err)
+	}
+	txDetailRepoWithTx, err := u.txDetailRepo.WithTransaction(tx)
+	if err != nil {
+		return 0, fmt.Errorf("fail to create transactional txDetailRepo: %w", err)
+	}
+	payReqRepoWithTx, err := u.payReqRepo.WithTransaction(tx)
+	if err != nil {
+		return 0, fmt.Errorf("fail to create transactional payReqRepo: %w", err)
+	}
 
 	// Insert tx
 	txID, err := txRepoWithTx.InsertUnsignedTx(targetAction)

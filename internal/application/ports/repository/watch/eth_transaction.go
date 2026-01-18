@@ -16,5 +16,5 @@ type ETHDetailTXRepositorier interface {
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
-	WithTransaction(tx persistence.Transaction) ETHDetailTXRepositorier
+	WithTransaction(tx persistence.Transaction) (ETHDetailTXRepositorier, error)
 }

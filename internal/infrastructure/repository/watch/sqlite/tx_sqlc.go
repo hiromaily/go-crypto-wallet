@@ -160,14 +160,16 @@ func (r *TxRepositorySqlc) DeleteAll() (int64, error) {
 }
 
 // WithTransaction returns a new repository instance that uses the provided transaction
-func (r *TxRepositorySqlc) WithTransaction(tx persistence.Transaction) repowatch.TxRepositorier {
+func (r *TxRepositorySqlc) WithTransaction(
+	tx persistence.Transaction,
+) (repowatch.TxRepositorier, error) {
 	sqlTx := database.UnwrapSQLTx(tx)
 	if sqlTx == nil {
-		return r // Return the same repository if transaction cannot be unwrapped
+		return nil, database.ErrUnsupportedTransaction
 	}
 	return &TxRepositorySqlc{
 		db:           r.db,
 		queries:      r.queries.WithTx(sqlTx),
 		coinTypeCode: r.coinTypeCode,
-	}
+	}, nil
 }

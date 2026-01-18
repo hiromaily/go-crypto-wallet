@@ -265,13 +265,15 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 }
 
 // WithTransaction returns a new repository instance that uses the provided transaction
-func (r *XRPDetailTxInputRepositorySqlc) WithTransaction(tx persistence.Transaction) repowatch.XRPDetailTXRepositorier {
+func (r *XRPDetailTxInputRepositorySqlc) WithTransaction(
+	tx persistence.Transaction,
+) (repowatch.XRPDetailTXRepositorier, error) {
 	sqlTx := database.UnwrapSQLTx(tx)
 	if sqlTx == nil {
-		return r // Return the same repository if transaction cannot be unwrapped
+		return nil, database.ErrUnsupportedTransaction
 	}
 	return &XRPDetailTxInputRepositorySqlc{
 		queries:      r.queries.WithTx(sqlTx),
 		coinTypeCode: r.coinTypeCode,
-	}
+	}, nil
 }

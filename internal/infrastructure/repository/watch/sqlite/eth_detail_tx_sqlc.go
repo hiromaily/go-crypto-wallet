@@ -271,14 +271,16 @@ func (r *ETHDetailTXInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 }
 
 // WithTransaction returns a new repository instance that uses the provided transaction
-func (r *ETHDetailTXInputRepositorySqlc) WithTransaction(tx persistence.Transaction) repowatch.ETHDetailTXRepositorier {
+func (r *ETHDetailTXInputRepositorySqlc) WithTransaction(
+	tx persistence.Transaction,
+) (repowatch.ETHDetailTXRepositorier, error) {
 	sqlTx := database.UnwrapSQLTx(tx)
 	if sqlTx == nil {
-		return r // Return the same repository if transaction cannot be unwrapped
+		return nil, database.ErrUnsupportedTransaction
 	}
 	return &ETHDetailTXInputRepositorySqlc{
 		db:           r.db,
 		queries:      r.queries.WithTx(sqlTx),
 		coinTypeCode: r.coinTypeCode,
-	}
+	}, nil
 }

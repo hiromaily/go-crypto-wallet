@@ -209,13 +209,13 @@ func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 // WithTransaction returns a new repository instance that uses the provided transaction
 func (r *PaymentRequestRepositorySqlc) WithTransaction(
 	tx persistence.Transaction,
-) repowatch.PaymentRequestRepositorier {
+) (repowatch.PaymentRequestRepositorier, error) {
 	sqlTx := database.UnwrapSQLTx(tx)
 	if sqlTx == nil {
-		return r // Return the same repository if transaction cannot be unwrapped
+		return nil, database.ErrUnsupportedTransaction
 	}
 	return &PaymentRequestRepositorySqlc{
 		queries:      r.queries.WithTx(sqlTx),
 		coinTypeCode: r.coinTypeCode,
-	}
+	}, nil
 }

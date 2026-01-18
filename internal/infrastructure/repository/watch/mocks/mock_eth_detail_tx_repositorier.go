@@ -538,7 +538,7 @@ func (_c *MockETHDetailTXRepositorier_UpdateTxTypeBySentHashTx_Call) RunAndRetur
 }
 
 // WithTransaction provides a mock function for the type MockETHDetailTXRepositorier
-func (_mock *MockETHDetailTXRepositorier) WithTransaction(tx persistence.Transaction) watch.ETHDetailTXRepositorier {
+func (_mock *MockETHDetailTXRepositorier) WithTransaction(tx persistence.Transaction) (watch.ETHDetailTXRepositorier, error) {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
@@ -546,6 +546,10 @@ func (_mock *MockETHDetailTXRepositorier) WithTransaction(tx persistence.Transac
 	}
 
 	var r0 watch.ETHDetailTXRepositorier
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) (watch.ETHDetailTXRepositorier, error)); ok {
+		return returnFunc(tx)
+	}
 	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) watch.ETHDetailTXRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
@@ -553,7 +557,12 @@ func (_mock *MockETHDetailTXRepositorier) WithTransaction(tx persistence.Transac
 			r0 = ret.Get(0).(watch.ETHDetailTXRepositorier)
 		}
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(persistence.Transaction) error); ok {
+		r1 = returnFunc(tx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockETHDetailTXRepositorier_WithTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTransaction'
@@ -580,12 +589,12 @@ func (_c *MockETHDetailTXRepositorier_WithTransaction_Call) Run(run func(tx pers
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_WithTransaction_Call) Return(eTHDetailTXRepositorier watch.ETHDetailTXRepositorier) *MockETHDetailTXRepositorier_WithTransaction_Call {
-	_c.Call.Return(eTHDetailTXRepositorier)
+func (_c *MockETHDetailTXRepositorier_WithTransaction_Call) Return(eTHDetailTXRepositorier watch.ETHDetailTXRepositorier, err error) *MockETHDetailTXRepositorier_WithTransaction_Call {
+	_c.Call.Return(eTHDetailTXRepositorier, err)
 	return _c
 }
 
-func (_c *MockETHDetailTXRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) watch.ETHDetailTXRepositorier) *MockETHDetailTXRepositorier_WithTransaction_Call {
+func (_c *MockETHDetailTXRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) (watch.ETHDetailTXRepositorier, error)) *MockETHDetailTXRepositorier_WithTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

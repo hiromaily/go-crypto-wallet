@@ -13,5 +13,5 @@ type PaymentRequestRepositorier interface {
 	UpdatePaymentID(paymentID int64, ids []int64) (int64, error)
 	UpdateIsDone(paymentID int64) (int64, error)
 	DeleteAll() (int64, error)
-	WithTransaction(tx persistence.Transaction) PaymentRequestRepositorier
+	WithTransaction(tx persistence.Transaction) (PaymentRequestRepositorier, error)
 }

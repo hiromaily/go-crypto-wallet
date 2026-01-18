@@ -386,7 +386,7 @@ func (_c *MockPaymentRequestRepositorier_UpdatePaymentID_Call) RunAndReturn(run 
 }
 
 // WithTransaction provides a mock function for the type MockPaymentRequestRepositorier
-func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx persistence.Transaction) watch.PaymentRequestRepositorier {
+func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx persistence.Transaction) (watch.PaymentRequestRepositorier, error) {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
@@ -394,6 +394,10 @@ func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx persistence.Tran
 	}
 
 	var r0 watch.PaymentRequestRepositorier
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) (watch.PaymentRequestRepositorier, error)); ok {
+		return returnFunc(tx)
+	}
 	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) watch.PaymentRequestRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
@@ -401,7 +405,12 @@ func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx persistence.Tran
 			r0 = ret.Get(0).(watch.PaymentRequestRepositorier)
 		}
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(persistence.Transaction) error); ok {
+		r1 = returnFunc(tx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockPaymentRequestRepositorier_WithTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTransaction'
@@ -428,12 +437,12 @@ func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Run(run func(tx p
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Return(paymentRequestRepositorier watch.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTransaction_Call {
-	_c.Call.Return(paymentRequestRepositorier)
+func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Return(paymentRequestRepositorier watch.PaymentRequestRepositorier, err error) *MockPaymentRequestRepositorier_WithTransaction_Call {
+	_c.Call.Return(paymentRequestRepositorier, err)
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) watch.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTransaction_Call {
+func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) (watch.PaymentRequestRepositorier, error)) *MockPaymentRequestRepositorier_WithTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

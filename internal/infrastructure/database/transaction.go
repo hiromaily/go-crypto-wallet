@@ -3,10 +3,14 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 )
+
+// ErrUnsupportedTransaction is returned when a transaction type is not supported.
+var ErrUnsupportedTransaction = errors.New("unsupported transaction type: expected *SQLTransaction")
 
 // Compile-time interface compliance check
 var (
@@ -98,10 +102,13 @@ func (u *SQLUnitOfWork) RunInTransaction(ctx context.Context, fn func(tx persist
 }
 
 // UnwrapSQLTx extracts the underlying *sql.Tx from a persistence.Transaction.
-// Returns nil if the transaction is not a SQLTransaction.
+// Returns nil if the transaction is nil or not a SQLTransaction.
 // This is a helper function for repository implementations.
 func UnwrapSQLTx(tx persistence.Transaction) *sql.Tx {
-	if sqlTx, ok := tx.(*SQLTransaction); ok {
+	if tx == nil {
+		return nil
+	}
+	if sqlTx, ok := tx.(*SQLTransaction); ok && sqlTx != nil {
 		return sqlTx.UnwrapTx()
 	}
 	return nil
