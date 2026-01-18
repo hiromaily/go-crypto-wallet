@@ -50,7 +50,7 @@ key_generation_phase() {
 	log_step "Key Generation Phase"
 
 	log_substep "Creating seed for keygen wallet"
-	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" create seed || {
+	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create seed || {
 		log_warn "Seed already exists or error occurred, continuing..."
 	}
 
@@ -164,11 +164,11 @@ transaction_flow_phase() {
 
 	log_substep "Signing with keygen wallet (single signature)"
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
+	tx_file_signed=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" sign signature --file "${tx_unsigned}")
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" api walletlock
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletlock
 	fi
 
 	tx_signed=$(btc_extract_file_path "$tx_file_signed")

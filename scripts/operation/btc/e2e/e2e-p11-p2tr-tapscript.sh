@@ -53,7 +53,7 @@ key_generation_phase() {
 	log_step "Key Generation Phase"
 
 	log_substep "Creating seed for keygen wallet"
-	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" create seed || {
+	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create seed || {
 		log_warn "Seed already exists, continuing..."
 	}
 
@@ -64,13 +64,13 @@ key_generation_phase() {
 
 	log_substep "Importing private keys into keygen wallet"
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 	fi
 	for account in deposit payment stored; do
 		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import privkey --account "$account"
 	done
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" api walletlock
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletlock
 	fi
 
 	log_substep "Creating seeds for sign wallets"
@@ -194,11 +194,11 @@ transaction_flow_phase() {
 	# Using standard signature as placeholder for Tapscript
 	log_substep "Signing with keygen wallet (1st Schnorr signature - placeholder)"
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
+	tx_file_signed=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" sign signature --file "${tx_unsigned}")
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" api walletlock
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletlock
 	fi
 
 	tx_signed1=$(btc_extract_file_path "$tx_file_signed")
