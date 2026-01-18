@@ -94,18 +94,20 @@ echo $WALLET_ADDRESS_TYPE  # Should be "legacy"
 
 ### Step 1: Run E2E Test
 
+**Always use Makefile targets** (build is automatic):
+
 ```bash
 # Full reset and run (recommended)
-make btc-e2e-p2-reset
+make btc-e2e-reset P=2
 
 # Or run from existing state
-./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh
+make btc-e2e P=2
 
 # With debug output
-./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh --verbose
+make btc-e2e-verbose P=2
 ```
 
-> **Note**: For build and verification commands, see common rules.
+> **Note**: Do NOT run scripts directly. Makefile includes build dependency.
 
 ### Step 2: Error Analysis
 
@@ -235,8 +237,8 @@ btc_cli "btc-watch" analyzepsbt "${psbt_hex}"
 
 ```bash
 # Stop containers only
-./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh --cleanup
+make btc-e2e-cleanup P=2
 
 # Full reset (including data)
-make btc-e2e-p2-reset
+make btc-e2e-reset P=2
 ```

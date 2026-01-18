@@ -121,11 +121,11 @@ btc-e2e-p7-reset:
 
 .PHONY: btc-e2e-p7
 btc-e2e-p7:
-	./scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh
+	make btc-e2e P=7
 
 .PHONY: btc-e2e-p7-verbose
 btc-e2e-p7-verbose:
-	./scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh --verbose
+	make btc-e2e-verbose P=7
 
 .PHONY: btc-e2e-p7-ci
 btc-e2e-p7-ci:
@@ -133,17 +133,17 @@ btc-e2e-p7-ci:
 
 .PHONY: btc-e2e-p7-cleanup
 btc-e2e-p7-cleanup:
-	./scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh --cleanup
+	make btc-e2e-cleanup P=7
 ```
 
 ### Step 3: Run E2E Test
 
 ```bash
 # Full reset and run (recommended)
-make btc-e2e-p7-reset
+make btc-e2e-reset P=7
 
 # With debug output
-./scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh --verbose
+make btc-e2e-verbose P=7
 ```
 
 > **Note**: For build and verification commands, see common rules.
@@ -406,8 +406,8 @@ Ensure script logic correctly handles the 3-of-3 requirement and doesn't skip Si
 
 ```bash
 # Stop containers only
-./scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh --cleanup
+make btc-e2e-cleanup P=7
 
 # Full reset (including data)
-make btc-e2e-p7-reset
+make btc-e2e-reset P=7
 ```

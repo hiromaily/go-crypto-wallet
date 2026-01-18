@@ -96,10 +96,10 @@ Before debugging, remember these BCH limitations:
 
 ```bash
 # Full reset and run E2E test
-./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+make bch-e2e-reset P=1
 
 # Or with verbose output
-./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset --verbose
+make bch-e2e-verbose P=1
 ```
 
 Check error message and categorize below.
@@ -251,7 +251,7 @@ grep "cut -d',' -f" scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh
 
 ```bash
 # Full reset
-./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+make bch-e2e-reset P=1
 ```
 
 ## Debug Commands
@@ -286,7 +286,7 @@ db_query "watch" "SELECT * FROM payment_request WHERE coin='bch'"
 
 ```bash
 # Run in verbose mode
-./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --verbose --reset
+make bch-e2e-verbose P=1
 
 # Check container logs
 docker logs bch-watch --tail 50
@@ -347,10 +347,10 @@ internal/application/usecase/*/btc/*descriptor*.go
 
 ```bash
 # Stop containers only
-./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --cleanup
+make bch-e2e-cleanup P=1
 
 # Full reset (including data)
-./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+make bch-e2e-reset P=1
 ```
 
 ## Known Issues

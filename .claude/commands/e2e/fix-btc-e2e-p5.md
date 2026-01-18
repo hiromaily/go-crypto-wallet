@@ -117,11 +117,11 @@ btc-e2e-p5-reset:
 
 .PHONY: btc-e2e-p5
 btc-e2e-p5:
-	./scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh
+	make btc-e2e P=5
 
 .PHONY: btc-e2e-p5-verbose
 btc-e2e-p5-verbose:
-	./scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh --verbose
+	make btc-e2e-verbose P=5
 
 .PHONY: btc-e2e-p5-ci
 btc-e2e-p5-ci:
@@ -129,17 +129,17 @@ btc-e2e-p5-ci:
 
 .PHONY: btc-e2e-p5-cleanup
 btc-e2e-p5-cleanup:
-	./scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh --cleanup
+	make btc-e2e-cleanup P=5
 ```
 
 ### Step 3: Run E2E Test
 
 ```bash
 # Full reset and run (recommended)
-make btc-e2e-p5-reset
+make btc-e2e-reset P=5
 
 # With debug output
-./scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh --verbose
+make btc-e2e-verbose P=5
 ```
 
 > **Note**: For build and verification commands, see common rules.
@@ -353,8 +353,8 @@ After creating script, update these documents:
 
 ```bash
 # Stop containers only
-./scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh --cleanup
+make btc-e2e-cleanup P=5
 
 # Full reset (including data)
-make btc-e2e-p5-reset
+make btc-e2e-reset P=5
 ```

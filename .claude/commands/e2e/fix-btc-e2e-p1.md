@@ -16,7 +16,7 @@ Fix errors in BTC E2E test (Pattern 1: P2PKH Single-sig).
 
 ## Overview
 
-This command diagnoses and fixes errors when running `make btc-e2e-p1-reset`.
+This command diagnoses and fixes errors when running `make btc-e2e-reset P=1`.
 The script already exists, so focus on identifying and fixing the root cause.
 
 ### Pattern 1 Technical Specifications
@@ -83,7 +83,7 @@ echo $WALLET_ADDRESS_TYPE  # Should be "legacy"
 
 ```bash
 # Full reset and run E2E test
-make btc-e2e-p1-reset
+make btc-e2e-reset P=1
 ```
 
 Check error message and categorize below.
@@ -249,11 +249,8 @@ db_query "watch" "SELECT * FROM payment_request WHERE coin='btc'"
 ### Log Check
 
 ```bash
-# Run in verbose mode
-make btc-e2e-p1-verbose
-
-# Or
-./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose --reset
+# Run in verbose mode (build is automatic)
+make btc-e2e-verbose P=1
 ```
 
 ## Identifying Files to Fix
@@ -292,8 +289,8 @@ make btc-e2e-p1-verbose
 
 ```bash
 # Stop containers only
-make btc-e2e-p1-cleanup
+make btc-e2e-cleanup P=1
 
 # Full reset (including data)
-make btc-e2e-p1-reset
+make btc-e2e-reset P=1
 ```

@@ -97,13 +97,13 @@ echo $WALLET_ADDRESS_TYPE  # Should be "p2sh-segwit"
 
 ```bash
 # Full reset and run (recommended)
-make btc-e2e-p8-reset
+make btc-e2e-reset P=8
 
 # Or run from existing state
-./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh
+make btc-e2e P=8
 
 # With debug output
-./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh --verbose
+make btc-e2e-verbose P=8
 ```
 
 > **Note**: For build and verification commands, see common rules.
@@ -254,8 +254,8 @@ sh(wsh(sortedmulti(3, [fp/49'/0'/0']xpub1/0/*, xpub2/0/*, xpub3/0/*)))
 
 ```bash
 # Stop containers only
-./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh --cleanup
+make btc-e2e-cleanup P=8
 
 # Full reset (including data)
-make btc-e2e-p8-reset
+make btc-e2e-reset P=8
 ```

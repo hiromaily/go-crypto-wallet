@@ -125,11 +125,11 @@ btc-e2e-p4-reset:
 
 .PHONY: btc-e2e-p4
 btc-e2e-p4:
-	./scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh
+	make btc-e2e P=4
 
 .PHONY: btc-e2e-p4-verbose
 btc-e2e-p4-verbose:
-	./scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh --verbose
+	make btc-e2e-verbose P=4
 
 .PHONY: btc-e2e-p4-ci
 btc-e2e-p4-ci:
@@ -137,17 +137,17 @@ btc-e2e-p4-ci:
 
 .PHONY: btc-e2e-p4-cleanup
 btc-e2e-p4-cleanup:
-	./scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh --cleanup
+	make btc-e2e-cleanup P=4
 ```
 
 ### Step 3: Run E2E Test
 
 ```bash
 # Full reset and run (recommended)
-make btc-e2e-p4-reset
+make btc-e2e-reset P=4
 
 # With debug output
-./scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh --verbose
+make btc-e2e-verbose P=4
 ```
 
 > **Note**: For build and verification commands, see common rules.
@@ -373,8 +373,8 @@ After creating script, update these documents:
 
 ```bash
 # Stop containers only
-./scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh --cleanup
+make btc-e2e-cleanup P=4
 
 # Full reset (including data)
-make btc-e2e-p4-reset
+make btc-e2e-reset P=4
 ```

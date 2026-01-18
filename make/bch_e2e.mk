@@ -40,23 +40,27 @@ _bch-e2e-validate:
 	fi
 
 # Run E2E test with --reset flag (recommended for fresh start)
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: bch-e2e-reset
-bch-e2e-reset: _bch-e2e-validate
+bch-e2e-reset: build-all _bch-e2e-validate
 	$(BCH_E2E_SCRIPT_PATH) --reset
 
 # Run complete E2E test
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: bch-e2e
-bch-e2e: _bch-e2e-validate
+bch-e2e: build-all _bch-e2e-validate
 	$(BCH_E2E_SCRIPT_PATH)
 
 # Run E2E test with verbose output
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: bch-e2e-verbose
-bch-e2e-verbose: _bch-e2e-validate
+bch-e2e-verbose: build-all _bch-e2e-validate
 	$(BCH_E2E_SCRIPT_PATH) --verbose
 
 # Run E2E test in non-interactive mode (for CI/CD)
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: bch-e2e-ci
-bch-e2e-ci: _bch-e2e-validate
+bch-e2e-ci: build-all _bch-e2e-validate
 	$(BCH_E2E_SCRIPT_PATH) --non-interactive
 
 # Cleanup E2E test environment

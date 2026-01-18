@@ -179,11 +179,11 @@ btc-e2e-p10-reset:
 
 .PHONY: btc-e2e-p10
 btc-e2e-p10:
-	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh
+	make btc-e2e P=10
 
 .PHONY: btc-e2e-p10-verbose
 btc-e2e-p10-verbose:
-	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --verbose
+	make btc-e2e-verbose P=10
 
 .PHONY: btc-e2e-p10-ci
 btc-e2e-p10-ci:
@@ -191,17 +191,17 @@ btc-e2e-p10-ci:
 
 .PHONY: btc-e2e-p10-cleanup
 btc-e2e-p10-cleanup:
-	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --cleanup
+	make btc-e2e-cleanup P=10
 ```
 
 ### Step 3: Run E2E Test
 
 ```bash
 # Full reset and run (recommended)
-make btc-e2e-p10-reset
+make btc-e2e-reset P=10
 
 # With debug output
-./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --verbose
+make btc-e2e-verbose P=10
 ```
 
 > **Note**: For build and verification commands, see common rules.
@@ -675,8 +675,8 @@ After creating script, update these documents:
 
 ```bash
 # Stop containers only
-./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --cleanup
+make btc-e2e-cleanup P=10
 
 # Full reset (including data)
-make btc-e2e-p10-reset
+make btc-e2e-reset P=10
 ```

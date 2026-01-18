@@ -137,10 +137,10 @@ Before debugging, remember these BCH limitations:
 
 ```bash
 # Full reset and run E2E test
-./scripts/operation/bch/e2e/e2e-p2-p2sh-2of3.sh --reset
+make bch-e2e-reset P=2
 
 # Or with verbose output
-./scripts/operation/bch/e2e/e2e-p2-p2sh-2of3.sh --reset --verbose
+make bch-e2e-verbose P=2
 ```
 
 Check error message and categorize below.
@@ -333,7 +333,7 @@ cat data/address/bch/address_payment_*.csv | head -5
 
 ```bash
 # Full reset
-./scripts/operation/bch/e2e/e2e-p2-p2sh-2of3.sh --reset
+make bch-e2e-reset P=2
 ```
 
 ## Debug Commands
@@ -371,7 +371,7 @@ db_query "keygen" "SELECT * FROM auth_fullpubkey LIMIT 5"
 
 ```bash
 # Run in verbose mode
-./scripts/operation/bch/e2e/e2e-p2-p2sh-2of3.sh --verbose --reset
+make bch-e2e-verbose P=2
 
 # Check container logs
 docker logs bch-watch --tail 50
@@ -437,10 +437,10 @@ internal/application/usecase/*/btc/*descriptor*.go
 
 ```bash
 # Stop containers only
-./scripts/operation/bch/e2e/e2e-p2-p2sh-2of3.sh --cleanup
+make bch-e2e-cleanup P=2
 
 # Full reset (including data)
-./scripts/operation/bch/e2e/e2e-p2-p2sh-2of3.sh --reset
+make bch-e2e-reset P=2
 ```
 
 ## Known Issues
