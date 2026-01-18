@@ -9,13 +9,11 @@ config/wallet/
 ├── btc/               # Bitcoin wallet configurations
 │   ├── watch.yaml     # BTC Watch-only wallet (online)
 │   ├── keygen.yaml    # BTC Keygen wallet (offline recommended)
-│   ├── sign.yaml      # BTC Sign wallet (offline recommended)
-│   ├── sign1.yaml     # Multisig signer 1
-│   └── sign2.yaml     # Multisig signer 2
+│   ├── sign1.yaml     # BTC Sign wallet 1 (offline recommended)
+│   └── sign2.yaml     # BTC Sign wallet 2 (for multisig)
 ├── bch/               # Bitcoin Cash wallet configurations
 │   ├── watch.yaml
 │   ├── keygen.yaml
-│   ├── sign.yaml
 │   ├── sign1.yaml
 │   └── sign2.yaml
 ├── eth/               # Ethereum wallet configurations
@@ -45,8 +43,8 @@ config/wallet/
 |------|---------|
 | `btc/watch.yaml` | BTC Watch-only wallet (online) |
 | `btc/keygen.yaml` | BTC Keygen wallet (offline recommended) |
-| `btc/sign.yaml` | BTC Sign wallet (offline recommended) |
-| `btc/sign1.yaml` / `btc/sign2.yaml` | Multisig signers 1/2 |
+| `btc/sign1.yaml` | BTC Sign wallet 1 (offline recommended) |
+| `btc/sign2.yaml` | BTC Sign wallet 2 (for multisig) |
 
 ### Account Config (`account/account*.yaml`)
 

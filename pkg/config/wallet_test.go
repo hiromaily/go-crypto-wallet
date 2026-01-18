@@ -44,7 +44,7 @@ func TestNewWallet(t *testing.T) {
 		},
 		{
 			name:         "BTC Sign Wallet",
-			configFile:   filepath.Join(projPath, "config/wallet/btc/sign.yaml"),
+			configFile:   filepath.Join(projPath, "config/wallet/btc/sign1.yaml"),
 			walletType:   domainWallet.WalletTypeSign,
 			coinTypeCode: domainCoin.BTC,
 			wantErr:      false,

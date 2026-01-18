@@ -111,7 +111,7 @@ bitcoin:
   network_type: testnet3
 ```
 
-**Sign Wallet** (`config/wallet/btc/sign.yaml`):
+**Sign Wallet** (`config/wallet/btc/sign1.yaml`):
 ```yaml
 address_type: taproot
 
@@ -263,7 +263,7 @@ WATCH_CONF=./config/wallet/btc/watch.yaml
 ```bash
 # Config paths
 KEYGEN_CONF=./config/wallet/btc/keygen.yaml
-SIGN_CONF=./config/wallet/btc/sign.yaml
+SIGN_CONF=./config/wallet/btc/sign1.yaml
 WATCH_CONF=./config/wallet/btc/watch.yaml
 
 # 1. Create unsigned transaction (Watch - ONLINE)

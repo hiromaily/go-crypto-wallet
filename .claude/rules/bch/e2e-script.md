@@ -154,16 +154,38 @@ db_query "keygen" "SELECT * FROM account_key LIMIT 5"
 - ✅ DO include SIGHASH_FORKID in signatures
 - ✅ DO use BIP44 derivation path with coin type 145 (mainnet) or 1 (testnet)
 
-## Build and Verification Rules
+## E2E Execution Rules
 
-### Build Before E2E Execution (Required)
+### ⚠️ MANDATORY: Always Use Makefile Targets
+
+**AI Agents and developers MUST use Makefile targets to run E2E tests.**
+Do NOT execute E2E scripts directly.
 
 ```bash
-# Build all wallet binaries
-make build-all
+# ✅ CORRECT: Use Makefile target
+make bch-e2e-reset P=1
 
-# Output: ${GOPATH}/bin/watch, keygen, sign1, sign2
+# ❌ WRONG: Do not run scripts directly
+./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
 ```
+
+### Why Makefile Targets?
+
+1. **Automatic Build**: `make bch-e2e-reset` includes `build-all` as a dependency
+   - Incremental build: only rebuilds when Go sources change
+   - No need to run `make build-all` separately
+2. **Consistent Environment**: Properly validates pattern before execution
+3. **Validated Patterns**: Validates pattern number before execution
+
+### Available Makefile Targets
+
+| Target | Description |
+|--------|-------------|
+| `make bch-e2e-reset P=N` | Fresh start with reset (recommended) |
+| `make bch-e2e P=N` | Run E2E test |
+| `make bch-e2e-verbose P=N` | Run with verbose output |
+| `make bch-e2e-ci P=N` | Run in non-interactive mode |
+| `make bch-e2e-cleanup P=N` | Cleanup only |
 
 ### Verification After Go Code Changes
 
@@ -171,11 +193,8 @@ make build-all
 # 1. Lint, build, and test
 make go-lint && make check-build && make gotest
 
-# 2. Rebuild binaries (required)
-make build-all
-
-# 3. Run E2E test (e.g., for Pattern 1)
-./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+# 2. Run E2E test (build is automatic via dependency)
+make bch-e2e-reset P=N
 ```
 
 ### Verification After Shell Script Changes

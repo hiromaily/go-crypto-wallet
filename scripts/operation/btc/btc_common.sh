@@ -586,9 +586,9 @@ btc_keygen_cmd() {
 btc_sign1_cmd() {
 	if db_is_sqlite; then
 		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN_DB_PATH}" \
-			sign "$@"
+			sign1 "$@"
 	else
-		sign "$@"
+		sign1 "$@"
 	fi
 }
 
@@ -598,9 +598,35 @@ btc_sign1_cmd() {
 btc_sign2_cmd() {
 	if db_is_sqlite; then
 		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN2_DB_PATH}" \
-			sign "$@"
+			sign2 "$@"
 	else
-		sign "$@"
+		sign2 "$@"
+	fi
+}
+
+# Generic wrapper for sign wallet commands with dynamic sign number
+# When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the appropriate sign database
+# Usage: btc_sign_cmd <sign_number> [args...]
+# Example: btc_sign_cmd 1 -c config.yaml --coin btc create seed
+#          btc_sign_cmd 2 -c config.yaml --coin btc create hdkey
+btc_sign_cmd() {
+	local sign_num="$1"
+	shift
+
+	local db_path
+	if [ "${sign_num}" = "1" ]; then
+		db_path="${SQLITE_SIGN_DB_PATH}"
+	elif [ "${sign_num}" = "2" ]; then
+		db_path="${SQLITE_SIGN2_DB_PATH}"
+	else
+		log_error "Invalid sign number provided to btc_sign_cmd: ${sign_num}"
+		return 1
+	fi
+
+	if db_is_sqlite; then
+		WALLET_DATABASE_SQLITE_PATH="${db_path}" "sign${sign_num}" "$@"
+	else
+		"sign${sign_num}" "$@"
 	fi
 }
 

@@ -73,7 +73,7 @@ key_generation_phase() {
 	log_substep "Creating seeds for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
-		"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" create seed || {
+		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" create seed || {
 			log_warn "Sign${i} seed already exists, continuing..."
 		}
 	done
@@ -81,18 +81,18 @@ key_generation_phase() {
 	log_substep "Creating HD keys for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
-		"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" create hdkey
+		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" create hdkey
 	done
 
 	log_substep "Importing private keys into sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 		fi
-		"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" import privkey
+		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" import privkey
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			"sign${i}" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletlock
+			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletlock
 		fi
 	done
 

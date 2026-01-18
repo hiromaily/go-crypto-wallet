@@ -25,3 +25,12 @@ CREATE TABLE auth_account_key (
 CREATE INDEX idx_auth_account_key_auth_account ON auth_account_key(auth_account);
 CREATE INDEX idx_auth_account_key_coin ON auth_account_key(coin);
 CREATE INDEX idx_auth_account_key_key_type ON auth_account_key(key_type);
+
+CREATE TABLE seed (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  coin TEXT NOT NULL CHECK(coin IN ('btc','bch','eth','xrp','hyt')),
+  seed TEXT NOT NULL,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_seed_coin ON seed(coin);

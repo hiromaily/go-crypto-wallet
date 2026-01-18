@@ -426,5 +426,5 @@ watch --config config/wallet/eth/watch.yaml --coin eth create deposit
 keygen --config config/wallet/btc/keygen.yaml --account-config config/wallet/account/account.yaml --coin btc create multisig --account payment
 
 # Sign wallet
-sign --config config/wallet/btc/sign.yaml --coin btc sign signature --file tx.json
+sign1 --config config/wallet/btc/sign1.yaml --coin btc sign signature --file tx.json
 ```
