@@ -77,22 +77,24 @@ func (u *SQLUnitOfWork) RunInTransaction(ctx context.Context, fn func(tx persist
 		return err
 	}
 
-	// Ensure rollback on panic or error
+	// Use committed flag to determine if rollback is needed
+	committed := false
 	defer func() {
-		if p := recover(); p != nil {
+		if !committed {
 			_ = tx.Rollback()
-			panic(p)
 		}
 	}()
 
 	if err := fn(tx); err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
-			return fmt.Errorf("rollback failed: %v (original error: %w)", rbErr, err)
-		}
 		return err
 	}
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	committed = true
+
+	return nil
 }
 
 // UnwrapSQLTx extracts the underlying *sql.Tx from a persistence.Transaction.
