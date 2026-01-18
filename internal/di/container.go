@@ -43,7 +43,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/descriptor"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
-	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	infraKeyGen "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/generator"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
 	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
@@ -709,7 +709,7 @@ func (c *container) newKeyGenerator() portsWallet.Generator {
 	}
 
 	// Use factory to create generator based on key type
-	factory := infraKey.NewFactory()
+	factory := infraKeyGen.NewFactory()
 	keyType := c.getKeyType() // Get from config or default to BIP44
 	generator, err := factory.CreateGenerator(keyType, c.conf.CoinTypeCode, chainConf)
 	if err != nil {

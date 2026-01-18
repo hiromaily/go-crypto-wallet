@@ -1,4 +1,4 @@
-package key
+package key_test
 
 import (
 	"encoding/hex"
@@ -11,6 +11,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/generator"
 )
 
 // TestBIP86IntegrationRealWalletScenario tests BIP86 with real wallet operations
@@ -53,7 +54,7 @@ func TestBIP86IntegrationRealWalletScenario(t *testing.T) {
 			t.Parallel()
 
 			// Create BIP86 generator
-			generator := NewBIP86Generator(domainCoin.BTC, scenario.network)
+			generator := generator.NewBIP86Generator(domainCoin.BTC, scenario.network)
 
 			// Generate multiple keys as would happen in a real wallet operation
 			const numKeys = 10
@@ -122,7 +123,7 @@ func TestBIP86IntegrationKeyConsistency(t *testing.T) {
 	network := &chaincfg.MainNetParams
 	accountType := domainAccount.AccountTypeClient
 
-	generator := NewBIP86Generator(domainCoin.BTC, network)
+	generator := generator.NewBIP86Generator(domainCoin.BTC, network)
 
 	// Generate keys multiple times
 	const iterations = 5
@@ -161,7 +162,7 @@ func TestBIP86IntegrationMultipleAccounts(t *testing.T) {
 	seed := make([]byte, 32)
 	copy(seed, []byte("multi-account test seed for bip86"))
 	network := &chaincfg.MainNetParams
-	generator := NewBIP86Generator(domainCoin.BTC, network)
+	generator := generator.NewBIP86Generator(domainCoin.BTC, network)
 
 	accounts := []struct {
 		accountType domainAccount.AccountType
@@ -241,7 +242,7 @@ func TestBIP86IntegrationAddressValidation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			generator := NewBIP86Generator(domainCoin.BTC, tt.network)
+			generator := generator.NewBIP86Generator(domainCoin.BTC, tt.network)
 			keys, err := generator.CreateKey(seed, domainAccount.AccountTypeClient, 0, 1)
 			require.NoError(t, err)
 			require.Len(t, keys, 1)

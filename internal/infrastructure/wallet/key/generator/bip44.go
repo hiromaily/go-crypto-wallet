@@ -1,4 +1,4 @@
-package key
+package generator
 
 import (
 	"fmt"
@@ -10,19 +10,20 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
 )
 
-// BIP49Generator implements Generator interface for BIP49 (P2SH-SegWit addresses)
-type BIP49Generator struct {
-	hdKey *HDKey
+// BIP44Generator implements Generator interface for BIP44 (Legacy P2PKH addresses)
+type BIP44Generator struct {
+	hdKey *infraKey.HDKey
 }
 
 // Compile-time check that generator implements Generator interface
-var _ portsWallet.Generator = (*BIP49Generator)(nil)
+var _ portsWallet.Generator = (*BIP44Generator)(nil)
 
-// NewBIP49Generator returns BIP49Generator
-func NewBIP49Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP49Generator {
+// NewBIP44Generator returns BIP44Generator
+func NewBIP44Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP44Generator {
 	// Create coin-specific strategy
 	coinStrategy, err := strategy.CreateCoinKeyStrategy(coinTypeCode, conf)
 	if err != nil {
@@ -30,18 +31,18 @@ func NewBIP49Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Para
 		panic(fmt.Sprintf("failed to create coin strategy for %s: %v", coinTypeCode.String(), err))
 	}
 
-	return &BIP49Generator{
-		hdKey: NewHDKey(PurposeTypeBIP49, coinTypeCode, conf, coinStrategy),
+	return &BIP44Generator{
+		hdKey: infraKey.NewHDKey(infraKey.PurposeTypeBIP44, coinTypeCode, conf, coinStrategy),
 	}
 }
 
 // KeyType returns the key type this generator supports
-func (*BIP49Generator) KeyType() domainKey.KeyType {
-	return domainKey.KeyTypeBIP49
+func (*BIP44Generator) KeyType() domainKey.KeyType {
+	return domainKey.KeyTypeBIP44
 }
 
-// CreateKey creates keys based on BIP49 standard
-func (g *BIP49Generator) CreateKey(
+// CreateKey creates keys based on BIP44 standard
+func (g *BIP44Generator) CreateKey(
 	seed []byte,
 	accountType domainAccount.AccountType,
 	idxFrom, count uint32,
@@ -51,7 +52,7 @@ func (g *BIP49Generator) CreateKey(
 
 // CreateKeyWithAccountXpriv creates HD keys and returns the account-level extended private key.
 // This method delegates to the underlying HDKey implementation.
-func (g *BIP49Generator) CreateKeyWithAccountXpriv(
+func (g *BIP44Generator) CreateKeyWithAccountXpriv(
 	seed []byte,
 	accountType domainAccount.AccountType,
 	idxFrom, count uint32,
@@ -60,11 +61,11 @@ func (g *BIP49Generator) CreateKeyWithAccountXpriv(
 }
 
 // SupportsAddressType checks if this generator supports the given address type
-func (*BIP49Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
-	return addrType == domainAddress.AddrTypeP2shSegwit
+func (*BIP44Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
+	return addrType == domainAddress.AddrTypeLegacy
 }
 
-// GetDerivationPath returns the BIP49 derivation path
-func (g *BIP49Generator) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
+// GetDerivationPath returns the BIP44 derivation path
+func (g *BIP44Generator) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
 	return g.hdKey.GetDerivationPath(accountType, index)
 }

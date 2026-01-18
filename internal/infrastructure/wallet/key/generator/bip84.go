@@ -1,9 +1,10 @@
-package key
+package generator
 
 import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -13,16 +14,16 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
 )
 
-// BIP86Generator implements Generator interface for BIP86 (Taproot addresses)
-type BIP86Generator struct {
-	hdKey *HDKey
+// BIP84Generator implements Generator interface for BIP84 (Native SegWit Bech32 addresses)
+type BIP84Generator struct {
+	hdKey *infraKey.HDKey
 }
 
-// Compile-time check that generator implements Generator interface
-var _ portsWallet.Generator = (*BIP86Generator)(nil)
+// Compile-time check that BIP84Generator implements Generator interface
+var _ portsWallet.Generator = (*BIP84Generator)(nil)
 
-// NewBIP86Generator returns BIP86Generator
-func NewBIP86Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP86Generator {
+// NewBIP84Generator returns BIP84Generator
+func NewBIP84Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP84Generator {
 	// Create coin-specific strategy
 	coinStrategy, err := strategy.CreateCoinKeyStrategy(coinTypeCode, conf)
 	if err != nil {
@@ -30,18 +31,18 @@ func NewBIP86Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Para
 		panic(fmt.Sprintf("failed to create coin strategy for %s: %v", coinTypeCode.String(), err))
 	}
 
-	return &BIP86Generator{
-		hdKey: NewHDKey(PurposeTypeBIP86, coinTypeCode, conf, coinStrategy),
+	return &BIP84Generator{
+		hdKey: infraKey.NewHDKey(infraKey.PurposeTypeBIP84, coinTypeCode, conf, coinStrategy),
 	}
 }
 
 // KeyType returns the key type this generator supports
-func (*BIP86Generator) KeyType() domainKey.KeyType {
-	return domainKey.KeyTypeBIP86
+func (*BIP84Generator) KeyType() domainKey.KeyType {
+	return domainKey.KeyTypeBIP84
 }
 
-// CreateKey creates keys based on BIP86 standard
-func (g *BIP86Generator) CreateKey(
+// CreateKey creates keys based on BIP84 standard
+func (g *BIP84Generator) CreateKey(
 	seed []byte,
 	accountType domainAccount.AccountType,
 	idxFrom, count uint32,
@@ -51,7 +52,7 @@ func (g *BIP86Generator) CreateKey(
 
 // CreateKeyWithAccountXpriv creates HD keys and returns the account-level extended private key.
 // This method delegates to the underlying HDKey implementation.
-func (g *BIP86Generator) CreateKeyWithAccountXpriv(
+func (g *BIP84Generator) CreateKeyWithAccountXpriv(
 	seed []byte,
 	accountType domainAccount.AccountType,
 	idxFrom, count uint32,
@@ -60,11 +61,11 @@ func (g *BIP86Generator) CreateKeyWithAccountXpriv(
 }
 
 // SupportsAddressType checks if this generator supports the given address type
-func (*BIP86Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
-	return addrType == domainAddress.AddrTypeTaproot
+func (*BIP84Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
+	return addrType == domainAddress.AddrTypeBech32
 }
 
-// GetDerivationPath returns the BIP86 derivation path
-func (g *BIP86Generator) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
+// GetDerivationPath returns the BIP84 derivation path
+func (g *BIP84Generator) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
 	return g.hdKey.GetDerivationPath(accountType, index)
 }

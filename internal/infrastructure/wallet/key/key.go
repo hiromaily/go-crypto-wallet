@@ -25,3 +25,9 @@ func CreateCoinKeyStrategy(
 ) (portsWallet.CoinKeyStrategy, error) {
 	return strategy.CreateCoinKeyStrategy(coinTypeCode, conf)
 }
+
+// NOTE: BIP Generator constructors (NewBIP44Generator, etc.) are not re-exported here
+// to avoid import cycles. Import them directly from the generator subpackage:
+//
+//	import infraKeyGen "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/generator"
+//	gen := infraKeyGen.NewBIP44Generator(coinTypeCode, conf)
