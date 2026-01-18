@@ -21,6 +21,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
@@ -323,107 +324,15 @@ func (u *signTransactionUseCase) deriveWIFsForPSBT(
 	// Process each input to derive its required WIF
 	for i, input := range parsed.Inputs {
 		if len(input.BIP32Derivation) == 0 {
-			// No BIP32 derivation info - this happens for P2TR (Taproot) inputs
-			// For P2TR, we need to derive keys at all possible indices and try each
-			// For now, derive keys at indices 0-9 (common range)
-			logger.Warn("PSBT input has no BIP32 derivation (likely P2TR), deriving multiple keys", "input_index", i)
-
-			// Derive keys at multiple indices (both receive and change paths)
-			for change := uint32(0); change <= 1; change++ {
-				for idx := uint32(0); idx < 10; idx++ {
-					childKey, err := infraKey.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, idx)
-					if err != nil {
-						logger.Debug("failed to derive key", "change", change, "index", idx, "error", err)
-						continue
-					}
-					privKey, err := childKey.ECPrivKey()
-					if err != nil {
-						continue
-					}
-					wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
-					if err != nil {
-						continue
-					}
-					wifKeys[wif.String()] = struct{}{}
-				}
-			}
+			// No BIP32 derivation info - derive fallback keys for P2TR
+			u.deriveFallbackWIFsForP2TR(accountKey, i, wifKeys)
 			continue
 		}
 
-		// Parse BIP32 derivation path to extract address index and change
-		// Path format: m/purpose'/coin'/account'/change/addressIndex
-		firstDeriv := input.BIP32Derivation[0]
-		pathComponents := strings.Split(strings.TrimPrefix(firstDeriv.Path, "m/"), "/")
-		if len(pathComponents) < 5 {
-			logger.Warn("invalid BIP32 path format, skipping input",
-				"path", firstDeriv.Path,
-				"input_index", i)
-			continue
+		// Derive WIF from BIP32 derivation path
+		if err := u.deriveWIFFromBIP32Path(accountKey, input, i, wifKeys); err != nil {
+			return nil, err
 		}
-
-		// Parse address index (last component)
-		addressIndexStr := strings.TrimSuffix(pathComponents[len(pathComponents)-1], "'")
-		addrIdx, err := strconv.ParseUint(addressIndexStr, 10, 32)
-		if err != nil {
-			logger.Warn("failed to parse address index from path, skipping input",
-				"path", firstDeriv.Path,
-				"input_index", i,
-				"error", err)
-			continue
-		}
-		addressIndex := uint32(addrIdx)
-
-		// Parse change index (second to last component)
-		changeStr := strings.TrimSuffix(pathComponents[len(pathComponents)-2], "'")
-		chgIdx, err := strconv.ParseUint(changeStr, 10, 32)
-		if err != nil {
-			logger.Warn("failed to parse change index from path, skipping input",
-				"path", firstDeriv.Path,
-				"input_index", i,
-				"error", err)
-			continue
-		}
-		change := uint32(chgIdx)
-
-		logger.Debug("deriving child key from account xpriv",
-			"wallet_type", "keygen",
-			"input_index", i,
-			"address_index", addressIndex,
-			"change", change,
-			"derivation_path", firstDeriv.Path)
-
-		// Derive child private key at the correct address index
-		childKey, err := infraKey.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, addressIndex)
-		if err != nil {
-			return nil, fmt.Errorf("failed to derive child key for input %d at index %d: %w", i, addressIndex, err)
-		}
-
-		// Extract private key
-		privKey, err := childKey.ECPrivKey()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get private key from child for input %d: %w", i, err)
-		}
-
-		// Get public key for verification logging
-		pubKey, err := childKey.ECPubKey()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get public key from child for input %d: %w", i, err)
-		}
-
-		// Convert to WIF (compressed format)
-		wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create WIF from derived key for input %d: %w", i, err)
-		}
-
-		logger.Info("derived WIF for signing",
-			"wallet_type", "keygen",
-			"input_index", i,
-			"address_index", addressIndex,
-			"change", change,
-			"pubkey_hex", hex.EncodeToString(pubKey.SerializeCompressed()))
-
-		wifKeys[wif.String()] = struct{}{}
 	}
 
 	// If no WIFs could be derived, fall back to stored WIF
@@ -443,4 +352,132 @@ func (u *signTransactionUseCase) deriveWIFsForPSBT(
 		"unique_wifs", len(derivedWIFs))
 
 	return derivedWIFs, nil
+}
+
+// deriveFallbackWIFsForP2TR derives WIFs at multiple indices for P2TR inputs without BIP32 derivation.
+// P2TR (Taproot) inputs don't include BIP32 derivation info, so we try common indices.
+func (u *signTransactionUseCase) deriveFallbackWIFsForP2TR(
+	accountKey *domainBitcoin.BtcAccountKey,
+	inputIndex int,
+	wifKeys map[string]struct{},
+) {
+	logger.Warn("PSBT input has no BIP32 derivation (likely P2TR), deriving multiple keys", "input_index", inputIndex)
+
+	// Derive keys at multiple indices (both receive and change paths)
+	for change := uint32(0); change <= 1; change++ {
+		for idx := uint32(0); idx < 10; idx++ {
+			childKey, err := infraKey.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, idx)
+			if err != nil {
+				logger.Debug("failed to derive key", "change", change, "index", idx, "error", err)
+				continue
+			}
+			privKey, err := childKey.ECPrivKey()
+			if err != nil {
+				continue
+			}
+			wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
+			if err != nil {
+				continue
+			}
+			wifKeys[wif.String()] = struct{}{}
+		}
+	}
+}
+
+// deriveWIFFromBIP32Path parses BIP32 derivation path and derives the corresponding WIF.
+func (u *signTransactionUseCase) deriveWIFFromBIP32Path(
+	accountKey *domainBitcoin.BtcAccountKey,
+	input dtobtc.ParsedPSBTInput,
+	inputIndex int,
+	wifKeys map[string]struct{},
+) error {
+	// Parse BIP32 derivation path to extract address index and change
+	// Path format: m/purpose'/coin'/account'/change/addressIndex
+	firstDeriv := input.BIP32Derivation[0]
+	pathComponents := strings.Split(strings.TrimPrefix(firstDeriv.Path, "m/"), "/")
+	if len(pathComponents) < 5 {
+		logger.Warn("invalid BIP32 path format, skipping input",
+			"path", firstDeriv.Path,
+			"input_index", inputIndex)
+		return nil
+	}
+
+	// Parse address index and change from path
+	addressIndex, change, err := u.parseAddressAndChangeFromPath(pathComponents, firstDeriv.Path, inputIndex)
+	if err != nil {
+		// Logged as warning, not fatal - skip this input
+		return nil
+	}
+
+	logger.Debug("deriving child key from account xpriv",
+		"wallet_type", "keygen",
+		"input_index", inputIndex,
+		"address_index", addressIndex,
+		"change", change,
+		"derivation_path", firstDeriv.Path)
+
+	// Derive child private key at the correct address index
+	childKey, err := infraKey.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, addressIndex)
+	if err != nil {
+		return fmt.Errorf("failed to derive child key for input %d at index %d: %w", inputIndex, addressIndex, err)
+	}
+
+	// Extract private key
+	privKey, err := childKey.ECPrivKey()
+	if err != nil {
+		return fmt.Errorf("failed to get private key from child for input %d: %w", inputIndex, err)
+	}
+
+	// Get public key for verification logging
+	pubKey, err := childKey.ECPubKey()
+	if err != nil {
+		return fmt.Errorf("failed to get public key from child for input %d: %w", inputIndex, err)
+	}
+
+	// Convert to WIF (compressed format)
+	wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
+	if err != nil {
+		return fmt.Errorf("failed to create WIF from derived key for input %d: %w", inputIndex, err)
+	}
+
+	logger.Info("derived WIF for signing",
+		"wallet_type", "keygen",
+		"input_index", inputIndex,
+		"address_index", addressIndex,
+		"change", change,
+		"pubkey_hex", hex.EncodeToString(pubKey.SerializeCompressed()))
+
+	wifKeys[wif.String()] = struct{}{}
+	return nil
+}
+
+// parseAddressAndChangeFromPath extracts address index and change from BIP32 path components.
+func (*signTransactionUseCase) parseAddressAndChangeFromPath(
+	pathComponents []string,
+	fullPath string,
+	inputIndex int,
+) (addressIndex, change uint32, err error) {
+	// Parse address index (last component)
+	addressIndexStr := strings.TrimSuffix(pathComponents[len(pathComponents)-1], "'")
+	addrIdx, err := strconv.ParseUint(addressIndexStr, 10, 32)
+	if err != nil {
+		logger.Warn("failed to parse address index from path, skipping input",
+			"path", fullPath,
+			"input_index", inputIndex,
+			"error", err)
+		return 0, 0, err
+	}
+
+	// Parse change index (second to last component)
+	changeStr := strings.TrimSuffix(pathComponents[len(pathComponents)-2], "'")
+	chgIdx, err := strconv.ParseUint(changeStr, 10, 32)
+	if err != nil {
+		logger.Warn("failed to parse change index from path, skipping input",
+			"path", fullPath,
+			"input_index", inputIndex,
+			"error", err)
+		return 0, 0, err
+	}
+
+	return uint32(addrIdx), uint32(chgIdx), nil
 }

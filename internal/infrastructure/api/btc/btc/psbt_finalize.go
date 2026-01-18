@@ -36,20 +36,9 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		"inputs", len(parsed.Packet.Inputs),
 		"outputs", len(parsed.Packet.Outputs))
 
-	// Log input states before finalization
-	for i, input := range parsed.Packet.Inputs {
-		logger.Info("Input state before finalization",
-			"input", i,
-			"hasPartialSigs", len(input.PartialSigs) > 0,
-			"partialSigsCount", len(input.PartialSigs),
-			"hasRedeemScript", len(input.RedeemScript) > 0,
-			"redeemScriptLen", len(input.RedeemScript),
-			"hasWitnessScript", len(input.WitnessScript) > 0,
-			"hasFinalScriptSig", input.FinalScriptSig != nil,
-			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
-	}
+	// Log and check completion
+	b.logInputStates(parsed.Packet, "before finalization")
 
-	// Check if PSBT is complete using custom multisig completion check
 	isComplete, err := b.isMultisigPSBTComplete(parsed.Packet)
 	if err != nil {
 		return "", fmt.Errorf("failed to check PSBT completion: %w", err)
@@ -60,8 +49,46 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		return "", errors.New("cannot finalize incomplete PSBT (missing signatures)")
 	}
 
-	// Auto-generate missing RedeemScripts for P2SH-P2WSH inputs before finalization
-	for i, input := range parsed.Packet.Inputs {
+	// Auto-generate missing RedeemScripts for P2SH-P2WSH inputs
+	if err := b.autoGenerateMissingRedeemScripts(parsed.Packet); err != nil {
+		return "", err
+	}
+
+	// Finalize all inputs
+	if err := b.finalizeAllInputs(parsed.Packet); err != nil {
+		return "", err
+	}
+
+	// Log and serialize
+	b.logInputStates(parsed.Packet, "after finalization")
+
+	finalizedPSBT, err := b.serializePSBT(parsed.Packet)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize finalized PSBT: %w", err)
+	}
+
+	logger.Info("PSBT finalization completed", "inputs", len(parsed.Packet.UnsignedTx.TxIn))
+	return finalizedPSBT, nil
+}
+
+// logInputStates logs the state of all PSBT inputs.
+func (*Bitcoin) logInputStates(packet *psbt.Packet, phase string) {
+	for i, input := range packet.Inputs {
+		logger.Info("Input state "+phase,
+			"input", i,
+			"hasPartialSigs", len(input.PartialSigs) > 0,
+			"partialSigsCount", len(input.PartialSigs),
+			"hasRedeemScript", len(input.RedeemScript) > 0,
+			"redeemScriptLen", len(input.RedeemScript),
+			"hasWitnessScript", len(input.WitnessScript) > 0,
+			"hasFinalScriptSig", input.FinalScriptSig != nil,
+			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
+	}
+}
+
+// autoGenerateMissingRedeemScripts generates RedeemScripts for P2SH-P2WSH inputs that are missing them.
+func (*Bitcoin) autoGenerateMissingRedeemScripts(packet *psbt.Packet) error {
+	for i, input := range packet.Inputs {
 		logger.Debug("Checking RedeemScript auto-generation",
 			"input", i,
 			"hasRedeemScript", len(input.RedeemScript) > 0,
@@ -71,130 +98,145 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		// If RedeemScript is missing but we have WitnessScript and witnessUtxo is P2SH
 		if len(input.RedeemScript) == 0 && len(input.WitnessScript) > 0 && input.WitnessUtxo != nil {
 			isP2SH := txscript.IsPayToScriptHash(input.WitnessUtxo.PkScript)
-			logger.Debug("RedeemScript check details",
-				"input", i,
-				"isP2SH", isP2SH)
+			logger.Debug("RedeemScript check details", "input", i, "isP2SH", isP2SH)
 
 			if isP2SH {
-				// Auto-generate RedeemScript for P2SH-P2WSH
 				witnessScriptHash := sha256.Sum256(input.WitnessScript)
 				redeemScript, err := txscript.NewScriptBuilder().
 					AddOp(txscript.OP_0).
 					AddData(witnessScriptHash[:]).
 					Script()
 				if err != nil {
-					return "", fmt.Errorf("failed to build redeemScript for input %d: %w", i, err)
+					return fmt.Errorf("failed to build redeemScript for input %d: %w", i, err)
 				}
 				input.RedeemScript = redeemScript
 				logger.Debug("Auto-generated RedeemScript for P2SH-P2WSH input during finalization", "input", i)
 			}
 		}
 	}
+	return nil
+}
 
-	// Finalize all inputs
-	for i := range parsed.Packet.UnsignedTx.TxIn {
-		// Check if this is a P2SH-P2WSH multisig input
-		input := parsed.Packet.Inputs[i]
-		hasRedeemScript := len(input.RedeemScript) > 0
-		hasWitnessScript := len(input.WitnessScript) > 0
-		hasPartialSigs := len(input.PartialSigs) > 0
+// finalizeAllInputs finalizes all inputs in the PSBT.
+func (b *Bitcoin) finalizeAllInputs(packet *psbt.Packet) error {
+	for i := range packet.UnsignedTx.TxIn {
+		if err := b.finalizeInput(packet, i); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-		// Detect script type for proper finalization
-		var scriptType string
-		if input.WitnessUtxo != nil {
-			if txscript.IsPayToPubKeyHash(input.WitnessUtxo.PkScript) {
-				scriptType = "P2PKH"
-			} else if txscript.IsPayToScriptHash(input.WitnessUtxo.PkScript) {
-				if hasWitnessScript {
-					scriptType = "P2SH-P2WSH"
-				} else {
-					scriptType = "P2SH"
-				}
-			} else if txscript.IsPayToWitnessPubKeyHash(input.WitnessUtxo.PkScript) {
-				scriptType = "P2WPKH"
-			} else if txscript.IsPayToWitnessScriptHash(input.WitnessUtxo.PkScript) {
-				scriptType = "P2WSH"
-			} else if txscript.IsPayToTaproot(input.WitnessUtxo.PkScript) {
-				scriptType = "P2TR"
-			}
+// finalizeInput finalizes a single PSBT input based on its script type.
+func (b *Bitcoin) finalizeInput(packet *psbt.Packet, inputIndex int) error {
+	input := packet.Inputs[inputIndex]
+
+	// Skip already-finalized inputs
+	if input.FinalScriptWitness != nil || input.FinalScriptSig != nil {
+		scriptType := b.detectInputScriptType(&input)
+		logger.Info("Input already finalized, skipping", "input", inputIndex, "scriptType", scriptType)
+		return nil
+	}
+
+	scriptType := b.detectInputScriptType(&input)
+	hasRedeemScript := len(input.RedeemScript) > 0
+	hasWitnessScript := len(input.WitnessScript) > 0
+	hasPartialSigs := len(input.PartialSigs) > 0
+
+	logger.Info("Checking finalization method for input",
+		"input", inputIndex,
+		"scriptType", scriptType,
+		"hasRedeemScript", hasRedeemScript,
+		"hasWitnessScript", hasWitnessScript,
+		"hasPartialSigs", hasPartialSigs,
+		"partialSigsCount", len(input.PartialSigs),
+		"hasFinalScriptWitness", input.FinalScriptWitness != nil)
+
+	return b.dispatchFinalization(packet, inputIndex, scriptType, hasRedeemScript, hasWitnessScript, hasPartialSigs)
+}
+
+// detectInputScriptType detects the script type of a PSBT input.
+func (*Bitcoin) detectInputScriptType(input *psbt.PInput) string {
+	if input.WitnessUtxo == nil {
+		return ""
+	}
+
+	hasWitnessScript := len(input.WitnessScript) > 0
+
+	switch {
+	case txscript.IsPayToPubKeyHash(input.WitnessUtxo.PkScript):
+		return "P2PKH"
+	case txscript.IsPayToScriptHash(input.WitnessUtxo.PkScript):
+		if hasWitnessScript {
+			return "P2SH-P2WSH"
+		}
+		return "P2SH"
+	case txscript.IsPayToWitnessPubKeyHash(input.WitnessUtxo.PkScript):
+		return "P2WPKH"
+	case txscript.IsPayToWitnessScriptHash(input.WitnessUtxo.PkScript):
+		return "P2WSH"
+	case txscript.IsPayToTaproot(input.WitnessUtxo.PkScript):
+		return "P2TR"
+	default:
+		return ""
+	}
+}
+
+// dispatchFinalization dispatches to the appropriate finalization method based on script type.
+func (b *Bitcoin) dispatchFinalization(
+	packet *psbt.Packet,
+	inputIndex int,
+	scriptType string,
+	hasRedeemScript, hasWitnessScript, hasPartialSigs bool,
+) error {
+	input := &packet.Inputs[inputIndex]
+
+	switch {
+	case scriptType == "P2PKH" && hasPartialSigs:
+		logger.Info("Using custom P2PKH finalization", "input", inputIndex)
+		if err := b.finalizeP2PKHInput(packet, inputIndex); err != nil {
+			return fmt.Errorf("failed to finalize P2PKH input %d: %w", inputIndex, err)
 		}
 
-		logger.Info("Checking finalization method for input",
-			"input", i,
-			"scriptType", scriptType,
-			"hasRedeemScript", hasRedeemScript,
-			"hasWitnessScript", hasWitnessScript,
-			"hasPartialSigs", hasPartialSigs,
-			"partialSigsCount", len(input.PartialSigs),
-			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
+	case scriptType == "P2SH" && hasRedeemScript && !hasWitnessScript && hasPartialSigs:
+		return b.finalizeP2SHInput(packet, inputIndex, input)
 
-		// Skip already-finalized inputs (e.g., P2TR which sets FinalScriptWitness during signing)
-		if input.FinalScriptWitness != nil || input.FinalScriptSig != nil {
-			logger.Info("Input already finalized, skipping", "input", i, "scriptType", scriptType)
-			continue
+	case hasRedeemScript && hasWitnessScript && hasPartialSigs:
+		logger.Info("Using custom P2SH-P2WSH multisig finalization", "input", inputIndex)
+		if err := b.finalizeMultisigInput(packet, inputIndex); err != nil {
+			return fmt.Errorf("failed to finalize P2SH-P2WSH multisig input %d: %w", inputIndex, err)
 		}
 
-		if scriptType == "P2PKH" && hasPartialSigs {
-			// P2PKH - use custom finalization (creates scriptSig, no witness)
-			logger.Info("Using custom P2PKH finalization", "input", i)
-			if err := b.finalizeP2PKHInput(parsed.Packet, i); err != nil {
-				return "", fmt.Errorf("failed to finalize P2PKH input %d: %w", i, err)
-			}
-		} else if scriptType == "P2SH" && hasRedeemScript && !hasWitnessScript && hasPartialSigs {
-			// Check if redeemScript is P2WPKH (BIP49 Nested SegWit single-sig)
-			// or multisig script (BIP44 P2SH multisig)
-			isP2WPKHRedeemScript := txscript.IsPayToWitnessPubKeyHash(input.RedeemScript)
-
-			if isP2WPKHRedeemScript {
-				// P2SH-P2WPKH (BIP49 Nested SegWit single-sig) - use custom finalization
-				logger.Info("Using custom P2SH-P2WPKH finalization", "input", i)
-				if err := b.finalizeP2SHP2WPKHInput(parsed.Packet, i); err != nil {
-					return "", fmt.Errorf("failed to finalize P2SH-P2WPKH input %d: %w", i, err)
-				}
-			} else {
-				// P2SH multisig (non-SegWit, BIP44) - use custom finalization
-				logger.Info("Using custom P2SH multisig finalization", "input", i)
-				if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
-					return "", fmt.Errorf("failed to finalize P2SH multisig input %d: %w", i, err)
-				}
-			}
-		} else if hasRedeemScript && hasWitnessScript && hasPartialSigs {
-			// P2SH-P2WSH multisig - use custom finalization
-			logger.Info("Using custom P2SH-P2WSH multisig finalization", "input", i)
-			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
-				return "", fmt.Errorf("failed to finalize P2SH-P2WSH multisig input %d: %w", i, err)
-			}
-		} else {
-			// Other script types - use btcd's default finalization
-			logger.Info("Using btcd default finalization", "input", i, "scriptType", scriptType,
-				"reason", "no matching custom finalization condition")
-			if err := psbt.Finalize(parsed.Packet, i); err != nil {
-				logger.Error("btcd finalization failed", "input", i, "error", err)
-				return "", fmt.Errorf("failed to finalize input %d: %w", i, err)
-			}
+	default:
+		logger.Info("Using btcd default finalization", "input", inputIndex, "scriptType", scriptType,
+			"reason", "no matching custom finalization condition")
+		if err := psbt.Finalize(packet, inputIndex); err != nil {
+			logger.Error("btcd finalization failed", "input", inputIndex, "error", err)
+			return fmt.Errorf("failed to finalize input %d: %w", inputIndex, err)
 		}
 	}
 
-	// Log input states after finalization
-	for i, input := range parsed.Packet.Inputs {
-		logger.Info("Input state after finalization",
-			"input", i,
-			"hasPartialSigs", len(input.PartialSigs) > 0,
-			"hasFinalScriptSig", input.FinalScriptSig != nil,
-			"finalScriptSigLen", len(input.FinalScriptSig),
-			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
+	return nil
+}
+
+// finalizeP2SHInput finalizes a P2SH input (either P2SH-P2WPKH or P2SH multisig).
+func (b *Bitcoin) finalizeP2SHInput(packet *psbt.Packet, inputIndex int, input *psbt.PInput) error {
+	// Check if redeemScript is P2WPKH (BIP49 Nested SegWit single-sig)
+	isP2WPKHRedeemScript := txscript.IsPayToWitnessPubKeyHash(input.RedeemScript)
+
+	if isP2WPKHRedeemScript {
+		logger.Info("Using custom P2SH-P2WPKH finalization", "input", inputIndex)
+		if err := b.finalizeP2SHP2WPKHInput(packet, inputIndex); err != nil {
+			return fmt.Errorf("failed to finalize P2SH-P2WPKH input %d: %w", inputIndex, err)
+		}
+	} else {
+		logger.Info("Using custom P2SH multisig finalization", "input", inputIndex)
+		if err := b.finalizeMultisigInput(packet, inputIndex); err != nil {
+			return fmt.Errorf("failed to finalize P2SH multisig input %d: %w", inputIndex, err)
+		}
 	}
 
-	// Serialize finalized PSBT to base64
-	finalizedPSBT, err := b.serializePSBT(parsed.Packet)
-	if err != nil {
-		return "", fmt.Errorf("failed to serialize finalized PSBT: %w", err)
-	}
-
-	logger.Info("PSBT finalization completed",
-		"inputs", len(parsed.Packet.UnsignedTx.TxIn))
-
-	return finalizedPSBT, nil
+	return nil
 }
 
 // finalizeP2PKHInput finalizes a P2PKH (Pay-to-Public-Key-Hash) PSBT input.
@@ -365,7 +407,59 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 		"hasWitnessScript", len(input.WitnessScript) > 0,
 		"partialSigsCount", len(input.PartialSigs))
 
-	// Ensure we have the required scripts
+	// Validate required data
+	if err := validateMultisigInputData(input, inputIndex); err != nil {
+		return err
+	}
+
+	// Determine script type and extract public keys
+	isSegWit := len(input.WitnessScript) > 0
+	logger.Info("Determined multisig type", "input", inputIndex, "isSegWit", isSegWit)
+
+	scriptToExtract := input.RedeemScript
+	if isSegWit {
+		scriptToExtract = input.WitnessScript
+	}
+
+	pubKeys, err := b.extractPubKeysFromScript(scriptToExtract)
+	if err != nil {
+		return fmt.Errorf("failed to extract public keys from multisig script: %w", err)
+	}
+
+	// Log and normalize public keys
+	logPubKeysDebugInfo(pubKeys, input.PartialSigs, inputIndex)
+	normalizedPubKeys, err := normalizePubKeysToCompressed(pubKeys, inputIndex)
+	if err != nil {
+		return err
+	}
+
+	// Order signatures by public key order
+	sigs := orderSignaturesByPubKeyOrder(normalizedPubKeys, input.PartialSigs, inputIndex)
+	if len(sigs) == 0 {
+		return fmt.Errorf(
+			"no matching signatures found: multisig script has %d pubkeys, PSBT has %d partial sigs, but none matched",
+			len(normalizedPubKeys), len(input.PartialSigs),
+		)
+	}
+
+	// Build final scripts
+	if isSegWit {
+		if err := buildSegWitMultisigFinalScripts(input, sigs, inputIndex); err != nil {
+			return err
+		}
+	} else {
+		if err := buildLegacyMultisigFinalScripts(input, sigs, inputIndex); err != nil {
+			return err
+		}
+	}
+
+	// Clear partial signatures as they're no longer needed
+	input.PartialSigs = nil
+	return nil
+}
+
+// validateMultisigInputData validates that required data is present for multisig finalization.
+func validateMultisigInputData(input *psbt.PInput, inputIndex int) error {
 	if len(input.RedeemScript) == 0 {
 		logger.Error("Missing redeemScript in finalizeMultisigInput", "input", inputIndex)
 		return errors.New("missing redeem script for P2SH multisig input")
@@ -374,105 +468,56 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 		logger.Error("No partial signatures in finalizeMultisigInput", "input", inputIndex)
 		return errors.New("no signatures to finalize")
 	}
+	return nil
+}
 
-	// Determine if this is P2SH (non-SegWit) or P2SH-P2WSH (SegWit)
-	isSegWit := len(input.WitnessScript) > 0
-	logger.Info("Determined multisig type", "input", inputIndex, "isSegWit", isSegWit)
-
-	// Extract public keys from the multisig script to determine signature order
-	// For multisig, signatures MUST be ordered according to pubkey order in the script
-	var scriptToExtract []byte
-	if isSegWit {
-		scriptToExtract = input.WitnessScript
-	} else {
-		scriptToExtract = input.RedeemScript
-	}
-
-	pubKeys, err := b.extractPubKeysFromScript(scriptToExtract)
-	if err != nil {
-		return fmt.Errorf("failed to extract public keys from multisig script: %w", err)
-	}
-
-	// Log redeemScript public keys
-	logger.Debug("RedeemScript public keys",
-		"input", inputIndex,
-		"count", len(pubKeys))
+// logPubKeysDebugInfo logs debug information about public keys.
+func logPubKeysDebugInfo(pubKeys [][]byte, partialSigs []*psbt.PartialSig, inputIndex int) {
+	logger.Debug("RedeemScript public keys", "input", inputIndex, "count", len(pubKeys))
 	for i, pk := range pubKeys {
 		logger.Debug("RedeemScript pubkey",
-			"input", inputIndex,
-			"index", i,
-			"pubkey", hex.EncodeToString(pk),
-			"len", len(pk))
+			"input", inputIndex, "index", i,
+			"pubkey", hex.EncodeToString(pk), "len", len(pk))
 	}
 
-	// Log PartialSigs public keys
-	logger.Debug("PartialSigs public keys",
-		"input", inputIndex,
-		"count", len(input.PartialSigs))
-	for i, partialSig := range input.PartialSigs {
+	logger.Debug("PartialSigs public keys", "input", inputIndex, "count", len(partialSigs))
+	for i, partialSig := range partialSigs {
 		logger.Debug("PartialSig pubkey",
-			"input", inputIndex,
-			"index", i,
-			"pubkey", hex.EncodeToString(partialSig.PubKey),
-			"len", len(partialSig.PubKey))
+			"input", inputIndex, "index", i,
+			"pubkey", hex.EncodeToString(partialSig.PubKey), "len", len(partialSig.PubKey))
 	}
+}
 
-	// Normalize public keys to compressed format for matching
-	// PartialSigs always use compressed public keys (33 bytes), but redeem script
-	// may contain uncompressed keys (65 bytes). Convert all to compressed for comparison.
+// normalizePubKeysToCompressed normalizes all public keys to compressed format.
+func normalizePubKeysToCompressed(pubKeys [][]byte, inputIndex int) ([][]byte, error) {
 	normalizedPubKeys := make([][]byte, len(pubKeys))
 	for i, pk := range pubKeys {
 		if len(pk) == 65 {
-			// Uncompressed key - convert to compressed
 			pubKeyObj, err := btcec.ParsePubKey(pk)
 			if err != nil {
-				return fmt.Errorf("failed to parse uncompressed public key at index %d: %w", i, err)
+				return nil, fmt.Errorf("failed to parse uncompressed public key at index %d: %w", i, err)
 			}
 			normalizedPubKeys[i] = pubKeyObj.SerializeCompressed()
 			logger.Debug("Converted uncompressed pubkey to compressed",
-				"input", inputIndex,
-				"index", i,
-				"uncompressed_len", len(pk),
-				"compressed_len", len(normalizedPubKeys[i]))
+				"input", inputIndex, "index", i,
+				"uncompressed_len", len(pk), "compressed_len", len(normalizedPubKeys[i]))
 		} else {
-			// Already compressed (33 bytes) or unknown format
 			normalizedPubKeys[i] = pk
 		}
 	}
+	return normalizedPubKeys, nil
+}
 
-	// Log public keys from multisig script for debugging
-	logger.Debug("Public keys extracted from multisig script",
-		"input", inputIndex,
-		"count", len(pubKeys),
-		"is_segwit", isSegWit)
-	for i, pk := range normalizedPubKeys {
-		logger.Debug("Multisig script pubkey (normalized)",
-			"input", inputIndex,
-			"index", i,
-			"length", len(pk),
-			"pubkey", hex.EncodeToString(pk))
-	}
-
-	// Log partial signatures for debugging
-	logger.Debug("Partial signatures available",
-		"input", inputIndex,
-		"count", len(input.PartialSigs))
-	for i, ps := range input.PartialSigs {
-		logger.Debug("PartialSig pubkey",
-			"input", inputIndex,
-			"index", i,
-			"length", len(ps.PubKey),
-			"pubkey", hex.EncodeToString(ps.PubKey))
-	}
-
-	// Order signatures according to public key order in multisig script
-	// PartialSigs is a slice []*PartialSig where each PartialSig has a PubKey field
-	// Use normalizedPubKeys for matching since PartialSigs always use compressed format
-	sigs := make([][]byte, 0, len(input.PartialSigs))
+// orderSignaturesByPubKeyOrder orders signatures according to public key order in multisig script.
+func orderSignaturesByPubKeyOrder(
+	normalizedPubKeys [][]byte,
+	partialSigs []*psbt.PartialSig,
+	inputIndex int,
+) [][]byte {
+	sigs := make([][]byte, 0, len(partialSigs))
 	for pkIdx, pubKey := range normalizedPubKeys {
-		// Find the signature for this public key in PartialSigs
 		found := false
-		for psIdx, partialSig := range input.PartialSigs {
+		for psIdx, partialSig := range partialSigs {
 			if bytes.Equal(partialSig.PubKey, pubKey) {
 				sigs = append(sigs, partialSig.Signature)
 				logger.Debug("Matched signature for pubkey",
@@ -495,75 +540,59 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 	logger.Debug("Signature matching complete",
 		"input", inputIndex,
 		"multisigScriptPubkeys", len(normalizedPubKeys),
-		"partialSigs", len(input.PartialSigs),
+		"partialSigs", len(partialSigs),
 		"matchedSigs", len(sigs))
 
-	if len(sigs) == 0 {
-		return fmt.Errorf(
-			"no matching signatures found: multisig script has %d pubkeys, PSBT has %d partial sigs, but none matched",
-			len(normalizedPubKeys), len(input.PartialSigs),
-		)
+	return sigs
+}
+
+// buildSegWitMultisigFinalScripts builds final scripts for P2SH-P2WSH (SegWit) multisig.
+func buildSegWitMultisigFinalScripts(input *psbt.PInput, sigs [][]byte, inputIndex int) error {
+	// Build witness stack: [OP_0, sig1, sig2, ..., witnessScript]
+	witness := wire.TxWitness{[]byte{}} // OP_0 (required for CHECKMULTISIG bug)
+	for _, sig := range sigs {
+		witness = append(witness, sig)
 	}
+	witness = append(witness, input.WitnessScript)
 
-	// Build final scripts based on whether this is SegWit or non-SegWit
-	if isSegWit {
-		// P2SH-P2WSH (SegWit) multisig:
-		// Build witness stack: [OP_0, sig1, sig2, ..., witnessScript]
-		witness := wire.TxWitness{
-			[]byte{}, // OP_0 (required for CHECKMULTISIG bug)
-		}
-		for _, sig := range sigs {
-			witness = append(witness, sig)
-		}
-		witness = append(witness, input.WitnessScript)
-
-		// Serialize witness to FinalScriptWitness format
-		witnessBytes, err := serializeWitness(witness)
-		if err != nil {
-			return fmt.Errorf("failed to serialize witness: %w", err)
-		}
-		input.FinalScriptWitness = witnessBytes
-
-		// Build scriptSig for P2SH wrapping: just the redeemScript (OP_0 <witnessScriptHash>)
-		scriptSigBuilder := txscript.NewScriptBuilder()
-		scriptSigBuilder.AddData(input.RedeemScript)
-		scriptSig, err := scriptSigBuilder.Script()
-		if err != nil {
-			return fmt.Errorf("failed to build P2SH-P2WSH scriptSig: %w", err)
-		}
-		input.FinalScriptSig = scriptSig
-
-		logger.Debug("Finalized P2SH-P2WSH multisig input",
-			"input", inputIndex,
-			"signatures", len(sigs),
-			"witnessLen", len(input.FinalScriptWitness),
-			"scriptSigLen", len(input.FinalScriptSig))
-	} else {
-		// P2SH (non-SegWit, BIP44) multisig:
-		// Build scriptSig: [OP_0, sig1, sig2, ..., redeemScript]
-		scriptSigBuilder := txscript.NewScriptBuilder()
-		scriptSigBuilder.AddOp(txscript.OP_0) // OP_0 (required for CHECKMULTISIG bug)
-		for _, sig := range sigs {
-			scriptSigBuilder.AddData(sig)
-		}
-		scriptSigBuilder.AddData(input.RedeemScript)
-		scriptSig, err := scriptSigBuilder.Script()
-		if err != nil {
-			return fmt.Errorf("failed to build P2SH scriptSig: %w", err)
-		}
-		input.FinalScriptSig = scriptSig
-
-		// No witness data for non-SegWit
-		input.FinalScriptWitness = nil
-
-		logger.Debug("Finalized P2SH multisig input",
-			"input", inputIndex,
-			"signatures", len(sigs),
-			"scriptSigLen", len(input.FinalScriptSig))
+	witnessBytes, err := serializeWitness(witness)
+	if err != nil {
+		return fmt.Errorf("failed to serialize witness: %w", err)
 	}
+	input.FinalScriptWitness = witnessBytes
 
-	// Clear partial signatures as they're no longer needed
-	input.PartialSigs = nil
+	// Build scriptSig for P2SH wrapping
+	scriptSigBuilder := txscript.NewScriptBuilder()
+	scriptSigBuilder.AddData(input.RedeemScript)
+	scriptSig, err := scriptSigBuilder.Script()
+	if err != nil {
+		return fmt.Errorf("failed to build P2SH-P2WSH scriptSig: %w", err)
+	}
+	input.FinalScriptSig = scriptSig
 
+	logger.Debug("Finalized P2SH-P2WSH multisig input",
+		"input", inputIndex, "signatures", len(sigs),
+		"witnessLen", len(input.FinalScriptWitness), "scriptSigLen", len(input.FinalScriptSig))
+	return nil
+}
+
+// buildLegacyMultisigFinalScripts builds final scripts for P2SH (non-SegWit) multisig.
+func buildLegacyMultisigFinalScripts(input *psbt.PInput, sigs [][]byte, inputIndex int) error {
+	// Build scriptSig: [OP_0, sig1, sig2, ..., redeemScript]
+	scriptSigBuilder := txscript.NewScriptBuilder()
+	scriptSigBuilder.AddOp(txscript.OP_0) // OP_0 (required for CHECKMULTISIG bug)
+	for _, sig := range sigs {
+		scriptSigBuilder.AddData(sig)
+	}
+	scriptSigBuilder.AddData(input.RedeemScript)
+	scriptSig, err := scriptSigBuilder.Script()
+	if err != nil {
+		return fmt.Errorf("failed to build P2SH scriptSig: %w", err)
+	}
+	input.FinalScriptSig = scriptSig
+	input.FinalScriptWitness = nil // No witness data for non-SegWit
+
+	logger.Debug("Finalized P2SH multisig input",
+		"input", inputIndex, "signatures", len(sigs), "scriptSigLen", len(input.FinalScriptSig))
 	return nil
 }
