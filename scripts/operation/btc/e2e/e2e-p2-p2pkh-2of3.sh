@@ -183,6 +183,7 @@ transaction_flow_phase() {
 	log_substep "Creating unsigned payment transaction"
 	tx_file=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
+		log_error "Error details: $tx_file"
 		if echo "$tx_file" | grep -q "No utxo"; then
 			btc_log_no_utxo_error
 		fi

@@ -98,25 +98,72 @@ check_docker() {
 }
 
 # Wait for Docker container to be healthy
+# Features:
+#   - Detects and restarts exited/crashed containers
+#   - Shows progress with current status and elapsed time
+#   - Shows container logs on failure for debugging
 # Usage: wait_for_healthy "container-name" [max_wait_seconds]
 wait_for_healthy() {
 	local container_name=$1
-	local max_wait=${2:-60}
+	local max_wait=${2:-120}
 	local counter=0
+	local last_status=""
+	local restart_count=0
+	local max_restarts=2
 
-	log_info "Waiting for $container_name to be healthy..."
+	log_info "Waiting for $container_name to be healthy (timeout: ${max_wait}s)..."
 
 	while [ $counter -lt $max_wait ]; do
-		status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "not_found")
+		# First check if container is running
+		local running_state
+		running_state=$(docker inspect --format='{{.State.Status}}' "$container_name" 2>/dev/null || echo "not_found")
 
-		if [ "$status" = "healthy" ]; then
-			log_info "$container_name is healthy"
+		# Handle exited/crashed container
+		if [ "$running_state" = "exited" ] || [ "$running_state" = "dead" ]; then
+			if [ $restart_count -lt $max_restarts ]; then
+				restart_count=$((restart_count + 1))
+				log_warn "$container_name has exited, restarting (attempt $restart_count/$max_restarts)..."
+				docker start "$container_name" >/dev/null 2>&1 || true
+				sleep 3
+				counter=$((counter + 3))
+				continue
+			else
+				log_error "$container_name keeps crashing after $max_restarts restart attempts"
+				log_error "Last 20 lines of container logs:"
+				docker logs --tail 20 "$container_name" 2>&1 | while IFS= read -r line; do
+					echo "  $line"
+				done
+				return 1
+			fi
+		fi
+
+		# Container not found
+		if [ "$running_state" = "not_found" ]; then
+			log_error "Container $container_name not found"
+			return 1
+		fi
+
+		# Get health status (only if container is running)
+		local health_status
+		health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "none")
+
+		# Check if healthy
+		if [ "$health_status" = "healthy" ]; then
+			log_info "$container_name is healthy (took ${counter}s)"
 			return 0
 		fi
 
-		if [ "$status" = "not_found" ]; then
-			log_error "Container $container_name not found"
-			return 1
+		# No healthcheck defined - check if container is running
+		if [ "$health_status" = "none" ] || [ "$health_status" = "" ]; then
+			if [ "$running_state" = "running" ]; then
+				log_warn "$container_name has no healthcheck, assuming ready"
+				return 0
+			fi
+		fi
+
+		# Show progress every 10 seconds
+		if [ $((counter % 10)) -eq 0 ]; then
+			log_info "  [${counter}s] $container_name: $health_status"
 		fi
 
 		counter=$((counter + 1))
@@ -124,6 +171,11 @@ wait_for_healthy() {
 	done
 
 	log_error "$container_name did not become healthy within ${max_wait}s"
+	log_error "Last 10 lines of container logs:"
+	docker logs --tail 10 "$container_name" 2>&1 | while IFS= read -r line; do
+		echo "  $line"
+	done
+
 	return 1
 }
 
