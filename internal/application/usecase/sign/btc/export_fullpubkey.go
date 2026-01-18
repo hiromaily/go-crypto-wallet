@@ -128,14 +128,8 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 	}
 
 	for _, purpose := range purposes {
-		// Create coin-specific strategy
-		purposeStrategy, stratErr := infraKey.CreateCoinKeyStrategy(u.coinTypeCode, u.chainConfig)
-		if stratErr != nil {
-			return "", fmt.Errorf("failed to create coin strategy for purpose %v: %w", purpose, stratErr)
-		}
-
-		// Create HDKey for this BIP purpose
-		hdKey := infraKey.NewHDKey(purpose, u.coinTypeCode, u.chainConfig, purposeStrategy)
+		// Create HDKey for this BIP purpose, reusing the strategy created outside the loop
+		hdKey := infraKey.NewHDKey(purpose, u.coinTypeCode, u.chainConfig, coinStrategy)
 
 		// Derive extended public key from seed
 		descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)

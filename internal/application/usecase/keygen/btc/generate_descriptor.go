@@ -9,6 +9,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 
+	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -29,6 +30,7 @@ type generateDescriptorUseCase struct {
 	seedRepo           repocold.SeedRepositorier
 	coinTypeCode       domainCoin.CoinTypeCode
 	multisigConfig     *domainAccount.MultisigConfig
+	coinStrategy       portsWallet.CoinKeyStrategy // Coin-specific key generation strategy
 }
 
 // NewGenerateDescriptorUseCase creates a descriptor generation use case.
@@ -40,6 +42,7 @@ func NewGenerateDescriptorUseCase(
 	seedRepo repocold.SeedRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	multisigConfig *domainAccount.MultisigConfig,
+	coinStrategy portsWallet.CoinKeyStrategy,
 ) keygenusecase.GenerateDescriptorUseCase {
 	return &generateDescriptorUseCase{
 		descriptorService:  descriptorService,
@@ -49,6 +52,7 @@ func NewGenerateDescriptorUseCase(
 		seedRepo:           seedRepo,
 		coinTypeCode:       coinTypeCode,
 		multisigConfig:     multisigConfig,
+		coinStrategy:       coinStrategy,
 	}
 }
 
@@ -401,14 +405,8 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 		return apibtcimpl.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
 	}
 
-	// Create coin-specific strategy
-	coinStrategy, err := infraKey.CreateCoinKeyStrategy(u.coinTypeCode, u.chainConfig)
-	if err != nil {
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf("failed to create coin strategy: %w", err)
-	}
-
-	// Create HD key for this purpose
-	hdKey := infraKey.NewHDKey(purposeType, u.coinTypeCode, u.chainConfig, coinStrategy)
+	// Create HD key for this purpose using the strategy provided at initialization
+	hdKey := infraKey.NewHDKey(purposeType, u.coinTypeCode, u.chainConfig, u.coinStrategy)
 
 	// Create descriptor generator
 	descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)
