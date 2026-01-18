@@ -187,9 +187,8 @@ This could indicate:
 1. **Multisig addresses not created correctly**
 
    ```bash
-   # Debug: Check address in database
-   docker compose exec -T wallet-db mysql -u root -proot watch -e \
-     "SELECT wallet_address, account FROM address WHERE coin='bch' AND account='payment' LIMIT 5"
+   # Debug: Check address in database (using abstraction function)
+   db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='bch' AND account='payment' LIMIT 5"
    ```
 
    Address should start with `2...` (P2SH format in regtest).
@@ -331,10 +330,8 @@ sign2 -c config/wallet/bch/sign2.yaml --coin bch --wallet sign2 export fullpubke
 **Steps**:
 
 ```bash
-# 1. Verify fullpubkeys were imported into keygen
-# Check database
-docker compose exec -T wallet-db mysql -u root -proot keygen -e \
-  "SELECT * FROM auth_fullpubkey LIMIT 5"
+# 1. Verify fullpubkeys were imported into keygen (using abstraction function)
+db_query "keygen" "SELECT * FROM auth_fullpubkey LIMIT 5"
 
 # 2. Re-create multisig addresses (only for deposit, payment, stored)
 keygen -c config/wallet/bch/keygen.yaml --coin bch create multisig --account deposit
@@ -391,18 +388,21 @@ docker exec bch-watch bitcoin-cli -regtest -rpcwallet=watch \
 
 # UTXO list
 docker exec bch-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
+```
 
+### Database Queries
+
+> **Note**: Database queries depend on `DB_TYPE` setting. See "Database Debug Commands" in @.claude/rules/bch/e2e-script.md
+
+```bash
 # Check DB addresses (should be P2SH `2...` format)
-docker compose exec -T wallet-db mysql -u root -proot watch -e \
-  "SELECT wallet_address, account FROM address WHERE coin='bch' LIMIT 10"
+db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='bch' LIMIT 10"
 
 # Check payment requests
-docker compose exec -T wallet-db mysql -u root -proot watch -e \
-  "SELECT * FROM payment_request WHERE coin='bch'"
+db_query "watch" "SELECT * FROM payment_request WHERE coin='bch'"
 
 # Check fullpubkeys in keygen DB
-docker compose exec -T wallet-db mysql -u root -proot keygen -e \
-  "SELECT * FROM auth_fullpubkey LIMIT 5"
+db_query "keygen" "SELECT * FROM auth_fullpubkey LIMIT 5"
 ```
 
 ### Log Check

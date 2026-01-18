@@ -93,6 +93,47 @@ BCH uses separate configuration files from BTC:
 | 2-of-3 Multisig | `config/wallet/account/account_2of3.yaml` |
 | 3-of-3 Multisig | `config/wallet/account/account_3of3.yaml` |
 
+## Database Configuration
+
+E2E scripts support two database backends via the `DB_TYPE` environment variable:
+
+| DB_TYPE | Description | Docker MySQL | Use Case |
+|---------|-------------|--------------|----------|
+| `sqlite` (default) | Local SQLite file | Not required | Fast testing, CI/CD |
+| `mysql` | Docker MySQL container | Required | Full integration test |
+
+### Usage
+
+```bash
+# SQLite (default) - faster startup, no Docker MySQL needed
+./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+
+# MySQL - traditional Docker-based testing
+DB_TYPE=mysql ./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+```
+
+### Database Debug Commands
+
+Use the database abstraction functions from `bch_common.sh` for queries:
+
+```bash
+# Query addresses (works with both SQLite and MySQL)
+db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='bch' LIMIT 10"
+
+# Query payment requests
+db_query "watch" "SELECT * FROM payment_request WHERE coin='bch'"
+
+# Query account keys
+db_query "keygen" "SELECT * FROM account_key LIMIT 5"
+```
+
+**Manual queries** (when abstraction functions are not available):
+
+| DB_TYPE | Command |
+|---------|---------|
+| `sqlite` | `sqlite3 ./data/sqlite/bch/e2e.db "SELECT ..."` |
+| `mysql` | `docker compose exec -T wallet-db mysql -u root -proot watch -e "SELECT ..."` |
+
 ## BCH-Specific Implementation Rules
 
 ### DO NOT (Prohibited)

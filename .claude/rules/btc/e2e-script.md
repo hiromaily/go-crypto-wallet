@@ -111,6 +111,28 @@ When `DB_TYPE=sqlite`:
 3. `btc_setup_infrastructure` initializes SQLite with all schemas
 4. No Docker MySQL container is started
 
+### Database Debug Commands
+
+Use the database abstraction functions from `btc_common.sh` for queries:
+
+```bash
+# Query addresses (works with both SQLite and MySQL)
+db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='btc' LIMIT 10"
+
+# Query payment requests
+db_query "watch" "SELECT * FROM payment_request WHERE coin='btc'"
+
+# Query account keys
+db_query "keygen" "SELECT * FROM account_key LIMIT 5"
+```
+
+**Manual queries** (when abstraction functions are not available):
+
+| DB_TYPE | Command |
+|---------|---------|
+| `sqlite` | `sqlite3 ./data/sqlite/btc/e2e.db "SELECT ..."` |
+| `mysql` | `docker compose exec -T wallet-db mysql -u root -proot watch -e "SELECT ..."` |
+
 ## Configuration File Policy (Important)
 
 ### ❌ Do NOT Edit Config Files Directly

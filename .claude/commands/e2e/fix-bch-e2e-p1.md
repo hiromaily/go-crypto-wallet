@@ -158,9 +158,8 @@ This could indicate:
    BCH regtest uses legacy format (`m.../n...`), not CashAddr.
 
    ```bash
-   # Check address in database
-   docker compose exec -T wallet-db mysql -u root -proot watch -e \
-     "SELECT wallet_address FROM address WHERE coin='bch' AND account='payment' LIMIT 5"
+   # Check address in database (using abstraction function)
+   db_query "watch" "SELECT wallet_address FROM address WHERE coin='bch' AND account='payment' LIMIT 5"
    ```
 
 4. **Rescan not performed**
@@ -269,14 +268,18 @@ docker exec bch-watch bitcoin-cli -regtest -rpcwallet=watch \
 
 # UTXO list
 docker exec bch-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
+```
 
-# Check DB addresses
-docker compose exec -T wallet-db mysql -u root -proot watch -e \
-  "SELECT wallet_address, account FROM address WHERE coin='bch' LIMIT 10"
+### Database Queries
+
+> **Note**: Database queries depend on `DB_TYPE` setting. See "Database Debug Commands" in @.claude/rules/bch/e2e-script.md
+
+```bash
+# Check DB addresses (using abstraction function)
+db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='bch' LIMIT 10"
 
 # Check payment requests
-docker compose exec -T wallet-db mysql -u root -proot watch -e \
-  "SELECT * FROM payment_request WHERE coin='bch'"
+db_query "watch" "SELECT * FROM payment_request WHERE coin='bch'"
 ```
 
 ### Log Check
