@@ -234,6 +234,61 @@ Working on BCH task?
 | Bech32/Bech32m addresses | CashAddr format (`q...`, `p...`) |
 | Taproot (P2TR) | Not supported - use P2PKH or P2SH |
 
+---
+
+## 📁 BTC → BCH Use Case File Mapping
+
+**When cointype is BCH, use the BCH-specific implementation files instead of BTC files.**
+
+### Watch Wallet Use Cases
+
+| BTC File (DO NOT USE for BCH) | BCH Alternative |
+|-------------------------------|-----------------|
+| `internal/application/usecase/watch/btc/create_transaction.go` | `internal/application/usecase/watch/bch/create_transaction.go` |
+| `internal/application/usecase/watch/btc/send_transaction.go` | `internal/application/usecase/watch/bch/send_transaction.go` |
+| `internal/application/usecase/watch/btc/import_descriptor.go` | ❌ Not applicable (BCH uses `ImportAddress`) |
+| `internal/application/usecase/watch/btc/musig2_aggregate.go` | ❌ Not applicable (BCH does not support MuSig2) |
+
+### Keygen Wallet Use Cases
+
+| BTC File (DO NOT USE for BCH) | BCH Alternative |
+|-------------------------------|-----------------|
+| `internal/application/usecase/keygen/btc/sign_transaction.go` | `internal/application/usecase/keygen/bch/sign_transaction.go` |
+| `internal/application/usecase/keygen/btc/generate_descriptor.go` | ❌ Not applicable (BCH does not support Descriptors) |
+| `internal/application/usecase/keygen/btc/export_descriptor.go` | ❌ Not applicable (BCH does not support Descriptors) |
+| `internal/application/usecase/keygen/btc/musig2_sign.go` | ❌ Not applicable (BCH does not support MuSig2) |
+| `internal/application/usecase/keygen/btc/musig2_nonce.go` | ❌ Not applicable (BCH does not support MuSig2) |
+| `internal/application/usecase/keygen/btc/create_musig2_address.go` | ❌ Not applicable (BCH does not support MuSig2) |
+
+### Sign Wallet Use Cases
+
+| BTC File (DO NOT USE for BCH) | BCH Alternative |
+|-------------------------------|-----------------|
+| `internal/application/usecase/sign/btc/sign_transaction.go` | `internal/application/usecase/sign/bch/sign_transaction.go` |
+| `internal/application/usecase/sign/btc/musig2_sign.go` | ❌ Not applicable (BCH does not support MuSig2) |
+| `internal/application/usecase/sign/btc/musig2_nonce.go` | ❌ Not applicable (BCH does not support MuSig2) |
+
+### Key Differences in Implementation
+
+| Aspect | BTC (`watch/btc/create_transaction.go`) | BCH (`watch/bch/create_transaction.go`) |
+|--------|----------------------------------------|----------------------------------------|
+| Transaction Format | PSBT (BIP174) | Raw Transaction Hex |
+| Output File | `.psbt` | `.hex` |
+| File Generation | `generatePSBTFile()` | `generateRawTxHexFile()` |
+| Interface Used | `createTxBTCClient` (includes `PSBTCreator`) | `createTxBCHClient` (no PSBT methods) |
+
+### DI Container Configuration
+
+The DI container (`internal/di/container.go`) must inject the correct use case based on cointype:
+
+```go
+// For BTC cointype
+watchusecase.NewCreateTransactionUseCase(btcClient, ...)  // Uses PSBT
+
+// For BCH cointype
+bchwatchusecase.NewCreateTransactionUseCase(bchClient, ...) // Uses Raw TX Hex
+```
+
 ## BCH Signing Requirements
 
 When signing BCH transactions, you MUST use:

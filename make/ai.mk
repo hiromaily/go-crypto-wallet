@@ -52,7 +52,7 @@ add-notion-mcp-by-claude:
 #   - .md -> .mdc extension
 .PHONY: sync-cursor-rules
 sync-cursor-rules:
-	@./scripts/ai-agent/sync-rule-claude-to-cursor.sh --force --verbose
+	@./scripts/ai-agent/sync-rule-claude-to-cursor.sh --clean --force --verbose
 
 # Dry-run: preview what would be converted
 .PHONY: sync-cursor-rules-dry

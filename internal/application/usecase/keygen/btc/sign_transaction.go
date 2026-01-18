@@ -1,3 +1,14 @@
+// Package btc provides BTC-specific keygen signing use cases.
+//
+// WARNING: This file is for BTC (Bitcoin) ONLY.
+// If cointype is BCH (Bitcoin Cash), DO NOT modify this file.
+// Use the BCH-specific implementation instead:
+//
+//	internal/application/usecase/keygen/bch/sign_transaction.go
+//
+// Key differences:
+//   - BTC: Signs PSBT files with PSBTSigner interface, supports Taproot/Schnorr
+//   - BCH: Signs raw transaction hex with SIGHASH_FORKID
 package btc
 
 import (

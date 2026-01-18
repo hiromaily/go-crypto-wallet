@@ -1,3 +1,14 @@
+// Package btc provides BTC-specific transaction creation use cases.
+//
+// WARNING: This file is for BTC (Bitcoin) ONLY.
+// If cointype is BCH (Bitcoin Cash), DO NOT modify this file.
+// Use the BCH-specific implementation instead:
+//
+//	internal/application/usecase/watch/bch/create_transaction.go
+//
+// Key differences:
+//   - BTC: Uses PSBT (BIP174) format, outputs .psbt files
+//   - BCH: Uses raw transaction hex format, outputs .hex files
 package btc
 
 import (

@@ -56,16 +56,19 @@ import (
 
 	// Use case imports
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	keygenusecasebch "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/bch"
 	keygenusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/btc"
 	keygenusecaseeth "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/eth"
 	keygenusecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/shared"
 	keygenusecasexrp "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/xrp"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
+	signusecasebch "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign/bch"
 	signusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign/btc"
 	signusecaseeth "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign/eth"
 	signusecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign/shared"
 	signusecasexrp "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign/xrp"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	watchusecasebch "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/bch"
 	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	watchusecaseeth "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/eth"
 	watchusecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/shared"
@@ -182,6 +185,14 @@ func (c *container) NewKeygener() wallets.Keygener {
 }
 
 func (c *container) newBTCKeygener() wallets.Keygener {
+	// Select BTC or BCH specific sign transaction use case
+	var signTxUseCase keygenusecase.SignTransactionUseCase
+	if c.conf.CoinTypeCode == domainCoin.BCH {
+		signTxUseCase = c.newBCHKeygenSignTransactionUseCase()
+	} else {
+		signTxUseCase = c.newBTCKeygenSignTransactionUseCase()
+	}
+
 	return btcwallet.NewBTCKeygen(
 		c.newBTC(),
 		c.pkgContainer.NewDatabaseClient(),
@@ -192,7 +203,7 @@ func (c *container) newBTCKeygener() wallets.Keygener {
 		c.newBTCKeygenImportFullPubkeyUseCase(),
 		c.newBTCKeygenCreateMultisigAddressUseCase(),
 		c.newKeygenExportAddressUseCase(),
-		c.newBTCKeygenSignTransactionUseCase(),
+		signTxUseCase,
 		c.walletType,
 	)
 }
@@ -290,6 +301,14 @@ func (c *container) AddressType() domainAddress.AddrType {
 }
 
 func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer {
+	// Select BTC or BCH specific sign transaction use case
+	var signTxUseCase signusecase.SignTransactionUseCase
+	if c.conf.CoinTypeCode == domainCoin.BCH {
+		signTxUseCase = c.newBCHSignTransactionUseCase()
+	} else {
+		signTxUseCase = c.newBTCSignTransactionUseCase()
+	}
+
 	return btcwallet.NewBTCSign(
 		c.newBTC(),
 		c.pkgContainer.NewDatabaseClient(),
@@ -300,19 +319,30 @@ func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer
 		c.NewSignGenerateAuthKeyUseCase(),
 		c.newBTCSignImportPrivateKeyUseCase(authType),
 		c.newBTCSignExportFullPubkeyUseCase(authType),
-		c.newBTCSignTransactionUseCase(),
+		signTxUseCase,
 		c.walletType,
 	)
 }
 
 func (c *container) newBTCWalleter() wallets.Watcher {
+	// Select BTC or BCH specific use cases
+	var createTxUseCase watchusecase.CreateTransactionUseCase
+	var sendTxUseCase watchusecase.SendTransactionUseCase
+	if c.conf.CoinTypeCode == domainCoin.BCH {
+		createTxUseCase = c.newBCHWatchCreateTransactionUseCase()
+		sendTxUseCase = c.newBCHWatchSendTransactionUseCase()
+	} else {
+		createTxUseCase = c.newBTCWatchCreateTransactionUseCase()
+		sendTxUseCase = c.newBTCWatchSendTransactionUseCase()
+	}
+
 	return btcwallet.NewBTCWatch(
 		c.newBTC(),
 		c.pkgContainer.NewDatabaseClient(),
 		c.conf.AddressType,
-		c.newBTCWatchCreateTransactionUseCase(),
+		createTxUseCase,
 		c.newBTCWatchMonitorTransactionUseCase(),
-		c.newBTCWatchSendTransactionUseCase(),
+		sendTxUseCase,
 		c.newBTCWatchImportAddressUseCase(),
 		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
@@ -631,7 +661,7 @@ func (c *container) newAddressRepo() repowatch.AddressRepositorier {
 
 func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
 	return address.NewAddressFileRepository(
-		c.conf.FilePath.FullPubKey,
+		c.conf.FilePath.Address,
 	)
 }
 
@@ -869,8 +899,10 @@ func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) repocol
 
 func (c *container) NewWatchCreateTransactionUseCase() any {
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCOnly(c.conf.CoinTypeCode):
 		return c.newBTCWatchCreateTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.BCH:
+		return c.newBCHWatchCreateTransactionUseCase()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHWatchCreateTransactionUseCase()
 	case c.conf.CoinTypeCode == domainCoin.XRP:
@@ -895,8 +927,10 @@ func (c *container) NewWatchMonitorTransactionUseCase() any {
 
 func (c *container) NewWatchSendTransactionUseCase() any {
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCOnly(c.conf.CoinTypeCode):
 		return c.newBTCWatchSendTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.BCH:
+		return c.newBCHWatchSendTransactionUseCase()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHWatchSendTransactionUseCase()
 	case c.conf.CoinTypeCode == domainCoin.XRP:
@@ -1000,8 +1034,10 @@ func (c *container) NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCa
 
 func (c *container) NewKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCOnly(c.conf.CoinTypeCode):
 		return c.newBTCKeygenSignTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.BCH:
+		return c.newBCHKeygenSignTransactionUseCase()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHKeygenSignTransactionUseCase()
 	case c.conf.CoinTypeCode == domainCoin.XRP:
@@ -1031,8 +1067,10 @@ func (c *container) NewKeygenMuSig2SignUseCase() keygenusecase.MuSig2SignUseCase
 
 func (c *container) NewSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCOnly(c.conf.CoinTypeCode):
 		return c.newBTCSignTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.BCH:
+		return c.newBCHSignTransactionUseCase()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHSignTransactionUseCase()
 	case c.conf.CoinTypeCode == domainCoin.XRP:
@@ -1149,6 +1187,34 @@ func (c *container) newBTCWatchAggregateMuSig2SignaturesUseCase() watchusecase.A
 	return watchusecasebtc.NewAggregateMuSig2SignaturesUseCase(
 		c.newMuSig2Service(),
 		c.newBTC(),
+	)
+}
+
+// BCH Watch Use Cases
+
+func (c *container) newBCHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
+	return watchusecasebch.NewCreateBCHTransactionUseCase(
+		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
+		c.pkgContainer.NewDatabaseClient(),
+		c.newAddressRepo(),
+		c.newBTCTxRepo(),
+		c.newBTCTxInputRepo(),
+		c.newBTCTxOutputRepo(),
+		c.newPaymentRequestRepo(),
+		c.newTxFileRepo(),
+		c.newDepositAccount(),
+		c.newPaymentAccount(),
+		c.walletType,
+	)
+}
+
+func (c *container) newBCHWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
+	return watchusecasebch.NewBCHSendTransactionUseCase(
+		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
+		c.newAddressRepo(),
+		c.newBTCTxRepo(),
+		c.newBTCTxOutputRepo(),
+		c.newTxFileRepo(),
 	)
 }
 
@@ -1363,6 +1429,15 @@ func (c *container) newBTCKeygenSignTransactionUseCase() keygenusecase.SignTrans
 	)
 }
 
+func (c *container) newBCHKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
+	return keygenusecasebch.NewBCHSignTransactionUseCase(
+		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
+		c.newAccountKeyRepo(),
+		c.newTxFileRepo(),
+		c.newMultiAccount(),
+	)
+}
+
 func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecaseeth.NewSignTransactionUseCase(
 		c.newETH(),
@@ -1401,6 +1476,18 @@ func (c *container) newBTCKeygenMuSig2SignUseCase() keygenusecase.MuSig2SignUseC
 func (c *container) newBTCSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecasebtc.NewSignTransactionUseCase(
 		c.newBTC(),
+		c.newAccountKeyRepo(),
+		c.newAuthKeyRepo(),
+		c.newTxFileRepo(),
+		c.newMultiAccount(),
+		c.walletType,
+		c.AuthType(),
+	)
+}
+
+func (c *container) newBCHSignTransactionUseCase() signusecase.SignTransactionUseCase {
+	return signusecasebch.NewBCHSignTransactionUseCase(
+		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
 		c.newAccountKeyRepo(),
 		c.newAuthKeyRepo(),
 		c.newTxFileRepo(),
