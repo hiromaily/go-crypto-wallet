@@ -2,6 +2,39 @@
 
 This document describes the database schema management workflow and SQLC code generation for the go-crypto-wallet project.
 
+## Supported Databases
+
+The project supports two database backends:
+
+| Database | Use Case | Configuration |
+|----------|----------|---------------|
+| **MySQL** | Production, full integration testing | Docker container |
+| **SQLite** | E2E testing, CI/CD, lightweight testing | Local file |
+
+### Database Type Configuration
+
+Database type is configured in wallet YAML files:
+
+```yaml
+database:
+  type: "sqlite"  # or "mysql"
+  mysql:
+    host: "127.0.0.1:3306"
+    dbname: "watch"
+    user: "hiromaily"
+    pass: "hiromaily"
+  sqlite:
+    path: "./data/sqlite/btc/e2e.db"
+    debug: true
+```
+
+Or override via environment variables:
+
+```bash
+export WALLET_DATABASE_TYPE=sqlite
+export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
+```
+
 ## Database Schema Changes
 
 This project uses [Atlas](https://atlasgo.io/) for database schema management with HCL (HashiCorp Configuration Language) as the source of truth.
@@ -119,16 +152,33 @@ make check-build
 **Source**: `tools/sqlc/schemas/*.sql` (auto-generated) and `tools/sqlc/queries/*.sql` (manually edited)
 **Command**: `make sqlc` (or `cd tools/sqlc && sqlc generate`)
 
+### MySQL SQLC
+
 **Generated Files**:
 
-- `internal/infrastructure/database/sqlc/*.go` (15 files)
+- `internal/infrastructure/database/mysql/sqlcgen/*.go` (15 files)
   - `models.go` - Database models
   - `db.go` - Database connection code
-  - `*.sql.go` - Query functions (account_key, address, auth_account_key,
-    auth_fullpubkey, btc_tx, btc_tx_input, btc_tx_output, eth_detail_tx,
-    payment_request, seed, tx, xrp_account_key, xrp_detail_tx)
+  - `*.sql.go` - Query functions
 
-**Note**: The legacy location `pkg/db/rdb/sqlcgen/*.go` is no longer generated and can be safely deleted.
+### SQLite SQLC
+
+**Config**: `tools/sqlc/sqlc_sqlite.yml`
+**Schema**: `tools/sqlc/schemas_sqlite/*.sql`
+**Command**: `make sqlc-sqlite`
+
+**Generated Files**:
+
+- `internal/infrastructure/database/sqlite/sqlcgen/*.go`
+
+**Schema Conversion Notes** (MySQL → SQLite):
+
+| MySQL | SQLite |
+|-------|--------|
+| `ENUM('a','b','c')` | `TEXT CHECK(column IN ('a','b','c'))` |
+| `AUTO_INCREMENT` | `AUTOINCREMENT` |
+| `TINYINT(1)` | `INTEGER` |
+| `DATETIME DEFAULT CURRENT_TIMESTAMP` | `TEXT DEFAULT CURRENT_TIMESTAMP` |
 
 **Note**: SQLC generates type-safe Go code from SQL queries and schemas.
 

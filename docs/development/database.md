@@ -5,16 +5,29 @@ This document describes the database architecture and operations for the go-cryp
 ## Table of Contents
 
 - [Overview](#overview)
+- [Supported Databases](#supported-databases)
 - [Architecture](#architecture)
 - [Schema Design](#schema-design)
 - [Setup and Configuration](#setup-and-configuration)
 - [Common Operations](#common-operations)
 - [Database Management](#database-management)
 - [Schema Migrations with Atlas](#schema-migrations-with-atlas)
+- [SQLite for E2E Testing](#sqlite-for-e2e-testing)
 - [Troubleshooting](#troubleshooting)
 - [Migration Guide](#migration-guide)
 
 ## Overview
+
+The project supports **two database backends**:
+
+| Database | Use Case | Features |
+|----------|----------|----------|
+| **MySQL** | Production, full testing | Docker container, schema separation |
+| **SQLite** | E2E testing, CI/CD | Local file, fast startup, no Docker DB required |
+
+## Supported Databases
+
+### MySQL (Production)
 
 The project uses a **single MySQL 8.4 container** with **three separate schemas** to manage wallet data:
 
@@ -619,6 +632,97 @@ For new schema changes:
 3. Check database connection
 
 For more detailed information, see [Atlas README](../../tools/atlas/README.md).
+
+## SQLite for E2E Testing
+
+SQLite provides a lightweight alternative for E2E testing without requiring Docker MySQL.
+
+### Benefits
+
+- **Faster startup**: No Docker MySQL container needed
+- **Parallel testing**: Each test can use separate database files
+- **Lighter CI/CD**: Reduced infrastructure requirements
+- **Simpler debugging**: Direct file access
+
+### Configuration
+
+#### Config Files
+
+All wallet config files support SQLite:
+
+```yaml
+database:
+  type: "sqlite"  # mysql or sqlite
+  mysql:
+    host: "127.0.0.1:3306"
+    dbname: "watch"
+  sqlite:
+    path: "./data/sqlite/btc/e2e.db"
+    debug: true
+```
+
+#### Environment Variables
+
+Override database type via environment variables:
+
+```bash
+export WALLET_DATABASE_TYPE=sqlite
+export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
+```
+
+### E2E Script Usage
+
+E2E scripts support the `DB_TYPE` environment variable:
+
+```bash
+# SQLite (default) - faster, no Docker MySQL
+make btc-e2e-reset P=1
+
+# MySQL - traditional Docker-based testing
+make btc-e2e-reset P=1 DB=mysql
+```
+
+### SQLite Schema Files
+
+SQLite-compatible schemas are located in:
+
+```
+tools/sqlc/schemas_sqlite/
+├── 01_watch.sql   # Watch wallet schema
+├── 02_keygen.sql  # Keygen wallet schema
+└── 03_sign.sql    # Sign wallet schema
+```
+
+These schemas are converted from MySQL with the following changes:
+
+| MySQL | SQLite |
+|-------|--------|
+| `ENUM('a','b')` | `TEXT CHECK(col IN ('a','b'))` |
+| `AUTO_INCREMENT` | `AUTOINCREMENT` |
+| `TINYINT(1)` | `INTEGER` |
+| `DATETIME DEFAULT CURRENT_TIMESTAMP` | `TEXT DEFAULT CURRENT_TIMESTAMP` |
+
+### SQLite Data Location
+
+SQLite database files are stored in:
+
+```
+data/sqlite/
+└── btc/
+    └── e2e.db  # Combined E2E test database
+```
+
+**Note**: Database files are gitignored (see `.gitignore`: `data/sqlite/**/*.db`)
+
+### SQLC Code Generation
+
+Generate SQLite-specific SQLC code:
+
+```bash
+make sqlc-sqlite
+```
+
+Generated files: `internal/infrastructure/database/sqlite/sqlcgen/`
 
 ## Troubleshooting
 

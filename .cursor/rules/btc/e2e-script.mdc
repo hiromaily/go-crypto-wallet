@@ -79,6 +79,41 @@ Use the appropriate configuration file based on the pattern:
 | 2-of-3 Multisig | `config/wallet/account/account_2of3.yaml` |
 | 3-of-3 Multisig | `config/wallet/account/account_3of3.yaml` |
 
+## Database Configuration
+
+E2E scripts support two database backends via the `DB_TYPE` environment variable:
+
+| DB_TYPE | Description | Docker MySQL | Use Case |
+|---------|-------------|--------------|----------|
+| `sqlite` (default) | Local SQLite file | Not required | Fast testing, CI/CD |
+| `mysql` | Docker MySQL container | Required | Full integration test |
+
+### Usage
+
+```bash
+# SQLite (default) - faster startup, no Docker MySQL needed
+make btc-e2e-reset P=1
+
+# MySQL - traditional Docker-based testing
+make btc-e2e-reset P=1 DB=mysql
+```
+
+### SQLite Configuration Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_TYPE` | `sqlite` | Database type |
+| `SQLITE_DB_PATH` | `./data/sqlite/btc/e2e.db` | SQLite database file |
+
+### How It Works
+
+When `DB_TYPE=sqlite`:
+
+1. Environment variables `WALLET_DATABASE_TYPE` and `WALLET_DATABASE_SQLITE_PATH` are exported
+2. All wallet commands (watch, keygen, sign) use SQLite instead of MySQL
+3. `btc_setup_infrastructure` initializes SQLite with all schemas
+4. No Docker MySQL container is started
+
 ## Configuration File Policy (Important)
 
 ### ❌ Do NOT Edit Config Files Directly
