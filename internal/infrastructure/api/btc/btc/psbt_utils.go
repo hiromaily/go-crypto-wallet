@@ -144,7 +144,7 @@ func (b *Bitcoin) WalletProcessPsbt(psbtBase64 string, sign bool) (string, bool,
 }
 
 // serializePSBT serializes a PSBT packet to base64 string.
-func (b *Bitcoin) serializePSBT(packet *psbt.Packet) (string, error) {
+func (*Bitcoin) serializePSBT(packet *psbt.Packet) (string, error) {
 	var buf bytes.Buffer
 	if err := packet.Serialize(&buf); err != nil {
 		return "", fmt.Errorf("failed to serialize PSBT: %w", err)
@@ -153,7 +153,7 @@ func (b *Bitcoin) serializePSBT(packet *psbt.Packet) (string, error) {
 }
 
 // hasPartialSignatures checks if any input in the PSBT has partial signatures.
-func (b *Bitcoin) hasPartialSignatures(packet *psbt.Packet) bool {
+func (*Bitcoin) hasPartialSignatures(packet *psbt.Packet) bool {
 	for _, input := range packet.Inputs {
 		if len(input.PartialSigs) > 0 {
 			return true

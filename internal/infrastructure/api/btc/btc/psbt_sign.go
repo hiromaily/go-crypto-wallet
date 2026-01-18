@@ -182,15 +182,15 @@ func buildP2PKHScriptCodeForP2SHWPKH(redeemScript []byte, inputIndex int, utxoVa
 	// Validate format: must be OP_0 <20-byte-hash>
 	// Format: [OP_0 (0x00), length byte (0x14 = 20 decimal), 20-byte pubkey hash]
 	if redeemScript[0] != txscript.OP_0 {
-		return nil, newPSBTError(inputIndex, "invalid P2WPKH redeemScript format: must start with OP_0 (0x00), got 0x%02x",
-			redeemScript[0])
+		return nil, newPSBTError(inputIndex,
+			"invalid P2WPKH redeemScript format: must start with OP_0 (0x00), got 0x%02x", redeemScript[0])
 	}
 
 	// Validate length byte (0x14 = 20 bytes for pubkey hash)
 	const pubKeyHashLength = 20
 	if redeemScript[1] != pubKeyHashLength {
-		return nil, newPSBTError(inputIndex, "invalid P2WPKH redeemScript format: invalid length byte, expected 0x14, got 0x%02x",
-			redeemScript[1])
+		return nil, newPSBTError(inputIndex,
+			"invalid P2WPKH redeemScript format: invalid length byte, expected 0x14, got 0x%02x", redeemScript[1])
 	}
 
 	// Extract pubkey hash (now safe after validation)
@@ -470,7 +470,7 @@ func (*Bitcoin) signLegacyInput(
 }
 
 // newPSBTError creates a formatted PSBT error
-func newPSBTError(inputIndex int, format string, args ...interface{}) error {
+func newPSBTError(inputIndex int, format string, args ...any) error {
 	return &psbtError{inputIndex: inputIndex, message: format, args: args}
 }
 
@@ -478,7 +478,7 @@ func newPSBTError(inputIndex int, format string, args ...interface{}) error {
 type psbtError struct {
 	inputIndex int
 	message    string
-	args       []interface{}
+	args       []any
 }
 
 func (e *psbtError) Error() string {
