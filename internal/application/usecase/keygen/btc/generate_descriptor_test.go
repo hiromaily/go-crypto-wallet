@@ -25,10 +25,13 @@ import (
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
-// createTestCoinStrategy creates a coin strategy for testing
-func createTestCoinStrategy(t *testing.T, coinType domainCoin.CoinTypeCode, conf *chaincfg.Params) portsWallet.CoinKeyStrategy {
+// createTestCoinStrategy creates a BTC coin strategy for testing
+func createTestCoinStrategy(
+	t *testing.T,
+	conf *chaincfg.Params,
+) portsWallet.CoinKeyStrategy {
 	t.Helper()
-	strategy, err := infraKey.CreateCoinKeyStrategy(coinType, conf)
+	strategy, err := infraKey.CreateCoinKeyStrategy(domainCoin.BTC, conf)
 	require.NoError(t, err, "Failed to create test coin strategy")
 	return strategy
 }
@@ -45,7 +48,7 @@ const (
 func TestNewGenerateDescriptorUseCase(t *testing.T) {
 	t.Parallel()
 
-	coinStrategy := createTestCoinStrategy(t, domainCoin.BTC, &chaincfg.MainNetParams)
+	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
@@ -73,7 +76,7 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 		},
 	}
 
-	coinStrategy := createTestCoinStrategy(t, domainCoin.BTC, &chaincfg.MainNetParams)
+	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
@@ -114,7 +117,7 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 	})
 
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
-	coinStrategy := createTestCoinStrategy(t, domainCoin.BTC, &chaincfg.MainNetParams)
+	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
@@ -155,7 +158,7 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 		},
 	})
 
-	coinStrategy := createTestCoinStrategy(t, domainCoin.BTC, &chaincfg.MainNetParams)
+	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
@@ -184,7 +187,7 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
 	t.Parallel()
 
-	coinStrategy := createTestCoinStrategy(t, domainCoin.BTC, &chaincfg.MainNetParams)
+	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
@@ -223,7 +226,7 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 	})
 
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
-	coinStrategy := createTestCoinStrategy(t, domainCoin.BTC, &chaincfg.MainNetParams)
+	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
@@ -271,7 +274,7 @@ func TestGenerateDescriptorUseCase_MultisigMissingSeed(t *testing.T) {
 		},
 	})
 
-	coinStrategy := createTestCoinStrategy(t, domainCoin.BTC, &chaincfg.MainNetParams)
+	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
