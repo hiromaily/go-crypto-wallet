@@ -16,6 +16,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
@@ -503,10 +504,13 @@ func (u *createTransactionUseCase) updateDB(
 		}
 	}()
 
+	// Wrap SQL transaction in abstract Transaction interface
+	tx := database.NewSQLTransaction(dtx)
+
 	// Create transactional repositories that use the transaction
-	txRepoWithTx := u.txRepo.WithTx(dtx)
-	txDetailRepoWithTx := u.txDetailRepo.WithTx(dtx)
-	payReqRepoWithTx := u.payReqRepo.WithTx(dtx)
+	txRepoWithTx := u.txRepo.WithTransaction(tx)
+	txDetailRepoWithTx := u.txDetailRepo.WithTransaction(tx)
+	payReqRepoWithTx := u.payReqRepo.WithTransaction(tx)
 
 	// Insert eth_tx
 	txID, err := txRepoWithTx.InsertUnsignedTx(targetAction)

@@ -19,6 +19,7 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
@@ -571,10 +572,13 @@ func (u *createTransactionUseCase) updateDB(
 		}
 	}()
 
+	// Wrap SQL transaction in abstract Transaction interface
+	tx := database.NewSQLTransaction(dtx)
+
 	// Create transactional repositories that use the transaction
-	txRepoWithTx := u.txRepo.WithTx(dtx)
-	txDetailRepoWithTx := u.txDetailRepo.WithTx(dtx)
-	payReqRepoWithTx := u.payReqRepo.WithTx(dtx)
+	txRepoWithTx := u.txRepo.WithTransaction(tx)
+	txDetailRepoWithTx := u.txDetailRepo.WithTransaction(tx)
+	payReqRepoWithTx := u.payReqRepo.WithTransaction(tx)
 
 	// Insert tx
 	txID, err := txRepoWithTx.InsertUnsignedTx(targetAction)

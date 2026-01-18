@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -262,10 +264,14 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 	return rowsAffected, nil
 }
 
-// WithTx returns a new repository instance that uses the provided transaction
-func (r *XRPDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) repowatch.XRPDetailTXRepositorier {
+// WithTransaction returns a new repository instance that uses the provided transaction
+func (r *XRPDetailTxInputRepositorySqlc) WithTransaction(tx persistence.Transaction) repowatch.XRPDetailTXRepositorier {
+	sqlTx := database.UnwrapSQLTx(tx)
+	if sqlTx == nil {
+		return r // Return the same repository if transaction cannot be unwrapped
+	}
 	return &XRPDetailTxInputRepositorySqlc{
-		queries:      r.queries.WithTx(tx),
+		queries:      r.queries.WithTx(sqlTx),
 		coinTypeCode: r.coinTypeCode,
 	}
 }

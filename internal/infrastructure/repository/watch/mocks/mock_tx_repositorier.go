@@ -5,8 +5,7 @@
 package mocks
 
 import (
-	"database/sql"
-
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	mock "github.com/stretchr/testify/mock"
@@ -334,16 +333,16 @@ func (_c *MockTxRepositorier_Update_Call) RunAndReturn(run func(txItem *transact
 	return _c
 }
 
-// WithTx provides a mock function for the type MockTxRepositorier
-func (_mock *MockTxRepositorier) WithTx(tx *sql.Tx) watch.TxRepositorier {
+// WithTransaction provides a mock function for the type MockTxRepositorier
+func (_mock *MockTxRepositorier) WithTransaction(tx persistence.Transaction) watch.TxRepositorier {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for WithTx")
+		panic("no return value specified for WithTransaction")
 	}
 
 	var r0 watch.TxRepositorier
-	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) watch.TxRepositorier); ok {
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) watch.TxRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
 		if ret.Get(0) != nil {
@@ -353,22 +352,22 @@ func (_mock *MockTxRepositorier) WithTx(tx *sql.Tx) watch.TxRepositorier {
 	return r0
 }
 
-// MockTxRepositorier_WithTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTx'
-type MockTxRepositorier_WithTx_Call struct {
+// MockTxRepositorier_WithTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTransaction'
+type MockTxRepositorier_WithTransaction_Call struct {
 	*mock.Call
 }
 
-// WithTx is a helper method to define mock.On call
-//   - tx *sql.Tx
-func (_e *MockTxRepositorier_Expecter) WithTx(tx interface{}) *MockTxRepositorier_WithTx_Call {
-	return &MockTxRepositorier_WithTx_Call{Call: _e.mock.On("WithTx", tx)}
+// WithTransaction is a helper method to define mock.On call
+//   - tx persistence.Transaction
+func (_e *MockTxRepositorier_Expecter) WithTransaction(tx interface{}) *MockTxRepositorier_WithTransaction_Call {
+	return &MockTxRepositorier_WithTransaction_Call{Call: _e.mock.On("WithTransaction", tx)}
 }
 
-func (_c *MockTxRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *MockTxRepositorier_WithTx_Call {
+func (_c *MockTxRepositorier_WithTransaction_Call) Run(run func(tx persistence.Transaction)) *MockTxRepositorier_WithTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *sql.Tx
+		var arg0 persistence.Transaction
 		if args[0] != nil {
-			arg0 = args[0].(*sql.Tx)
+			arg0 = args[0].(persistence.Transaction)
 		}
 		run(
 			arg0,
@@ -377,12 +376,12 @@ func (_c *MockTxRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *MockTxRepos
 	return _c
 }
 
-func (_c *MockTxRepositorier_WithTx_Call) Return(txRepositorier watch.TxRepositorier) *MockTxRepositorier_WithTx_Call {
+func (_c *MockTxRepositorier_WithTransaction_Call) Return(txRepositorier watch.TxRepositorier) *MockTxRepositorier_WithTransaction_Call {
 	_c.Call.Return(txRepositorier)
 	return _c
 }
 
-func (_c *MockTxRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) watch.TxRepositorier) *MockTxRepositorier_WithTx_Call {
+func (_c *MockTxRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) watch.TxRepositorier) *MockTxRepositorier_WithTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

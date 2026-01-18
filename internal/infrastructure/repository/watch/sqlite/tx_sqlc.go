@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlite/sqlcgen"
 )
 
@@ -157,11 +159,15 @@ func (r *TxRepositorySqlc) DeleteAll() (int64, error) {
 	return rowsAffected, nil
 }
 
-// WithTx returns a new repository instance that uses the provided transaction
-func (r *TxRepositorySqlc) WithTx(tx *sql.Tx) repowatch.TxRepositorier {
+// WithTransaction returns a new repository instance that uses the provided transaction
+func (r *TxRepositorySqlc) WithTransaction(tx persistence.Transaction) repowatch.TxRepositorier {
+	sqlTx := database.UnwrapSQLTx(tx)
+	if sqlTx == nil {
+		return r // Return the same repository if transaction cannot be unwrapped
+	}
 	return &TxRepositorySqlc{
 		db:           r.db,
-		queries:      r.queries.WithTx(tx),
+		queries:      r.queries.WithTx(sqlTx),
 		coinTypeCode: r.coinTypeCode,
 	}
 }

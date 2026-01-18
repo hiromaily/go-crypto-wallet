@@ -1,8 +1,7 @@
 package watch
 
 import (
-	"database/sql"
-
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 )
@@ -19,5 +18,5 @@ type XRPDetailTXRepositorier interface {
 	) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
-	WithTx(tx *sql.Tx) XRPDetailTXRepositorier
+	WithTransaction(tx persistence.Transaction) XRPDetailTXRepositorier
 }
