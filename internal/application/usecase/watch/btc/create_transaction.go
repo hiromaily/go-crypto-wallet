@@ -23,8 +23,20 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// createTxBTCClient defines the minimal interface needed for BTC transaction creation.
+// This follows the Interface Segregation Principle - depend only on methods actually used.
+type createTxBTCClient interface {
+	apibtc.ChainConfigProvider
+	apibtc.AmountConverter
+	apibtc.UTXOProvider
+	apibtc.RawTransactionCreator
+	apibtc.AddressOperator
+	apibtc.BalanceChecker
+	apibtc.PSBTCreator
+}
+
 type createTransactionUseCase struct {
-	btcClient       apibtc.Bitcoiner
+	btcClient       createTxBTCClient
 	dbConn          *sql.DB
 	addrRepo        repowatch.AddressRepositorier
 	txRepo          repowatch.BTCTxRepositorier

@@ -16,16 +16,35 @@ import (
 
 // Bitcoiner is the full Bitcoin/BitcoinCash interface.
 //
-// This interface is maintained for backward compatibility with existing code.
-// For new code, consider using the more specific interfaces:
+// Deprecated: This interface is too large and violates the Interface Segregation Principle.
+// New code should use the small, focused interfaces from interfaces_small.go instead:
+//
+//   - ChainConfigProvider: Chain configuration and coin type
+//   - AmountConverter: Amount format conversion
+//   - UTXOProvider: UTXO queries
+//   - RawTransactionCreator: Raw transaction creation
+//   - AddressOperator: Address operations
+//   - BalanceChecker: Balance queries
+//   - TransactionSender: Transaction broadcast
+//   - TransactionMonitor: Transaction monitoring
+//   - AddressImporter: Address import
+//   - PrivateKeyImporter: Private key import
+//   - DescriptorManager: Descriptor operations (BTC only)
+//   - PSBTCreator: Create PSBT (BTC only)
+//   - PSBTSigner: Sign PSBT (BTC only)
+//   - PSBTFinalizer: Finalize PSBT (BTC only)
+//   - RawTransactionSigner: Raw transaction signing
+//   - MultisigManager: Multisig address management
+//
+// For chain-specific interfaces:
 //   - BitcoinCompatible: Methods common to BTC and BCH
 //   - BTCOnly: Methods specific to BTC (PSBT, Descriptors, MuSig2)
-//   - BCHer: Interface for BCH operations (embeds BitcoinCompatible)
-//   - FullBitcoiner: Composed interface (BitcoinCompatible + BTCOnly)
+//   - BCHer: Interface for BCH operations
 //
 // See:
+//   - interfaces_small.go: Small, focused interfaces (recommended)
 //   - bitcoin_compatible.go: BitcoinCompatible interface
-//   - btc_only.go: BTCOnly and FullBitcoiner interfaces
+//   - btc_only.go: BTCOnly interface
 //   - bch_only.go: BCHer interface
 type Bitcoiner interface {
 	// public_account.go -> wrapper of GetAddressInfo to return account

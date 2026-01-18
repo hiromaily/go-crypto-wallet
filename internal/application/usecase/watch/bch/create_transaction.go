@@ -24,10 +24,22 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// createTxBCHClient defines the minimal interface needed for BCH transaction creation.
+// This follows the Interface Segregation Principle - depend only on methods actually used.
+// BCH does not use PSBT, so this interface excludes PSBT-related methods.
+type createTxBCHClient interface {
+	apibtc.ChainConfigProvider
+	apibtc.AmountConverter
+	apibtc.UTXOProvider
+	apibtc.RawTransactionCreator
+	apibtc.AddressOperator
+	apibtc.BalanceChecker
+}
+
 // createTransactionUseCase implements BCH-specific transaction creation.
 // Unlike BTC, BCH uses Raw Transaction Hex format instead of PSBT.
 type createTransactionUseCase struct {
-	bchClient       apibtc.BCHer
+	bchClient       createTxBCHClient
 	dbConn          *sql.DB
 	addrRepo        repowatch.AddressRepositorier
 	txRepo          repowatch.BTCTxRepositorier

@@ -22,8 +22,16 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// signTxBTCClient defines the minimal interface needed for sign wallet PSBT signing.
+// This follows the Interface Segregation Principle - depend only on methods actually used.
+type signTxBTCClient interface {
+	apibtc.ChainConfigProvider // GetChainConf
+	apibtc.PSBTSigner          // SignPSBTWithKey
+	apibtc.PSBTHandler         // ParsePSBT
+}
+
 type signTransactionUseCase struct {
-	btc             apibtc.Bitcoiner
+	btc             signTxBTCClient
 	accountKeyRepo  repocold.BTCAccountKeyRepositorier
 	authKeyRepo     repocold.AuthAccountKeyRepositorier
 	txFileRepo      file.TransactionFileRepositorier

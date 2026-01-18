@@ -34,8 +34,15 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/retry"
 )
 
+// importDescBTCClient defines the minimal interface needed for BTC descriptor import.
+// This follows the Interface Segregation Principle - depend only on methods actually used.
+type importDescBTCClient interface {
+	apibtc.DescriptorManager // GetDescriptorInfo, ImportDescriptors, SetLabel
+	apibtc.AddressOperator   // GetAddressInfo
+}
+
 type importDescriptorUseCase struct {
-	btcClient apibtc.Bitcoiner
+	btcClient importDescBTCClient
 	parser    *apibtcimpl.DescriptorParser
 	chainConf *chaincfg.Params
 	addrRepo  repowatch.AddressRepositorier
