@@ -34,7 +34,7 @@ tracer:
   type: "none" # none, jaeger, datadog
 # Database configuration - choose between mysql or sqlite
 database:
-  type: "mysql" # mysql, sqlite
+  type: "sqlite" # mysql, sqlite
   mysql:
     host: "127.0.0.1:3306"
     dbname: "keygen"

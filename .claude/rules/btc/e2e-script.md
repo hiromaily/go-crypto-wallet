@@ -76,6 +76,63 @@ Use the appropriate configuration file based on the pattern:
 | 2-of-3 Multisig | `config/wallet/account/account_2of3.yaml` |
 | 3-of-3 Multisig | `config/wallet/account/account_3of3.yaml` |
 
+## Database Configuration
+
+E2E scripts support two database backends via the `DB_TYPE` environment variable:
+
+| DB_TYPE | Description | Docker MySQL | Use Case |
+|---------|-------------|--------------|----------|
+| `sqlite` (**default**) | Local SQLite file | Not required | Fast testing, CI/CD |
+| `mysql` | Docker MySQL container | Required | Full integration test |
+
+### Usage
+
+```bash
+# SQLite (default) - faster startup, no Docker MySQL needed
+make btc-e2e-reset P=1
+
+# MySQL - traditional Docker-based testing
+make btc-e2e-reset P=1 DB=mysql
+```
+
+### SQLite Configuration Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_TYPE` | `sqlite` | Database type |
+| `SQLITE_DB_PATH` | `./data/sqlite/btc/e2e.db` | SQLite database file |
+
+### How It Works
+
+When `DB_TYPE=sqlite`:
+
+1. Environment variables `WALLET_DATABASE_TYPE` and `WALLET_DATABASE_SQLITE_PATH` are exported
+2. All wallet commands (watch, keygen, sign) use SQLite instead of MySQL
+3. `btc_setup_infrastructure` initializes SQLite with all schemas
+4. No Docker MySQL container is started
+
+### Database Debug Commands
+
+Use the database abstraction functions from `btc_common.sh` for queries:
+
+```bash
+# Query addresses (works with both SQLite and MySQL)
+db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='btc' LIMIT 10"
+
+# Query payment requests
+db_query "watch" "SELECT * FROM payment_request WHERE coin='btc'"
+
+# Query account keys
+db_query "keygen" "SELECT * FROM account_key LIMIT 5"
+```
+
+**Manual queries** (when abstraction functions are not available):
+
+| DB_TYPE | Command |
+|---------|---------|
+| `sqlite` | `sqlite3 ./data/sqlite/btc/e2e.db "SELECT ..."` |
+| `mysql` | `docker compose exec -T wallet-db mysql -u root -proot watch -e "SELECT ..."` |
+
 ## Configuration File Policy (Important)
 
 ### ❌ Do NOT Edit Config Files Directly

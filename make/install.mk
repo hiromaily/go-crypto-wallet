@@ -32,6 +32,7 @@ install-tools-by-gomod:
 	go get -tool github.com/ethereum/go-ethereum/cmd/abigen@latest
 	go get -tool github.com/vektra/mockery/v3@latest
 	go get -tool github.com/evilmartians/lefthook@latest
+	go get -tool gotest.tools/gotestsum@latest
 	go get -tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go get -tool golang.org/x/vuln/cmd/govulncheck@latest
 	go get -tool honnef.co/go/tools/cmd/staticcheck@latest

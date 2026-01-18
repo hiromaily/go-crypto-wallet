@@ -37,6 +37,7 @@ data/fullpubkey/*
 data/keystore/*
 data/tx/*
 data/gaiad/*
+data/sqlite/**/*.db
 
 # Node files
 # BTC

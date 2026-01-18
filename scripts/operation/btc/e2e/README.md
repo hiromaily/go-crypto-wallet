@@ -268,6 +268,64 @@ RPC_PASSWORD=xyz
 
 # MySQL credentials (defaults are for regtest/development only)
 MYSQL_ROOT_PASSWORD=root
+
+# Database type selection (mysql or sqlite)
+DB_TYPE=mysql  # Default: mysql
+```
+
+## Database Configuration
+
+E2E scripts support two database backends:
+
+### MySQL (Default)
+
+Uses Docker MySQL container. This is the default and requires Docker running.
+
+```bash
+# Run with MySQL (default)
+./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+```
+
+### SQLite (Lightweight Testing)
+
+Uses local SQLite files. No Docker MySQL container required, enabling:
+
+- Faster test startup (no Docker database container)
+- Parallel test execution (each test can use separate DB files)
+- Lighter CI/CD environments
+- Testing without Docker MySQL overhead
+
+```bash
+# Run with SQLite
+DB_TYPE=sqlite ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+```
+
+### SQLite Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_TYPE` | `mysql` | Database type: `mysql` or `sqlite` |
+| `SQLITE_WATCH_DB_PATH` | `./data/sqlite/btc/watch.db` | SQLite database file for watch wallet |
+| `SQLITE_KEYGEN_DB_PATH` | `./data/sqlite/btc/keygen.db` | SQLite database file for keygen wallet |
+| `SQLITE_SIGN_DB_PATH` | `./data/sqlite/btc/sign.db` | SQLite database file for sign wallet |
+
+### Wallet Configuration for SQLite
+
+When using SQLite, update wallet config files to use SQLite:
+
+```yaml
+# config/wallet/btc/watch.yaml
+database:
+  type: "sqlite"
+  sqlite:
+    path: "./data/sqlite/btc/watch.db"
+    debug: true
+```
+
+Or use environment variable override:
+
+```bash
+WALLET_DATABASE_TYPE=sqlite WALLET_DATABASE_SQLITE_PATH="./data/sqlite/btc/watch.db" watch ...
 ```
 
 ## Common Utilities

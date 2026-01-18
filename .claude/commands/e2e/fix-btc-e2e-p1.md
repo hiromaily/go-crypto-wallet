@@ -232,14 +232,18 @@ docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch getbalances
 
 # UTXO list
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
+```
 
-# Check DB addresses
-docker compose exec -T wallet-db mysql -u root -proot watch -e \
-  "SELECT wallet_address, account FROM address WHERE coin='btc' LIMIT 10"
+### Database Queries
+
+> **Note**: Database queries depend on `DB_TYPE` setting. See "Database Debug Commands" in common rules.
+
+```bash
+# Check DB addresses (using abstraction function)
+db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='btc' LIMIT 10"
 
 # Check payment requests
-docker compose exec -T wallet-db mysql -u root -proot watch -e \
-  "SELECT * FROM payment_request WHERE coin='btc'"
+db_query "watch" "SELECT * FROM payment_request WHERE coin='btc'"
 ```
 
 ### Log Check
