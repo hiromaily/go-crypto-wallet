@@ -47,6 +47,7 @@ git checkout -b {type}/issue-{number}-{description}
 
 Ask the user:
 > "You are currently on branch `{current-branch}`. Should I:
+>
 > 1. Continue working on this branch?
 > 2. Switch to `main` and create a new branch for this task?"
 
@@ -242,14 +243,14 @@ Your commit message: <your-invalid-commit-message>
 
 ### ⚠️ MANDATORY: Ask Before Creating PR
 
-**PRを作成する前に、必ずユーザーに確認してください。**
+**Always ask the user before creating a PR.**
 
-複数のphaseに分かれたタスクでは、1つのbranchで複数のcommitが作成されます。
-すべてのcommitが完了するまでPRを作成しないでください。
+Multi-phase tasks create multiple commits on a single branch.
+Do not create a PR until all commits are complete.
 
 ```
 After commits are pushed, ALWAYS ask:
-> "PRを作成しますか？または追加の作業がありますか？"
+> "Would you like me to create a PR? Or is there additional work to do?"
 ```
 
 ### When to Ask
@@ -265,7 +266,7 @@ After commits are pushed, ALWAYS ask:
 ```bash
 git push -u origin {branch-name}
 
-# Ask user: "PRを作成しますか？"
+# Ask user: "Would you like me to create a PR?"
 # Only proceed if user confirms
 
 gh pr create --title "{type}: {description}" --body "$(cat <<'EOF'
@@ -401,7 +402,7 @@ Closes #{number}"
 git push -u origin {branch-name}
 
 # 7. Ask user before creating PR (REQUIRED)
-#    "PRを作成しますか？または追加の作業がありますか？"
+#    "Would you like me to create a PR? Or is there additional work?"
 #    Only create PR if user confirms
 gh pr create --title "{type}: {description}"
 ```
