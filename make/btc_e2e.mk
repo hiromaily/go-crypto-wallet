@@ -66,22 +66,25 @@ _btc-e2e-validate:
 	fi
 
 # Run E2E test with --reset flag (recommended for fresh start)
-# Note: build-all ensures binaries are up-to-date before running E2E tests
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: btc-e2e-reset
 btc-e2e-reset: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --reset
 
 # Run complete E2E test
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: btc-e2e
 btc-e2e: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH)
 
 # Run E2E test with verbose output
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: btc-e2e-verbose
 btc-e2e-verbose: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --verbose
 
 # Run E2E test in non-interactive mode (for CI/CD)
+# Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: btc-e2e-ci
 btc-e2e-ci: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --non-interactive

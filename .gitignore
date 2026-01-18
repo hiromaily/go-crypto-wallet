@@ -38,6 +38,8 @@ data/keystore/*
 data/tx/*
 data/gaiad/*
 data/sqlite/**/*.db
+data/sqlite/**/*.db-wal
+data/sqlite/**/*.db-shm
 
 # Node files
 # BTC

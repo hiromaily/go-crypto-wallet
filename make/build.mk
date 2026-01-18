@@ -5,7 +5,69 @@
 # Build on local
 # - appVersion is injected via LDFLAGS (defined in vars.mk)
 # - authName on sign works as account name
-#.PHONY: tidy
+
+#------------------------------------------------------------------------------
+# Go Source Files and Binary Paths
+#------------------------------------------------------------------------------
+# GO_SRCS: All Go source files in the project
+# - Used as dependencies for incremental builds
+# - When any .go file is modified, Make detects it and triggers rebuild
+# - Excludes vendor/ and .git/ directories
+GO_SRCS := $(shell find . -name '*.go' -not -path './vendor/*' -not -path './.git/*')
+
+# Binary output paths
+# - These are the actual executable files that `go build` produces
+# - Located in $GOPATH/bin/ so they're available in PATH
+WATCH_BIN  := $(GOPATH)/bin/watch
+KEYGEN_BIN := $(GOPATH)/bin/keygen
+SIGN1_BIN  := $(GOPATH)/bin/sign1
+SIGN2_BIN  := $(GOPATH)/bin/sign2
+WALLET_BINS := $(WATCH_BIN) $(KEYGEN_BIN) $(SIGN1_BIN) $(SIGN2_BIN)
+
+#------------------------------------------------------------------------------
+# Incremental Build Targets (file-based dependencies)
+#------------------------------------------------------------------------------
+# How it works:
+#   Make compares timestamps of the target file (binary) vs dependencies (source files).
+#   - If any dependency is NEWER than the target → rebuild
+#   - If target is NEWER than all dependencies → skip (already up-to-date)
+#
+# Example:
+#   $(WATCH_BIN): $(GO_SRCS) go.mod go.sum
+#   ↑ target      ↑ dependencies
+#
+#   1st run:  $GOPATH/bin/watch doesn't exist → build
+#   2nd run:  watch exists, sources unchanged → "Nothing to be done" (skip)
+#   3rd run:  internal/foo.go modified → rebuild
+#
+# Benefits:
+#   - `make btc-e2e-reset P=2` skips build if sources haven't changed
+#   - Saves ~10-30 seconds per E2E test run during development
+#
+# To force rebuild regardless of timestamps:
+#   make build-all-force
+
+$(WATCH_BIN): $(GO_SRCS) go.mod go.sum
+	@echo "Building watch..."
+	@go build -ldflags "$(LDFLAGS)" -o $@ ./cmd/watch/
+
+$(KEYGEN_BIN): $(GO_SRCS) go.mod go.sum
+	@echo "Building keygen..."
+	@go build -ldflags "$(LDFLAGS)" -o $@ ./cmd/keygen/
+
+$(SIGN1_BIN): $(GO_SRCS) go.mod go.sum
+	@echo "Building sign1..."
+	@go build -ldflags "$(LDFLAGS) -X main.authName=auth1" -o $@ ./cmd/sign/
+
+$(SIGN2_BIN): $(GO_SRCS) go.mod go.sum
+	@echo "Building sign2..."
+	@go build -ldflags "$(LDFLAGS) -X main.authName=auth2" -o $@ ./cmd/sign/
+
+#------------------------------------------------------------------------------
+# PHONY Build Targets
+#------------------------------------------------------------------------------
+
+.PHONY: tidy
 tidy:
 	# go mod verify
 	go mod tidy
@@ -16,25 +78,26 @@ check-build: tidy
 	go build -ldflags "$(LDFLAGS)" -v -o /dev/null ./cmd/keygen/
 	go build -ldflags "$(LDFLAGS) -X main.authName=auth1" -v -o /dev/null ./cmd/sign/
 
+# build-all: Build all wallet binaries (incremental - only rebuilds when sources change)
 .PHONY: build-all
-build-all: tidy
+build-all: $(WALLET_BINS)
+
+# build-all-force: Force rebuild all binaries (ignores timestamps)
+.PHONY: build-all-force
+build-all-force: tidy
 	go build -ldflags "$(LDFLAGS)" -v -o ${GOPATH}/bin/watch ./cmd/watch/
 	go build -ldflags "$(LDFLAGS)" -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 	go build -ldflags "$(LDFLAGS) -X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 	go build -ldflags "$(LDFLAGS) -X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 
 .PHONY: build-watch
-build-watch:
-	go build -ldflags "$(LDFLAGS)" -v -o ${GOPATH}/bin/watch ./cmd/watch/
+build-watch: $(WATCH_BIN)
 
 .PHONY: build-keygen
-build-keygen:
-	go build -ldflags "$(LDFLAGS)" -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
+build-keygen: $(KEYGEN_BIN)
 
 .PHONY: build-sign
-build-sign:
-	go build -ldflags "$(LDFLAGS) -X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
-	go build -ldflags "$(LDFLAGS) -X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
+build-sign: $(SIGN1_BIN) $(SIGN2_BIN)
 
 # Build from inside docker container
 .PHONY: build-linux
