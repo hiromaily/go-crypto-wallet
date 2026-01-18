@@ -5,7 +5,7 @@
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "bash -c 'set -e; go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2 && curl -sSfL https://atlasgo.sh | sh -s -- --version v1.0.0'",
+  "postCreateCommand": "bash -c 'set -e; go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.8.0 && curl -sSfL https://atlasgo.sh | sh -s -- --version v1.0.0'",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -34,11 +34,15 @@
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,
         "go.buildTags": "integration",
-        "go.lintFlags": ["-tags=integration"],
+        "go.lintFlags": [
+          "-tags=integration"
+        ],
         "go.lintTool": "golangci-lint",
         "go.lintOnSave": "package",
         "gopls": {
-          "buildFlags": ["-tags=integration"]
+          "buildFlags": [
+            "-tags=integration"
+          ]
         },
         "[go]": {
           "editor.defaultFormatter": "golang.go",

@@ -32,7 +32,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
 | Docker Compose | latest | Container orchestration |
-| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.7.2+ | Linter (for development) |
+| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.8.0+ | Linter (for development) |
 | [buf](https://buf.build/) | latest | Protocol buffer management |
 
 ### Blockchain Nodes
@@ -321,7 +321,7 @@ This project provides an **optional** DevContainer configuration for a standardi
 **Key Benefits:**
 
 - ✅ **Safe AI Development**: Isolated environment protects your host system from accidental AI-generated changes
-- ✅ **Consistent Setup**: Pre-configured with Go 1.25.5, golangci-lint v2.7.2, Atlas v1.0.0, and GitHub CLI
+- ✅ **Consistent Setup**: Pre-configured with Go 1.25.5, golangci-lint v2.8.0, Atlas v1.0.0, and GitHub CLI
 - ✅ **Quick Start**: New developers can start coding in minutes
 - ✅ **Zero Impact**: Local development workflow remains completely unchanged
 

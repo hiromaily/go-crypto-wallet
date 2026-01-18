@@ -69,7 +69,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.7.2
+          version: v2.8.0
           working-directory: ./
           # PR: Report only new issues introduced in the PR (uses --new-from-rev internally)
           # Push: Report all issues (default behavior when not a PR)
