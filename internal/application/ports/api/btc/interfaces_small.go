@@ -29,6 +29,34 @@ import (
 //
 // Note: The full Bitcoiner interface is kept for backward compatibility.
 // New code should prefer these small interfaces.
+//
+// =============================================================================
+// Usage Pattern
+// =============================================================================
+//
+// Each usecase defines a local interface by embedding the small interfaces it needs:
+//
+//	// In usecase file (e.g., watch/btc/create_transaction.go)
+//	type createTxBTCClient interface {
+//	    apibtc.ChainConfigProvider
+//	    apibtc.AmountConverter
+//	    apibtc.UTXOProvider
+//	    apibtc.RawTransactionCreator
+//	    apibtc.AddressOperator
+//	    apibtc.BalanceChecker
+//	    apibtc.PSBTCreator  // BTC only
+//	}
+//
+//	type createTransactionUseCase struct {
+//	    btcClient createTxBTCClient  // Use local interface, not Bitcoiner
+//	    // ...
+//	}
+//
+// DI Layer Integration:
+// - DI layer continues to inject the full Bitcoiner implementation
+// - Go's implicit interface satisfaction handles the type conversion automatically
+// - No changes needed in DI layer when usecases use these small interfaces
+//
 // =============================================================================
 
 // -----------------------------------------------------------------------------
