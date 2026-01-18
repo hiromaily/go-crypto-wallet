@@ -739,10 +739,12 @@ btc_wait_for_balance() {
 
 	while [ $elapsed -lt $max_wait ]; do
 		# Check balance using Bitcoin Core RPC directly
-		local balance_json
-		balance_json=$(btc_cli "btc-watch" -rpcwallet=watch getbalances 2>&1 || true)
+		# Use subshell with xtrace disabled to prevent shell trace from contaminating JSON output
 		local trusted_balance
-		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
+		trusted_balance=$(
+			set +x 2>/dev/null
+			btc_cli "btc-watch" -rpcwallet=watch getbalances 2>/dev/null | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0"
+		)
 
 		# Check if we have any trusted (mature) balance
 		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo 0)" -eq 1 ]; then
