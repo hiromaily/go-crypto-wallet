@@ -323,9 +323,30 @@ func (u *signTransactionUseCase) deriveWIFsForPSBT(
 	// Process each input to derive its required WIF
 	for i, input := range parsed.Inputs {
 		if len(input.BIP32Derivation) == 0 {
-			// No BIP32 derivation info - fall back to stored WIF
-			logger.Warn("PSBT input has no BIP32 derivation information, using stored WIF", "input_index", i)
-			wifKeys[accountKey.WalletImportFormat] = struct{}{}
+			// No BIP32 derivation info - this happens for P2TR (Taproot) inputs
+			// For P2TR, we need to derive keys at all possible indices and try each
+			// For now, derive keys at indices 0-9 (common range)
+			logger.Warn("PSBT input has no BIP32 derivation (likely P2TR), deriving multiple keys", "input_index", i)
+
+			// Derive keys at multiple indices (both receive and change paths)
+			for change := uint32(0); change <= 1; change++ {
+				for idx := uint32(0); idx < 10; idx++ {
+					childKey, err := infraKey.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, idx)
+					if err != nil {
+						logger.Debug("failed to derive key", "change", change, "index", idx, "error", err)
+						continue
+					}
+					privKey, err := childKey.ECPrivKey()
+					if err != nil {
+						continue
+					}
+					wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
+					if err != nil {
+						continue
+					}
+					wifKeys[wif.String()] = struct{}{}
+				}
+			}
 			continue
 		}
 

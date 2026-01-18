@@ -449,6 +449,26 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 	}
 
 	if signedCount == 0 {
+		// Log detailed information about why signing failed
+		logger.Error("PSBT signing failed - no signatures added",
+			"inputCount", len(parsed.Packet.UnsignedTx.TxIn),
+			"keyCount", len(privKeys))
+		for i, input := range parsed.Packet.Inputs {
+			if input.WitnessUtxo != nil {
+				isTaproot := txscript.IsPayToTaproot(input.WitnessUtxo.PkScript)
+				logger.Error("Input details",
+					"input", i,
+					"isTaproot", isTaproot,
+					"pkScript", hex.EncodeToString(input.WitnessUtxo.PkScript))
+			}
+		}
+		for j, privKey := range privKeys {
+			pubKey := privKey.PrivKey.PubKey()
+			logger.Error("Key details",
+				"keyIndex", j,
+				"compressedPubKey", hex.EncodeToString(pubKey.SerializeCompressed()),
+				"xOnlyPubKey", hex.EncodeToString(schnorr.SerializePubKey(pubKey)))
+		}
 		return "", false, errors.New("no signatures were added (keys may not match PSBT inputs)")
 	}
 
@@ -578,7 +598,14 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 			"hasRedeemScript", hasRedeemScript,
 			"hasWitnessScript", hasWitnessScript,
 			"hasPartialSigs", hasPartialSigs,
-			"partialSigsCount", len(input.PartialSigs))
+			"partialSigsCount", len(input.PartialSigs),
+			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
+
+		// Skip already-finalized inputs (e.g., P2TR which sets FinalScriptWitness during signing)
+		if input.FinalScriptWitness != nil || input.FinalScriptSig != nil {
+			logger.Info("Input already finalized, skipping", "input", i, "scriptType", scriptType)
+			continue
+		}
 
 		if scriptType == "P2PKH" && hasPartialSigs {
 			// P2PKH - use custom finalization (creates scriptSig, no witness)
@@ -1196,12 +1223,73 @@ func (b *Bitcoin) signInputWithKey(
 }
 
 // signTaprootInput signs a Taproot (P2TR) input using Schnorr signatures.
+// For key-path spending (BIP86), the private key must be tweaked before signing.
+// Note: Since btcd's psbt package doesn't have TaprootKeyPathSig field,
+// we add the signature directly to FinalScriptWitness for single-sig scenarios.
 func (*Bitcoin) signTaprootInput(
-	updater *psbt.Updater,
+	_ *psbt.Updater,
 	msgTx *wire.MsgTx,
 	inputIndex int,
 	psbtInput *psbt.PInput,
 	privKey *btcutil.WIF,
+	prevOutputFetcher *txscript.MultiPrevOutFetcher,
+) bool {
+	// Extract the x-only output key from the scriptPubKey
+	// P2TR scriptPubKey format: OP_1 (0x51) + OP_DATA_32 (0x20) + 32-byte x-only pubkey
+	pkScript := psbtInput.WitnessUtxo.PkScript
+	if len(pkScript) != 34 {
+		logger.Warn("Invalid P2TR scriptPubKey length", "input", inputIndex, "length", len(pkScript))
+		return false
+	}
+	outputKeyBytes := pkScript[2:34]
+
+	// Get the internal public key (before tweaking)
+	internalPubKey := privKey.PrivKey.PubKey()
+	internalPubKeyXOnly := schnorr.SerializePubKey(internalPubKey)
+
+	logger.Warn("Taproot signing attempt",
+		"input", inputIndex,
+		"outputKeyInScript", hex.EncodeToString(outputKeyBytes),
+		"internalPubKeyCompressed", hex.EncodeToString(internalPubKey.SerializeCompressed()),
+		"internalPubKeyXOnly", hex.EncodeToString(internalPubKeyXOnly))
+
+	// For BIP86 key-path spending, tweak the private key with empty merkle root
+	// The output key = internal_key + H(internal_key || empty) * G
+	tweakedPrivKey := txscript.TweakTaprootPrivKey(*privKey.PrivKey, nil)
+
+	// Verify that the tweaked public key matches the output key in scriptPubKey
+	tweakedPubKey := tweakedPrivKey.PubKey()
+	tweakedPubKeyBytes := schnorr.SerializePubKey(tweakedPubKey)
+
+	logger.Warn("Taproot key comparison",
+		"input", inputIndex,
+		"tweakedPubKey", hex.EncodeToString(tweakedPubKeyBytes),
+		"outputKey", hex.EncodeToString(outputKeyBytes),
+		"match", bytes.Equal(tweakedPubKeyBytes, outputKeyBytes))
+
+	if !bytes.Equal(tweakedPubKeyBytes, outputKeyBytes) {
+		// Also try matching without tweaking (in case output key IS the internal key)
+		if bytes.Equal(internalPubKeyXOnly, outputKeyBytes) {
+			logger.Info("Output key matches internal key without tweaking - using untweaked key",
+				"input", inputIndex)
+			// Sign without tweaking (unusual but possible for some descriptor setups)
+			return signTaprootWithKey(msgTx, inputIndex, psbtInput, privKey.PrivKey, prevOutputFetcher)
+		}
+		logger.Debug("Tweaked pubkey does not match output key, key not applicable for this input",
+			"input", inputIndex)
+		return false
+	}
+
+	// Sign with the tweaked private key
+	return signTaprootWithKey(msgTx, inputIndex, psbtInput, tweakedPrivKey, prevOutputFetcher)
+}
+
+// signTaprootWithKey signs a Taproot input with a given private key (already tweaked if needed)
+func signTaprootWithKey(
+	msgTx *wire.MsgTx,
+	inputIndex int,
+	psbtInput *psbt.PInput,
+	privKey *btcec.PrivateKey,
 	prevOutputFetcher *txscript.MultiPrevOutFetcher,
 ) bool {
 	// Calculate Taproot signature hash
@@ -1219,30 +1307,31 @@ func (*Bitcoin) signTaprootInput(
 	}
 
 	// Sign with Schnorr
-	signature, err := schnorr.Sign(privKey.PrivKey, hash)
+	signature, err := schnorr.Sign(privKey, hash)
 	if err != nil {
 		logger.Warn("Failed to create Schnorr signature", "input", inputIndex, "error", err)
 		return false
 	}
 
-	// For Taproot, signature is just the Schnorr signature (no sighash type appended for SIGHASH_DEFAULT)
+	// For Taproot with SIGHASH_DEFAULT, signature is just 64 bytes (no sighash type appended)
 	sigBytes := signature.Serialize()
-	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
 
-	// Add signature using btcd's updater
-	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
-	if err != nil {
-		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
-		return false
-	}
+	// For P2TR key-path spending, the witness is just the signature (64 bytes)
+	// Since btcd's psbt package doesn't have TaprootKeyPathSig field,
+	// we serialize the witness directly to FinalScriptWitness format
+	// Witness format: [varint count=1][varint len=64][64-byte signature]
+	witnessData := make([]byte, 0, 66)
+	witnessData = append(witnessData, 0x01)        // witness stack count = 1
+	witnessData = append(witnessData, 0x40)        // signature length = 64 (0x40)
+	witnessData = append(witnessData, sigBytes...) // 64-byte Schnorr signature
 
-	if outcome == psbt.SignSuccesful {
-		logger.Debug("Added Taproot signature to input", "input", inputIndex)
-		return true
-	}
+	psbtInput.FinalScriptWitness = witnessData
 
-	logger.Debug("Taproot signature not added", "input", inputIndex, "outcome", outcome)
-	return false
+	logger.Debug("Added Taproot key-path signature to input",
+		"input", inputIndex,
+		"sigLen", len(sigBytes),
+		"witnessLen", len(witnessData))
+	return true
 }
 
 // buildP2PKHScriptCodeForP2SHWPKH validates a P2WPKH redeemScript and builds
@@ -2410,30 +2499,24 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 		}
 		return errors.New("address has no HD key path (not from descriptor wallet?)")
 	}
-	// Parse the public key
-	// For P2TR (Taproot), Bitcoin Core doesn't return pubkey in getaddressinfo,
-	// so we extract the x-only pubkey (32 bytes) directly from the scriptPubKey
-	var pubKeyBytes []byte
+	// For P2TR (Taproot), Bitcoin Core doesn't return pubkey in getaddressinfo.
+	// Taproot uses x-only pubkeys (32 bytes) which are incompatible with AddInBip32Derivation
+	// (which expects 33-byte compressed pubkeys). For P2TR single-sig, the keygen wallet
+	// can sign without BIP32 derivation info in PSBT, so we skip it.
+	if txscript.IsPayToTaproot(scriptPubKey) {
+		logger.Debug("Skipping BIP32 derivation for P2TR input (Taproot uses x-only pubkeys)",
+			"input_index", inputIndex,
+			"address", addressStr)
+		return nil
+	}
+
+	// Parse the public key for non-Taproot addresses
 	if addressInfo.PubKey == "" {
-		if txscript.IsPayToTaproot(scriptPubKey) {
-			// P2TR scriptPubKey format: OP_1 (0x51) + OP_DATA_32 (0x20) + 32-byte x-only pubkey
-			// Total 34 bytes, pubkey is at bytes 2-33
-			if len(scriptPubKey) != 34 {
-				return fmt.Errorf("invalid P2TR scriptPubKey length: got %d, expected 34", len(scriptPubKey))
-			}
-			pubKeyBytes = scriptPubKey[2:34]
-			logger.Debug("Extracted x-only pubkey from P2TR scriptPubKey",
-				"input_index", inputIndex,
-				"pubkey_len", len(pubKeyBytes))
-		} else {
-			return errors.New("address has no public key")
-		}
-	} else {
-		var err error
-		pubKeyBytes, err = hex.DecodeString(addressInfo.PubKey)
-		if err != nil {
-			return fmt.Errorf("failed to decode public key: %w", err)
-		}
+		return errors.New("address has no public key")
+	}
+	pubKeyBytes, err := hex.DecodeString(addressInfo.PubKey)
+	if err != nil {
+		return fmt.Errorf("failed to decode public key: %w", err)
 	}
 
 	// Get the correct fingerprint from imported descriptors, not from Bitcoin Core's internal wallet
