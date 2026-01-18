@@ -99,7 +99,7 @@ E2E scripts support two database backends via the `DB_TYPE` environment variable
 
 | DB_TYPE | Description | Docker MySQL | Use Case |
 |---------|-------------|--------------|----------|
-| `sqlite` (default) | Local SQLite file | Not required | Fast testing, CI/CD |
+| `sqlite` (**default**) | Local SQLite file | Not required | Fast testing, CI/CD |
 | `mysql` | Docker MySQL container | Required | Full integration test |
 
 ### Usage

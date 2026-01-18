@@ -56,8 +56,8 @@ BTC_KEYGEN_WALLET_RPC_HOST="${BTC_KEYGEN_WALLET_RPC_HOST:-127.0.0.1:19332/wallet
 # Database Configuration
 ###############################################################################
 
-# Database type: mysql (default) or sqlite
-DB_TYPE="${DB_TYPE:-mysql}"
+# Database type: sqlite (default) or mysql
+DB_TYPE="${DB_TYPE:-sqlite}"
 
 # SQLite configuration
 # For E2E testing, we use a single database file containing all schemas
@@ -89,13 +89,13 @@ fi
 # Check if using SQLite database
 # Usage: if db_is_sqlite; then ...; fi
 db_is_sqlite() {
-	[ "${DB_TYPE:-mysql}" = "sqlite" ]
+	[ "${DB_TYPE}" = "sqlite" ]
 }
 
 # Check if using MySQL database
 # Usage: if db_is_mysql; then ...; fi
 db_is_mysql() {
-	[ "${DB_TYPE:-mysql}" = "mysql" ]
+	[ "${DB_TYPE}" = "mysql" ]
 }
 
 # Initialize SQLite database with schema
@@ -221,7 +221,7 @@ mysql_query() {
 	local db_name="$1"
 	local query="$2"
 
-	docker compose exec -e MYSQL_PWD="${BTC_MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root "$db_name" -N -e "$query" 2>/dev/null
+	docker compose exec -e MYSQL_PWD="${BTC_MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root "$db_name" -N -e "$query"
 }
 
 # Execute database query (abstraction layer)
