@@ -616,8 +616,11 @@ btc_sign_cmd() {
 	local db_path
 	if [ "${sign_num}" = "1" ]; then
 		db_path="${SQLITE_SIGN_DB_PATH}"
-	else
+	elif [ "${sign_num}" = "2" ]; then
 		db_path="${SQLITE_SIGN2_DB_PATH}"
+	else
+		log_error "Invalid sign number provided to btc_sign_cmd: ${sign_num}"
+		return 1
 	fi
 
 	if db_is_sqlite; then
