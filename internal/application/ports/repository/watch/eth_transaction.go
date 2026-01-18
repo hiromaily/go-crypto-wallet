@@ -1,8 +1,7 @@
 package watch
 
 import (
-	"database/sql"
-
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
@@ -17,5 +16,5 @@ type ETHDetailTXRepositorier interface {
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
-	WithTx(tx *sql.Tx) ETHDetailTXRepositorier
+	WithTransaction(tx persistence.Transaction) (ETHDetailTXRepositorier, error)
 }

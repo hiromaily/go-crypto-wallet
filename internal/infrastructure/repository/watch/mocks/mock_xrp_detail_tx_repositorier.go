@@ -5,8 +5,7 @@
 package mocks
 
 import (
-	"database/sql"
-
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
@@ -544,41 +543,50 @@ func (_c *MockXRPDetailTXRepositorier_UpdateTxTypeBySentHashTx_Call) RunAndRetur
 	return _c
 }
 
-// WithTx provides a mock function for the type MockXRPDetailTXRepositorier
-func (_mock *MockXRPDetailTXRepositorier) WithTx(tx *sql.Tx) watch.XRPDetailTXRepositorier {
+// WithTransaction provides a mock function for the type MockXRPDetailTXRepositorier
+func (_mock *MockXRPDetailTXRepositorier) WithTransaction(tx persistence.Transaction) (watch.XRPDetailTXRepositorier, error) {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for WithTx")
+		panic("no return value specified for WithTransaction")
 	}
 
 	var r0 watch.XRPDetailTXRepositorier
-	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) watch.XRPDetailTXRepositorier); ok {
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) (watch.XRPDetailTXRepositorier, error)); ok {
+		return returnFunc(tx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) watch.XRPDetailTXRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(watch.XRPDetailTXRepositorier)
 		}
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(persistence.Transaction) error); ok {
+		r1 = returnFunc(tx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
-// MockXRPDetailTXRepositorier_WithTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTx'
-type MockXRPDetailTXRepositorier_WithTx_Call struct {
+// MockXRPDetailTXRepositorier_WithTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTransaction'
+type MockXRPDetailTXRepositorier_WithTransaction_Call struct {
 	*mock.Call
 }
 
-// WithTx is a helper method to define mock.On call
-//   - tx *sql.Tx
-func (_e *MockXRPDetailTXRepositorier_Expecter) WithTx(tx interface{}) *MockXRPDetailTXRepositorier_WithTx_Call {
-	return &MockXRPDetailTXRepositorier_WithTx_Call{Call: _e.mock.On("WithTx", tx)}
+// WithTransaction is a helper method to define mock.On call
+//   - tx persistence.Transaction
+func (_e *MockXRPDetailTXRepositorier_Expecter) WithTransaction(tx interface{}) *MockXRPDetailTXRepositorier_WithTransaction_Call {
+	return &MockXRPDetailTXRepositorier_WithTransaction_Call{Call: _e.mock.On("WithTransaction", tx)}
 }
 
-func (_c *MockXRPDetailTXRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *MockXRPDetailTXRepositorier_WithTx_Call {
+func (_c *MockXRPDetailTXRepositorier_WithTransaction_Call) Run(run func(tx persistence.Transaction)) *MockXRPDetailTXRepositorier_WithTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *sql.Tx
+		var arg0 persistence.Transaction
 		if args[0] != nil {
-			arg0 = args[0].(*sql.Tx)
+			arg0 = args[0].(persistence.Transaction)
 		}
 		run(
 			arg0,
@@ -587,12 +595,12 @@ func (_c *MockXRPDetailTXRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *Mo
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_WithTx_Call) Return(xRPDetailTXRepositorier watch.XRPDetailTXRepositorier) *MockXRPDetailTXRepositorier_WithTx_Call {
-	_c.Call.Return(xRPDetailTXRepositorier)
+func (_c *MockXRPDetailTXRepositorier_WithTransaction_Call) Return(xRPDetailTXRepositorier watch.XRPDetailTXRepositorier, err error) *MockXRPDetailTXRepositorier_WithTransaction_Call {
+	_c.Call.Return(xRPDetailTXRepositorier, err)
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) watch.XRPDetailTXRepositorier) *MockXRPDetailTXRepositorier_WithTx_Call {
+func (_c *MockXRPDetailTXRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) (watch.XRPDetailTXRepositorier, error)) *MockXRPDetailTXRepositorier_WithTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

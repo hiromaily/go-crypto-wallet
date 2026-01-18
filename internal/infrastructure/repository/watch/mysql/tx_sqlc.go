@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -146,10 +148,16 @@ func (r *TxRepositorySqlc) DeleteAll() (int64, error) {
 	return rowsAffected, nil
 }
 
-// WithTx returns a new repository instance that uses the provided transaction
-func (r *TxRepositorySqlc) WithTx(tx *sql.Tx) repowatch.TxRepositorier {
-	return &TxRepositorySqlc{
-		queries:      r.queries.WithTx(tx),
-		coinTypeCode: r.coinTypeCode,
+// WithTransaction returns a new repository instance that uses the provided transaction
+func (r *TxRepositorySqlc) WithTransaction(
+	tx persistence.Transaction,
+) (repowatch.TxRepositorier, error) {
+	sqlTx := database.UnwrapSQLTx(tx)
+	if sqlTx == nil {
+		return nil, database.ErrUnsupportedTransaction
 	}
+	return &TxRepositorySqlc{
+		queries:      r.queries.WithTx(sqlTx),
+		coinTypeCode: r.coinTypeCode,
+	}, nil
 }

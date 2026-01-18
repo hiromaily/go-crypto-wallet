@@ -19,6 +19,7 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
@@ -571,10 +572,22 @@ func (u *createTransactionUseCase) updateDB(
 		}
 	}()
 
+	// Wrap SQL transaction in abstract Transaction interface
+	tx := database.NewSQLTransaction(dtx)
+
 	// Create transactional repositories that use the transaction
-	txRepoWithTx := u.txRepo.WithTx(dtx)
-	txDetailRepoWithTx := u.txDetailRepo.WithTx(dtx)
-	payReqRepoWithTx := u.payReqRepo.WithTx(dtx)
+	txRepoWithTx, err := u.txRepo.WithTransaction(tx)
+	if err != nil {
+		return 0, fmt.Errorf("fail to create transactional txRepo: %w", err)
+	}
+	txDetailRepoWithTx, err := u.txDetailRepo.WithTransaction(tx)
+	if err != nil {
+		return 0, fmt.Errorf("fail to create transactional txDetailRepo: %w", err)
+	}
+	payReqRepoWithTx, err := u.payReqRepo.WithTransaction(tx)
+	if err != nil {
+		return 0, fmt.Errorf("fail to create transactional payReqRepo: %w", err)
+	}
 
 	// Insert tx
 	txID, err := txRepoWithTx.InsertUnsignedTx(targetAction)

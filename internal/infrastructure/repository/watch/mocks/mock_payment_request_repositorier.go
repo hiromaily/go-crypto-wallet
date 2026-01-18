@@ -5,8 +5,7 @@
 package mocks
 
 import (
-	"database/sql"
-
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	mock "github.com/stretchr/testify/mock"
@@ -386,41 +385,50 @@ func (_c *MockPaymentRequestRepositorier_UpdatePaymentID_Call) RunAndReturn(run 
 	return _c
 }
 
-// WithTx provides a mock function for the type MockPaymentRequestRepositorier
-func (_mock *MockPaymentRequestRepositorier) WithTx(tx *sql.Tx) watch.PaymentRequestRepositorier {
+// WithTransaction provides a mock function for the type MockPaymentRequestRepositorier
+func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx persistence.Transaction) (watch.PaymentRequestRepositorier, error) {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for WithTx")
+		panic("no return value specified for WithTransaction")
 	}
 
 	var r0 watch.PaymentRequestRepositorier
-	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) watch.PaymentRequestRepositorier); ok {
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) (watch.PaymentRequestRepositorier, error)); ok {
+		return returnFunc(tx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) watch.PaymentRequestRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(watch.PaymentRequestRepositorier)
 		}
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(persistence.Transaction) error); ok {
+		r1 = returnFunc(tx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
-// MockPaymentRequestRepositorier_WithTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTx'
-type MockPaymentRequestRepositorier_WithTx_Call struct {
+// MockPaymentRequestRepositorier_WithTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithTransaction'
+type MockPaymentRequestRepositorier_WithTransaction_Call struct {
 	*mock.Call
 }
 
-// WithTx is a helper method to define mock.On call
-//   - tx *sql.Tx
-func (_e *MockPaymentRequestRepositorier_Expecter) WithTx(tx interface{}) *MockPaymentRequestRepositorier_WithTx_Call {
-	return &MockPaymentRequestRepositorier_WithTx_Call{Call: _e.mock.On("WithTx", tx)}
+// WithTransaction is a helper method to define mock.On call
+//   - tx persistence.Transaction
+func (_e *MockPaymentRequestRepositorier_Expecter) WithTransaction(tx interface{}) *MockPaymentRequestRepositorier_WithTransaction_Call {
+	return &MockPaymentRequestRepositorier_WithTransaction_Call{Call: _e.mock.On("WithTransaction", tx)}
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *MockPaymentRequestRepositorier_WithTx_Call {
+func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Run(run func(tx persistence.Transaction)) *MockPaymentRequestRepositorier_WithTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *sql.Tx
+		var arg0 persistence.Transaction
 		if args[0] != nil {
-			arg0 = args[0].(*sql.Tx)
+			arg0 = args[0].(persistence.Transaction)
 		}
 		run(
 			arg0,
@@ -429,12 +437,12 @@ func (_c *MockPaymentRequestRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) 
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTx_Call) Return(paymentRequestRepositorier watch.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTx_Call {
-	_c.Call.Return(paymentRequestRepositorier)
+func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Return(paymentRequestRepositorier watch.PaymentRequestRepositorier, err error) *MockPaymentRequestRepositorier_WithTransaction_Call {
+	_c.Call.Return(paymentRequestRepositorier, err)
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) watch.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTx_Call {
+func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) (watch.PaymentRequestRepositorier, error)) *MockPaymentRequestRepositorier_WithTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
