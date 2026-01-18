@@ -16,6 +16,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
+# E2E Pattern identifier for database file naming
+# Format: watch-e2e-p8-{timestamp}.db, keygen-e2e-p8-{timestamp}.db, etc.
+export E2E_PATTERN="p8"
+
 # Source BTC common utilities
 # shellcheck source=../btc_common.sh
 source "${SCRIPT_DIR}/../btc_common.sh"
@@ -45,24 +49,24 @@ key_generation_phase() {
 	log_step "Key Generation Phase"
 
 	log_substep "Creating seed for keygen wallet"
-	keygen -c "${BTC_CONFIG_KEYGEN}" create seed || {
+	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create seed || {
 		log_warn "Seed already exists, continuing..."
 	}
 
 	log_substep "Creating HD keys for keygen wallet"
 	for account in client deposit payment stored; do
-		keygen -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create hdkey --account "$account" --keynum 10
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create hdkey --account "$account" --keynum 10
 	done
 
 	log_substep "Importing private keys into keygen wallet"
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BTC_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 	fi
 	for account in client deposit payment stored; do
-		keygen -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import privkey --account "$account"
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import privkey --account "$account"
 	done
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BTC_CONFIG_KEYGEN}" api walletlock
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletlock
 	fi
 
 	log_substep "Creating seeds for sign wallets"
@@ -92,8 +96,8 @@ key_generation_phase() {
 	done
 
 	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(sign1 --conf "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(sign2 --conf "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
+	file_fullpubkey_auth1=$(btc_sign1_cmd --conf "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
+	file_fullpubkey_auth2=$(btc_sign2_cmd --conf "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
 
 	export FULLPUBKEY_FILE1="${file_fullpubkey_auth1##*\[fileName\]: }"
 	export FULLPUBKEY_FILE2="${file_fullpubkey_auth2##*\[fileName\]: }"
@@ -107,8 +111,8 @@ multisig_setup_phase() {
 	log_step "Multisig Setup Phase (3-of-3 P2SH-P2WSH)"
 
 	log_substep "Importing full public keys into keygen wallet"
-	keygen -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE1}"
-	keygen -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
+	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE1}"
+	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
 
 	log_substep "Exporting descriptors from keygen wallet"
 	file_descriptor_deposit=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
@@ -170,7 +174,7 @@ transaction_flow_phase() {
 	log_step "Transaction Flow Phase (3-of-3 P2SH-P2WSH)"
 
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" create payment 2>&1) || {
+	tx_file=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
 		if echo "$tx_file" | grep -q "No utxo"; then
 			btc_log_no_utxo_error
@@ -182,25 +186,25 @@ transaction_flow_phase() {
 
 	log_substep "Signing with keygen wallet (1st signature)"
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BTC_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(keygen -c "${BTC_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
+	tx_file_signed=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" sign signature --file "${tx_unsigned}")
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BTC_CONFIG_KEYGEN}" api walletlock
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletlock
 	fi
 
 	tx_signed1=$(btc_extract_file_path "$tx_file_signed")
 
 	log_substep "Signing with sign1 wallet (2nd signature)"
-	tx_file_signed2=$(sign1 --conf "${BTC_CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_file_signed2=$(btc_sign1_cmd --conf "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 sign signature --file "${tx_signed1}")
 	tx_signed2=$(btc_extract_file_path "$tx_file_signed2")
 
 	log_substep "Signing with sign2 wallet (3rd signature - completing 3-of-3)"
-	tx_file_signed3=$(sign2 --conf "${BTC_CONFIG_SIGN2}" --wallet sign2 sign signature --file "${tx_signed2}")
+	tx_file_signed3=$(btc_sign2_cmd --conf "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 sign signature --file "${tx_signed2}")
 	tx_signed3=$(btc_extract_file_path "$tx_file_signed3")
 
 	log_substep "Sending fully signed transaction"
-	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" send --file "${tx_signed3}")
+	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" send --file "${tx_signed3}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"

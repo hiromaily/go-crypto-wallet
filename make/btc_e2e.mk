@@ -8,9 +8,10 @@
 #   make btc-e2e-ci P=<pattern>        # Run with --non-interactive flag
 #   make btc-e2e-cleanup P=<pattern>   # Run with --cleanup flag
 #
-# Database:
-#   DB=sqlite (default) - Use local SQLite files (faster, no Docker DB)
-#   DB=mysql            - Use Docker MySQL container
+# Database Backend:
+#   DB=sqlite (default) - Use local SQLite files with SQLC schemas
+#                         Faster, no Docker MySQL container needed
+#   DB=mysql            - Use Docker MySQL container with Atlas migrations
 #
 # Patterns:
 #   1:  P2PKH Single-sig
@@ -65,26 +66,27 @@ _btc-e2e-validate:
 	fi
 
 # Run E2E test with --reset flag (recommended for fresh start)
+# Note: build-all ensures binaries are up-to-date before running E2E tests
 .PHONY: btc-e2e-reset
-btc-e2e-reset: _btc-e2e-validate
+btc-e2e-reset: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --reset
 
 # Run complete E2E test
 .PHONY: btc-e2e
-btc-e2e: _btc-e2e-validate
+btc-e2e: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH)
 
 # Run E2E test with verbose output
 .PHONY: btc-e2e-verbose
-btc-e2e-verbose: _btc-e2e-validate
+btc-e2e-verbose: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --verbose
 
 # Run E2E test in non-interactive mode (for CI/CD)
 .PHONY: btc-e2e-ci
-btc-e2e-ci: _btc-e2e-validate
+btc-e2e-ci: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --non-interactive
 
-# Cleanup E2E test environment
+# Cleanup E2E test environment (no build needed for cleanup)
 .PHONY: btc-e2e-cleanup
 btc-e2e-cleanup: _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --cleanup
@@ -106,12 +108,13 @@ btc-e2e-help:
 	@echo "  P=11 : P2TR Tapscript M-of-N"
 	@echo ""
 	@echo "Database Backend:"
-	@echo "  DB=sqlite (default) - Local SQLite files (faster, no Docker DB)"
-	@echo "  DB=mysql            - Docker MySQL container"
+	@echo "  DB=sqlite (default) - Local SQLite files with SQLC schemas"
+	@echo "                        No Docker MySQL container needed (faster)"
+	@echo "  DB=mysql            - Docker MySQL container with Atlas migrations"
 	@echo ""
 	@echo "Usage:"
-	@echo "  make btc-e2e P=<pattern>              # Run E2E test (SQLite)"
-	@echo "  make btc-e2e-reset P=<pattern>        # Run with --reset flag"
+	@echo "  make btc-e2e P=<pattern>              # Run E2E test (SQLite default)"
+	@echo "  make btc-e2e-reset P=<pattern>        # Run with --reset flag (recommended)"
 	@echo "  make btc-e2e-reset P=1 DB=mysql       # Run with MySQL"
 	@echo "  make btc-e2e-verbose P=<pattern>      # Run with --verbose flag"
 	@echo "  make btc-e2e-ci P=<pattern>           # Run with --non-interactive flag"

@@ -43,6 +43,7 @@ database:
     debug: false
   sqlite:
     path: "./data/sqlite/xrp/keygen.db"
+    max_open_conns: 2
     debug: true
 file_path:
   tx: "./data/tx/xrp/"

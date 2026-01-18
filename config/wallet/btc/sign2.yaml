@@ -49,6 +49,7 @@ database:
     debug: true
   sqlite:
     path: "./data/sqlite/btc/sign2.db"
+    max_open_conns: 2
     debug: true
 file_path:
   tx: "./data/tx/btc/"

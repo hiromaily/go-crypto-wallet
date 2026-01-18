@@ -11,8 +11,8 @@
 # Database Support:
 #   This file supports both MySQL and SQLite databases for E2E testing.
 #   Set DB_TYPE environment variable to choose:
-#     DB_TYPE=mysql (default) - Uses Docker MySQL container
-#     DB_TYPE=sqlite          - Uses local SQLite file (no Docker required)
+#     DB_TYPE=sqlite (default) - Uses local SQLite file (no Docker DB required)
+#     DB_TYPE=mysql            - Uses Docker MySQL container
 
 # Script directory for relative paths
 _BTC_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -59,27 +59,56 @@ BTC_KEYGEN_WALLET_RPC_HOST="${BTC_KEYGEN_WALLET_RPC_HOST:-127.0.0.1:19332/wallet
 # Database type: sqlite (default) or mysql
 DB_TYPE="${DB_TYPE:-sqlite}"
 
-# SQLite configuration
-# For E2E testing, we use a single database file containing all schemas
-# This simplifies testing as all wallet commands share the same database
-SQLITE_DB_PATH="${SQLITE_DB_PATH:-./data/sqlite/btc/e2e.db}"
+# E2E Pattern identifier (set by each E2E script, e.g., "p1", "p2", etc.)
+# This is used to generate unique SQLite database file names
+E2E_PATTERN="${E2E_PATTERN:-}"
 
-# Individual wallet DB paths (kept for backward compatibility, default to shared DB)
-SQLITE_WATCH_DB_PATH="${SQLITE_WATCH_DB_PATH:-${SQLITE_DB_PATH}}"
-SQLITE_KEYGEN_DB_PATH="${SQLITE_KEYGEN_DB_PATH:-${SQLITE_DB_PATH}}"
-SQLITE_SIGN_DB_PATH="${SQLITE_SIGN_DB_PATH:-${SQLITE_DB_PATH}}"
+# E2E Timestamp for unique database files (generated once per run)
+# Format: YYYYMMDD-HHMMSS
+E2E_TIMESTAMP="${E2E_TIMESTAMP:-$(date +%Y%m%d-%H%M%S)}"
+
+# SQLite base directory
+SQLITE_DB_DIR="${SQLITE_DB_DIR:-./data/sqlite/btc}"
 
 # SQLite schema file location
 SQLITE_WATCH_SCHEMA="${SQLITE_WATCH_SCHEMA:-tools/sqlc/schemas_sqlite/01_watch.sql}"
 SQLITE_KEYGEN_SCHEMA="${SQLITE_KEYGEN_SCHEMA:-tools/sqlc/schemas_sqlite/02_keygen.sql}"
 SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas_sqlite/03_sign.sql}"
 
+# Generate SQLite database file path for a specific wallet type
+# Usage: db_path=$(sqlite_get_db_path "watch")
+# Output format: ./data/sqlite/btc/watch-e2e-p1-20260118-123456.db
+sqlite_get_db_path() {
+	local wallet_type="$1"
+	local pattern_suffix=""
+
+	if [ -n "${E2E_PATTERN}" ]; then
+		pattern_suffix="-e2e-${E2E_PATTERN}-${E2E_TIMESTAMP}"
+	else
+		pattern_suffix="-e2e-${E2E_TIMESTAMP}"
+	fi
+
+	echo "${SQLITE_DB_DIR}/${wallet_type}${pattern_suffix}.db"
+}
+
+# Individual wallet DB paths (generated dynamically based on pattern and timestamp)
+# These are computed lazily when needed
+sqlite_init_db_paths() {
+	SQLITE_WATCH_DB_PATH="${SQLITE_WATCH_DB_PATH:-$(sqlite_get_db_path "watch")}"
+	SQLITE_KEYGEN_DB_PATH="${SQLITE_KEYGEN_DB_PATH:-$(sqlite_get_db_path "keygen")}"
+	SQLITE_SIGN_DB_PATH="${SQLITE_SIGN_DB_PATH:-$(sqlite_get_db_path "sign")}"
+	SQLITE_SIGN2_DB_PATH="${SQLITE_SIGN2_DB_PATH:-$(sqlite_get_db_path "sign2")}"
+
+	export SQLITE_WATCH_DB_PATH SQLITE_KEYGEN_DB_PATH SQLITE_SIGN_DB_PATH SQLITE_SIGN2_DB_PATH
+}
+
 # Export database environment variables for wallet CLI commands
-# When DB_TYPE=sqlite, set WALLET_DATABASE_TYPE and WALLET_DATABASE_SQLITE_PATH
-# so that wallet commands (watch, keygen, sign) use SQLite instead of MySQL
+# Override config file's database.type based on DB_TYPE environment variable
+# Note: WALLET_DATABASE_SQLITE_PATH is set per-command in btc_watch_cmd, btc_keygen_cmd, etc.
 if [ "${DB_TYPE}" = "sqlite" ]; then
 	export WALLET_DATABASE_TYPE="sqlite"
-	export WALLET_DATABASE_SQLITE_PATH="${SQLITE_DB_PATH}"
+elif [ "${DB_TYPE}" = "mysql" ]; then
+	export WALLET_DATABASE_TYPE="mysql"
 fi
 
 ###############################################################################
@@ -100,49 +129,82 @@ db_is_mysql() {
 
 # Initialize SQLite database with schema
 # Usage: sqlite_init_db "watch"
-#        sqlite_init_db "all"  # Initialize with all schemas
-# Creates the database file and applies the schema
+#        sqlite_init_db "all"  # Initialize all wallet databases (watch, keygen, sign)
+# Creates separate database files for each wallet type with pattern and timestamp
 sqlite_init_db() {
 	local db_name="$1"
-	local db_path="${SQLITE_DB_PATH}"
+
+	# Initialize database paths first
+	sqlite_init_db_paths
 
 	# Create directory if it doesn't exist
-	mkdir -p "$(dirname "$db_path")"
+	mkdir -p "${SQLITE_DB_DIR}"
 
 	if [ "$db_name" = "all" ]; then
-		# Initialize with all schemas for E2E testing
-		log_info "Initializing SQLite database with all schemas: $db_path"
+		# Initialize separate databases for each wallet type
+		log_info "Initializing SQLite databases for E2E testing"
+		log_info "  Pattern: ${E2E_PATTERN:-unset}"
+		log_info "  Timestamp: ${E2E_TIMESTAMP}"
 
-		# Remove existing database to start fresh
-		rm -f "$db_path"
-
-		# Apply all schemas
-		for schema_name in watch keygen sign; do
-			local schema_file
-			case "$schema_name" in
-			watch) schema_file="${PROJECT_ROOT}/${SQLITE_WATCH_SCHEMA}" ;;
-			keygen) schema_file="${PROJECT_ROOT}/${SQLITE_KEYGEN_SCHEMA}" ;;
-			sign) schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}" ;;
+		# Initialize each wallet database
+		for wallet_type in watch keygen sign sign2; do
+			local db_path schema_file
+			case "$wallet_type" in
+			watch)
+				db_path="${SQLITE_WATCH_DB_PATH}"
+				schema_file="${PROJECT_ROOT}/${SQLITE_WATCH_SCHEMA}"
+				;;
+			keygen)
+				db_path="${SQLITE_KEYGEN_DB_PATH}"
+				schema_file="${PROJECT_ROOT}/${SQLITE_KEYGEN_SCHEMA}"
+				;;
+			sign)
+				db_path="${SQLITE_SIGN_DB_PATH}"
+				schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
+				;;
+			sign2)
+				db_path="${SQLITE_SIGN2_DB_PATH}"
+				schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
+				;;
 			esac
 
 			if [ -f "$schema_file" ]; then
-				log_info "  Applying ${schema_name} schema..."
+				# Remove existing database to start fresh
+				rm -f "$db_path"
+				log_info "  Creating ${wallet_type} database: $(basename "$db_path")"
 				sqlite3 "$db_path" <"$schema_file"
 			else
 				log_warn "  Schema file not found: $schema_file"
 			fi
 		done
 
-		log_info "SQLite database initialized with all schemas"
+		log_info "SQLite databases initialized:"
+		log_info "  Watch:  ${SQLITE_WATCH_DB_PATH}"
+		log_info "  Keygen: ${SQLITE_KEYGEN_DB_PATH}"
+		log_info "  Sign:   ${SQLITE_SIGN_DB_PATH}"
+		log_info "  Sign2:  ${SQLITE_SIGN2_DB_PATH}"
 		return 0
 	fi
 
 	# Initialize with specific schema
-	local schema_file
+	local db_path schema_file
 	case "$db_name" in
-	watch) schema_file="${PROJECT_ROOT}/${SQLITE_WATCH_SCHEMA}" ;;
-	keygen) schema_file="${PROJECT_ROOT}/${SQLITE_KEYGEN_SCHEMA}" ;;
-	sign | sign1 | sign2) schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}" ;;
+	watch)
+		db_path="${SQLITE_WATCH_DB_PATH}"
+		schema_file="${PROJECT_ROOT}/${SQLITE_WATCH_SCHEMA}"
+		;;
+	keygen)
+		db_path="${SQLITE_KEYGEN_DB_PATH}"
+		schema_file="${PROJECT_ROOT}/${SQLITE_KEYGEN_SCHEMA}"
+		;;
+	sign | sign1)
+		db_path="${SQLITE_SIGN_DB_PATH}"
+		schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
+		;;
+	sign2)
+		db_path="${SQLITE_SIGN2_DB_PATH}"
+		schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
+		;;
 	*)
 		log_error "Unknown database name: $db_name"
 		return 1
@@ -157,32 +219,63 @@ sqlite_init_db() {
 
 	log_info "Initializing SQLite database: $db_path (${db_name} schema)"
 
-	# Create database and apply schema
+	# Remove existing and create fresh database
+	rm -f "$db_path"
 	sqlite3 "$db_path" <"$schema_file"
 
 	log_info "SQLite database initialized: $db_path"
 }
 
-# Clean SQLite database
+# Clean SQLite database files
 # Usage: sqlite_clean_db "watch"
-#        sqlite_clean_db "all"  # Remove the shared E2E database
+#        sqlite_clean_db "all"  # Remove all E2E database files matching current pattern/timestamp
+#        sqlite_clean_db "all" "pattern"  # Remove all database files matching the pattern (e.g., "*.db")
 sqlite_clean_db() {
 	local db_name="$1"
-	local db_path="${SQLITE_DB_PATH}"
+	local pattern="${2:-}"
 
 	if [ "$db_name" = "all" ]; then
-		if [ -f "$db_path" ]; then
-			rm -f "$db_path"
-			log_info "Removed SQLite database: $db_path"
+		if [ -n "$pattern" ]; then
+			# Remove files matching pattern
+			log_info "Removing SQLite database files matching: ${SQLITE_DB_DIR}/${pattern}"
+			rm -f "${SQLITE_DB_DIR}"/${pattern} 2>/dev/null || true
+		else
+			# Remove current session's database files
+			if [ -n "${SQLITE_WATCH_DB_PATH:-}" ] && [ -f "${SQLITE_WATCH_DB_PATH}" ]; then
+				rm -f "${SQLITE_WATCH_DB_PATH}"
+				log_info "Removed: ${SQLITE_WATCH_DB_PATH}"
+			fi
+			if [ -n "${SQLITE_KEYGEN_DB_PATH:-}" ] && [ -f "${SQLITE_KEYGEN_DB_PATH}" ]; then
+				rm -f "${SQLITE_KEYGEN_DB_PATH}"
+				log_info "Removed: ${SQLITE_KEYGEN_DB_PATH}"
+			fi
+			if [ -n "${SQLITE_SIGN_DB_PATH:-}" ] && [ -f "${SQLITE_SIGN_DB_PATH}" ]; then
+				rm -f "${SQLITE_SIGN_DB_PATH}"
+				log_info "Removed: ${SQLITE_SIGN_DB_PATH}"
+			fi
+			if [ -n "${SQLITE_SIGN2_DB_PATH:-}" ] && [ -f "${SQLITE_SIGN2_DB_PATH}" ]; then
+				rm -f "${SQLITE_SIGN2_DB_PATH}"
+				log_info "Removed: ${SQLITE_SIGN2_DB_PATH}"
+			fi
+			# Also remove any old-style e2e.db file
+			if [ -f "${SQLITE_DB_DIR}/e2e.db" ]; then
+				rm -f "${SQLITE_DB_DIR}/e2e.db"
+				log_info "Removed legacy: ${SQLITE_DB_DIR}/e2e.db"
+			fi
 		fi
 		return 0
 	fi
 
-	# For backward compatibility, individual wallet cleanup
+	# Initialize paths if not already set
+	sqlite_init_db_paths
+
+	# Individual wallet cleanup
+	local db_path
 	case "$db_name" in
 	watch) db_path="${SQLITE_WATCH_DB_PATH}" ;;
 	keygen) db_path="${SQLITE_KEYGEN_DB_PATH}" ;;
-	sign | sign1 | sign2) db_path="${SQLITE_SIGN_DB_PATH}" ;;
+	sign | sign1) db_path="${SQLITE_SIGN_DB_PATH}" ;;
+	sign2) db_path="${SQLITE_SIGN2_DB_PATH}" ;;
 	*)
 		log_error "Unknown database name: $db_name"
 		return 1
@@ -205,7 +298,8 @@ sqlite_query() {
 	case "$db_name" in
 	watch) db_path="${SQLITE_WATCH_DB_PATH}" ;;
 	keygen) db_path="${SQLITE_KEYGEN_DB_PATH}" ;;
-	sign | sign1 | sign2) db_path="${SQLITE_SIGN_DB_PATH}" ;;
+	sign | sign1) db_path="${SQLITE_SIGN_DB_PATH}" ;;
+	sign2) db_path="${SQLITE_SIGN2_DB_PATH}" ;;
 	*)
 		log_error "Unknown database name: $db_name"
 		return 1
@@ -389,11 +483,22 @@ btc_full_reset() {
 	docker compose -f compose.btc.yaml down -v 2>/dev/null || true
 
 	if db_is_sqlite; then
-		# SQLite mode: Remove SQLite database file
-		log_info "Removing SQLite database file..."
-		sqlite_clean_db "all"
+		# SQLite mode: Remove SQLite database files
+		log_info "Using SQLite mode (no MySQL container needed)"
+		log_info "Removing all SQLite E2E database files..."
+		# Remove all E2E database files (pattern: *-e2e-*.db)
+		sqlite_clean_db "all" "*-e2e-*.db"
+		# Also remove any old-style single e2e.db file
+		sqlite_clean_db "all" "e2e.db"
+
+		# Also stop MySQL containers if running from previous runs (for clean state)
+		if docker compose -f compose.yaml ps -q 2>/dev/null | grep -q .; then
+			log_info "Stopping leftover MySQL containers from previous runs..."
+			docker compose -f compose.yaml down -v 2>/dev/null || true
+		fi
 	else
 		# MySQL mode: Stop database container and remove volumes
+		log_info "Using MySQL mode"
 		log_info "Stopping database container (with volume removal)..."
 		docker compose -f compose.yaml down -v 2>/dev/null || true
 
@@ -420,7 +525,7 @@ btc_full_reset() {
 	if db_is_sqlite; then
 		log_info "Note: SQLite database files were removed for complete cleanup"
 	else
-		log_info "Note: Database volumes were removed for complete cleanup"
+		log_info "Note: MySQL database volumes were removed for complete cleanup"
 	fi
 }
 
@@ -433,7 +538,12 @@ btc_cleanup() {
 	docker compose -f compose.btc.yaml down -v 2>/dev/null || true
 
 	if db_is_sqlite; then
-		log_info "SQLite mode: No database container to stop"
+		log_info "SQLite mode: No database container needed"
+		# Also stop MySQL containers if running from previous runs (for clean state)
+		if docker compose -f compose.yaml ps -q 2>/dev/null | grep -q .; then
+			log_info "Stopping leftover MySQL containers from previous runs..."
+			docker compose -f compose.yaml down -v 2>/dev/null || true
+		fi
 	else
 		log_info "Stopping database container..."
 		docker compose -f compose.yaml down -v 2>/dev/null || true
@@ -446,20 +556,52 @@ btc_cleanup() {
 # BTC Wallet Command Wrappers
 ###############################################################################
 
-# Wrapper for watch wallet commands with host override
-# Database environment is already exported via WALLET_DATABASE_TYPE and
-# WALLET_DATABASE_SQLITE_PATH when DB_TYPE=sqlite
+# Wrapper for watch wallet commands with host and database path override
+# When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the watch-specific database
 # Usage: btc_watch_cmd [args...]
 btc_watch_cmd() {
-	WALLET_BITCOIN_HOST="${BTC_WATCH_WALLET_RPC_HOST}" watch "$@"
+	if db_is_sqlite; then
+		WALLET_DATABASE_SQLITE_PATH="${SQLITE_WATCH_DB_PATH}" \
+			WALLET_BITCOIN_HOST="${BTC_WATCH_WALLET_RPC_HOST}" watch "$@"
+	else
+		WALLET_BITCOIN_HOST="${BTC_WATCH_WALLET_RPC_HOST}" watch "$@"
+	fi
 }
 
-# Wrapper for keygen wallet commands with host override
-# Database environment is already exported via WALLET_DATABASE_TYPE and
-# WALLET_DATABASE_SQLITE_PATH when DB_TYPE=sqlite
+# Wrapper for keygen wallet commands with host and database path override
+# When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the keygen-specific database
 # Usage: btc_keygen_cmd [args...]
 btc_keygen_cmd() {
-	WALLET_BITCOIN_HOST="${BTC_KEYGEN_WALLET_RPC_HOST}" keygen "$@"
+	if db_is_sqlite; then
+		WALLET_DATABASE_SQLITE_PATH="${SQLITE_KEYGEN_DB_PATH}" \
+			WALLET_BITCOIN_HOST="${BTC_KEYGEN_WALLET_RPC_HOST}" keygen "$@"
+	else
+		WALLET_BITCOIN_HOST="${BTC_KEYGEN_WALLET_RPC_HOST}" keygen "$@"
+	fi
+}
+
+# Wrapper for sign1 wallet commands with host and database path override
+# When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the sign-specific database
+# Usage: btc_sign1_cmd [args...]
+btc_sign1_cmd() {
+	if db_is_sqlite; then
+		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN_DB_PATH}" \
+			sign "$@"
+	else
+		sign "$@"
+	fi
+}
+
+# Wrapper for sign2 wallet commands with host and database path override
+# When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the sign2-specific database
+# Usage: btc_sign2_cmd [args...]
+btc_sign2_cmd() {
+	if db_is_sqlite; then
+		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN2_DB_PATH}" \
+			sign "$@"
+	else
+		sign "$@"
+	fi
 }
 
 ###############################################################################
@@ -495,18 +637,19 @@ btc_check_prerequisites() {
 #          btc_setup_infrastructure "btc-watch btc-keygen btc-sign1 btc-sign2"
 btc_setup_infrastructure() {
 	local containers="${1:-btc-watch btc-keygen}"
-	log_step "Setting up infrastructure"
+	log_step "Setting up infrastructure (DB_TYPE=${DB_TYPE})"
 
 	if db_is_sqlite; then
-		# SQLite mode: Initialize SQLite database with all schemas
-		log_substep "Initializing SQLite database"
+		# SQLite mode: Initialize separate SQLite databases for each wallet type
+		# No Docker MySQL container is started - this is faster and simpler
+		log_substep "Initializing SQLite databases (no MySQL container needed)"
 		sqlite_init_db "all"
-		log_info "SQLite database initialized"
+		# Database paths are logged by sqlite_init_db
 	else
 		# MySQL mode: Start database container
-		log_substep "Starting database container"
+		log_substep "Starting MySQL database container"
 		docker compose -f compose.yaml up -d
-		log_info "Database container started"
+		log_info "MySQL database container started"
 
 		# Wait for database to be healthy
 		wait_for_healthy "wallet-db" 90

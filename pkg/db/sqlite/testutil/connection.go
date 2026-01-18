@@ -20,19 +20,42 @@ func GetDB() *sql.DB {
 		return dbConn
 	}
 
+	dbConn = GetDBWithMaxConns(2)
+	return dbConn
+}
+
+// GetDBWithMaxConns returns a database connection with specified max open connections.
+// This is useful for testing different connection pool configurations.
+//
+// IMPORTANT: maxOpenConns=1 will cause deadlock when a read query is followed by Begin().
+// See TestSQLiteTransaction_MaxOpenConns1_Deadlock for the reproduction case.
+func GetDBWithMaxConns(maxOpenConns int) *sql.DB {
 	// Use in-memory database for tests
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
+	// Configure connection pool
+	db.SetMaxIdleConns(maxOpenConns)
+	db.SetMaxOpenConns(maxOpenConns)
+
 	// Enable foreign keys
 	if _, err := db.Exec("PRAGMA foreign_keys = ON"); err != nil {
 		log.Fatalf("fail to enable foreign keys: %v", err)
 	}
 
-	dbConn = db
-	return dbConn
+	// Enable WAL mode for better concurrency
+	if _, err := db.Exec("PRAGMA journal_mode = WAL"); err != nil {
+		log.Fatalf("fail to enable WAL mode: %v", err)
+	}
+
+	// Set busy timeout
+	if _, err := db.Exec("PRAGMA busy_timeout = 5000"); err != nil {
+		log.Fatalf("fail to set busy timeout: %v", err)
+	}
+
+	return db
 }
 
 // GetTestDBPath returns a temporary SQLite database file path for tests

@@ -16,6 +16,10 @@ set -eu
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
+# E2E Pattern identifier for database file naming
+# Format: watch-e2e-p3-{timestamp}.db, keygen-e2e-p3-{timestamp}.db, etc.
+export E2E_PATTERN="p3"
+
 # Source BTC common utilities (includes common.sh automatically)
 # shellcheck source=../btc_common.sh
 source "${SCRIPT_DIR}/../btc_common.sh"
@@ -45,14 +49,14 @@ key_generation_phase() {
 	log_step "Key Generation Phase"
 
 	log_substep "Creating seed for keygen wallet"
-	keygen -c "${BTC_CONFIG_KEYGEN}" create seed || {
+	btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create seed || {
 		log_warn "Seed already exists or error occurred, continuing..."
 	}
 
 	log_substep "Creating HD keys for keygen wallet (client, deposit, payment, stored)"
 	for account in client deposit payment stored; do
 		log_info "Creating HD keys for account: $account"
-		keygen -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create hdkey --account "$account" --keynum 10
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create hdkey --account "$account" --keynum 10
 	done
 }
 
@@ -156,7 +160,7 @@ transaction_flow_phase() {
 	log_step "Transaction Flow Phase (Single-sig P2SH-P2WPKH)"
 
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" create payment 2>&1) || {
+	tx_file=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
 		if echo "$tx_file" | grep -q "No utxo"; then
 			btc_log_no_utxo_error
@@ -169,18 +173,18 @@ transaction_flow_phase() {
 
 	log_substep "Signing with keygen wallet (single signature)"
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BTC_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(keygen -c "${BTC_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
+	tx_file_signed=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" sign signature --file "${tx_unsigned}")
 	if [ "${BTC_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BTC_CONFIG_KEYGEN}" api walletlock
+		btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" api walletlock
 	fi
 
 	tx_signed=$(btc_extract_file_path "$tx_file_signed")
 	log_info "Signed transaction: $tx_signed"
 
 	log_substep "Sending fully signed transaction"
-	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" send --file "${tx_signed}")
+	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" send --file "${tx_signed}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"

@@ -51,6 +51,7 @@ database:
     debug: true
   sqlite:
     path: "./data/sqlite/btc/keygen_bip86_test.db"
+    max_open_conns: 2
     debug: true
 file_path:
   tx: "./data/tx/btc/bip86_test/"

@@ -58,6 +58,11 @@ database:
     debug: true
   sqlite:
     path: "./data/sqlite/btc/watch.db"
+    # max_open_conns: Maximum number of open connections to the database.
+    # IMPORTANT: Do NOT set to 1 - causes deadlock when read query is followed by Begin().
+    # Minimum recommended: 2 (allows concurrent read + write operations)
+    # Default: 2 (if not specified or set to 0)
+    max_open_conns: 2
     debug: true
 file_path:
   tx: "./data/tx/btc/"
