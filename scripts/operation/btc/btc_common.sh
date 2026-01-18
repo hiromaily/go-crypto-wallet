@@ -103,10 +103,12 @@ sqlite_init_db_paths() {
 }
 
 # Export database environment variables for wallet CLI commands
-# When DB_TYPE=sqlite, set WALLET_DATABASE_TYPE
+# Override config file's database.type based on DB_TYPE environment variable
 # Note: WALLET_DATABASE_SQLITE_PATH is set per-command in btc_watch_cmd, btc_keygen_cmd, etc.
 if [ "${DB_TYPE}" = "sqlite" ]; then
 	export WALLET_DATABASE_TYPE="sqlite"
+elif [ "${DB_TYPE}" = "mysql" ]; then
+	export WALLET_DATABASE_TYPE="mysql"
 fi
 
 ###############################################################################
