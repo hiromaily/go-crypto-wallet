@@ -530,7 +530,9 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		if addrErr != nil {
 			return "", "", fmt.Errorf("fail to call bchaddr.NewCashAddressScriptHash(): %w", addrErr)
 		}
-		return bchAddress.String(), strRedeemScript, nil
+		// BCH does not support SegWit, so redeem script should be empty for single-sig
+		// For multisig, the redeem script will be set later during multisig address creation
+		return bchAddress.String(), "", nil
 	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 	default:

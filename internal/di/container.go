@@ -631,7 +631,7 @@ func (c *container) newAddressRepo() repowatch.AddressRepositorier {
 
 func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
 	return address.NewAddressFileRepository(
-		c.conf.FilePath.FullPubKey,
+		c.conf.FilePath.Address,
 	)
 }
 

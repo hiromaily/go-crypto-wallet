@@ -257,7 +257,14 @@ func (u *importAddressUseCase) selectTargetAddress(addrFmt *appdto.AddressFormat
 		}
 	}
 
-	// For non-client accounts (deposit, payment, etc.), use multisig address
+	// For non-client accounts (deposit, payment, etc.), determine address type based on multisig status
+	// BCH: For single-sig accounts (Pattern 1), use P2PKH even for payment/deposit accounts
+	if u.btcClient.CoinTypeCode() == domainCoin.BCH && addrFmt.MultisigAddress == "" && addrFmt.RedeemScript == "" {
+		// BCH single-sig: use P2PKH address
+		return addrFmt.P2PKHAddress, nil
+	}
+
+	// For multisig accounts, use multisig address
 	// Fallback to P2SHSegwit if MultisigAddress is empty (traditional multisig)
 	if addrFmt.MultisigAddress != "" {
 		return addrFmt.MultisigAddress, nil
