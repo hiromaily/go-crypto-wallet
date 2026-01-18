@@ -25,6 +25,12 @@ go-lint-check:
 go-lint:
 	go tool golangci-lint run --fix
 
+# verify golangci-lint configuration
+# Note: run after modifying .golangci.yml
+.PHONY: go-lint-verify-config
+go-lint-verify-config:
+	go tool golangci-lint config verify
+
 # clean golangci-lint cache
 .PHONY: go-clean-lint-cache
 go-clean-lint-cache:

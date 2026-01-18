@@ -68,7 +68,7 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	xpriv := testDescriptorMainnetXpriv
 	accountRepo := &stubAccountRepo{
-		key: &domainBitcoin.BtcAccountKey{
+		key: &domainBitcoin.BTCAccountKey{
 			FullPublicKey:          testDescriptorMainnetXpub,
 			KeyType:                string(domainKey.KeyTypeBIP84),
 			Account:                domainAccount.AccountTypeDeposit,
@@ -297,7 +297,7 @@ func TestGenerateDescriptorUseCase_MultisigMissingSeed(t *testing.T) {
 }
 
 type stubAccountRepo struct {
-	key *domainBitcoin.BtcAccountKey
+	key *domainBitcoin.BTCAccountKey
 	err error
 }
 
@@ -305,21 +305,21 @@ func (*stubAccountRepo) GetMaxIndex(_ context.Context, _ domainAccount.AccountTy
 	return 0, nil
 }
 
-func (s *stubAccountRepo) GetOneMaxID(domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error) {
+func (s *stubAccountRepo) GetOneMaxID(domainAccount.AccountType) (*domainBitcoin.BTCAccountKey, error) {
 	return s.key, s.err
 }
 
 func (*stubAccountRepo) GetAllAddrStatus(
 	domainAccount.AccountType,
 	domainAddress.AddrStatus,
-) ([]*domainBitcoin.BtcAccountKey, error) {
+) ([]*domainBitcoin.BTCAccountKey, error) {
 	return nil, nil
 }
 
-func (*stubAccountRepo) GetAllMultiAddr(domainAccount.AccountType, []string) ([]*domainBitcoin.BtcAccountKey, error) {
+func (*stubAccountRepo) GetAllMultiAddr(domainAccount.AccountType, []string) ([]*domainBitcoin.BTCAccountKey, error) {
 	return nil, nil
 }
-func (*stubAccountRepo) InsertBulk([]*domainBitcoin.BtcAccountKey) error { return nil }
+func (*stubAccountRepo) InsertBulk([]*domainBitcoin.BTCAccountKey) error { return nil }
 func (*stubAccountRepo) UpdateAddr(domainAccount.AccountType, string, string) (int64, error) {
 	return 0, nil
 }
@@ -332,13 +332,13 @@ func (*stubAccountRepo) UpdateAddrStatus(
 	return 0, nil
 }
 
-func (*stubAccountRepo) UpdateMultisigAddr(domainAccount.AccountType, *domainBitcoin.BtcAccountKey) (int64, error) {
+func (*stubAccountRepo) UpdateMultisigAddr(domainAccount.AccountType, *domainBitcoin.BTCAccountKey) (int64, error) {
 	return 0, nil
 }
 
 func (*stubAccountRepo) UpdateMultisigAddrs(
 	domainAccount.AccountType,
-	[]*domainBitcoin.BtcAccountKey,
+	[]*domainBitcoin.BTCAccountKey,
 ) (int64, error) {
 	return 0, nil
 }

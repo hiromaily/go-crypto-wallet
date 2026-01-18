@@ -50,7 +50,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 
 	// Create test eth detail tx
 	uuid := "eth-uuid-sqlc-test"
-	ethTx, err := domainEth.NewEthDetailTx(
+	ethTx, err := domainEth.NewETHDetailTx(
 		txID,
 		uuid,
 		domainTx.TxTypeUnsigned,
@@ -63,7 +63,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 		21000,
 		1,
 	)
-	require.NoError(t, err, "fail to create EthDetailTx")
+	require.NoError(t, err, "fail to create ETHDetailTx")
 	ethTx.UnsignedHexTx = "0xunsigned-hex-sqlc"
 
 	// Insert
@@ -136,7 +136,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTx1, err := domainEth.NewEthDetailTx(
+	bulkTx1, err := domainEth.NewETHDetailTx(
 		txID2,
 		"eth-uuid-bulk-1",
 		domainTx.TxTypeUnsigned,
@@ -149,10 +149,10 @@ func TestETHDetailTXSqlc(t *testing.T) {
 		21000,
 		2,
 	)
-	require.NoError(t, err, "fail to create bulk EthDetailTx 1")
+	require.NoError(t, err, "fail to create bulk ETHDetailTx 1")
 	bulkTx1.UnsignedHexTx = "0xunsigned-bulk-1"
 
-	bulkTx2, err := domainEth.NewEthDetailTx(
+	bulkTx2, err := domainEth.NewETHDetailTx(
 		txID2,
 		"eth-uuid-bulk-2",
 		domainTx.TxTypeUnsigned,
@@ -165,10 +165,10 @@ func TestETHDetailTXSqlc(t *testing.T) {
 		21000,
 		3,
 	)
-	require.NoError(t, err, "fail to create bulk EthDetailTx 2")
+	require.NoError(t, err, "fail to create bulk ETHDetailTx 2")
 	bulkTx2.UnsignedHexTx = "0xunsigned-bulk-2"
 
-	bulkTxs := []*domainEth.EthDetailTx{bulkTx1, bulkTx2}
+	bulkTxs := []*domainEth.ETHDetailTx{bulkTx1, bulkTx2}
 
 	err = ethDetailTXRepo.InsertBulk(bulkTxs)
 	require.NoError(t, err, "fail to call InsertBulk()")

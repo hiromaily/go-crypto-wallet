@@ -266,12 +266,12 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 	serializedTxs := []string{serializedTx}
 
-	// create domain entity EthDetailTx from DTO
-	txDetailItem, err := u.createEthDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeTransfer)
+	// create domain entity ETHDetailTx from DTO
+	txDetailItem, err := u.createETHDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeTransfer)
 	if err != nil {
-		return "", fmt.Errorf("fail to create EthDetailTx: %w", err)
+		return "", fmt.Errorf("fail to create ETHDetailTx: %w", err)
 	}
-	txDetailItems := []*domainEthereum.EthDetailTx{txDetailItem}
+	txDetailItems := []*domainEthereum.ETHDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -336,7 +336,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []domainEthereum.UserAmount,
-) ([]string, []*domainEthereum.EthDetailTx, error) {
+) ([]string, []*domainEthereum.ETHDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -347,7 +347,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*domainEthereum.EthDetailTx, 0, len(userAmounts))
+	txDetailItems := make([]*domainEthereum.ETHDetailTx, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		var rawTx *domainEthereum.RawTx
@@ -370,11 +370,11 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		}
 		serializedTxs = append(serializedTxs, serializedTx)
 
-		// create domain entity EthDetailTx from DTO
-		var txDetailItem *domainEthereum.EthDetailTx
-		txDetailItem, err = u.createEthDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeDeposit)
+		// create domain entity ETHDetailTx from DTO
+		var txDetailItem *domainEthereum.ETHDetailTx
+		txDetailItem, err = u.createETHDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeDeposit)
 		if err != nil {
-			return nil, nil, fmt.Errorf("fail to create EthDetailTx: %w", err)
+			return nil, nil, fmt.Errorf("fail to create ETHDetailTx: %w", err)
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
@@ -451,9 +451,9 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *domainAddress.Address,
-) ([]string, []*domainEthereum.EthDetailTx, error) {
+) ([]string, []*domainEthereum.ETHDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*domainEthereum.EthDetailTx, 0, len(userPayments))
+	txDetailItems := make([]*domainEthereum.ETHDetailTx, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
@@ -475,10 +475,10 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		}
 		serializedTxs = append(serializedTxs, serializedTx)
 
-		// create domain entity EthDetailTx from DTO
-		txDetailItem, err := u.createEthDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypePayment)
+		// create domain entity ETHDetailTx from DTO
+		txDetailItem, err := u.createETHDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypePayment)
 		if err != nil {
-			return nil, nil, fmt.Errorf("fail to create EthDetailTx: %w", err)
+			return nil, nil, fmt.Errorf("fail to create ETHDetailTx: %w", err)
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
@@ -487,7 +487,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*domainEthereum.EthDetailTx,
+	txDetailItems []*domainEthereum.ETHDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
@@ -547,17 +547,17 @@ func (u *createTransactionUseCase) generateHexFile(
 	return generatedFileName, nil
 }
 
-// createEthDetailTx constructs the domain entity EthDetailTx from the DTO returned by infrastructure layer.
+// createETHDetailTx constructs the domain entity ETHDetailTx from the DTO returned by infrastructure layer.
 // This ensures the use case layer maintains full responsibility for domain entity creation.
-func (*createTransactionUseCase) createEthDetailTx(
+func (*createTransactionUseCase) createETHDetailTx(
 	txParams *apieth.TxCreateParams,
 	sender, receiver domainAccount.AccountType,
 	rawTxHex string,
 	_ domainTx.ActionType,
-) (*domainEthereum.EthDetailTx, error) {
+) (*domainEthereum.ETHDetailTx, error) {
 	// Create domain entity from DTO
 	// Note: CurrentTxType is set to TxTypeUnsigned since we're creating unsigned transactions
-	txDetailItem, err := domainEthereum.NewEthDetailTx(
+	txDetailItem, err := domainEthereum.NewETHDetailTx(
 		0, // TxID - will be set when saving to DB
 		txParams.UUID,
 		domainTx.TxTypeUnsigned,
@@ -571,7 +571,7 @@ func (*createTransactionUseCase) createEthDetailTx(
 		txParams.Nonce,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("fail to create domain EthDetailTx: %w", err)
+		return nil, fmt.Errorf("fail to create domain ETHDetailTx: %w", err)
 	}
 
 	// Set unsigned transaction data

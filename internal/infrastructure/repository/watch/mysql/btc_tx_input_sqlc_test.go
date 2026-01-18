@@ -22,7 +22,7 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	btcTxInputRepo := watchTestutil.NewBTCTxInputRepositorySqlc()
 
 	// Create a parent tx
-	txItem := domainBitcoin.NewBtcTransaction(
+	txItem := domainBitcoin.NewBTCTransaction(
 		domainCoin.BTC,
 		domainTx.ActionTypePayment,
 		domainTx.TxTypeUnsigned,
@@ -33,19 +33,19 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test inputs
-	input1, err := domainBitcoin.NewBtcTxInput(
+	input1, err := domainBitcoin.NewBTCTxInput(
 		txID, "input-txid-sqlc-1", 0, "input-address-sqlc-1",
 		"client", "0.05", 6,
 	)
 	require.NoError(t, err, "fail to create input1")
 
-	input2, err := domainBitcoin.NewBtcTxInput(
+	input2, err := domainBitcoin.NewBTCTxInput(
 		txID, "input-txid-sqlc-2", 1, "input-address-sqlc-2",
 		"client", "0.05", 6,
 	)
 	require.NoError(t, err, "fail to create input2")
 
-	inputs := []*domainBitcoin.BtcTxInput{input1, input2}
+	inputs := []*domainBitcoin.BTCTxInput{input1, input2}
 
 	// Insert bulk
 	err = btcTxInputRepo.InsertBulk(inputs)
@@ -62,7 +62,7 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	require.Equal(t, "input-txid-sqlc-1", oneInput.InputTxid, "GetOne() InputTxid mismatch")
 
 	// Insert single
-	singleInput, err := domainBitcoin.NewBtcTxInput(
+	singleInput, err := domainBitcoin.NewBTCTxInput(
 		txID, "input-txid-sqlc-3", 2, "input-address-sqlc-3",
 		"client", "0.03", 6,
 	)

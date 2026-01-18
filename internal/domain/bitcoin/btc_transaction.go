@@ -7,8 +7,8 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
-// BtcTransaction represents a Bitcoin transaction in the domain layer
-type BtcTransaction struct {
+// BTCTransaction represents a Bitcoin transaction in the domain layer
+type BTCTransaction struct {
 	ID                int64
 	CoinTypeCode      domainCoin.CoinTypeCode
 	ActionType        domainTx.ActionType
@@ -23,13 +23,13 @@ type BtcTransaction struct {
 	SentUpdatedAt     *time.Time
 }
 
-// NewBtcTransaction creates a new BtcTransaction entity
-func NewBtcTransaction(
+// NewBTCTransaction creates a new BtcTransaction entity
+func NewBTCTransaction(
 	coinTypeCode domainCoin.CoinTypeCode,
 	actionType domainTx.ActionType,
 	currentTxType domainTx.TxType,
-) *BtcTransaction {
-	return &BtcTransaction{
+) *BTCTransaction {
+	return &BTCTransaction{
 		CoinTypeCode:  coinTypeCode,
 		ActionType:    actionType,
 		CurrentTxType: currentTxType,
@@ -37,7 +37,7 @@ func NewBtcTransaction(
 }
 
 // SetUnsignedTx sets the unsigned transaction data
-func (t *BtcTransaction) SetUnsignedTx(hexTx, totalInput, totalOutput, fee string) {
+func (t *BTCTransaction) SetUnsignedTx(hexTx, totalInput, totalOutput, fee string) {
 	t.UnsignedHexTx = hexTx
 	t.TotalInputAmount = totalInput
 	t.TotalOutputAmount = totalOutput
@@ -47,7 +47,7 @@ func (t *BtcTransaction) SetUnsignedTx(hexTx, totalInput, totalOutput, fee strin
 }
 
 // SetSignedTx sets the signed transaction data
-func (t *BtcTransaction) SetSignedTx(signedHex, sentHash string) {
+func (t *BTCTransaction) SetSignedTx(signedHex, sentHash string) {
 	t.SignedHexTx = signedHex
 	t.SentHashTx = sentHash
 	now := time.Now()
@@ -55,6 +55,6 @@ func (t *BtcTransaction) SetSignedTx(signedHex, sentHash string) {
 }
 
 // UpdateTxType updates the transaction type
-func (t *BtcTransaction) UpdateTxType(txType domainTx.TxType) {
+func (t *BTCTransaction) UpdateTxType(txType domainTx.TxType) {
 	t.CurrentTxType = txType
 }

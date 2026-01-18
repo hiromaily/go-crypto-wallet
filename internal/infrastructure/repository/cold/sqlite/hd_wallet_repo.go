@@ -125,7 +125,7 @@ func (w *AccountHDWalletRepo) Insert(
 	keyType domainKey.KeyType,
 ) error {
 	// insert key information to btc_account_key table
-	accountKeyItems := make([]*domainBitcoin.BtcAccountKey, len(keys))
+	accountKeyItems := make([]*domainBitcoin.BTCAccountKey, len(keys))
 	now := time.Now()
 	for idx, keyItem := range keys {
 		var taprootAddr *string
@@ -133,7 +133,7 @@ func (w *AccountHDWalletRepo) Insert(
 			taprootAddr = &keyItem.TaprootAddr
 		}
 
-		accountKeyItems[idx] = &domainBitcoin.BtcAccountKey{
+		accountKeyItems[idx] = &domainBitcoin.BTCAccountKey{
 			CoinTypeCode:       coinTypeCode,
 			KeyType:            keyType.String(),
 			Account:            accountType,

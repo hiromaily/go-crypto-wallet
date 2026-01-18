@@ -292,7 +292,7 @@ func TestWritePSBTFile(t *testing.T) {
 				}
 
 				// Read and verify content
-				content, err := os.ReadFile(fileName) //nolint:gosec
+				content, err := os.ReadFile(fileName)
 				if err != nil {
 					t.Errorf("Failed to read written file: %v", err)
 				}

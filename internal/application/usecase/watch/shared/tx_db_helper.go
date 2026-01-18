@@ -61,8 +61,8 @@ func (h *TxDBHelper) InsertTxTableForUnsigned(
 	inputTotal,
 	outputTotal,
 	fee btcutil.Amount,
-	txInputs []*domainBitcoin.BtcTxInput,
-	txOutputs []*domainBitcoin.BtcTxOutput,
+	txInputs []*domainBitcoin.BTCTxInput,
+	txOutputs []*domainBitcoin.BTCTxOutput,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// skip if same hex is already stored
@@ -88,7 +88,7 @@ func (h *TxDBHelper) InsertTxTableForUnsigned(
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert fee amount to decimal: %w", err)
 	}
-	txItem := domainBitcoin.NewBtcTransaction(
+	txItem := domainBitcoin.NewBTCTransaction(
 		h.converter.CoinTypeCode(),
 		actionType,
 		domainTx.TxTypeUnsigned,

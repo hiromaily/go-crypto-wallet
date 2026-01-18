@@ -29,14 +29,14 @@ func NewETHDetailTXInputRepositorySqlc(
 	}
 }
 
-// convertToEthDetailTx converts sqlcgen.EthDetailTx to domain.EthDetailTx entity
-func convertToEthDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.EthDetailTx, error) {
+// convertToETHDetailTx converts sqlcgen.EthDetailTx to domain.ETHDetailTx entity
+func convertToETHDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.ETHDetailTx, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
 	}
 
-	tx := &domainEth.EthDetailTx{
+	tx := &domainEth.ETHDetailTx{
 		ID:              sqlcTx.ID,
 		TxID:            sqlcTx.TxID,
 		UUID:            sqlcTx.Uuid,
@@ -64,8 +64,8 @@ func convertToEthDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.EthDetailTx, 
 	return tx, nil
 }
 
-// convertFromEthDetailTx converts domain.EthDetailTx entity to sqlcgen.EthDetailTx
-func convertFromEthDetailTx(tx *domainEth.EthDetailTx) *sqlcgen.EthDetailTx {
+// convertFromETHDetailTx converts domain.ETHDetailTx entity to sqlcgen.EthDetailTx
+func convertFromETHDetailTx(tx *domainEth.ETHDetailTx) *sqlcgen.EthDetailTx {
 	sqlcTx := &sqlcgen.EthDetailTx{
 		ID:              tx.ID,
 		TxID:            tx.TxID,
@@ -95,7 +95,7 @@ func convertFromEthDetailTx(tx *domainEth.EthDetailTx) *sqlcgen.EthDetailTx {
 }
 
 // GetOne get one record by ID
-func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*domainEth.EthDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*domainEth.ETHDetailTx, error) {
 	ctx := context.Background()
 
 	ethTx, err := r.queries.GetETHDetailTXByID(ctx, id)
@@ -103,11 +103,11 @@ func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*domainEth.EthDetailT
 		return nil, fmt.Errorf("failed to call GetETHDetailTXByID(): %w", err)
 	}
 
-	return convertToEthDetailTx(&ethTx)
+	return convertToETHDetailTx(&ethTx)
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainEth.EthDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainEth.ETHDetailTx, error) {
 	ctx := context.Background()
 
 	ethTxs, err := r.queries.GetETHDetailTXsByTxID(ctx, id)
@@ -115,9 +115,9 @@ func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainEth.Et
 		return nil, fmt.Errorf("failed to call GetETHDetailTXsByTxID(): %w", err)
 	}
 
-	result := make([]*domainEth.EthDetailTx, len(ethTxs))
+	result := make([]*domainEth.ETHDetailTx, len(ethTxs))
 	for i := range ethTxs {
-		domainTx, err := convertToEthDetailTx(&ethTxs[i])
+		domainTx, err := convertToETHDetailTx(&ethTxs[i])
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert eth detail tx: %w", err)
 		}
@@ -143,10 +143,10 @@ func (r *ETHDetailTXInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *domainEth.EthDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *domainEth.ETHDetailTx) error {
 	ctx := context.Background()
 
-	sqlcTx := convertFromEthDetailTx(txItem)
+	sqlcTx := convertFromETHDetailTx(txItem)
 	_, err := r.queries.InsertETHDetailTX(ctx, sqlcgen.InsertETHDetailTXParams{
 		TxID:              sqlcTx.TxID,
 		Uuid:              sqlcTx.Uuid,
@@ -173,7 +173,7 @@ func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *domainEth.EthDetailTx) e
 }
 
 // InsertBulk inserts multiple records
-func (r *ETHDetailTXInputRepositorySqlc) InsertBulk(txItems []*domainEth.EthDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) InsertBulk(txItems []*domainEth.ETHDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err

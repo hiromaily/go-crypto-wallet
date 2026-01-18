@@ -29,14 +29,14 @@ func NewXRPDetailTxInputRepositorySqlc(
 	}
 }
 
-// convertToXrpDetailTx converts sqlcgen.XrpDetailTx to domain.XrpDetailTx entity
-func convertToXrpDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XrpDetailTx, error) {
+// convertToXRPDetailTx converts sqlcgen.XrpDetailTx to domain.XRPDetailTx entity
+func convertToXRPDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XRPDetailTx, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
 	}
 
-	tx := &domainXrp.XrpDetailTx{
+	tx := &domainXrp.XRPDetailTx{
 		ID:                    sqlcTx.ID,
 		TxID:                  sqlcTx.TxID,
 		UUID:                  sqlcTx.Uuid,
@@ -66,8 +66,8 @@ func convertToXrpDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XrpDetailTx, 
 	return tx, nil
 }
 
-// convertFromXrpDetailTx converts domain.XrpDetailTx entity to sqlcgen.XrpDetailTx
-func convertFromXrpDetailTx(tx *domainXrp.XrpDetailTx) *sqlcgen.XrpDetailTx {
+// convertFromXRPDetailTx converts domain.XRPDetailTx entity to sqlcgen.XrpDetailTx
+func convertFromXRPDetailTx(tx *domainXrp.XRPDetailTx) *sqlcgen.XrpDetailTx {
 	sqlcTx := &sqlcgen.XrpDetailTx{
 		ID:                    tx.ID,
 		TxID:                  tx.TxID,
@@ -99,29 +99,29 @@ func convertFromXrpDetailTx(tx *domainXrp.XrpDetailTx) *sqlcgen.XrpDetailTx {
 }
 
 // GetOne get one record by ID
-func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*domainXrp.XrpDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*domainXrp.XRPDetailTx, error) {
 	ctx := context.Background()
 
-	xrpTx, err := r.queries.GetXrpDetailTxByID(ctx, id)
+	xrpTx, err := r.queries.GetXRPDetailTxByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetXrpDetailTxByID(): %w", err)
+		return nil, fmt.Errorf("failed to call GetXRPDetailTxByID(): %w", err)
 	}
 
-	return convertToXrpDetailTx(&xrpTx)
+	return convertToXRPDetailTx(&xrpTx)
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainXrp.XrpDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainXrp.XRPDetailTx, error) {
 	ctx := context.Background()
 
-	xrpTxs, err := r.queries.GetXrpDetailTxsByTxID(ctx, id)
+	xrpTxs, err := r.queries.GetXRPDetailTxsByTxID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetXrpDetailTxsByTxID(): %w", err)
+		return nil, fmt.Errorf("failed to call GetXRPDetailTxsByTxID(): %w", err)
 	}
 
-	result := make([]*domainXrp.XrpDetailTx, len(xrpTxs))
+	result := make([]*domainXrp.XRPDetailTx, len(xrpTxs))
 	for i := range xrpTxs {
-		domainTx, err := convertToXrpDetailTx(&xrpTxs[i])
+		domainTx, err := convertToXRPDetailTx(&xrpTxs[i])
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert xrp detail tx: %w", err)
 		}
@@ -135,23 +135,23 @@ func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainXrp.Xr
 func (r *XRPDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) ([]string, error) {
 	ctx := context.Background()
 
-	blobs, err := r.queries.GetXrpDetailTxBlobList(ctx, sqlcgen.GetXrpDetailTxBlobListParams{
+	blobs, err := r.queries.GetXRPDetailTxBlobList(ctx, sqlcgen.GetXRPDetailTxBlobListParams{
 		Coin:          sqlcgen.TxCoin(r.coinTypeCode.String()),
 		CurrentTxType: txType.Int8(),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetXrpDetailTxBlobList(): %w", err)
+		return nil, fmt.Errorf("failed to call GetXRPDetailTxBlobList(): %w", err)
 	}
 
 	return blobs, nil
 }
 
 // Insert inserts one record
-func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *domainXrp.XrpDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *domainXrp.XRPDetailTx) error {
 	ctx := context.Background()
 
-	sqlcTx := convertFromXrpDetailTx(txItem)
-	_, err := r.queries.InsertXrpDetailTx(ctx, sqlcgen.InsertXrpDetailTxParams{
+	sqlcTx := convertFromXRPDetailTx(txItem)
+	_, err := r.queries.InsertXRPDetailTx(ctx, sqlcgen.InsertXRPDetailTxParams{
 		TxID:                  sqlcTx.TxID,
 		Uuid:                  sqlcTx.Uuid,
 		CurrentTxType:         sqlcTx.CurrentTxType,
@@ -174,14 +174,14 @@ func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *domainXrp.XrpDetailTx) e
 		SentUpdatedAt:         sqlcTx.SentUpdatedAt,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to call InsertXrpDetailTx(): %w", err)
+		return fmt.Errorf("failed to call InsertXRPDetailTx(): %w", err)
 	}
 
 	return nil
 }
 
 // InsertBulk inserts multiple records
-func (r *XRPDetailTxInputRepositorySqlc) InsertBulk(txItems []*domainXrp.XrpDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) InsertBulk(txItems []*domainXrp.XRPDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err
@@ -200,7 +200,7 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateXrpDetailTxAfterSent(ctx, sqlcgen.UpdateXrpDetailTxAfterSentParams{
+	result, err := r.queries.UpdateXRPDetailTxAfterSent(ctx, sqlcgen.UpdateXRPDetailTxAfterSentParams{
 		CurrentTxType:         txType.Int8(),
 		SignedTxID:            signedTxID,
 		TxBlob:                txBlob,
@@ -209,7 +209,7 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 		Uuid:                  uuid,
 	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to call UpdateXrpDetailTxAfterSent(): %w", err)
+		return 0, fmt.Errorf("failed to call UpdateXRPDetailTxAfterSent(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -224,12 +224,12 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 func (r *XRPDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateXrpDetailTxType(ctx, sqlcgen.UpdateXrpDetailTxTypeParams{
+	result, err := r.queries.UpdateXRPDetailTxType(ctx, sqlcgen.UpdateXRPDetailTxTypeParams{
 		CurrentTxType: txType.Int8(),
 		ID:            id,
 	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to call UpdateXrpDetailTxType(): %w", err)
+		return 0, fmt.Errorf("failed to call UpdateXRPDetailTxType(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -246,12 +246,12 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateXrpDetailTxTypeBySentHash(ctx, sqlcgen.UpdateXrpDetailTxTypeBySentHashParams{
+	result, err := r.queries.UpdateXRPDetailTxTypeBySentHash(ctx, sqlcgen.UpdateXRPDetailTxTypeBySentHashParams{
 		CurrentTxType: txType.Int8(),
 		TxBlob:        sentHashTx, // sentHashTx is actually tx_blob for XRP
 	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to call UpdateXrpDetailTxTypeBySentHash(): %w", err)
+		return 0, fmt.Errorf("failed to call UpdateXRPDetailTxTypeBySentHash(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()

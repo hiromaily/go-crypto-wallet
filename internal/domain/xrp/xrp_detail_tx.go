@@ -7,8 +7,8 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
-// XrpDetailTx represents an XRP transaction detail in the domain layer
-type XrpDetailTx struct {
+// XRPDetailTx represents an XRP transaction detail in the domain layer
+type XRPDetailTx struct {
 	ID                    int64
 	TxID                  int64
 	UUID                  string
@@ -32,8 +32,8 @@ type XrpDetailTx struct {
 	SentUpdatedAt         *time.Time
 }
 
-// NewXrpDetailTx creates a new XrpDetailTx entity
-func NewXrpDetailTx(
+// NewXRPDetailTx creates a new XRPDetailTx entity
+func NewXRPDetailTx(
 	txID int64,
 	uuid string,
 	currentTxType domainTx.TxType,
@@ -47,7 +47,7 @@ func NewXrpDetailTx(
 	flags uint64,
 	lastLedgerSequence uint64,
 	sequence uint64,
-) (*XrpDetailTx, error) {
+) (*XRPDetailTx, error) {
 	if uuid == "" {
 		return nil, errors.New("uuid cannot be empty")
 	}
@@ -61,7 +61,7 @@ func NewXrpDetailTx(
 		return nil, errors.New("amount cannot be empty")
 	}
 
-	return &XrpDetailTx{
+	return &XRPDetailTx{
 		TxID:               txID,
 		UUID:               uuid,
 		CurrentTxType:      currentTxType,
@@ -79,14 +79,14 @@ func NewXrpDetailTx(
 }
 
 // SetSigningData sets signing-related data
-func (x *XrpDetailTx) SetSigningData(signingPubkey, txnSignature, hash string) {
+func (x *XRPDetailTx) SetSigningData(signingPubkey, txnSignature, hash string) {
 	x.SigningPubkey = signingPubkey
 	x.TxnSignature = txnSignature
 	x.Hash = hash
 }
 
 // SetSentData sets sent transaction data
-func (x *XrpDetailTx) SetSentData(signedTxID, txBlob string, earliestLedgerVersion uint64) {
+func (x *XRPDetailTx) SetSentData(signedTxID, txBlob string, earliestLedgerVersion uint64) {
 	x.SignedTxID = signedTxID
 	x.TxBlob = txBlob
 	x.EarliestLedgerVersion = earliestLedgerVersion
@@ -95,6 +95,6 @@ func (x *XrpDetailTx) SetSentData(signedTxID, txBlob string, earliestLedgerVersi
 }
 
 // UpdateTxType updates the transaction type
-func (x *XrpDetailTx) UpdateTxType(txType domainTx.TxType) {
+func (x *XRPDetailTx) UpdateTxType(txType domainTx.TxType) {
 	x.CurrentTxType = txType
 }

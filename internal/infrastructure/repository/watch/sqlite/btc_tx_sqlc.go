@@ -29,13 +29,13 @@ func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode
 }
 
 // convertToBtcTransaction converts sqlcgen.BtcTx to domain.BtcTransaction entity
-func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BtcTransaction, error) {
+func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BTCTransaction, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(int8(sqlcTx.CurrentTxType))
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
 	}
 
-	tx := &domainBitcoin.BtcTransaction{
+	tx := &domainBitcoin.BTCTransaction{
 		ID:                sqlcTx.ID,
 		CoinTypeCode:      domainCoin.CoinTypeCode(sqlcTx.Coin),
 		ActionType:        domainTx.ActionType(sqlcTx.Action),
@@ -66,7 +66,7 @@ func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BtcTransacti
 }
 
 // convertFromBtcTransaction converts domain.BtcTransaction entity to sqlcgen.BtcTx
-func convertFromBtcTransaction(tx *domainBitcoin.BtcTransaction) *sqlcgen.BtcTx {
+func convertFromBtcTransaction(tx *domainBitcoin.BTCTransaction) *sqlcgen.BtcTx {
 	sqlcTx := &sqlcgen.BtcTx{
 		ID:                tx.ID,
 		Coin:              tx.CoinTypeCode.String(),
@@ -98,7 +98,7 @@ func convertFromBtcTransaction(tx *domainBitcoin.BtcTransaction) *sqlcgen.BtcTx 
 }
 
 // GetOne returns one record by ID
-func (r *BTCTxRepositorySqlc) GetOne(id int64) (*domainBitcoin.BtcTransaction, error) {
+func (r *BTCTxRepositorySqlc) GetOne(id int64) (*domainBitcoin.BTCTransaction, error) {
 	ctx := context.Background()
 
 	btcTx, err := r.queries.GetBtcTxByID(ctx, id)
@@ -159,7 +159,7 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType domainTx.ActionType, txTy
 
 // InsertUnsignedTx inserts unsigned transaction
 func (r *BTCTxRepositorySqlc) InsertUnsignedTx(
-	actionType domainTx.ActionType, txItem *domainBitcoin.BtcTransaction,
+	actionType domainTx.ActionType, txItem *domainBitcoin.BTCTransaction,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -183,7 +183,7 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(
 }
 
 // Update updates transaction
-func (r *BTCTxRepositorySqlc) Update(txItem *domainBitcoin.BtcTransaction) (int64, error) {
+func (r *BTCTxRepositorySqlc) Update(txItem *domainBitcoin.BTCTransaction) (int64, error) {
 	ctx := context.Background()
 
 	sqlcTx := convertFromBtcTransaction(txItem)

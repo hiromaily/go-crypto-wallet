@@ -41,23 +41,23 @@ func (_m *MockXRPDetailTXRepositorier) EXPECT() *MockXRPDetailTXRepositorier_Exp
 }
 
 // GetAllByTxID provides a mock function for the type MockXRPDetailTXRepositorier
-func (_mock *MockXRPDetailTXRepositorier) GetAllByTxID(id int64) ([]*xrp.XrpDetailTx, error) {
+func (_mock *MockXRPDetailTXRepositorier) GetAllByTxID(id int64) ([]*xrp.XRPDetailTx, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllByTxID")
 	}
 
-	var r0 []*xrp.XrpDetailTx
+	var r0 []*xrp.XRPDetailTx
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) ([]*xrp.XrpDetailTx, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) ([]*xrp.XRPDetailTx, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) []*xrp.XrpDetailTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) []*xrp.XRPDetailTx); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*xrp.XrpDetailTx)
+			r0 = ret.Get(0).([]*xrp.XRPDetailTx)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -92,34 +92,34 @@ func (_c *MockXRPDetailTXRepositorier_GetAllByTxID_Call) Run(run func(id int64))
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_GetAllByTxID_Call) Return(xrpDetailTxs []*xrp.XrpDetailTx, err error) *MockXRPDetailTXRepositorier_GetAllByTxID_Call {
-	_c.Call.Return(xrpDetailTxs, err)
+func (_c *MockXRPDetailTXRepositorier_GetAllByTxID_Call) Return(xRPDetailTxs []*xrp.XRPDetailTx, err error) *MockXRPDetailTXRepositorier_GetAllByTxID_Call {
+	_c.Call.Return(xRPDetailTxs, err)
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*xrp.XrpDetailTx, error)) *MockXRPDetailTXRepositorier_GetAllByTxID_Call {
+func (_c *MockXRPDetailTXRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*xrp.XRPDetailTx, error)) *MockXRPDetailTXRepositorier_GetAllByTxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetOne provides a mock function for the type MockXRPDetailTXRepositorier
-func (_mock *MockXRPDetailTXRepositorier) GetOne(id int64) (*xrp.XrpDetailTx, error) {
+func (_mock *MockXRPDetailTXRepositorier) GetOne(id int64) (*xrp.XRPDetailTx, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *xrp.XrpDetailTx
+	var r0 *xrp.XRPDetailTx
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*xrp.XrpDetailTx, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) (*xrp.XRPDetailTx, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *xrp.XrpDetailTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) *xrp.XRPDetailTx); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.XrpDetailTx)
+			r0 = ret.Get(0).(*xrp.XRPDetailTx)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -154,12 +154,12 @@ func (_c *MockXRPDetailTXRepositorier_GetOne_Call) Run(run func(id int64)) *Mock
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_GetOne_Call) Return(xrpDetailTx *xrp.XrpDetailTx, err error) *MockXRPDetailTXRepositorier_GetOne_Call {
-	_c.Call.Return(xrpDetailTx, err)
+func (_c *MockXRPDetailTXRepositorier_GetOne_Call) Return(xRPDetailTx *xrp.XRPDetailTx, err error) *MockXRPDetailTXRepositorier_GetOne_Call {
+	_c.Call.Return(xRPDetailTx, err)
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*xrp.XrpDetailTx, error)) *MockXRPDetailTXRepositorier_GetOne_Call {
+func (_c *MockXRPDetailTXRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*xrp.XRPDetailTx, error)) *MockXRPDetailTXRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -227,7 +227,7 @@ func (_c *MockXRPDetailTXRepositorier_GetSentHashTx_Call) RunAndReturn(run func(
 }
 
 // Insert provides a mock function for the type MockXRPDetailTXRepositorier
-func (_mock *MockXRPDetailTXRepositorier) Insert(txItem *xrp.XrpDetailTx) error {
+func (_mock *MockXRPDetailTXRepositorier) Insert(txItem *xrp.XRPDetailTx) error {
 	ret := _mock.Called(txItem)
 
 	if len(ret) == 0 {
@@ -235,7 +235,7 @@ func (_mock *MockXRPDetailTXRepositorier) Insert(txItem *xrp.XrpDetailTx) error 
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*xrp.XrpDetailTx) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(*xrp.XRPDetailTx) error); ok {
 		r0 = returnFunc(txItem)
 	} else {
 		r0 = ret.Error(0)
@@ -249,16 +249,16 @@ type MockXRPDetailTXRepositorier_Insert_Call struct {
 }
 
 // Insert is a helper method to define mock.On call
-//   - txItem *xrp.XrpDetailTx
+//   - txItem *xrp.XRPDetailTx
 func (_e *MockXRPDetailTXRepositorier_Expecter) Insert(txItem interface{}) *MockXRPDetailTXRepositorier_Insert_Call {
 	return &MockXRPDetailTXRepositorier_Insert_Call{Call: _e.mock.On("Insert", txItem)}
 }
 
-func (_c *MockXRPDetailTXRepositorier_Insert_Call) Run(run func(txItem *xrp.XrpDetailTx)) *MockXRPDetailTXRepositorier_Insert_Call {
+func (_c *MockXRPDetailTXRepositorier_Insert_Call) Run(run func(txItem *xrp.XRPDetailTx)) *MockXRPDetailTXRepositorier_Insert_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *xrp.XrpDetailTx
+		var arg0 *xrp.XRPDetailTx
 		if args[0] != nil {
-			arg0 = args[0].(*xrp.XrpDetailTx)
+			arg0 = args[0].(*xrp.XRPDetailTx)
 		}
 		run(
 			arg0,
@@ -272,13 +272,13 @@ func (_c *MockXRPDetailTXRepositorier_Insert_Call) Return(err error) *MockXRPDet
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_Insert_Call) RunAndReturn(run func(txItem *xrp.XrpDetailTx) error) *MockXRPDetailTXRepositorier_Insert_Call {
+func (_c *MockXRPDetailTXRepositorier_Insert_Call) RunAndReturn(run func(txItem *xrp.XRPDetailTx) error) *MockXRPDetailTXRepositorier_Insert_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockXRPDetailTXRepositorier
-func (_mock *MockXRPDetailTXRepositorier) InsertBulk(txItems []*xrp.XrpDetailTx) error {
+func (_mock *MockXRPDetailTXRepositorier) InsertBulk(txItems []*xrp.XRPDetailTx) error {
 	ret := _mock.Called(txItems)
 
 	if len(ret) == 0 {
@@ -286,7 +286,7 @@ func (_mock *MockXRPDetailTXRepositorier) InsertBulk(txItems []*xrp.XrpDetailTx)
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*xrp.XrpDetailTx) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*xrp.XRPDetailTx) error); ok {
 		r0 = returnFunc(txItems)
 	} else {
 		r0 = ret.Error(0)
@@ -300,16 +300,16 @@ type MockXRPDetailTXRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - txItems []*xrp.XrpDetailTx
+//   - txItems []*xrp.XRPDetailTx
 func (_e *MockXRPDetailTXRepositorier_Expecter) InsertBulk(txItems interface{}) *MockXRPDetailTXRepositorier_InsertBulk_Call {
 	return &MockXRPDetailTXRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", txItems)}
 }
 
-func (_c *MockXRPDetailTXRepositorier_InsertBulk_Call) Run(run func(txItems []*xrp.XrpDetailTx)) *MockXRPDetailTXRepositorier_InsertBulk_Call {
+func (_c *MockXRPDetailTXRepositorier_InsertBulk_Call) Run(run func(txItems []*xrp.XRPDetailTx)) *MockXRPDetailTXRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*xrp.XrpDetailTx
+		var arg0 []*xrp.XRPDetailTx
 		if args[0] != nil {
-			arg0 = args[0].([]*xrp.XrpDetailTx)
+			arg0 = args[0].([]*xrp.XRPDetailTx)
 		}
 		run(
 			arg0,
@@ -323,7 +323,7 @@ func (_c *MockXRPDetailTXRepositorier_InsertBulk_Call) Return(err error) *MockXR
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*xrp.XrpDetailTx) error) *MockXRPDetailTXRepositorier_InsertBulk_Call {
+func (_c *MockXRPDetailTXRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*xrp.XRPDetailTx) error) *MockXRPDetailTXRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }

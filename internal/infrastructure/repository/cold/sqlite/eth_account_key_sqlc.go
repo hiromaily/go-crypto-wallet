@@ -78,9 +78,9 @@ func convertFromETHAccountKey(key *domainEth.ETHAccountKey) *sqlcgen.EthAccountK
 func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(
 	ctx context.Context, accountType domainAccount.AccountType,
 ) (int64, error) {
-	result, err := r.queries.GetMaxEthAccountKeyIndex(ctx, accountType.String())
+	result, err := r.queries.GetMaxETHAccountKeyIndex(ctx, accountType.String())
 	if err != nil {
-		return 0, fmt.Errorf("failed to call GetMaxEthAccountKeyIndex(): %w", err)
+		return 0, fmt.Errorf("failed to call GetMaxETHAccountKeyIndex(): %w", err)
 	}
 
 	// Type assert interface{} to int64
@@ -96,9 +96,9 @@ func (r *ETHAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Acco
 ) (*domainEth.ETHAccountKey, error) {
 	ctx := context.Background()
 
-	accountKey, err := r.queries.GetOneEthAccountKeyByMaxID(ctx, accountType.String())
+	accountKey, err := r.queries.GetOneETHAccountKeyByMaxID(ctx, accountType.String())
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetOneEthAccountKeyByMaxID(): %w", err)
+		return nil, fmt.Errorf("failed to call GetOneETHAccountKeyByMaxID(): %w", err)
 	}
 
 	return convertToETHAccountKey(&accountKey)
@@ -110,12 +110,12 @@ func (r *ETHAccountKeyRepositorySqlc) GetAllAddrStatus(
 ) ([]*domainEth.ETHAccountKey, error) {
 	ctx := context.Background()
 
-	accountKeys, err := r.queries.GetEthAccountKeysByAddrStatus(ctx, sqlcgen.GetEthAccountKeysByAddrStatusParams{
+	accountKeys, err := r.queries.GetETHAccountKeysByAddrStatus(ctx, sqlcgen.GetETHAccountKeysByAddrStatusParams{
 		Account:    accountType.String(),
 		AddrStatus: int64(addrStatus.Int8()),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetEthAccountKeysByAddrStatus(): %w", err)
+		return nil, fmt.Errorf("failed to call GetETHAccountKeysByAddrStatus(): %w", err)
 	}
 
 	result := make([]*domainEth.ETHAccountKey, 0, len(accountKeys))
@@ -134,9 +134,9 @@ func (r *ETHAccountKeyRepositorySqlc) GetAllAddrStatus(
 func (r *ETHAccountKeyRepositorySqlc) GetByAddress(addr string) (*domainEth.ETHAccountKey, error) {
 	ctx := context.Background()
 
-	accountKey, err := r.queries.GetEthAccountKeyByAddress(ctx, addr)
+	accountKey, err := r.queries.GetETHAccountKeyByAddress(ctx, addr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetEthAccountKeyByAddress(): %w", err)
+		return nil, fmt.Errorf("failed to call GetETHAccountKeyByAddress(): %w", err)
 	}
 
 	return convertToETHAccountKey(&accountKey)
@@ -154,7 +154,7 @@ func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*domainEth.ETHAccountKe
 
 	for _, item := range items {
 		sqlcItem := convertFromETHAccountKey(item)
-		_, err := qtx.InsertEthAccountKey(ctx, sqlcgen.InsertEthAccountKeyParams{
+		_, err := qtx.InsertETHAccountKey(ctx, sqlcgen.InsertETHAccountKeyParams{
 			Account:       sqlcItem.Account,
 			Address:       sqlcItem.Address,
 			FullPublicKey: sqlcItem.FullPublicKey,
@@ -164,7 +164,7 @@ func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*domainEth.ETHAccountKe
 		})
 		if err != nil {
 			_ = tx.Rollback()
-			return fmt.Errorf("failed to call InsertEthAccountKey(): %w", err)
+			return fmt.Errorf("failed to call InsertETHAccountKey(): %w", err)
 		}
 	}
 
@@ -190,7 +190,7 @@ func (r *ETHAccountKeyRepositorySqlc) UpdateAddrStatus(
 	var totalAffected int64
 	// sqlc doesn't support IN clauses with variable arguments, so update one at a time
 	for _, privateKey := range privateKeys {
-		result, err := qtx.UpdateEthAccountKeyAddrStatus(ctx, sqlcgen.UpdateEthAccountKeyAddrStatusParams{
+		result, err := qtx.UpdateETHAccountKeyAddrStatus(ctx, sqlcgen.UpdateETHAccountKeyAddrStatusParams{
 			AddrStatus: int64(addrStatus.Int8()),
 			UpdatedAt:  sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true},
 			Account:    accountType.String(),
@@ -198,7 +198,7 @@ func (r *ETHAccountKeyRepositorySqlc) UpdateAddrStatus(
 		})
 		if err != nil {
 			_ = tx.Rollback()
-			return 0, fmt.Errorf("failed to call UpdateEthAccountKeyAddrStatus(): %w", err)
+			return 0, fmt.Errorf("failed to call UpdateETHAccountKeyAddrStatus(): %w", err)
 		}
 
 		affected, err := result.RowsAffected()

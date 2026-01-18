@@ -7,8 +7,8 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
-// EthDetailTx represents an Ethereum transaction detail in the domain layer
-type EthDetailTx struct {
+// ETHDetailTx represents an Ethereum transaction detail in the domain layer
+type ETHDetailTx struct {
 	ID                int64
 	TxID              int64
 	UUID              string
@@ -28,8 +28,8 @@ type EthDetailTx struct {
 	SentUpdatedAt     *time.Time
 }
 
-// NewEthDetailTx creates a new EthDetailTx entity
-func NewEthDetailTx(
+// NewETHDetailTx creates a new ETHDetailTx entity
+func NewETHDetailTx(
 	txID int64,
 	uuid string,
 	currentTxType domainTx.TxType,
@@ -41,7 +41,7 @@ func NewEthDetailTx(
 	fee uint64,
 	gasLimit uint32,
 	nonce uint64,
-) (*EthDetailTx, error) {
+) (*ETHDetailTx, error) {
 	if uuid == "" {
 		return nil, errors.New("uuid cannot be empty")
 	}
@@ -53,7 +53,7 @@ func NewEthDetailTx(
 	}
 	// Note: amount can be zero for ERC20 token transactions where only the token is transferred
 
-	return &EthDetailTx{
+	return &ETHDetailTx{
 		TxID:            txID,
 		UUID:            uuid,
 		CurrentTxType:   currentTxType,
@@ -69,14 +69,14 @@ func NewEthDetailTx(
 }
 
 // SetUnsignedTx sets unsigned transaction data
-func (e *EthDetailTx) SetUnsignedTx(hexTx string) {
+func (e *ETHDetailTx) SetUnsignedTx(hexTx string) {
 	e.UnsignedHexTx = hexTx
 	now := time.Now()
 	e.UnsignedUpdatedAt = &now
 }
 
 // SetSignedTx sets signed transaction data
-func (e *EthDetailTx) SetSignedTx(signedHex, sentHash string) {
+func (e *ETHDetailTx) SetSignedTx(signedHex, sentHash string) {
 	e.SignedHexTx = signedHex
 	e.SentHashTx = sentHash
 	now := time.Now()
@@ -84,6 +84,6 @@ func (e *EthDetailTx) SetSignedTx(signedHex, sentHash string) {
 }
 
 // UpdateTxType updates the transaction type
-func (e *EthDetailTx) UpdateTxType(txType domainTx.TxType) {
+func (e *ETHDetailTx) UpdateTxType(txType domainTx.TxType) {
 	e.CurrentTxType = txType
 }

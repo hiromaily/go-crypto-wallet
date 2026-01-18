@@ -237,7 +237,7 @@ func (u *createTransactionUseCase) createTransferTx(
 
 type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
-	txRepoTxInputs []*domainBitcoin.BtcTxInput
+	txRepoTxInputs []*domainBitcoin.BTCTxInput
 	prevTxs        []dtobtc.PreviousTx
 	addresses      []string // input, sender's address
 }
@@ -414,7 +414,7 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 ) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
-	txRepoTxInputs := make([]*domainBitcoin.BtcTxInput, 0, len(unspentList))
+	txRepoTxInputs := make([]*domainBitcoin.BTCTxInput, 0, len(unspentList))
 	prevTxs := make([]dtobtc.PreviousTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
@@ -438,7 +438,7 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 			logger.Error("fail to convert input amount to decimal", "error", err)
 			continue
 		}
-		input, err := domainBitcoin.NewBtcTxInput(
+		input, err := domainBitcoin.NewBTCTxInput(
 			0, // TxID will be set later
 			txItem.TxID,
 			txItem.Vout,
@@ -598,14 +598,14 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 	inputTotal btcutil.Amount,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
 	changeAddrStr string, // Address string of the change output (where fee should be subtracted from)
-) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*domainBitcoin.BtcTxOutput, error) {
+) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*domainBitcoin.BTCTxOutput, error) {
 	// get fee
 	fee, err := u.btcClient.GetFee(msgTx, adjustmentFee)
 	if err != nil {
 		return 0, 0, nil, nil, fmt.Errorf("fail to call btc.GetFee(): %w", err)
 	}
 	var outputTotal btcutil.Amount
-	txRepoOutputs := make([]*domainBitcoin.BtcTxOutput, 0, len(txPrevOutputs))
+	txRepoOutputs := make([]*domainBitcoin.BTCTxOutput, 0, len(txPrevOutputs))
 
 	// subtract fee from output transaction for change
 	// FIXME: what if change is short, should re-run from the beginning with shortage-flag
@@ -621,7 +621,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
-			output, err := domainBitcoin.NewBtcTxOutput(
+			output, err := domainBitcoin.NewBTCTxOutput(
 				0, // TxID will be set later
 				addr.String(),
 				receiver.String(),
@@ -644,7 +644,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert change amount to decimal: %w", err)
 			}
-			output, err := domainBitcoin.NewBtcTxOutput(
+			output, err := domainBitcoin.NewBTCTxOutput(
 				0, // TxID will be set later
 				addr.String(),
 				sender.String(),
@@ -661,7 +661,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
-			output, err := domainBitcoin.NewBtcTxOutput(
+			output, err := domainBitcoin.NewBTCTxOutput(
 				0, // TxID will be set later
 				addr.String(),
 				receiver.String(),
@@ -702,8 +702,8 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	inputTotal,
 	outputTotal,
 	fee btcutil.Amount,
-	txInputs []*domainBitcoin.BtcTxInput,
-	txOutputs []*domainBitcoin.BtcTxOutput,
+	txInputs []*domainBitcoin.BTCTxInput,
+	txOutputs []*domainBitcoin.BTCTxOutput,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// skip if same hex is already stored
@@ -729,7 +729,7 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert fee amount to decimal: %w", err)
 	}
-	txItem := domainBitcoin.NewBtcTransaction(
+	txItem := domainBitcoin.NewBTCTransaction(
 		u.btcClient.CoinTypeCode(),
 		actionType,
 		domainTx.TxTypeUnsigned,
