@@ -32,7 +32,6 @@ config/wallet/
 ├── btc/
 │   ├── watch.yaml      # Watch wallet config
 │   ├── keygen.yaml     # Keygen wallet config
-│   ├── sign.yaml       # Sign wallet config (sign1)
 │   ├── sign1.yaml      # Sign wallet config (auth1)
 │   └── sign2.yaml      # Sign wallet config (auth2)
 ├── bch/
@@ -116,19 +115,19 @@ Offline cold wallet for additional signatures on multisig transactions.
 
 ```bash
 # Create seed
-sign --config config/wallet/btc/sign.yaml --coin btc create seed
+sign1 --config config/wallet/btc/sign1.yaml --coin btc create seed
 
 # Generate HD key for auth account
-sign --config config/wallet/btc/sign.yaml --coin btc create hdkey
+sign1 --config config/wallet/btc/sign1.yaml --coin btc create hdkey
 
 # Export full public key
-sign --config config/wallet/btc/sign.yaml --coin btc export fullpubkey
+sign1 --config config/wallet/btc/sign1.yaml --coin btc export fullpubkey
 
 # Import private key
-sign --config config/wallet/btc/sign.yaml --coin btc import privkey
+sign1 --config config/wallet/btc/sign1.yaml --coin btc import privkey
 
 # Sign transaction (second/additional signature)
-sign --config config/wallet/btc/sign.yaml --coin btc sign signature --file data/tx/btc/payment_unsigned_1.psbt
+sign1 --config config/wallet/btc/sign1.yaml --coin btc sign signature --file data/tx/btc/payment_unsigned_1.psbt
 ```
 
 ## Multi-Coin Examples

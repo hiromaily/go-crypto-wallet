@@ -176,12 +176,12 @@ bitcoin-cli -regtest -rpcwallet=test_taproot -generate 101
 
 ### Configuration
 
-Set `address_type = "taproot"` in your test configuration:
+Override settings using environment variables (no separate config file needed):
 
-```toml
-# config/wallet/btc/keygen_bip86_test.yaml
-key_type = "bip86"        # Required for Taproot
-address_type = "taproot"  # legacy, p2sh-segwit, bech32, taproot
+```bash
+# Set Taproot configuration via environment variables
+export WALLET_KEY_TYPE=bip86        # Required for Taproot
+export WALLET_ADDRESS_TYPE=taproot  # legacy, p2sh-segwit, bech32, taproot
 ```
 
 ### Run Integration Tests
@@ -196,8 +196,10 @@ go test -v -tags=integration ./internal/infrastructure/api/btc/btc/
 ### 1. Keygen Wallet - Generate Taproot Keys
 
 ```bash
-# Config path (Taproot configuration)
-KEYGEN_CONF=./config/wallet/btc/keygen_bip86_test.yaml
+# Use standard keygen config with environment variable overrides
+KEYGEN_CONF=./config/wallet/btc/keygen.yaml
+export WALLET_KEY_TYPE=bip86
+export WALLET_ADDRESS_TYPE=taproot
 
 # Generate seed
 ./keygen --config $KEYGEN_CONF --coin btc create seed
@@ -234,10 +236,10 @@ WATCH_CONF=./config/wallet/btc/watch.yaml
 
 ```bash
 # Config path
-SIGN_CONF=./config/wallet/btc/sign.yaml
+SIGN_CONF=./config/wallet/btc/sign1.yaml
 
 # Sign multisig transaction (Schnorr signature)
-./sign --config $SIGN_CONF --coin btc sign --file ./data/tx/btc/payment_5_unsigned_1_1234567890.tx
+./sign1 --config $SIGN_CONF --coin btc sign --file ./data/tx/btc/payment_5_unsigned_1_1234567890.tx
 ```
 
 ### 5. Watch Wallet - Send Taproot Transaction

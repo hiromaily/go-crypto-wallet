@@ -107,7 +107,7 @@ config/wallet/btc/watch.yaml
 config/wallet/btc/keygen.yaml
 
 # Sign wallet configuration (for multisig)
-config/wallet/btc/sign.yaml
+config/wallet/btc/sign1.yaml
 ```
 
 **Important**: All wallet commands require the `--config` flag to specify the configuration file:
@@ -116,7 +116,7 @@ config/wallet/btc/sign.yaml
 # Example usage
 ./watch --config config/wallet/btc/watch.yaml --coin btc create payment
 ./keygen --config config/wallet/btc/keygen.yaml --coin btc sign --file tx.psbt
-./sign --config config/wallet/btc/sign.yaml --coin btc sign --file tx.psbt
+./sign1 --config config/wallet/btc/sign1.yaml --coin btc sign --file tx.psbt
 ```
 
 See `docs/crypto/btc/operation_example.md` for configuration details.
