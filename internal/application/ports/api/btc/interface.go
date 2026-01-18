@@ -28,8 +28,11 @@ import (
 //   - TransactionSender: Transaction broadcast
 //   - TransactionMonitor: Transaction monitoring
 //   - AddressImporter: Address import
+//   - PrivateKeyImporter: Private key import
 //   - DescriptorManager: Descriptor operations (BTC only)
-//   - PSBTHandler: PSBT operations (BTC only)
+//   - PSBTCreator: Create PSBT (BTC only)
+//   - PSBTSigner: Sign PSBT (BTC only)
+//   - PSBTFinalizer: Finalize PSBT (BTC only)
 //   - RawTransactionSigner: Raw transaction signing
 //   - MultisigManager: Multisig address management
 //

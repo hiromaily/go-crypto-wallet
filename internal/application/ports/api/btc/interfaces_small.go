@@ -90,14 +90,20 @@ type UTXOProvider interface {
 	GetUnspentListAddrs(unspentList []dtobtc.UnspentOutput, accountType domainAccount.AccountType) []string
 }
 
+// RawTransactionConverter converts between transaction formats.
+// Used by signing usecases that need to convert hex <-> MsgTx.
+type RawTransactionConverter interface {
+	ToHex(tx *wire.MsgTx) (string, error)
+	ToMsgTx(txHex string) (*wire.MsgTx, error)
+}
+
 // RawTransactionCreator creates and manipulates raw transactions.
 // Used by watch wallet transaction creation.
 type RawTransactionCreator interface {
+	RawTransactionConverter
 	CreateRawTransaction(
 		inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
 	) (*wire.MsgTx, error)
-	ToHex(tx *wire.MsgTx) (string, error)
-	ToMsgTx(txHex string) (*wire.MsgTx, error)
 	GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error)
 }
 
@@ -240,8 +246,8 @@ type TransactionCreationDeps interface {
 // Use this for BCH keygen/sign transaction usecases.
 type BCHTransactionSigner interface {
 	ChainConfigProvider
-	RawTransactionCreator // ToHex, ToMsgTx
-	RawTransactionSigner  // SignRawTransactionWithKey
+	RawTransactionConverter // ToHex, ToMsgTx
+	RawTransactionSigner    // SignRawTransactionWithKey
 }
 
 // BTCTransactionSigner combines interfaces needed for BTC transaction signing.
