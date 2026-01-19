@@ -1,0 +1,29 @@
+{
+  "name": "xrpl-grpc-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "XRP Ledger gRPC server using Bun runtime",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.0.0",
+    "@connectrpc/connect": "^2.0.0",
+    "xrpl": "^4.5.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "@bufbuild/buf": "^1.40.0",
+    "@bufbuild/protoc-gen-es": "^2.0.0",
+    "@connectrpc/protoc-gen-connect-es": "^2.0.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
