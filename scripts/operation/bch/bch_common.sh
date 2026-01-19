@@ -589,16 +589,13 @@ bch_cleanup() {
 # Wrapper for bitcoin-cli commands with BCH RPC credentials
 # Usage: bch_cli <container_name> [bitcoin-cli args...]
 # Example: bch_cli "bch-watch" -rpcwallet=watch getbalance
+# Note: Uses subshell to temporarily set BCH credentials without affecting parent shell
 bch_cli() {
-	local container=$1
-	shift
-	local rpc_user="${BCH_RPC_USER}"
-	local rpc_password="${BCH_RPC_PASSWORD}"
-
-	docker exec "$container" bitcoin-cli -regtest \
-		-rpcuser="${rpc_user}" \
-		-rpcpassword="${rpc_password}" \
-		"$@"
+	(
+		RPC_USER="${BCH_RPC_USER}"
+		RPC_PASSWORD="${BCH_RPC_PASSWORD}"
+		bitcoin_cli "$@"
+	)
 }
 
 ###############################################################################
