@@ -944,14 +944,18 @@ func (c *container) NewWatchSendTransactionUseCase() any {
 
 func (c *container) NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
 	// Use coin-specific implementations for BTC and BCH
-	if c.conf.CoinTypeCode == domainCoin.BTC {
+	switch c.conf.CoinTypeCode {
+	case domainCoin.BTC:
 		return c.newBTCWatchImportAddressUseCase()
-	}
-	if c.conf.CoinTypeCode == domainCoin.BCH {
+	case domainCoin.BCH:
 		return c.newBCHWatchImportAddressUseCase()
+	case domainCoin.ETH, domainCoin.XRP, domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
+		// Use shared implementation for other coins
+		return c.newWatchImportAddressUseCase()
+	default:
+		// Fallback for any new coin types
+		return c.newWatchImportAddressUseCase()
 	}
-	// Use shared implementation for other coins (ETH, XRP, etc.)
-	return c.newWatchImportAddressUseCase()
 }
 
 func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
