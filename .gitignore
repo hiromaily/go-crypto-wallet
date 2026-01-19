@@ -35,6 +35,7 @@ data/descriptor/*
 data/dump/*
 data/fullpubkey/*
 data/keystore/*
+data/logs/*
 data/tx/*
 data/gaiad/*
 data/sqlite/**/*.db
