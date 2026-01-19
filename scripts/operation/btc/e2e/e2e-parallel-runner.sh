@@ -92,6 +92,7 @@ log_error() {
 	fi
 }
 
+# shellcheck disable=SC2329  # Utility function for future use
 log_warn() {
 	if [[ "$CI_MODE" == "true" ]]; then
 		echo "[WARN] $*"
@@ -227,6 +228,7 @@ setup_shared_infrastructure() {
 	echo ""
 }
 
+# shellcheck disable=SC2329  # Used in trap (line 442)
 cleanup_shared_infrastructure() {
 	log_info ""
 	log_info "=========================================="
