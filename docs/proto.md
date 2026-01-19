@@ -169,14 +169,25 @@ inputs:
   - directory: proto/rippleapi
 ```
 
-## Tooling Versions
+## Version Requirements
 
-| Tool | Version | Edition 2024 Support |
-|------|---------|---------------------|
-| protoc | 33.4 | Full support |
-| buf CLI | 1.63.0 | Not yet supported |
+| Tool | Minimum Version | Edition 2024 Support |
+|------|-----------------|---------------------|
+| protoc | **>= 33.0** | Full support |
+| buf CLI | >= 1.64.0 | Expected (v1.63.0 does not support) |
 | protoc-gen-go | latest | Full support |
 | protoc-gen-go-grpc | latest | Full support |
+
+### Version Checks
+
+The Makefile includes automatic version verification:
+
+```bash
+make proto-version-check  # Check protoc >= 33.0
+make buf-version-check    # Check buf >= 1.64.0
+```
+
+These checks run automatically when using `make proto` or `make proto-buf`.
 
 ## References
 
