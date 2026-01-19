@@ -23,20 +23,18 @@ message ResponseGenerateXAddress {
   string secret = 2;
 }
 
-message RequestIsValidAddress {
-  string address = 1;
-}
+message RequestIsValidAddress { string address = 1; }
 
-message ResponseIsValidAddress {
-  bool isValid = 1;
-}
+message ResponseIsValidAddress { bool isValid = 1; }
 
 // RippleAddressAPI
 service RippleAddressAPI {
   // https://xrpl.org/rippleapi-reference.html#generateaddress
-  rpc GenerateAddress(google.protobuf.Empty) returns (ResponseGenerateAddress) {}
+  rpc GenerateAddress(google.protobuf.Empty) returns (ResponseGenerateAddress) {
+  }
   // https://xrpl.org/rippleapi-reference.html#generatexaddress
-  rpc GenerateXAddress(google.protobuf.Empty) returns (ResponseGenerateXAddress) {}
+  rpc GenerateXAddress(google.protobuf.Empty)
+      returns (ResponseGenerateXAddress) {}
   // https://xrpl.org/rippleapi-reference.html#isvalidaddress
   rpc IsValidAddress(RequestIsValidAddress) returns (ResponseIsValidAddress) {}
 }

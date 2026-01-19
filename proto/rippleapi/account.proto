@@ -11,7 +11,7 @@ option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructu
 
 message RequestGetAccountInfo {
   string address = 1;
-  //uint64 ledgerVersion = 2;
+  // uint64 ledgerVersion = 2;
 }
 
 message ResponseGetAccountInfo {
