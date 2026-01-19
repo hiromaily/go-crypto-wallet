@@ -29,7 +29,7 @@ import (
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	bitcoin "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc"
+	apibchimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/bch"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
@@ -437,11 +437,30 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 func (c *container) newBTC() apibtc.Bitcoiner {
 	if c.btc == nil {
 		var err error
-		c.btc, err = bitcoin.NewBitcoin(
-			c.newRPCClient(),
-			&c.conf.Bitcoin,
-			c.conf.CoinTypeCode,
-		)
+		// Create BCH-specific client for Bitcoin Cash, BTC client otherwise
+		if c.conf.CoinTypeCode == domainCoin.BCH {
+			logger.Debug("DI: Creating BitcoinCash instance for BCH")
+			c.btc, err = apibchimpl.NewBitcoinCash(
+				c.newRPCClient(),
+				c.conf.CoinTypeCode,
+				&c.conf.Bitcoin,
+			)
+			if err == nil {
+				// Verify the type is correct
+				if _, ok := c.btc.(*apibchimpl.BitcoinCash); ok {
+					logger.Debug("DI: Successfully created BitcoinCash instance")
+				} else {
+					logger.Error("DI: Created instance is not BitcoinCash!")
+				}
+			}
+		} else {
+			logger.Debug("DI: Creating Bitcoin instance for BTC")
+			c.btc, err = apibtcimpl.NewBitcoin(
+				c.newRPCClient(),
+				&c.conf.Bitcoin,
+				c.conf.CoinTypeCode,
+			)
+		}
 		if err != nil {
 			panic(err)
 		}
