@@ -76,18 +76,29 @@ edition "2024" not yet fully supported; latest supported edition "2023"
 
 Once buf adds Edition 2024 support, `make proto-buf` can be used as the primary generation method.
 
+### Proto Formatting (clang-format)
+
+Since buf CLI v1.63.0 doesn't support edition 2024, use `clang-format` for proto formatting:
+
+```bash
+make proto-fmt         # Format proto files with clang-format (recommended)
+make proto-fmt-check   # Check formatting (used in CI)
+```
+
+**Requirements:**
+- `clang-format` (install via `apt install clang-format` or `brew install clang-format`)
+
 ### buf Utilities (Limited with Edition 2024)
 
 **Note:** As of buf CLI v1.63.0, the following commands fail with edition 2024:
 
 ```bash
-make proto-fmt       # ❌ Fails - edition 2024 not supported
-make proto-lint      # ❌ Fails - edition 2024 not supported
-make breaking-proto  # ✅ Works with continue-on-error
+make proto-fmt-buf       # ❌ Fails - edition 2024 not supported
+make proto-lint          # ❌ Fails - edition 2024 not supported
+make breaking-proto      # ✅ Works with continue-on-error
 ```
 
-These commands are temporarily disabled in CI (`.github/workflows/lint-test.yml`).
-Re-enable when buf >= 1.64.0 adds edition 2024 support.
+buf lint is temporarily disabled in CI. Re-enable when buf >= 1.64.0 adds edition 2024 support.
 
 ## Generated Code
 

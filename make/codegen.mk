@@ -137,25 +137,55 @@ proto-buf: buf-version-check clean-pb
 	buf generate
 
 # Format proto files with buf
-.PHONY: proto-fmt
-proto-fmt:
+# NOTE: Fails with edition 2024 - use 'make proto-clang-fmt' instead
+.PHONY: proto-fmt-buf
+proto-fmt-buf: buf-version-check
 	buf format -w
 
-# Check proto file formatting (for CI)
-.PHONY: proto-fmt-check
-proto-fmt-check:
+# Check proto file formatting with buf (for CI)
+# NOTE: Fails with edition 2024 - use 'make proto-clang-fmt-check' instead
+.PHONY: proto-fmt-buf-check
+proto-fmt-buf-check: buf-version-check
 	buf format -d --exit-code
 
 # Lint proto files with buf
-# NOTE: May fail with edition 2024 until buf adds support
+# NOTE: Fails with edition 2024 until buf adds support
 .PHONY: proto-lint
-proto-lint:
+proto-lint: buf-version-check
 	buf lint
 
 # Check for breaking changes in proto files
 .PHONY: breaking-proto
 breaking-proto:
 	buf breaking --against '.git#branch=main'
+
+#------------------------------------------------------------------------------
+# clang-format based formatting (for edition 2024)
+#------------------------------------------------------------------------------
+# clang-format supports proto files and works with edition 2024.
+# This is the recommended formatting method until buf adds edition 2024 support.
+#------------------------------------------------------------------------------
+
+# Format proto files with clang-format (recommended for edition 2024)
+.PHONY: proto-fmt
+proto-fmt:
+	@command -v clang-format >/dev/null 2>&1 || { echo "Error: clang-format is not installed"; exit 1; }
+	@echo "Formatting proto files with clang-format..."
+	@find proto -name "*.proto" -exec clang-format -i {} \;
+	@echo "Proto files formatted successfully"
+
+# Check proto file formatting with clang-format (for CI)
+.PHONY: proto-fmt-check
+proto-fmt-check:
+	@command -v clang-format >/dev/null 2>&1 || { echo "Error: clang-format is not installed"; exit 1; }
+	@echo "Checking proto file formatting with clang-format..."
+	@DIFF=$$(find proto -name "*.proto" -exec clang-format --dry-run -Werror {} \; 2>&1); \
+	if [ -n "$$DIFF" ]; then \
+		echo "Proto files are not formatted. Run 'make proto-fmt' to fix."; \
+		echo "$$DIFF"; \
+		exit 1; \
+	fi; \
+	echo "Proto file formatting check passed"
 
 #------------------------------------------------------------------------------
 # Common targets
