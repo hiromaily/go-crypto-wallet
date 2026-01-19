@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/btcsuite/btcd/btcutil"
 
@@ -95,23 +93,19 @@ func (u *signTransactionUseCase) Sign(
 
 	// Write signed transaction file
 	// CreateFilePath returns base path without extension: {action}_{txID}_{type}_{count}_
-	// Add timestamp and .hex extension (following WritePSBTFile pattern)
+	// WriteHexFile adds timestamp and .hex extension (following WritePSBTFile pattern)
 	// Final format: payment_1_signed_0_1768819476518045000.hex
 	basePath := u.txFileRepo.CreateFilePath(actionType, txType, txID, signedCount)
-	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
-	generatedFileName := basePath + ts + ".hex"
 
-	// Write transaction hex to file directly (don't use WriteFile which adds another timestamp)
-	var byteTx []byte
+	var generatedFileName string
 	if isSigned {
 		// For fully signed transactions, just write the hex
-		byteTx = []byte(signedHex)
+		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, signedHex)
 	} else {
 		// For partially signed, include prevTx metadata for next signer
 		content := u.formatSignedTxContent(signedHex, prevTxs)
-		byteTx = []byte(content)
+		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, content)
 	}
-	err = os.WriteFile(generatedFileName, byteTx, 0o644)
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to write signed tx file: %w", err)
 	}

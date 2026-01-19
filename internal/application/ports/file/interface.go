@@ -21,6 +21,9 @@ type TransactionFileRepositorier interface {
 	// PSBT-specific methods (BIP174)
 	ReadPSBTFile(path string) (string, error)
 	WritePSBTFile(path, psbtBase64 string) (string, error)
+
+	// Hex file methods (for raw transaction hex - used by BCH)
+	WriteHexFile(path, hexTx string) (string, error)
 }
 
 // FileName is object for items in fine name

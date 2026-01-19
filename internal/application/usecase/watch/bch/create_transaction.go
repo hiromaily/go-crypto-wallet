@@ -5,10 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
@@ -509,18 +507,14 @@ func (u *createTransactionUseCase) generateRawTxHexFile(
 ) (string, error) {
 	// Create file path (use .hex extension for BCH raw transactions)
 	// CreateFilePath returns path ending with underscore: payment_1_unsign_0_
+	// WriteHexFile adds timestamp and .hex extension (similar to WritePSBTFile pattern)
+	// Final format: payment_1_unsigned_0_1768816802572944000.hex
 	basePath := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, id, 0)
-
-	// Add timestamp and .hex extension (similar to WritePSBTFile pattern)
-	// Final format: payment_1_unsign_0_1768816802572944000.hex
-	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
-	generatedFileName := basePath + ts + ".hex"
 
 	// Write transaction hex to file
 	// For BCH, we store raw hex along with prevTx metadata
 	content := u.formatRawTxContent(txHex, prevTxs)
-	byteTx := []byte(content)
-	err := os.WriteFile(generatedFileName, byteTx, 0o644)
+	generatedFileName, err := u.txFileRepo.WriteHexFile(basePath, content)
 	if err != nil {
 		return "", fmt.Errorf("fail to write raw tx file: %w", err)
 	}
