@@ -19,6 +19,10 @@ set -eu
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
+# E2E Pattern identifier for database file naming
+# Format: watch-e2e-p1-{timestamp}.db, keygen-e2e-p1-{timestamp}.db, etc.
+export E2E_PATTERN="p1"
+
 # Source BCH common utilities (includes common.sh automatically)
 # shellcheck source=../bch_common.sh
 source "${SCRIPT_DIR}/../bch_common.sh"
@@ -45,14 +49,14 @@ key_generation_phase() {
 	log_step "Key Generation Phase"
 
 	log_substep "Creating seed for keygen wallet"
-	keygen -c "${BCH_CONFIG_KEYGEN}" create seed || {
+	bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create seed || {
 		log_warn "Seed already exists or error occurred, continuing..."
 	}
 
 	log_substep "Creating HD keys for keygen wallet (client, deposit, payment, stored)"
 	for account in client deposit payment stored; do
 		log_info "Creating HD keys for account: $account"
-		keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create hdkey --account "$account" --keynum 10
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create hdkey --account "$account" --keynum 10
 	done
 }
 
@@ -66,14 +70,14 @@ singlesig_setup_phase() {
 	# BCH doesn't support descriptor wallets, use address export/import workflow
 	log_substep "Importing private keys into keygen wallet"
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 	fi
 	for account in client deposit payment stored; do
 		log_info "Importing private keys for account: $account"
-		keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import privkey --account "$account"
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import privkey --account "$account"
 	done
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletlock
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletlock
 	fi
 
 	# Export addresses from keygen
@@ -83,7 +87,7 @@ singlesig_setup_phase() {
 
 	for account in "${accounts[@]}"; do
 		log_info "Exporting ${account} addresses"
-		file_output=$(keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account "${account}")
+		file_output=$(bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account "${account}")
 		address_files[$account]=$(bch_extract_file_path "$file_output")
 		log_info "  ${account}: ${address_files[$account]}"
 	done
@@ -92,7 +96,7 @@ singlesig_setup_phase() {
 	log_substep "Importing addresses into watch wallet"
 	for account in "${accounts[@]}"; do
 		log_info "Importing ${account} addresses"
-		watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_files[$account]}"
+		bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_files[$account]}"
 	done
 
 	log_info "All addresses imported successfully"
@@ -142,9 +146,11 @@ create_payment_requests_phase() {
 	log_info "Using sender address: $sender_address"
 
 	# Generate receiver addresses (BCH uses legacy format)
-	receiver1=$(bch_cli "bch-watch" -rpcwallet=watch getnewaddress "" legacy)
-	receiver2=$(bch_cli "bch-watch" -rpcwallet=watch getnewaddress "" legacy)
-	receiver3=$(bch_cli "bch-watch" -rpcwallet=watch getnewaddress "" legacy)
+	# Use pattern-specific wallet name
+	local wallet_name="${BCH_WATCH_WALLET_NAME:-watch}"
+	receiver1=$(bch_cli "bch-watch" -rpcwallet="${wallet_name}" getnewaddress "" legacy)
+	receiver2=$(bch_cli "bch-watch" -rpcwallet="${wallet_name}" getnewaddress "" legacy)
+	receiver3=$(bch_cli "bch-watch" -rpcwallet="${wallet_name}" getnewaddress "" legacy)
 
 	bch_insert_payment_requests "$sender_address" "$receiver1 $receiver2 $receiver3" "0.001 0.002 0.0015"
 }
@@ -157,8 +163,9 @@ transaction_flow_phase() {
 	log_step "Transaction Flow Phase (Single-sig)"
 
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" create payment 2>&1) || {
+	tx_file=$(bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
+		log_error "Error details: $tx_file"
 		if echo "$tx_file" | grep -q "No utxo"; then
 			bch_log_no_utxo_error
 		fi
@@ -170,18 +177,18 @@ transaction_flow_phase() {
 
 	log_substep "Signing with keygen wallet (single signature)"
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(keygen -c "${BCH_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
+	tx_file_signed=$(bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" sign signature --file "${tx_unsigned}")
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletlock
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletlock
 	fi
 
 	tx_signed=$(bch_extract_file_path "$tx_file_signed")
 	log_info "Signed transaction: $tx_signed"
 
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send --file "${tx_signed}")
+	tx_result=$(bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send --file "${tx_signed}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
