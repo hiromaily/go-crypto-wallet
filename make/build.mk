@@ -18,10 +18,12 @@ GO_SRCS := $(shell find . -name '*.go' -not -path './vendor/*' -not -path './.gi
 # Binary output paths
 # - These are the actual executable files that `go build` produces
 # - Located in $GOPATH/bin/ so they're available in PATH
-WATCH_BIN  := $(GOPATH)/bin/watch
-KEYGEN_BIN := $(GOPATH)/bin/keygen
-SIGN1_BIN  := $(GOPATH)/bin/sign1
-SIGN2_BIN  := $(GOPATH)/bin/sign2
+# - Use 'go env GOPATH' as fallback when GOPATH env var is not set (e.g., CI)
+BIN_DIR    := $(or $(GOPATH),$(shell go env GOPATH))/bin
+WATCH_BIN  := $(BIN_DIR)/watch
+KEYGEN_BIN := $(BIN_DIR)/keygen
+SIGN1_BIN  := $(BIN_DIR)/sign1
+SIGN2_BIN  := $(BIN_DIR)/sign2
 WALLET_BINS := $(WATCH_BIN) $(KEYGEN_BIN) $(SIGN1_BIN) $(SIGN2_BIN)
 
 #------------------------------------------------------------------------------
