@@ -84,24 +84,24 @@ key_generation_phase() {
 	log_substep "Creating HD keys for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
-		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" create hdkey
+		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" create hdkey
 	done
 
 	log_substep "Importing private keys into sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 		fi
-		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" import privkey
+		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" import privkey
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletlock
+			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" api walletlock
 		fi
 	done
 
 	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(btc_sign2_cmd -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
+	file_fullpubkey_auth1=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" export fullpubkey)
+	file_fullpubkey_auth2=$(btc_sign2_cmd -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" export fullpubkey)
 
 	export FULLPUBKEY_FILE1="${file_fullpubkey_auth1##*\[fileName\]: }"
 	export FULLPUBKEY_FILE2="${file_fullpubkey_auth2##*\[fileName\]: }"
@@ -209,11 +209,11 @@ transaction_flow_phase() {
 	tx_signed1=$(btc_extract_file_path "$tx_file_signed")
 
 	log_substep "Signing with sign1 wallet (2nd signature - placeholder)"
-	tx_file_signed2=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_file_signed2=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" sign signature --file "${tx_signed1}")
 	tx_signed2=$(btc_extract_file_path "$tx_file_signed2")
 
 	log_substep "Signing with sign2 wallet (3rd signature - placeholder)"
-	tx_file_signed3=$(btc_sign2_cmd -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 sign signature --file "${tx_signed2}")
+	tx_file_signed3=$(btc_sign2_cmd -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" sign signature --file "${tx_signed2}")
 	tx_signed3=$(btc_extract_file_path "$tx_file_signed3")
 
 	log_substep "Sending transaction"

@@ -677,19 +677,23 @@ btc_sign_cmd() {
 	shift
 
 	local db_path
+	local rpc_host
 	if [ "${sign_num}" = "1" ]; then
 		db_path="${SQLITE_SIGN_DB_PATH}"
+		rpc_host="${BTC_SIGN1_WALLET_RPC_HOST}"
 	elif [ "${sign_num}" = "2" ]; then
 		db_path="${SQLITE_SIGN2_DB_PATH}"
+		rpc_host="${BTC_SIGN2_WALLET_RPC_HOST}"
 	else
 		log_error "Invalid sign number provided to btc_sign_cmd: ${sign_num}"
 		return 1
 	fi
 
 	if db_is_sqlite; then
-		WALLET_DATABASE_SQLITE_PATH="${db_path}" "sign${sign_num}" "$@"
+		WALLET_DATABASE_SQLITE_PATH="${db_path}" \
+			WALLET_BITCOIN_HOST="${rpc_host}" "sign${sign_num}" "$@"
 	else
-		"sign${sign_num}" "$@"
+		WALLET_BITCOIN_HOST="${rpc_host}" "sign${sign_num}" "$@"
 	fi
 }
 
