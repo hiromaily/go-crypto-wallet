@@ -9,6 +9,13 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+const (
+	// minFeeRateSatsPerByte is the minimum fee rate for BCH transactions (1 sat/byte)
+	minFeeRateSatsPerByte = 1
+	// minTxFeeSats is the absolute minimum fee for any BCH transaction (1000 satoshis)
+	minTxFeeSats = 1000
+)
+
 // GetFee overrides BTC GetFee to properly handle BCH fee calculation.
 // BCH differences from BTC:
 //   - No SegWit, so all bytes count equally (no witness discount)
@@ -20,14 +27,9 @@ func (b *BitcoinCash) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amo
 	// BCH regtest and testnets often have unreliable fee estimation
 	// Use a more conservative approach: always start with a safe minimum
 
-	// Calculate minimum fee: 1 sat/byte
+	// Calculate minimum fee: 1 sat/byte using integer arithmetic
 	txSize := tx.SerializeSize()
-	minFeePerByte := 0.00001 // BCH/kB (1 sat/byte)
-	calculatedFee := fmt.Sprintf("%f", minFeePerByte*float64(txSize)/1000)
-	fee, err := b.StrToAmount(calculatedFee)
-	if err != nil {
-		return 0, fmt.Errorf("failed to calculate BCH minimum fee: %w", err)
-	}
+	fee := btcutil.Amount(txSize * minFeeRateSatsPerByte)
 
 	logger.Debug("BCH calculated minimum fee",
 		"tx_size_bytes", txSize,
@@ -60,10 +62,8 @@ func (b *BitcoinCash) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amo
 
 	// BCH minimum: ensure at least 1000 satoshis (0.00001 BCH)
 	// This is a safety net to prevent "min relay fee not met" errors
-	minFee, err := b.FloatToAmount(0.00001) // 1000 satoshis
-	if err != nil {
-		logger.Warn("failed to convert min fee", "error", err)
-	} else if fee < minFee {
+	minFee := btcutil.Amount(minTxFeeSats)
+	if fee < minFee {
 		logger.Debug("increasing fee to BCH minimum",
 			"calculated_fee", fee.ToBTC(),
 			"min_fee", minFee.ToBTC())
@@ -89,7 +89,7 @@ func (b *BitcoinCash) getMinRelayFeeBCH() (btcutil.Amount, error) {
 	if res.RelayFee == 0 {
 		// BCH regtest may return 0 relay fee, use conservative default
 		logger.Debug("BCH relay fee is 0 from getnetworkinfo, using default minimum")
-		return b.FloatToAmount(0.00001) // 1 sat/byte = 0.00001 BCH/kB
+		return btcutil.Amount(minTxFeeSats), nil
 	}
 	fee, err := b.FloatToAmount(res.RelayFee)
 	if err != nil {
@@ -97,10 +97,7 @@ func (b *BitcoinCash) getMinRelayFeeBCH() (btcutil.Amount, error) {
 	}
 
 	// Ensure minimum 1000 satoshis (0.00001 BCH)
-	minFee, err := b.FloatToAmount(0.00001)
-	if err != nil {
-		return fee, nil // Return original fee if conversion fails
-	}
+	minFee := btcutil.Amount(minTxFeeSats)
 	if fee < minFee {
 		return minFee, nil
 	}

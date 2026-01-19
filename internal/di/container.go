@@ -442,8 +442,8 @@ func (c *container) newBTC() apibtc.Bitcoiner {
 			logger.Debug("DI: Creating BitcoinCash instance for BCH")
 			c.btc, err = apibchimpl.NewBitcoinCash(
 				c.newRPCClient(),
-				c.conf.CoinTypeCode,
 				&c.conf.Bitcoin,
+				c.conf.CoinTypeCode,
 			)
 			if err == nil {
 				// Verify the type is correct
