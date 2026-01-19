@@ -177,4 +177,4 @@ btc-e2e-parallel: build-all
 # Note: build-all uses incremental build - only rebuilds when Go sources change
 .PHONY: btc-e2e-ci-all
 btc-e2e-ci-all: build-all
-	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) --ci
+	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG) --ci

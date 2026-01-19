@@ -275,7 +275,8 @@ run_pattern() {
 	if [[ "$VERBOSE" == "true" ]]; then
 		# Show real-time output (skip --reset since infrastructure is shared)
 		"${script_path}" --non-interactive 2>&1 | tee "${log_file}"
-		echo "$?" >"${exit_code_file}"
+		# Use PIPESTATUS[0] to capture script exit code, not tee's exit code
+		echo "${PIPESTATUS[0]}" >"${exit_code_file}"
 	else
 		# Redirect to log file (skip --reset since infrastructure is shared)
 		"${script_path}" --non-interactive >"${log_file}" 2>&1
@@ -297,10 +298,11 @@ run_patterns_parallel() {
 		while [[ $running -ge $MAX_PARALLEL ]]; do
 			# Check for completed processes
 			for pid in "${pids[@]}"; do
-				if ! kill -0 "$pid" 2>/dev/null; then
+				if [[ -n "$pid" ]] && ! kill -0 "$pid" 2>/dev/null; then
 					wait "$pid" 2>/dev/null || true
 					running=$((running - 1))
-					# Remove completed PID
+					# Remove the completed PID from the array using bash substitution.
+					# This replaces the first occurrence of the PID's value with an empty string.
 					pids=("${pids[@]/$pid/}")
 				fi
 			done
