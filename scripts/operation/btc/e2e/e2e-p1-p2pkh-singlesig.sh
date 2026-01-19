@@ -74,9 +74,14 @@ singlesig_setup_phase() {
 
 	for account in "${accounts[@]}"; do
 		log_info "Exporting ${account} descriptors"
+		# Use pattern-specific descriptor file path for parallel execution
+		local descriptor_suffix=""
+		if [ -n "${E2E_PATTERN}" ]; then
+			descriptor_suffix="-${E2E_PATTERN}"
+		fi
 		file_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" descriptor export \
 			--account "${account}" \
-			--output "data/descriptor/btc/${account}_descriptors.json" \
+			--output "data/descriptor/btc/${account}_descriptors${descriptor_suffix}.json" \
 			--format bitcoin-core \
 			--include-change)
 		descriptor_files[$account]="${file_output##*exported to }"
