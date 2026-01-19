@@ -92,20 +92,19 @@ func (u *signTransactionUseCase) Sign(
 	}
 
 	// Write signed transaction file
-	path := u.txFileRepo.CreateFilePath(actionType, txType, txID, signedCount)
-	// Use .hex extension for BCH
-	if strings.HasSuffix(path, ".psbt") {
-		path = path[:len(path)-5] + ".hex"
-	}
+	// CreateFilePath returns base path without extension: {action}_{txID}_{type}_{count}_
+	// WriteHexFile adds timestamp and .hex extension (following WritePSBTFile pattern)
+	// Final format: payment_1_signed_0_1768819476518045000.hex
+	basePath := u.txFileRepo.CreateFilePath(actionType, txType, txID, signedCount)
 
 	var generatedFileName string
 	if isSigned {
 		// For fully signed transactions, just write the hex
-		generatedFileName, err = u.txFileRepo.WriteFile(path, signedHex)
+		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, signedHex)
 	} else {
 		// For partially signed, include prevTx metadata for next signer
 		content := u.formatSignedTxContent(signedHex, prevTxs)
-		generatedFileName, err = u.txFileRepo.WriteFile(path, content)
+		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, content)
 	}
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to write signed tx file: %w", err)
@@ -185,9 +184,13 @@ func (u *signTransactionUseCase) getWIFsForAccount(
 	senderAccount domainAccount.AccountType,
 ) ([]string, error) {
 	// Get keys with various statuses
+	// After export address command, status becomes AddrStatusAddressExported (3)
+	// So we need to query for all relevant statuses
 	statuses := []domainAddress.AddrStatus{
-		domainAddress.AddrStatusHDKeyGenerated,
-		domainAddress.AddrStatusPrivKeyImported,
+		domainAddress.AddrStatusHDKeyGenerated,           // 0
+		domainAddress.AddrStatusPrivKeyImported,          // 1
+		domainAddress.AddrStatusMultisigAddressGenerated, // 2 (for multisig)
+		domainAddress.AddrStatusAddressExported,          // 3 (after export address)
 	}
 
 	wifs := make([]string, 0)
@@ -196,6 +199,7 @@ func (u *signTransactionUseCase) getWIFsForAccount(
 		if err != nil {
 			return nil, fmt.Errorf("fail to get account keys for %s: %w", senderAccount.String(), err)
 		}
+
 		for _, key := range accountKeys {
 			if key.WalletImportFormat != "" {
 				wifs = append(wifs, key.WalletImportFormat)

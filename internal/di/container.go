@@ -943,12 +943,19 @@ func (c *container) NewWatchSendTransactionUseCase() any {
 }
 
 func (c *container) NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
-	// Use BTC-specific implementation for BTC/BCH to import addresses into Bitcoin Core
-	if domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
+	// Use coin-specific implementations for BTC and BCH
+	switch c.conf.CoinTypeCode {
+	case domainCoin.BTC:
 		return c.newBTCWatchImportAddressUseCase()
+	case domainCoin.BCH:
+		return c.newBCHWatchImportAddressUseCase()
+	case domainCoin.ETH, domainCoin.XRP, domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
+		// Use shared implementation for other coins
+		return c.newWatchImportAddressUseCase()
+	default:
+		// Fallback for any new coin types
+		return c.newWatchImportAddressUseCase()
 	}
-	// Use shared implementation for other coins (ETH, XRP, etc.)
-	return c.newWatchImportAddressUseCase()
 }
 
 func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
@@ -1217,6 +1224,16 @@ func (c *container) newBCHWatchSendTransactionUseCase() watchusecase.SendTransac
 		c.newBTCTxRepo(),
 		c.newBTCTxOutputRepo(),
 		c.newTxFileRepo(),
+	)
+}
+
+func (c *container) newBCHWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
+	return watchusecasebch.NewImportBCHAddressUseCase(
+		c.newBTC(), // BCH BitcoinCash struct embeds Bitcoin, providing all methods
+		c.newAddressRepo(),
+		c.newAddressFileRepo(),
+		c.conf.CoinTypeCode,
+		c.conf.AddressType,
 	)
 }
 

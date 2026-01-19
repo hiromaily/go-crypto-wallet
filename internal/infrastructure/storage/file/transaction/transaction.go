@@ -250,6 +250,29 @@ func (*TransactionFileRepository) WritePSBTFile(path, psbtBase64 string) (string
 	return fileName, nil
 }
 
+// WriteHexFile writes raw transaction hex to file with .hex extension
+// Used by BCH for raw transaction hex format (not PSBT)
+func (*TransactionFileRepository) WriteHexFile(path, hexTx string) (string, error) {
+	// Add timestamp and .hex extension
+	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := path + ts + ".hex"
+
+	// Create directory if not existing (using os.MkdirAll for robustness)
+	dir := filepath.Dir(fileName)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	// Write raw transaction hex
+	byteHex := []byte(hexTx)
+	err := os.WriteFile(fileName, byteHex, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write hex file %s: %w", fileName, err)
+	}
+
+	return fileName, nil
+}
+
 func (*TransactionFileRepository) createDir(path string) {
 	tmp1 := strings.Split(path, "/")
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename

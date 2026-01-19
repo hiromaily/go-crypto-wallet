@@ -1,4 +1,4 @@
-package btc
+package bch
 
 import (
 	"context"
@@ -20,37 +20,34 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// importAddrBTCClient defines the minimal interface needed for BTC address import.
+// importAddrBCHClient defines the minimal interface needed for BCH address import.
 // This follows the Interface Segregation Principle - depend only on methods actually used.
-type importAddrBTCClient interface {
+type importAddrBCHClient interface {
 	apibtc.ChainConfigProvider   // CoinTypeCode
 	apibtc.LegacyAddressImporter // ImportAddressWithLabel, ImportMulti
 	apibtc.AddressOperator       // GetAddressInfo
 }
 
-// ImportAddressUseCase handles BTC address imports with rescan support
-type ImportAddressUseCase interface {
-	Execute(ctx context.Context, input watchusecase.ImportAddressInput) error
-}
-
 type importAddressUseCase struct {
-	btcClient    importAddrBTCClient
+	bchClient    importAddrBCHClient
 	addrRepo     repowatch.AddressRepositorier
 	addrFileRepo file.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	addrType     domainAddress.AddrType
 }
 
-// NewImportAddressUseCase creates a new BTC-specific ImportAddressUseCase
-func NewImportAddressUseCase(
-	btcClient apibtc.Bitcoiner,
+// NewImportBCHAddressUseCase creates a new BCH-specific ImportAddressUseCase
+// Note: Accepts a minimal interface matching the actual BCH implementation methods
+// BCH's BitcoinCash struct embeds Bitcoin, providing ImportMulti through that embedding
+func NewImportBCHAddressUseCase(
+	bchClient importAddrBCHClient,
 	addrRepo repowatch.AddressRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	addrType domainAddress.AddrType,
-) ImportAddressUseCase {
+) watchusecase.ImportAddressUseCase {
 	return &importAddressUseCase{
-		btcClient:    btcClient,
+		bchClient:    bchClient,
 		addrRepo:     addrRepo,
 		addrFileRepo: addrFileRepo,
 		coinTypeCode: coinTypeCode,
@@ -58,7 +55,7 @@ func NewImportAddressUseCase(
 	}
 }
 
-// Execute imports addresses from a file with optional rescan
+// Execute imports BCH addresses from a file with optional rescan
 func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.ImportAddressInput) error {
 	// Read addresses from file
 	pubKeys, err := u.addrFileRepo.ImportAddress(input.FileName)
@@ -94,12 +91,12 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		inner := strings.Split(key, ",")
 
 		// Convert address format
-		addrFmt, err := address.ConvertLine(u.btcClient.CoinTypeCode(), inner)
+		addrFmt, err := address.ConvertLine(u.bchClient.CoinTypeCode(), inner)
 		if err != nil {
 			return fmt.Errorf("failed to convert address format: %w", err)
 		}
 
-		// Select target address based on account type and address type
+		// Select target address based on account type (BCH-specific logic)
 		targetAddr, err := u.selectTargetAddress(addrFmt)
 		if err != nil {
 			return err
@@ -131,7 +128,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 	}
 
 	// Log import statistics
-	logger.Info("address import completed",
+	logger.Info("BCH address import completed",
 		"total", importStats.total,
 		"imported", importStats.success,
 		"skipped", importStats.skipped)
@@ -146,7 +143,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 	return nil
 }
 
-// importSingleAddress imports a single address into Bitcoin Core
+// importSingleAddress imports a single BCH address into Bitcoin Cash Core
 // Returns (imported=true, nil) if successfully imported
 // Returns (imported=false, nil) if address already exists (recoverable error)
 // Returns (imported=false, error) for critical errors
@@ -156,12 +153,12 @@ func (u *importAddressUseCase) importSingleAddress(
 	rescan bool,
 	handleRecoverableError func(error, string, domainAccount.AccountType) bool,
 ) (bool, error) {
-	// Use ImportMulti if redeem script is available (for P2SH multisig)
-	// Otherwise use legacy ImportAddressWithLabel
+	// BCH: Use ImportMulti with pubkey to make UTXOs solvable
+	// For multisig, use redeem script
 	if addrFmt.RedeemScript != "" {
 		return u.importWithRedeemScript(targetAddr, addrFmt, rescan, handleRecoverableError)
 	}
-	return u.importLegacyAddress(targetAddr, addrFmt, rescan, handleRecoverableError)
+	return u.importWithPubkey(targetAddr, addrFmt, rescan, handleRecoverableError)
 }
 
 // importWithRedeemScript imports P2SH multisig address with redeem script using ImportMulti
@@ -171,7 +168,7 @@ func (u *importAddressUseCase) importWithRedeemScript(
 	rescan bool,
 	handleRecoverableError func(error, string, domainAccount.AccountType) bool,
 ) (bool, error) {
-	logger.Debug("importing multisig address with redeem script",
+	logger.Debug("importing BCH multisig address with redeem script",
 		"address", targetAddr,
 		"account", addrFmt.AccountType.String())
 
@@ -185,9 +182,9 @@ func (u *importAddressUseCase) importWithRedeemScript(
 		},
 	}
 
-	responses, err := u.btcClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: rescan})
+	responses, err := u.bchClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: rescan})
 	if err != nil {
-		return false, fmt.Errorf("failed to call ImportMulti for address %s: %w", targetAddr, err)
+		return false, fmt.Errorf("failed to call ImportMulti for BCH address %s: %w", targetAddr, err)
 	}
 
 	if len(responses) == 0 || !responses[0].Success {
@@ -199,85 +196,103 @@ func (u *importAddressUseCase) importWithRedeemScript(
 		if handleRecoverableError(fmt.Errorf("%s", errMsg), targetAddr, addrFmt.AccountType) {
 			return false, nil // Address already exists, skip
 		}
-		return false, fmt.Errorf("failed to import multisig address %s: %s", targetAddr, errMsg)
+		return false, fmt.Errorf("failed to import BCH multisig address %s: %s", targetAddr, errMsg)
 	}
 
 	return true, nil
 }
 
-// importLegacyAddress imports regular address using legacy ImportAddressWithLabel
-func (u *importAddressUseCase) importLegacyAddress(
+// importWithPubkey imports BCH P2PKH address with pubkey using ImportMulti
+// BCH requires pubkey to make UTXOs solvable for spending
+func (u *importAddressUseCase) importWithPubkey(
 	targetAddr string,
 	addrFmt *appdto.AddressFormat,
 	rescan bool,
 	handleRecoverableError func(error, string, domainAccount.AccountType) bool,
 ) (bool, error) {
-	// Use legacy ImportAddressWithLabel for BTC addresses
-	err := u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), rescan)
+	if addrFmt.FullPublicKey == "" {
+		return false, fmt.Errorf("BCH requires full public key for address %s", targetAddr)
+	}
+
+	logger.Debug("importing BCH address with pubkey using ImportMulti",
+		"pubkey", addrFmt.FullPublicKey,
+		"address", targetAddr,
+		"account", addrFmt.AccountType.String())
+
+	// Set timestamp based on rescan parameter:
+	// - rescan=true: Use 0 to rescan from beginning
+	// - rescan=false: Use "now" to only watch new transactions
+	timestamp := "now"
+	if rescan {
+		timestamp = "0"
+	}
+
+	requests := []dtobtc.ImportMultiRequest{
+		{
+			ScriptPubKey: map[string]string{"address": targetAddr},
+			Timestamp:    timestamp,
+			PubKeys:      []string{addrFmt.FullPublicKey},
+			WatchOnly:    true,
+			Label:        addrFmt.AccountType.String(),
+		},
+	}
+
+	responses, err := u.bchClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: rescan})
 	if err != nil {
+		return false, fmt.Errorf("failed to call ImportMulti for BCH address %s: %w", targetAddr, err)
+	}
+
+	if len(responses) == 0 || !responses[0].Success {
+		errMsg := "unknown error"
+		if len(responses) > 0 && responses[0].Error != nil {
+			errMsg = responses[0].Error.Message
+		}
 		// Check if error is recoverable using helper
-		if handleRecoverableError(err, targetAddr, addrFmt.AccountType) {
+		if handleRecoverableError(fmt.Errorf("%s", errMsg), targetAddr, addrFmt.AccountType) {
 			return false, nil // Address already exists, skip
 		}
-
-		// All other errors are critical - fail the import
-		return false, fmt.Errorf("failed to import address %s (account: %s): %w",
-			targetAddr, addrFmt.AccountType.String(), err)
+		return false, fmt.Errorf("failed to import BCH address %s: %s", targetAddr, errMsg)
 	}
 
 	return true, nil
 }
 
-// selectTargetAddress determines which address format to use based on account type and address type
-func (u *importAddressUseCase) selectTargetAddress(addrFmt *appdto.AddressFormat) (string, error) {
-	// For client accounts, use specific address format
+// selectTargetAddress determines which address format to use for BCH
+// BCH-specific logic:
+// - Client accounts: Always use P2PKH (CashAddr format)
+// - Single-sig accounts (Pattern 1): Use P2PKH for all account types
+// - Multisig accounts (Pattern 2, 3): Use multisig address or P2SH
+func (*importAddressUseCase) selectTargetAddress(addrFmt *appdto.AddressFormat) (string, error) {
+	// For client accounts, always use P2PKH
 	if addrFmt.AccountType == domainAccount.AccountTypeClient {
-		switch u.btcClient.CoinTypeCode() {
-		case domainCoin.BTC:
-			switch u.addrType {
-			case domainAddress.AddrTypeBech32:
-				return addrFmt.Bech32Address, nil
-			case domainAddress.AddrTypeTaproot:
-				if addrFmt.TaprootAddress == "" {
-					return "", errors.New("taproot address is empty in the imported data")
-				}
-				return addrFmt.TaprootAddress, nil
-			case domainAddress.AddrTypeLegacy:
-				return addrFmt.P2PKHAddress, nil
-			case domainAddress.AddrTypeP2shSegwit,
-				domainAddress.AddrTypeBCHCashAddr, domainAddress.AddrTypeETH:
-				return addrFmt.P2SHSegwitAddress, nil
-			default:
-				return addrFmt.P2SHSegwitAddress, nil
-			}
-		case domainCoin.BCH:
-			return addrFmt.P2PKHAddress, nil
-		case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
-			return "", fmt.Errorf("unsupported coin type: %s", u.btcClient.CoinTypeCode().String())
-		default:
-			return "", fmt.Errorf("unknown coin type: %s", u.btcClient.CoinTypeCode().String())
-		}
+		return addrFmt.P2PKHAddress, nil
 	}
 
-	// For non-client accounts (deposit, payment, etc.), determine address type based on multisig status
-	// For multisig accounts, use multisig address
-	// Fallback to P2SHSegwit if MultisigAddress is empty (traditional multisig)
+	// For non-client accounts (deposit, payment, etc.)
+	// Check if this is a single-sig account (no multisig address or redeem script)
+	if addrFmt.MultisigAddress == "" && addrFmt.RedeemScript == "" {
+		// BCH Pattern 1 (Single-sig): use P2PKH address
+		return addrFmt.P2PKHAddress, nil
+	}
+
+	// For multisig accounts (Pattern 2, 3), use multisig address
 	if addrFmt.MultisigAddress != "" {
 		return addrFmt.MultisigAddress, nil
 	}
-	// For traditional multisig (non-MuSig2), use P2SH-Segwit address
+	// Fallback to P2SH if MultisigAddress is empty
 	if addrFmt.P2SHSegwitAddress != "" {
 		return addrFmt.P2SHSegwitAddress, nil
 	}
-	return "", errors.New("no valid address found for non-client account")
+
+	return "", errors.New("no valid address found for BCH account")
 }
 
-// verifyImportedAddress confirms the address was imported correctly as watch-only
+// verifyImportedAddress confirms the BCH address was imported correctly as watch-only
 func (u *importAddressUseCase) verifyImportedAddress(addr string) {
-	addrInfo, err := u.btcClient.GetAddressInfo(addr)
+	addrInfo, err := u.bchClient.GetAddressInfo(addr)
 	if err != nil {
 		logger.Error(
-			"failed to verify imported address",
+			"failed to verify imported BCH address",
 			"address", addr,
 			"error", err)
 		return
@@ -287,13 +302,13 @@ func (u *importAddressUseCase) verifyImportedAddress(addr string) {
 	if len(addrInfo.Labels) != 0 {
 		labelName = addrInfo.Labels[0]
 	}
-	logger.Debug("address verified",
+	logger.Debug("BCH address verified",
 		"account", labelName,
 		"address", addr)
 
 	// Warn if not watch-only (should always be watch-only for watch wallets)
 	if !addrInfo.IsWatchOnly {
-		logger.Warn("address should be watch-only",
+		logger.Warn("BCH address should be watch-only",
 			"address", addr)
 	}
 }

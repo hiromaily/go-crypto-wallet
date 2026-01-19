@@ -631,3 +631,69 @@ func (_c *MockTransactionFileRepositorier_WritePSBTFile_Call) RunAndReturn(run f
 	_c.Call.Return(run)
 	return _c
 }
+
+// WriteHexFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) WriteHexFile(path string, hexTx string) (string, error) {
+	ret := _mock.Called(path, hexTx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WriteHexFile")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string, string) (string, error)); ok {
+		return returnFunc(path, hexTx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = returnFunc(path, hexTx)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = returnFunc(path, hexTx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_WriteHexFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WriteHexFile'
+type MockTransactionFileRepositorier_WriteHexFile_Call struct {
+	*mock.Call
+}
+
+// WriteHexFile is a helper method to define mock.On call
+//   - path string
+//   - hexTx string
+func (_e *MockTransactionFileRepositorier_Expecter) WriteHexFile(path interface{}, hexTx interface{}) *MockTransactionFileRepositorier_WriteHexFile_Call {
+	return &MockTransactionFileRepositorier_WriteHexFile_Call{Call: _e.mock.On("WriteHexFile", path, hexTx)}
+}
+
+func (_c *MockTransactionFileRepositorier_WriteHexFile_Call) Run(run func(path string, hexTx string)) *MockTransactionFileRepositorier_WriteHexFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteHexFile_Call) Return(s string, err error) *MockTransactionFileRepositorier_WriteHexFile_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteHexFile_Call) RunAndReturn(run func(path string, hexTx string) (string, error)) *MockTransactionFileRepositorier_WriteHexFile_Call {
+	_c.Call.Return(run)
+	return _c
+}
