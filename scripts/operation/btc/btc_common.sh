@@ -619,52 +619,49 @@ btc_cleanup() {
 # BTC Wallet Command Wrappers
 ###############################################################################
 
+# Internal helper function for wallet command wrappers
+# Handles environment variable setup for both SQLite and MySQL modes
+# Usage: _btc_wallet_cmd <wallet_name> <db_path> <rpc_host> [args...]
+_btc_wallet_cmd() {
+	local wallet_name="$1"
+	local db_path="$2"
+	local rpc_host="$3"
+	shift 3
+
+	if db_is_sqlite; then
+		WALLET_DATABASE_SQLITE_PATH="${db_path}" \
+			WALLET_BITCOIN_HOST="${rpc_host}" "${wallet_name}" "$@"
+	else
+		WALLET_BITCOIN_HOST="${rpc_host}" "${wallet_name}" "$@"
+	fi
+}
+
 # Wrapper for watch wallet commands with host and database path override
 # When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the watch-specific database
 # Usage: btc_watch_cmd [args...]
 btc_watch_cmd() {
-	if db_is_sqlite; then
-		WALLET_DATABASE_SQLITE_PATH="${SQLITE_WATCH_DB_PATH}" \
-			WALLET_BITCOIN_HOST="${BTC_WATCH_WALLET_RPC_HOST}" watch "$@"
-	else
-		WALLET_BITCOIN_HOST="${BTC_WATCH_WALLET_RPC_HOST}" watch "$@"
-	fi
+	_btc_wallet_cmd "watch" "${SQLITE_WATCH_DB_PATH}" "${BTC_WATCH_WALLET_RPC_HOST}" "$@"
 }
 
 # Wrapper for keygen wallet commands with host and database path override
 # When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the keygen-specific database
 # Usage: btc_keygen_cmd [args...]
 btc_keygen_cmd() {
-	if db_is_sqlite; then
-		WALLET_DATABASE_SQLITE_PATH="${SQLITE_KEYGEN_DB_PATH}" \
-			WALLET_BITCOIN_HOST="${BTC_KEYGEN_WALLET_RPC_HOST}" keygen "$@"
-	else
-		WALLET_BITCOIN_HOST="${BTC_KEYGEN_WALLET_RPC_HOST}" keygen "$@"
-	fi
+	_btc_wallet_cmd "keygen" "${SQLITE_KEYGEN_DB_PATH}" "${BTC_KEYGEN_WALLET_RPC_HOST}" "$@"
 }
 
 # Wrapper for sign1 wallet commands with host and database path override
 # When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the sign-specific database
 # Usage: btc_sign1_cmd [args...]
 btc_sign1_cmd() {
-	if db_is_sqlite; then
-		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN_DB_PATH}" \
-			WALLET_BITCOIN_HOST="${BTC_SIGN1_WALLET_RPC_HOST}" sign1 "$@"
-	else
-		WALLET_BITCOIN_HOST="${BTC_SIGN1_WALLET_RPC_HOST}" sign1 "$@"
-	fi
+	btc_sign_cmd 1 "$@"
 }
 
 # Wrapper for sign2 wallet commands with host and database path override
 # When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the sign2-specific database
 # Usage: btc_sign2_cmd [args...]
 btc_sign2_cmd() {
-	if db_is_sqlite; then
-		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN2_DB_PATH}" \
-			WALLET_BITCOIN_HOST="${BTC_SIGN2_WALLET_RPC_HOST}" sign2 "$@"
-	else
-		WALLET_BITCOIN_HOST="${BTC_SIGN2_WALLET_RPC_HOST}" sign2 "$@"
-	fi
+	btc_sign_cmd 2 "$@"
 }
 
 # Generic wrapper for sign wallet commands with dynamic sign number
@@ -689,12 +686,7 @@ btc_sign_cmd() {
 		return 1
 	fi
 
-	if db_is_sqlite; then
-		WALLET_DATABASE_SQLITE_PATH="${db_path}" \
-			WALLET_BITCOIN_HOST="${rpc_host}" "sign${sign_num}" "$@"
-	else
-		WALLET_BITCOIN_HOST="${rpc_host}" "sign${sign_num}" "$@"
-	fi
+	_btc_wallet_cmd "sign${sign_num}" "${db_path}" "${rpc_host}" "$@"
 }
 
 ###############################################################################
