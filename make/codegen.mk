@@ -75,11 +75,12 @@ BUF_MIN_VERSION := 1.64
 #------------------------------------------------------------------------------
 
 # Check protoc version (edition 2024 requires >= 33.0)
+# Uses sort -V for robust semantic version comparison
 .PHONY: proto-version-check
 proto-version-check:
 	@command -v protoc >/dev/null 2>&1 || { echo "Error: protoc is not installed"; exit 1; }
-	@PROTOC_VERSION=$$(protoc --version | sed 's/libprotoc //' | cut -d. -f1); \
-	if [ "$$PROTOC_VERSION" -lt $(PROTOC_MIN_VERSION) ]; then \
+	@PROTOC_VERSION=$$(protoc --version | sed 's/libprotoc //'); \
+	if [ "$$(printf '%s\n' '$(PROTOC_MIN_VERSION)' "$$PROTOC_VERSION" | sort -V | head -n 1)" != "$(PROTOC_MIN_VERSION)" ]; then \
 		echo "Error: protoc version $$PROTOC_VERSION is too old. Edition 2024 requires protoc >= $(PROTOC_MIN_VERSION).0"; \
 		echo "Current version: $$(protoc --version)"; \
 		echo "Please upgrade protoc: https://grpc.io/docs/protoc-installation/"; \
@@ -112,16 +113,12 @@ proto: proto-version-check clean-pb
 #------------------------------------------------------------------------------
 
 # Check buf version (edition 2024 expected to require >= 1.64.0)
+# Uses sort -V for robust semantic version comparison
 .PHONY: buf-version-check
 buf-version-check:
 	@command -v buf >/dev/null 2>&1 || { echo "Error: buf is not installed"; exit 1; }
 	@BUF_VERSION=$$(buf --version); \
-	BUF_MAJOR=$$(echo "$$BUF_VERSION" | cut -d. -f1); \
-	BUF_MINOR=$$(echo "$$BUF_VERSION" | cut -d. -f2); \
-	REQ_MAJOR=$$(echo "$(BUF_MIN_VERSION)" | cut -d. -f1); \
-	REQ_MINOR=$$(echo "$(BUF_MIN_VERSION)" | cut -d. -f2); \
-	if [ "$$BUF_MAJOR" -lt "$$REQ_MAJOR" ] || \
-	   ([ "$$BUF_MAJOR" -eq "$$REQ_MAJOR" ] && [ "$$BUF_MINOR" -lt "$$REQ_MINOR" ]); then \
+	if [ "$$(printf '%s\n' '$(BUF_MIN_VERSION)' "$$BUF_VERSION" | sort -V | head -n 1)" != "$(BUF_MIN_VERSION)" ]; then \
 		echo "Error: buf version $$BUF_VERSION is too old. Edition 2024 requires buf >= $(BUF_MIN_VERSION).0"; \
 		echo "Current version: $$BUF_VERSION"; \
 		echo "Please upgrade buf: https://buf.build/docs/cli/installation/"; \
