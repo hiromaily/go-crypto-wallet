@@ -166,9 +166,9 @@ create_payment_requests_phase() {
 	sender_address="$payment_address"
 	log_info "Using sender address: $sender_address"
 
-	receiver1=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" legacy)
-	receiver2=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" legacy)
-	receiver3=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" legacy)
+	receiver1=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" legacy)
+	receiver2=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" legacy)
+	receiver3=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" legacy)
 
 	btc_insert_payment_requests "$sender_address" "$receiver1 $receiver2 $receiver3" "0.001 0.002 0.0015"
 }

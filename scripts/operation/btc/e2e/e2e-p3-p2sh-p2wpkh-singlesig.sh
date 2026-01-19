@@ -140,9 +140,9 @@ create_payment_requests_phase() {
 	log_info "Using sender address: $sender_address"
 
 	log_substep "Generating receiver addresses for payment requests"
-	receiver1=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
-	receiver2=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
-	receiver3=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
+	receiver1=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" p2sh-segwit)
+	receiver2=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" p2sh-segwit)
+	receiver3=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" p2sh-segwit)
 
 	log_info "Generated receiver addresses:"
 	log_info "  1. $receiver1"
