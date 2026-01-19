@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: transaction.proto
 
-package xrp
+package protogen
 
 import (
 	context "context"

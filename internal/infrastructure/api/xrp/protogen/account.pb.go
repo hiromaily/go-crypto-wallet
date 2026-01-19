@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: account.proto
 
-package xrp
+package protogen
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -159,7 +159,7 @@ const file_account_proto_rawDesc = "" +
 	"\x1epreviousAffectingTransactionID\x18\x04 \x01(\tR\x1epreviousAffectingTransactionID\x12\\\n" +
 	")previousAffectingTransactionLedgerVersion\x18\x05 \x01(\x04R)previousAffectingTransactionLedgerVersion2{\n" +
 	"\x10RippleAccountAPI\x12g\n" +
-	"\x0eGetAccountInfo\x12(.rippleapi.account.RequestGetAccountInfo\x1a).rippleapi.account.ResponseGetAccountInfo\"\x00BPZIgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp\x92\x03\x02\b\x02b\beditionsp\xe8\a"
+	"\x0eGetAccountInfo\x12(.rippleapi.account.RequestGetAccountInfo\x1a).rippleapi.account.ResponseGetAccountInfo\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe8\a"
 
 var (
 	file_account_proto_rawDescOnce sync.Once

@@ -147,7 +147,7 @@ linters:
           alias: apiethimpl
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20
           alias: apierc20impl
-        - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp
           alias: apixrpimpl
         # - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/db/mysql/sqlcgen
         #   alias: sqlcgen

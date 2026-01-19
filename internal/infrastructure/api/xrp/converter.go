@@ -5,14 +5,15 @@ import (
 	"strconv"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 )
 
 // ToInfraInstructions converts DTO Instructions to infrastructure Instructions.
-func ToInfraInstructions(dto *dtoRipple.Instructions) *Instructions {
+func ToInfraInstructions(dto *dtoRipple.Instructions) *protogen.Instructions {
 	if dto == nil {
 		return nil
 	}
-	return &Instructions{
+	return &protogen.Instructions{
 		Fee:                    dto.Fee,
 		MaxFee:                 dto.MaxFee,
 		MaxLedgerVersion:       dto.MaxLedgerVersion,
@@ -23,7 +24,7 @@ func ToInfraInstructions(dto *dtoRipple.Instructions) *Instructions {
 }
 
 // ToDTOInstructions converts infrastructure Instructions to DTO Instructions.
-func ToDTOInstructions(infra *Instructions) *dtoRipple.Instructions {
+func ToDTOInstructions(infra *protogen.Instructions) *dtoRipple.Instructions {
 	if infra == nil {
 		return nil
 	}
@@ -180,7 +181,7 @@ func ToDTOXRPKeyType(infra XRPKeyType) dtoRipple.XRPKeyType {
 }
 
 // ToDTOResponseGetAccountInfo converts infrastructure ResponseGetAccountInfo to DTO.
-func ToDTOResponseGetAccountInfo(infra *ResponseGetAccountInfo) *dtoRipple.ResponseGetAccountInfo {
+func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *dtoRipple.ResponseGetAccountInfo {
 	if infra == nil {
 		return nil
 	}
@@ -194,7 +195,7 @@ func ToDTOResponseGetAccountInfo(infra *ResponseGetAccountInfo) *dtoRipple.Respo
 }
 
 // ToDTOResponseGenerateAddress converts infrastructure ResponseGenerateAddress to DTO.
-func ToDTOResponseGenerateAddress(infra *ResponseGenerateAddress) *dtoRipple.ResponseGenerateAddress {
+func ToDTOResponseGenerateAddress(infra *protogen.ResponseGenerateAddress) *dtoRipple.ResponseGenerateAddress {
 	if infra == nil {
 		return nil
 	}
@@ -207,7 +208,7 @@ func ToDTOResponseGenerateAddress(infra *ResponseGenerateAddress) *dtoRipple.Res
 }
 
 // ToDTOResponseGenerateXAddress converts infrastructure ResponseGenerateXAddress to DTO.
-func ToDTOResponseGenerateXAddress(infra *ResponseGenerateXAddress) *dtoRipple.ResponseGenerateXAddress {
+func ToDTOResponseGenerateXAddress(infra *protogen.ResponseGenerateXAddress) *dtoRipple.ResponseGenerateXAddress {
 	if infra == nil {
 		return nil
 	}

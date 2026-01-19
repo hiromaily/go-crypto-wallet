@@ -14,6 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -115,8 +116,8 @@ func (r *Ripple) PrepareTransaction(
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
-	req := &RequestPrepareTransaction{
-		TxType:          EnumTransactionType_TX_PAYMENT,
+	req := &protogen.RequestPrepareTransaction{
+		TxType:          protogen.EnumTransactionType_TX_PAYMENT,
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
@@ -155,7 +156,7 @@ func (r *Ripple) SignTransaction(
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call json.Marshal(txJSON): %w", err)
 	}
-	req := &RequestSignTransaction{
+	req := &protogen.RequestSignTransaction{
 		TxJSON: string(strJSON),
 		Secret: secret,
 	}
@@ -171,7 +172,7 @@ func (r *Ripple) SignTransaction(
 // CombineTransaction combines signed transactions from multiple accounts for a multisignature transaction.
 // - The signed transaction must subsequently be submitted.
 func (r *Ripple) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {
-	req := &RequestCombineTransaction{
+	req := &protogen.RequestCombineTransaction{
 		SignedTransactions: signedTxs,
 	}
 
@@ -186,7 +187,7 @@ func (r *Ripple) CombineTransaction(ctx context.Context, signedTxs []string) (st
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
 func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*dtoRipple.SentTx, uint64, error) {
-	req := &RequestSubmitTransaction{
+	req := &protogen.RequestSubmitTransaction{
 		TxBlob: signedTx,
 	}
 	res, err := r.API.txClient.SubmitTransaction(ctx, req)
@@ -231,7 +232,7 @@ func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64)
 	}()
 
 	for {
-		var res *ResponseWaitValidation
+		var res *protogen.ResponseWaitValidation
 		res, err = resStream.Recv()
 		if err == io.EOF {
 			logger.Warn("server is closed in WaitValidation()")
@@ -277,7 +278,7 @@ func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64)
 func (r *Ripple) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
 ) (*dtoRipple.TxInfo, error) {
-	req := &RequestGetTransaction{
+	req := &protogen.RequestGetTransaction{
 		TxID:             txID,
 		MinLedgerVersion: targetLedgerVersion,
 	}

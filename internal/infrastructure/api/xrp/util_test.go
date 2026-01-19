@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
+	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 )
 
 // TestValidateAddress is test for ValidateAddress

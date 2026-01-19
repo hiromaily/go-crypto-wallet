@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/testutil"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
 )
 
 type txTest struct {

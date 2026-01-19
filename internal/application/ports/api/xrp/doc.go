@@ -34,6 +34,6 @@
 //
 // # Related Packages
 //
-//   - internal/infrastructure/api/xrp/xrp/: XRP implementation
+//   - internal/infrastructure/api/xrp/: XRP implementation
 //   - internal/application/dto/ripple/: DTOs used in interface methods
 package xrp
