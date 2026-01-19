@@ -218,8 +218,12 @@ setup_shared_infrastructure() {
 		wait_for_healthy "$container" 90
 	done
 
+	# Additional wait to ensure Bitcoin Core is fully initialized
+	log_info "Waiting for Bitcoin Core to fully initialize..."
+	sleep 5
+
 	log_info "Shared infrastructure is ready"
-	log_info "Note: Each pattern will initialize its own SQLite database"
+	log_info "Note: Each pattern will create its own wallets and SQLite databases"
 	echo ""
 }
 
