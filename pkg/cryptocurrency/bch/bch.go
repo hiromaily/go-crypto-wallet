@@ -595,7 +595,7 @@ func packAddressData(addrType AddressType, addrHash data) (data, error) {
 		return data{}, errors.New("encoded size out of valid range")
 	}
 	versionByte |= uint(encodedSize)
-	var addrHashUint data
+	addrHashUint := make(data, 0, len(addrHash))
 	addrHashUint = append(addrHashUint, addrHash...)
 	data := append([]byte{byte(versionByte)}, addrHashUint...)
 	packedData, err := convertBits(data, 8, 5, true)

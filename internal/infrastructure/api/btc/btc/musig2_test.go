@@ -8,8 +8,6 @@ import (
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 func TestNewMuSig2Service(t *testing.T) {
@@ -17,17 +15,10 @@ func TestNewMuSig2Service(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		logger  logger.Logger
 		wantNil bool
 	}{
 		{
-			name:    "with logger",
-			logger:  logger.NewNoopLogger(),
-			wantNil: false,
-		},
-		{
-			name:    "without logger (should use noop)",
-			logger:  nil,
+			name:    "happy path",
 			wantNil: false,
 		},
 	}
@@ -36,7 +27,7 @@ func TestNewMuSig2Service(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			service := NewMuSig2Service(tt.logger)
+			service := NewMuSig2Service()
 			if (service == nil) != tt.wantNil {
 				t.Errorf("NewMuSig2Service() = %v, wantNil %v", service, tt.wantNil)
 			}
@@ -47,7 +38,7 @@ func TestNewMuSig2Service(t *testing.T) {
 func TestMuSig2Service_CreateContext(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Generate test keys
 	privKey1, err := btcec.NewPrivateKey()
@@ -142,7 +133,7 @@ func TestMuSig2Service_CreateContext(t *testing.T) {
 func TestMuSig2Service_CreateContextWithTaproot(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Generate test keys
 	privKey1, err := btcec.NewPrivateKey()
@@ -215,7 +206,7 @@ func TestMuSig2Service_CreateContextWithTaproot(t *testing.T) {
 func TestMuSig2Service_CreateSession(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -369,7 +360,7 @@ func testSignAndAggregate(
 func TestMuSig2Service_CompleteTwoRoundProtocol(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Generate test keys for 2-of-2 multisig
 	privKey1, _ := btcec.NewPrivateKey()
@@ -412,7 +403,7 @@ func TestMuSig2Service_CompleteTwoRoundProtocol(t *testing.T) {
 func TestMuSig2Service_RegisterPubNonce(t *testing.T) {
 	// Note: Cannot use t.Parallel() because tests mutate session state
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -485,7 +476,7 @@ func TestMuSig2Service_RegisterPubNonce(t *testing.T) {
 func TestMuSig2Service_Sign(t *testing.T) {
 	// Note: Cannot use t.Parallel() because tests mutate session state
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -561,7 +552,7 @@ func TestMuSig2Service_Sign(t *testing.T) {
 func TestMuSig2Service_GetCombinedKey(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -622,7 +613,7 @@ func TestMuSig2Service_GetCombinedKey(t *testing.T) {
 func TestMuSig2Service_VerifySignature(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(logger.NewNoopLogger())
+	service := NewMuSig2Service()
 
 	// Create a complete signature for testing
 	privKey1, _ := btcec.NewPrivateKey()

@@ -213,7 +213,7 @@ func TestMuSig2NonceCollectionValidation(t *testing.T) {
 
 	t.Run("ValidNonceCollection", func(t *testing.T) {
 		// Collect nonces from all signers
-		var nonces [][]byte
+		nonces := make([][]byte, 0, 3)
 
 		// Generate from keygen
 		keygenNonceUseCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
@@ -254,7 +254,7 @@ func TestMuSig2NonceCollectionValidation(t *testing.T) {
 
 	t.Run("MissingNonces", func(t *testing.T) {
 		// Simulate scenario where one signer fails to provide nonce
-		var nonces [][]byte
+		nonces := make([][]byte, 0, 3)
 
 		nonce1 := []byte("keygen_nonce_valid_0123456789012345678901234567890123456789012345")
 		nonces = append(nonces, nonce1)
@@ -280,7 +280,7 @@ func TestMuSig2NonceCollectionValidation(t *testing.T) {
 
 	t.Run("DuplicateNonces", func(t *testing.T) {
 		// Simulate scenario with duplicate nonces (security issue)
-		var nonces [][]byte
+		nonces := make([][]byte, 0, 3)
 
 		duplicateNonce := []byte("duplicate_nonce_0123456789012345678901234567890123456789012345")
 

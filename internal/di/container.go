@@ -449,8 +449,9 @@ func (c *container) newBTC() apibtc.Bitcoiner {
 	return c.btc
 }
 
-func (c *container) newMuSig2Service() *apibtcimpl.MuSig2Service {
-	return apibtcimpl.NewMuSig2Service(c.pkgContainer.NewLogger())
+// TODO: define interface for MuSig2Service
+func (*container) newMuSig2Service() *apibtcimpl.MuSig2Service {
+	return apibtcimpl.NewMuSig2Service()
 }
 
 func (c *container) newETH() apieth.Ethereumer {
