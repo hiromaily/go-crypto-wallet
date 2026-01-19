@@ -27,9 +27,11 @@
         "EditorConfig.EditorConfig",
         "streetsidesoftware.code-spell-checker",
         "ms-azuretools.vscode-docker",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "PKief.material-icon-theme"
       ],
       "settings": {
+        "workbench.iconTheme": "material-icon-theme",
         "editor.formatOnSave": true,
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,

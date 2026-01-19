@@ -3,6 +3,7 @@
   // General Settings
   // ===================
   "editor.formatOnSave": true,
+  "workbench.iconTheme": "material-icon-theme",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   // ===================
