@@ -77,3 +77,30 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 
 	return nil
 }
+
+// IsRecoverableImportError checks if an import error is recoverable (e.g., "address already exists").
+// This is shared between BTC and BCH import address use cases.
+func IsRecoverableImportError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := strings.ToLower(err.Error())
+
+	// Check for common "address already exists" error patterns
+	// Note: "already" covers all variants like "already have", "already imported",
+	// "already in wallet", and "label already exists"
+	recoverablePatterns := []string{
+		"already",   // Catches all "already..." variants, e.g., "address already exists", "label already exists"
+		"duplicate", // For "duplicate" errors
+		"exists",    // For generic "exists" errors
+	}
+
+	for _, pattern := range recoverablePatterns {
+		if strings.Contains(errMsg, pattern) {
+			return true
+		}
+	}
+
+	return false
+}

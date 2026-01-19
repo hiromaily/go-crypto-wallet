@@ -12,6 +12,7 @@ import (
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	usecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/shared"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -76,7 +77,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 
 	// Helper function to handle recoverable import errors (e.g., address already exists)
 	handleRecoverableError := func(err error, targetAddr string, accountType domainAccount.AccountType) bool {
-		if !isRecoverableImportError(err) {
+		if !usecaseshared.IsRecoverableImportError(err) {
 			return false
 		}
 
@@ -295,32 +296,4 @@ func (u *importAddressUseCase) verifyImportedAddress(addr string) {
 		logger.Warn("address should be watch-only",
 			"address", addr)
 	}
-}
-
-// isRecoverableImportError checks if an import error is recoverable (address already exists)
-// Returns true for errors that can be safely ignored (address duplicates)
-// Returns false for critical errors that should fail the import
-func isRecoverableImportError(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	errMsg := strings.ToLower(err.Error())
-
-	// Check for common "address already exists" error patterns
-	// Note: "already" covers all variants like "already have", "already imported",
-	// "already in wallet", and "label already exists"
-	recoverablePatterns := []string{
-		"already",   // Catches all "already..." variants, e.g., "address already exists", "label already exists"
-		"duplicate", // For "duplicate" errors
-		"exists",    // For generic "exists" errors
-	}
-
-	for _, pattern := range recoverablePatterns {
-		if strings.Contains(errMsg, pattern) {
-			return true
-		}
-	}
-
-	return false
 }
