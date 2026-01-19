@@ -33,7 +33,8 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 | Docker | latest | Container runtime |
 | Docker Compose | latest | Container orchestration |
 | [golangci-lint](https://github.com/golangci/golangci-lint) | v2.8.0+ | Linter (for development) |
-| [buf](https://buf.build/) | latest | Protocol buffer management |
+| [protoc](https://grpc.io/docs/protoc-installation/) | 33.0+ | Protocol buffer compiler (**Edition 2024**) |
+| [buf](https://buf.build/) | latest | Protocol buffer management (lint, format) |
 
 ### Blockchain Nodes
 
@@ -210,7 +211,7 @@ The codebase is organized into `internal/` (new architecture) and `pkg/` (shared
 - `config/` ... Application configuration files (Git managed)
   - `wallet/` ... Wallet configuration TOML files
   - `blockchain/` ... Blockchain node configuration files
-- `proto/` ... Protocol Buffers definitions (Git managed, code generation source)
+- `proto/` ... Protocol Buffers definitions (**Edition 2024**, see [docs/proto.md](./docs/proto.md))
 - `contracts/` ... Smart contract ABI files (Git managed, code generation source)
 - `data/` ... Generated files (ignored by Git)
   - `address/` ... Generated address files (bch, btc, eth, xrp)

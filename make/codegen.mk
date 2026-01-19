@@ -48,14 +48,57 @@ clean-mocks:
 	find . -type d -name "mocks" -exec rm -rf {} + 2>/dev/null || true
 
 ###############################################################################
-# Protocol Buffer (buf-based generation)
+# Protocol Buffer Code Generation
 #------------------------------------------------------------------------------
-# Protocol Buffer code generation using buf
-# buf replaces direct protoc usage and provides:
+# This project uses Protobuf Edition 2024.
+# See docs/proto.md for details on edition support and tooling.
+#
+# Two generation methods are available:
+# 1. protoc (native) - Recommended for edition 2024 support
+# 2. buf - For when buf CLI adds edition 2024 support
+#------------------------------------------------------------------------------
+
+# Output directory for generated proto files
+PROTO_OUT_DIR := internal/infrastructure/api/xrp/protogen
+
+#------------------------------------------------------------------------------
+# protoc-based generation (Recommended)
+#------------------------------------------------------------------------------
+# Direct protoc usage for edition 2024 support.
+# Requires: protoc >= 33.0, protoc-gen-go, protoc-gen-go-grpc
+#------------------------------------------------------------------------------
+
+# Generate Go code from proto files using protoc (recommended for edition 2024)
+.PHONY: proto
+proto: clean-pb
+	@echo "Generating proto files with protoc (edition 2024)..."
+	protoc \
+		--go_out=$(PROTO_OUT_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_OUT_DIR) \
+		--go-grpc_opt=paths=source_relative \
+		-I proto/rippleapi \
+		proto/rippleapi/*.proto
+
+#------------------------------------------------------------------------------
+# buf-based generation (for future use)
+#------------------------------------------------------------------------------
+# buf provides additional features:
 # - Linting with buf lint
 # - Breaking change detection with buf breaking
-# - Code generation with buf generate
+# - Managed mode for go_package options
+#
+# NOTE: As of buf CLI v1.63.0, edition 2024 is not yet supported.
+# Use 'make proto' (protoc) until buf adds support.
 #------------------------------------------------------------------------------
+
+# Generate Go code from proto files using buf
+# NOTE: Currently fails with edition 2024 - use 'make proto' instead
+.PHONY: proto-buf
+proto-buf: clean-pb
+	@echo "Generating proto files with buf..."
+	@echo "WARNING: buf CLI may not support edition 2024 yet"
+	buf generate
 
 # Format proto files with buf
 .PHONY: proto-fmt
@@ -68,6 +111,7 @@ proto-fmt-check:
 	buf format -d --exit-code
 
 # Lint proto files with buf
+# NOTE: May fail with edition 2024 until buf adds support
 .PHONY: proto-lint
 proto-lint:
 	buf lint
@@ -77,15 +121,14 @@ proto-lint:
 breaking-proto:
 	buf breaking --against '.git#branch=main'
 
-# Generate Go code from proto files using buf
-.PHONY: protoc-go
-protoc-go: clean-pb
-	buf generate
+#------------------------------------------------------------------------------
+# Common targets
+#------------------------------------------------------------------------------
 
 # Clean generated protobuf files
 .PHONY: clean-pb
 clean-pb:
-	rm -rf internal/infrastructure/api/xrp/xrp/*.pb.go
+	rm -rf $(PROTO_OUT_DIR)/*.pb.go
 
 ###############################################################################
 # ABI
