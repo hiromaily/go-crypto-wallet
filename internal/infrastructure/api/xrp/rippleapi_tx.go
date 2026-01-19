@@ -116,25 +116,25 @@ func (r *Ripple) PrepareTransaction(
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
-	req := &protogen.RequestPrepareTransaction{
+	req := protogen.RequestPrepareTransaction_builder{
 		TxType:          protogen.EnumTransactionType_TX_PAYMENT,
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
 		Instructions:    infraInstructions,
-	}
+	}.Build()
 
 	res, err := r.API.txClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction(): %w", err)
 	}
 	logger.Debug("response",
-		"TxJSON", res.TxJSON,
-		"Instructions", res.Instructions,
+		"TxJSON", res.GetTxJSON(),
+		"Instructions", res.GetInstructions(),
 	)
 
 	var txInput TxInput
-	unquotedJSON, _ := strconv.Unquote(res.TxJSON)
+	unquotedJSON, _ := strconv.Unquote(res.GetTxJSON())
 	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
 		return nil, "", fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 	}
@@ -156,62 +156,62 @@ func (r *Ripple) SignTransaction(
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call json.Marshal(txJSON): %w", err)
 	}
-	req := &protogen.RequestSignTransaction{
+	req := protogen.RequestSignTransaction_builder{
 		TxJSON: string(strJSON),
 		Secret: secret,
-	}
+	}.Build()
 
 	res, err := r.API.txClient.SignTransaction(ctx, req)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call client.SignTransaction(): %w", err)
 	}
 
-	return res.TxID, res.TxBlob, nil
+	return res.GetTxID(), res.GetTxBlob(), nil
 }
 
 // CombineTransaction combines signed transactions from multiple accounts for a multisignature transaction.
 // - The signed transaction must subsequently be submitted.
 func (r *Ripple) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {
-	req := &protogen.RequestCombineTransaction{
+	req := protogen.RequestCombineTransaction_builder{
 		SignedTransactions: signedTxs,
-	}
+	}.Build()
 
 	res, err := r.API.txClient.CombineTransaction(ctx, req)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call client.CombineTransaction(): %w", err)
 	}
 
-	return res.TxID, res.SignedTransaction, nil
+	return res.GetTxID(), res.GetSignedTransaction(), nil
 }
 
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
 func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*dtoRipple.SentTx, uint64, error) {
-	req := &protogen.RequestSubmitTransaction{
+	req := protogen.RequestSubmitTransaction_builder{
 		TxBlob: signedTx,
-	}
+	}.Build()
 	res, err := r.API.txClient.SubmitTransaction(ctx, req)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to call client.SubmitTransaction(): %w", err)
 	}
 
 	var sentTxJSON SentTx
-	if err = json.Unmarshal([]byte(res.ResultJSONString), &sentTxJSON); err != nil {
+	if err = json.Unmarshal([]byte(res.GetResultJSONString()), &sentTxJSON); err != nil {
 		return nil, 0, fmt.Errorf("fail to call json.Unmarshal(sentTxJSON): %w", err)
 	}
 
 	// FIXME:
 	// res.EarliestLedgerVersion may be useless because SentTxJSON includes `LastLedgerSequence` and it would be useful
 	logger.Debug("response of submitTransaction",
-		"res.ResultJSONString", res.ResultJSONString,
-		"res.EarliestLedgerVersion", res.EarliestLedgerVersion,
+		"res.ResultJSONString", res.GetResultJSONString(),
+		"res.EarliestLedgerVersion", res.GetEarliestLedgerVersion(),
 		"sentTxJSON.TxJSON.LastLedgerSequence", sentTxJSON.TxJSON.LastLedgerSequence,
 	)
 	// res.EarliestLedgerVersion => for when calling GetTransaction()
 	// sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
 
 	// Convert infrastructure type to DTO
-	return ToDTOSentTx(&sentTxJSON), res.EarliestLedgerVersion, nil
+	return ToDTOSentTx(&sentTxJSON), res.GetEarliestLedgerVersion(), nil
 	// return ToDTOSentTx(&sentTxJSON), sentTxJSON.TxJSON.LastLedgerSequence, nil
 }
 
@@ -265,10 +265,10 @@ func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64)
 			return 0, fmt.Errorf("fail to call resStream.Recv(): %w", err)
 		}
 		// success
-		logger.Info("response in WaitValidation()", "LedgerVersion", res.LedgerVersion)
-		if targetledgerVarsion <= res.LedgerVersion {
+		logger.Info("response in WaitValidation()", "LedgerVersion", res.GetLedgerVersion())
+		if targetledgerVarsion <= res.GetLedgerVersion() {
 			// done
-			return res.LedgerVersion, nil
+			return res.GetLedgerVersion(), nil
 		}
 		// continue
 	}
@@ -278,25 +278,25 @@ func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64)
 func (r *Ripple) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
 ) (*dtoRipple.TxInfo, error) {
-	req := &protogen.RequestGetTransaction{
+	req := protogen.RequestGetTransaction_builder{
 		TxID:             txID,
 		MinLedgerVersion: targetLedgerVersion,
-	}
+	}.Build()
 	res, err := r.API.txClient.GetTransaction(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call client.GetTransaction(): %w", err)
 	}
 
-	if res.ResultJSONString == "" {
+	if res.GetResultJSONString() == "" {
 		return nil, fmt.Errorf("fail to get transaction info by %s", txID)
 	}
 
 	logger.Debug("response of getTransaction",
-		"res.ResultJSONString", res.ResultJSONString,
+		"res.ResultJSONString", res.GetResultJSONString(),
 	)
 
 	var txInfo TxInfo
-	if err = json.Unmarshal([]byte(res.ResultJSONString), &txInfo); err != nil {
+	if err = json.Unmarshal([]byte(res.GetResultJSONString()), &txInfo); err != nil {
 		return nil, fmt.Errorf("fail to call json.Unmarshal(txInfo): %w", err)
 	}
 	// TODO: check

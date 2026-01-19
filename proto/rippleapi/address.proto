@@ -1,4 +1,4 @@
-edition = "2023";
+edition = "2024";
 
 package rippleapi.address;
 
@@ -7,6 +7,8 @@ import "google/protobuf/empty.proto";
 // Use proto3 semantics for field presence (implicit presence)
 // This maintains backward compatibility with existing Go code
 option features.field_presence = IMPLICIT;
+// Allow existing camelCase field names without requiring snake_case
+option features.enforce_naming_style = STYLE_LEGACY;
 option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen";
 
 message ResponseGenerateAddress {
@@ -21,20 +23,18 @@ message ResponseGenerateXAddress {
   string secret = 2;
 }
 
-message RequestIsValidAddress {
-  string address = 1;
-}
+message RequestIsValidAddress { string address = 1; }
 
-message ResponseIsValidAddress {
-  bool isValid = 1;
-}
+message ResponseIsValidAddress { bool isValid = 1; }
 
 // RippleAddressAPI
 service RippleAddressAPI {
   // https://xrpl.org/rippleapi-reference.html#generateaddress
-  rpc GenerateAddress(google.protobuf.Empty) returns (ResponseGenerateAddress) {}
+  rpc GenerateAddress(google.protobuf.Empty) returns (ResponseGenerateAddress) {
+  }
   // https://xrpl.org/rippleapi-reference.html#generatexaddress
-  rpc GenerateXAddress(google.protobuf.Empty) returns (ResponseGenerateXAddress) {}
+  rpc GenerateXAddress(google.protobuf.Empty)
+      returns (ResponseGenerateXAddress) {}
   // https://xrpl.org/rippleapi-reference.html#isvalidaddress
   rpc IsValidAddress(RequestIsValidAddress) returns (ResponseIsValidAddress) {}
 }

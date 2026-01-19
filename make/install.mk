@@ -20,7 +20,8 @@ install-mac-tools:
 		protobuf \
 		buf \
 		sqlfluff \
-		shellcheck
+		shellcheck \
+		clang-format
 
 .PHONY: install-ssl
 install-ssl:

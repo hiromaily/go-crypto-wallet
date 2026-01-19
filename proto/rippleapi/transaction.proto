@@ -1,4 +1,4 @@
-edition = "2023";
+edition = "2024";
 
 package rippleapi.transaction;
 
@@ -7,27 +7,29 @@ import "google/protobuf/empty.proto";
 // Use proto3 semantics for field presence (implicit presence)
 // This maintains backward compatibility with existing Go code
 option features.field_presence = IMPLICIT;
+// Allow existing camelCase field names without requiring snake_case
+option features.enforce_naming_style = STYLE_LEGACY;
 option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen";
 
 enum EnumTransactionType {
-  TX_ACCOUNT_SET = 0; // AccountSet
-  TX_ACCOUNT_DELETE = 1; // AccountDelete
-  TX_CHECK_CANCEL = 2; // CheckCancel
-  TX_CHECK_CASH = 3; // CheckCash
-  TX_CHECK_CREATE = 4; // CheckCreate
-  TX_DEPOSIT_PREAUTH = 5; // DepositPreauth
-  TX_ESCROW_CANCEL = 6; // EscrowCancel
-  TX_ESCROW_CREATE = 7; // EscrowCreate
-  TX_ESCROW_FINISH = 8; // EscrowFinish
-  TX_OFFER_CANCEL = 9; // OfferCancel
-  TX_OFFER_CREATE = 10; // OfferCreate
-  TX_PAYMENT = 11; // Payment
-  TX_PAYMENT_CHANNEL_CLAIM = 12; // PaymentChannelClaim
+  TX_ACCOUNT_SET = 0;             // AccountSet
+  TX_ACCOUNT_DELETE = 1;          // AccountDelete
+  TX_CHECK_CANCEL = 2;            // CheckCancel
+  TX_CHECK_CASH = 3;              // CheckCash
+  TX_CHECK_CREATE = 4;            // CheckCreate
+  TX_DEPOSIT_PREAUTH = 5;         // DepositPreauth
+  TX_ESCROW_CANCEL = 6;           // EscrowCancel
+  TX_ESCROW_CREATE = 7;           // EscrowCreate
+  TX_ESCROW_FINISH = 8;           // EscrowFinish
+  TX_OFFER_CANCEL = 9;            // OfferCancel
+  TX_OFFER_CREATE = 10;           // OfferCreate
+  TX_PAYMENT = 11;                // Payment
+  TX_PAYMENT_CHANNEL_CLAIM = 12;  // PaymentChannelClaim
   TX_PAYMENT_CHANNEL_CREATE = 13; // PaymentChannelCreate
-  TX_PAYMENT_CHANNEL_FUND = 14; // PaymentChannelFund
-  TX_SET_REGULAR_KEY = 15; // SetRegularKey
-  TX_SINGER_LIST_SET = 16; // SignerListSet
-  TX_TRUST_SET = 17; // TrustSet
+  TX_PAYMENT_CHANNEL_FUND = 14;   // PaymentChannelFund
+  TX_SET_REGULAR_KEY = 15;        // SetRegularKey
+  TX_SINGER_LIST_SET = 16;        // SignerListSet
+  TX_TRUST_SET = 17;              // TrustSet
 }
 
 message Instructions {
@@ -62,31 +64,23 @@ message ResponseSignTransaction {
   string txBlob = 2;
 }
 
-message RequestSubmitTransaction {
-  string txBlob = 1;
-}
+message RequestSubmitTransaction { string txBlob = 1; }
 
 message ResponseSubmitTransaction {
   string resultJSONString = 1;
   uint64 earliestLedgerVersion = 2;
 }
 
-message ResponseWaitValidation {
-  uint64 ledgerVersion = 1;
-}
+message ResponseWaitValidation { uint64 ledgerVersion = 1; }
 
 message RequestGetTransaction {
   string txID = 1;
   uint64 minLedgerVersion = 2;
 }
 
-message ResponseGetTransaction {
-  string resultJSONString = 1;
-}
+message ResponseGetTransaction { string resultJSONString = 1; }
 
-message RequestCombineTransaction {
-  repeated string signedTransactions = 1;
-}
+message RequestCombineTransaction { repeated string signedTransactions = 1; }
 
 message ResponseCombineTransaction {
   string signedTransaction = 1;
@@ -96,10 +90,15 @@ message ResponseCombineTransaction {
 // RippleTransactionAPI
 service RippleTransactionAPI {
   // https://xrpl.org/rippleapi-reference.html#preparetransaction
-  rpc PrepareTransaction(RequestPrepareTransaction) returns (ResponsePrepareTransaction) {}
-  rpc SignTransaction(RequestSignTransaction) returns (ResponseSignTransaction) {}
-  rpc SubmitTransaction(RequestSubmitTransaction) returns (ResponseSubmitTransaction) {}
-  rpc WaitValidation(google.protobuf.Empty) returns (stream ResponseWaitValidation) {}
+  rpc PrepareTransaction(RequestPrepareTransaction)
+      returns (ResponsePrepareTransaction) {}
+  rpc SignTransaction(RequestSignTransaction)
+      returns (ResponseSignTransaction) {}
+  rpc SubmitTransaction(RequestSubmitTransaction)
+      returns (ResponseSubmitTransaction) {}
+  rpc WaitValidation(google.protobuf.Empty)
+      returns (stream ResponseWaitValidation) {}
   rpc GetTransaction(RequestGetTransaction) returns (ResponseGetTransaction) {}
-  rpc CombineTransaction(RequestCombineTransaction) returns (ResponseCombineTransaction) {}
+  rpc CombineTransaction(RequestCombineTransaction)
+      returns (ResponseCombineTransaction) {}
 }
