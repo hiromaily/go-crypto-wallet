@@ -61,6 +61,9 @@ clean-mocks:
 # Output directory for generated proto files
 PROTO_OUT_DIR := internal/infrastructure/api/xrp/protogen
 
+# Minimum protoc version required for edition 2024
+PROTOC_MIN_VERSION := 33
+
 #------------------------------------------------------------------------------
 # protoc-based generation (Recommended)
 #------------------------------------------------------------------------------
@@ -68,9 +71,22 @@ PROTO_OUT_DIR := internal/infrastructure/api/xrp/protogen
 # Requires: protoc >= 33.0, protoc-gen-go, protoc-gen-go-grpc
 #------------------------------------------------------------------------------
 
+# Check protoc version (edition 2024 requires >= 33.0)
+.PHONY: proto-version-check
+proto-version-check:
+	@command -v protoc >/dev/null 2>&1 || { echo "Error: protoc is not installed"; exit 1; }
+	@PROTOC_VERSION=$$(protoc --version | sed 's/libprotoc //' | cut -d. -f1); \
+	if [ "$$PROTOC_VERSION" -lt $(PROTOC_MIN_VERSION) ]; then \
+		echo "Error: protoc version $$PROTOC_VERSION is too old. Edition 2024 requires protoc >= $(PROTOC_MIN_VERSION).0"; \
+		echo "Current version: $$(protoc --version)"; \
+		echo "Please upgrade protoc: https://grpc.io/docs/protoc-installation/"; \
+		exit 1; \
+	fi; \
+	echo "protoc version check passed: $$(protoc --version)"
+
 # Generate Go code from proto files using protoc (recommended for edition 2024)
 .PHONY: proto
-proto: clean-pb
+proto: proto-version-check clean-pb
 	@echo "Generating proto files with protoc (edition 2024)..."
 	protoc \
 		--go_out=$(PROTO_OUT_DIR) \
