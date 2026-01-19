@@ -26,7 +26,7 @@ func NewBitcoin(
 		return bit, err
 	case domainCoin.BCH:
 		// BCH
-		bitc, err := apibchimpl.NewBitcoinCash(client, coinTypeCode, conf)
+		bitc, err := apibchimpl.NewBitcoinCash(client, conf, coinTypeCode)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call bch.NewBitcoinCash(): %w", err)
 		}

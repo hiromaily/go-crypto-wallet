@@ -35,8 +35,8 @@ type BitcoinCash struct {
 // NewBitcoinCash bitcoin cash instance based on Bitcoin
 func NewBitcoinCash(
 	client *rpcclient.Client,
-	coinTypeCode domainCoin.CoinTypeCode,
 	conf *config.Bitcoin,
+	coinTypeCode domainCoin.CoinTypeCode,
 ) (*BitcoinCash, error) {
 	// bitcoin base
 	bit, err := apibtcimpl.NewBitcoin(client, conf, coinTypeCode)
