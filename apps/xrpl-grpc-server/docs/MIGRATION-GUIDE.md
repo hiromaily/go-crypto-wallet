@@ -281,15 +281,15 @@ private async _prepareTransaction(call) {
 **After:**
 
 ```typescript
-import { Client, xrpToDrops } from "xrpl";
+import { Client, xrpToDrops, type Transaction } from "xrpl";
 
 prepareTransaction: async (req) => {
-  const tx: any = {
+  const tx = {
     TransactionType: enumTransactionTypeString[req.txType],
     Account: req.senderAccount,
     Amount: xrpToDrops(req.amount.toString()),
     Destination: req.receiverAccount,
-  };
+  } as Transaction;
 
   // Handle LastLedgerSequence
   if (req.instructions?.maxLedgerVersionOffset) {
@@ -326,11 +326,11 @@ signTransaction = (call, callback) => {
 **After:**
 
 ```typescript
-import { Wallet } from "xrpl";
+import { Wallet, type Transaction } from "xrpl";
 
 signTransaction: async (req) => {
   const wallet = Wallet.fromSeed(req.secret);
-  const tx = JSON.parse(req.txJson);
+  const tx = JSON.parse(req.txJson) as Transaction;
   const signed = wallet.sign(tx);
 
   return {
@@ -424,14 +424,15 @@ combineTransaction = (call, callback) => {
 **After:**
 
 ```typescript
-import { multisign } from "xrpl";
+import { multisign, hashes } from "xrpl";
 
 combineTransaction: async (req) => {
   const combined = multisign(req.signedTransactions);
+  const txId = hashes.hashSignedTx(combined);
 
   return {
     signedTransaction: combined,
-    txId: "", // Hash can be computed separately if needed
+    txId: txId,
   };
 }
 ```
@@ -570,7 +571,7 @@ apps/xrpl-grpc-server/
   "dependencies": {
     "@bufbuild/protobuf": "^2.0.0",
     "@connectrpc/connect": "^2.0.0",
-    "xrpl": "^4.5.0"
+    "xrpl": "4.5.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
