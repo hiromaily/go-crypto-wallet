@@ -1,6 +1,6 @@
 # Migration Guide: ripple-lib 1.x to xrpl.js 4.5.0
 
-This guide provides detailed migration instructions for upgrading the `ripple-lib-server` from the deprecated `ripple-lib 1.x` to the modern `xrpl.js 4.5.0`.
+This guide provides detailed migration instructions for creating a new `xrpl-grpc-server` using xrpl.js 4.5.0 to replace the deprecated `ripple-lib-server`.
 
 ## Official Reference
 
@@ -11,8 +11,8 @@ This guide provides detailed migration instructions for upgrading the `ripple-li
 
 ### Tech Stack Changes
 
-| Component | Old | New |
-|-----------|-----|-----|
+| Component | Old (ripple-lib-server) | New (xrpl-grpc-server) |
+|-----------|-------------------------|------------------------|
 | Runtime | Node.js + ts-node | **Bun** |
 | XRP Library | ripple-lib 1.10.1 | **xrpl.js 4.5.0** |
 | gRPC | grpc (deprecated) | **ConnectRPC** (@connectrpc/connect) |
@@ -522,14 +522,14 @@ The `Wallet.fromSeed()` and `wallet.sign()` operations work offline (no network 
 ## 6. New Project Structure
 
 ```
-apps/ripple-lib-server/
+apps/xrpl-grpc-server/
 ├── biome.json              # Biome config (linter + formatter)
 ├── bun.lock                # Bun lockfile
 ├── package.json            # Bun-compatible dependencies
 ├── tsconfig.json           # TypeScript 5.9.3 config
 ├── buf.gen.yaml            # Buf code generation config
 ├── buf.yaml                # Buf module config
-├── README.md               # Updated documentation
+├── README.md               # Documentation
 ├── docs/
 │   └── MIGRATION-GUIDE.md  # This file
 ├── src/
@@ -555,8 +555,8 @@ apps/ripple-lib-server/
 
 ```json
 {
-  "name": "ripple-lib-server",
-  "version": "2.0.0",
+  "name": "xrpl-grpc-server",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "bun --hot src/index.ts",
@@ -594,3 +594,14 @@ bun run dev       # bun --hot src/index.ts
 bun run build     # bun build src/index.ts
 bun run proto     # buf generate
 ```
+
+---
+
+## 9. Relationship with ripple-lib-server
+
+The old `apps/ripple-lib-server` is preserved for reference. Once `xrpl-grpc-server` is fully tested and integrated, the old server can be deprecated and eventually removed.
+
+| Directory | Status | Description |
+|-----------|--------|-------------|
+| `apps/ripple-lib-server` | **Preserved** | Legacy server using ripple-lib 1.x |
+| `apps/xrpl-grpc-server` | **New** | Modern server using xrpl.js 4.5.0 |
