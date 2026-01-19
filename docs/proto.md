@@ -76,15 +76,18 @@ edition "2024" not yet fully supported; latest supported edition "2023"
 
 Once buf adds Edition 2024 support, `make proto-buf` can be used as the primary generation method.
 
-### buf Utilities (Still Available)
+### buf Utilities (Limited with Edition 2024)
 
-Even without full Edition 2024 support for generation, buf provides useful utilities:
+**Note:** As of buf CLI v1.63.0, the following commands fail with edition 2024:
 
 ```bash
-make proto-fmt       # Format proto files
-make proto-lint      # Lint proto files (may show edition warnings)
-make breaking-proto  # Check for breaking changes
+make proto-fmt       # ❌ Fails - edition 2024 not supported
+make proto-lint      # ❌ Fails - edition 2024 not supported
+make breaking-proto  # ✅ Works with continue-on-error
 ```
+
+These commands are temporarily disabled in CI (`.github/workflows/lint-test.yml`).
+Re-enable when buf >= 1.64.0 adds edition 2024 support.
 
 ## Generated Code
 

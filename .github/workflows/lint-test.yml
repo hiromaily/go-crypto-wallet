@@ -75,6 +75,9 @@ jobs:
           # Push: Report all issues (default behavior when not a PR)
           only-new-issues: true
   # Proto linting with buf
+  # NOTE: buf format/lint temporarily disabled - buf CLI v1.63.0 doesn't support edition 2024
+  # Re-enable when buf >= 1.64.0 adds edition 2024 support
+  # See: docs/proto.md for details
   proto-lint:
     needs: changes
     if: ${{ needs.changes.outputs.proto == 'true' }}
@@ -89,10 +92,11 @@ jobs:
         uses: bufbuild/buf-action@v1
         with:
           setup_only: true
-      - name: Format check
-        run: buf format --diff --exit-code
-      - name: Lint proto files
-        run: buf lint
+      # TODO: Re-enable when buf supports edition 2024
+      # - name: Format check
+      #   run: buf format --diff --exit-code
+      # - name: Lint proto files
+      #   run: buf lint
       - name: Check for breaking changes
         run: buf breaking --against '.git#branch=main'
         continue-on-error: true
