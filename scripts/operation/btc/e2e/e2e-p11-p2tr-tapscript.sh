@@ -84,24 +84,24 @@ key_generation_phase() {
 	log_substep "Creating HD keys for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
-		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" create hdkey
+		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" create hdkey
 	done
 
 	log_substep "Importing private keys into sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BTC_CONFIG_SIGN${i}"
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
+			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" api walletpassphrase --passphrase "${BTC_WALLET_PASSPHRASE}"
 		fi
-		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" import privkey
+		btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" import privkey
 		if [ "${BTC_ENCRYPTED}" = "true" ]; then
-			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" --wallet "sign${i}" api walletlock
+			btc_sign_cmd "$i" -c "${!config_var}" --coin "${BTC_COIN}" api walletlock
 		fi
 	done
 
 	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(btc_sign2_cmd -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" --wallet sign2 export fullpubkey)
+	file_fullpubkey_auth1=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" export fullpubkey)
+	file_fullpubkey_auth2=$(btc_sign2_cmd -c "${BTC_CONFIG_SIGN2}" --coin "${BTC_COIN}" export fullpubkey)
 
 	export FULLPUBKEY_FILE1="${file_fullpubkey_auth1##*\[fileName\]: }"
 	export FULLPUBKEY_FILE2="${file_fullpubkey_auth2##*\[fileName\]: }"
@@ -122,8 +122,13 @@ tapscript_setup_phase() {
 
 	log_substep "Exporting descriptors from keygen wallet"
 	declare -A descriptor_paths
+	# Use pattern-specific descriptor file path for parallel execution
+	local descriptor_suffix=""
+	if [ -n "${E2E_PATTERN}" ]; then
+		descriptor_suffix="-${E2E_PATTERN}"
+	fi
 	for account in deposit payment stored; do
-		output_file="data/descriptor/btc/${account}_descriptors.json"
+		output_file="data/descriptor/btc/${account}_descriptors${descriptor_suffix}.json"
 		cmd_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --account-config "${BTC_ACCOUNT_CONF}" --coin "${BTC_COIN}" descriptor export --account "$account" --output "$output_file" --format bitcoin-core --include-change)
 		descriptor_paths[$account]="${cmd_output##*exported to }"
 	done
@@ -164,9 +169,9 @@ create_payment_requests_phase() {
 
 	sender_address="$payment_address"
 
-	receiver1=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32m)
-	receiver2=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32m)
-	receiver3=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32m)
+	receiver1=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" bech32m)
+	receiver2=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" bech32m)
+	receiver3=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" bech32m)
 
 	btc_insert_payment_requests "$sender_address" "$receiver1 $receiver2 $receiver3" "0.001 0.002 0.0015"
 }
@@ -204,7 +209,7 @@ transaction_flow_phase() {
 	tx_signed1=$(btc_extract_file_path "$tx_file_signed")
 
 	log_substep "Signing with sign1 wallet (2nd signature - completing 2-of-3)"
-	tx_file_signed2=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_file_signed2=$(btc_sign1_cmd -c "${BTC_CONFIG_SIGN1}" --coin "${BTC_COIN}" sign signature --file "${tx_signed1}")
 	tx_signed2=$(btc_extract_file_path "$tx_file_signed2")
 
 	log_substep "Sending transaction"

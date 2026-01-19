@@ -73,9 +73,14 @@ singlesig_setup_phase() {
 
 	for account in "${accounts[@]}"; do
 		log_info "Exporting ${account} descriptors"
+		# Use pattern-specific descriptor file path for parallel execution
+		local descriptor_suffix=""
+		if [ -n "${E2E_PATTERN}" ]; then
+			descriptor_suffix="-${E2E_PATTERN}"
+		fi
 		file_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" descriptor export \
 			--account "${account}" \
-			--output "data/descriptor/btc/${account}_descriptors.json" \
+			--output "data/descriptor/btc/${account}_descriptors${descriptor_suffix}.json" \
 			--format bitcoin-core \
 			--include-change)
 		descriptor_files[$account]="${file_output##*exported to }"
@@ -140,9 +145,9 @@ create_payment_requests_phase() {
 	log_info "Using sender address: $sender_address"
 
 	log_substep "Generating receiver addresses for payment requests"
-	receiver1=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
-	receiver2=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
-	receiver3=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
+	receiver1=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" p2sh-segwit)
+	receiver2=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" p2sh-segwit)
+	receiver3=$(btc_cli "btc-watch" -rpcwallet="${BTC_WATCH_WALLET_NAME:-watch}" getnewaddress "" p2sh-segwit)
 
 	log_info "Generated receiver addresses:"
 	log_info "  1. $receiver1"

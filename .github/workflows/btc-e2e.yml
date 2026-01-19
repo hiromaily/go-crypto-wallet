@@ -1,0 +1,96 @@
+name: BTC E2E Tests
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/operation/btc/**/*.sh"
+      - "scripts/operation/common.sh"
+      - "config/wallet/**"
+      - "make/btc_e2e.mk"
+      - ".github/workflows/btc-e2e.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/operation/btc/**/*.sh"
+      - "scripts/operation/common.sh"
+      - "config/wallet/**"
+      - "make/btc_e2e.mk"
+      - ".github/workflows/btc-e2e.yml"
+  workflow_dispatch:
+    inputs:
+      patterns:
+        description: "Patterns to run (e.g., 1-11 or 1,2,3)"
+        required: false
+        default: "1-9" # patterns 10 and 11 are not fixed yet
+      max_parallel:
+        description: "Max parallel processes"
+        required: false
+        default: "9" # patterns 10 and 11 are not fixed yet
+env:
+  GO_VERSION: "1.25"
+  # Check for updates: https://github.com/docker/compose/releases
+  # Note: v5.x requires Docker 28+, use v2.x for broader compatibility
+  DOCKER_COMPOSE_VERSION: "2.40.3"
+permissions:
+  contents: read
+jobs:
+  btc-e2e-parallel:
+    name: BTC E2E (Parallel)
+    # ubuntu-latest required: Docker is pre-installed (ubuntu-slim lacks Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Install Docker Compose V2
+        run: |
+          # Install Docker Compose V2 plugin (supports 'docker compose' syntax)
+          DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+          mkdir -p $DOCKER_CONFIG/cli-plugins
+          curl -SL "https://github.com/docker/compose/releases/download/v${{ env.DOCKER_COMPOSE_VERSION }}/docker-compose-linux-x86_64" \
+            -o $DOCKER_CONFIG/cli-plugins/docker-compose
+          chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          docker compose version
+
+      - name: Build project
+        run: make build-all
+
+      - name: Run BTC E2E tests in parallel
+        run: |
+          PATTERNS="${{ github.event.inputs.patterns || '1-9' }}"
+          MAX_PARALLEL="${{ github.event.inputs.max_parallel || '9' }}"
+          ./scripts/operation/btc/e2e/e2e-parallel-runner.sh \
+            --patterns "${PATTERNS}" \
+            --max-parallel "${MAX_PARALLEL}" \
+            --ci
+
+      - name: Upload E2E logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: btc-e2e-logs
+          path: data/logs/e2e-parallel/
+          retention-days: 7
+
+      - name: Upload E2E SQLite databases on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-e2e-databases
+          path: data/sqlite/btc/
+          retention-days: 3

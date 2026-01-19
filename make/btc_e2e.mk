@@ -122,3 +122,59 @@ btc-e2e-help:
 	@echo "  make btc-e2e-verbose P=<pattern>      # Run with --verbose flag"
 	@echo "  make btc-e2e-ci P=<pattern>           # Run with --non-interactive flag"
 	@echo "  make btc-e2e-cleanup P=<pattern>      # Run with --cleanup flag"
+
+###############################################################################
+# Parallel E2E Testing - Run Multiple Patterns Concurrently
+###############################################################################
+# Usage:
+#   make btc-e2e-parallel                          # Run all patterns (P1-P11) in parallel
+#   make btc-e2e-parallel PATTERNS=1,2,3           # Run specific patterns
+#   make btc-e2e-parallel PATTERNS=1-5             # Run pattern range
+#   make btc-e2e-parallel MAX_PARALLEL=3           # Limit concurrent processes
+#   make btc-e2e-ci-all                            # Run all patterns in CI mode
+#
+# Parameters:
+#   PATTERNS      - Comma-separated list or range (e.g., "1,2,3" or "1-11")
+#                   Default: "1-11" (all patterns)
+#   MAX_PARALLEL  - Maximum number of concurrent processes
+#                   Default: 11 (all patterns run in parallel)
+#   VERBOSE       - Show real-time output (true/false)
+#                   Default: false
+#
+# Notes:
+#   - Uses SQLite backend for isolated database per pattern
+#   - Each pattern runs with --reset --non-interactive flags
+#   - Logs are saved to data/logs/e2e-parallel/
+#   - Ideal for CI/CD environments to reduce execution time
+#
+# Examples:
+#   make btc-e2e-parallel                          # All patterns, full parallelism
+#   make btc-e2e-parallel PATTERNS=1-5 MAX_PARALLEL=3
+#   make btc-e2e-ci-all                            # CI mode (all patterns)
+###############################################################################
+
+# Default parameters
+PATTERNS ?= 1-11
+MAX_PARALLEL ?= 11
+VERBOSE ?= false
+
+# Parallel runner script path
+E2E_PARALLEL_SCRIPT := ./scripts/operation/btc/e2e/e2e-parallel-runner.sh
+
+# Build verbose flag
+VERBOSE_FLAG :=
+ifeq ($(VERBOSE),true)
+	VERBOSE_FLAG := --verbose
+endif
+
+# Run E2E tests in parallel
+# Note: build-all uses incremental build - only rebuilds when Go sources change
+.PHONY: btc-e2e-parallel
+btc-e2e-parallel: build-all
+	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG)
+
+# Run all E2E tests in parallel for CI (non-interactive mode)
+# Note: build-all uses incremental build - only rebuilds when Go sources change
+.PHONY: btc-e2e-ci-all
+btc-e2e-ci-all: build-all
+	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG) --ci

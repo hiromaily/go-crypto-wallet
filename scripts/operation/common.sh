@@ -314,8 +314,8 @@ bitcoin_create_wallet_if_needed() {
 			local disable_private_keys=false
 			local use_descriptors=false
 
-			# Watch wallet: watch-only with descriptors
-			if [[ "$wallet_name" == "watch" ]]; then
+			# Watch wallet: watch-only with descriptors (matches "watch", "watch-p1", "watch-p2", etc.)
+			if [[ "$wallet_name" == watch* ]]; then
 				disable_private_keys=true
 				use_descriptors=true
 			fi

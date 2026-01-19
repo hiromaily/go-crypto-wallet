@@ -32,6 +32,7 @@ data/address/*
 data/dump/*
 data/fullpubkey/*
 data/keystore/*
+data/logs/*
 data/tx/*
 data/certs/*
 data/gaiad/*
