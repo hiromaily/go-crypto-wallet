@@ -872,7 +872,9 @@ bch_generate_test_utxos() {
 # Usage: file_path=$(bch_extract_file_path "$output")
 bch_extract_file_path() {
 	local output="$1"
-	echo "${output##*\[fileName\]: }"
+	# Extract everything after [fileName]: and take only the first line
+	# Output format: [fileName]: /path/to/file.hex\n[signedCount]: 1\n...
+	echo "${output##*\[fileName\]: }" | head -n1
 }
 
 ###############################################################################
