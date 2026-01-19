@@ -1,7 +1,6 @@
 package xrp
 
 import (
-	"context"
 	"fmt"
 
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
@@ -18,7 +17,7 @@ func NewRippleFromCoinType(
 	//nolint:exhaustive
 	switch coinTypeCode {
 	case domainCoin.XRP:
-		ripple, err := NewRipple(context.Background(), wsPublic, wsAdmin, api, coinTypeCode, conf)
+		ripple, err := NewRipple(wsPublic, wsAdmin, api, coinTypeCode, conf)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call xrp.NewRipple(): %w", err)
 		}

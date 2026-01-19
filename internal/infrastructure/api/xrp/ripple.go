@@ -1,8 +1,6 @@
 package xrp
 
 import (
-	"context"
-
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -22,7 +20,6 @@ type Ripple struct {
 
 // NewRipple creates Ripple object
 func NewRipple(
-	ctx context.Context,
 	wsPublic *websocket.WS,
 	wsAdmin *websocket.WS,
 	api *RippleAPI,
