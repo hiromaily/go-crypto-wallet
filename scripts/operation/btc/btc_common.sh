@@ -779,6 +779,10 @@ btc_setup_wallets() {
 	local wallets="${1:-watch keygen}"
 	log_step "Setting up Bitcoin wallets"
 
+	if [ -n "${E2E_PATTERN}" ]; then
+		log_info "E2E Pattern: ${E2E_PATTERN} (wallets will have pattern suffix)"
+	fi
+
 	for wallet in $wallets; do
 		local container="btc-${wallet}"
 		local wallet_name="$wallet"
@@ -786,10 +790,28 @@ btc_setup_wallets() {
 		# Use pattern-specific wallet name for parallel E2E execution
 		if [ -n "${E2E_PATTERN}" ]; then
 			wallet_name="${wallet}-${E2E_PATTERN}"
-			log_info "Using pattern-specific wallet name: ${wallet_name}"
+			log_info "Creating/loading wallet: ${wallet_name} in container ${container}"
+		else
+			log_info "Creating/loading wallet: ${wallet_name} in container ${container}"
 		fi
 
-		btc_create_wallet_if_needed "$container" "$wallet_name"
+		if ! btc_create_wallet_if_needed "$container" "$wallet_name"; then
+			log_error "Failed to create/load wallet ${wallet_name} in ${container}"
+			return 1
+		fi
+
+		# Verify wallet is loaded
+		if btc_wallet_exists "$container" "$wallet_name"; then
+			log_info "  ✓ Wallet ${wallet_name} is ready and loaded"
+		else
+			log_error "  ✗ Wallet ${wallet_name} creation reported success but wallet not found!"
+			log_error "    Container: ${container}"
+			log_error "    Wallet name: ${wallet_name}"
+			# List available wallets for debugging
+			log_error "    Available wallets:"
+			btc_cli "$container" listwallets 2>/dev/null || log_error "    Failed to list wallets"
+			return 1
+		fi
 	done
 
 	log_info "All wallets are ready"
