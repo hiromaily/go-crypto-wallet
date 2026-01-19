@@ -64,6 +64,9 @@ PROTO_OUT_DIR := internal/infrastructure/api/xrp/protogen
 # Minimum protoc version required for edition 2024
 PROTOC_MIN_VERSION := 33
 
+# Minimum buf version required for edition 2024 (expected support)
+BUF_MIN_VERSION := 1.64
+
 #------------------------------------------------------------------------------
 # protoc-based generation (Recommended)
 #------------------------------------------------------------------------------
@@ -105,15 +108,32 @@ proto: proto-version-check clean-pb
 # - Managed mode for go_package options
 #
 # NOTE: As of buf CLI v1.63.0, edition 2024 is not yet supported.
-# Use 'make proto' (protoc) until buf adds support.
+# Use 'make proto' (protoc) until buf adds support (expected in v1.64.0+).
 #------------------------------------------------------------------------------
 
+# Check buf version (edition 2024 expected to require >= 1.64.0)
+.PHONY: buf-version-check
+buf-version-check:
+	@command -v buf >/dev/null 2>&1 || { echo "Error: buf is not installed"; exit 1; }
+	@BUF_VERSION=$$(buf --version); \
+	BUF_MAJOR=$$(echo "$$BUF_VERSION" | cut -d. -f1); \
+	BUF_MINOR=$$(echo "$$BUF_VERSION" | cut -d. -f2); \
+	REQ_MAJOR=$$(echo "$(BUF_MIN_VERSION)" | cut -d. -f1); \
+	REQ_MINOR=$$(echo "$(BUF_MIN_VERSION)" | cut -d. -f2); \
+	if [ "$$BUF_MAJOR" -lt "$$REQ_MAJOR" ] || \
+	   ([ "$$BUF_MAJOR" -eq "$$REQ_MAJOR" ] && [ "$$BUF_MINOR" -lt "$$REQ_MINOR" ]); then \
+		echo "Error: buf version $$BUF_VERSION is too old. Edition 2024 requires buf >= $(BUF_MIN_VERSION).0"; \
+		echo "Current version: $$BUF_VERSION"; \
+		echo "Please upgrade buf: https://buf.build/docs/cli/installation/"; \
+		exit 1; \
+	fi; \
+	echo "buf version check passed: $$BUF_VERSION"
+
 # Generate Go code from proto files using buf
-# NOTE: Currently fails with edition 2024 - use 'make proto' instead
+# NOTE: Requires buf >= 1.64.0 for edition 2024 support
 .PHONY: proto-buf
-proto-buf: clean-pb
+proto-buf: buf-version-check clean-pb
 	@echo "Generating proto files with buf..."
-	@echo "WARNING: buf CLI may not support edition 2024 yet"
 	buf generate
 
 # Format proto files with buf
