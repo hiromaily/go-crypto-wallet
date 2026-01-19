@@ -100,6 +100,8 @@ For detailed transaction pattern explanations, technical references, and impleme
 
 ### Make Targets
 
+#### Single Pattern Execution
+
 Use `P=<pattern>` parameter to specify the test pattern (1-11):
 
 ```bash
@@ -121,6 +123,41 @@ make btc-e2e-cleanup P=<pattern>
 # Show help and pattern list
 make btc-e2e-help
 ```
+
+#### Parallel Pattern Execution
+
+Run multiple patterns in parallel for faster CI/CD execution:
+
+```bash
+# Run all patterns in parallel (recommended for CI)
+make btc-e2e-parallel
+
+# Run all patterns in CI mode
+make btc-e2e-ci-all
+
+# Run specific patterns in parallel
+make btc-e2e-parallel PATTERNS=1,2,3
+
+# Run pattern range with limited parallelism
+make btc-e2e-parallel PATTERNS=1-5 MAX_PARALLEL=3
+
+# Run with verbose output
+make btc-e2e-parallel PATTERNS=1-11 VERBOSE=true
+```
+
+**Parallel Execution Parameters:**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `PATTERNS` | `1-11` | Comma-separated list or range (e.g., "1,2,3" or "1-11") |
+| `MAX_PARALLEL` | `11` | Maximum number of concurrent processes |
+| `VERBOSE` | `false` | Show real-time output from all processes |
+
+**Benefits:**
+- Uses SQLite backend for isolated database per pattern
+- Each pattern runs independently without database conflicts
+- Significantly reduces total CI execution time
+- Logs are saved to `data/logs/e2e-parallel/`
 
 **Examples:**
 

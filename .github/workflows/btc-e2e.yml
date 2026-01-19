@@ -1,0 +1,87 @@
+name: BTC E2E Tests
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/operation/btc/**/*.sh"
+      - "scripts/operation/common.sh"
+      - "config/wallet/**"
+      - "make/btc_e2e.mk"
+      - ".github/workflows/btc-e2e.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/operation/btc/**/*.sh"
+      - "scripts/operation/common.sh"
+      - "config/wallet/**"
+      - "make/btc_e2e.mk"
+      - ".github/workflows/btc-e2e.yml"
+  workflow_dispatch:
+    inputs:
+      patterns:
+        description: "Patterns to run (e.g., 1-11 or 1,2,3)"
+        required: false
+        default: "1-11"
+      max_parallel:
+        description: "Max parallel processes"
+        required: false
+        default: "11"
+env:
+  GO_VERSION: "1.25"
+permissions:
+  contents: read
+jobs:
+  btc-e2e-parallel:
+    name: BTC E2E (Parallel)
+    runs-on: ubuntu-slim
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Build project
+        run: make build-all
+
+      - name: Run BTC E2E tests in parallel
+        run: |
+          PATTERNS="${{ github.event.inputs.patterns || '1-11' }}"
+          MAX_PARALLEL="${{ github.event.inputs.max_parallel || '11' }}"
+          ./scripts/operation/btc/e2e/e2e-parallel-runner.sh \
+            --patterns "${PATTERNS}" \
+            --max-parallel "${MAX_PARALLEL}" \
+            --ci
+
+      - name: Upload E2E logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-e2e-logs
+          path: data/logs/e2e-parallel/
+          retention-days: 7
+
+      - name: Upload E2E SQLite databases on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-e2e-databases
+          path: data/sqlite/btc/
+          retention-days: 3
