@@ -174,6 +174,52 @@ validate_pattern() {
 }
 
 ###############################################################################
+# Infrastructure Management
+###############################################################################
+
+setup_shared_infrastructure() {
+	log_info "=========================================="
+	log_info "Setting up shared infrastructure"
+	log_info "=========================================="
+
+	# Source BTC common utilities
+	# shellcheck source=../btc_common.sh
+	source "${SCRIPT_DIR}/../btc_common.sh"
+
+	# Set SQLite mode
+	export DB_TYPE="sqlite"
+
+	# Full cleanup first
+	log_info "Cleaning up any existing infrastructure..."
+	btc_full_reset "watch keygen sign1 sign2" 2>/dev/null || true
+
+	# Start Bitcoin node containers (shared across all patterns)
+	log_info "Starting shared Bitcoin node containers..."
+	btc_setup_infrastructure "btc-watch btc-keygen btc-sign1 btc-sign2"
+
+	log_info "Shared infrastructure is ready"
+	echo ""
+}
+
+cleanup_shared_infrastructure() {
+	log_info ""
+	log_info "=========================================="
+	log_info "Cleaning up shared infrastructure"
+	log_info "=========================================="
+
+	# Source BTC common utilities if not already sourced
+	if ! command -v btc_cleanup &>/dev/null; then
+		# shellcheck source=../btc_common.sh
+		source "${SCRIPT_DIR}/../btc_common.sh"
+	fi
+
+	# Cleanup Bitcoin containers and state
+	btc_cleanup "watch keygen sign1 sign2"
+
+	log_info "Cleanup complete"
+}
+
+###############################################################################
 # Main Test Execution
 ###############################################################################
 
@@ -187,19 +233,20 @@ run_pattern() {
 	# Ensure log directory exists
 	mkdir -p "${LOG_DIR}"
 
-	# Set up isolated SQLite database for this pattern
+	# Set up environment for this pattern
 	export DB_TYPE="sqlite"
 	export E2E_PATTERN="p${pattern}"
+	export E2E_SHARED_INFRASTRUCTURE="true" # Tell script to skip infrastructure setup
 
 	log_info "Starting P${pattern}: ${PATTERN_DESCRIPTIONS[$pattern]}"
 
 	if [[ "$VERBOSE" == "true" ]]; then
-		# Show real-time output
-		"${script_path}" --reset --non-interactive 2>&1 | tee "${log_file}"
+		# Show real-time output (skip --reset since infrastructure is shared)
+		"${script_path}" --non-interactive 2>&1 | tee "${log_file}"
 		echo "$?" >"${exit_code_file}"
 	else
-		# Redirect to log file
-		"${script_path}" --reset --non-interactive >"${log_file}" 2>&1
+		# Redirect to log file (skip --reset since infrastructure is shared)
+		"${script_path}" --non-interactive >"${log_file}" 2>&1
 		echo "$?" >"${exit_code_file}"
 	fi
 }
@@ -354,15 +401,26 @@ main() {
 	log_info "  Verbose: ${VERBOSE}"
 	log_info "  CI Mode: ${CI_MODE}"
 	log_info "  Database: SQLite (isolated per pattern)"
+	log_info "  Infrastructure: Shared Bitcoin nodes"
 	echo ""
+
+	# Setup trap to ensure cleanup happens
+	trap cleanup_shared_infrastructure EXIT
+
+	# Setup shared infrastructure (Bitcoin containers)
+	setup_shared_infrastructure
 
 	# Run patterns in parallel
 	run_patterns_parallel "${patterns[@]}"
 
 	# Generate and display summary
+	local summary_exit=0
 	if ! generate_summary "${patterns[@]}"; then
-		exit 1
+		summary_exit=1
 	fi
+
+	# Cleanup will be called by trap
+	exit $summary_exit
 }
 
 # Execute main function

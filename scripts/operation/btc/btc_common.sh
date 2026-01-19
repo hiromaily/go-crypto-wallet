@@ -49,8 +49,38 @@ BTC_WALLET_PASSPHRASE="${BTC_WALLET_PASSPHRASE:-${WALLET_PASSPHRASE:-test}}"
 BTC_DOCKER_VOLUME_NAME="${BTC_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
 
 # Wallet-specific RPC hosts (for environment variable overrides)
-BTC_WATCH_WALLET_RPC_HOST="${BTC_WATCH_WALLET_RPC_HOST:-127.0.0.1:18332/wallet/watch}"
-BTC_KEYGEN_WALLET_RPC_HOST="${BTC_KEYGEN_WALLET_RPC_HOST:-127.0.0.1:19332/wallet/keygen}"
+# Note: These are initialized with default values and updated by btc_init_rpc_hosts()
+# when E2E_PATTERN is set for parallel execution
+BTC_WATCH_WALLET_RPC_HOST="${BTC_WATCH_WALLET_RPC_HOST:-}"
+BTC_KEYGEN_WALLET_RPC_HOST="${BTC_KEYGEN_WALLET_RPC_HOST:-}"
+
+# Initialize RPC hosts based on E2E_PATTERN
+# Usage: btc_init_rpc_hosts
+# Sets BTC_WATCH_WALLET_RPC_HOST and BTC_KEYGEN_WALLET_RPC_HOST
+# If E2E_PATTERN is set (e.g., "p1"), wallet names will be suffixed (e.g., "watch-p1")
+btc_init_rpc_hosts() {
+	local watch_wallet="watch"
+	local keygen_wallet="keygen"
+	local sign1_wallet="sign1"
+	local sign2_wallet="sign2"
+
+	# Use pattern-specific wallet names for parallel E2E execution
+	if [ -n "${E2E_PATTERN}" ]; then
+		watch_wallet="watch-${E2E_PATTERN}"
+		keygen_wallet="keygen-${E2E_PATTERN}"
+		sign1_wallet="sign1-${E2E_PATTERN}"
+		sign2_wallet="sign2-${E2E_PATTERN}"
+	fi
+
+	# Set RPC hosts with wallet-specific paths
+	BTC_WATCH_WALLET_RPC_HOST="127.0.0.1:18332/wallet/${watch_wallet}"
+	BTC_KEYGEN_WALLET_RPC_HOST="127.0.0.1:19332/wallet/${keygen_wallet}"
+	BTC_SIGN1_WALLET_RPC_HOST="127.0.0.1:20332/wallet/${sign1_wallet}"
+	BTC_SIGN2_WALLET_RPC_HOST="127.0.0.1:21332/wallet/${sign2_wallet}"
+
+	export BTC_WATCH_WALLET_RPC_HOST BTC_KEYGEN_WALLET_RPC_HOST
+	export BTC_SIGN1_WALLET_RPC_HOST BTC_SIGN2_WALLET_RPC_HOST
+}
 
 ###############################################################################
 # Database Configuration
@@ -359,6 +389,9 @@ btc_get_config_paths() {
 		return 1
 	fi
 
+	# Initialize RPC hosts based on E2E_PATTERN
+	btc_init_rpc_hosts
+
 	BTC_CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc/watch.yaml"
 	BTC_CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc/keygen.yaml"
 	BTC_CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc/sign1.yaml"
@@ -473,9 +506,22 @@ btc_verify_volume_deleted() {
 # Usage: btc_full_reset [volume_name] [node_list]
 # Example: btc_full_reset
 #          btc_full_reset "go-crypto-wallet_wallet-db" "watch keygen sign1 sign2"
+# Note: When E2E_SHARED_INFRASTRUCTURE=true, skips Docker container management (for parallel E2E)
 btc_full_reset() {
 	local volume_name="${1:-${BTC_DOCKER_VOLUME_NAME}}"
 	local nodes="${2:-watch keygen}"
+
+	# Skip container management when using shared infrastructure (parallel E2E)
+	if [ "${E2E_SHARED_INFRASTRUCTURE:-false}" = "true" ]; then
+		log_info "Using shared infrastructure (skipping full reset)"
+		# Only clean SQLite databases for this pattern
+		if db_is_sqlite; then
+			log_info "Cleaning SQLite databases for pattern: ${E2E_PATTERN}"
+			sqlite_clean_db "all" "*-e2e-${E2E_PATTERN}-*.db"
+		fi
+		return 0
+	fi
+
 	log_step "Performing full reset for fresh state"
 
 	# Stop and remove containers WITH VOLUMES
@@ -531,7 +577,14 @@ btc_full_reset() {
 
 # Basic cleanup: just stop containers
 # Usage: btc_cleanup
+# Note: When E2E_SHARED_INFRASTRUCTURE=true, skips Docker container management (for parallel E2E)
 btc_cleanup() {
+	# Skip container management when using shared infrastructure (parallel E2E)
+	if [ "${E2E_SHARED_INFRASTRUCTURE:-false}" = "true" ]; then
+		log_info "Using shared infrastructure (skipping cleanup)"
+		return 0
+	fi
+
 	log_step "Cleaning up containers and state"
 
 	log_info "Stopping Bitcoin containers..."
@@ -586,9 +639,9 @@ btc_keygen_cmd() {
 btc_sign1_cmd() {
 	if db_is_sqlite; then
 		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN_DB_PATH}" \
-			sign1 "$@"
+			WALLET_BITCOIN_HOST="${BTC_SIGN1_WALLET_RPC_HOST}" sign1 "$@"
 	else
-		sign1 "$@"
+		WALLET_BITCOIN_HOST="${BTC_SIGN1_WALLET_RPC_HOST}" sign1 "$@"
 	fi
 }
 
@@ -598,9 +651,9 @@ btc_sign1_cmd() {
 btc_sign2_cmd() {
 	if db_is_sqlite; then
 		WALLET_DATABASE_SQLITE_PATH="${SQLITE_SIGN2_DB_PATH}" \
-			sign2 "$@"
+			WALLET_BITCOIN_HOST="${BTC_SIGN2_WALLET_RPC_HOST}" sign2 "$@"
 	else
-		sign2 "$@"
+		WALLET_BITCOIN_HOST="${BTC_SIGN2_WALLET_RPC_HOST}" sign2 "$@"
 	fi
 }
 
@@ -661,8 +714,18 @@ btc_check_prerequisites() {
 # Usage: btc_setup_infrastructure [container_list]
 # Example: btc_setup_infrastructure "btc-watch btc-keygen"
 #          btc_setup_infrastructure "btc-watch btc-keygen btc-sign1 btc-sign2"
+# Note: When E2E_SHARED_INFRASTRUCTURE=true, skips Docker container management (for parallel E2E)
 btc_setup_infrastructure() {
 	local containers="${1:-btc-watch btc-keygen}"
+
+	# Skip infrastructure setup when using shared infrastructure (parallel E2E)
+	if [ "${E2E_SHARED_INFRASTRUCTURE:-false}" = "true" ]; then
+		log_info "Using shared infrastructure (skipping Docker container management)"
+		log_substep "Initializing SQLite databases"
+		sqlite_init_db "all"
+		return 0
+	fi
+
 	log_step "Setting up infrastructure (DB_TYPE=${DB_TYPE})"
 
 	if db_is_sqlite; then
@@ -701,13 +764,22 @@ btc_setup_infrastructure() {
 # Example: btc_setup_wallets "watch keygen"
 #          btc_setup_wallets "watch keygen sign1 sign2"
 # Note: Container name is derived as "btc-${wallet_name}"
+#       If E2E_PATTERN is set (e.g., "p1"), wallet names will be suffixed (e.g., "watch-p1")
 btc_setup_wallets() {
 	local wallets="${1:-watch keygen}"
 	log_step "Setting up Bitcoin wallets"
 
 	for wallet in $wallets; do
 		local container="btc-${wallet}"
-		btc_create_wallet_if_needed "$container" "$wallet"
+		local wallet_name="$wallet"
+
+		# Use pattern-specific wallet name for parallel E2E execution
+		if [ -n "${E2E_PATTERN}" ]; then
+			wallet_name="${wallet}-${E2E_PATTERN}"
+			log_info "Using pattern-specific wallet name: ${wallet_name}"
+		fi
+
+		btc_create_wallet_if_needed "$container" "$wallet_name"
 	done
 
 	log_info "All wallets are ready"
