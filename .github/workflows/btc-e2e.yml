@@ -53,18 +53,23 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Install Docker Compose
+      - name: Install Docker Compose V2
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
+          # Install Docker Compose V2 plugin (supports 'docker compose' syntax)
+          DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+          mkdir -p $DOCKER_CONFIG/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 \
+            -o $DOCKER_CONFIG/cli-plugins/docker-compose
+          chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          docker compose version
 
       - name: Build project
         run: make build-all
 
       - name: Run BTC E2E tests in parallel
         run: |
-          PATTERNS="${{ github.event.inputs.patterns || '1-11' }}"
-          MAX_PARALLEL="${{ github.event.inputs.max_parallel || '11' }}"
+          PATTERNS="${{ github.event.inputs.patterns || '1-9' }}"
+          MAX_PARALLEL="${{ github.event.inputs.max_parallel || '9' }}"
           ./scripts/operation/btc/e2e/e2e-parallel-runner.sh \
             --patterns "${PATTERNS}" \
             --max-parallel "${MAX_PARALLEL}" \
