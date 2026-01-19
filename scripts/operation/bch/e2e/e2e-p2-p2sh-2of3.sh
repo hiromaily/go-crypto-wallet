@@ -19,6 +19,10 @@ set -eu
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
+# E2E Pattern identifier for database file naming
+# Format: watch-e2e-p2-{timestamp}.db, keygen-e2e-p2-{timestamp}.db, etc.
+export E2E_PATTERN="p2"
+
 # Source BCH common utilities (includes common.sh automatically)
 # shellcheck source=../bch_common.sh
 source "${SCRIPT_DIR}/../bch_common.sh"
@@ -46,7 +50,7 @@ key_generation_phase() {
 
 	# Keygen wallet - create seed
 	log_substep "Creating seed for keygen wallet"
-	keygen -c "${BCH_CONFIG_KEYGEN}" create seed || {
+	bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create seed || {
 		log_warn "Seed already exists or error occurred, continuing..."
 	}
 
@@ -54,27 +58,27 @@ key_generation_phase() {
 	log_substep "Creating HD keys for keygen wallet (client, deposit, payment, stored)"
 	for account in client deposit payment stored; do
 		log_info "Creating HD keys for account: $account"
-		keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create hdkey --account "$account" --keynum 10
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create hdkey --account "$account" --keynum 10
 	done
 
 	# Keygen wallet - import private keys
 	log_substep "Importing private keys into keygen wallet"
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 	fi
 	for account in client deposit payment stored; do
 		log_info "Importing private keys for account: $account"
-		keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import privkey --account "$account"
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import privkey --account "$account"
 	done
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletlock
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletlock
 	fi
 
 	# Sign wallets - create seed
 	log_substep "Creating seeds for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		config_var="BCH_CONFIG_SIGN${i}"
-		"sign${i}" -c "${!config_var}" --coin "${BCH_COIN}" create seed || {
+		bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" create seed || {
 			log_warn "Sign${i} seed already exists, continuing..."
 		}
 	done
@@ -84,7 +88,7 @@ key_generation_phase() {
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		log_info "Creating HD keys for sign${i}"
 		config_var="BCH_CONFIG_SIGN${i}"
-		"sign${i}" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" create hdkey
+		bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" create hdkey
 	done
 
 	# Sign wallets - import private keys
@@ -93,18 +97,18 @@ key_generation_phase() {
 		log_info "Importing private keys for sign${i}"
 		config_var="BCH_CONFIG_SIGN${i}"
 		if [ "${BCH_ENCRYPTED}" = "true" ]; then
-			"sign${i}" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
+			bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 		fi
-		"sign${i}" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" import privkey
+		bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" import privkey
 		if [ "${BCH_ENCRYPTED}" = "true" ]; then
-			"sign${i}" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" api walletlock
+			bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" api walletlock
 		fi
 	done
 
 	# Sign wallets - export fullpubkey
 	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(sign1 -c "${BCH_CONFIG_SIGN1}" --coin "${BCH_COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(sign2 -c "${BCH_CONFIG_SIGN2}" --coin "${BCH_COIN}" --wallet sign2 export fullpubkey)
+	file_fullpubkey_auth1=$(bch_sign1_cmd -c "${BCH_CONFIG_SIGN1}" --coin "${BCH_COIN}" --wallet sign1 export fullpubkey)
+	file_fullpubkey_auth2=$(bch_sign2_cmd -c "${BCH_CONFIG_SIGN2}" --coin "${BCH_COIN}" --wallet sign2 export fullpubkey)
 
 	# Extract file paths
 	FULLPUBKEY_FILE1="${file_fullpubkey_auth1##*\[fileName\]: }"
@@ -129,24 +133,24 @@ multisig_setup_phase() {
 	# Import fullpubkeys
 	log_substep "Importing full public keys into keygen wallet"
 	log_info "Importing fullpubkey from sign1: $FULLPUBKEY_FILE1"
-	keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE1}"
+	bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE1}"
 
 	log_info "Importing fullpubkey from sign2: $FULLPUBKEY_FILE2"
-	keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
+	bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
 
 	# Create multisig addresses (2-of-3)
 	log_substep "Creating 2-of-3 multisig addresses"
 	for account in deposit payment stored; do
 		log_info "Creating 2-of-3 multisig address for account: $account"
-		keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create multisig --account "$account"
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" create multisig --account "$account"
 	done
 
 	# Export addresses
 	log_substep "Exporting addresses from keygen wallet"
-	file_address_client=$(keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account client)
-	file_address_deposit=$(keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account deposit)
-	file_address_payment=$(keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account payment)
-	file_address_stored=$(keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account stored)
+	file_address_client=$(bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account client)
+	file_address_deposit=$(bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account deposit)
+	file_address_payment=$(bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account payment)
+	file_address_stored=$(bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account stored)
 
 	# Extract file paths
 	address_client="${file_address_client##*\[fileName\]: }"
@@ -163,16 +167,16 @@ multisig_setup_phase() {
 	# Import addresses into watch wallet
 	log_substep "Importing addresses into watch wallet"
 	log_info "Importing client addresses"
-	watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_client}"
+	bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_client}"
 
 	log_info "Importing deposit addresses"
-	watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_deposit}"
+	bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_deposit}"
 
 	log_info "Importing payment addresses"
-	watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_payment}"
+	bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_payment}"
 
 	log_info "Importing stored addresses"
-	watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_stored}"
+	bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_stored}"
 
 	# Store payment address file for UTXO generation
 	export ADDRESS_FILE_PAYMENT="${address_payment}"
@@ -221,9 +225,11 @@ create_payment_requests_phase() {
 	log_info "Using sender address: $sender_address"
 
 	# Generate receiver addresses (BCH uses legacy format)
-	receiver1=$(bch_cli "bch-watch" -rpcwallet=watch getnewaddress "" legacy)
-	receiver2=$(bch_cli "bch-watch" -rpcwallet=watch getnewaddress "" legacy)
-	receiver3=$(bch_cli "bch-watch" -rpcwallet=watch getnewaddress "" legacy)
+	# Use pattern-specific wallet name
+	local wallet_name="${BCH_WATCH_WALLET_NAME:-watch}"
+	receiver1=$(bch_cli "bch-watch" -rpcwallet="${wallet_name}" getnewaddress "" legacy)
+	receiver2=$(bch_cli "bch-watch" -rpcwallet="${wallet_name}" getnewaddress "" legacy)
+	receiver3=$(bch_cli "bch-watch" -rpcwallet="${wallet_name}" getnewaddress "" legacy)
 
 	bch_insert_payment_requests "$sender_address" "$receiver1 $receiver2 $receiver3" "0.001 0.002 0.0015"
 }
@@ -237,9 +243,9 @@ transaction_flow_phase() {
 
 	# Create unsigned transaction
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" create payment 2>&1) || {
+	tx_file=$(bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
-		log_error "Output: $tx_file"
+		log_error "Error details: $tx_file"
 
 		if echo "$tx_file" | grep -q "No utxo"; then
 			bch_log_no_utxo_error
@@ -255,11 +261,11 @@ transaction_flow_phase() {
 	# Sign with keygen wallet (1st signature)
 	log_substep "Signing with keygen wallet (1st signature)"
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(keygen -c "${BCH_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
+	tx_file_signed=$(bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" sign signature --file "${tx_unsigned}")
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
-		keygen -c "${BCH_CONFIG_KEYGEN}" api walletlock
+		bch_keygen_cmd -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" api walletlock
 	fi
 
 	tx_signed1=$(bch_extract_file_path "$tx_file_signed")
@@ -267,7 +273,7 @@ transaction_flow_phase() {
 
 	# Sign with sign1 wallet (2nd signature - completing 2-of-3)
 	log_substep "Signing with sign1 wallet (2nd signature - completing 2-of-3)"
-	tx_file_signed2=$(sign1 -c "${BCH_CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_file_signed2=$(bch_sign1_cmd -c "${BCH_CONFIG_SIGN1}" --coin "${BCH_COIN}" --wallet sign1 sign signature --file "${tx_signed1}")
 	tx_signed2=$(bch_extract_file_path "$tx_file_signed2")
 	log_info "Signed transaction (2nd): $tx_signed2"
 
@@ -276,7 +282,7 @@ transaction_flow_phase() {
 
 	# Send transaction
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send --file "${tx_signed2}")
+	tx_result=$(bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send --file "${tx_signed2}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
