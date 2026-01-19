@@ -197,7 +197,7 @@ setup_shared_infrastructure() {
 
 	# Clean old SQLite databases
 	log_info "Cleaning old SQLite databases..."
-	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-p*.db 2>/dev/null || true
+	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-*.db 2>/dev/null || true
 
 	# Start Bitcoin node containers (shared across all patterns)
 	log_info "Starting shared Bitcoin node containers..."
@@ -227,7 +227,7 @@ cleanup_shared_infrastructure() {
 
 	# Clean up pattern-specific SQLite databases
 	log_info "Cleaning pattern-specific SQLite databases..."
-	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-p*.db 2>/dev/null || true
+	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-*.db 2>/dev/null || true
 
 	log_info "Cleanup complete"
 }

@@ -107,17 +107,14 @@ SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas_sqlite/03_sign.sql}
 
 # Generate SQLite database file path for a specific wallet type
 # Usage: db_path=$(sqlite_get_db_path "watch")
-# Output format for parallel E2E: ./data/sqlite/btc/watch-e2e-p1.db
-# Output format for standalone: ./data/sqlite/btc/watch-e2e-20260118-123456.db
+# Output format: ./data/sqlite/btc/watch-e2e-p1-20260118-123456.db
 sqlite_get_db_path() {
 	local wallet_type="$1"
 	local pattern_suffix=""
 
 	if [ -n "${E2E_PATTERN}" ]; then
-		# For parallel E2E: Use pattern-only suffix (no timestamp to avoid conflicts)
-		pattern_suffix="-e2e-${E2E_PATTERN}"
+		pattern_suffix="-e2e-${E2E_PATTERN}-${E2E_TIMESTAMP}"
 	else
-		# For standalone E2E: Use timestamp for uniqueness
 		pattern_suffix="-e2e-${E2E_TIMESTAMP}"
 	fi
 
@@ -140,6 +137,10 @@ sqlite_init_db_paths() {
 # Note: WALLET_DATABASE_SQLITE_PATH is set per-command in btc_watch_cmd, btc_keygen_cmd, etc.
 if [ "${DB_TYPE}" = "sqlite" ]; then
 	export WALLET_DATABASE_TYPE="sqlite"
+	# Increase max_open_conns for E2E tests to handle concurrent operations
+	# Default in config is 2, which is too low for parallel E2E execution
+	# Set to 20 to allow sufficient concurrent connections
+	export WALLET_DATABASE_SQLITE_MAX_OPEN_CONNS=20
 elif [ "${DB_TYPE}" = "mysql" ]; then
 	export WALLET_DATABASE_TYPE="mysql"
 fi
@@ -520,8 +521,7 @@ btc_full_reset() {
 		# Only clean SQLite databases for this pattern
 		if db_is_sqlite; then
 			log_info "Cleaning SQLite databases for pattern: ${E2E_PATTERN}"
-			# Clean pattern-specific databases (without timestamp)
-			sqlite_clean_db "all" "*-e2e-${E2E_PATTERN}.db"
+			sqlite_clean_db "all" "*-e2e-${E2E_PATTERN}-*.db"
 		fi
 		return 0
 	fi
