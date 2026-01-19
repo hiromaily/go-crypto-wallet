@@ -80,6 +80,12 @@ btc_init_rpc_hosts() {
 
 	export BTC_WATCH_WALLET_RPC_HOST BTC_KEYGEN_WALLET_RPC_HOST
 	export BTC_SIGN1_WALLET_RPC_HOST BTC_SIGN2_WALLET_RPC_HOST
+
+	# Export wallet names for use in bitcoin-cli commands
+	export BTC_WATCH_WALLET_NAME="${watch_wallet}"
+	export BTC_KEYGEN_WALLET_NAME="${keygen_wallet}"
+	export BTC_SIGN1_WALLET_NAME="${sign1_wallet}"
+	export BTC_SIGN2_WALLET_NAME="${sign2_wallet}"
 }
 
 ###############################################################################
@@ -816,10 +822,12 @@ btc_wait_for_balance() {
 	while [ $elapsed -lt $max_wait ]; do
 		# Check balance using Bitcoin Core RPC directly
 		# Use subshell with xtrace disabled to prevent shell trace from contaminating JSON output
+		# Use pattern-specific wallet name if E2E_PATTERN is set
+		local wallet_name="${BTC_WATCH_WALLET_NAME:-watch}"
 		local trusted_balance
 		trusted_balance=$(
 			set +x 2>/dev/null
-			btc_cli "btc-watch" -rpcwallet=watch getbalances 2>/dev/null | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0"
+			btc_cli "btc-watch" -rpcwallet="${wallet_name}" getbalances 2>/dev/null | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0"
 		)
 
 		# Check if we have any trusted (mature) balance
@@ -858,8 +866,11 @@ btc_generate_test_utxos() {
 	log_info "Using payment address: $payment_address"
 
 	# Generate blocks with coinbase reward to payment address
+	# Use pattern-specific wallet name if E2E_PATTERN is set
+	local wallet_name="${BTC_WATCH_WALLET_NAME:-watch}"
 	log_info "Generating $block_count blocks to create mature coinbase for testing..."
-	btc_cli "btc-watch" generatetoaddress "$block_count" "$payment_address" >/dev/null
+	log_info "Using wallet: ${wallet_name}"
+	btc_cli "btc-watch" -rpcwallet="${wallet_name}" generatetoaddress "$block_count" "$payment_address" >/dev/null
 
 	log_info "Test UTXOs generated successfully"
 }
