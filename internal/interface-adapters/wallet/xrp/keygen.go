@@ -50,7 +50,6 @@ func NewXRPKeygen(
 
 // GenerateSeed generates seed
 func (k *XRPKeygen) GenerateSeed() ([]byte, error) {
-	// k.logger.Info("no functionality for GenerateSeed() in XRP")
 	output, err := k.generateSeedUseCase.Generate(context.Background())
 	if err != nil {
 		return nil, err
@@ -60,7 +59,6 @@ func (k *XRPKeygen) GenerateSeed() ([]byte, error) {
 
 // StoreSeed stores seed
 func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
-	// k.logger.Info("no functionality for StoreSeed() in XRP")
 	output, err := k.generateSeedUseCase.Store(context.Background(), keygenusecase.StoreSeedInput{
 		Seed: strSeed,
 	})

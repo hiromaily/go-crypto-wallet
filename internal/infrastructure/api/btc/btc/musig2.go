@@ -37,18 +37,11 @@ import (
 //
 // The service uses the high-level Session API from btcd which provides built-in
 // protection against nonce reuse and other common pitfalls.
-type MuSig2Service struct {
-	logger logger.Logger
-}
+type MuSig2Service struct{}
 
 // NewMuSig2Service creates a new MuSig2 service instance.
-func NewMuSig2Service(log logger.Logger) *MuSig2Service {
-	if log == nil {
-		log = logger.NewNoopLogger()
-	}
-	return &MuSig2Service{
-		logger: log,
-	}
+func NewMuSig2Service() *MuSig2Service {
+	return &MuSig2Service{}
 }
 
 // validateContextInputs validates common inputs for context creation.
@@ -84,7 +77,7 @@ func validateContextInputs(privKey *btcec.PrivateKey, allPubKeys []*btcec.Public
 // Returns:
 //   - *musig2.Context: The created context
 //   - error: Any error that occurred during context creation
-func (m *MuSig2Service) CreateContext(
+func (*MuSig2Service) CreateContext(
 	privKey *btcec.PrivateKey,
 	allPubKeys []*btcec.PublicKey,
 	sortKeys bool,
@@ -103,7 +96,7 @@ func (m *MuSig2Service) CreateContext(
 		return nil, fmt.Errorf("failed to create MuSig2 context: %w", err)
 	}
 
-	m.logger.Debug("MuSig2 context created", map[string]any{
+	logger.Debug("MuSig2 context created", map[string]any{
 		"num_signers": len(allPubKeys),
 		"sort_keys":   sortKeys,
 	})
@@ -122,7 +115,7 @@ func (m *MuSig2Service) CreateContext(
 // Returns:
 //   - *musig2.Context: The created context with Taproot tweak
 //   - error: Any error that occurred during context creation
-func (m *MuSig2Service) CreateContextWithTaproot(
+func (*MuSig2Service) CreateContextWithTaproot(
 	privKey *btcec.PrivateKey,
 	allPubKeys []*btcec.PublicKey,
 	sortKeys bool,
@@ -142,7 +135,7 @@ func (m *MuSig2Service) CreateContextWithTaproot(
 		return nil, fmt.Errorf("failed to create MuSig2 context with Taproot: %w", err)
 	}
 
-	m.logger.Debug("MuSig2 context created with Taproot tweak", map[string]any{
+	logger.Debug("MuSig2 context created with Taproot tweak", map[string]any{
 		"num_signers": len(allPubKeys),
 		"sort_keys":   sortKeys,
 	})
@@ -162,7 +155,7 @@ func (m *MuSig2Service) CreateContextWithTaproot(
 // Returns:
 //   - *musig2.Session: The created session
 //   - error: Any error that occurred during session creation
-func (m *MuSig2Service) CreateSession(ctx *musig2.Context) (*musig2.Session, error) {
+func (*MuSig2Service) CreateSession(ctx *musig2.Context) (*musig2.Session, error) {
 	if ctx == nil {
 		return nil, errors.New("context cannot be nil")
 	}
@@ -172,7 +165,7 @@ func (m *MuSig2Service) CreateSession(ctx *musig2.Context) (*musig2.Session, err
 		return nil, fmt.Errorf("failed to create MuSig2 session: %w", err)
 	}
 
-	m.logger.Debug("MuSig2 session created")
+	logger.Debug("MuSig2 session created")
 
 	return session, nil
 }
@@ -201,7 +194,7 @@ func (*MuSig2Service) GetPublicNonce(session *musig2.Session) [66]byte {
 // Returns:
 //   - bool: Whether all nonces have been received
 //   - error: Any error that occurred during nonce registration
-func (m *MuSig2Service) RegisterPubNonce(
+func (*MuSig2Service) RegisterPubNonce(
 	session *musig2.Session,
 	pubNonce [66]byte,
 ) (bool, error) {
@@ -220,7 +213,7 @@ func (m *MuSig2Service) RegisterPubNonce(
 		return false, fmt.Errorf("failed to register public nonce: %w", err)
 	}
 
-	m.logger.Debug("Public nonce registered", map[string]any{
+	logger.Debug("Public nonce registered", map[string]any{
 		"have_all_nonces": haveAllNonces,
 	})
 
@@ -237,7 +230,7 @@ func (m *MuSig2Service) RegisterPubNonce(
 // Returns:
 //   - *musig2.PartialSignature: The partial signature
 //   - error: Any error that occurred during signing
-func (m *MuSig2Service) Sign(
+func (*MuSig2Service) Sign(
 	session *musig2.Session,
 	messageHash [32]byte,
 ) (*musig2.PartialSignature, error) {
@@ -250,7 +243,7 @@ func (m *MuSig2Service) Sign(
 		return nil, fmt.Errorf("failed to create partial signature: %w", err)
 	}
 
-	m.logger.Debug("Partial signature created")
+	logger.Debug("Partial signature created")
 
 	return partialSig, nil
 }
@@ -265,7 +258,7 @@ func (m *MuSig2Service) Sign(
 // Returns:
 //   - bool: Whether all partial signatures have been received
 //   - error: Any error that occurred during signature combination
-func (m *MuSig2Service) CombineSig(
+func (*MuSig2Service) CombineSig(
 	session *musig2.Session,
 	partialSig *musig2.PartialSignature,
 ) (bool, error) {
@@ -282,7 +275,7 @@ func (m *MuSig2Service) CombineSig(
 		return false, fmt.Errorf("failed to combine partial signature: %w", err)
 	}
 
-	m.logger.Debug("Partial signature combined", map[string]any{
+	logger.Debug("Partial signature combined", map[string]any{
 		"have_all_sigs": haveAllSigs,
 	})
 
@@ -298,7 +291,7 @@ func (m *MuSig2Service) CombineSig(
 // Returns:
 //   - *schnorr.Signature: The final aggregated signature (64 bytes)
 //   - error: Any error that occurred
-func (m *MuSig2Service) FinalSig(session *musig2.Session) (*schnorr.Signature, error) {
+func (*MuSig2Service) FinalSig(session *musig2.Session) (*schnorr.Signature, error) {
 	if session == nil {
 		return nil, errors.New("session cannot be nil")
 	}
@@ -308,7 +301,7 @@ func (m *MuSig2Service) FinalSig(session *musig2.Session) (*schnorr.Signature, e
 		return nil, errors.New("final signature not available")
 	}
 
-	m.logger.Debug("Final signature retrieved")
+	logger.Debug("Final signature retrieved")
 
 	return finalSig, nil
 }
@@ -322,7 +315,7 @@ func (m *MuSig2Service) FinalSig(session *musig2.Session) (*schnorr.Signature, e
 // Returns:
 //   - *btcec.PublicKey: The aggregated public key
 //   - error: Any error that occurred
-func (m *MuSig2Service) GetCombinedKey(ctx *musig2.Context) (*btcec.PublicKey, error) {
+func (*MuSig2Service) GetCombinedKey(ctx *musig2.Context) (*btcec.PublicKey, error) {
 	if ctx == nil {
 		return nil, errors.New("context cannot be nil")
 	}
@@ -338,7 +331,7 @@ func (m *MuSig2Service) GetCombinedKey(ctx *musig2.Context) (*btcec.PublicKey, e
 		return nil, fmt.Errorf("invalid aggregated key: %w", err)
 	}
 
-	m.logger.Debug("Combined key retrieved")
+	logger.Debug("Combined key retrieved")
 
 	return aggregatedKey, nil
 }
@@ -352,13 +345,13 @@ func (m *MuSig2Service) GetCombinedKey(ctx *musig2.Context) (*btcec.PublicKey, e
 //
 // Returns:
 //   - bool: Whether the signature is valid
-func (m *MuSig2Service) VerifySignature(
+func (*MuSig2Service) VerifySignature(
 	signature *schnorr.Signature,
 	messageHash [32]byte,
 	aggregatedKey *btcec.PublicKey,
 ) bool {
 	if signature == nil || aggregatedKey == nil {
-		m.logger.Warn("Invalid input for signature verification", map[string]any{
+		logger.Warn("Invalid input for signature verification", map[string]any{
 			"signature_nil": signature == nil,
 			"key_nil":       aggregatedKey == nil,
 		})
@@ -367,7 +360,7 @@ func (m *MuSig2Service) VerifySignature(
 
 	valid := signature.Verify(messageHash[:], aggregatedKey)
 
-	m.logger.Debug("Signature verification completed", map[string]any{
+	logger.Debug("Signature verification completed", map[string]any{
 		"valid": valid,
 	})
 

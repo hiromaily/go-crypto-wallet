@@ -238,7 +238,7 @@ func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
 	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
 
 	// create data
-	var data []byte
+	data := make([]byte, 0, len(methodID)+len(paddedToAddr)+len(paddedAmount))
 	data = append(data, methodID...)
 	data = append(data, paddedToAddr...)
 	data = append(data, paddedAmount...)

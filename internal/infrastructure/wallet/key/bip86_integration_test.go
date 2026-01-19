@@ -134,7 +134,7 @@ func TestBIP86IntegrationKeyConsistency(t *testing.T) {
 		require.NoError(t, err, "iteration %d: key generation should succeed", i)
 
 		// Extract addresses
-		var addresses []string
+		addresses := make([]string, 0, len(keys))
 		for _, key := range keys {
 			addresses = append(addresses, key.TaprootAddr)
 		}
