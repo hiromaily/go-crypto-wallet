@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -16,7 +17,7 @@ func (r *Ripple) GetAccountInfo(ctx context.Context, address string) (*dtoRipple
 		return nil, errors.New("address is empty")
 	}
 
-	req := &RequestGetAccountInfo{
+	req := &protogen.RequestGetAccountInfo{
 		Address: address,
 	}
 

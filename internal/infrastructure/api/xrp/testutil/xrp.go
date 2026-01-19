@@ -9,8 +9,7 @@ import (
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	rippleimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
+	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
 	"github.com/hiromaily/go-crypto-wallet/pkg/grpc"
@@ -50,7 +49,7 @@ func GetXRP() (apixrp.Rippler, error) {
 	}
 	grpcAPI := apixrpimpl.NewRippleAPI(conn)
 
-	xr, err = rippleimpl.NewRipple(wsPublicClient, wsAdminClient, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
+	xr, err = apixrpimpl.NewRippleFromCoinType(wsPublicClient, wsAdminClient, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}

@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: address.proto
 
-package xrp
+package protogen
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -250,7 +250,7 @@ const file_address_proto_rawDesc = "" +
 	"\x10RippleAddressAPI\x12W\n" +
 	"\x0fGenerateAddress\x12\x16.google.protobuf.Empty\x1a*.rippleapi.address.ResponseGenerateAddress\"\x00\x12Y\n" +
 	"\x10GenerateXAddress\x12\x16.google.protobuf.Empty\x1a+.rippleapi.address.ResponseGenerateXAddress\"\x00\x12g\n" +
-	"\x0eIsValidAddress\x12(.rippleapi.address.RequestIsValidAddress\x1a).rippleapi.address.ResponseIsValidAddress\"\x00BPZIgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp\x92\x03\x02\b\x02b\beditionsp\xe8\a"
+	"\x0eIsValidAddress\x12(.rippleapi.address.RequestIsValidAddress\x1a).rippleapi.address.ResponseIsValidAddress\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe8\a"
 
 var (
 	file_address_proto_rawDescOnce sync.Once

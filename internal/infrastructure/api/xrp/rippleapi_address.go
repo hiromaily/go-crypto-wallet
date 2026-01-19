@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -48,7 +49,7 @@ func (r *Ripple) GenerateXAddress(ctx context.Context) (*dtoRipple.ResponseGener
 
 // IsValidAddress calls IsValidAddress API
 func (r *Ripple) IsValidAddress(ctx context.Context, addr string) (bool, error) {
-	req := &RequestIsValidAddress{
+	req := &protogen.RequestIsValidAddress{
 		Address: addr,
 	}
 

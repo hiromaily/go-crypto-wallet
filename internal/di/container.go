@@ -33,8 +33,7 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
-	rippleimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
+	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
@@ -500,7 +499,7 @@ func (c *container) newXRP() apixrp.Rippler {
 	if c.xrp == nil {
 		var err error
 		wsPublic, wsAdmin := c.newXRPWSClient()
-		c.xrp, err = rippleimpl.NewRipple(
+		c.xrp, err = apixrpimpl.NewRippleFromCoinType(
 			wsPublic,
 			wsAdmin,
 			c.newRippleAPI(),

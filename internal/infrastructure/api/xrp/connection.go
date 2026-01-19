@@ -1,4 +1,4 @@
-package ripple
+package xrp
 
 import (
 	"context"
@@ -6,20 +6,19 @@ import (
 
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 )
 
-// NewRipple creates Ripple instance according to coinType
-func NewRipple(
-	wsPublic *websocket.WS, wsAdmin *websocket.WS, api *apixrpimpl.RippleAPI, conf *config.Ripple,
+// NewRippleFromCoinType creates Ripple instance according to coinType
+func NewRippleFromCoinType(
+	wsPublic *websocket.WS, wsAdmin *websocket.WS, api *RippleAPI, conf *config.Ripple,
 	coinTypeCode domainCoin.CoinTypeCode,
 ) (apixrp.Rippler, error) {
 	//nolint:exhaustive
 	switch coinTypeCode {
 	case domainCoin.XRP:
-		ripple, err := apixrpimpl.NewRipple(context.Background(), wsPublic, wsAdmin, api, coinTypeCode, conf)
+		ripple, err := NewRipple(context.Background(), wsPublic, wsAdmin, api, coinTypeCode, conf)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call xrp.NewRipple(): %w", err)
 		}
