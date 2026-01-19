@@ -199,11 +199,12 @@ setup_shared_infrastructure() {
 	log_info "Cleaning old SQLite databases..."
 	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-*.db 2>/dev/null || true
 
-	# Clean Bitcoin Core wallet directories for pattern-specific wallets
-	log_info "Cleaning Bitcoin Core wallet directories..."
+	# Clean Bitcoin Core data directories completely for fresh state
+	log_info "Cleaning Bitcoin Core data directories..."
 	for node in watch keygen sign1 sign2; do
-		# Remove pattern-specific wallet directories (watch-p1, watch-p2, etc.)
-		rm -rf "${PROJECT_ROOT}/docker/nodes/btc/${node}/regtest/wallets/"*-p* 2>/dev/null || true
+		# Remove entire regtest directory to ensure completely fresh state
+		log_info "  Cleaning ${node} regtest directory..."
+		rm -rf "${PROJECT_ROOT}/docker/nodes/btc/${node}/regtest" 2>/dev/null || true
 	done
 
 	# Start Bitcoin node containers (shared across all patterns)
@@ -236,10 +237,11 @@ cleanup_shared_infrastructure() {
 	log_info "Cleaning pattern-specific SQLite databases..."
 	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-*.db 2>/dev/null || true
 
-	# Clean Bitcoin Core wallet directories
-	log_info "Cleaning Bitcoin Core wallet directories..."
+	# Clean Bitcoin Core data directories
+	log_info "Cleaning Bitcoin Core data directories..."
 	for node in watch keygen sign1 sign2; do
-		rm -rf "${PROJECT_ROOT}/docker/nodes/btc/${node}/regtest/wallets/"*-p* 2>/dev/null || true
+		log_info "  Cleaning ${node} regtest directory..."
+		rm -rf "${PROJECT_ROOT}/docker/nodes/btc/${node}/regtest" 2>/dev/null || true
 	done
 
 	log_info "Cleanup complete"
