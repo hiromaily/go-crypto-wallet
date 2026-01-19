@@ -159,6 +159,42 @@ db_is_mysql() {
 	[ "${DB_TYPE}" = "mysql" ]
 }
 
+# Resolve database name to its SQLite path
+# Usage: db_path=$(_sqlite_resolve_db_path "watch")
+# Returns: The path to the SQLite database file, or empty string with error for unknown names
+# Note: This is a helper function to avoid duplicating the case statement in multiple functions
+_sqlite_resolve_db_path() {
+	local db_name="$1"
+
+	case "$db_name" in
+	watch) echo "${SQLITE_WATCH_DB_PATH}" ;;
+	keygen) echo "${SQLITE_KEYGEN_DB_PATH}" ;;
+	sign | sign1) echo "${SQLITE_SIGN_DB_PATH}" ;;
+	sign2) echo "${SQLITE_SIGN2_DB_PATH}" ;;
+	*)
+		log_error "Unknown database name: $db_name"
+		return 1
+		;;
+	esac
+}
+
+# Resolve database name to its schema file path
+# Usage: schema_file=$(_sqlite_resolve_schema_path "watch")
+# Returns: The path to the schema file, or empty string with error for unknown names
+_sqlite_resolve_schema_path() {
+	local db_name="$1"
+
+	case "$db_name" in
+	watch) echo "${PROJECT_ROOT}/${SQLITE_WATCH_SCHEMA}" ;;
+	keygen) echo "${PROJECT_ROOT}/${SQLITE_KEYGEN_SCHEMA}" ;;
+	sign | sign1 | sign2) echo "${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}" ;;
+	*)
+		log_error "Unknown database name: $db_name"
+		return 1
+		;;
+	esac
+}
+
 # Initialize SQLite database with schema
 # Usage: sqlite_init_db "watch"
 #        sqlite_init_db "all"  # Initialize all wallet databases (watch, keygen, sign)
@@ -178,27 +214,11 @@ sqlite_init_db() {
 		log_info "  Pattern: ${E2E_PATTERN:-unset}"
 		log_info "  Timestamp: ${E2E_TIMESTAMP}"
 
-		# Initialize each wallet database
+		# Initialize each wallet database using helper functions
 		for wallet_type in watch keygen sign sign2; do
 			local db_path schema_file
-			case "$wallet_type" in
-			watch)
-				db_path="${SQLITE_WATCH_DB_PATH}"
-				schema_file="${PROJECT_ROOT}/${SQLITE_WATCH_SCHEMA}"
-				;;
-			keygen)
-				db_path="${SQLITE_KEYGEN_DB_PATH}"
-				schema_file="${PROJECT_ROOT}/${SQLITE_KEYGEN_SCHEMA}"
-				;;
-			sign)
-				db_path="${SQLITE_SIGN_DB_PATH}"
-				schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
-				;;
-			sign2)
-				db_path="${SQLITE_SIGN2_DB_PATH}"
-				schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
-				;;
-			esac
+			db_path=$(_sqlite_resolve_db_path "$wallet_type")
+			schema_file=$(_sqlite_resolve_schema_path "$wallet_type")
 
 			if [ -f "$schema_file" ]; then
 				# Remove existing database to start fresh
@@ -218,30 +238,10 @@ sqlite_init_db() {
 		return 0
 	fi
 
-	# Initialize with specific schema
+	# Initialize with specific schema using helper functions
 	local db_path schema_file
-	case "$db_name" in
-	watch)
-		db_path="${SQLITE_WATCH_DB_PATH}"
-		schema_file="${PROJECT_ROOT}/${SQLITE_WATCH_SCHEMA}"
-		;;
-	keygen)
-		db_path="${SQLITE_KEYGEN_DB_PATH}"
-		schema_file="${PROJECT_ROOT}/${SQLITE_KEYGEN_SCHEMA}"
-		;;
-	sign | sign1)
-		db_path="${SQLITE_SIGN_DB_PATH}"
-		schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
-		;;
-	sign2)
-		db_path="${SQLITE_SIGN2_DB_PATH}"
-		schema_file="${PROJECT_ROOT}/${SQLITE_SIGN_SCHEMA}"
-		;;
-	*)
-		log_error "Unknown database name: $db_name"
-		return 1
-		;;
-	esac
+	db_path=$(_sqlite_resolve_db_path "$db_name") || return 1
+	schema_file=$(_sqlite_resolve_schema_path "$db_name") || return 1
 
 	# Check if schema file exists
 	if [ ! -f "$schema_file" ]; then
@@ -272,23 +272,15 @@ sqlite_clean_db() {
 			log_info "Removing SQLite database files matching: ${SQLITE_DB_DIR}/${pattern}"
 			rm -f "${SQLITE_DB_DIR}"/${pattern} 2>/dev/null || true
 		else
-			# Remove current session's database files
-			if [ -n "${SQLITE_WATCH_DB_PATH:-}" ] && [ -f "${SQLITE_WATCH_DB_PATH}" ]; then
-				rm -f "${SQLITE_WATCH_DB_PATH}"
-				log_info "Removed: ${SQLITE_WATCH_DB_PATH}"
-			fi
-			if [ -n "${SQLITE_KEYGEN_DB_PATH:-}" ] && [ -f "${SQLITE_KEYGEN_DB_PATH}" ]; then
-				rm -f "${SQLITE_KEYGEN_DB_PATH}"
-				log_info "Removed: ${SQLITE_KEYGEN_DB_PATH}"
-			fi
-			if [ -n "${SQLITE_SIGN_DB_PATH:-}" ] && [ -f "${SQLITE_SIGN_DB_PATH}" ]; then
-				rm -f "${SQLITE_SIGN_DB_PATH}"
-				log_info "Removed: ${SQLITE_SIGN_DB_PATH}"
-			fi
-			if [ -n "${SQLITE_SIGN2_DB_PATH:-}" ] && [ -f "${SQLITE_SIGN2_DB_PATH}" ]; then
-				rm -f "${SQLITE_SIGN2_DB_PATH}"
-				log_info "Removed: ${SQLITE_SIGN2_DB_PATH}"
-			fi
+			# Remove current session's database files using helper function
+			for wallet_type in watch keygen sign sign2; do
+				local db_path
+				db_path=$(_sqlite_resolve_db_path "$wallet_type" 2>/dev/null) || continue
+				if [ -n "$db_path" ] && [ -f "$db_path" ]; then
+					rm -f "$db_path"
+					log_info "Removed: $db_path"
+				fi
+			done
 			# Also remove any old-style e2e.db file
 			if [ -f "${SQLITE_DB_DIR}/e2e.db" ]; then
 				rm -f "${SQLITE_DB_DIR}/e2e.db"
@@ -301,18 +293,9 @@ sqlite_clean_db() {
 	# Initialize paths if not already set
 	sqlite_init_db_paths
 
-	# Individual wallet cleanup
+	# Individual wallet cleanup using helper function
 	local db_path
-	case "$db_name" in
-	watch) db_path="${SQLITE_WATCH_DB_PATH}" ;;
-	keygen) db_path="${SQLITE_KEYGEN_DB_PATH}" ;;
-	sign | sign1) db_path="${SQLITE_SIGN_DB_PATH}" ;;
-	sign2) db_path="${SQLITE_SIGN2_DB_PATH}" ;;
-	*)
-		log_error "Unknown database name: $db_name"
-		return 1
-		;;
-	esac
+	db_path=$(_sqlite_resolve_db_path "$db_name") || return 1
 
 	if [ -f "$db_path" ]; then
 		rm -f "$db_path"
@@ -327,16 +310,7 @@ sqlite_query() {
 	local query="$2"
 	local db_path
 
-	case "$db_name" in
-	watch) db_path="${SQLITE_WATCH_DB_PATH}" ;;
-	keygen) db_path="${SQLITE_KEYGEN_DB_PATH}" ;;
-	sign | sign1) db_path="${SQLITE_SIGN_DB_PATH}" ;;
-	sign2) db_path="${SQLITE_SIGN2_DB_PATH}" ;;
-	*)
-		log_error "Unknown database name: $db_name"
-		return 1
-		;;
-	esac
+	db_path=$(_sqlite_resolve_db_path "$db_name") || return 1
 
 	sqlite3 -batch "$db_path" "$query"
 }
