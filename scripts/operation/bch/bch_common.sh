@@ -97,10 +97,14 @@ E2E_PATTERN="${E2E_PATTERN:-}"
 # Format: YYYYMMDD-HHMMSS
 E2E_TIMESTAMP="${E2E_TIMESTAMP:-$(date +%Y%m%d-%H%M%S)}"
 
-# SQLite base directory
-SQLITE_DB_DIR="${SQLITE_DB_DIR:-./data/sqlite/bch}"
+# Detect project root (3 levels up from bch_common.sh location)
+# bch_common.sh is at: scripts/operation/bch/bch_common.sh
+_BCH_PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../" && pwd)"
 
-# SQLite schema file location
+# SQLite base directory (use absolute path to ensure consistent location)
+SQLITE_DB_DIR="${SQLITE_DB_DIR:-${_BCH_PROJECT_ROOT}/data/sqlite/bch}"
+
+# SQLite schema file location (relative paths - will be prefixed with PROJECT_ROOT)
 SQLITE_WATCH_SCHEMA="${SQLITE_WATCH_SCHEMA:-tools/sqlc/schemas_sqlite/01_watch.sql}"
 SQLITE_KEYGEN_SCHEMA="${SQLITE_KEYGEN_SCHEMA:-tools/sqlc/schemas_sqlite/02_keygen.sql}"
 SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas_sqlite/03_sign.sql}"
@@ -576,6 +580,22 @@ bch_cleanup() {
 	fi
 
 	log_info "Cleanup complete"
+}
+
+###############################################################################
+# BCH RPC Command Wrappers
+###############################################################################
+
+# Wrapper for bitcoin-cli commands with BCH RPC credentials
+# Usage: bch_cli <container_name> [bitcoin-cli args...]
+# Example: bch_cli "bch-watch" -rpcwallet=watch getbalance
+# Note: Uses subshell to temporarily set BCH credentials without affecting parent shell
+bch_cli() {
+	(
+		RPC_USER="${BCH_RPC_USER}"
+		RPC_PASSWORD="${BCH_RPC_PASSWORD}"
+		bitcoin_cli "$@"
+	)
 }
 
 ###############################################################################

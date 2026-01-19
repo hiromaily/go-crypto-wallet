@@ -68,6 +68,11 @@ func NewCreateBCHTransactionUseCase(
 	paymentSender domainAccount.AccountType,
 	walletType domainWallet.WalletType,
 ) watchusecase.CreateTransactionUseCase {
+	// Runtime type verification for debugging
+	logger.Debug("BCH use case: received client type",
+		"type", fmt.Sprintf("%T", bchClient),
+		"coin", bchClient.CoinTypeCode())
+
 	return &createTransactionUseCase{
 		bchClient:       bchClient,
 		dbConn:          dbConn,
@@ -285,6 +290,10 @@ func (u *createTransactionUseCase) createTx(
 	if err != nil {
 		return "", "", err
 	}
+	logger.Debug("transaction fee calculated",
+		"input_total", inputTotal.ToBTC(),
+		"output_total", outputTotal.ToBTC(),
+		"fee", fee.ToBTC())
 
 	// Re-create raw transaction with adjusted outputs
 	msgTx, err = u.bchClient.CreateRawTransaction(parsedTx.TxInputs, txOutputs)
@@ -417,15 +426,36 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
 	changeAddrStr string,
 ) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*domainBitcoin.BTCTxOutput, error) {
+	logger.Debug("BCH use case: calculateOutputTotal called",
+		"tx_size", msgTx.SerializeSize(),
+		"adjustment_fee", adjustmentFee,
+		"input_total", inputTotal.ToBTC())
+
+	// Call GetFee through interface - Go should dispatch to BitcoinCash.GetFee override
+	logger.Debug("calling GetFee",
+		"tx_size", msgTx.SerializeSize(),
+		"adjustment_fee", adjustmentFee)
 	fee, err := u.bchClient.GetFee(msgTx, adjustmentFee)
+
 	if err != nil {
 		return 0, 0, nil, nil, fmt.Errorf("fail to call bch.GetFee(): %w", err)
 	}
+	logger.Debug("BCH fee calculated",
+		"fee_satoshis", fee,
+		"fee_btc", fee.ToBTC(),
+		"tx_size", msgTx.SerializeSize())
+
+	// BCH addresses may have network prefix (bchreg:, bitcoincash:, bchtest:)
+	// Strip prefix for comparison since addr.String() doesn't include it
+	changeAddrWithoutPrefix := strings.TrimPrefix(changeAddrStr, "bchreg:")
+	changeAddrWithoutPrefix = strings.TrimPrefix(changeAddrWithoutPrefix, "bitcoincash:")
+	changeAddrWithoutPrefix = strings.TrimPrefix(changeAddrWithoutPrefix, "bchtest:")
+
 	var outputTotal btcutil.Amount
 	txRepoOutputs := make([]*domainBitcoin.BTCTxOutput, 0, len(txPrevOutputs))
 
 	for addr, amt := range txPrevOutputs {
-		isChangeAddr := addr.String() == changeAddrStr
+		isChangeAddr := addr.String() == changeAddrWithoutPrefix
 
 		if len(txPrevOutputs) == 1 {
 			txPrevOutputs[addr] -= fee
