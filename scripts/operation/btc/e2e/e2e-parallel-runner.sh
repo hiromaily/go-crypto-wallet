@@ -189,15 +189,29 @@ setup_shared_infrastructure() {
 	# Set SQLite mode
 	export DB_TYPE="sqlite"
 
-	# Full cleanup first
+	# Full cleanup first (stop any existing containers)
 	log_info "Cleaning up any existing infrastructure..."
-	btc_full_reset "watch keygen sign1 sign2" 2>/dev/null || true
+	log_info "Stopping Bitcoin containers..."
+	docker compose -f "${PROJECT_ROOT}/compose.btc.yaml" down -v 2>/dev/null || true
+	docker compose -f "${PROJECT_ROOT}/compose.yaml" down -v 2>/dev/null || true
+
+	# Clean old SQLite databases
+	log_info "Cleaning old SQLite databases..."
+	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-p*.db 2>/dev/null || true
 
 	# Start Bitcoin node containers (shared across all patterns)
 	log_info "Starting shared Bitcoin node containers..."
-	btc_setup_infrastructure "btc-watch btc-keygen btc-sign1 btc-sign2"
+	log_substep "Starting Bitcoin node containers"
+	docker compose -f "${PROJECT_ROOT}/compose.btc.yaml" up -d btc-watch btc-keygen btc-sign1 btc-sign2
+
+	# Wait for containers to be healthy
+	log_substep "Waiting for containers to be healthy"
+	for container in btc-watch btc-keygen btc-sign1 btc-sign2; do
+		wait_for_healthy "$container" 90
+	done
 
 	log_info "Shared infrastructure is ready"
+	log_info "Note: Each pattern will initialize its own SQLite database"
 	echo ""
 }
 
@@ -207,14 +221,13 @@ cleanup_shared_infrastructure() {
 	log_info "Cleaning up shared infrastructure"
 	log_info "=========================================="
 
-	# Source BTC common utilities if not already sourced
-	if ! command -v btc_cleanup &>/dev/null; then
-		# shellcheck source=../btc_common.sh
-		source "${SCRIPT_DIR}/../btc_common.sh"
-	fi
+	# Stop Bitcoin containers
+	log_info "Stopping Bitcoin containers..."
+	docker compose -f "${PROJECT_ROOT}/compose.btc.yaml" down -v 2>/dev/null || true
 
-	# Cleanup Bitcoin containers and state
-	btc_cleanup "watch keygen sign1 sign2"
+	# Clean up pattern-specific SQLite databases
+	log_info "Cleaning pattern-specific SQLite databases..."
+	rm -rf "${PROJECT_ROOT}/data/sqlite/btc"/*-e2e-p*.db 2>/dev/null || true
 
 	log_info "Cleanup complete"
 }

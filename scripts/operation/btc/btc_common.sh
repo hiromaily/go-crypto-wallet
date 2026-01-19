@@ -107,14 +107,17 @@ SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas_sqlite/03_sign.sql}
 
 # Generate SQLite database file path for a specific wallet type
 # Usage: db_path=$(sqlite_get_db_path "watch")
-# Output format: ./data/sqlite/btc/watch-e2e-p1-20260118-123456.db
+# Output format for parallel E2E: ./data/sqlite/btc/watch-e2e-p1.db
+# Output format for standalone: ./data/sqlite/btc/watch-e2e-20260118-123456.db
 sqlite_get_db_path() {
 	local wallet_type="$1"
 	local pattern_suffix=""
 
 	if [ -n "${E2E_PATTERN}" ]; then
-		pattern_suffix="-e2e-${E2E_PATTERN}-${E2E_TIMESTAMP}"
+		# For parallel E2E: Use pattern-only suffix (no timestamp to avoid conflicts)
+		pattern_suffix="-e2e-${E2E_PATTERN}"
 	else
+		# For standalone E2E: Use timestamp for uniqueness
 		pattern_suffix="-e2e-${E2E_TIMESTAMP}"
 	fi
 
@@ -517,7 +520,8 @@ btc_full_reset() {
 		# Only clean SQLite databases for this pattern
 		if db_is_sqlite; then
 			log_info "Cleaning SQLite databases for pattern: ${E2E_PATTERN}"
-			sqlite_clean_db "all" "*-e2e-${E2E_PATTERN}-*.db"
+			# Clean pattern-specific databases (without timestamp)
+			sqlite_clean_db "all" "*-e2e-${E2E_PATTERN}.db"
 		fi
 		return 0
 	fi
@@ -721,7 +725,7 @@ btc_setup_infrastructure() {
 	# Skip infrastructure setup when using shared infrastructure (parallel E2E)
 	if [ "${E2E_SHARED_INFRASTRUCTURE:-false}" = "true" ]; then
 		log_info "Using shared infrastructure (skipping Docker container management)"
-		log_substep "Initializing SQLite databases"
+		log_substep "Initializing SQLite databases for pattern: ${E2E_PATTERN}"
 		sqlite_init_db "all"
 		return 0
 	fi
