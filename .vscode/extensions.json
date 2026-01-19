@@ -30,7 +30,8 @@
     "EditorConfig.EditorConfig",
     "streetsidesoftware.code-spell-checker",
     "ms-azuretools.vscode-docker",
-    "eamodio.gitlens"
+    "eamodio.gitlens",
+    "PKief.material-icon-theme"
   ],
   "unwantedRecommendations": []
 }
