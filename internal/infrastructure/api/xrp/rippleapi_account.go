@@ -17,9 +17,9 @@ func (r *Ripple) GetAccountInfo(ctx context.Context, address string) (*dtoRipple
 		return nil, errors.New("address is empty")
 	}
 
-	req := &protogen.RequestGetAccountInfo{
+	req := protogen.RequestGetAccountInfo_builder{
 		Address: address,
-	}
+	}.Build()
 
 	res, err := r.API.accountClient.GetAccountInfo(ctx, req)
 	if err != nil {
@@ -29,11 +29,11 @@ func (r *Ripple) GetAccountInfo(ctx context.Context, address string) (*dtoRipple
 		return nil, fmt.Errorf("fail to call accountClient.GetAccountInfo(): %w", err)
 	}
 	logger.Debug("response",
-		"Sequence", res.Sequence,
-		"XrpBalance", res.XrpBalance,
-		"OwnerCount", res.OwnerCount,
-		"PreviousAffectingTransactionID", res.PreviousAffectingTransactionID,
-		"PreviousAffectingTransactionLedgerVersion", res.PreviousAffectingTransactionLedgerVersion,
+		"Sequence", res.GetSequence(),
+		"XrpBalance", res.GetXrpBalance(),
+		"OwnerCount", res.GetOwnerCount(),
+		"PreviousAffectingTransactionID", res.GetPreviousAffectingTransactionID(),
+		"PreviousAffectingTransactionLedgerVersion", res.GetPreviousAffectingTransactionLedgerVersion(),
 	)
 
 	// Convert infrastructure type to DTO

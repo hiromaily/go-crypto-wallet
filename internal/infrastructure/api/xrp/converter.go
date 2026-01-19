@@ -13,14 +13,14 @@ func ToInfraInstructions(dto *dtoRipple.Instructions) *protogen.Instructions {
 	if dto == nil {
 		return nil
 	}
-	return &protogen.Instructions{
+	return protogen.Instructions_builder{
 		Fee:                    dto.Fee,
 		MaxFee:                 dto.MaxFee,
 		MaxLedgerVersion:       dto.MaxLedgerVersion,
 		MaxLedgerVersionOffset: dto.MaxLedgerVersionOffset,
 		Sequence:               dto.Sequence,
 		SignersCount:           dto.SignersCount,
-	}
+	}.Build()
 }
 
 // ToDTOInstructions converts infrastructure Instructions to DTO Instructions.
@@ -29,12 +29,12 @@ func ToDTOInstructions(infra *protogen.Instructions) *dtoRipple.Instructions {
 		return nil
 	}
 	return &dtoRipple.Instructions{
-		Fee:                    infra.Fee,
-		MaxFee:                 infra.MaxFee,
-		MaxLedgerVersion:       infra.MaxLedgerVersion,
-		MaxLedgerVersionOffset: infra.MaxLedgerVersionOffset,
-		Sequence:               infra.Sequence,
-		SignersCount:           infra.SignersCount,
+		Fee:                    infra.GetFee(),
+		MaxFee:                 infra.GetMaxFee(),
+		MaxLedgerVersion:       infra.GetMaxLedgerVersion(),
+		MaxLedgerVersionOffset: infra.GetMaxLedgerVersionOffset(),
+		Sequence:               infra.GetSequence(),
+		SignersCount:           infra.GetSignersCount(),
 	}
 }
 
@@ -186,11 +186,11 @@ func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *dtoRip
 		return nil
 	}
 	return &dtoRipple.ResponseGetAccountInfo{
-		Sequence:                       infra.Sequence,
-		XrpBalance:                     infra.XrpBalance,
-		OwnerCount:                     infra.OwnerCount,
-		PreviousAffectingTransactionID: infra.PreviousAffectingTransactionID,
-		PreviousAffectingTransactionLedgerVersion: infra.PreviousAffectingTransactionLedgerVersion,
+		Sequence:                       infra.GetSequence(),
+		XrpBalance:                     infra.GetXrpBalance(),
+		OwnerCount:                     infra.GetOwnerCount(),
+		PreviousAffectingTransactionID: infra.GetPreviousAffectingTransactionID(),
+		PreviousAffectingTransactionLedgerVersion: infra.GetPreviousAffectingTransactionLedgerVersion(),
 	}
 }
 
@@ -200,10 +200,10 @@ func ToDTOResponseGenerateAddress(infra *protogen.ResponseGenerateAddress) *dtoR
 		return nil
 	}
 	return &dtoRipple.ResponseGenerateAddress{
-		XAddress:       infra.XAddress,
-		ClassicAddress: infra.ClassicAddress,
-		Address:        infra.Address,
-		Secret:         infra.Secret,
+		XAddress:       infra.GetXAddress(),
+		ClassicAddress: infra.GetClassicAddress(),
+		Address:        infra.GetAddress(),
+		Secret:         infra.GetSecret(),
 	}
 }
 
@@ -213,8 +213,8 @@ func ToDTOResponseGenerateXAddress(infra *protogen.ResponseGenerateXAddress) *dt
 		return nil
 	}
 	return &dtoRipple.ResponseGenerateXAddress{
-		XAddress: infra.XAddress,
-		Secret:   infra.Secret,
+		XAddress: infra.GetXAddress(),
+		Secret:   infra.GetSecret(),
 	}
 }
 
