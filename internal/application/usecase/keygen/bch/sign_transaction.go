@@ -2,17 +2,12 @@ package bch
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 
-	"github.com/btcsuite/btcd/btcutil"
-
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/bchutil"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	usecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/shared"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -72,7 +67,7 @@ func (u *signTransactionUseCase) Sign(
 	}
 
 	// Parse the BCH raw tx content (hex + prevtx metadata)
-	txHex, prevTxs, err := u.parseRawTxContent(txContent)
+	txHex, prevTxs, err := bchutil.ParseRawTxContent(txContent)
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to parse raw tx content: %w", err)
 	}
@@ -116,13 +111,13 @@ func (u *signTransactionUseCase) Sign(
 	// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
 	// Related: Issue #485, Issue #433
 	isMultisig := u.multisigAccount != nil
-	if isSigned && !isMultisig {
+	if bchutil.ShouldIncludePrevTxMetadata(isSigned, isMultisig) {
+		// Include prevTx metadata for next signer (multisig or not yet fully signed)
+		content := bchutil.FormatSignedTxContent(signedHex, prevTxs)
+		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, content)
+	} else {
 		// For fully signed single-sig transactions, just write the hex
 		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, signedHex)
-	} else {
-		// For partially signed or multisig, include prevTx metadata for next signer
-		content := u.formatSignedTxContent(signedHex, prevTxs)
-		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, content)
 	}
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to write signed tx file: %w", err)
@@ -148,7 +143,7 @@ func (u *signTransactionUseCase) Sign(
 // BCH uses SIGHASH_FORKID (0x41) which is handled internally by the BCH node.
 func (u *signTransactionUseCase) sign(
 	txHex string,
-	prevTxs []signPrevTx,
+	prevTxs []bchutil.PrevTx,
 	actionType domainTx.ActionType,
 ) (string, bool, error) {
 	// Infer sender account from action type
@@ -173,7 +168,7 @@ func (u *signTransactionUseCase) sign(
 	}
 
 	// Convert prevTxs to DTO format
-	dtoPrevTxs := u.convertPrevTxsToDTO(prevTxs)
+	dtoPrevTxs := bchutil.ConvertPrevTxsToDTO(prevTxs)
 
 	// Sign raw transaction with WIF keys
 	// BCH nodes handle SIGHASH_FORKID internally
@@ -226,95 +221,4 @@ func (u *signTransactionUseCase) getWIFsForAccount(
 	}
 
 	return wifs, nil
-}
-
-// signPrevTx represents previous transaction data for BCH signing
-type signPrevTx struct {
-	TxID         string
-	Vout         uint32
-	ScriptPubKey string
-	RedeemScript string
-	Amount       int64
-}
-
-// parseRawTxContent parses BCH raw transaction content
-// Format: txHex on first line, followed by prevtx metadata lines
-func (*signTransactionUseCase) parseRawTxContent(content string) (string, []signPrevTx, error) {
-	lines := strings.Split(strings.TrimSpace(content), "\n")
-	if len(lines) == 0 {
-		return "", nil, errors.New("empty transaction content")
-	}
-
-	txHex := lines[0]
-	prevTxs := make([]signPrevTx, 0, len(lines)-1)
-
-	for i := 1; i < len(lines); i++ {
-		line := strings.TrimSpace(lines[i])
-		if line == "" || !strings.HasPrefix(line, "prevtx:") {
-			continue
-		}
-
-		// Parse prevtx:txid:vout:scriptPubKey:redeemScript:amount
-		parts := strings.Split(strings.TrimPrefix(line, "prevtx:"), ":")
-		if len(parts) < 5 {
-			logger.Warn("invalid prevtx format, skipping", "line", line)
-			continue
-		}
-
-		vout64, err := strconv.ParseUint(parts[1], 10, 32)
-		if err != nil {
-			logger.Warn("invalid vout in prevtx", "vout", parts[1], "error", err)
-			continue
-		}
-		vout := uint32(vout64)
-
-		amount, err := strconv.ParseInt(parts[4], 10, 64)
-		if err != nil {
-			logger.Warn("invalid amount in prevtx", "amount", parts[4], "error", err)
-			continue
-		}
-
-		prevTxs = append(prevTxs, signPrevTx{
-			TxID:         parts[0],
-			Vout:         vout,
-			ScriptPubKey: parts[2],
-			RedeemScript: parts[3],
-			Amount:       amount,
-		})
-	}
-
-	return txHex, prevTxs, nil
-}
-
-// convertPrevTxsToDTO converts signPrevTx to DTO format for signing
-func (*signTransactionUseCase) convertPrevTxsToDTO(prevTxs []signPrevTx) []dtobtc.PreviousTx {
-	result := make([]dtobtc.PreviousTx, len(prevTxs))
-	for i, prev := range prevTxs {
-		result[i] = dtobtc.PreviousTx{
-			TxID:         prev.TxID,
-			Vout:         prev.Vout,
-			ScriptPubKey: prev.ScriptPubKey,
-			RedeemScript: prev.RedeemScript,
-			Amount:       btcutil.Amount(prev.Amount),
-		}
-	}
-	return result
-}
-
-// formatSignedTxContent formats the signed transaction content for BCH
-func (*signTransactionUseCase) formatSignedTxContent(txHex string, prevTxs []signPrevTx) string {
-	var builder strings.Builder
-	builder.WriteString(txHex)
-	builder.WriteString("\n")
-
-	for _, prev := range prevTxs {
-		fmt.Fprintf(&builder, "prevtx:%s:%d:%s:%s:%d\n",
-			prev.TxID,
-			prev.Vout,
-			prev.ScriptPubKey,
-			prev.RedeemScript,
-			prev.Amount,
-		)
-	}
-	return builder.String()
 }
