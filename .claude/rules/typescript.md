@@ -10,23 +10,29 @@ Rules for modifying TypeScript (`*.ts`, `*.tsx`) and JavaScript (`*.js`, `*.jsx`
 
 ## Applicable Directories
 
-| App | Language | Path |
-|-----|----------|------|
-| ripple-lib-server | TypeScript | `apps/ripple-lib-server/` |
-| erc20-token | JavaScript/TypeScript | `apps/erc20-token/` |
+| App | Language | Runtime | Path | Status |
+|-----|----------|---------|------|--------|
+| xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **Active** |
+| erc20-token | JavaScript/TypeScript | Node.js | `apps/erc20-token/` | Active |
+| ripple-lib-server | TypeScript | Node.js | `apps/ripple-lib-server/` | **READ-ONLY** (deprecated) |
+
+> **Important**: `ripple-lib-server` is deprecated. All XRP server work should be done in `xrpl-grpc-server`. See `apps/xrpl-grpc-server/docs/MIGRATION-GUIDE.md` for details.
 
 ## Verification Commands
 
 **Navigate to app directory first:**
 
-### ripple-lib-server (TypeScript)
+### xrpl-grpc-server (TypeScript + Bun) - Active Development
 
 ```bash
-cd apps/ripple-lib-server
-yarn install          # Install dependencies (if needed)
-yarn lint             # Lint and auto-fix with ESLint
-yarn test             # Run tests with Jest
-yarn test:watch       # Run tests in watch mode
+cd apps/xrpl-grpc-server
+bun install           # Install dependencies (if needed)
+bun run lint          # Lint with Biome
+bun run format        # Format with Biome
+bun run typecheck     # TypeScript type checking
+bun run dev           # Run dev server with hot reload
+bun run build         # Build for production
+bun run proto         # Generate protobuf code
 ```
 
 ### erc20-token (JavaScript/Solidity)
@@ -41,12 +47,18 @@ npm run build         # Compile contracts with Truffle
 npm run test-all      # Run all tests
 ```
 
+### ripple-lib-server (Deprecated - READ ONLY)
+
+This directory is **read-only**. Do not modify files here.
+Reference only for migration purposes.
+
 ## Command Summary
 
 | App | Lint | Format | Build | Test |
 |-----|------|--------|-------|------|
-| ripple-lib-server | `yarn lint` | (included in lint) | - | `yarn test` |
+| xrpl-grpc-server | `bun run lint` | `bun run format` | `bun run build` | `bun run typecheck` |
 | erc20-token | `npm run lint-js` | `npm run fmt` | `npm run build` | `npm run test-all` |
+| ripple-lib-server | - | - | - | - (read-only) |
 
 ## Code Style
 
@@ -79,12 +91,25 @@ async function fetchData(): Promise<Data> {
 2. External packages
 3. Internal modules
 
+#### xrpl-grpc-server (xrpl.js 4.5.0)
+
+```typescript
+import * as path from "path";
+
+import { Client, Wallet, xrpToDrops, dropsToXrp } from "xrpl";
+import { createConnectRouter } from "@connectrpc/connect";
+
+import { AccountService } from "./services/account";
+```
+
+#### erc20-token
+
 ```typescript
 import * as path from 'path';
 
-import { RippleAPI } from 'ripple-lib';
+import { ethers } from 'ethers';
 
-import { AccountService } from './services/account';
+import { TokenService } from './services/token';
 ```
 
 ## Auto-Generated Files
@@ -93,8 +118,9 @@ import { AccountService } from './services/account';
 
 | App | Generated Files |
 |-----|-----------------|
-| ripple-lib-server | `apps/ripple-lib-server/src/pb/` (Protocol Buffer generated) |
+| xrpl-grpc-server | `apps/xrpl-grpc-server/src/gen/` (Buf/ConnectRPC generated) |
 | erc20-token | `apps/erc20-token/build/` (Truffle build artifacts) |
+| ripple-lib-server | `apps/ripple-lib-server/src/pb/` (deprecated - entire directory is read-only) |
 
 ## Security
 
@@ -105,11 +131,12 @@ import { AccountService } from './services/account';
 
 ## Quick Checklist
 
-### ripple-lib-server
+### xrpl-grpc-server (Active)
 
-- [ ] `yarn lint` passes
-- [ ] `yarn test` passes
-- [ ] No TypeScript errors
+- [ ] `bun run lint` passes
+- [ ] `bun run format` applied
+- [ ] `bun run typecheck` passes
+- [ ] `bun run build` passes
 - [ ] No `any` types (unless documented reason)
 - [ ] Async errors properly handled
 
@@ -120,12 +147,22 @@ import { AccountService } from './services/account';
 - [ ] `npm run build` passes
 - [ ] `npm run test-all` passes
 
+### ripple-lib-server (READ-ONLY)
+
+This directory is deprecated. **Do not modify any files.**
+
 ## Related Documentation
 
-- @apps/ripple-lib-server/package.json - ripple-lib-server scripts
+- @apps/xrpl-grpc-server/README.md - xrpl-grpc-server documentation
+- @apps/xrpl-grpc-server/docs/MIGRATION-GUIDE.md - Migration guide from ripple-lib
+- @apps/xrpl-grpc-server/package.json - xrpl-grpc-server scripts
 - @apps/erc20-token/package.json - erc20-token scripts
 
 ## Related Skills
 
 - `typescript-development` - Full TypeScript workflow
 - `solidity-development` - For Solidity contracts in erc20-token
+
+## Related Rules
+
+- @.claude/rules/apps/xrp-server.md - XRP server directory rules (ripple-lib-server read-only)
