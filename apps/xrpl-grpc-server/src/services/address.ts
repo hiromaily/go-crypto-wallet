@@ -62,12 +62,16 @@ export const addressService = {
    */
   generateAddress: (): GenerateAddressResponse => {
     const wallet = Wallet.generate();
+    if (!wallet.seed) {
+      // This should not happen with Wallet.generate(), but as a safeguard
+      throw new Error('Failed to generate a wallet seed.');
+    }
 
     return {
       xAddress: wallet.getXAddress(),
       classicAddress: wallet.classicAddress,
       address: wallet.address,
-      secret: wallet.seed ?? '',
+      secret: wallet.seed,
     };
   },
 
@@ -82,10 +86,14 @@ export const addressService = {
    */
   generateXAddress: (): GenerateXAddressResponse => {
     const wallet = Wallet.generate();
+    if (!wallet.seed) {
+      // This should not happen with Wallet.generate(), but as a safeguard
+      throw new Error('Failed to generate a wallet seed.');
+    }
 
     return {
       xAddress: wallet.getXAddress(),
-      secret: wallet.seed ?? '',
+      secret: wallet.seed,
     };
   },
 
@@ -104,5 +112,3 @@ export const addressService = {
     };
   },
 };
-
-export default addressService;
