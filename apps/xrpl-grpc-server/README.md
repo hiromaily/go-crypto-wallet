@@ -20,7 +20,7 @@ This server provides gRPC endpoints for interacting with the XRP Ledger, replaci
 ## Prerequisites
 
 - [Bun](https://bun.sh/) >= 1.3.6
-- protoc >= 33.0 (for proto generation)
+- protoc >= 33.4 (for proto generation)
 - Access to XRP Ledger node (testnet by default)
 
 ## Setup
@@ -93,6 +93,7 @@ make dev
 ```
 apps/xrpl-grpc-server/
 ├── src/                # Source code
+│   ├── gen/            # Generated protobuf/connect code
 │   ├── index.ts        # Entry point
 │   ├── server.ts       # ConnectRPC server setup
 │   ├── config.ts       # Environment configuration
@@ -108,6 +109,7 @@ apps/xrpl-grpc-server/
 ├── biome.json          # Biome configuration
 ├── package.json        # Dependencies
 ├── tsconfig.json       # TypeScript configuration
+├── bun.lock            # Bun lockfile
 ├── Makefile            # Build commands
 └── README.md           # This file
 ```
