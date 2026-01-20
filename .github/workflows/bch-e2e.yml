@@ -87,7 +87,7 @@ jobs:
 
       - name: Upload E2E SQLite databases on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: bch-e2e-databases
           path: data/sqlite/bch/

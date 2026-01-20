@@ -204,7 +204,7 @@ setup_shared_infrastructure() {
 	echo ""
 }
 
-# shellcheck disable=SC2329  # Used in trap (line 374)
+# shellcheck disable=SC2329  # Used in trap (line 420)
 cleanup_shared_infrastructure() {
 	log_info ""
 	log_info "=========================================="
