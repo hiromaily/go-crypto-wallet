@@ -67,11 +67,23 @@ func (u *signTransactionUseCase) Sign(
 	ctx context.Context,
 	input signusecase.SignTransactionInput,
 ) (signusecase.SignTransactionOutput, error) {
-	// Get tx_deposit_id from tx file name
-	actionType, _, txID, signedCount, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeUnsigned)
+	// Get tx metadata from file name
+	// For BCH multisig, accept both "unsigned" and "signed" files since BCH may mark
+	// a transaction as "signed" even when it needs additional signatures for multisig
+	fileType, err := u.txFileRepo.GetFileNameType(input.FilePath)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, err
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to parse file name: %w", err)
 	}
+
+	// Validate transaction type - accept both unsigned and signed for multisig
+	if fileType.TxType != domainTx.TxTypeUnsigned && fileType.TxType != domainTx.TxTypeSigned {
+		return signusecase.SignTransactionOutput{}, fmt.Errorf(
+			"invalid txType: %s (expected unsigned or signed)", fileType.TxType)
+	}
+
+	actionType := fileType.ActionType
+	txID := fileType.TxID
+	signedCount := fileType.SignedCount
 
 	// Read partially signed TX from file (BCH format)
 	txContent, err := u.txFileRepo.ReadFile(input.FilePath)
