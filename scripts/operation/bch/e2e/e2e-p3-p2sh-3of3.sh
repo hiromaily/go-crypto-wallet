@@ -88,7 +88,7 @@ key_generation_phase() {
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		log_info "Creating HD keys for sign${i}"
 		config_var="BCH_CONFIG_SIGN${i}"
-		bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" create hdkey
+		bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" create hdkey
 	done
 
 	# Sign wallets - import private keys
@@ -97,18 +97,18 @@ key_generation_phase() {
 		log_info "Importing private keys for sign${i}"
 		config_var="BCH_CONFIG_SIGN${i}"
 		if [ "${BCH_ENCRYPTED}" = "true" ]; then
-			bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
+			bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 		fi
-		bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" import privkey
+		bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" import privkey
 		if [ "${BCH_ENCRYPTED}" = "true" ]; then
-			bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" --wallet "sign${i}" api walletlock
+			bch_sign_cmd "$i" -c "${!config_var}" --coin "${BCH_COIN}" api walletlock
 		fi
 	done
 
 	# Sign wallets - export fullpubkey
 	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(bch_sign1_cmd -c "${BCH_CONFIG_SIGN1}" --coin "${BCH_COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(bch_sign2_cmd -c "${BCH_CONFIG_SIGN2}" --coin "${BCH_COIN}" --wallet sign2 export fullpubkey)
+	file_fullpubkey_auth1=$(bch_sign1_cmd -c "${BCH_CONFIG_SIGN1}" --coin "${BCH_COIN}" export fullpubkey)
+	file_fullpubkey_auth2=$(bch_sign2_cmd -c "${BCH_CONFIG_SIGN2}" --coin "${BCH_COIN}" export fullpubkey)
 
 	# Extract file paths
 	FULLPUBKEY_FILE1="${file_fullpubkey_auth1##*\[fileName\]: }"
@@ -186,9 +186,9 @@ generate_test_utxos() {
 
 	log_info "Reading payment address from exported file..."
 	# Get first payment address from the exported CSV file
-	# CSV format: coin,account,P2PKH,P2SH-segwit,bech32,taproot,pubkey,(empty),scriptPubKey,index
-	# For BCH P2SH multisig, use field 4 (P2SH address)
-	payment_address=$(awk -F, '!/^#/ {print $4; exit}' "${ADDRESS_FILE_PAYMENT}" 2>/dev/null)
+	# CSV format: coin,account,address,p2sh_segwit,bech32,pubkey,taproot,descriptor,index
+	# For BCH P2SH multisig, use field 3 (address)
+	payment_address=$(awk -F, '!/^#/ {print $3; exit}' "${ADDRESS_FILE_PAYMENT}" 2>/dev/null)
 
 	if [ -z "$payment_address" ]; then
 		log_error "Failed to extract payment address from ${ADDRESS_FILE_PAYMENT}"
@@ -268,13 +268,13 @@ transaction_flow_phase() {
 
 	# Sign with sign1 wallet (2nd signature)
 	log_substep "Signing with sign1 wallet (2nd signature)"
-	tx_file_signed2=$(bch_sign1_cmd -c "${BCH_CONFIG_SIGN1}" --coin "${BCH_COIN}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_file_signed2=$(bch_sign1_cmd -c "${BCH_CONFIG_SIGN1}" --coin "${BCH_COIN}" sign signature --file "${tx_signed1}")
 	tx_signed2=$(bch_extract_file_path "$tx_file_signed2")
 	log_info "Signed transaction (2nd): $tx_signed2"
 
 	# Sign with sign2 wallet (3rd signature - completing 3-of-3)
 	log_substep "Signing with sign2 wallet (3rd signature - completing 3-of-3)"
-	tx_file_signed3=$(bch_sign2_cmd -c "${BCH_CONFIG_SIGN2}" --coin "${BCH_COIN}" --wallet sign2 sign signature --file "${tx_signed2}")
+	tx_file_signed3=$(bch_sign2_cmd -c "${BCH_CONFIG_SIGN2}" --coin "${BCH_COIN}" sign signature --file "${tx_signed2}")
 	tx_signed3=$(bch_extract_file_path "$tx_file_signed3")
 	log_info "Signed transaction (3rd): $tx_signed3"
 

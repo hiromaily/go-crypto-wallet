@@ -31,7 +31,6 @@ func NewAuthAccountKeyRepositorySqlc(
 	}
 }
 
-
 // GetOne returns one record by authType
 // Note: Uses raw SQL with COALESCE to handle NULL values in BCH (no SegWit support)
 func (r *AuthAccountKeyRepositorySqlc) GetOne(

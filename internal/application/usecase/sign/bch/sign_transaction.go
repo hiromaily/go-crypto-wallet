@@ -117,9 +117,14 @@ func (u *signTransactionUseCase) Sign(
 	}
 
 	var generatedFileName string
-	if isSigned {
+	// For multisig transactions, always include prevTx metadata for subsequent signers,
+	// even if BCH incorrectly reports isSigned=true for partial signatures
+	isMultisig := u.multisigAccount != nil
+	if isSigned && !isMultisig {
+		// For fully signed single-sig transactions, just write the hex
 		generatedFileName, err = u.txFileRepo.WriteFile(path, signedHex)
 	} else {
+		// For partially signed or multisig, include prevTx metadata for next signer
 		content := u.formatSignedTxContent(signedHex, prevTxs)
 		generatedFileName, err = u.txFileRepo.WriteFile(path, content)
 	}
