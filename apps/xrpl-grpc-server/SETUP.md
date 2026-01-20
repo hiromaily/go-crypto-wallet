@@ -2,40 +2,30 @@
 
 ## Prerequisites
 
-1. **Bun** >= 1.3.6
+Install required tools via Makefile (from repository root):
 
-   ```bash
-   # Install Bun
-   curl -fsSL https://bun.sh/install | bash
+```bash
+# Install Bun (if not installed)
+make install-bun
 
-   # Verify version
-   bun --version
-   ```
+# Install protoc and other tools (macOS)
+make install-mac-tools
 
-2. **protoc** >= 33.0
-
-   ```bash
-   # Check protoc version
-   protoc --version
-
-   # Install protoc if needed
-   # See https://grpc.io/docs/protoc-installation/
-   ```
+# Verify protoc version (>= 33.0 required)
+make check-protoc
+```
 
 ## Installation Steps
 
 1. **Install dependencies**
 
    ```bash
-   cd apps/xrpl-grpc-server
-   bun install
+   make install-xrpl-deps
    ```
 
 2. **Generate TypeScript proto files**
 
    ```bash
-   bun run proto
-   # Or from repository root:
    make proto-ts
    ```
 
@@ -85,22 +75,18 @@ src/gen/
 
 ### protoc version too old
 
-If you see "Edition 2024 requires protoc >= 33.0":
-
 ```bash
-# Check your protoc version
-protoc --version
+# Check protoc version
+make check-protoc
 
-# Upgrade protoc - see https://grpc.io/docs/protoc-installation/
+# Upgrade protoc (macOS)
+brew upgrade protobuf
 ```
 
 ### Missing protoc-gen-* executables
 
-Install dependencies via bun:
-
 ```bash
-cd apps/xrpl-grpc-server
-bun install
+make install-xrpl-deps
 ```
 
 ## Technical Notes

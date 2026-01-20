@@ -27,6 +27,31 @@ install-mac-tools:
 install-bun:
 	curl -fsSL https://bun.sh/install | bash
 
+#------------------------------------------------------------------------------
+# xrpl-grpc-server dependencies
+#------------------------------------------------------------------------------
+
+# Install all xrpl-grpc-server dependencies
+.PHONY: install-xrpl-deps
+install-xrpl-deps:
+	cd apps/xrpl-grpc-server && bun install
+
+# Check protoc version (required >= 33.0 for Edition 2024)
+.PHONY: check-protoc
+check-protoc:
+	@command -v protoc >/dev/null 2>&1 || { \
+		echo "Error: protoc is not installed"; \
+		echo "Install via: make install-mac-tools (macOS) or see https://grpc.io/docs/protoc-installation/"; \
+		exit 1; \
+	}
+	@PROTOC_VERSION=$$(protoc --version | sed 's/libprotoc //'); \
+	if [ "$$(printf '%s\n' '33' "$$PROTOC_VERSION" | sort -V | head -n 1)" != "33" ]; then \
+		echo "Error: protoc version $$PROTOC_VERSION is too old. Required: >= 33.0"; \
+		echo "Upgrade via: brew upgrade protobuf (macOS)"; \
+		exit 1; \
+	fi; \
+	echo "protoc version OK: $$PROTOC_VERSION"
+
 .PHONY: install-ssl
 install-ssl:
 	mkcert -install
