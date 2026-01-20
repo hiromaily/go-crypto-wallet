@@ -16,29 +16,29 @@ build:
 # Lint code with Biome
 .PHONY: lint
 lint:
-	bun run biome check .
+	bun run lint
 
 # Fix lint issues
 .PHONY: lint-fix
 lint-fix:
-	bun run biome check --write .
+	bun run lint:fix
 
 # Format code with Biome
 .PHONY: format
 format:
-	bun run biome format --write .
+	bun run format
 
 # TypeScript type checking
 .PHONY: typecheck
 typecheck:
-	bun run tsc --noEmit
+	bun run typecheck
 
-# Generate proto files
+# Generate proto files (TypeScript only via root Makefile)
 .PHONY: proto
 proto:
-	bun run buf generate ../../proto/rippleapi
+	bun run proto
 
 # Clean build artifacts
 .PHONY: clean
 clean:
-	rm -rf dist node_modules
+	rm -rf dist node_modules src/gen
