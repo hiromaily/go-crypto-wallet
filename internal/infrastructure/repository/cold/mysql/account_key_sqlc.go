@@ -33,6 +33,11 @@ func NewBTCAccountKeyRepositorySqlc(
 
 // convertGetOneBtcAccountKeyByMaxIDRow converts row to domain.BtcAccountKey entity.
 func convertGetOneBtcAccountKeyByMaxIDRow(row *sqlcgen.GetOneBtcAccountKeyByMaxIDRow) (*domainBitcoin.BTCAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(row.AddrStatus)
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
 	key := &domainBitcoin.BTCAccountKey{
 		ID:                 row.ID,
 		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
@@ -46,7 +51,7 @@ func convertGetOneBtcAccountKeyByMaxIDRow(row *sqlcgen.GetOneBtcAccountKeyByMaxI
 		RedeemScript:       row.RedeemScript,
 		WalletImportFormat: row.WalletImportFormat,
 		Idx:                row.Idx,
-		AddrStatus:         domainAddress.AddrStatus(row.AddrStatus),
+		AddrStatus:         addrStatus,
 	}
 
 	if row.TaprootAddress.Valid {
@@ -64,6 +69,11 @@ func convertGetOneBtcAccountKeyByMaxIDRow(row *sqlcgen.GetOneBtcAccountKeyByMaxI
 
 // convertGetBtcAccountKeysByAddrStatusRow converts row to domain.BtcAccountKey entity.
 func convertGetBtcAccountKeysByAddrStatusRow(row *sqlcgen.GetBtcAccountKeysByAddrStatusRow) (*domainBitcoin.BTCAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(row.AddrStatus)
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
 	key := &domainBitcoin.BTCAccountKey{
 		ID:                 row.ID,
 		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
@@ -77,7 +87,7 @@ func convertGetBtcAccountKeysByAddrStatusRow(row *sqlcgen.GetBtcAccountKeysByAdd
 		RedeemScript:       row.RedeemScript,
 		WalletImportFormat: row.WalletImportFormat,
 		Idx:                row.Idx,
-		AddrStatus:         domainAddress.AddrStatus(row.AddrStatus),
+		AddrStatus:         addrStatus,
 	}
 
 	if row.TaprootAddress.Valid {
@@ -95,6 +105,11 @@ func convertGetBtcAccountKeysByAddrStatusRow(row *sqlcgen.GetBtcAccountKeysByAdd
 
 // convertGetBtcAccountKeysByMultisigAddressesRow converts row to domain.BtcAccountKey entity.
 func convertGetBtcAccountKeysByMultisigAddressesRow(row *sqlcgen.GetBtcAccountKeysByMultisigAddressesRow) (*domainBitcoin.BTCAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(row.AddrStatus)
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
 	key := &domainBitcoin.BTCAccountKey{
 		ID:                 row.ID,
 		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
@@ -108,7 +123,7 @@ func convertGetBtcAccountKeysByMultisigAddressesRow(row *sqlcgen.GetBtcAccountKe
 		RedeemScript:       row.RedeemScript,
 		WalletImportFormat: row.WalletImportFormat,
 		Idx:                row.Idx,
-		AddrStatus:         domainAddress.AddrStatus(row.AddrStatus),
+		AddrStatus:         addrStatus,
 	}
 
 	if row.TaprootAddress.Valid {

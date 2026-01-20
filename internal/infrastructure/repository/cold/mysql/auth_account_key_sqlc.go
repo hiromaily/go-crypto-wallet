@@ -31,6 +31,11 @@ func NewAuthAccountKeyRepositorySqlc(
 
 // convertGetAuthAccountKeyRow converts sqlcgen.GetAuthAccountKeyRow to domain.AuthAccountKey entity.
 func convertGetAuthAccountKeyRow(row *sqlcgen.GetAuthAccountKeyRow) (*domainAuth.AuthAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(row.AddrStatus)
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
 	key := &domainAuth.AuthAccountKey{
 		ID:                 row.ID,
 		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
@@ -45,7 +50,7 @@ func convertGetAuthAccountKeyRow(row *sqlcgen.GetAuthAccountKeyRow) (*domainAuth
 		RedeemScript:       row.RedeemScript,
 		WalletImportFormat: row.WalletImportFormat,
 		Idx:                row.Idx,
-		AddrStatus:         domainAddress.AddrStatus(row.AddrStatus),
+		AddrStatus:         addrStatus,
 	}
 
 	if row.TaprootAddress.Valid {
@@ -63,6 +68,11 @@ func convertGetAuthAccountKeyRow(row *sqlcgen.GetAuthAccountKeyRow) (*domainAuth
 
 // convertGetAuthAccountKeyByAccountRow converts sqlcgen.GetAuthAccountKeyByAccountRow to domain.AuthAccountKey entity.
 func convertGetAuthAccountKeyByAccountRow(row *sqlcgen.GetAuthAccountKeyByAccountRow) (*domainAuth.AuthAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(row.AddrStatus)
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
 	key := &domainAuth.AuthAccountKey{
 		ID:                 row.ID,
 		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
@@ -77,7 +87,7 @@ func convertGetAuthAccountKeyByAccountRow(row *sqlcgen.GetAuthAccountKeyByAccoun
 		RedeemScript:       row.RedeemScript,
 		WalletImportFormat: row.WalletImportFormat,
 		Idx:                row.Idx,
-		AddrStatus:         domainAddress.AddrStatus(row.AddrStatus),
+		AddrStatus:         addrStatus,
 	}
 
 	if row.TaprootAddress.Valid {
