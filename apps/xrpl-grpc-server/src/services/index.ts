@@ -5,6 +5,15 @@
  */
 
 export {
+  AccountInfoError,
+  AccountNotFoundError,
+  accountService,
+  createAccountService,
+  type GetAccountInfoRequest,
+  type GetAccountInfoResponse,
+} from './account';
+
+export {
   addressService,
   type GenerateAddressResponse,
   type GenerateXAddressResponse,
