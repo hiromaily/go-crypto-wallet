@@ -13,7 +13,7 @@ For detailed rules, format commands, and verification commands, see the correspo
 | Shell | [.claude/rules/shell-script.md](../../.claude/rules/shell-script.md) | `make shfmt`, `shellcheck` |
 | SQL | [.claude/rules/sql.md](../../.claude/rules/sql.md) | `make sqlc-validate`, `make sqlc` |
 | HCL | [.claude/rules/hcl.md](../../.claude/rules/hcl.md) | `make atlas-fmt`, `make atlas-lint` |
-| Proto | [.claude/rules/proto.md](../../.claude/rules/proto.md) | `make lint-proto`, `make protoc-go` |
+| Proto | [.claude/rules/proto.md](../../.claude/rules/proto.md) | `make proto-fmt`, `make proto` |
 | YAML | [.claude/rules/yaml.md](../../.claude/rules/yaml.md) | `make yaml-lint` |
 
 ## Quick Verification Reference

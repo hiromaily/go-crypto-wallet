@@ -8,6 +8,10 @@ modules:
   - path: proto/rippleapi
     name: buf.build/hiromaily/go-crypto-wallet-rippleapi
 
+# Dependencies from Buf Schema Registry
+deps:
+  - buf.build/googleapis/googleapis
+
 # Lint configuration
 # Using BASIC ruleset to maintain backward compatibility with existing API structure
 # Specific rules are disabled to avoid breaking changes to the existing API

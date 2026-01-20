@@ -23,11 +23,13 @@ Generate TypeScript code from proto files:
 
 ```bash
 bun run proto
+# Or from repository root:
+make proto-ts
 ```
 
-This generates TypeScript types and Connect-ES service clients from the proto definitions in `../../proto/rippleapi/`.
+This generates TypeScript types and Connect-ES service clients from the proto definitions in `proto/rippleapi/`.
 
-⚠️ **Important**: This **currently does not work** due to buf CLI not supporting Protobuf Edition 2024 yet. The proto files use `edition = "2024"` (see `../../docs/proto.md`). Code generation will work once buf CLI >= 1.64.0 is released. See [SETUP.md](SETUP.md) for full details.
+**Note**: Code generation uses `protoc` (>= 33.0) because buf CLI does not yet support Protobuf Edition 2024. See [SETUP.md](SETUP.md) for details.
 
 ## Development
 

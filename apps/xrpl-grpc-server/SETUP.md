@@ -11,17 +11,19 @@
    bun --version
    ```
 
-2. **Buf CLI** >= 1.64.0 (NOT YET AVAILABLE)
+2. **protoc** >= 33.0 (for Edition 2024 support)
    ```bash
-   # Check if buf is installed
-   buf --version
+   # Check protoc version
+   protoc --version
 
-   # Install buf if needed
-   # See https://buf.build/docs/installation
+   # Install protoc if needed
+   # See https://grpc.io/docs/protoc-installation/
    ```
 
-   ⚠️ **Important**: Buf CLI v1.63.0 does NOT support Protobuf Edition 2024.
-   Code generation will NOT work until buf >= 1.64.0 is released.
+3. **Buf CLI** >= 1.64.0 (optional, for future use)
+
+   ⚠️ **Note**: Buf CLI v1.63.0 does NOT support Protobuf Edition 2024.
+   Currently, `protoc` is used for code generation via `make proto-ts`.
 
 ## Installation Steps
 
@@ -34,10 +36,12 @@
 2. **Generate TypeScript proto files**
    ```bash
    bun run proto
+   # Or from repository root:
+   make proto-ts
    ```
 
    This will:
-   - Use buf to read proto files from `../../proto/rippleapi/`
+   - Use protoc (>= 33.0) to read proto files from `proto/rippleapi/`
    - Generate TypeScript files in `src/gen/`
    - Use @bufbuild/protoc-gen-es for protobuf messages
    - Use @connectrpc/protoc-gen-connect-es for gRPC services
@@ -55,8 +59,9 @@
 
 | File | Purpose |
 |------|---------|
-| `buf.yaml` | Buf module configuration with googleapis dependency |
-| `buf.gen.yaml` | Code generation configuration for TypeScript |
+| `../../make/codegen.mk` | Makefile targets for proto generation (`proto-ts`) |
+| `../../buf.yaml` | Buf module configuration (for future buf CLI use) |
+| `../../buf.gen.yaml` | Buf code generation config (for future buf CLI use) |
 | `package.json` | Dependencies and scripts |
 | `tsconfig.json` | TypeScript compiler options |
 | `biome.json` | Linting and formatting rules |
@@ -80,29 +85,25 @@ src/gen/
 
 ## Known Issues
 
-### Protobuf Edition 2024 - Buf CLI Not Usable
-
-⚠️ **CRITICAL**: Buf CLI **CANNOT** currently be used for code generation due to Protobuf Edition 2024.
+### Protobuf Edition 2024 - Using protoc Instead of Buf
 
 **The proto files in this project use `edition = "2024"`** (upgraded in PR #469, issue #409).
 
 **Current Tool Support Status:**
-- ✅ **protoc >= 33.0**: Full Edition 2024 support (used for Go code generation via `make proto`)
+- ✅ **protoc >= 33.0**: Full Edition 2024 support (used for code generation via `make proto` and `make proto-ts`)
 - ❌ **buf CLI v1.63.0**: Does NOT support Edition 2024 (support expected in v1.64.0+)
-- ❓ **TypeScript plugins**: Unknown - will be tested once buf CLI adds support
 
-**Impact:**
+**Current Approach:**
+- TypeScript code generation uses `protoc` via `make proto-ts`
+- Go code generation uses `protoc` via `make proto`
+- Buf CLI configuration files (`buf.yaml`, `buf.gen.yaml`) are kept for future use
+
+**Buf CLI Commands (will fail until buf >= 1.64.0):**
 ```bash
-bun run proto    # WILL FAIL with: "edition 2024 not yet fully supported"
 buf generate     # WILL FAIL with: "edition 2024 not yet fully supported"
 buf lint         # WILL FAIL
 buf format       # WILL FAIL
 ```
-
-**What This Means:**
-- The configuration in this directory (`buf.yaml`, `buf.gen.yaml`) is **correct and future-proof**
-- Code generation **will work** once buf CLI >= 1.64.0 is released
-- This is a **temporary limitation** of the buf CLI tool, not our configuration
 
 **For More Information:**
 - See `../../docs/proto.md` - Comprehensive Edition 2024 documentation
@@ -111,22 +112,21 @@ buf format       # WILL FAIL
 
 ## Troubleshooting
 
-### buf generate fails with edition error
+### protoc version too old
 
-**Expected behavior**: This is a known limitation. The configuration is correct and will work once:
-1. buf CLI >= 1.64.0 is released with Edition 2024 support
-2. Dependencies are updated with `bun install`
+If you see "Edition 2024 requires protoc >= 33.0":
+```bash
+# Check your protoc version
+protoc --version
 
-**Current workaround**: N/A - wait for buf CLI update
-
-**Do not**:
-- Downgrade proto files to edition 2023 (breaks compatibility with Go code)
-- Modify feature flags in proto files
+# Upgrade protoc - see https://grpc.io/docs/protoc-installation/
+```
 
 ### Missing protoc-gen-* executables
 
-The buf.gen.yaml uses local plugins (`local: protoc-gen-es`). These must be installed via npm/bun:
+The `make proto-ts` target requires local plugins. Install them via bun:
 ```bash
+cd apps/xrpl-grpc-server
 bun install
 ```
 
@@ -134,7 +134,13 @@ This installs:
 - `@bufbuild/protoc-gen-es` → creates `node_modules/.bin/protoc-gen-es`
 - `@connectrpc/protoc-gen-connect-es` → creates `node_modules/.bin/protoc-gen-connect-es`
 
-Buf will look for these in your PATH or node_modules/.bin/.
+### buf generate fails with edition error
+
+This is expected. Use `make proto-ts` instead of `buf generate` until buf CLI >= 1.64.0 is released.
+
+**Do not**:
+- Downgrade proto files to edition 2023 (breaks compatibility with Go code)
+- Modify feature flags in proto files
 
 ## Next Steps
 

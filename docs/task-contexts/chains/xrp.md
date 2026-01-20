@@ -165,7 +165,9 @@ service TransactionService {
 
 ```bash
 # protobuf/gRPCコード生成
-make proto-gen
+make proto      # Go
+make proto-ts   # TypeScript
+make proto-all  # 両方
 ```
 
 ## Implementation Patterns
@@ -270,7 +272,7 @@ apps/ripple-lib-server/
 3. **Drops変換**: 金額操作時はDrops単位で計算
 4. **アカウントリザーブ**: 新規アカウントには10XRP以上の初期送金が必要
 5. **Destination Tag**: 取引所への送金時は必須の場合が多い
-6. **Proto更新**: `.proto` ファイルを変更した場合は `make proto-gen` でコード再生成
+6. **Proto更新**: `.proto` ファイルを変更した場合は `make proto-all` でコード再生成
 
 ## Comparison with Other Chains
 

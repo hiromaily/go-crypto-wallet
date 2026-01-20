@@ -23,6 +23,10 @@ install-mac-tools:
 		shellcheck \
 		clang-format
 
+.PHONY: install-bun
+install-bun:
+	curl -fsSL https://bun.sh/install | bash
+
 .PHONY: install-ssl
 install-ssl:
 	mkcert -install
