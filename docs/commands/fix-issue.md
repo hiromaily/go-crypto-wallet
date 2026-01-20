@@ -14,7 +14,7 @@ gh issue view {issue_number}
 
 # 2. Create branch
 git fetch origin && git checkout main && git reset --hard origin/main
-git checkout -b fix/issue-{number}-{description}
+git checkout -b fix/{brief-description}-{issue-number}
 
 # 3. Implement fix (follow Clean Architecture)
 

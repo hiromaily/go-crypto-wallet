@@ -1,84 +1,84 @@
 # Cursor Rules
 
-> **Note**: このディレクトリのルールは `.claude/rules/` から自動生成されます。
-> 直接編集せず、ソースを編集後 `make sync-cursor-rules` を実行してください。
+> **Note**: Rules in this directory are auto-generated from `.claude/rules/`.
+> Do not edit directly. Edit the source and run `make sync-cursor-rules`.
 
-## 概要
+## Overview
 
-Cursor Rules は AI Agent に対するシステムレベルの指示を提供します。
-ルールの内容はモデルコンテキストの先頭に含まれ、コード生成や編集に一貫したガイダンスを与えます。
+Cursor Rules provide system-level instructions to AI Agents.
+Rule contents are included at the beginning of the model context, providing consistent guidance for code generation and editing.
 
-## ルールタイプ
+## Rule Types
 
-| タイプ | frontmatter | 説明 |
-|--------|-------------|------|
-| **Always Apply** | `alwaysApply: true` | すべてのチャットセッションに適用 |
-| **Apply Intelligently** | `alwaysApply: false` + `description` | Agent が関連性を判断して適用 |
-| **Apply to Specific Files** | `globs: ["pattern"]` | ファイルパターンにマッチした場合に適用 |
-| **Apply Manually** | (description のみ) | `@rule-name` でメンション時に適用 |
+| Type | frontmatter | Description |
+|------|-------------|-------------|
+| **Always Apply** | `alwaysApply: true` | Applied to all chat sessions |
+| **Apply Intelligently** | `alwaysApply: false` + `description` | Agent determines relevance and applies |
+| **Apply to Specific Files** | `globs: ["pattern"]` | Applied when file pattern matches |
+| **Apply Manually** | (description only) | Applied when mentioned with `@rule-name` |
 
-## ファイル形式
+## File Format
 
-### RULE.md 形式 (推奨)
+### RULE.md Format (Recommended)
 
-\`\`\`
+```
 .cursor/rules/
   my-rule/
-    RULE.md           # メインルールファイル
-    scripts/          # ヘルパースクリプト (オプション)
-\`\`\`
+    RULE.md           # Main rule file
+    scripts/          # Helper scripts (optional)
+```
 
-### .mdc 形式 (レガシー、引き続きサポート)
+### .mdc Format (Legacy, still supported)
 
-\`\`\`yaml
+```yaml
 ---
-description: ルールの説明
+description: Rule description
 globs:
   - "**/*.go"
   - "**/*.ts"
 alwaysApply: false
 ---
 
-# ルール本文
+# Rule body
 ...
-\`\`\`
+```
 
-## frontmatter プロパティ
+## frontmatter Properties
 
-| プロパティ | 型 | 説明 |
-|-----------|------|------|
-| `description` | string | ルールの説明（Apply Intelligently 時に必須） |
-| `globs` | string[] | 適用対象のファイルパターン |
-| `alwaysApply` | boolean | `true`: 常に適用、`false`: 条件付き適用 |
+| Property | Type | Description |
+|----------|------|-------------|
+| `description` | string | Rule description (required for Apply Intelligently) |
+| `globs` | string[] | File patterns to apply to |
+| `alwaysApply` | boolean | `true`: always apply, `false`: conditional apply |
 
-## このプロジェクトでの使い方
+## Usage in This Project
 
 ### SSOT (Single Source of Truth)
 
-- **ソース**: `.claude/rules/*.md`
-- **生成先**: `.cursor/rules/*.mdc`
-- **変換コマンド**: `make sync-cursor-rules`
+- **Source**: `.claude/rules/*.md`
+- **Output**: `.cursor/rules/*.mdc`
+- **Conversion command**: `make sync-cursor-rules`
 
-### 変換ルール
+### Conversion Rules
 
-| Claude (`paths:`) | Cursor 出力 |
-|-------------------|-------------|
-| なし | `alwaysApply: true` |
-| あり | `globs: ...` + `alwaysApply: false` |
-| 最初の `# 見出し` | `description: ...` |
-| `.md` 拡張子 | `.mdc` 拡張子 |
+| Claude (`paths:`) | Cursor output |
+|-------------------|---------------|
+| None | `alwaysApply: true` |
+| Present | `globs: ...` + `alwaysApply: false` |
+| First `# heading` | `description: ...` |
+| `.md` extension | `.mdc` extension |
 
-### 同期コマンド
+### Sync Commands
 
-\`\`\`bash
-# dry-run で確認
+```bash
+# Verify with dry-run
 make sync-cursor-rules-dry
 
-# 実際に変換（既存ファイルを上書き）
+# Actually convert (overwrites existing files)
 make sync-cursor-rules
-\`\`\`
+```
 
-## 参考
+## References
 
 - [Cursor Rules Documentation](https://cursor.com/docs/context/rules)
-- [AGENTS.md](AGENTS.md) - プロジェクト全体のガイドライン
+- [AGENTS.md](AGENTS.md) - Project-wide guidelines

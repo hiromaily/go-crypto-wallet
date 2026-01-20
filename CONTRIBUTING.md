@@ -6,7 +6,7 @@ Thank you for your interest in contributing to go-crypto-wallet!
 
 1. Fork the repository
 2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/go-crypto-wallet.git`
-3. Create a feature branch: `git checkout -b feature/issue-123-description`
+3. Create a feature branch: `git checkout -b feature/add-description-123`
 4. Make your changes
 5. Run verification commands
 6. Commit with conventional commit message
@@ -132,13 +132,15 @@ Your commit message: <your-invalid-commit-message>
 
 ## Branch Naming
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Feature | `feature/issue-{number}-{desc}` | `feature/issue-123-add-taproot` |
-| Bug fix | `fix/issue-{number}-{desc}` | `fix/issue-456-fee-calculation` |
-| Refactor | `refactor/issue-{number}-{desc}` | `refactor/issue-789-clean-arch` |
-| Docs | `docs/issue-{number}-{desc}` | `docs/issue-101-update-readme` |
-| CI/CD | `ci/issue-{number}-{desc}` | `ci/issue-200-add-workflow` |
+**Format**: `{type}/{brief-description}-{issue-number}`
+
+| Type | Prefix | Example |
+|------|--------|---------|
+| Feature | `feature/` | `feature/add-taproot-support-123` |
+| Bug fix | `fix/` | `fix/fee-calculation-error-456` |
+| Refactor | `refactor/` | `refactor/clean-arch-layer-789` |
+| Docs | `docs/` | `docs/update-readme-101` |
+| CI/CD | `ci/` | `ci/add-workflow-200` |
 
 ## Pull Request Guidelines
 
