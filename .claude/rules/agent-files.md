@@ -110,8 +110,10 @@ Auto-generated from Claude rules. Conversion rules:
 **Sync Command:**
 
 ```bash
-./scripts/ai-agent/sync-rule-claude-to-cursor.sh --force --verbose
+make sync-cursor-rules
 ```
+
+> **IMPORTANT**: After modifying any files in `.claude/rules/`, you MUST run `make sync-cursor-rules` to synchronize with `.cursor/rules/`. This ensures both Claude Code and Cursor use the same rules.
 
 ## Model Context Protocol (MCP) / Skills
 
@@ -131,7 +133,7 @@ When editing `.claude/` or `.cursor/`:
 
 - [ ] Make changes to `.claude/` (SSOT)
 - [ ] Do NOT edit `.cursor/rules/` directly
-- [ ] Run sync script after adding new rules
+- [ ] **Run `make sync-cursor-rules` after modifying `.claude/rules/`** (Required)
 - [ ] Check if README.md needs updating
 
 ## Related Documents
