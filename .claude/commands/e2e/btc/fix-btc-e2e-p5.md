@@ -42,5 +42,5 @@ make btc-e2e-cleanup P=5
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/btc-e2e-p5`
+- **Branch**: `fix/btc-e2e-p5-{issue_number}`
 - **Commit**: `fix(btc): ...`

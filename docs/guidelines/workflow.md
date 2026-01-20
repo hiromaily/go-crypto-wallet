@@ -152,9 +152,9 @@ Closes #[issue_number]
 
 Format: `{type}/{brief-description}-{issue-number}`
 
-- `feature/{brief-description}-{number}` - For new features
-- `fix/{brief-description}-{number}` - For bug fixes
-- `refactor/{brief-description}-{number}` - For refactoring
+- `feature/{brief-description}-{issue-number}` - For new features
+- `fix/{brief-description}-{issue-number}` - For bug fixes
+- `refactor/{brief-description}-{issue-number}` - For refactoring
 
 See [docs/standards/workflow.md](../standards/workflow.md) for the complete branch naming convention.
 

@@ -53,5 +53,5 @@ jq '.[0].desc' data/descriptor/btc/payment_descriptors.json
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/btc-e2e-p3`
+- **Branch**: `fix/btc-e2e-p3-{issue_number}`
 - **Commit**: `fix(btc): ...`

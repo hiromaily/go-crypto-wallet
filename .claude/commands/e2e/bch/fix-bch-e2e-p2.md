@@ -60,5 +60,5 @@ Watch (broadcast)
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/bch-e2e-p2`
+- **Branch**: `fix/bch-e2e-p2-{issue_number}`
 - **Commit**: `fix(bch): ...`

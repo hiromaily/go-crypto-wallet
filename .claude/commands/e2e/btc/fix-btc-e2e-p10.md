@@ -64,5 +64,5 @@ Verify all partial signatures are valid before aggregation.
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/btc-e2e-p10`
+- **Branch**: `fix/btc-e2e-p10-{issue_number}`
 - **Commit**: `fix(btc): ...`
