@@ -445,13 +445,14 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
     combineTransaction: async (
       request: CombineTransactionRequest,
     ): Promise<CombineTransactionResponse> => {
-      try {
-        if (request.signedTransactions.length < 2) {
-          throw new CombineTransactionError(
-            'At least 2 signed transactions are required for multi-signature',
-          );
-        }
+      // Validate input before calling external library
+      if (request.signedTransactions.length < 2) {
+        throw new CombineTransactionError(
+          'At least 2 signed transactions are required for multi-signature',
+        );
+      }
 
+      try {
         const combined = multisign(request.signedTransactions);
 
         return {
@@ -459,9 +460,6 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
           txId: '', // The txId changes after combining, caller should compute if needed
         };
       } catch (error) {
-        if (error instanceof CombineTransactionError) {
-          throw error;
-        }
         if (error instanceof Error) {
           throw new CombineTransactionError(`Failed to combine transactions: ${error.message}`);
         }
