@@ -8,7 +8,8 @@ This server provides gRPC endpoints for interacting with the XRP Ledger, replaci
 
 ## Prerequisites
 
-- [Bun](https://bun.sh/) >= 1.0.0
+- [Bun](https://bun.sh/) >= 1.3.6
+- Buf CLI >= 1.64.0 (not yet available - see [SETUP.md](SETUP.md) for details)
 
 ## Installation
 
@@ -26,7 +27,7 @@ bun run proto
 
 This generates TypeScript types and Connect-ES service clients from the proto definitions in `../../proto/rippleapi/`.
 
-**Note**: This requires buf CLI >= 1.64.0 with Edition 2024 support. See [SETUP.md](SETUP.md) for details.
+⚠️ **Important**: This **currently does not work** due to buf CLI not supporting Protobuf Edition 2024 yet. The proto files use `edition = "2024"` (see `../../docs/proto.md`). Code generation will work once buf CLI >= 1.64.0 is released. See [SETUP.md](SETUP.md) for full details.
 
 ## Development
 

@@ -2,13 +2,16 @@
 
 ## Prerequisites
 
-1. **Bun** >= 1.0.0
+1. **Bun** >= 1.3.6
    ```bash
    # Install Bun
    curl -fsSL https://bun.sh/install | bash
+
+   # Verify version
+   bun --version
    ```
 
-2. **Buf CLI** >= 1.63.0
+2. **Buf CLI** >= 1.64.0 (NOT YET AVAILABLE)
    ```bash
    # Check if buf is installed
    buf --version
@@ -16,6 +19,9 @@
    # Install buf if needed
    # See https://buf.build/docs/installation
    ```
+
+   ⚠️ **Important**: Buf CLI v1.63.0 does NOT support Protobuf Edition 2024.
+   Code generation will NOT work until buf >= 1.64.0 is released.
 
 ## Installation Steps
 
@@ -74,28 +80,34 @@ src/gen/
 
 ## Known Issues
 
-### Protobuf Edition 2024 Support
+### Protobuf Edition 2024 - Buf CLI Not Usable
 
-⚠️ **Important**: The proto files use `edition = "2024"` which is not yet fully supported by buf CLI v1.63.0.
+⚠️ **CRITICAL**: Buf CLI **CANNOT** currently be used for code generation due to Protobuf Edition 2024.
 
-**Status as of January 2026:**
-- ✅ protoc >= 33.0 fully supports Edition 2024 (used for Go code generation)
-- ❌ buf CLI v1.63.0 does NOT support Edition 2024 (expected in v1.64.0+)
-- ❓ TypeScript plugins (@bufbuild/protoc-gen-es, @connectrpc/protoc-gen-connect-es) support status unknown
+**The proto files in this project use `edition = "2024"`** (upgraded in PR #469, issue #409).
+
+**Current Tool Support Status:**
+- ✅ **protoc >= 33.0**: Full Edition 2024 support (used for Go code generation via `make proto`)
+- ❌ **buf CLI v1.63.0**: Does NOT support Edition 2024 (support expected in v1.64.0+)
+- ❓ **TypeScript plugins**: Unknown - will be tested once buf CLI adds support
 
 **Impact:**
-Running `bun run proto` will currently fail with:
-```
-edition "2024" not yet fully supported; latest supported edition "2023"
+```bash
+bun run proto    # WILL FAIL with: "edition 2024 not yet fully supported"
+buf generate     # WILL FAIL with: "edition 2024 not yet fully supported"
+buf lint         # WILL FAIL
+buf format       # WILL FAIL
 ```
 
-**Resolution:**
-This configuration is future-proof and ready for when buf CLI >= 1.64.0 is released with Edition 2024 support.
+**What This Means:**
+- The configuration in this directory (`buf.yaml`, `buf.gen.yaml`) is **correct and future-proof**
+- Code generation **will work** once buf CLI >= 1.64.0 is released
+- This is a **temporary limitation** of the buf CLI tool, not our configuration
 
-For reference, see:
-- Issue #409: Protobuf Edition 2024 upgrade
-- PR #469: Implementation details
-- `docs/proto.md`: Comprehensive protobuf documentation
+**For More Information:**
+- See `../../docs/proto.md` - Comprehensive Edition 2024 documentation
+- See `../../make/codegen.mk` - Proto generation targets and version checks
+- See PR #469 - Edition 2024 migration implementation
 
 ## Troubleshooting
 
