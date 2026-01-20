@@ -6,75 +6,131 @@ Modern XRP Ledger gRPC server built with Bun runtime.
 
 This server provides gRPC endpoints for interacting with the XRP Ledger, replacing the older `ripple-lib-server` implementation with modern tooling.
 
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Runtime | [Bun](https://bun.sh/) >= 1.3.6 |
+| Language | TypeScript 5.9.3 |
+| XRP Library | xrpl.js 4.5.0 |
+| gRPC Framework | [ConnectRPC](https://connectrpc.com/) (@connectrpc/connect) |
+| Protobuf | @bufbuild/protobuf |
+| Linter/Formatter | [Biome](https://biomejs.dev/) |
+
 ## Prerequisites
 
 - [Bun](https://bun.sh/) >= 1.3.6
-- Buf CLI >= 1.64.0 (not yet available - see [SETUP.md](SETUP.md) for details)
+- protoc >= 33.4 (for proto generation)
+- Access to XRP Ledger node (testnet by default)
 
-## Installation
+## Setup
+
+### Install dependencies
 
 ```bash
 bun install
 ```
 
-## Code Generation
-
-Generate TypeScript code from proto files:
+### Generate proto files
 
 ```bash
-bun run proto
-# Or from repository root:
-make proto-ts
+make proto
 ```
 
-This generates TypeScript types and Connect-ES service clients from the proto definitions in `proto/rippleapi/`.
-
-**Note**: Code generation uses `protoc` (>= 33.0) because buf CLI does not yet support Protobuf Edition 2024. See [SETUP.md](SETUP.md) for details.
-
-## Development
+### Start development server
 
 ```bash
-# Start server in development mode with hot reload
-bun run dev
-
-# Run type checking
-bun run typecheck
-
-# Run linter
-bun run lint
-
-# Fix linting issues
-bun run lint:fix
-
-# Format code
-bun run format
+make dev
 ```
 
-## Production
+## Environment Variables
 
-```bash
-bun run start
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GRPC_PORT` | `50051` | gRPC server port |
+| `GRPC_HOST` | `0.0.0.0` | gRPC server host |
+| `XRP_WS_URL` | - | Direct WebSocket URL (overrides XRP_NETWORK) |
+| `XRP_NETWORK` | `testnet` | Network selection: `mainnet`, `testnet`, `devnet` |
+| `XRP_CONNECTION_TIMEOUT` | `20000` | Connection timeout in milliseconds |
+| `XRP_MAX_RECONNECT_ATTEMPTS` | `5` | Maximum reconnection attempts |
+| `XRP_RECONNECT_DELAY` | `1000` | Delay between reconnection attempts (ms) |
 
-## Technology Stack
+### Network WebSocket URLs
 
-- **Runtime**: Bun
-- **Language**: TypeScript 5.9.3
-- **gRPC Framework**: Connect RPC (@connectrpc/connect)
-- **Protobuf**: Buf (@bufbuild/protobuf)
-- **XRP Library**: xrpl.js (xrpl)
-- **Linter/Formatter**: Biome
+| Network | WebSocket URL |
+|---------|---------------|
+| mainnet | `wss://xrplcluster.com` |
+| testnet | `wss://s.altnet.rippletest.net:51233` |
+| devnet | `wss://s.devnet.rippletest.net:51233` |
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `make install` | Install dependencies |
+| `make dev` | Start dev server with hot reload |
+| `make build` | Build for production |
+| `make lint` | Run Biome linter |
+| `make lint-fix` | Fix lint issues |
+| `make format` | Format code with Biome |
+| `make typecheck` | Run TypeScript type checking |
+| `make proto` | Generate proto files |
+| `make clean` | Clean build artifacts |
+
+### npm scripts
+
+| Script | Description |
+|--------|-------------|
+| `bun run start` | Start production server |
+| `bun run dev` | Start dev server with watch mode |
+| `bun run typecheck` | Run TypeScript type checking |
+| `bun run lint` | Run Biome linter |
+| `bun run lint:fix` | Fix lint issues |
+| `bun run format` | Format code |
 
 ## Project Structure
 
 ```
 apps/xrpl-grpc-server/
-├── src/           # Source code
-├── biome.json     # Biome configuration
-├── package.json   # Dependencies
-├── tsconfig.json  # TypeScript configuration
-└── README.md      # This file
+├── src/                # Source code
+│   ├── gen/            # Generated protobuf/connect code
+│   ├── index.ts        # Entry point
+│   ├── server.ts       # ConnectRPC server setup
+│   ├── config.ts       # Environment configuration
+│   ├── services/       # gRPC service implementations
+│   │   ├── account.ts  # RippleAccountAPI
+│   │   ├── address.ts  # RippleAddressAPI
+│   │   └── transaction.ts # RippleTransactionAPI
+│   └── xrpl/           # XRPL client wrapper
+│       └── client.ts
+├── docs/               # Documentation
+│   ├── MIGRATION-GUIDE.md
+│   └── PROTOBUF-EDITION-2024.md
+├── biome.json          # Biome configuration
+├── package.json        # Dependencies
+├── tsconfig.json       # TypeScript configuration
+├── bun.lock            # Bun lockfile
+├── Makefile            # Build commands
+└── README.md           # This file
 ```
+
+## Migration
+
+This server replaces the deprecated `ripple-lib-server`. See [MIGRATION-GUIDE.md](docs/MIGRATION-GUIDE.md) for detailed migration instructions from ripple-lib 1.x to xrpl.js 4.5.0.
+
+Key changes:
+- Runtime: Node.js + ts-node → **Bun**
+- XRP Library: ripple-lib 1.10.1 → **xrpl.js 4.5.0**
+- gRPC: grpc (deprecated) → **ConnectRPC**
+- Linter: ESLint + Prettier → **Biome**
+
+## References
+
+- [xrpl.js Documentation](https://js.xrpl.org/)
+- [xrpl.org Migration Guide](https://xrpl.org/docs/references/xrpljs2-migration-guide)
+- [ConnectRPC Documentation](https://connectrpc.com/docs/node/getting-started)
+- [Biome Documentation](https://biomejs.dev/)
+- [Bun Documentation](https://bun.sh/docs)
 
 ## Related
 
