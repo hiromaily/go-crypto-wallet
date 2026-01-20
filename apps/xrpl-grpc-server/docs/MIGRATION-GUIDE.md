@@ -18,7 +18,7 @@ This guide provides detailed migration instructions for creating a new `xrpl-grp
 | gRPC | grpc (deprecated) | **ConnectRPC** (@connectrpc/connect) |
 | Linter/Formatter | ESLint + Prettier | **Biome** (Rust-based) |
 | TypeScript | 4.7.4 | **5.9.3** |
-| Proto codegen | grpc_tools_node_protoc_ts | **@bufbuild/protoc-gen-es** + **@connectrpc/protoc-gen-connect-es** |
+| Proto codegen | grpc_tools_node_protoc_ts | **@bufbuild/protoc-gen-es** (Edition 2024 support) |
 
 ### Why These Changes?
 
@@ -26,6 +26,10 @@ This guide provides detailed migration instructions for creating a new `xrpl-grp
 - **xrpl.js 4.5.0**: Active development, modern API, better TypeScript types
 - **ConnectRPC**: Better Bun compatibility, supports gRPC/gRPC-Web/Connect protocols
 - **Biome**: Single tool for linting and formatting, faster (Rust-based)
+
+### Protobuf Edition 2024
+
+This project uses **Protobuf Edition 2024** for proto files. See [PROTOBUF-EDITION-2024.md](./PROTOBUF-EDITION-2024.md) for details on current support status and future migration plans.
 
 ## Security Warning
 
@@ -560,28 +564,33 @@ apps/xrpl-grpc-server/
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/index.ts",
-    "build": "bun build src/index.ts --outdir=dist --target=bun",
+    "start": "bun run src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "proto": "cd ../.. && make proto-ts",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "proto": "buf generate"
+    "format": "biome format --write ."
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.0.0",
-    "@connectrpc/connect": "^2.0.0",
-    "xrpl": "4.5.0"
+    "@bufbuild/protobuf": "^2.10.2",
+    "@connectrpc/connect": "^2.1.1",
+    "xrpl": "^4.5.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.0",
-    "@bufbuild/buf": "^1.40.0",
-    "@bufbuild/protoc-gen-es": "^2.0.0",
-    "@connectrpc/protoc-gen-connect-es": "^2.0.0",
+    "@biomejs/biome": "^2.3.11",
+    "@bufbuild/buf": "^1.63.0",
+    "@bufbuild/protoc-gen-es": "^2.10.2",
+    "@connectrpc/protoc-gen-connect-es": "^1.7.0",
+    "bun-types": "latest",
     "typescript": "^5.9.3"
   }
 }
 ```
+
+> **Note**: `@connectrpc/protoc-gen-connect-es` v1.7.0 does not support Edition 2024.
+> ConnectRPC handlers are manually implemented in `src/server.ts`.
+> See [PROTOBUF-EDITION-2024.md](./PROTOBUF-EDITION-2024.md) for migration plan.
 
 ---
 
