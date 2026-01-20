@@ -55,6 +55,7 @@ func ToDomainBlockInfo(infra *BlockInfo) *domainEthereum.BlockInfo {
 		Timestamp:        infra.Timestamp,
 		Transactions:     infra.Transactions,
 		Uncles:           infra.Uncles,
+		BaseFeePerGas:    infra.BaseFeePerGas,
 	}
 }
 

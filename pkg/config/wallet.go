@@ -64,7 +64,7 @@ type Ethereum struct {
 	Port       int    `toml:"port" yaml:"port" mapstructure:"port" validate:"required"`
 	DisableTLS bool   `toml:"disable_tls" yaml:"disable_tls" mapstructure:"disable_tls"`
 	//nolint:lll,revive
-	NetworkType string `toml:"network_type" yaml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
+	NetworkType string `toml:"network_type" yaml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten anvil local"`
 	KeyDirName  string `toml:"keydir" yaml:"keydir" mapstructure:"keydir"`
 	//nolint:lll,revive
 	ConfirmationNum uint64                          `toml:"confirmation_num" yaml:"confirmation_num" mapstructure:"confirmation_num"`

@@ -383,6 +383,7 @@ type BlockRawInfo struct {
 	Timestamp        string   `json:"timestamp"`
 	Transactions     []string `json:"transactions"`
 	Uncles           []string `json:"uncles"`
+	BaseFeePerGas    string   `json:"baseFeePerGas,omitempty"` // EIP-1559 (London hard fork)
 }
 
 // BlockInfo is block info
@@ -405,6 +406,7 @@ type BlockInfo struct {
 	Timestamp        *big.Int `json:"timestamp"`
 	Transactions     []string `json:"transactions"`
 	Uncles           []string `json:"uncles"`
+	BaseFeePerGas    *big.Int `json:"baseFeePerGas,omitempty"` // EIP-1559 (London hard fork)
 }
 
 // GetBlockByNumber returns information about a block by block number
@@ -426,6 +428,11 @@ func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*d
 }
 
 func convertBlockRawInfo(raw *BlockRawInfo) *BlockInfo {
+	var baseFeePerGas *big.Int
+	if raw.BaseFeePerGas != "" {
+		baseFeePerGas = decodeString(raw.BaseFeePerGas)
+	}
+
 	return &BlockInfo{
 		Number:           decodeString(raw.Number),
 		Hash:             raw.Hash,
@@ -445,6 +452,7 @@ func convertBlockRawInfo(raw *BlockRawInfo) *BlockInfo {
 		Timestamp:        decodeString(raw.Timestamp),
 		Transactions:     raw.Transactions,
 		Uncles:           raw.Uncles,
+		BaseFeePerGas:    baseFeePerGas,
 	}
 }
 

@@ -1,5 +1,7 @@
 package eth
 
+import "strings"
+
 //----------------------------------------------------
 // QuantityTag
 //----------------------------------------------------
@@ -33,6 +35,8 @@ const (
 	NetworkTypeETHGoerli     NetworkTypeETH = "goerli"
 	NetworkTypeETHRegRinkeby NetworkTypeETH = "rinkeby"
 	NetworkTypeETHRopsten    NetworkTypeETH = "ropsten"
+	NetworkTypeETHAnvil      NetworkTypeETH = "anvil"
+	NetworkTypeETHLocal      NetworkTypeETH = "local"
 )
 
 // String converter
@@ -86,11 +90,25 @@ type ClientVersion string
 const (
 	ClientVersionGeth   ClientVersion = "Geth"
 	ClientVersionParity ClientVersion = "Parity-Ethereum"
+	ClientVersionAnvil  ClientVersion = "Anvil"
 )
 
 // String converter
 func (c ClientVersion) String() string {
 	return string(c)
+}
+
+// DetectClientType detects the Ethereum client type from version string
+func DetectClientType(version string) ClientVersion {
+	versionLower := strings.ToLower(version)
+	if strings.Contains(versionLower, "anvil") {
+		return ClientVersionAnvil
+	}
+	if strings.Contains(versionLower, "parity") {
+		return ClientVersionParity
+	}
+	// Default to Geth (most common)
+	return ClientVersionGeth
 }
 
 // GasLimit fixed GasLimit

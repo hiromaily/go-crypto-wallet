@@ -101,6 +101,10 @@ type Ethereumer interface {
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	CreateRawTransactionEIP1559(
+		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	SupportsEIP1559(ctx context.Context) bool
 	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)

@@ -49,6 +49,9 @@ type BlockInfo struct {
 	Timestamp        *big.Int
 	Transactions     []string
 	Uncles           []string
+	// BaseFeePerGas is the base fee per gas for EIP-1559 transactions (London hard fork and later).
+	// This field will be nil for blocks before the London hard fork.
+	BaseFeePerGas *big.Int
 }
 
 // ResponseGetTransaction represents the response from eth_getTransactionByHash.
