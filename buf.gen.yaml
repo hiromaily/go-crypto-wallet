@@ -21,6 +21,19 @@ plugins:
     opt:
       - paths=source_relative
 
+  # Generate TypeScript protocol buffer code using protoc-gen-es
+  # Note: Using local plugins. Once buf CLI >= 1.64.0 adds Edition 2024 support,
+  # these will work with the edition 2024 proto files.
+  # Until then, generation will fail with "edition 2024 not yet fully supported"
+  - local: protoc-gen-es
+    out: apps/xrpl-grpc-server/src/gen
+    opt: target=ts
+
+  # Generate Connect-ES service code for gRPC-web
+  - local: protoc-gen-connect-es
+    out: apps/xrpl-grpc-server/src/gen
+    opt: target=ts
+
 # Input directories
 # Note: third_party proto files are not included as inputs since they are
 # provided by the protobuf runtime (google.golang.org/protobuf/types/known)

@@ -5,6 +5,9 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# Generated proto files
+src/gen/
+
 # Environment
 .env
 .env.local

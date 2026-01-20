@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["node_modules", "dist", "*.pb.ts", "*.d.ts"]
+    "ignore": ["node_modules", "dist", "src/gen", "*.pb.ts", "*.d.ts"]
   },
   "formatter": {
     "enabled": true,

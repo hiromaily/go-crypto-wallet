@@ -593,7 +593,7 @@ bun run format    # biome format
 bun run typecheck # tsc --noEmit
 bun run dev       # bun --hot src/index.ts
 bun run build     # bun build src/index.ts
-bun run proto     # buf generate
+bun run proto     # make proto-ts (uses protoc)
 ```
 
 ---

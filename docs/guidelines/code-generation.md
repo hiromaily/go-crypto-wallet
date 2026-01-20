@@ -56,9 +56,9 @@ This project uses several code generation tools. **All auto-generated files cont
 
 ## Protocol Buffer Code (Go)
 
-**Tool**: [buf](https://buf.build/) with protoc-gen-go and protoc-gen-go-grpc
+**Tool**: protoc (or buf when Edition 2024 is supported)
 **Source**: `proto/rippleapi/*.proto`
-**Command**: `make protoc-go` (or `buf generate`)
+**Command**: `make proto`
 
 **Generated Files**:
 
@@ -157,21 +157,23 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 **Note**: See [Testing Guidelines](testing.md) for mock usage examples and best practices.
 
-## Protocol Buffer Code (JavaScript/TypeScript)
+## Protocol Buffer Code (TypeScript)
 
-**Tool**: protoc with JavaScript/TypeScript plugins
+**Tool**: protoc with protoc-gen-es and protoc-gen-connect-es
 **Source**: `proto/rippleapi/*.proto`
-**Command**: `web/ripple-lib-server/scripts/protoc-ts.sh`
+**Command**: `make proto-ts`
 
 **Generated Files**:
 
-- `web/ripple-lib-server/src/pb/*.js` - JavaScript/TypeScript protocol buffer code
-  - `account_pb.js`, `account_grpc_pb.js`
-  - `address_pb.js`, `address_grpc_pb.js`
-  - `transaction_pb.js`, `transaction_grpc_pb.js`
-  - `gogo/protobuf/gogoproto/gogo_pb.js`
+- `apps/xrpl-grpc-server/src/gen/*.ts` - TypeScript protocol buffer code
+  - `account_pb.ts` - Account message types
+  - `account_connect.ts` - Account service client
+  - `address_pb.ts` - Address message types
+  - `address_connect.ts` - Address service client
+  - `transaction_pb.ts` - Transaction message types
+  - `transaction_connect.ts` - Transaction service client
 
-**Note**: Used by the ripple-lib-server web project.
+**Note**: Used by the xrpl-grpc-server project. The older ripple-lib-server is deprecated.
 
 ## Web Project Build Artifacts
 
@@ -216,9 +218,9 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 | SQLC Schema Extract | `data/dump/sql/dump_*.sql` | `make extract-sqlc-schema-all` | `tools/sqlc/schemas/*.sql` |
 | SQLC | `tools/sqlc/schemas/*.sql` + `tools/sqlc/queries/*.sql` | `make sqlc` | `internal/infrastructure/database/sqlc/*.go` |
 | Mockery | `.mockery.yaml` + interface definitions | `make mockery` | `internal/infrastructure/*/mocks/*.go` |
-| Protocol Buffers (Go) | `proto/rippleapi/*.proto` | `make protoc-go` | `internal/infrastructure/api/xrp/xrp/*.pb.go` |
+| Protocol Buffers (Go) | `proto/rippleapi/*.proto` | `make proto` | `internal/infrastructure/api/xrp/protogen/*.pb.go` |
 | Smart Contract ABI | `contracts/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
-| Protocol Buffers (JS/TS) | `proto/rippleapi/*.proto` | `web/ripple-lib-server/scripts/protoc-ts.sh` | `web/ripple-lib-server/src/pb/*.js` |
+| Protocol Buffers (TS) | `proto/rippleapi/*.proto` | `make proto-ts` | `apps/xrpl-grpc-server/src/gen/*.ts` |
 
 ## See Also
 

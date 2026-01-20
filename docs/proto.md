@@ -64,7 +64,7 @@ This uses `protoc` directly, which fully supports Edition 2024.
 ### Alternative: buf (for future use)
 
 ```bash
-make proto-buf
+make proto PROTO_TOOL=buf
 ```
 
 **Note:** As of January 2026, buf CLI v1.63.0 does not yet fully support Edition 2024.
@@ -74,7 +74,7 @@ The command will fail with:
 edition "2024" not yet fully supported; latest supported edition "2023"
 ```
 
-Once buf adds Edition 2024 support, `make proto-buf` can be used as the primary generation method.
+Once buf adds Edition 2024 support (>= 1.64.0), change the default `PROTO_TOOL` in `make/codegen.mk` to `buf`.
 
 ### Proto Formatting (clang-format)
 
@@ -93,9 +93,9 @@ make proto-fmt-check   # Check formatting (used in CI)
 **Note:** As of buf CLI v1.63.0, the following commands fail with edition 2024:
 
 ```bash
-make proto-fmt-buf       # ❌ Fails - edition 2024 not supported
-make proto-lint          # ❌ Fails - edition 2024 not supported
-make breaking-proto      # ✅ Works with continue-on-error
+make proto-fmt PROTO_TOOL=buf   # ❌ Fails - edition 2024 not supported
+make proto-lint PROTO_TOOL=buf  # ❌ Fails - edition 2024 not supported
+make proto-breaking             # ✅ Works with continue-on-error
 ```
 
 buf lint is temporarily disabled in CI. Re-enable when buf >= 1.64.0 adds edition 2024 support.
@@ -197,11 +197,11 @@ inputs:
 The Makefile includes automatic version verification:
 
 ```bash
-make proto-version-check  # Check protoc >= 33.0
-make buf-version-check    # Check buf >= 1.64.0
+make protoc-version-check  # Check protoc >= 33.0
+make buf-version-check     # Check buf >= 1.64.0
 ```
 
-These checks run automatically when using `make proto` or `make proto-buf`.
+These checks run automatically when using `make proto`.
 
 ## References
 
