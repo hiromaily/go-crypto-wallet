@@ -6,7 +6,7 @@
  */
 
 import { getConfig } from './config';
-import { createServerFetchHandler } from './server';
+import { createFetchHandler } from './server';
 import { disconnectClient, getClientManager } from './xrpl';
 
 /** Server instance for graceful shutdown */
@@ -51,7 +51,7 @@ async function initializeXRPLClient(): Promise<void> {
  * @returns Bun server instance
  */
 function startServer(host: string, port: number): ReturnType<typeof Bun.serve> {
-  const fetchHandler = createServerFetchHandler();
+  const fetchHandler = createFetchHandler();
 
   return Bun.serve({
     hostname: host,
@@ -125,6 +125,6 @@ main().catch((error) => {
 });
 
 export { getConfig } from './config';
-export { createRouter, createServerFetchHandler } from './server';
+export { createFetchHandler, createRouter } from './server';
 export { accountService, addressService } from './services';
 export { disconnectClient, getClient, getClientManager } from './xrpl';

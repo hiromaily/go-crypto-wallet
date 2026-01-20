@@ -25,7 +25,7 @@ import {
   RippleAddressAPI,
 } from './gen/address_pb';
 import {
-  EnumTransactionType,
+  type EnumTransactionType,
   type RequestCombineTransaction,
   type RequestGetTransaction,
   type RequestPrepareTransaction,
@@ -42,7 +42,7 @@ import {
 import { accountService } from './services/account';
 import { addressService } from './services/address';
 import {
-  EnumTransactionType as ServiceEnumTxType,
+  type EnumTransactionType as ServiceEnumTxType,
   transactionService,
 } from './services/transaction';
 
@@ -167,12 +167,12 @@ export function createRouter(): ConnectRouter {
 
         if (result.instructions) {
           responseInit.instructions = {
-            fee: result.instructions.fee || '',
-            maxFee: result.instructions.maxFee || '',
-            maxLedgerVersion: result.instructions.maxLedgerVersion || BigInt(0),
-            maxLedgerVersionOffset: result.instructions.maxLedgerVersionOffset || BigInt(0),
-            sequence: result.instructions.sequence || BigInt(0),
-            signersCount: result.instructions.signersCount || BigInt(0),
+            fee: result.instructions.fee ?? '',
+            maxFee: result.instructions.maxFee ?? '',
+            maxLedgerVersion: result.instructions.maxLedgerVersion ?? 0n,
+            maxLedgerVersionOffset: result.instructions.maxLedgerVersionOffset ?? 0n,
+            sequence: result.instructions.sequence ?? 0n,
+            signersCount: result.instructions.signersCount ?? 0n,
           };
         }
 
@@ -220,15 +220,8 @@ export function createRouter(): ConnectRouter {
         });
       },
       waitValidation: async function* (_, context) {
-        const abortController = new AbortController();
-
-        // Connect the context signal to our abort controller
-        context.signal.addEventListener('abort', () => {
-          abortController.abort();
-        });
-
         for await (const response of transactionService.waitValidation({
-          signal: abortController.signal,
+          signal: context.signal,
         })) {
           yield create(ResponseWaitValidationSchema, {
             ledgerVersion: response.ledgerVersion,
@@ -239,41 +232,22 @@ export function createRouter(): ConnectRouter {
 }
 
 /**
- * Map proto enum to service enum
+ * Map proto enum to service enum.
+ * Both enums have identical numeric values, so direct return is safe.
  */
 function mapEnumTransactionType(protoEnum: EnumTransactionType): ServiceEnumTxType {
-  const mapping: Record<EnumTransactionType, ServiceEnumTxType> = {
-    [EnumTransactionType.TX_ACCOUNT_SET]: ServiceEnumTxType.TX_ACCOUNT_SET,
-    [EnumTransactionType.TX_ACCOUNT_DELETE]: ServiceEnumTxType.TX_ACCOUNT_DELETE,
-    [EnumTransactionType.TX_CHECK_CANCEL]: ServiceEnumTxType.TX_CHECK_CANCEL,
-    [EnumTransactionType.TX_CHECK_CASH]: ServiceEnumTxType.TX_CHECK_CASH,
-    [EnumTransactionType.TX_CHECK_CREATE]: ServiceEnumTxType.TX_CHECK_CREATE,
-    [EnumTransactionType.TX_DEPOSIT_PREAUTH]: ServiceEnumTxType.TX_DEPOSIT_PREAUTH,
-    [EnumTransactionType.TX_ESCROW_CANCEL]: ServiceEnumTxType.TX_ESCROW_CANCEL,
-    [EnumTransactionType.TX_ESCROW_CREATE]: ServiceEnumTxType.TX_ESCROW_CREATE,
-    [EnumTransactionType.TX_ESCROW_FINISH]: ServiceEnumTxType.TX_ESCROW_FINISH,
-    [EnumTransactionType.TX_OFFER_CANCEL]: ServiceEnumTxType.TX_OFFER_CANCEL,
-    [EnumTransactionType.TX_OFFER_CREATE]: ServiceEnumTxType.TX_OFFER_CREATE,
-    [EnumTransactionType.TX_PAYMENT]: ServiceEnumTxType.TX_PAYMENT,
-    [EnumTransactionType.TX_PAYMENT_CHANNEL_CLAIM]: ServiceEnumTxType.TX_PAYMENT_CHANNEL_CLAIM,
-    [EnumTransactionType.TX_PAYMENT_CHANNEL_CREATE]: ServiceEnumTxType.TX_PAYMENT_CHANNEL_CREATE,
-    [EnumTransactionType.TX_PAYMENT_CHANNEL_FUND]: ServiceEnumTxType.TX_PAYMENT_CHANNEL_FUND,
-    [EnumTransactionType.TX_SET_REGULAR_KEY]: ServiceEnumTxType.TX_SET_REGULAR_KEY,
-    [EnumTransactionType.TX_SINGER_LIST_SET]: ServiceEnumTxType.TX_SINGER_LIST_SET,
-    [EnumTransactionType.TX_TRUST_SET]: ServiceEnumTxType.TX_TRUST_SET,
-  };
-  return mapping[protoEnum];
+  return protoEnum;
 }
 
 /**
- * Create a fetch handler from the ConnectRPC router
+ * Create a fetch handler from the ConnectRPC router.
  *
- * This converts the ConnectRPC handlers into a single fetch function
- * suitable for use with Bun.serve().
+ * Routes incoming requests to the appropriate service handler.
+ * This is required because ConnectRouter is not directly a fetch handler.
  *
- * @returns Fetch handler function
+ * @returns Fetch handler function for use with Bun.serve()
  */
-export function createServerFetchHandler(): (request: Request) => Promise<Response> {
+export function createFetchHandler(): (request: Request) => Promise<Response> {
   const router = createRouter();
 
   return async (request: Request): Promise<Response> => {
@@ -282,10 +256,7 @@ export function createServerFetchHandler(): (request: Request) => Promise<Respon
     // Find matching handler based on path
     for (const handler of router.handlers) {
       if (url.pathname.startsWith(handler.requestPath)) {
-        const uRequest = universalServerRequestFromFetch(request, {
-          httpVersion: '2',
-        });
-
+        const uRequest = universalServerRequestFromFetch(request, {});
         const uResponse = await handler(uRequest);
         return universalServerResponseToFetch(uResponse);
       }
