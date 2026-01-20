@@ -331,7 +331,7 @@ Execute verification commands for the modified file types:
 | File Type | Required Commands |
 |-----------|-------------------|
 | Go (`*.go`) | `make go-lint && make tidy && make check-build && make gotest` |
-| TypeScript (`*.ts`) | `cd apps/{app} && npm run lint && npm run build` |
+| TypeScript (`*.ts`) | See `typescript-development` skill (Bun for xrpl-grpc-server, npm for erc20-token) |
 | Shell (`*.sh`) | `make shfmt` |
 | Makefile | `make mk-lint` |
 | SQL/HCL | `make atlas-fmt && make atlas-lint` |
