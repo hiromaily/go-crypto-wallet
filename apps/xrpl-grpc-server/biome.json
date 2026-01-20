@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["node_modules", "dist", "src/gen", "*.pb.ts", "*.d.ts"]
+    "includes": ["src/**/*.ts", "!**/node_modules", "!**/dist", "!**/src/gen"]
   },
   "formatter": {
     "enabled": true,
@@ -15,8 +15,14 @@
     "indentWidth": 2,
     "lineWidth": 100
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on"
+        }
+      }
+    }
   },
   "linter": {
     "enabled": true,
@@ -24,13 +30,12 @@
       "recommended": true,
       "complexity": {
         "noExtraBooleanCast": "error",
-        "noMultipleSpacesInRegularExpressionLiterals": "error",
+        "noAdjacentSpacesInRegex": "error",
         "noUselessCatch": "error",
         "noUselessConstructor": "error",
         "noUselessLabel": "error",
         "noUselessLoneBlockStatements": "error",
-        "noUselessRename": "error",
-        "noWith": "error"
+        "noUselessRename": "error"
       },
       "correctness": {
         "noConstAssign": "error",
@@ -38,7 +43,7 @@
         "noEmptyPattern": "error",
         "noGlobalObjectCalls": "error",
         "noInvalidConstructorSuper": "error",
-        "noNewSymbol": "error",
+        "noInvalidBuiltinInstantiation": "error",
         "noNonoctalDecimalEscape": "error",
         "noPrecisionLoss": "error",
         "noSelfAssign": "error",
@@ -52,7 +57,8 @@
         "noUnusedLabels": "error",
         "noUnusedVariables": "error",
         "useIsNan": "error",
-        "useValidForDirection": "error"
+        "useValidForDirection": "error",
+        "useValidTypeof": "error"
       },
       "style": {
         "noInferrableTypes": "error",
@@ -87,8 +93,8 @@
         "noRedeclare": "error",
         "noShadowRestrictedNames": "error",
         "noUnsafeNegation": "error",
-        "useGetterReturn": "error",
-        "useValidTypeof": "error"
+        "noWith": "error",
+        "useGetterReturn": "error"
       }
     }
   },
