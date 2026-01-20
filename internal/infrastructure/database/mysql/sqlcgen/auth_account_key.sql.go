@@ -92,8 +92,8 @@ type InsertAuthAccountKeyParams struct {
 	AuthAccount            string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      string
-	Bech32Address          string
+	P2shSegwitAddress      sql.NullString
+	Bech32Address          sql.NullString
 	TaprootAddress         sql.NullString
 	FullPublicKey          string
 	MultisigAddress        string

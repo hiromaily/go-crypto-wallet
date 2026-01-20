@@ -37,6 +37,16 @@ func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthA
 		return nil, fmt.Errorf("invalid addr status in database: %w", err)
 	}
 
+	// Handle nullable string fields (sql.NullString -> string)
+	p2shSegwitAddr := ""
+	if sqlcKey.P2shSegwitAddress.Valid {
+		p2shSegwitAddr = sqlcKey.P2shSegwitAddress.String
+	}
+	bech32Addr := ""
+	if sqlcKey.Bech32Address.Valid {
+		bech32Addr = sqlcKey.Bech32Address.String
+	}
+
 	key := &domainAuth.AuthAccountKey{
 		ID:                 sqlcKey.ID,
 		CoinTypeCode:       domainCoin.CoinTypeCode(sqlcKey.Coin),
@@ -44,8 +54,8 @@ func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthA
 		AuthAccount:        domainAccount.AuthType(sqlcKey.AuthAccount),
 		Account:            domainAccount.AccountType(sqlcKey.Account),
 		P2pkhAddress:       sqlcKey.P2pkhAddress,
-		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress,
-		Bech32Address:      sqlcKey.Bech32Address,
+		P2shSegwitAddress:  p2shSegwitAddr,
+		Bech32Address:      bech32Addr,
 		FullPublicKey:      sqlcKey.FullPublicKey,
 		MultisigAddress:    sqlcKey.MultisigAddress,
 		RedeemScript:       sqlcKey.RedeemScript,
@@ -76,8 +86,6 @@ func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAcco
 		AuthAccount:        key.AuthAccount.String(),
 		Account:            key.Account.String(),
 		P2pkhAddress:       key.P2pkhAddress,
-		P2shSegwitAddress:  key.P2shSegwitAddress,
-		Bech32Address:      key.Bech32Address,
 		FullPublicKey:      key.FullPublicKey,
 		MultisigAddress:    key.MultisigAddress,
 		RedeemScript:       key.RedeemScript,
@@ -86,6 +94,14 @@ func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAcco
 		AddrStatus:         key.AddrStatus.Int8(),
 	}
 
+	// Handle nullable string fields (string -> sql.NullString)
+	// Empty strings are converted to NULL to avoid UNIQUE constraint violations for BCH
+	if key.P2shSegwitAddress != "" {
+		sqlcKey.P2shSegwitAddress = sql.NullString{String: key.P2shSegwitAddress, Valid: true}
+	}
+	if key.Bech32Address != "" {
+		sqlcKey.Bech32Address = sql.NullString{String: key.Bech32Address, Valid: true}
+	}
 	if key.TaprootAddress != nil {
 		sqlcKey.TaprootAddress = sql.NullString{String: *key.TaprootAddress, Valid: true}
 	}

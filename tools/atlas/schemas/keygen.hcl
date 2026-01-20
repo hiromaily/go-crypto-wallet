@@ -85,13 +85,13 @@ table "btc_account_key" {
 
   column "p2sh_segwit_address" {
     type    = varchar(255)
-    null    = false
+    null    = true
     comment = "p2sh-segwit address"
   }
 
   column "bech32_address" {
     type    = varchar(255)
-    null    = false
+    null    = true
     comment = "bech32 address"
   }
 

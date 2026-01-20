@@ -49,14 +49,24 @@ func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCA
 		return nil, fmt.Errorf("invalid account type from database: %s", sqlcKey.Account)
 	}
 
+	// Handle nullable string fields (sql.NullString -> string)
+	p2shSegwitAddr := ""
+	if sqlcKey.P2shSegwitAddress.Valid {
+		p2shSegwitAddr = sqlcKey.P2shSegwitAddress.String
+	}
+	bech32Addr := ""
+	if sqlcKey.Bech32Address.Valid {
+		bech32Addr = sqlcKey.Bech32Address.String
+	}
+
 	key := &domainBitcoin.BTCAccountKey{
 		ID:                 sqlcKey.ID,
 		CoinTypeCode:       coinTypeCode,
 		KeyType:            sqlcKey.KeyType,
 		Account:            accountType,
 		P2pkhAddress:       sqlcKey.P2pkhAddress,
-		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress,
-		Bech32Address:      sqlcKey.Bech32Address,
+		P2shSegwitAddress:  p2shSegwitAddr,
+		Bech32Address:      bech32Addr,
 		FullPublicKey:      sqlcKey.FullPublicKey,
 		MultisigAddress:    sqlcKey.MultisigAddress,
 		RedeemScript:       sqlcKey.RedeemScript,
@@ -86,8 +96,6 @@ func convertFromBTCAccountKey(key *domainBitcoin.BTCAccountKey) *sqlcgen.BtcAcco
 		KeyType:            key.KeyType,
 		Account:            sqlcgen.BtcAccountKeyAccount(key.Account.String()),
 		P2pkhAddress:       key.P2pkhAddress,
-		P2shSegwitAddress:  key.P2shSegwitAddress,
-		Bech32Address:      key.Bech32Address,
 		FullPublicKey:      key.FullPublicKey,
 		MultisigAddress:    key.MultisigAddress,
 		RedeemScript:       key.RedeemScript,
@@ -96,6 +104,14 @@ func convertFromBTCAccountKey(key *domainBitcoin.BTCAccountKey) *sqlcgen.BtcAcco
 		AddrStatus:         key.AddrStatus.Int8(),
 	}
 
+	// Handle nullable string fields (string -> sql.NullString)
+	// Empty strings are converted to NULL to avoid UNIQUE constraint violations for BCH
+	if key.P2shSegwitAddress != "" {
+		sqlcKey.P2shSegwitAddress = sql.NullString{String: key.P2shSegwitAddress, Valid: true}
+	}
+	if key.Bech32Address != "" {
+		sqlcKey.Bech32Address = sql.NullString{String: key.Bech32Address, Valid: true}
+	}
 	if key.TaprootAddress != nil {
 		sqlcKey.TaprootAddress = sql.NullString{String: *key.TaprootAddress, Valid: true}
 	}
@@ -250,12 +266,18 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddr(
 ) (int64, error) {
 	ctx := context.Background()
 
+	// Convert keyAddress to sql.NullString (it might be empty for BCH)
+	var p2shSegwitAddr sql.NullString
+	if keyAddress != "" {
+		p2shSegwitAddr = sql.NullString{String: keyAddress, Valid: true}
+	}
+
 	result, err := r.queries.UpdateBtcAccountKeyAddress(ctx, sqlcgen.UpdateBtcAccountKeyAddressParams{
 		P2pkhAddress:      addr,
 		UpdatedAt:         sql.NullTime{Time: time.Now(), Valid: true},
 		Coin:              sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
 		Account:           sqlcgen.BtcAccountKeyAccount(accountType.String()),
-		P2shSegwitAddress: keyAddress,
+		P2shSegwitAddress: p2shSegwitAddr,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call UpdateBtcAccountKeyAddress(): %w", err)

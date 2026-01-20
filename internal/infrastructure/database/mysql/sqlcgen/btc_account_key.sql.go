@@ -187,8 +187,8 @@ type InsertBtcAccountKeyParams struct {
 	KeyType                string
 	Account                BtcAccountKeyAccount
 	P2pkhAddress           string
-	P2shSegwitAddress      string
-	Bech32Address          string
+	P2shSegwitAddress      sql.NullString
+	Bech32Address          sql.NullString
 	TaprootAddress         sql.NullString
 	FullPublicKey          string
 	MultisigAddress        string
@@ -251,7 +251,7 @@ type UpdateBtcAccountKeyAddressParams struct {
 	UpdatedAt         sql.NullTime
 	Coin              BtcAccountKeyCoin
 	Account           BtcAccountKeyAccount
-	P2shSegwitAddress string
+	P2shSegwitAddress sql.NullString
 }
 
 func (q *Queries) UpdateBtcAccountKeyAddress(ctx context.Context, arg UpdateBtcAccountKeyAddressParams) (sql.Result, error) {

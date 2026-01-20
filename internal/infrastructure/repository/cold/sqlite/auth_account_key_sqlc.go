@@ -15,6 +15,7 @@ import (
 
 // AuthAccountKeyRepositorySqlc is repository for auth_account_key table using sqlc
 type AuthAccountKeyRepositorySqlc struct {
+	db           *sql.DB
 	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
@@ -24,6 +25,7 @@ func NewAuthAccountKeyRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AuthAccountKeyRepositorySqlc {
 	return &AuthAccountKeyRepositorySqlc{
+		db:           dbConn,
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
@@ -142,29 +144,41 @@ func (r *AuthAccountKeyRepositorySqlc) GetByAccount(
 }
 
 // Insert inserts record
+// For SQLite, we use raw SQL with NULLIF to convert empty strings to NULL
+// to avoid UNIQUE constraint violations on bech32_address and p2sh_segwit_address
 func (r *AuthAccountKeyRepositorySqlc) Insert(item *domainAuth.AuthAccountKey) error {
 	ctx := context.Background()
 
 	sqlcItem := convertFromAuthAccountKey(item)
-	_, err := r.queries.InsertAuthAccountKey(ctx, sqlcgen.InsertAuthAccountKeyParams{
-		Coin:                   sqlcItem.Coin,
-		KeyType:                sqlcItem.KeyType,
-		AuthAccount:            sqlcItem.AuthAccount,
-		Account:                sqlcItem.Account,
-		P2pkhAddress:           sqlcItem.P2pkhAddress,
-		P2shSegwitAddress:      sqlcItem.P2shSegwitAddress,
-		Bech32Address:          sqlcItem.Bech32Address,
-		TaprootAddress:         sqlcItem.TaprootAddress,
-		FullPublicKey:          sqlcItem.FullPublicKey,
-		MultisigAddress:        sqlcItem.MultisigAddress,
-		RedeemScript:           sqlcItem.RedeemScript,
-		WalletImportFormat:     sqlcItem.WalletImportFormat,
-		AccountExtendedPrivkey: sqlcItem.AccountExtendedPrivkey,
-		Idx:                    sqlcItem.Idx,
-		AddrStatus:             sqlcItem.AddrStatus,
-	})
+
+	// Use raw SQL with NULLIF to handle empty strings for BCH compatibility
+	// BCH doesn't support SegWit/bech32, so these fields are empty and must be NULL
+	query := `INSERT INTO auth_account_key (
+		coin, key_type, auth_account, account, p2pkh_address,
+		p2sh_segwit_address, bech32_address, taproot_address,
+		full_public_key, multisig_address, redeem_script,
+		wallet_import_format, account_extended_privkey, idx, addr_status
+	) VALUES (?, ?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err := r.db.ExecContext(ctx, query,
+		sqlcItem.Coin,
+		sqlcItem.KeyType,
+		sqlcItem.AuthAccount,
+		sqlcItem.Account,
+		sqlcItem.P2pkhAddress,
+		sqlcItem.P2shSegwitAddress,
+		sqlcItem.Bech32Address,
+		sqlcItem.TaprootAddress,
+		sqlcItem.FullPublicKey,
+		sqlcItem.MultisigAddress,
+		sqlcItem.RedeemScript,
+		sqlcItem.WalletImportFormat,
+		sqlcItem.AccountExtendedPrivkey,
+		sqlcItem.Idx,
+		sqlcItem.AddrStatus,
+	)
 	if err != nil {
-		return fmt.Errorf("failed to call InsertAuthAccountKey(): %w", err)
+		return fmt.Errorf("failed to insert auth account key: %w", err)
 	}
 
 	return nil
