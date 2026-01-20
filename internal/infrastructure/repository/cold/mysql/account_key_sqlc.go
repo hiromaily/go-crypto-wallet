@@ -150,75 +150,24 @@ func convertBtcAccountKeyRow[T btcAccountKeyRow](row T) (*domainBitcoin.BTCAccou
 }
 
 // convertGetOneBtcAccountKeyByMaxIDRow converts row to domain.BtcAccountKey entity.
-func convertGetOneBtcAccountKeyByMaxIDRow(row *sqlcgen.GetOneBtcAccountKeyByMaxIDRow) (*domainBitcoin.BTCAccountKey, error) {
+func convertGetOneBtcAccountKeyByMaxIDRow(
+	row *sqlcgen.GetOneBtcAccountKeyByMaxIDRow,
+) (*domainBitcoin.BTCAccountKey, error) {
 	return convertBtcAccountKeyRow(row)
 }
 
 // convertGetBtcAccountKeysByAddrStatusRow converts row to domain.BtcAccountKey entity.
-func convertGetBtcAccountKeysByAddrStatusRow(row *sqlcgen.GetBtcAccountKeysByAddrStatusRow) (*domainBitcoin.BTCAccountKey, error) {
+func convertGetBtcAccountKeysByAddrStatusRow(
+	row *sqlcgen.GetBtcAccountKeysByAddrStatusRow,
+) (*domainBitcoin.BTCAccountKey, error) {
 	return convertBtcAccountKeyRow(row)
 }
 
 // convertGetBtcAccountKeysByMultisigAddressesRow converts row to domain.BtcAccountKey entity.
-func convertGetBtcAccountKeysByMultisigAddressesRow(row *sqlcgen.GetBtcAccountKeysByMultisigAddressesRow) (*domainBitcoin.BTCAccountKey, error) {
+func convertGetBtcAccountKeysByMultisigAddressesRow(
+	row *sqlcgen.GetBtcAccountKeysByMultisigAddressesRow,
+) (*domainBitcoin.BTCAccountKey, error) {
 	return convertBtcAccountKeyRow(row)
-}
-
-// convertToBTCAccountKey converts sqlcgen.BtcAccountKey to domain.BtcAccountKey entity.
-// SECURITY: Handles WIF (private key) data - never log the wallet import format field.
-func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCAccountKey, error) {
-	addrStatus, err := domainAddress.AddrStatusFromInt8(sqlcKey.AddrStatus)
-	if err != nil {
-		return nil, fmt.Errorf("invalid addr status in database: %w", err)
-	}
-
-	coinTypeCode := domainCoin.CoinTypeCode(sqlcKey.Coin)
-	if !domainCoin.IsCoinTypeCode(string(coinTypeCode)) {
-		return nil, fmt.Errorf("invalid coin type from database: %s", sqlcKey.Coin)
-	}
-
-	accountType := domainAccount.AccountType(sqlcKey.Account)
-	if !domainAccount.ValidateAccountType(string(accountType)) {
-		return nil, fmt.Errorf("invalid account type from database: %s", sqlcKey.Account)
-	}
-
-	// Handle nullable string fields (sql.NullString -> string)
-	p2shSegwitAddr := ""
-	if sqlcKey.P2shSegwitAddress.Valid {
-		p2shSegwitAddr = sqlcKey.P2shSegwitAddress.String
-	}
-	bech32Addr := ""
-	if sqlcKey.Bech32Address.Valid {
-		bech32Addr = sqlcKey.Bech32Address.String
-	}
-
-	key := &domainBitcoin.BTCAccountKey{
-		ID:                 sqlcKey.ID,
-		CoinTypeCode:       coinTypeCode,
-		KeyType:            sqlcKey.KeyType,
-		Account:            accountType,
-		P2pkhAddress:       sqlcKey.P2pkhAddress,
-		P2shSegwitAddress:  p2shSegwitAddr,
-		Bech32Address:      bech32Addr,
-		FullPublicKey:      sqlcKey.FullPublicKey,
-		MultisigAddress:    sqlcKey.MultisigAddress,
-		RedeemScript:       sqlcKey.RedeemScript,
-		WalletImportFormat: sqlcKey.WalletImportFormat, // WIF - NEVER log
-		Idx:                sqlcKey.Idx,
-		AddrStatus:         addrStatus,
-	}
-
-	if sqlcKey.TaprootAddress.Valid {
-		key.TaprootAddress = &sqlcKey.TaprootAddress.String
-	}
-	if sqlcKey.AccountExtendedPrivkey.Valid {
-		key.AccountExtendedPrivkey = &sqlcKey.AccountExtendedPrivkey.String // NEVER log
-	}
-	if sqlcKey.UpdatedAt.Valid {
-		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
-	}
-
-	return key, nil
 }
 
 // convertFromBTCAccountKey converts domain.BTCAccountKey entity to sqlcgen.BtcAccountKey.

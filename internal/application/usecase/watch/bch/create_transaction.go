@@ -436,7 +436,6 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 		"tx_size", msgTx.SerializeSize(),
 		"adjustment_fee", adjustmentFee)
 	fee, err := u.bchClient.GetFee(msgTx, adjustmentFee)
-
 	if err != nil {
 		return 0, 0, nil, nil, fmt.Errorf("fail to call bch.GetFee(): %w", err)
 	}

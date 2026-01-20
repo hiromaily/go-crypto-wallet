@@ -31,7 +31,6 @@ func NewAuthAccountKeyRepositorySqlc(
 	}
 }
 
-
 // GetOne returns one record by authType
 // Note: Uses raw SQL with COALESCE to handle NULL values in BCH (no SegWit support)
 func (r *AuthAccountKeyRepositorySqlc) GetOne(
@@ -177,11 +176,11 @@ func (r *AuthAccountKeyRepositorySqlc) Insert(item *domainAuth.AuthAccountKey) e
 	) VALUES (?, ?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	// Handle nullable pointer fields
-	var taprootAddr interface{} = nil
+	var taprootAddr any = nil
 	if item.TaprootAddress != nil {
 		taprootAddr = *item.TaprootAddress
 	}
-	var accountExtPrivkey interface{} = nil
+	var accountExtPrivkey any = nil
 	if item.AccountExtendedPrivkey != nil {
 		accountExtPrivkey = *item.AccountExtendedPrivkey
 	}
