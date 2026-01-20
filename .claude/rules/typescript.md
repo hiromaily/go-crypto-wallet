@@ -35,6 +35,9 @@ bun run build         # Build for production
 bun run proto         # Generate protobuf code
 ```
 
+> **Important**: Use `bunx` instead of `npx` for running CLI tools in xrpl-grpc-server.
+> Example: `bunx biome check .` instead of `npx biome check .`
+
 ### erc20-token (JavaScript/Solidity)
 
 ```bash
