@@ -83,7 +83,7 @@ make check-build
 After editing `.claude/rules/*.md`:
 
 ```bash
-./scripts/ai-agent/sync-rule-claude-to-cursor.sh -f
+make sync-cursor-rules
 ```
 
 This generates `.cursor/rules/*.mdc` automatically.

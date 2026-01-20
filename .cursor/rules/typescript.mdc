@@ -4,6 +4,7 @@ globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
 alwaysApply: false
 ---
 
+
 # TypeScript/JavaScript File Rules
 
 ## Overview
@@ -36,6 +37,9 @@ bun run dev           # Run dev server with hot reload
 bun run build         # Build for production
 bun run proto         # Generate protobuf code
 ```
+
+> **Important**: Use `bunx` instead of `npx` for running CLI tools in xrpl-grpc-server.
+> Example: `bunx biome check .` instead of `npx biome check .`
 
 ### erc20-token (JavaScript/Solidity)
 
@@ -85,6 +89,35 @@ async function fetchData(): Promise<Data> {
 // Avoid: any type (unless absolutely necessary)
 // Bad: function process(data: any)
 // Good: function process(data: TransactionData)
+```
+
+### Critical Value Handling
+
+Never use nullish coalescing (`??`) with empty string for critical values like secrets or keys.
+Instead, throw an error to fail fast and prevent silent failures.
+
+```typescript
+// Bad: Silently returns empty string if seed is undefined
+const secret = wallet.seed ?? '';
+
+// Good: Fail fast with explicit error
+if (!wallet.seed) {
+  throw new Error('Failed to generate a wallet seed.');
+}
+const secret = wallet.seed;
+```
+
+### Module Exports
+
+Prefer named exports over default exports for consistency and better tooling support.
+
+```typescript
+// Bad: Mixed exports cause inconsistent import styles
+export const myService = { ... };
+export default myService;
+
+// Good: Named exports only
+export const myService = { ... };
 ```
 
 ### Import Order

@@ -55,7 +55,7 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 
 **Sync Process:**
 
-- `.cursor/rules/` → Auto-generated via `scripts/ai-agent/sync-rule-claude-to-cursor.sh`
+- `.cursor/rules/` → Auto-generated via `make sync-cursor-rules`
 - `.cursor/skills/` → Symlink to `.claude/skills/`
 
 ### Project Documentation
