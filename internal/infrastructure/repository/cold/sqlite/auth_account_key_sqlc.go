@@ -86,9 +86,10 @@ func (r *AuthAccountKeyRepositorySqlc) GetOne(
 	}
 	if updatedAt.Valid {
 		t, err := time.Parse("2006-01-02 15:04:05", updatedAt.String)
-		if err == nil {
-			key.UpdatedAt = &t
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp format in database: %w", err)
 		}
+		key.UpdatedAt = &t
 	}
 
 	return &key, nil
@@ -151,9 +152,10 @@ func (r *AuthAccountKeyRepositorySqlc) GetByAccount(
 	}
 	if updatedAt.Valid {
 		t, err := time.Parse("2006-01-02 15:04:05", updatedAt.String)
-		if err == nil {
-			key.UpdatedAt = &t
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp format in database: %w", err)
 		}
+		key.UpdatedAt = &t
 	}
 
 	return &key, nil

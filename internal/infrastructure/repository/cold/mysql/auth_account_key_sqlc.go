@@ -29,78 +29,117 @@ func NewAuthAccountKeyRepositorySqlc(
 	}
 }
 
-// convertGetAuthAccountKeyRow converts sqlcgen.GetAuthAccountKeyRow to domain.AuthAccountKey entity.
-func convertGetAuthAccountKeyRow(row *sqlcgen.GetAuthAccountKeyRow) (*domainAuth.AuthAccountKey, error) {
-	addrStatus, err := domainAddress.AddrStatusFromInt8(row.AddrStatus)
+// authAccountKeyRow defines the common interface for auth account key query results
+type authAccountKeyRow interface {
+	*sqlcgen.GetAuthAccountKeyRow | *sqlcgen.GetAuthAccountKeyByAccountRow
+}
+
+// convertAuthAccountKeyRow is a helper to convert query row types to domain.AuthAccountKey
+// This reduces code duplication between different query result converters
+func convertAuthAccountKeyRow[T authAccountKeyRow](row T) (*domainAuth.AuthAccountKey, error) {
+	// Extract fields using type switch to handle different row types
+	var (
+		id                     int16
+		coin                   sqlcgen.AuthAccountKeyCoin
+		keyType                string
+		authAccount            string
+		account                string
+		p2pkhAddress           string
+		p2shSegwitAddress      string
+		bech32Address          string
+		taprootAddress         sql.NullString
+		fullPublicKey          string
+		multisigAddress        string
+		redeemScript           string
+		walletImportFormat     string
+		accountExtendedPrivkey sql.NullString
+		idx                    int64
+		addrStatus             int8
+		updatedAt              sql.NullTime
+	)
+
+	switch v := any(row).(type) {
+	case *sqlcgen.GetAuthAccountKeyRow:
+		id = v.ID
+		coin = v.Coin
+		keyType = v.KeyType
+		authAccount = v.AuthAccount
+		account = v.Account
+		p2pkhAddress = v.P2pkhAddress
+		p2shSegwitAddress = v.P2shSegwitAddress
+		bech32Address = v.Bech32Address
+		taprootAddress = v.TaprootAddress
+		fullPublicKey = v.FullPublicKey
+		multisigAddress = v.MultisigAddress
+		redeemScript = v.RedeemScript
+		walletImportFormat = v.WalletImportFormat
+		accountExtendedPrivkey = v.AccountExtendedPrivkey
+		idx = v.Idx
+		addrStatus = v.AddrStatus
+		updatedAt = v.UpdatedAt
+	case *sqlcgen.GetAuthAccountKeyByAccountRow:
+		id = v.ID
+		coin = v.Coin
+		keyType = v.KeyType
+		authAccount = v.AuthAccount
+		account = v.Account
+		p2pkhAddress = v.P2pkhAddress
+		p2shSegwitAddress = v.P2shSegwitAddress
+		bech32Address = v.Bech32Address
+		taprootAddress = v.TaprootAddress
+		fullPublicKey = v.FullPublicKey
+		multisigAddress = v.MultisigAddress
+		redeemScript = v.RedeemScript
+		walletImportFormat = v.WalletImportFormat
+		accountExtendedPrivkey = v.AccountExtendedPrivkey
+		idx = v.Idx
+		addrStatus = v.AddrStatus
+		updatedAt = v.UpdatedAt
+	}
+
+	status, err := domainAddress.AddrStatusFromInt8(addrStatus)
 	if err != nil {
 		return nil, fmt.Errorf("invalid addr status in database: %w", err)
 	}
 
 	key := &domainAuth.AuthAccountKey{
-		ID:                 row.ID,
-		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
-		KeyType:            row.KeyType,
-		AuthAccount:        domainAccount.AuthType(row.AuthAccount),
-		Account:            domainAccount.AccountType(row.Account),
-		P2pkhAddress:       row.P2pkhAddress,
-		P2shSegwitAddress:  row.P2shSegwitAddress,
-		Bech32Address:      row.Bech32Address,
-		FullPublicKey:      row.FullPublicKey,
-		MultisigAddress:    row.MultisigAddress,
-		RedeemScript:       row.RedeemScript,
-		WalletImportFormat: row.WalletImportFormat,
-		Idx:                row.Idx,
-		AddrStatus:         addrStatus,
+		ID:                 id,
+		CoinTypeCode:       domainCoin.CoinTypeCode(coin),
+		KeyType:            keyType,
+		AuthAccount:        domainAccount.AuthType(authAccount),
+		Account:            domainAccount.AccountType(account),
+		P2pkhAddress:       p2pkhAddress,
+		P2shSegwitAddress:  p2shSegwitAddress,
+		Bech32Address:      bech32Address,
+		FullPublicKey:      fullPublicKey,
+		MultisigAddress:    multisigAddress,
+		RedeemScript:       redeemScript,
+		WalletImportFormat: walletImportFormat,
+		Idx:                idx,
+		AddrStatus:         status,
 	}
 
-	if row.TaprootAddress.Valid {
-		key.TaprootAddress = &row.TaprootAddress.String
+	if taprootAddress.Valid {
+		key.TaprootAddress = &taprootAddress.String
 	}
-	if row.AccountExtendedPrivkey.Valid {
-		key.AccountExtendedPrivkey = &row.AccountExtendedPrivkey.String
+	if accountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = &accountExtendedPrivkey.String
 	}
-	if row.UpdatedAt.Valid {
-		key.UpdatedAt = &row.UpdatedAt.Time
+	if updatedAt.Valid {
+		key.UpdatedAt = &updatedAt.Time
 	}
 
 	return key, nil
 }
 
+// convertGetAuthAccountKeyRow converts sqlcgen.GetAuthAccountKeyRow to domain.AuthAccountKey entity.
+func convertGetAuthAccountKeyRow(row *sqlcgen.GetAuthAccountKeyRow) (*domainAuth.AuthAccountKey, error) {
+	return convertAuthAccountKeyRow(row)
+}
+
 // convertGetAuthAccountKeyByAccountRow converts sqlcgen.GetAuthAccountKeyByAccountRow to domain.AuthAccountKey entity.
 func convertGetAuthAccountKeyByAccountRow(row *sqlcgen.GetAuthAccountKeyByAccountRow) (*domainAuth.AuthAccountKey, error) {
-	addrStatus, err := domainAddress.AddrStatusFromInt8(row.AddrStatus)
-	if err != nil {
-		return nil, fmt.Errorf("invalid addr status in database: %w", err)
-	}
-
-	key := &domainAuth.AuthAccountKey{
-		ID:                 row.ID,
-		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
-		KeyType:            row.KeyType,
-		AuthAccount:        domainAccount.AuthType(row.AuthAccount),
-		Account:            domainAccount.AccountType(row.Account),
-		P2pkhAddress:       row.P2pkhAddress,
-		P2shSegwitAddress:  row.P2shSegwitAddress,
-		Bech32Address:      row.Bech32Address,
-		FullPublicKey:      row.FullPublicKey,
-		MultisigAddress:    row.MultisigAddress,
-		RedeemScript:       row.RedeemScript,
-		WalletImportFormat: row.WalletImportFormat,
-		Idx:                row.Idx,
-		AddrStatus:         addrStatus,
-	}
-
-	if row.TaprootAddress.Valid {
-		key.TaprootAddress = &row.TaprootAddress.String
-	}
-	if row.AccountExtendedPrivkey.Valid {
-		key.AccountExtendedPrivkey = &row.AccountExtendedPrivkey.String
-	}
-	if row.UpdatedAt.Valid {
-		key.UpdatedAt = &row.UpdatedAt.Time
-	}
-
-	return key, nil
+	return convertAuthAccountKeyRow(row)
 }
 
 // convertToAuthAccountKey converts sqlcgen.AuthAccountKey to domain.AuthAccountKey entity.
