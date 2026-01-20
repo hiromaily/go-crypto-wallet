@@ -40,7 +40,7 @@ git fetch origin
 git reset --hard origin/main
 
 # 2. Create new branch
-git checkout -b {type}/issue-{number}-{description}
+git checkout -b {type}/{brief-description}-{issue-number}
 ```
 
 ### If on Wrong Feature Branch
@@ -59,7 +59,7 @@ main
 # → Must create new branch before any work!
 
 $ git branch --show-current
-feature/issue-123-add-taproot
+feature/add-taproot-support-123
 # → OK to continue if this is the correct branch for the task
 ```
 
@@ -75,58 +75,63 @@ Always create from latest `main`:
 git fetch origin
 git checkout main
 git reset --hard origin/main
-git checkout -b {type}/issue-{number}-{brief-description}
+git checkout -b {type}/{brief-description}-{issue-number}
 ```
 
 ### Branch Naming Convention
 
+**Format**: `{type}/{brief-description}-{issue-number}`
+
+- Description should be short and meaningful (use kebab-case)
+- Issue number at the end (just the number, no "issue-" prefix)
+
 | Type | Prefix | Example |
 |------|--------|---------|
-| Feature | `feature/` | `feature/issue-123-add-taproot` |
-| Bug fix | `fix/` | `fix/issue-456-db-connection` |
-| Refactoring | `refactor/` | `refactor/issue-789-clean-arch` |
-| Documentation | `docs/` | `docs/311-update-readme` |
-| DevOps/CI | `ci/` | `ci/issue-100-add-workflow` |
-| Chore | `chore/` | `chore/issue-200-update-deps` |
+| Feature | `feature/` | `feature/add-taproot-support-123` |
+| Bug fix | `fix/` | `fix/db-connection-error-456` |
+| Refactoring | `refactor/` | `refactor/clean-arch-layer-789` |
+| Documentation | `docs/` | `docs/update-readme-311` |
+| DevOps/CI | `ci/` | `ci/add-lint-workflow-100` |
+| Chore | `chore/` | `chore/update-deps-200` |
 
 ### Branch Rules
 
 - **Always from `main`**: Never branch from feature branches
-- **One issue = One branch**: 1つのissueに対して1つのbranchのみ作成
+- **One issue = One branch**: Create only one branch per issue
 - **Short-lived**: Merge within days, not weeks
 - **Delete after merge**: Keep repository clean
 
-### ⚠️ 重要: 複数ブランチ禁止ルール
+### ⚠️ Important: No Multiple Branches Per Issue
 
-**1つのissueに対して複数のbranchを作成しないでください。**
+**Do NOT create multiple branches for the same issue.**
 
 ```
-❌ 禁止パターン:
-  issue-123 → fix/issue-123-first-attempt
-            → fix/issue-123-second-attempt  ← これは作らない
-            → fix/issue-123-another-fix     ← これも作らない
+❌ Prohibited Pattern:
+  issue-123 → fix/first-attempt-123
+            → fix/second-attempt-123  ← Do NOT create this
+            → fix/another-fix-123     ← Do NOT create this either
 
-✅ 正しいパターン:
-  issue-123 → fix/issue-123-description
-            → PR作成 → レビュー → マージ
-            → (必要なら) 新しいissueで新しいbranch
+✅ Correct Pattern:
+  issue-123 → fix/description-123
+            → Create PR → Review → Merge
+            → (If needed) Create new issue with new branch
 ```
 
-### 作業開始前の確認
+### Pre-Work Verification
 
-**新しいbranchを作成する前に、必ず以下を確認:**
+**Before creating a new branch, always check the following:**
 
 ```bash
-# 1. 既存のブランチを確認
-git branch -a | grep "issue-{number}"
+# 1. Check for existing branches
+git branch -a | grep "{issue-number}"
 
-# 2. 既存のPRを確認
-gh pr list --search "issue-{number}"
+# 2. Check for existing PRs
+gh pr list --search "{issue-number}"
 ```
 
-- **既存branchがある場合**: そのbranchで作業を継続
-- **既存PRがある場合**: PRをmergeしてから新しい作業を開始
-- **何もない場合**: 新しいbranchを作成してOK
+- **If existing branch exists**: Continue working on that branch
+- **If existing PR exists**: Merge the PR before starting new work
+- **If nothing exists**: OK to create a new branch
 
 ## Commit Conventions
 
@@ -374,16 +379,16 @@ Only proceed to commit after:
 ### New Issue Workflow
 
 ```bash
-# 0. 既存ブランチ/PRを確認（必須）
-git branch -a | grep "issue-{number}"
-gh pr list --search "issue-{number}"
-# → 既存があれば、そのbranchで作業を継続
+# 0. Check for existing branches/PRs (Required)
+git branch -a | grep "{issue-number}"
+gh pr list --search "{issue-number}"
+# → If exists, continue working on that branch
 
 # 1. Update main
 git fetch origin && git checkout main && git reset --hard origin/main
 
-# 2. Create branch (既存がない場合のみ)
-git checkout -b {type}/issue-{number}-{description}
+# 2. Create branch (only if none exists)
+git checkout -b {type}/{brief-description}-{issue-number}
 
 # 3. Make changes...
 

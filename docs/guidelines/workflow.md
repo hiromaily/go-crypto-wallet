@@ -150,9 +150,13 @@ Closes #[issue_number]
 
 **Branch Naming:**
 
-- `feature/issue-{number}-{brief-description}` - For new features
-- `fix/issue-{number}-{brief-description}` - For bug fixes
-- `refactor/issue-{number}-{brief-description}` - For refactoring
+Format: `{type}/{brief-description}-{issue-number}`
+
+- `feature/{brief-description}-{number}` - For new features
+- `fix/{brief-description}-{number}` - For bug fixes
+- `refactor/{brief-description}-{number}` - For refactoring
+
+See [docs/standards/workflow.md](../standards/workflow.md) for the complete branch naming convention.
 
 **Branch Lifecycle:**
 

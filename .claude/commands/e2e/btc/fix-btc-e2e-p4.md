@@ -42,5 +42,5 @@ Watch → Keygen (1st) → Sign1 (2nd) → Watch (broadcast)
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/issue-{issue_number}-btc-e2e-p4`
+- **Branch**: `fix/btc-e2e-p4`
 - **Commit**: `fix(btc): ...`

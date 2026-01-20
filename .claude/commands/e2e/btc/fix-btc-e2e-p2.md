@@ -79,6 +79,6 @@ btc_cli "btc-watch" analyzepsbt "${psbt_hex}"
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/issue-{issue_number}-btc-e2e-p2`
+- **Branch**: `fix/btc-e2e-p2`
 - **Commit**: `fix(btc): ...`
 - **Skill**: @.claude/skills/git-workflow/SKILL.md

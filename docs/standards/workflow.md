@@ -20,12 +20,25 @@ git push origin branch-name
 
 ## Branch Naming
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Feature | `feature/{issue}-{desc}` | `feature/123-add-taproot` |
-| Bug fix | `fix/{issue}-{desc}` | `fix/456-fee-calculation` |
-| Refactor | `refactor/{issue}-{desc}` | `refactor/789-clean-arch` |
-| Docs | `docs/{issue}-{desc}` | `docs/101-update-readme` |
+### Format
+
+```
+{type}/{brief-description}-{issue-number}
+```
+
+- Description should be short and meaningful (use kebab-case)
+- Issue number at the end (just the number, no "issue-" prefix)
+
+### Types and Examples
+
+| Type | Prefix | Example |
+|------|--------|---------|
+| Feature | `feature/` | `feature/add-taproot-support-123` |
+| Bug fix | `fix/` | `fix/fee-calculation-error-456` |
+| Refactor | `refactor/` | `refactor/clean-arch-layer-789` |
+| Docs | `docs/` | `docs/update-readme-101` |
+| DevOps/CI | `ci/` | `ci/add-lint-workflow-200` |
+| Chore | `chore/` | `chore/update-deps-300` |
 
 ## Commit Messages
 

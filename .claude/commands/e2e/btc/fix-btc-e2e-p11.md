@@ -59,5 +59,5 @@ Verify the control block includes correct internal key and merkle proof.
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/issue-{issue_number}-btc-e2e-p11`
+- **Branch**: `fix/btc-e2e-p11`
 - **Commit**: `fix(btc): ...`

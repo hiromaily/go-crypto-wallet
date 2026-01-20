@@ -67,6 +67,6 @@ echo $WALLET_ADDRESS_TYPE  # Should be "legacy"
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/issue-{issue_number}-btc-e2e-p1`
+- **Branch**: `fix/btc-e2e-p1`
 - **Commit**: `fix(btc): ...`
 - **Skill**: @.claude/skills/git-workflow/SKILL.md

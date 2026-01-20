@@ -70,6 +70,6 @@ cat data/address/bch/address_payment_*.csv | head -5
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/issue-{issue_number}-bch-e2e-p1`
+- **Branch**: `fix/bch-e2e-p1`
 - **Commit**: `fix(bch): ...`
 - **Skill**: @.claude/skills/git-workflow/SKILL.md

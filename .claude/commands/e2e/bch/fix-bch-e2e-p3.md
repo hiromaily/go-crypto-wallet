@@ -57,5 +57,5 @@ Watch → Keygen (1st) → Sign1 (2nd) → Sign2 (3rd) → Watch (broadcast)
 
 When `{issue_number}` is specified:
 
-- **Branch**: `fix/issue-{issue_number}-bch-e2e-p3`
+- **Branch**: `fix/bch-e2e-p3`
 - **Commit**: `fix(bch): ...`
