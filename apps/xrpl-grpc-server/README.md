@@ -16,6 +16,18 @@ This server provides gRPC endpoints for interacting with the XRP Ledger, replaci
 bun install
 ```
 
+## Code Generation
+
+Generate TypeScript code from proto files:
+
+```bash
+bun run proto
+```
+
+This generates TypeScript types and Connect-ES service clients from the proto definitions in `../../proto/rippleapi/`.
+
+**Note**: This requires buf CLI >= 1.64.0 with Edition 2024 support. See [SETUP.md](SETUP.md) for details.
+
 ## Development
 
 ```bash

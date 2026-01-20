@@ -1,0 +1,26 @@
+# buf.gen.yaml - Code generation configuration for TypeScript/Connect-ES
+# https://buf.build/docs/configuration/v2/buf-gen-yaml
+version: v2
+
+# Managed mode is disabled to preserve existing go_package options in proto files
+managed:
+  enabled: false
+
+# Plugins for TypeScript code generation
+# Note: Using local plugins. Once buf CLI >= 1.64.0 adds Edition 2024 support,
+# these will work with the edition 2024 proto files.
+# Until then, generation will fail with "edition 2024 not yet fully supported"
+plugins:
+  # Generate TypeScript protocol buffer code using protoc-gen-es
+  - local: protoc-gen-es
+    out: src/gen
+    opt: target=ts
+
+  # Generate Connect-ES service code for gRPC-web
+  - local: protoc-gen-connect-es
+    out: src/gen
+    opt: target=ts
+
+# Input directories - use the proto files from the repository root
+inputs:
+  - directory: ../../proto/rippleapi
