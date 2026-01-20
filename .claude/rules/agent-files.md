@@ -22,7 +22,7 @@ AI Agent configuration files are managed with **Claude Code's `.claude/` directo
 
 .cursor/                    ← Auto-generated / Symlinked
 ├── commands/README.md      ← Reference only (uses .claude/commands)
-├── rules/*.mdc             ← Auto-generated (scripts/ai-agent/sync-rule-claude-to-cursor.sh)
+├── rules/*.mdc             ← Auto-generated (make sync-cursor-rules)
 └── skills/                 ← Symlink → ../.claude/skills
 
 .codex/                     ← TODO (Future support)

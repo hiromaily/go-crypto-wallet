@@ -1,7 +1,7 @@
 # Cursor Rules
 
 > **Note**: このディレクトリのルールは `.claude/rules/` から自動生成されます。
-> 直接編集せず、ソースを編集後 `scripts/ai-agent/sync-rule-claude-to-cursor.sh` を実行してください。
+> 直接編集せず、ソースを編集後 `make sync-cursor-rules` を実行してください。
 
 ## 概要
 
@@ -21,16 +21,16 @@ Cursor Rules は AI Agent に対するシステムレベルの指示を提供し
 
 ### RULE.md 形式 (推奨)
 
-```
+\`\`\`
 .cursor/rules/
   my-rule/
     RULE.md           # メインルールファイル
     scripts/          # ヘルパースクリプト (オプション)
-```
+\`\`\`
 
 ### .mdc 形式 (レガシー、引き続きサポート)
 
-```yaml
+\`\`\`yaml
 ---
 description: ルールの説明
 globs:
@@ -41,7 +41,7 @@ alwaysApply: false
 
 # ルール本文
 ...
-```
+\`\`\`
 
 ## frontmatter プロパティ
 
@@ -57,7 +57,7 @@ alwaysApply: false
 
 - **ソース**: `.claude/rules/*.md`
 - **生成先**: `.cursor/rules/*.mdc`
-- **変換スクリプト**: `scripts/ai-agent/sync-rule-claude-to-cursor.sh`
+- **変換コマンド**: `make sync-cursor-rules`
 
 ### 変換ルール
 
@@ -70,13 +70,13 @@ alwaysApply: false
 
 ### 同期コマンド
 
-```bash
+\`\`\`bash
 # dry-run で確認
-./scripts/ai-agent/sync-rule-claude-to-cursor.sh --dry-run --verbose
+make sync-cursor-rules-dry
 
 # 実際に変換（既存ファイルを上書き）
-./scripts/ai-agent/sync-rule-claude-to-cursor.sh --force --verbose
-```
+make sync-cursor-rules
+\`\`\`
 
 ## 参考
 

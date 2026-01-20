@@ -224,7 +224,7 @@ Commands and Skills         ← Reference, don't duplicate
 
 **Sync Process**:
 
-- Rules: `scripts/ai-agent/sync-rule-claude-to-cursor.sh`
+- Rules: `make sync-cursor-rules`
 - Skills: Symlinks (automatic)
 - Commands: Cursor loads from `.claude/commands/`
 
