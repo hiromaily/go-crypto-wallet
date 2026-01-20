@@ -49,14 +49,24 @@ func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCA
 		return nil, fmt.Errorf("invalid account type from database: %s", sqlcKey.Account)
 	}
 
+	// Handle interface{} types from SQLC (BCH compatibility)
+	p2shSegwitAddr := ""
+	if v, ok := sqlcKey.P2shSegwitAddress.(string); ok {
+		p2shSegwitAddr = v
+	}
+	bech32Addr := ""
+	if v, ok := sqlcKey.Bech32Address.(string); ok {
+		bech32Addr = v
+	}
+
 	key := &domainBitcoin.BTCAccountKey{
 		ID:                 sqlcKey.ID,
 		CoinTypeCode:       coinTypeCode,
 		KeyType:            sqlcKey.KeyType,
 		Account:            accountType,
 		P2pkhAddress:       sqlcKey.P2pkhAddress,
-		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress,
-		Bech32Address:      sqlcKey.Bech32Address,
+		P2shSegwitAddress:  p2shSegwitAddr,
+		Bech32Address:      bech32Addr,
 		FullPublicKey:      sqlcKey.FullPublicKey,
 		MultisigAddress:    sqlcKey.MultisigAddress,
 		RedeemScript:       sqlcKey.RedeemScript,
@@ -65,14 +75,16 @@ func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCA
 		AddrStatus:         addrStatus,
 	}
 
-	if sqlcKey.TaprootAddress.Valid {
-		key.TaprootAddress = &sqlcKey.TaprootAddress.String
+	// Handle nullable TaprootAddress (interface{})
+	if v, ok := sqlcKey.TaprootAddress.(string); ok && v != "" {
+		key.TaprootAddress = &v
 	}
+	// Handle nullable AccountExtendedPrivkey (sql.NullString)
 	if sqlcKey.AccountExtendedPrivkey.Valid {
 		key.AccountExtendedPrivkey = &sqlcKey.AccountExtendedPrivkey.String // NEVER log
 	}
 
-	// Parse TEXT timestamp
+	// Parse TEXT timestamp (sql.NullString)
 	if sqlcKey.UpdatedAt.Valid {
 		t, err := time.Parse("2006-01-02 15:04:05", sqlcKey.UpdatedAt.String)
 		if err != nil {

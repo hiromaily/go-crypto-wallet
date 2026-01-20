@@ -23,20 +23,22 @@ CREATE TABLE btc_account_key (
   coin TEXT NOT NULL CHECK(coin IN ('btc','bch')),
   key_type TEXT NOT NULL DEFAULT 'bip44',
   account TEXT NOT NULL CHECK(account IN ('client','deposit','payment','stored')),
-  p2pkh_address TEXT NOT NULL UNIQUE,
-  p2sh_segwit_address TEXT NOT NULL,
-  bech32_address TEXT NOT NULL,
-  taproot_address TEXT DEFAULT NULL,
+  p2pkh_address TEXT NOT NULL,
+  p2sh_segwit_address TEXT NULL,
+  bech32_address TEXT NULL,
+  taproot_address TEXT NULL,
   full_public_key TEXT NOT NULL,
   multisig_address TEXT NOT NULL DEFAULT '',
   redeem_script TEXT NOT NULL DEFAULT '',
-  wallet_import_format TEXT NOT NULL UNIQUE,
+  wallet_import_format TEXT NOT NULL,
   account_extended_privkey TEXT DEFAULT NULL,
   idx INTEGER NOT NULL,
   addr_status INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE UNIQUE INDEX idx_btc_account_key_p2pkh_address ON btc_account_key(p2pkh_address);
+CREATE UNIQUE INDEX idx_btc_account_key_wallet_import_format ON btc_account_key(wallet_import_format);
 CREATE INDEX idx_btc_account_key_account ON btc_account_key(account);
 CREATE INDEX idx_btc_account_key_coin ON btc_account_key(coin);
 CREATE INDEX idx_btc_account_key_key_type ON btc_account_key(key_type);

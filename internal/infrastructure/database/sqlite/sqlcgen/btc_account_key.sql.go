@@ -12,7 +12,13 @@ import (
 )
 
 const getBtcAccountKeysByAddrStatus = `-- name: GetBtcAccountKeysByAddrStatus :many
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? AND addr_status = ?
+SELECT
+  id, coin, key_type, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM btc_account_key WHERE coin = ? AND account = ? AND addr_status = ?
 `
 
 type GetBtcAccountKeysByAddrStatusParams struct {
@@ -62,7 +68,13 @@ func (q *Queries) GetBtcAccountKeysByAddrStatus(ctx context.Context, arg GetBtcA
 }
 
 const getBtcAccountKeysByMultisigAddresses = `-- name: GetBtcAccountKeysByMultisigAddresses :many
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? AND multisig_address IN (/*SLICE:addrs*/?)
+SELECT
+  id, coin, key_type, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM btc_account_key WHERE coin = ? AND account = ? AND multisig_address IN (/*SLICE:addrs*/?)
 `
 
 type GetBtcAccountKeysByMultisigAddressesParams struct {
@@ -143,7 +155,13 @@ func (q *Queries) GetMaxBtcAccountKeyIndex(ctx context.Context, arg GetMaxBtcAcc
 }
 
 const getOneBtcAccountKeyByMaxID = `-- name: GetOneBtcAccountKeyByMaxID :one
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1
+SELECT
+  id, coin, key_type, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM btc_account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1
 `
 
 type GetOneBtcAccountKeyByMaxIDParams struct {
@@ -187,9 +205,9 @@ type InsertBtcAccountKeyParams struct {
 	KeyType                string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      string
-	Bech32Address          string
-	TaprootAddress         sql.NullString
+	P2shSegwitAddress      interface{}
+	Bech32Address          interface{}
+	TaprootAddress         interface{}
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string
@@ -251,7 +269,7 @@ type UpdateBtcAccountKeyAddressParams struct {
 	UpdatedAt         sql.NullString
 	Coin              string
 	Account           string
-	P2shSegwitAddress string
+	P2shSegwitAddress interface{}
 }
 
 func (q *Queries) UpdateBtcAccountKeyAddress(ctx context.Context, arg UpdateBtcAccountKeyAddressParams) (sql.Result, error) {

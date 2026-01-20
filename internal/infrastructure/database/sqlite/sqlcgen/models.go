@@ -24,9 +24,9 @@ type AuthAccountKey struct {
 	AuthAccount            string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      string
-	Bech32Address          string
-	TaprootAddress         sql.NullString
+	P2shSegwitAddress      interface{}
+	Bech32Address          interface{}
+	TaprootAddress         interface{}
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string
@@ -55,9 +55,9 @@ type BtcAccountKey struct {
 	KeyType                string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      string
-	Bech32Address          string
-	TaprootAddress         sql.NullString
+	P2shSegwitAddress      interface{}
+	Bech32Address          interface{}
+	TaprootAddress         interface{}
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string

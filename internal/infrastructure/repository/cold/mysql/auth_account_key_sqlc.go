@@ -29,6 +29,70 @@ func NewAuthAccountKeyRepositorySqlc(
 	}
 }
 
+// convertGetAuthAccountKeyRow converts sqlcgen.GetAuthAccountKeyRow to domain.AuthAccountKey entity.
+func convertGetAuthAccountKeyRow(row *sqlcgen.GetAuthAccountKeyRow) (*domainAuth.AuthAccountKey, error) {
+	key := &domainAuth.AuthAccountKey{
+		ID:                 row.ID,
+		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
+		KeyType:            row.KeyType,
+		AuthAccount:        domainAccount.AuthType(row.AuthAccount),
+		Account:            domainAccount.AccountType(row.Account),
+		P2pkhAddress:       row.P2pkhAddress,
+		P2shSegwitAddress:  row.P2shSegwitAddress,
+		Bech32Address:      row.Bech32Address,
+		FullPublicKey:      row.FullPublicKey,
+		MultisigAddress:    row.MultisigAddress,
+		RedeemScript:       row.RedeemScript,
+		WalletImportFormat: row.WalletImportFormat,
+		Idx:                row.Idx,
+		AddrStatus:         domainAddress.AddrStatus(row.AddrStatus),
+	}
+
+	if row.TaprootAddress.Valid {
+		key.TaprootAddress = &row.TaprootAddress.String
+	}
+	if row.AccountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = &row.AccountExtendedPrivkey.String
+	}
+	if row.UpdatedAt.Valid {
+		key.UpdatedAt = &row.UpdatedAt.Time
+	}
+
+	return key, nil
+}
+
+// convertGetAuthAccountKeyByAccountRow converts sqlcgen.GetAuthAccountKeyByAccountRow to domain.AuthAccountKey entity.
+func convertGetAuthAccountKeyByAccountRow(row *sqlcgen.GetAuthAccountKeyByAccountRow) (*domainAuth.AuthAccountKey, error) {
+	key := &domainAuth.AuthAccountKey{
+		ID:                 row.ID,
+		CoinTypeCode:       domainCoin.CoinTypeCode(row.Coin),
+		KeyType:            row.KeyType,
+		AuthAccount:        domainAccount.AuthType(row.AuthAccount),
+		Account:            domainAccount.AccountType(row.Account),
+		P2pkhAddress:       row.P2pkhAddress,
+		P2shSegwitAddress:  row.P2shSegwitAddress,
+		Bech32Address:      row.Bech32Address,
+		FullPublicKey:      row.FullPublicKey,
+		MultisigAddress:    row.MultisigAddress,
+		RedeemScript:       row.RedeemScript,
+		WalletImportFormat: row.WalletImportFormat,
+		Idx:                row.Idx,
+		AddrStatus:         domainAddress.AddrStatus(row.AddrStatus),
+	}
+
+	if row.TaprootAddress.Valid {
+		key.TaprootAddress = &row.TaprootAddress.String
+	}
+	if row.AccountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = &row.AccountExtendedPrivkey.String
+	}
+	if row.UpdatedAt.Valid {
+		key.UpdatedAt = &row.UpdatedAt.Time
+	}
+
+	return key, nil
+}
+
 // convertToAuthAccountKey converts sqlcgen.AuthAccountKey to domain.AuthAccountKey entity.
 // SECURITY: Handles WIF (private key) data - never log the wallet import format field.
 func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthAccountKey, error) {
@@ -127,7 +191,7 @@ func (r *AuthAccountKeyRepositorySqlc) GetOne(
 		return nil, fmt.Errorf("failed to call GetAuthAccountKey(): %w", err)
 	}
 
-	return convertToAuthAccountKey(&authKey)
+	return convertGetAuthAccountKeyRow(&authKey)
 }
 
 // GetByAccount returns one record by authType and accountType
@@ -145,7 +209,7 @@ func (r *AuthAccountKeyRepositorySqlc) GetByAccount(
 		return nil, fmt.Errorf("failed to call GetAuthAccountKeyByAccount(): %w", err)
 	}
 
-	return convertToAuthAccountKey(&authKey)
+	return convertGetAuthAccountKeyByAccountRow(&authKey)
 }
 
 // Insert inserts record
