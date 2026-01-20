@@ -7,13 +7,7 @@
  * Security Note: Secrets must never be logged.
  */
 
-import {
-  type Client,
-  multisign,
-  type SubmittableTransaction,
-  Wallet,
-  xrpToDrops,
-} from 'xrpl';
+import { type Client, multisign, type SubmittableTransaction, Wallet, xrpToDrops } from 'xrpl';
 import { getClient } from '../xrpl';
 
 // ============================================================================
@@ -491,22 +485,43 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
     waitValidation: async function* (
       context: StreamingContext,
     ): AsyncGenerator<WaitValidationResponse> {
+      // Early exit if already aborted
+      if (context.signal.aborted) {
+        return;
+      }
+
       const client = await clientGetter();
 
       // Subscribe to ledger events
       await client.request({ command: 'subscribe', streams: ['ledger'] });
 
-      // Create a promise factory for ledger events
-      const ledgerPromise = (): Promise<number> =>
+      // Create a promise factory for ledger events with abort support
+      const ledgerPromise = (): Promise<number | null> =>
         new Promise((resolve) => {
-          client.once('ledgerClosed', (ledger: { ledger_index: number }) => {
+          // Handle abort signal
+          const onAbort = () => {
+            client.off('ledgerClosed', onLedger);
+            resolve(null);
+          };
+
+          // Handle ledger event
+          const onLedger = (ledger: { ledger_index: number }) => {
+            context.signal.removeEventListener('abort', onAbort);
             resolve(ledger.ledger_index);
-          });
+          };
+
+          // Set up listeners
+          context.signal.addEventListener('abort', onAbort, { once: true });
+          client.once('ledgerClosed', onLedger);
         });
 
       try {
         while (!context.signal.aborted) {
           const ledgerIndex = await ledgerPromise();
+          // Exit if aborted (ledgerIndex will be null)
+          if (ledgerIndex === null) {
+            break;
+          }
           yield { ledgerVersion: BigInt(ledgerIndex) };
         }
       } finally {
