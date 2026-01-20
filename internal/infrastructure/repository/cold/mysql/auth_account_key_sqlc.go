@@ -138,56 +138,10 @@ func convertGetAuthAccountKeyRow(row *sqlcgen.GetAuthAccountKeyRow) (*domainAuth
 }
 
 // convertGetAuthAccountKeyByAccountRow converts sqlcgen.GetAuthAccountKeyByAccountRow to domain.AuthAccountKey entity.
-func convertGetAuthAccountKeyByAccountRow(row *sqlcgen.GetAuthAccountKeyByAccountRow) (*domainAuth.AuthAccountKey, error) {
+func convertGetAuthAccountKeyByAccountRow(
+	row *sqlcgen.GetAuthAccountKeyByAccountRow,
+) (*domainAuth.AuthAccountKey, error) {
 	return convertAuthAccountKeyRow(row)
-}
-
-// convertToAuthAccountKey converts sqlcgen.AuthAccountKey to domain.AuthAccountKey entity.
-// SECURITY: Handles WIF (private key) data - never log the wallet import format field.
-func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthAccountKey, error) {
-	addrStatus, err := domainAddress.AddrStatusFromInt8(sqlcKey.AddrStatus)
-	if err != nil {
-		return nil, fmt.Errorf("invalid addr status in database: %w", err)
-	}
-
-	// Handle nullable string fields (sql.NullString -> string)
-	p2shSegwitAddr := ""
-	if sqlcKey.P2shSegwitAddress.Valid {
-		p2shSegwitAddr = sqlcKey.P2shSegwitAddress.String
-	}
-	bech32Addr := ""
-	if sqlcKey.Bech32Address.Valid {
-		bech32Addr = sqlcKey.Bech32Address.String
-	}
-
-	key := &domainAuth.AuthAccountKey{
-		ID:                 sqlcKey.ID,
-		CoinTypeCode:       domainCoin.CoinTypeCode(sqlcKey.Coin),
-		KeyType:            sqlcKey.KeyType,
-		AuthAccount:        domainAccount.AuthType(sqlcKey.AuthAccount),
-		Account:            domainAccount.AccountType(sqlcKey.Account),
-		P2pkhAddress:       sqlcKey.P2pkhAddress,
-		P2shSegwitAddress:  p2shSegwitAddr,
-		Bech32Address:      bech32Addr,
-		FullPublicKey:      sqlcKey.FullPublicKey,
-		MultisigAddress:    sqlcKey.MultisigAddress,
-		RedeemScript:       sqlcKey.RedeemScript,
-		WalletImportFormat: sqlcKey.WalletImportFormat, // WIF - NEVER log
-		Idx:                sqlcKey.Idx,
-		AddrStatus:         addrStatus,
-	}
-
-	if sqlcKey.TaprootAddress.Valid {
-		key.TaprootAddress = &sqlcKey.TaprootAddress.String
-	}
-	if sqlcKey.AccountExtendedPrivkey.Valid {
-		key.AccountExtendedPrivkey = &sqlcKey.AccountExtendedPrivkey.String
-	}
-	if sqlcKey.UpdatedAt.Valid {
-		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
-	}
-
-	return key, nil
 }
 
 // convertFromAuthAccountKey converts domain.AuthAccountKey entity to sqlcgen.AuthAccountKey.

@@ -32,8 +32,9 @@ type PrevTx struct {
 // ParseRawTxContent parses BCH raw transaction content.
 //
 // Format:
-//   Line 1: Transaction hex
-//   Line 2+: prevtx:txid:vout:scriptPubKey:redeemScript:amount
+//
+//	Line 1: Transaction hex
+//	Line 2+: prevtx:txid:vout:scriptPubKey:redeemScript:amount
 //
 // The prevTx metadata is required for multisig transactions to enable subsequent
 // signers to add their signatures. This metadata is preserved as a workaround for
@@ -108,8 +109,9 @@ func ConvertPrevTxsToDTO(prevTxs []PrevTx) []dtobtc.PreviousTx {
 // FormatSignedTxContent formats the signed transaction content for BCH.
 //
 // This function creates the transaction file format used in BCH multisig workflows:
-//   Line 1: Transaction hex
-//   Line 2+: prevtx:txid:vout:scriptPubKey:redeemScript:amount
+//
+//	Line 1: Transaction hex
+//	Line 2+: prevtx:txid:vout:scriptPubKey:redeemScript:amount
 //
 // The prevTx metadata is included to enable subsequent signers (Sign1, Sign2) to
 // add their signatures. This is critical for the BCH Node RPC bug workaround.
