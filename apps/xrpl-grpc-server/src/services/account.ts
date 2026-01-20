@@ -98,18 +98,19 @@ export function createAccountService(clientGetter: () => Promise<Client>) {
       } catch (error) {
         // Handle specific XRPL errors
         if (error instanceof Error) {
+          // RippledError has a `data` property with the error code.
+          // See: https://xrpl.org/docs/references/http-websocket-apis/error-formatting/
+          const errorCode = (error as { data?: { error?: string } }).data?.error;
+
           // actNotFound is the error code for non-existent accounts
-          if (
-            error.message.includes('actNotFound') ||
-            error.message.includes('Account not found')
-          ) {
+          if (errorCode === 'actNotFound') {
             throw new AccountNotFoundError(request.address);
           }
 
           // Re-throw with more context
           throw new AccountInfoError(
             `Failed to get account info for ${request.address}: ${error.message}`,
-            (error as { data?: { error?: string } }).data?.error,
+            errorCode,
           );
         }
 
