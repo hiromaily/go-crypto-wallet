@@ -120,6 +120,9 @@ sqlc-lint: sqlc-validate
 .PHONY: hcl-fmt
 hcl-fmt: atlas-fmt
 
+.PHONY: hcl-fmt-check
+hcl-fmt-check: atlas-fmt-check
+
 .PHONY: hcl-lint
 hcl-lint: atlas-lint
 

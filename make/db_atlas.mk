@@ -43,6 +43,19 @@ atlas-fmt:
 	@atlas schema fmt tools/atlas/schemas/
 	@echo "✓ HCL files formatted successfully"
 
+# Check if HCL files are formatted (CI mode)
+# Format files and check for git changes
+.PHONY: atlas-fmt-check
+atlas-fmt-check:
+	@echo "Checking Atlas HCL schema file formatting..."
+	@atlas schema fmt tools/atlas/schemas/
+	@if ! git diff --exit-code tools/atlas/schemas/ > /dev/null 2>&1; then \
+		echo "❌ HCL files are not formatted. Run 'make atlas-fmt' to fix."; \
+		git diff tools/atlas/schemas/; \
+		exit 1; \
+	fi
+	@echo "✓ All HCL files are properly formatted"
+
 # Lint all HCL schema files with validation
 # `atlas schema lint`
 .PHONY: atlas-lint
