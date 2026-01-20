@@ -98,8 +98,23 @@ func (u *signTransactionUseCase) Sign(
 	basePath := u.txFileRepo.CreateFilePath(actionType, txType, txID, signedCount)
 
 	var generatedFileName string
-	// For multisig transactions, always include prevTx metadata for subsequent signers,
-	// even if BCH incorrectly reports isSigned=true for partial signatures
+	// Workaround for BCH Node RPC bug in signrawtransactionwithkey.
+	//
+	// Issue: BCH Node incorrectly reports complete=true after adding the 2nd signature
+	// to a 3-of-3 multisig transaction (should require all 3 signatures).
+	//
+	// Impact: When complete=true is reported prematurely, the transaction file is marked
+	// as "signed" and prevTx metadata (TXID, vout, scriptPubKey, redeemScript, amount)
+	// is omitted. Without this metadata, subsequent signers cannot add their signatures,
+	// resulting in error: "Input not found or already spent"
+	//
+	// Solution: For multisig transactions, always include prevTx metadata regardless of
+	// the complete flag. This allows Sign1 and Sign2 wallets to add their signatures.
+	//
+	// Detection: Use non-nil multisigAccount to determine if transaction is multisig.
+	//
+	// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+	// Related: Issue #485, Issue #433
 	isMultisig := u.multisigAccount != nil
 	if isSigned && !isMultisig {
 		// For fully signed single-sig transactions, just write the hex

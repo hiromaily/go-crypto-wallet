@@ -68,14 +68,28 @@ func (u *signTransactionUseCase) Sign(
 	input signusecase.SignTransactionInput,
 ) (signusecase.SignTransactionOutput, error) {
 	// Get tx metadata from file name
-	// For BCH multisig, accept both "unsigned" and "signed" files since BCH may mark
-	// a transaction as "signed" even when it needs additional signatures for multisig
+	//
+	// Workaround for BCH Node RPC bug: Accept both "unsigned" and "signed" transaction types.
+	//
+	// Issue: BCH Node's signrawtransactionwithkey incorrectly reports complete=true after
+	// adding the 2nd signature to a 3-of-3 multisig transaction. This causes the keygen
+	// wallet to mark the transaction file as "signed" when it should remain "unsigned"
+	// for subsequent signers.
+	//
+	// Impact: Sign1 wallet receives a file marked as "signed" when adding the 2nd signature
+	// in a 3-of-3 multisig. Sign2 wallet also receives "signed" files. Without this
+	// workaround, both would reject the file with "invalid txType: signed" error.
+	//
+	// Solution: Accept both transaction types to handle BCH Node's incorrect complete flag.
+	//
+	// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+	// Related: Issue #485, Issue #433
 	fileType, err := u.txFileRepo.GetFileNameType(input.FilePath)
 	if err != nil {
 		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to parse file name: %w", err)
 	}
 
-	// Validate transaction type - accept both unsigned and signed for multisig
+	// Validate transaction type - accept both unsigned and signed for BCH multisig workaround
 	if fileType.TxType != domainTx.TxTypeUnsigned && fileType.TxType != domainTx.TxTypeSigned {
 		return signusecase.SignTransactionOutput{}, fmt.Errorf(
 			"invalid txType: %s (expected unsigned or signed)", fileType.TxType)
@@ -117,8 +131,24 @@ func (u *signTransactionUseCase) Sign(
 	}
 
 	var generatedFileName string
-	// For multisig transactions, always include prevTx metadata for subsequent signers,
-	// even if BCH incorrectly reports isSigned=true for partial signatures
+	// Workaround for BCH Node RPC bug in signrawtransactionwithkey.
+	//
+	// Issue: BCH Node incorrectly reports complete=true after adding the 2nd signature
+	// to a 3-of-3 multisig transaction (should require all 3 signatures).
+	//
+	// Impact: When Sign1 wallet adds the 2nd signature and BCH reports complete=true,
+	// the transaction file would be marked as "signed" and prevTx metadata would be
+	// omitted. Without this metadata, Sign2 wallet cannot add the 3rd signature,
+	// resulting in error: "Input not found or already spent"
+	//
+	// Solution: For multisig transactions, always include prevTx metadata regardless of
+	// the complete flag. This ensures Sign2 wallet (and any subsequent signer) can add
+	// their signatures.
+	//
+	// Detection: Use non-nil multisigAccount to determine if transaction is multisig.
+	//
+	// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+	// Related: Issue #485, Issue #433
 	isMultisig := u.multisigAccount != nil
 	if isSigned && !isMultisig {
 		// For fully signed single-sig transactions, just write the hex
