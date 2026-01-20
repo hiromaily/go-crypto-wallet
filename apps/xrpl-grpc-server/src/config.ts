@@ -52,8 +52,10 @@ function getXRPLWebSocketUrl(): string {
     return envUrl;
   }
 
-  const network = process.env.XRP_NETWORK || 'testnet';
-  return XRPL_WS_URLS[network as keyof typeof XRPL_WS_URLS] || XRPL_WS_URLS.testnet;
+  const network = process.env.XRP_NETWORK;
+  return network === 'mainnet' || network === 'devnet'
+    ? XRPL_WS_URLS[network]
+    : XRPL_WS_URLS.testnet;
 }
 
 /**

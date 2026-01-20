@@ -46,14 +46,16 @@ function setupGracefulShutdown(): void {
   const shutdown = async (signal: string) => {
     console.log(`\nReceived ${signal}, shutting down gracefully...`);
 
+    let exitCode = 0;
     try {
       await disconnectClient();
       console.log('XRPL client disconnected');
     } catch (error) {
       console.error('Error during shutdown:', error);
+      exitCode = 1;
     }
 
-    process.exit(0);
+    process.exit(exitCode);
   };
 
   process.on('SIGINT', () => shutdown('SIGINT'));
