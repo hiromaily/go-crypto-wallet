@@ -93,4 +93,5 @@ main().catch((error) => {
 });
 
 export { getConfig } from './config';
+export { addressService } from './services';
 export { disconnectClient, getClient, getClientManager } from './xrpl';
