@@ -50,10 +50,10 @@ For `xrpl-grpc-server` only:
 
 ```bash
 cd apps/xrpl-grpc-server
-npm install           # Install dependencies
-npm run lint          # Lint with Biome
-npm run build         # Build TypeScript
-npm run start         # Run server
+bun install           # Install dependencies
+bun run lint          # Lint with Biome
+bun run build         # Build TypeScript
+bun run dev           # Run server in dev mode
 ```
 
 ## Quick Reference
