@@ -11,7 +11,13 @@ import (
 )
 
 const getAuthAccountKey = `-- name: GetAuthAccountKey :one
-SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? LIMIT 1
+SELECT
+  id, coin, key_type, auth_account, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM auth_account_key WHERE coin = ? AND auth_account = ? LIMIT 1
 `
 
 type GetAuthAccountKeyParams struct {
@@ -19,9 +25,29 @@ type GetAuthAccountKeyParams struct {
 	AuthAccount string
 }
 
-func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyParams) (AuthAccountKey, error) {
+type GetAuthAccountKeyRow struct {
+	ID                     int16
+	Coin                   AuthAccountKeyCoin
+	KeyType                string
+	AuthAccount            string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int8
+	UpdatedAt              sql.NullTime
+}
+
+func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyParams) (GetAuthAccountKeyRow, error) {
 	row := q.db.QueryRowContext(ctx, getAuthAccountKey, arg.Coin, arg.AuthAccount)
-	var i AuthAccountKey
+	var i GetAuthAccountKeyRow
 	err := row.Scan(
 		&i.ID,
 		&i.Coin,
@@ -45,7 +71,13 @@ func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyPa
 }
 
 const getAuthAccountKeyByAccount = `-- name: GetAuthAccountKeyByAccount :one
-SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? AND account = ? LIMIT 1
+SELECT
+  id, coin, key_type, auth_account, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM auth_account_key WHERE coin = ? AND auth_account = ? AND account = ? LIMIT 1
 `
 
 type GetAuthAccountKeyByAccountParams struct {
@@ -54,9 +86,29 @@ type GetAuthAccountKeyByAccountParams struct {
 	Account     string
 }
 
-func (q *Queries) GetAuthAccountKeyByAccount(ctx context.Context, arg GetAuthAccountKeyByAccountParams) (AuthAccountKey, error) {
+type GetAuthAccountKeyByAccountRow struct {
+	ID                     int16
+	Coin                   AuthAccountKeyCoin
+	KeyType                string
+	AuthAccount            string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int8
+	UpdatedAt              sql.NullTime
+}
+
+func (q *Queries) GetAuthAccountKeyByAccount(ctx context.Context, arg GetAuthAccountKeyByAccountParams) (GetAuthAccountKeyByAccountRow, error) {
 	row := q.db.QueryRowContext(ctx, getAuthAccountKeyByAccount, arg.Coin, arg.AuthAccount, arg.Account)
-	var i AuthAccountKey
+	var i GetAuthAccountKeyByAccountRow
 	err := row.Scan(
 		&i.ID,
 		&i.Coin,
@@ -92,8 +144,8 @@ type InsertAuthAccountKeyParams struct {
 	AuthAccount            string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      string
-	Bech32Address          string
+	P2shSegwitAddress      sql.NullString
+	Bech32Address          sql.NullString
 	TaprootAddress         sql.NullString
 	FullPublicKey          string
 	MultisigAddress        string

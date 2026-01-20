@@ -11,7 +11,13 @@ import (
 )
 
 const getAuthAccountKey = `-- name: GetAuthAccountKey :one
-SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? LIMIT 1
+SELECT
+  id, coin, key_type, auth_account, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM auth_account_key WHERE coin = ? AND auth_account = ? LIMIT 1
 `
 
 type GetAuthAccountKeyParams struct {
@@ -45,7 +51,13 @@ func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyPa
 }
 
 const getAuthAccountKeyByAccount = `-- name: GetAuthAccountKeyByAccount :one
-SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? AND account = ? LIMIT 1
+SELECT
+  id, coin, key_type, auth_account, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM auth_account_key WHERE coin = ? AND auth_account = ? AND account = ? LIMIT 1
 `
 
 type GetAuthAccountKeyByAccountParams struct {
@@ -92,9 +104,9 @@ type InsertAuthAccountKeyParams struct {
 	AuthAccount            string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      string
-	Bech32Address          string
-	TaprootAddress         sql.NullString
+	P2shSegwitAddress      interface{}
+	Bech32Address          interface{}
+	TaprootAddress         interface{}
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string

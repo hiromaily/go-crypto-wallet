@@ -15,6 +15,7 @@ import (
 
 // AuthAccountKeyRepositorySqlc is repository for auth_account_key table using sqlc
 type AuthAccountKeyRepositorySqlc struct {
+	db           *sql.DB
 	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
@@ -24,147 +25,186 @@ func NewAuthAccountKeyRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AuthAccountKeyRepositorySqlc {
 	return &AuthAccountKeyRepositorySqlc{
+		db:           dbConn,
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
-// convertToAuthAccountKey converts sqlcgen.AuthAccountKey to domain.AuthAccountKey entity.
-// SECURITY: Handles WIF (private key) data - never log the wallet import format field.
-func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthAccountKey, error) {
-	addrStatus, err := domainAddress.AddrStatusFromInt8(int8(sqlcKey.AddrStatus))
+
+// GetOne returns one record by authType
+// Note: Uses raw SQL with COALESCE to handle NULL values in BCH (no SegWit support)
+func (r *AuthAccountKeyRepositorySqlc) GetOne(
+	ctx context.Context, authType domainAccount.AuthType,
+) (*domainAuth.AuthAccountKey, error) {
+	query := `SELECT
+		id, coin, key_type, auth_account, account, p2pkh_address,
+		COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+		COALESCE(bech32_address, '') as bech32_address,
+		taproot_address, full_public_key, multisig_address, redeem_script,
+		wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+	FROM auth_account_key WHERE coin = ? AND auth_account = ? LIMIT 1`
+
+	var key domainAuth.AuthAccountKey
+	var taprootAddress, accountExtendedPrivkey, updatedAt sql.NullString
+	var addrStatus int64
+
+	err := r.db.QueryRowContext(ctx, query, r.coinTypeCode.String(), authType.String()).Scan(
+		&key.ID,
+		&key.CoinTypeCode,
+		&key.KeyType,
+		&key.AuthAccount,
+		&key.Account,
+		&key.P2pkhAddress,
+		&key.P2shSegwitAddress,
+		&key.Bech32Address,
+		&taprootAddress,
+		&key.FullPublicKey,
+		&key.MultisigAddress,
+		&key.RedeemScript,
+		&key.WalletImportFormat,
+		&accountExtendedPrivkey,
+		&key.Idx,
+		&addrStatus,
+		&updatedAt,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+		return nil, fmt.Errorf("failed to query auth account key: %w", err)
 	}
 
-	// Validate ID fits in int16 to prevent overflow
-	if sqlcKey.ID < -32768 || sqlcKey.ID > 32767 {
-		return nil, fmt.Errorf("auth account key ID %d out of int16 range", sqlcKey.ID)
+	// Convert scanned values
+	status, err := domainAddress.AddrStatusFromInt8(int8(addrStatus))
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status: %w", err)
 	}
-
-	key := &domainAuth.AuthAccountKey{
-		ID:                 int16(sqlcKey.ID),
-		CoinTypeCode:       domainCoin.CoinTypeCode(sqlcKey.Coin),
-		KeyType:            sqlcKey.KeyType,
-		AuthAccount:        domainAccount.AuthType(sqlcKey.AuthAccount),
-		Account:            domainAccount.AccountType(sqlcKey.Account),
-		P2pkhAddress:       sqlcKey.P2pkhAddress,
-		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress,
-		Bech32Address:      sqlcKey.Bech32Address,
-		FullPublicKey:      sqlcKey.FullPublicKey,
-		MultisigAddress:    sqlcKey.MultisigAddress,
-		RedeemScript:       sqlcKey.RedeemScript,
-		WalletImportFormat: sqlcKey.WalletImportFormat, // WIF - NEVER log
-		Idx:                sqlcKey.Idx,
-		AddrStatus:         addrStatus,
+	key.AddrStatus = status
+	if taprootAddress.Valid {
+		key.TaprootAddress = &taprootAddress.String
 	}
-
-	if sqlcKey.TaprootAddress.Valid {
-		key.TaprootAddress = &sqlcKey.TaprootAddress.String
+	if accountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = &accountExtendedPrivkey.String
 	}
-	if sqlcKey.AccountExtendedPrivkey.Valid {
-		key.AccountExtendedPrivkey = &sqlcKey.AccountExtendedPrivkey.String
-	}
-	if sqlcKey.UpdatedAt.Valid {
-		t, err := time.Parse("2006-01-02 15:04:05", sqlcKey.UpdatedAt.String)
+	if updatedAt.Valid {
+		t, err := time.Parse("2006-01-02 15:04:05", updatedAt.String)
 		if err != nil {
-			return nil, fmt.Errorf("invalid timestamp in database: %w", err)
+			return nil, fmt.Errorf("invalid timestamp format in database: %w", err)
 		}
 		key.UpdatedAt = &t
 	}
 
-	return key, nil
-}
-
-// convertFromAuthAccountKey converts domain.AuthAccountKey entity to sqlcgen.AuthAccountKey.
-func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAccountKey {
-	sqlcKey := &sqlcgen.AuthAccountKey{
-		ID:                 int64(key.ID),
-		Coin:               key.CoinTypeCode.String(),
-		KeyType:            key.KeyType,
-		AuthAccount:        key.AuthAccount.String(),
-		Account:            key.Account.String(),
-		P2pkhAddress:       key.P2pkhAddress,
-		P2shSegwitAddress:  key.P2shSegwitAddress,
-		Bech32Address:      key.Bech32Address,
-		FullPublicKey:      key.FullPublicKey,
-		MultisigAddress:    key.MultisigAddress,
-		RedeemScript:       key.RedeemScript,
-		WalletImportFormat: key.WalletImportFormat,
-		Idx:                key.Idx,
-		AddrStatus:         int64(key.AddrStatus.Int8()),
-	}
-
-	if key.TaprootAddress != nil {
-		sqlcKey.TaprootAddress = sql.NullString{String: *key.TaprootAddress, Valid: true}
-	}
-	if key.AccountExtendedPrivkey != nil {
-		sqlcKey.AccountExtendedPrivkey = sql.NullString{String: *key.AccountExtendedPrivkey, Valid: true}
-	}
-	if key.UpdatedAt != nil {
-		sqlcKey.UpdatedAt = sql.NullString{String: key.UpdatedAt.Format("2006-01-02 15:04:05"), Valid: true}
-	}
-
-	return sqlcKey
-}
-
-// GetOne returns one record by authType
-func (r *AuthAccountKeyRepositorySqlc) GetOne(
-	ctx context.Context, authType domainAccount.AuthType,
-) (*domainAuth.AuthAccountKey, error) {
-	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlcgen.GetAuthAccountKeyParams{
-		Coin:        r.coinTypeCode.String(),
-		AuthAccount: authType.String(),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to call GetAuthAccountKey(): %w", err)
-	}
-
-	return convertToAuthAccountKey(&authKey)
+	return &key, nil
 }
 
 // GetByAccount returns one record by authType and accountType
+// Note: Uses raw SQL with COALESCE to handle NULL values in BCH (no SegWit support)
 func (r *AuthAccountKeyRepositorySqlc) GetByAccount(
 	authType domainAccount.AuthType, accountType domainAccount.AccountType,
 ) (*domainAuth.AuthAccountKey, error) {
 	ctx := context.Background()
 
-	authKey, err := r.queries.GetAuthAccountKeyByAccount(ctx, sqlcgen.GetAuthAccountKeyByAccountParams{
-		Coin:        r.coinTypeCode.String(),
-		AuthAccount: authType.String(),
-		Account:     accountType.String(),
-	})
+	query := `SELECT
+		id, coin, key_type, auth_account, account, p2pkh_address,
+		COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+		COALESCE(bech32_address, '') as bech32_address,
+		taproot_address, full_public_key, multisig_address, redeem_script,
+		wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+	FROM auth_account_key WHERE coin = ? AND auth_account = ? AND account = ? LIMIT 1`
+
+	var key domainAuth.AuthAccountKey
+	var taprootAddress, accountExtendedPrivkey, updatedAt sql.NullString
+	var addrStatus int64
+
+	err := r.db.QueryRowContext(ctx, query,
+		r.coinTypeCode.String(), authType.String(), accountType.String()).Scan(
+		&key.ID,
+		&key.CoinTypeCode,
+		&key.KeyType,
+		&key.AuthAccount,
+		&key.Account,
+		&key.P2pkhAddress,
+		&key.P2shSegwitAddress,
+		&key.Bech32Address,
+		&taprootAddress,
+		&key.FullPublicKey,
+		&key.MultisigAddress,
+		&key.RedeemScript,
+		&key.WalletImportFormat,
+		&accountExtendedPrivkey,
+		&key.Idx,
+		&addrStatus,
+		&updatedAt,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetAuthAccountKeyByAccount(): %w", err)
+		return nil, fmt.Errorf("failed to query auth account key: %w", err)
 	}
 
-	return convertToAuthAccountKey(&authKey)
+	// Convert scanned values
+	status, err := domainAddress.AddrStatusFromInt8(int8(addrStatus))
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status: %w", err)
+	}
+	key.AddrStatus = status
+	if taprootAddress.Valid {
+		key.TaprootAddress = &taprootAddress.String
+	}
+	if accountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = &accountExtendedPrivkey.String
+	}
+	if updatedAt.Valid {
+		t, err := time.Parse("2006-01-02 15:04:05", updatedAt.String)
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp format in database: %w", err)
+		}
+		key.UpdatedAt = &t
+	}
+
+	return &key, nil
 }
 
 // Insert inserts record
+// For SQLite, we use raw SQL with NULLIF to convert empty strings to NULL
+// to avoid UNIQUE constraint violations on bech32_address and p2sh_segwit_address
 func (r *AuthAccountKeyRepositorySqlc) Insert(item *domainAuth.AuthAccountKey) error {
 	ctx := context.Background()
 
-	sqlcItem := convertFromAuthAccountKey(item)
-	_, err := r.queries.InsertAuthAccountKey(ctx, sqlcgen.InsertAuthAccountKeyParams{
-		Coin:                   sqlcItem.Coin,
-		KeyType:                sqlcItem.KeyType,
-		AuthAccount:            sqlcItem.AuthAccount,
-		Account:                sqlcItem.Account,
-		P2pkhAddress:           sqlcItem.P2pkhAddress,
-		P2shSegwitAddress:      sqlcItem.P2shSegwitAddress,
-		Bech32Address:          sqlcItem.Bech32Address,
-		TaprootAddress:         sqlcItem.TaprootAddress,
-		FullPublicKey:          sqlcItem.FullPublicKey,
-		MultisigAddress:        sqlcItem.MultisigAddress,
-		RedeemScript:           sqlcItem.RedeemScript,
-		WalletImportFormat:     sqlcItem.WalletImportFormat,
-		AccountExtendedPrivkey: sqlcItem.AccountExtendedPrivkey,
-		Idx:                    sqlcItem.Idx,
-		AddrStatus:             sqlcItem.AddrStatus,
-	})
+	// Use raw SQL with NULLIF to handle empty strings for BCH compatibility
+	// BCH doesn't support SegWit/bech32, so these fields are empty and must be NULL
+	query := `INSERT INTO auth_account_key (
+		coin, key_type, auth_account, account, p2pkh_address,
+		p2sh_segwit_address, bech32_address, taproot_address,
+		full_public_key, multisig_address, redeem_script,
+		wallet_import_format, account_extended_privkey, idx, addr_status
+	) VALUES (?, ?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	// Handle nullable pointer fields
+	var taprootAddr interface{} = nil
+	if item.TaprootAddress != nil {
+		taprootAddr = *item.TaprootAddress
+	}
+	var accountExtPrivkey interface{} = nil
+	if item.AccountExtendedPrivkey != nil {
+		accountExtPrivkey = *item.AccountExtendedPrivkey
+	}
+
+	_, err := r.db.ExecContext(ctx, query,
+		item.CoinTypeCode.String(),
+		item.KeyType,
+		item.AuthAccount.String(),
+		item.Account.String(),
+		item.P2pkhAddress,
+		item.P2shSegwitAddress,
+		item.Bech32Address,
+		taprootAddr,
+		item.FullPublicKey,
+		item.MultisigAddress,
+		item.RedeemScript,
+		item.WalletImportFormat,
+		accountExtPrivkey,
+		item.Idx,
+		item.AddrStatus.Int8(),
+	)
 	if err != nil {
-		return fmt.Errorf("failed to call InsertAuthAccountKey(): %w", err)
+		return fmt.Errorf("failed to insert auth account key: %w", err)
 	}
 
 	return nil

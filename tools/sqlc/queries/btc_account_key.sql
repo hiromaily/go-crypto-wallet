@@ -5,13 +5,31 @@
 SELECT COALESCE(MAX(idx), 0) as max_idx FROM btc_account_key WHERE coin = ? AND account = ?;
 
 -- name: GetOneBtcAccountKeyByMaxID :one
-SELECT * FROM btc_account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1;
+SELECT
+  id, coin, key_type, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM btc_account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1;
 
 -- name: GetBtcAccountKeysByAddrStatus :many
-SELECT * FROM btc_account_key WHERE coin = ? AND account = ? AND addr_status = ?;
+SELECT
+  id, coin, key_type, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM btc_account_key WHERE coin = ? AND account = ? AND addr_status = ?;
 
 -- name: GetBtcAccountKeysByMultisigAddresses :many
-SELECT * FROM btc_account_key WHERE coin = ? AND account = ? AND multisig_address IN (sqlc.slice('addrs'));
+SELECT
+  id, coin, key_type, account, p2pkh_address,
+  COALESCE(p2sh_segwit_address, '') as p2sh_segwit_address,
+  COALESCE(bech32_address, '') as bech32_address,
+  taproot_address, full_public_key, multisig_address, redeem_script,
+  wallet_import_format, account_extended_privkey, idx, addr_status, updated_at
+FROM btc_account_key WHERE coin = ? AND account = ? AND multisig_address IN (sqlc.slice('addrs'));
 
 -- name: InsertBtcAccountKey :execresult
 INSERT INTO btc_account_key (

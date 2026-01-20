@@ -689,9 +689,9 @@ type AuthAccountKey struct {
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
 	P2pkhAddress string
 	// p2sh-segwit address
-	P2shSegwitAddress string
+	P2shSegwitAddress sql.NullString
 	// bech32 address
-	Bech32Address string
+	Bech32Address sql.NullString
 	// taproot address (BIP86)
 	TaprootAddress sql.NullString
 	// full public key
@@ -747,9 +747,9 @@ type BtcAccountKey struct {
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
 	P2pkhAddress string
 	// p2sh-segwit address
-	P2shSegwitAddress string
+	P2shSegwitAddress sql.NullString
 	// bech32 address
-	Bech32Address string
+	Bech32Address sql.NullString
 	// taproot address (BIP86)
 	TaprootAddress sql.NullString
 	// full public key

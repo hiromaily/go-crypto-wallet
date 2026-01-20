@@ -154,7 +154,7 @@ jobs:
       - name: Setup Atlas
         uses: ariga/setup-atlas@v0
       - name: Format check
-        run: atlas schema fmt --check tools/atlas/schemas/
+        run: make atlas-fmt-check
   # Unit tests (only when Go files change)
   unit-test:
     needs: changes
