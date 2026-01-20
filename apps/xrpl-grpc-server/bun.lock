@@ -11,7 +11,7 @@
       },
       "devDependencies": {
         "@biomejs/biome": "^2.3.11",
-        "@bufbuild/buf": "^1.63.0",
+        "@bufbuild/buf": "^1.64.0",
         "@bufbuild/protoc-gen-es": "^2.10.2",
         "@connectrpc/protoc-gen-connect-es": "^1.7.0",
         "bun-types": "latest",
