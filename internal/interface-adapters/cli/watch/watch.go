@@ -63,6 +63,9 @@ func AddCommands(
 	// MuSig2 command (BTC only)
 	AddMuSig2Commands(rootCmd, containerGetter)
 
+	// XRP multisig and regular key commands (XRP only)
+	AddXRPMultisigCommands(rootCmd, containerGetter)
+
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{
 		Use:   "api",
