@@ -1,6 +1,6 @@
 module github.com/hiromaily/go-crypto-wallet
 
-go 1.25.5
+go 1.25.6
 
 require (
 	github.com/LanfordCai/ava v0.1.3
