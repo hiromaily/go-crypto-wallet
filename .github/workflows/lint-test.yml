@@ -13,7 +13,7 @@ on:
       - "**.md"
       - "**.mdc"
 env:
-  GO_VERSION: "1.25"
+  GO_VERSION: "1.25.6"
 jobs:
   # Detect which files changed to conditionally run jobs
   changes:
