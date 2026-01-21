@@ -99,7 +99,7 @@ type Ripple struct {
 	// OfflineKeyGen enables fully offline key generation without API dependencies.
 	// When true, keys are generated using native Go implementation.
 	// When false (default), keys are generated via ripple-lib-server API.
-	//nolint:lll,revive
+	//nolint:lll
 	OfflineKeyGen bool `toml:"offline_keygen" yaml:"offline_keygen" mapstructure:"offline_keygen"`
 }
 

@@ -118,7 +118,7 @@ func (g *KeyGenerator) GenerateFromEntropy(entropy []byte) (*XRPKeyPair, error) 
 }
 
 // generateSecp256k1 generates an XRP key pair using secp256k1.
-func (g *KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) {
+func (*KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) {
 	// Generate the family seed hash
 	seedHash := Sha512Half(seedBytes)
 
@@ -126,7 +126,9 @@ func (g *KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) 
 	// XRP uses SHA512Half of (seed || sequence) for key derivation
 	// For the root key, sequence is 0
 	sequence := make([]byte, 4)
-	keyGenData := append(seedHash, sequence...)
+	keyGenData := make([]byte, 0, len(seedHash)+len(sequence))
+	keyGenData = append(keyGenData, seedHash...)
+	keyGenData = append(keyGenData, sequence...)
 	privateKeyBytes := Sha512Half(keyGenData)
 
 	// Create secp256k1 private key
@@ -171,7 +173,7 @@ func (g *KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) 
 }
 
 // generateEd25519 generates an XRP key pair using Ed25519.
-func (g *KeyGenerator) generateEd25519(seedBytes []byte) (*XRPKeyPair, error) {
+func (*KeyGenerator) generateEd25519(seedBytes []byte) (*XRPKeyPair, error) {
 	// For Ed25519, XRP uses SHA512Half of the seed to derive the private key
 	privateKeyBytes := Sha512Half(seedBytes)
 

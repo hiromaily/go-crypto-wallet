@@ -151,7 +151,7 @@ func (u *offlineGenerateKeyUseCase) Generate(
 // SECURITY NOTE: This function will fail explicitly if no valid private key
 // can be extracted. We do NOT fall back to public key data as that would be
 // cryptographically insecure.
-func (u *offlineGenerateKeyUseCase) extractPrivateKeyBytes(wk domainKey.WalletKey) ([]byte, error) {
+func (*offlineGenerateKeyUseCase) extractPrivateKeyBytes(wk domainKey.WalletKey) ([]byte, error) {
 	if wk.WIF == "" {
 		return nil, errors.New("WIF field is empty: no private key available")
 	}
@@ -163,11 +163,14 @@ func (u *offlineGenerateKeyUseCase) extractPrivateKeyBytes(wk domainKey.WalletKe
 	}
 
 	// If hex decode failed or wrong length, the WIF field format is not supported
-	return nil, fmt.Errorf("invalid private key format in WIF field: expected 32-byte hex-encoded key, got %d bytes", len(privKeyBytes))
+	return nil, fmt.Errorf(
+		"invalid private key format in WIF field: expected 32-byte hex-encoded key, got %d bytes",
+		len(privKeyBytes),
+	)
 }
 
 // convertAlgorithmToKeyType converts xrpkg.KeyAlgorithm to domainXrp.XRPKeyType.
-func (u *offlineGenerateKeyUseCase) convertAlgorithmToKeyType(alg xrpkg.KeyAlgorithm) domainXrp.XRPKeyType {
+func (*offlineGenerateKeyUseCase) convertAlgorithmToKeyType(alg xrpkg.KeyAlgorithm) domainXrp.XRPKeyType {
 	switch alg {
 	case xrpkg.AlgorithmEd25519:
 		return domainXrp.XRPKeyTypeEd25519
