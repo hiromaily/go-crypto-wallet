@@ -168,20 +168,26 @@ jobs:
     name: ts-lint
     runs-on: ubuntu-slim
     timeout-minutes: 5
-    defaults:
-      run:
-        working-directory: apps/xrpl-grpc-server
     steps:
       - uses: actions/checkout@v6
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Setup buf
+        uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
       - name: Install dependencies
+        working-directory: apps/xrpl-grpc-server
         run: bun install --frozen-lockfile
+      - name: Generate protobuf types
+        run: make proto-ts
       - name: Run Biome lint
+        working-directory: apps/xrpl-grpc-server
         run: bun run lint
       - name: Run TypeScript type check
+        working-directory: apps/xrpl-grpc-server
         run: bun run typecheck
   # Unit tests (only when Go files change)
   unit-test:
