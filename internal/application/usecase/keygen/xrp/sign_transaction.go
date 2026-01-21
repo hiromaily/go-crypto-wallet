@@ -17,15 +17,23 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// xrpKeygenSignClient defines the interface for XRP operations needed by signTransactionUseCase in keygen.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpKeygenSignClient interface {
+	apixrp.TransactionSigner
+}
+
 type signTransactionUseCase struct {
-	xrp               apixrp.XRPer
+	xrp               xrpKeygenSignClient
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
 	txFileRepo        file.TransactionFileRepositorier
 }
 
-// NewSignTransactionUseCase creates a new SignTransactionUseCase for XRP keygen
+// NewSignTransactionUseCase creates a new SignTransactionUseCase for XRP keygen.
+// The xrp parameter accepts any type that implements xrpKeygenSignClient (TransactionSigner).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewSignTransactionUseCase(
-	xrp apixrp.XRPer,
+	xrp xrpKeygenSignClient,
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 ) keygenusecase.SignTransactionUseCase {

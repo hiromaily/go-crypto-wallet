@@ -15,16 +15,24 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
+// xrpRegularKeyClient defines the interface for XRP operations needed by setRegularKeyUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpRegularKeyClient interface {
+	apixrp.RegularKeyPreparer
+}
+
 type setRegularKeyUseCase struct {
-	xrper          apixrp.XRPer
+	xrper          xrpRegularKeyClient
 	uuidHandler    uuid.UUIDHandler
 	regularKeyRepo repocold.XRPRegularKeyRepositorier
 	txFileRepo     file.TransactionFileRepositorier
 }
 
-// NewSetRegularKeyUseCase creates a new SetRegularKeyUseCase
+// NewSetRegularKeyUseCase creates a new SetRegularKeyUseCase.
+// The xrper parameter accepts any type that implements xrpRegularKeyClient (RegularKeyPreparer).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewSetRegularKeyUseCase(
-	xrper apixrp.XRPer,
+	xrper xrpRegularKeyClient,
 	uuidHandler uuid.UUIDHandler,
 	regularKeyRepo repocold.XRPRegularKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,

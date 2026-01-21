@@ -17,16 +17,24 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// xrpKeyGenClient defines the interface for XRP operations needed by generateKeyUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpKeyGenClient interface {
+	apixrp.KeyGenerator
+}
+
 type generateKeyUseCase struct {
-	xrp               apixrp.XRPer
+	xrp               xrpKeyGenClient
 	dbConn            *sql.DB
 	coinTypeCode      domainCoin.CoinTypeCode
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
 }
 
-// NewGenerateKeyUseCase creates a new GenerateKeyUseCase
+// NewGenerateKeyUseCase creates a new GenerateKeyUseCase.
+// The xrp parameter accepts any type that implements xrpKeyGenClient (KeyGenerator).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewGenerateKeyUseCase(
-	xrp apixrp.XRPer,
+	xrp xrpKeyGenClient,
 	dbConn *sql.DB,
 	coinTypeCode domainCoin.CoinTypeCode,
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,

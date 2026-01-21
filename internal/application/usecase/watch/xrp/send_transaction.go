@@ -17,15 +17,26 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// xrpSendTxClient defines the interface for XRP operations needed by sendTransactionUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpSendTxClient interface {
+	apixrp.TransactionSubmitter
+	apixrp.LedgerWaiter
+	apixrp.TransactionGetter
+}
+
 type sendTransactionUseCase struct {
-	xrper        apixrp.XRPer
+	xrper        xrpSendTxClient
 	txDetailRepo repowatch.XRPDetailTXRepositorier
 	txFileRepo   file.TransactionFileRepositorier
 }
 
-// NewSendTransactionUseCase creates a new SendTransactionUseCase
+// NewSendTransactionUseCase creates a new SendTransactionUseCase.
+// The xrper parameter accepts any type that implements xrpSendTxClient
+// (TransactionSubmitter + LedgerWaiter + TransactionGetter).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewSendTransactionUseCase(
-	xrper apixrp.XRPer,
+	xrper xrpSendTxClient,
 	txDetailRepo repowatch.XRPDetailTXRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {

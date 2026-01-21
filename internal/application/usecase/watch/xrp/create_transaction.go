@@ -24,8 +24,15 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
+// xrpCreateTxClient defines the interface for XRP operations needed by createTransactionUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpCreateTxClient interface {
+	apixrp.BalanceChecker
+	apixrp.TransactionPreparer
+}
+
 type createTransactionUseCase struct {
-	xrper           apixrp.XRPer
+	xrper           xrpCreateTxClient
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        repowatch.AddressRepositorier
@@ -37,9 +44,11 @@ type createTransactionUseCase struct {
 	paymentSender   domainAccount.AccountType
 }
 
-// NewCreateTransactionUseCase creates a new CreateTransactionUseCase
+// NewCreateTransactionUseCase creates a new CreateTransactionUseCase.
+// The xrper parameter accepts any type that implements xrpCreateTxClient (BalanceChecker + TransactionPreparer).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewCreateTransactionUseCase(
-	xrper apixrp.XRPer,
+	xrper xrpCreateTxClient,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo repowatch.AddressRepositorier,

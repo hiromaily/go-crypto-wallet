@@ -11,14 +11,22 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// xrpMonitorClient defines the interface for XRP operations needed by monitorTransactionUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpMonitorClient interface {
+	apixrp.BalanceChecker
+}
+
 type monitorTransactionUseCase struct {
-	xrper    apixrp.XRPer
+	xrper    xrpMonitorClient
 	addrRepo repowatch.AddressRepositorier
 }
 
-// NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
+// NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase.
+// The xrper parameter accepts any type that implements xrpMonitorClient (BalanceChecker).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewMonitorTransactionUseCase(
-	xrper apixrp.XRPer,
+	xrper xrpMonitorClient,
 	addrRepo repowatch.AddressRepositorier,
 ) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{

@@ -18,16 +18,24 @@ import (
 // DefaultMultisigExpiration is the default expiration time for pending multisig transactions
 const DefaultMultisigExpiration = 24 * time.Hour
 
+// xrpCreateMultisigClient defines the interface for XRP operations needed by createMultisigTxUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpCreateMultisigClient interface {
+	apixrp.TransactionPreparer
+}
+
 type createMultisigTxUseCase struct {
-	xrper               apixrp.XRPer
+	xrper               xrpCreateMultisigClient
 	uuidHandler         uuid.UUIDHandler
 	signerListRepo      repocold.XRPSignerListRepositorier
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
 }
 
-// NewCreateMultisigTxUseCase creates a new CreateMultisigTxUseCase
+// NewCreateMultisigTxUseCase creates a new CreateMultisigTxUseCase.
+// The xrper parameter accepts any type that implements xrpCreateMultisigClient (TransactionPreparer).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewCreateMultisigTxUseCase(
-	xrper apixrp.XRPer,
+	xrper xrpCreateMultisigClient,
 	uuidHandler uuid.UUIDHandler,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,
