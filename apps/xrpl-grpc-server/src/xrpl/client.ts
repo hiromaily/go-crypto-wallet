@@ -237,7 +237,9 @@ export class XRPLClientManager {
     this.emit('reconnecting', this.reconnectAttempts);
 
     this.reconnectTimer = setTimeout(() => {
-      this.reconnect();
+      this.reconnect().catch((error) => {
+        this.logger.error('Reconnection failed:', error);
+      });
     }, delay);
   }
 

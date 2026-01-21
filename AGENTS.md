@@ -34,6 +34,7 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 - ❌ Edit files marked `DO NOT EDIT` (auto-generated)
 - ❌ Push directly to `main` branch
 - ❌ Run `git merge` or `gh pr merge`
+- ❌ Run `protoc` or `buf` commands directly (always use Makefile targets like `make proto`, `make proto-ts`)
 
 ### Ask Before
 
