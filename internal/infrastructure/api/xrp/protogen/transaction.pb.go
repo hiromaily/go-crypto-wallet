@@ -42,6 +42,11 @@ const (
 	EnumTransactionType_TX_SET_REGULAR_KEY        EnumTransactionType = 15 // SetRegularKey
 	EnumTransactionType_TX_SINGER_LIST_SET        EnumTransactionType = 16 // SignerListSet
 	EnumTransactionType_TX_TRUST_SET              EnumTransactionType = 17 // TrustSet
+	EnumTransactionType_TX_NFTOKEN_MINT           EnumTransactionType = 18 // NFTokenMint
+	EnumTransactionType_TX_NFTOKEN_BURN           EnumTransactionType = 19 // NFTokenBurn
+	EnumTransactionType_TX_NFTOKEN_CREATE_OFFER   EnumTransactionType = 20 // NFTokenCreateOffer
+	EnumTransactionType_TX_NFTOKEN_ACCEPT_OFFER   EnumTransactionType = 21 // NFTokenAcceptOffer
+	EnumTransactionType_TX_NFTOKEN_CANCEL_OFFER   EnumTransactionType = 22 // NFTokenCancelOffer
 )
 
 // Enum value maps for EnumTransactionType.
@@ -65,6 +70,11 @@ var (
 		15: "TX_SET_REGULAR_KEY",
 		16: "TX_SINGER_LIST_SET",
 		17: "TX_TRUST_SET",
+		18: "TX_NFTOKEN_MINT",
+		19: "TX_NFTOKEN_BURN",
+		20: "TX_NFTOKEN_CREATE_OFFER",
+		21: "TX_NFTOKEN_ACCEPT_OFFER",
+		22: "TX_NFTOKEN_CANCEL_OFFER",
 	}
 	EnumTransactionType_value = map[string]int32{
 		"TX_ACCOUNT_SET":            0,
@@ -85,6 +95,11 @@ var (
 		"TX_SET_REGULAR_KEY":        15,
 		"TX_SINGER_LIST_SET":        16,
 		"TX_TRUST_SET":              17,
+		"TX_NFTOKEN_MINT":           18,
+		"TX_NFTOKEN_BURN":           19,
+		"TX_NFTOKEN_CREATE_OFFER":   20,
+		"TX_NFTOKEN_ACCEPT_OFFER":   21,
+		"TX_NFTOKEN_CANCEL_OFFER":   22,
 	}
 )
 
@@ -397,36 +412,45 @@ func (b0 IssuedCurrencyAmount_builder) Build() *IssuedCurrencyAmount {
 }
 
 type RequestPrepareTransaction struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_TxType          EnumTransactionType    `protobuf:"varint,1,opt,name=tx_type,json=txType,enum=rippleapi.transaction.EnumTransactionType"`
-	xxx_hidden_SenderAccount   string                 `protobuf:"bytes,2,opt,name=senderAccount"`
-	xxx_hidden_Amount          float64                `protobuf:"fixed64,3,opt,name=amount"`
-	xxx_hidden_ReceiverAccount string                 `protobuf:"bytes,4,opt,name=receiverAccount"`
-	xxx_hidden_Instructions    *Instructions          `protobuf:"bytes,5,opt,name=instructions"`
-	xxx_hidden_RegularKey      string                 `protobuf:"bytes,6,opt,name=regularKey"`
-	xxx_hidden_SetFlag         uint32                 `protobuf:"varint,7,opt,name=setFlag"`
-	xxx_hidden_ClearFlag       uint32                 `protobuf:"varint,8,opt,name=clearFlag"`
-	xxx_hidden_SignerQuorum    uint32                 `protobuf:"varint,9,opt,name=signerQuorum"`
-	xxx_hidden_SignerEntries   *[]*SignerEntry        `protobuf:"bytes,10,rep,name=signerEntries"`
-	xxx_hidden_LimitAmount     *IssuedCurrencyAmount  `protobuf:"bytes,11,opt,name=limitAmount"`
-	xxx_hidden_QualityIn       uint32                 `protobuf:"varint,12,opt,name=qualityIn"`
-	xxx_hidden_QualityOut      uint32                 `protobuf:"varint,13,opt,name=qualityOut"`
-	xxx_hidden_CancelAfter     uint32                 `protobuf:"varint,14,opt,name=cancelAfter"`
-	xxx_hidden_FinishAfter     uint32                 `protobuf:"varint,15,opt,name=finishAfter"`
-	xxx_hidden_Condition       string                 `protobuf:"bytes,16,opt,name=condition"`
-	xxx_hidden_DestinationTag  uint32                 `protobuf:"varint,17,opt,name=destinationTag"`
-	xxx_hidden_Owner           string                 `protobuf:"bytes,18,opt,name=owner"`
-	xxx_hidden_OfferSequence   uint32                 `protobuf:"varint,19,opt,name=offerSequence"`
-	xxx_hidden_Fulfillment     string                 `protobuf:"bytes,20,opt,name=fulfillment"`
-	xxx_hidden_SettleDelay     uint32                 `protobuf:"varint,21,opt,name=settleDelay"`
-	xxx_hidden_PublicKey       string                 `protobuf:"bytes,22,opt,name=publicKey"`
-	xxx_hidden_SourceTag       uint32                 `protobuf:"varint,23,opt,name=sourceTag"`
-	xxx_hidden_Channel         string                 `protobuf:"bytes,24,opt,name=channel"`
-	xxx_hidden_Expiration      uint32                 `protobuf:"varint,25,opt,name=expiration"`
-	xxx_hidden_Balance         string                 `protobuf:"bytes,26,opt,name=balance"`
-	xxx_hidden_Signature       string                 `protobuf:"bytes,27,opt,name=signature"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TxType           EnumTransactionType    `protobuf:"varint,1,opt,name=tx_type,json=txType,enum=rippleapi.transaction.EnumTransactionType"`
+	xxx_hidden_SenderAccount    string                 `protobuf:"bytes,2,opt,name=senderAccount"`
+	xxx_hidden_Amount           float64                `protobuf:"fixed64,3,opt,name=amount"`
+	xxx_hidden_ReceiverAccount  string                 `protobuf:"bytes,4,opt,name=receiverAccount"`
+	xxx_hidden_Instructions     *Instructions          `protobuf:"bytes,5,opt,name=instructions"`
+	xxx_hidden_RegularKey       string                 `protobuf:"bytes,6,opt,name=regularKey"`
+	xxx_hidden_SetFlag          uint32                 `protobuf:"varint,7,opt,name=setFlag"`
+	xxx_hidden_ClearFlag        uint32                 `protobuf:"varint,8,opt,name=clearFlag"`
+	xxx_hidden_SignerQuorum     uint32                 `protobuf:"varint,9,opt,name=signerQuorum"`
+	xxx_hidden_SignerEntries    *[]*SignerEntry        `protobuf:"bytes,10,rep,name=signerEntries"`
+	xxx_hidden_LimitAmount      *IssuedCurrencyAmount  `protobuf:"bytes,11,opt,name=limitAmount"`
+	xxx_hidden_QualityIn        uint32                 `protobuf:"varint,12,opt,name=qualityIn"`
+	xxx_hidden_QualityOut       uint32                 `protobuf:"varint,13,opt,name=qualityOut"`
+	xxx_hidden_CancelAfter      uint32                 `protobuf:"varint,14,opt,name=cancelAfter"`
+	xxx_hidden_FinishAfter      uint32                 `protobuf:"varint,15,opt,name=finishAfter"`
+	xxx_hidden_Condition        string                 `protobuf:"bytes,16,opt,name=condition"`
+	xxx_hidden_DestinationTag   uint32                 `protobuf:"varint,17,opt,name=destinationTag"`
+	xxx_hidden_Owner            string                 `protobuf:"bytes,18,opt,name=owner"`
+	xxx_hidden_OfferSequence    uint32                 `protobuf:"varint,19,opt,name=offerSequence"`
+	xxx_hidden_Fulfillment      string                 `protobuf:"bytes,20,opt,name=fulfillment"`
+	xxx_hidden_SettleDelay      uint32                 `protobuf:"varint,21,opt,name=settleDelay"`
+	xxx_hidden_PublicKey        string                 `protobuf:"bytes,22,opt,name=publicKey"`
+	xxx_hidden_SourceTag        uint32                 `protobuf:"varint,23,opt,name=sourceTag"`
+	xxx_hidden_Channel          string                 `protobuf:"bytes,24,opt,name=channel"`
+	xxx_hidden_Expiration       uint32                 `protobuf:"varint,25,opt,name=expiration"`
+	xxx_hidden_Balance          string                 `protobuf:"bytes,26,opt,name=balance"`
+	xxx_hidden_Signature        string                 `protobuf:"bytes,27,opt,name=signature"`
+	xxx_hidden_NfTokenTaxon     uint32                 `protobuf:"varint,28,opt,name=nfTokenTaxon"`
+	xxx_hidden_Issuer           string                 `protobuf:"bytes,29,opt,name=issuer"`
+	xxx_hidden_TransferFee      uint32                 `protobuf:"varint,30,opt,name=transferFee"`
+	xxx_hidden_Uri              string                 `protobuf:"bytes,31,opt,name=uri"`
+	xxx_hidden_NfTokenID        string                 `protobuf:"bytes,32,opt,name=nfTokenID"`
+	xxx_hidden_NfTokenSellOffer string                 `protobuf:"bytes,33,opt,name=nfTokenSellOffer"`
+	xxx_hidden_NfTokenBuyOffer  string                 `protobuf:"bytes,34,opt,name=nfTokenBuyOffer"`
+	xxx_hidden_NfTokenBrokerFee float64                `protobuf:"fixed64,35,opt,name=nfTokenBrokerFee"`
+	xxx_hidden_NfTokenOffers    []string               `protobuf:"bytes,36,rep,name=nfTokenOffers"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *RequestPrepareTransaction) Reset() {
@@ -645,6 +669,69 @@ func (x *RequestPrepareTransaction) GetSignature() string {
 	return ""
 }
 
+func (x *RequestPrepareTransaction) GetNfTokenTaxon() uint32 {
+	if x != nil {
+		return x.xxx_hidden_NfTokenTaxon
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetIssuer() string {
+	if x != nil {
+		return x.xxx_hidden_Issuer
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetTransferFee() uint32 {
+	if x != nil {
+		return x.xxx_hidden_TransferFee
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetUri() string {
+	if x != nil {
+		return x.xxx_hidden_Uri
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenID() string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenID
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenSellOffer() string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenSellOffer
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenBuyOffer() string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenBuyOffer
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenBrokerFee() float64 {
+	if x != nil {
+		return x.xxx_hidden_NfTokenBrokerFee
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenOffers() []string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenOffers
+	}
+	return nil
+}
+
 func (x *RequestPrepareTransaction) SetTxType(v EnumTransactionType) {
 	x.xxx_hidden_TxType = v
 }
@@ -753,6 +840,42 @@ func (x *RequestPrepareTransaction) SetSignature(v string) {
 	x.xxx_hidden_Signature = v
 }
 
+func (x *RequestPrepareTransaction) SetNfTokenTaxon(v uint32) {
+	x.xxx_hidden_NfTokenTaxon = v
+}
+
+func (x *RequestPrepareTransaction) SetIssuer(v string) {
+	x.xxx_hidden_Issuer = v
+}
+
+func (x *RequestPrepareTransaction) SetTransferFee(v uint32) {
+	x.xxx_hidden_TransferFee = v
+}
+
+func (x *RequestPrepareTransaction) SetUri(v string) {
+	x.xxx_hidden_Uri = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenID(v string) {
+	x.xxx_hidden_NfTokenID = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenSellOffer(v string) {
+	x.xxx_hidden_NfTokenSellOffer = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenBuyOffer(v string) {
+	x.xxx_hidden_NfTokenBuyOffer = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenBrokerFee(v float64) {
+	x.xxx_hidden_NfTokenBrokerFee = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenOffers(v []string) {
+	x.xxx_hidden_NfTokenOffers = v
+}
+
 func (x *RequestPrepareTransaction) HasInstructions() bool {
 	if x == nil {
 		return false
@@ -857,6 +980,33 @@ type RequestPrepareTransaction_builder struct {
 	// signature is used for PaymentChannelClaim transaction type (optional)
 	// - Hex-encoded signature over channel ID + amount for claim authorization
 	Signature string
+	// nfTokenTaxon is used for NFTokenMint transaction type
+	// - A taxon identifying a collection or category of NFTs (required)
+	NfTokenTaxon uint32
+	// issuer is used for NFTokenMint transaction type (optional)
+	// - The issuer of the NFT (if different from Account)
+	Issuer string
+	// transferFee is used for NFTokenMint transaction type (optional)
+	// - Fee (0-50000) charged by issuer on secondary sales (0.001% each unit)
+	TransferFee uint32
+	// uri is used for NFTokenMint transaction type (optional)
+	// - Hex-encoded URI pointing to NFT metadata (up to 256 bytes)
+	Uri string
+	// nfTokenID is used for NFTokenBurn, NFTokenCreateOffer transaction types
+	// - The unique ID of the NFToken (Hash256)
+	NfTokenID string
+	// nfTokenSellOffer is used for NFTokenAcceptOffer transaction type
+	// - The ID of the sell offer to accept (Hash256)
+	NfTokenSellOffer string
+	// nfTokenBuyOffer is used for NFTokenAcceptOffer transaction type
+	// - The ID of the buy offer to accept (Hash256)
+	NfTokenBuyOffer string
+	// nfTokenBrokerFee is used for NFTokenAcceptOffer transaction type (optional)
+	// - Fee the broker keeps in brokered mode (in XRP)
+	NfTokenBrokerFee float64
+	// nfTokenOffers is used for NFTokenCancelOffer transaction type
+	// - Array of NFTokenOffer IDs to cancel
+	NfTokenOffers []string
 }
 
 func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
@@ -890,6 +1040,15 @@ func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
 	x.xxx_hidden_Expiration = b.Expiration
 	x.xxx_hidden_Balance = b.Balance
 	x.xxx_hidden_Signature = b.Signature
+	x.xxx_hidden_NfTokenTaxon = b.NfTokenTaxon
+	x.xxx_hidden_Issuer = b.Issuer
+	x.xxx_hidden_TransferFee = b.TransferFee
+	x.xxx_hidden_Uri = b.Uri
+	x.xxx_hidden_NfTokenID = b.NfTokenID
+	x.xxx_hidden_NfTokenSellOffer = b.NfTokenSellOffer
+	x.xxx_hidden_NfTokenBuyOffer = b.NfTokenBuyOffer
+	x.xxx_hidden_NfTokenBrokerFee = b.NfTokenBrokerFee
+	x.xxx_hidden_NfTokenOffers = b.NfTokenOffers
 	return m0
 }
 
@@ -1576,7 +1735,8 @@ const file_transaction_proto_rawDesc = "" +
 	"\x14IssuedCurrencyAmount\x12\x1a\n" +
 	"\bcurrency\x18\x01 \x01(\tR\bcurrency\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\"\x9c\b\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\"\xd2\n" +
+	"\n" +
 	"\x19RequestPrepareTransaction\x12C\n" +
 	"\atx_type\x18\x01 \x01(\x0e2*.rippleapi.transaction.EnumTransactionTypeR\x06txType\x12$\n" +
 	"\rsenderAccount\x18\x02 \x01(\tR\rsenderAccount\x12\x16\n" +
@@ -1611,7 +1771,16 @@ const file_transaction_proto_rawDesc = "" +
 	"expiration\x18\x19 \x01(\rR\n" +
 	"expiration\x12\x18\n" +
 	"\abalance\x18\x1a \x01(\tR\abalance\x12\x1c\n" +
-	"\tsignature\x18\x1b \x01(\tR\tsignature\"}\n" +
+	"\tsignature\x18\x1b \x01(\tR\tsignature\x12\"\n" +
+	"\fnfTokenTaxon\x18\x1c \x01(\rR\fnfTokenTaxon\x12\x16\n" +
+	"\x06issuer\x18\x1d \x01(\tR\x06issuer\x12 \n" +
+	"\vtransferFee\x18\x1e \x01(\rR\vtransferFee\x12\x10\n" +
+	"\x03uri\x18\x1f \x01(\tR\x03uri\x12\x1c\n" +
+	"\tnfTokenID\x18  \x01(\tR\tnfTokenID\x12*\n" +
+	"\x10nfTokenSellOffer\x18! \x01(\tR\x10nfTokenSellOffer\x12(\n" +
+	"\x0fnfTokenBuyOffer\x18\" \x01(\tR\x0fnfTokenBuyOffer\x12*\n" +
+	"\x10nfTokenBrokerFee\x18# \x01(\x01R\x10nfTokenBrokerFee\x12$\n" +
+	"\rnfTokenOffers\x18$ \x03(\tR\rnfTokenOffers\"}\n" +
 	"\x1aResponsePrepareTransaction\x12\x16\n" +
 	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12G\n" +
 	"\finstructions\x18\x02 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\"H\n" +
@@ -1637,7 +1806,7 @@ const file_transaction_proto_rawDesc = "" +
 	"\x12signedTransactions\x18\x01 \x03(\tR\x12signedTransactions\"^\n" +
 	"\x1aResponseCombineTransaction\x12,\n" +
 	"\x11signedTransaction\x18\x01 \x01(\tR\x11signedTransaction\x12\x12\n" +
-	"\x04txID\x18\x02 \x01(\tR\x04txID*\xad\x03\n" +
+	"\x04txID\x18\x02 \x01(\tR\x04txID*\xae\x04\n" +
 	"\x13EnumTransactionType\x12\x12\n" +
 	"\x0eTX_ACCOUNT_SET\x10\x00\x12\x15\n" +
 	"\x11TX_ACCOUNT_DELETE\x10\x01\x12\x13\n" +
@@ -1658,7 +1827,12 @@ const file_transaction_proto_rawDesc = "" +
 	"\x17TX_PAYMENT_CHANNEL_FUND\x10\x0e\x12\x16\n" +
 	"\x12TX_SET_REGULAR_KEY\x10\x0f\x12\x16\n" +
 	"\x12TX_SINGER_LIST_SET\x10\x10\x12\x10\n" +
-	"\fTX_TRUST_SET\x10\x112\xcc\x05\n" +
+	"\fTX_TRUST_SET\x10\x11\x12\x13\n" +
+	"\x0fTX_NFTOKEN_MINT\x10\x12\x12\x13\n" +
+	"\x0fTX_NFTOKEN_BURN\x10\x13\x12\x1b\n" +
+	"\x17TX_NFTOKEN_CREATE_OFFER\x10\x14\x12\x1b\n" +
+	"\x17TX_NFTOKEN_ACCEPT_OFFER\x10\x15\x12\x1b\n" +
+	"\x17TX_NFTOKEN_CANCEL_OFFER\x10\x162\xcc\x05\n" +
 	"\x14RippleTransactionAPI\x12{\n" +
 	"\x12PrepareTransaction\x120.rippleapi.transaction.RequestPrepareTransaction\x1a1.rippleapi.transaction.ResponsePrepareTransaction\"\x00\x12r\n" +
 	"\x0fSignTransaction\x12-.rippleapi.transaction.RequestSignTransaction\x1a..rippleapi.transaction.ResponseSignTransaction\"\x00\x12x\n" +

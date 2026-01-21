@@ -30,6 +30,11 @@ enum EnumTransactionType {
   TX_SET_REGULAR_KEY = 15;        // SetRegularKey
   TX_SINGER_LIST_SET = 16;        // SignerListSet
   TX_TRUST_SET = 17;              // TrustSet
+  TX_NFTOKEN_MINT = 18;           // NFTokenMint
+  TX_NFTOKEN_BURN = 19;           // NFTokenBurn
+  TX_NFTOKEN_CREATE_OFFER = 20;   // NFTokenCreateOffer
+  TX_NFTOKEN_ACCEPT_OFFER = 21;   // NFTokenAcceptOffer
+  TX_NFTOKEN_CANCEL_OFFER = 22;   // NFTokenCancelOffer
 }
 
 message Instructions {
@@ -150,6 +155,42 @@ message RequestPrepareTransaction {
   // signature is used for PaymentChannelClaim transaction type (optional)
   // - Hex-encoded signature over channel ID + amount for claim authorization
   string signature = 27;
+
+  // ============================================================================
+  // NFToken transaction fields
+  // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+  // ============================================================================
+
+  // nfTokenTaxon is used for NFTokenMint transaction type
+  // - A taxon identifying a collection or category of NFTs (required)
+  uint32 nfTokenTaxon = 28;
+  // issuer is used for NFTokenMint transaction type (optional)
+  // - The issuer of the NFT (if different from Account)
+  string issuer = 29;
+  // transferFee is used for NFTokenMint transaction type (optional)
+  // - Fee (0-50000) charged by issuer on secondary sales (0.001% each unit)
+  uint32 transferFee = 30;
+  // uri is used for NFTokenMint transaction type (optional)
+  // - Hex-encoded URI pointing to NFT metadata (up to 256 bytes)
+  string uri = 31;
+
+  // nfTokenID is used for NFTokenBurn, NFTokenCreateOffer transaction types
+  // - The unique ID of the NFToken (Hash256)
+  string nfTokenID = 32;
+
+  // nfTokenSellOffer is used for NFTokenAcceptOffer transaction type
+  // - The ID of the sell offer to accept (Hash256)
+  string nfTokenSellOffer = 33;
+  // nfTokenBuyOffer is used for NFTokenAcceptOffer transaction type
+  // - The ID of the buy offer to accept (Hash256)
+  string nfTokenBuyOffer = 34;
+  // nfTokenBrokerFee is used for NFTokenAcceptOffer transaction type (optional)
+  // - Fee the broker keeps in brokered mode (in XRP)
+  double nfTokenBrokerFee = 35;
+
+  // nfTokenOffers is used for NFTokenCancelOffer transaction type
+  // - Array of NFTokenOffer IDs to cancel
+  repeated string nfTokenOffers = 36;
 }
 
 message ResponsePrepareTransaction {

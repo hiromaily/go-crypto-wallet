@@ -36,6 +36,11 @@ export enum EnumTransactionType {
   TX_SET_REGULAR_KEY = 15,
   TX_SINGER_LIST_SET = 16,
   TX_TRUST_SET = 17,
+  TX_NFTOKEN_MINT = 18,
+  TX_NFTOKEN_BURN = 19,
+  TX_NFTOKEN_CREATE_OFFER = 20,
+  TX_NFTOKEN_ACCEPT_OFFER = 21,
+  TX_NFTOKEN_CANCEL_OFFER = 22,
 }
 
 /**
@@ -60,6 +65,11 @@ const enumToTransactionType: Record<EnumTransactionType, string> = {
   [EnumTransactionType.TX_SET_REGULAR_KEY]: 'SetRegularKey',
   [EnumTransactionType.TX_SINGER_LIST_SET]: 'SignerListSet',
   [EnumTransactionType.TX_TRUST_SET]: 'TrustSet',
+  [EnumTransactionType.TX_NFTOKEN_MINT]: 'NFTokenMint',
+  [EnumTransactionType.TX_NFTOKEN_BURN]: 'NFTokenBurn',
+  [EnumTransactionType.TX_NFTOKEN_CREATE_OFFER]: 'NFTokenCreateOffer',
+  [EnumTransactionType.TX_NFTOKEN_ACCEPT_OFFER]: 'NFTokenAcceptOffer',
+  [EnumTransactionType.TX_NFTOKEN_CANCEL_OFFER]: 'NFTokenCancelOffer',
 };
 
 // ============================================================================
@@ -152,6 +162,26 @@ export interface PrepareTransactionRequest {
   balance?: string;
   /** For PaymentChannelClaim: hex-encoded signature for claim authorization */
   signature?: string;
+
+  // NFToken transaction fields
+  /** For NFTokenMint: taxon identifying a collection or category of NFTs */
+  nfTokenTaxon?: number;
+  /** For NFTokenMint: issuer of the NFT (if different from Account) */
+  issuer?: string;
+  /** For NFTokenMint: fee (0-50000) charged on secondary sales */
+  transferFee?: number;
+  /** For NFTokenMint: hex-encoded URI pointing to NFT metadata */
+  uri?: string;
+  /** For NFTokenBurn/NFTokenCreateOffer: unique ID of the NFToken */
+  nfTokenID?: string;
+  /** For NFTokenAcceptOffer: ID of the sell offer to accept */
+  nfTokenSellOffer?: string;
+  /** For NFTokenAcceptOffer: ID of the buy offer to accept */
+  nfTokenBuyOffer?: string;
+  /** For NFTokenAcceptOffer: broker fee in XRP (brokered mode) */
+  nfTokenBrokerFee?: number;
+  /** For NFTokenCancelOffer: array of NFTokenOffer IDs to cancel */
+  nfTokenOffers?: string[];
 }
 
 /**
@@ -517,6 +547,78 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
             }
             if (request.publicKey) {
               tx.PublicKey = request.publicKey;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_MINT:
+            // NFTokenMint transaction for creating (minting) an NFT
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+            if (request.nfTokenTaxon !== undefined) {
+              tx.NFTokenTaxon = request.nfTokenTaxon;
+            }
+            if (request.issuer) {
+              tx.Issuer = request.issuer;
+            }
+            if (request.transferFee !== undefined && request.transferFee > 0) {
+              tx.TransferFee = request.transferFee;
+            }
+            if (request.uri) {
+              tx.URI = request.uri;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_BURN:
+            // NFTokenBurn transaction for destroying an NFT
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
+            if (request.nfTokenID) {
+              tx.NFTokenID = request.nfTokenID;
+            }
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_CREATE_OFFER:
+            // NFTokenCreateOffer transaction for creating buy/sell offers for NFTs
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
+            if (request.nfTokenID) {
+              tx.NFTokenID = request.nfTokenID;
+            }
+            if (request.amount > 0) {
+              tx.Amount = xrpToDrops(request.amount.toString());
+            } else {
+              tx.Amount = '0'; // For free sell offers
+            }
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            if (request.expiration !== undefined && request.expiration > 0) {
+              tx.Expiration = request.expiration;
+            }
+            if (request.receiverAccount) {
+              tx.Destination = request.receiverAccount;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_ACCEPT_OFFER:
+            // NFTokenAcceptOffer transaction for accepting buy/sell offers
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
+            if (request.nfTokenSellOffer) {
+              tx.NFTokenSellOffer = request.nfTokenSellOffer;
+            }
+            if (request.nfTokenBuyOffer) {
+              tx.NFTokenBuyOffer = request.nfTokenBuyOffer;
+            }
+            if (request.nfTokenBrokerFee !== undefined && request.nfTokenBrokerFee > 0) {
+              tx.NFTokenBrokerFee = xrpToDrops(request.nfTokenBrokerFee.toString());
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_CANCEL_OFFER:
+            // NFTokenCancelOffer transaction for canceling NFT offers
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
+            if (request.nfTokenOffers && request.nfTokenOffers.length > 0) {
+              tx.NFTokenOffers = request.nfTokenOffers;
             }
             break;
 

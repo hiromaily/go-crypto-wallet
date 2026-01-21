@@ -146,6 +146,53 @@ type RippleAPIer interface {
 		signature, publicKey string,
 		instructions *dtoRipple.Instructions,
 	) (*dtoRipple.PaymentChannelClaimTxInput, string, error)
+
+	// NFToken operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+	PrepareNFTokenMintTransaction(
+		ctx context.Context,
+		senderAccount string,
+		nfTokenTaxon uint32,
+		issuer, uri string,
+		transferFee uint32,
+		flags uint64,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenMintTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
+	PrepareNFTokenBurnTransaction(
+		ctx context.Context,
+		senderAccount, nfTokenID, owner string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenBurnTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
+	PrepareNFTokenCreateOfferTransaction(
+		ctx context.Context,
+		senderAccount, nfTokenID string,
+		amount float64,
+		owner, destination string,
+		expiration uint32,
+		flags uint64,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenCreateOfferTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
+	PrepareNFTokenAcceptOfferTransaction(
+		ctx context.Context,
+		senderAccount string,
+		nfTokenSellOffer, nfTokenBuyOffer string,
+		nfTokenBrokerFee float64,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenAcceptOfferTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
+	PrepareNFTokenCancelOfferTransaction(
+		ctx context.Context,
+		senderAccount string,
+		nfTokenOffers []string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenCancelOfferTxInput, string, error)
 }
 
 // RipplePublicer defines the interface for Ripple public node operations.

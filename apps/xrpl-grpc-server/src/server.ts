@@ -138,6 +138,16 @@ export function createRouter(): ConnectRouter {
           expiration?: number;
           balance?: string;
           signature?: string;
+          // NFToken fields
+          nfTokenTaxon?: number;
+          issuer?: string;
+          transferFee?: number;
+          uri?: string;
+          nfTokenID?: string;
+          nfTokenSellOffer?: string;
+          nfTokenBuyOffer?: string;
+          nfTokenBrokerFee?: number;
+          nfTokenOffers?: string[];
         };
 
         const serviceRequest: ServiceRequest = {
@@ -230,6 +240,35 @@ export function createRouter(): ConnectRouter {
         }
         if (request.signature) {
           serviceRequest.signature = request.signature;
+        }
+
+        // Map NFToken fields
+        if (request.nfTokenTaxon > 0) {
+          serviceRequest.nfTokenTaxon = request.nfTokenTaxon;
+        }
+        if (request.issuer) {
+          serviceRequest.issuer = request.issuer;
+        }
+        if (request.transferFee > 0) {
+          serviceRequest.transferFee = request.transferFee;
+        }
+        if (request.uri) {
+          serviceRequest.uri = request.uri;
+        }
+        if (request.nfTokenID) {
+          serviceRequest.nfTokenID = request.nfTokenID;
+        }
+        if (request.nfTokenSellOffer) {
+          serviceRequest.nfTokenSellOffer = request.nfTokenSellOffer;
+        }
+        if (request.nfTokenBuyOffer) {
+          serviceRequest.nfTokenBuyOffer = request.nfTokenBuyOffer;
+        }
+        if (request.nfTokenBrokerFee > 0) {
+          serviceRequest.nfTokenBrokerFee = request.nfTokenBrokerFee;
+        }
+        if (request.nfTokenOffers && request.nfTokenOffers.length > 0) {
+          serviceRequest.nfTokenOffers = [...request.nfTokenOffers];
         }
 
         // Map instructions if provided

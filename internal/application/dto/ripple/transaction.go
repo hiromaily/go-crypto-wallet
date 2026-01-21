@@ -258,6 +258,91 @@ type PaymentChannelClaimTxInput struct {
 	Hash               string
 }
 
+// NFTokenMintTxInput represents an NFTokenMint transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+type NFTokenMintTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenTaxon       uint32
+	Issuer             string
+	TransferFee        uint32
+	URI                string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenBurnTxInput represents an NFTokenBurn transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
+type NFTokenBurnTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenID          string
+	Owner              string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenCreateOfferTxInput represents an NFTokenCreateOffer transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
+type NFTokenCreateOfferTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenID          string
+	Amount             string
+	Owner              string
+	Expiration         uint32
+	Destination        string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenAcceptOfferTxInput represents an NFTokenAcceptOffer transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
+type NFTokenAcceptOfferTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenSellOffer   string
+	NFTokenBuyOffer    string
+	NFTokenBrokerFee   string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenCancelOfferTxInput represents an NFTokenCancelOffer transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
+type NFTokenCancelOfferTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenOffers      []string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
 // XRPKeyType represents the type of XRP cryptographic key.
 type XRPKeyType string
 
