@@ -381,11 +381,16 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	}
 
 	// Calculate EIP-1559 fees
-	// maxPriorityFeePerGas: 2 Gwei (reasonable default tip)
-	maxPriorityFeePerGas := big.NewInt(2000000000) // 2 Gwei
+	// maxPriorityFeePerGas: Configurable priority fee (tip for miners/validators)
+	// Default: 2 Gwei if not configured
+	priorityFeeGwei := e.conf.MaxPriorityFeePerGas
+	if priorityFeeGwei == 0 {
+		priorityFeeGwei = 2 // Default to 2 Gwei
+	}
+	maxPriorityFeePerGas := new(big.Int).SetUint64(priorityFeeGwei * 1000000000) // Convert Gwei to Wei
 
 	// maxFeePerGas: (baseFee * 2) + maxPriorityFee
-	// The doubling provides buffer for baseFee increases
+	// The doubling provides buffer for baseFee increases between tx creation and inclusion
 	maxFeePerGas := new(big.Int).Mul(blockInfo.BaseFeePerGas, big.NewInt(2))
 	maxFeePerGas = maxFeePerGas.Add(maxFeePerGas, maxPriorityFeePerGas)
 
@@ -427,8 +432,7 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 		}
 	}
 
-	logger.Debug("tx parameter",
-		"GasLimit", GasLimit,
+	logger.Debug("EIP-1559 tx parameter",
 		"estimatedGas", estimatedGas.Uint64(),
 		"txFee", txFee.Uint64(),
 		"newValue", newValue.Uint64())

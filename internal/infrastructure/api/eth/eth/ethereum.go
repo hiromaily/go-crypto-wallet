@@ -29,6 +29,7 @@ type Ethereum struct {
 	chainConf    *chaincfg.Params
 	coinTypeCode domainCoin.CoinTypeCode
 	uuidHandler  uuid.UUIDHandler
+	conf         *config.Ethereum
 	netID        uint16
 	version      string
 	keyDir       string
@@ -50,6 +51,7 @@ func NewEthereum(
 		rpcClient:    rpcClient,
 		coinTypeCode: coinTypeCode,
 		uuidHandler:  uuidHandler,
+		conf:         conf,
 		keyDir:       conf.KeyDirName,
 	}
 
