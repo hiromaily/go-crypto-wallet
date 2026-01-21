@@ -8,7 +8,7 @@ This project is a cryptocurrency wallet CLI application implemented in Go. This 
 
 ### Technology Stack
 
-- **Go**: 1.25.5 (updated from 1.20)
+- **Go**: 1.25.6 (updated from 1.20)
 - **Major Dependencies**:
   - `ethereum/go-ethereum`: v1.16.7 (updated from v1.12.0)
   - `btcsuite/btcd`: v0.25.0 (updated from v0.23.4)
@@ -36,7 +36,7 @@ This project is a cryptocurrency wallet CLI application implemented in Go. This 
 
 #### Completed ✅
 
-- Go version updated to 1.25.5
+- Go version updated to 1.25.6
 - Major dependencies updated to recent versions
 - Linter configuration (`.golangci.yml`) exists and is well-configured
 - CI/CD workflow exists (`.github/workflows/lint-test.yml`)
@@ -62,7 +62,7 @@ This project is a cryptocurrency wallet CLI application implemented in Go. This 
 
 #### 1.1 Go Version and Dependency Updates
 
-- [x] Go upgraded to 1.25.5
+- [x] Go upgraded to 1.25.6
 - [x] Major dependencies updated
   - [x] `ethereum/go-ethereum` → v1.16.7
   - [x] `btcsuite/btcd` → v0.25.0
@@ -420,4 +420,4 @@ This project is a cryptocurrency wallet CLI application implemented in Go. This 
 ## Update History
 
 - 2024-XX-XX: Initial version created
-- 2025-01-XX: Updated to reflect current state (Go 1.25.5, modern dependencies, current architecture)
+- 2025-01-XX: Updated to reflect current state (Go 1.25.6, modern dependencies, current architecture)

@@ -91,6 +91,16 @@ type Ripple struct {
 	//nolint:lll,revive
 	NetworkType string    `toml:"network_type" yaml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet testnet devnet"`
 	API         RippleAPI `toml:"api" yaml:"api" mapstructure:"api"`
+	// KeyAlgorithm specifies the cryptographic algorithm for key generation.
+	// Supported values: "ed25519" (recommended), "secp256k1"
+	// Default: "ed25519" if not specified
+	//nolint:lll,revive
+	KeyAlgorithm string `toml:"key_algorithm" yaml:"key_algorithm" mapstructure:"key_algorithm" validate:"omitempty,oneof=ed25519 secp256k1"`
+	// OfflineKeyGen enables fully offline key generation without API dependencies.
+	// When true, keys are generated using native Go implementation.
+	// When false (default), keys are generated via ripple-lib-server API.
+	//nolint:lll
+	OfflineKeyGen bool `toml:"offline_keygen" yaml:"offline_keygen" mapstructure:"offline_keygen"`
 }
 
 // RippleAPI is ripple-lib server info
