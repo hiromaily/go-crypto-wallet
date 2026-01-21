@@ -508,7 +508,8 @@ func (r *Ripple) PrepareEscrowCreateTransaction(
 ) (*dtoRipple.EscrowCreateTxInput, string, error) {
 	// Validate: at least one of cancelAfter, finishAfter, or condition must be set
 	if cancelAfter == 0 && finishAfter == 0 && condition == "" {
-		return nil, "", errors.New("at least one of cancelAfter, finishAfter, or condition must be set for EscrowCreate")
+		return nil, "", errors.New(
+			"at least one of cancelAfter, finishAfter, or condition must be set for EscrowCreate")
 	}
 
 	// Convert DTO to infrastructure type
@@ -1161,7 +1162,8 @@ func (r *Ripple) PrepareNFTokenAcceptOfferTransaction(
 ) (*dtoRipple.NFTokenAcceptOfferTxInput, string, error) {
 	// Validate: at least one offer must be provided
 	if nfTokenSellOffer == "" && nfTokenBuyOffer == "" {
-		return nil, "", errors.New("at least one of nfTokenSellOffer or nfTokenBuyOffer is required for NFTokenAcceptOffer transaction")
+		return nil, "", errors.New(
+			"at least one of nfTokenSellOffer or nfTokenBuyOffer is required for NFTokenAcceptOffer")
 	}
 
 	// Convert DTO to infrastructure type
