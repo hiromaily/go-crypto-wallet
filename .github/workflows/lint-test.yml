@@ -166,7 +166,7 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.ts == 'true' }}
     name: ts-lint
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
@@ -174,10 +174,13 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - name: Setup buf
-        uses: bufbuild/buf-action@v1
-        with:
-          setup_only: true
+      - name: Install protoc
+        run: |
+          # Install protoc v29 (supports edition 2024)
+          PROTOC_VERSION=29.3
+          curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+          unzip -o "protoc-${PROTOC_VERSION}-linux-x86_64.zip" -d /usr/local
+          protoc --version
       - name: Install dependencies
         working-directory: apps/xrpl-grpc-server
         run: bun install --frozen-lockfile
