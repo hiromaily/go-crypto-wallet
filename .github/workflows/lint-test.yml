@@ -24,6 +24,7 @@ jobs:
       shell: ${{ steps.filter.outputs.shell }}
       sql: ${{ steps.filter.outputs.sql }}
       hcl: ${{ steps.filter.outputs.hcl }}
+      ts: ${{ steps.filter.outputs.ts }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
@@ -47,6 +48,11 @@ jobs:
             hcl:
               - 'tools/atlas/**/*.hcl'
               - 'tools/atlas/atlas.hcl'
+            ts:
+              - 'apps/xrpl-grpc-server/**/*.ts'
+              - 'apps/xrpl-grpc-server/package.json'
+              - 'apps/xrpl-grpc-server/biome.json'
+              - 'apps/xrpl-grpc-server/tsconfig.json'
   # Go linting
   # PR: only-new-issues=true checks only changed code (faster)
   # Push to main: full check for post-merge quality assurance
@@ -155,6 +161,28 @@ jobs:
         uses: ariga/setup-atlas@v0
       - name: Format check
         run: make atlas-fmt-check
+  # TypeScript linting and type checking for xrpl-grpc-server
+  ts-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.ts == 'true' }}
+    name: ts-lint
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: apps/xrpl-grpc-server
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Run Biome lint
+        run: bun run lint
+      - name: Run TypeScript type check
+        run: bun run typecheck
   # Unit tests (only when Go files change)
   unit-test:
     needs: changes

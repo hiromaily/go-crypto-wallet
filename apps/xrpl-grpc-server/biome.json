@@ -35,7 +35,18 @@
         "noUselessConstructor": "error",
         "noUselessLabel": "error",
         "noUselessLoneBlockStatements": "error",
-        "noUselessRename": "error"
+        "noUselessRename": "error",
+        "noVoid": "error",
+        "noForEach": "warn",
+        "useLiteralKeys": "error",
+        "useOptionalChain": "error",
+        "noUselessTypeConstraint": "error",
+        "noUselessThisAlias": "error",
+        "noUselessEmptyExport": "error",
+        "noUselessFragments": "error",
+        "noUselessSwitchCase": "error",
+        "noUselessTernary": "error",
+        "useSimplifiedLogicExpression": "warn"
       },
       "correctness": {
         "noConstAssign": "error",
@@ -56,9 +67,13 @@
         "noUnsafeOptionalChaining": "error",
         "noUnusedLabels": "error",
         "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUnusedPrivateClassMembers": "error",
         "useIsNan": "error",
         "useValidForDirection": "error",
-        "useValidTypeof": "error"
+        "useValidTypeof": "error",
+        "noInvalidUseBeforeDeclaration": "error",
+        "noVoidTypeReturn": "error"
       },
       "style": {
         "noInferrableTypes": "error",
@@ -67,7 +82,21 @@
         "useBlockStatements": "off",
         "useConst": "error",
         "useDefaultParameterLast": "error",
-        "useExponentiationOperator": "error"
+        "useExponentiationOperator": "error",
+        "noNonNullAssertion": "warn",
+        "useEnumInitializers": "error",
+        "useShorthandFunctionType": "error",
+        "noParameterAssign": "error",
+        "useNumberNamespace": "error",
+        "useNodejsImportProtocol": "error",
+        "useExportType": "error",
+        "useImportType": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useTemplate": "error",
+        "useSingleVarDeclarator": "error",
+        "useShorthandAssign": "error",
+        "useArrayLiterals": "error",
+        "useNamingConvention": "off"
       },
       "suspicious": {
         "noAsyncPromiseExecutor": "error",
@@ -82,7 +111,7 @@
         "noDuplicateObjectKeys": "error",
         "noDuplicateParameters": "error",
         "noEmptyBlockStatements": "error",
-        "noExplicitAny": "warn",
+        "noExplicitAny": "error",
         "noExtraNonNullAssertion": "error",
         "noFallthroughSwitchClause": "error",
         "noFunctionAssign": "error",
@@ -94,7 +123,35 @@
         "noShadowRestrictedNames": "error",
         "noUnsafeNegation": "error",
         "noWith": "error",
-        "useGetterReturn": "error"
+        "useGetterReturn": "error",
+        "noConsole": "off",
+        "noConfusingVoidType": "error",
+        "useAwait": "warn",
+        "noMisrefactoredShorthandAssign": "error",
+        "noEmptyInterface": "error",
+        "noArrayIndexKey": "warn",
+        "noAssignInExpressions": "error",
+        "noCommentText": "error",
+        "noDuplicateJsxProps": "error",
+        "noSuspiciousSemicolonInJsx": "error",
+        "noVar": "error",
+        "noTemplateCurlyInString": "error"
+      },
+      "performance": {
+        "noAccumulatingSpread": "warn",
+        "noDelete": "warn",
+        "noBarrelFile": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "error",
+        "noDangerouslySetInnerHtmlWithChildren": "error",
+        "noGlobalEval": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noShadow": "warn",
+        "noUnusedExpressions": "error",
+        "useExplicitType": "off"
       }
     }
   },
