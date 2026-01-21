@@ -121,6 +121,32 @@ type SignerListSetTxInput struct {
 	Hash               string
 }
 
+// IssuedCurrencyAmount represents a token amount with currency and issuer.
+// Used for TrustSet and other token-related transactions.
+// Reference: https://xrpl.org/docs/references/protocol/data-types/currency-formats#issued-currency-amount-format
+type IssuedCurrencyAmount struct {
+	Currency string
+	Issuer   string
+	Value    string
+}
+
+// TrustSetTxInput represents a TrustSet transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+type TrustSetTxInput struct {
+	TransactionType    string
+	Account            string
+	LimitAmount        IssuedCurrencyAmount
+	QualityIn          uint32
+	QualityOut         uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
 // XRPKeyType represents the type of XRP cryptographic key.
 type XRPKeyType string
 

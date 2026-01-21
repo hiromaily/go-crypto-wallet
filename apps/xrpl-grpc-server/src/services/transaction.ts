@@ -87,6 +87,15 @@ export interface SignerEntry {
 }
 
 /**
+ * IssuedCurrencyAmount for TrustSet and token transactions
+ */
+export interface IssuedCurrencyAmount {
+  currency: string;
+  issuer: string;
+  value: string;
+}
+
+/**
  * Request for PrepareTransaction RPC
  */
 export interface PrepareTransactionRequest {
@@ -105,6 +114,12 @@ export interface PrepareTransactionRequest {
   signerQuorum?: number;
   /** For SignerListSet: list of signers with their weights */
   signerEntries?: SignerEntry[];
+  /** For TrustSet: the currency amount with issuer for the trust line limit */
+  limitAmount?: IssuedCurrencyAmount;
+  /** For TrustSet: value incoming balances at this ratio per 1,000,000,000 (optional) */
+  qualityIn?: number;
+  /** For TrustSet: value outgoing balances at this ratio per 1,000,000,000 (optional) */
+  qualityOut?: number;
 }
 
 /**
@@ -350,6 +365,26 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
               }));
             }
             // If signerQuorum is 0 and no signerEntries, this will remove the signer list
+            break;
+
+          case EnumTransactionType.TX_TRUST_SET:
+            // TrustSet transaction for creating/modifying trust lines
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+            // - LimitAmount: Issued currency amount specifying the trust line limit
+            // - QualityIn/QualityOut: Optional exchange rate adjustments
+            if (request.limitAmount) {
+              tx.LimitAmount = {
+                currency: request.limitAmount.currency,
+                issuer: request.limitAmount.issuer,
+                value: request.limitAmount.value,
+              };
+            }
+            if (request.qualityIn !== undefined && request.qualityIn > 0) {
+              tx.QualityIn = request.qualityIn;
+            }
+            if (request.qualityOut !== undefined && request.qualityOut > 0) {
+              tx.QualityOut = request.qualityOut;
+            }
             break;
 
           default:

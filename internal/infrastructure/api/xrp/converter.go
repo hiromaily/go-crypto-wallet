@@ -356,3 +356,29 @@ func ToDTOSignerListSetTxInput(infra *SignerListSetTxInput) *dtoRipple.SignerLis
 		Hash:               infra.Hash,
 	}
 }
+
+// ToDTOTrustSetTxInput converts infrastructure TrustSetTxInput to DTO.
+func ToDTOTrustSetTxInput(infra *TrustSetTxInput) *dtoRipple.TrustSetTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.TrustSetTxInput{
+		TransactionType: infra.TransactionType,
+		Account:         infra.Account,
+		LimitAmount: dtoRipple.IssuedCurrencyAmount{
+			Currency: infra.LimitAmount.Currency,
+			Issuer:   infra.LimitAmount.Issuer,
+			Value:    infra.LimitAmount.Value,
+		},
+		QualityIn:          infra.QualityIn,
+		QualityOut:         infra.QualityOut,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}

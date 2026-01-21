@@ -117,6 +117,11 @@ export function createRouter(): ConnectRouter {
           regularKey?: string;
           setFlag?: number;
           clearFlag?: number;
+          signerQuorum?: number;
+          signerEntries?: { account: string; weight: number }[];
+          limitAmount?: { currency: string; issuer: string; value: string };
+          qualityIn?: number;
+          qualityOut?: number;
         };
 
         const serviceRequest: ServiceRequest = {
@@ -137,6 +142,32 @@ export function createRouter(): ConnectRouter {
         }
         if (request.clearFlag > 0) {
           serviceRequest.clearFlag = request.clearFlag;
+        }
+
+        // Map SignerListSet fields
+        if (request.signerQuorum !== undefined && request.signerQuorum > 0) {
+          serviceRequest.signerQuorum = request.signerQuorum;
+        }
+        if (request.signerEntries && request.signerEntries.length > 0) {
+          serviceRequest.signerEntries = request.signerEntries.map((entry) => ({
+            account: entry.account,
+            weight: entry.weight,
+          }));
+        }
+
+        // Map TrustSet fields
+        if (request.limitAmount) {
+          serviceRequest.limitAmount = {
+            currency: request.limitAmount.currency,
+            issuer: request.limitAmount.issuer,
+            value: request.limitAmount.value,
+          };
+        }
+        if (request.qualityIn > 0) {
+          serviceRequest.qualityIn = request.qualityIn;
+        }
+        if (request.qualityOut > 0) {
+          serviceRequest.qualityOut = request.qualityOut;
         }
 
         // Map instructions if provided

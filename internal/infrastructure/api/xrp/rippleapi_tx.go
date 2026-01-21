@@ -343,6 +343,93 @@ func (r *Ripple) SignSignerListSetTransaction(
 	return r.signTransactionJSON(ctx, txInput, secret, "SignerListSet")
 }
 
+// IssuedCurrencyAmount represents a token amount with currency and issuer
+// Used for TrustSet and other token-related transactions
+type IssuedCurrencyAmount struct {
+	Currency string `json:"currency"`
+	Issuer   string `json:"issuer"`
+	Value    string `json:"value"`
+}
+
+// TrustSetTxInput is the transaction input for TrustSet
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+type TrustSetTxInput struct {
+	TransactionType    string               `json:"TransactionType"`
+	Account            string               `json:"Account"`
+	LimitAmount        IssuedCurrencyAmount `json:"LimitAmount"`
+	QualityIn          uint32               `json:"QualityIn,omitempty"`
+	QualityOut         uint32               `json:"QualityOut,omitempty"`
+	Fee                string               `json:"Fee"`
+	Flags              uint64               `json:"Flags"`
+	LastLedgerSequence uint64               `json:"LastLedgerSequence"`
+	Sequence           uint64               `json:"Sequence"`
+	SigningPubKey      string               `json:"SigningPubKey,omitempty"`
+	TxnSignature       string               `json:"TxnSignature,omitempty"`
+	Hash               string               `json:"hash,omitempty"`
+}
+
+// PrepareTrustSetTransaction prepares a TrustSet transaction
+// - limitAmount: the currency, issuer, and trust line limit (required)
+// - qualityIn: value incoming balances at this ratio per 1,000,000,000 (optional, 0 to omit)
+// - qualityOut: value outgoing balances at this ratio per 1,000,000,000 (optional, 0 to omit)
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+func (r *Ripple) PrepareTrustSetTransaction(
+	ctx context.Context,
+	senderAccount string,
+	limitAmount *dtoRipple.IssuedCurrencyAmount,
+	qualityIn, qualityOut uint32,
+	instructions *dtoRipple.Instructions,
+) (*dtoRipple.TrustSetTxInput, string, error) {
+	// Validate required parameter
+	if limitAmount == nil {
+		return nil, "", fmt.Errorf("limitAmount is required for TrustSet transaction")
+	}
+
+	// Convert DTO to infrastructure type
+	infraInstructions := ToInfraInstructions(instructions)
+
+	// Convert IssuedCurrencyAmount DTO to protogen
+	protoLimitAmount := protogen.IssuedCurrencyAmount_builder{
+		Currency: limitAmount.Currency,
+		Issuer:   limitAmount.Issuer,
+		Value:    limitAmount.Value,
+	}.Build()
+
+	req := protogen.RequestPrepareTransaction_builder{
+		TxType:        protogen.EnumTransactionType_TX_TRUST_SET,
+		SenderAccount: senderAccount,
+		LimitAmount:   protoLimitAmount,
+		QualityIn:     qualityIn,
+		QualityOut:    qualityOut,
+		Instructions:  infraInstructions,
+	}.Build()
+
+	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for TrustSet: %w", err)
+	}
+	logger.Debug("response TrustSet",
+		"TxJSON", res.GetTxJSON(),
+		"Instructions", res.GetInstructions(),
+	)
+
+	var txInput TrustSetTxInput
+	unquotedJSON := unquoteJSON(res.GetTxJSON())
+	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
+		return nil, "", fmt.Errorf("fail to call json.Unmarshal(TrustSetTxJSON): %w", err)
+	}
+
+	// Convert infrastructure type to DTO
+	return ToDTOTrustSetTxInput(&txInput), unquotedJSON, nil
+}
+
+// SignTrustSetTransaction signs a TrustSet transaction
+func (r *Ripple) SignTrustSetTransaction(
+	ctx context.Context, txInput *TrustSetTxInput, secret string,
+) (string, string, error) {
+	return r.signTransactionJSON(ctx, txInput, secret, "TrustSet")
+}
+
 // signTransactionJSON is a generic helper that signs any transaction type.
 // It marshals the input to JSON and calls the gRPC SignTransaction API.
 func (r *Ripple) signTransactionJSON(

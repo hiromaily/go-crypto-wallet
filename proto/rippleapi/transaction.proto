@@ -47,6 +47,14 @@ message SignerEntry {
   uint32 weight = 2;     // Weight of this signer (contributes to quorum)
 }
 
+// IssuedCurrencyAmount represents a token amount with currency and issuer
+// Used for TrustSet and other token-related transactions
+message IssuedCurrencyAmount {
+  string currency = 1;   // Currency code (3-letter or 40-char hex)
+  string issuer = 2;     // XRP address of the token issuer
+  string value = 3;      // Amount as a string (supports high precision)
+}
+
 message RequestPrepareTransaction {
   EnumTransactionType tx_type = 1;
   string senderAccount = 2;
@@ -71,6 +79,16 @@ message RequestPrepareTransaction {
   // - List of signers with their weights
   // - Must be empty when signerQuorum is 0 (removing signer list)
   repeated SignerEntry signerEntries = 10;
+  // limitAmount is used for TrustSet transaction type
+  // - Specifies the currency, issuer, and trust line limit
+  // - Set value to "0" to remove the trust line
+  IssuedCurrencyAmount limitAmount = 11;
+  // qualityIn is used for TrustSet transaction type (optional)
+  // - Value incoming balances on this trust line at the ratio of this number per 1,000,000,000
+  uint32 qualityIn = 12;
+  // qualityOut is used for TrustSet transaction type (optional)
+  // - Value outgoing balances on this trust line at the ratio of this number per 1,000,000,000
+  uint32 qualityOut = 13;
 }
 
 message ResponsePrepareTransaction {

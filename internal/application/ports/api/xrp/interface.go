@@ -76,6 +76,16 @@ type RippleAPIer interface {
 		signerEntries []SignerEntryInput,
 		instructions *dtoRipple.Instructions,
 	) (*dtoRipple.SignerListSetTxInput, string, error)
+
+	// Trust line operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+	PrepareTrustSetTransaction(
+		ctx context.Context,
+		senderAccount string,
+		limitAmount *dtoRipple.IssuedCurrencyAmount,
+		qualityIn, qualityOut uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.TrustSetTxInput, string, error)
 }
 
 // RipplePublicer defines the interface for Ripple public node operations.
