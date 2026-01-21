@@ -67,9 +67,9 @@ services:
       xrp-node:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bun", "--eval", "fetch('http://localhost:50051/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"]
+      test: ["CMD", "bun", "--eval", "fetch('http://localhost:50051/').then(r=>process.exit(r.status===404?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     restart: unless-stopped

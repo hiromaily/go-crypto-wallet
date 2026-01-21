@@ -39,8 +39,8 @@ COPY apps/xrpl-grpc-server/tsconfig.json ./
 RUN test -f src/gen/account_pb.ts || \
     (echo "Error: Proto files not found. Run 'make proto-ts' before building Docker image." && exit 1)
 
-# Build the application
-RUN bun build src/index.ts --outdir=dist --target=bun
+# Type check (optional build verification)
+RUN bun run typecheck
 
 # -----------------------------------------------------------------------------
 # Stage 2: Production - Minimal runtime image
@@ -58,9 +58,9 @@ COPY apps/xrpl-grpc-server/package.json apps/xrpl-grpc-server/bun.lock ./
 RUN bun install --frozen-lockfile --production && \
     rm -rf /root/.bun/install/cache
 
-# Copy built application and generated files
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/gen ./src/gen
+# Copy source files (includes src/gen for runtime imports)
+# Note: Using source instead of bundled dist because Bun runtime is more efficient
+#       for server applications than pre-bundled code
 COPY --from=builder /app/src ./src
 
 # Change ownership to non-root user
@@ -81,7 +81,7 @@ ENV GRPC_PORT=50051 \
 # Health check - verify the server is responding
 # ConnectRPC servers return 404 for non-service paths, which indicates the server is running
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD bun --eval "fetch('http://localhost:${GRPC_PORT}/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"
+    CMD ["bun", "--eval", "fetch('http://localhost:50051/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"]
 
 # Start the gRPC server
 CMD ["bun", "run", "src/index.ts"]
