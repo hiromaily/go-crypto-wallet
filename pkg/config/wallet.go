@@ -64,12 +64,14 @@ type Ethereum struct {
 	Port       int    `toml:"port" yaml:"port" mapstructure:"port" validate:"required"`
 	DisableTLS bool   `toml:"disable_tls" yaml:"disable_tls" mapstructure:"disable_tls"`
 	//nolint:lll,revive
-	NetworkType string `toml:"network_type" yaml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
+	NetworkType string `toml:"network_type" yaml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten anvil local"`
 	KeyDirName  string `toml:"keydir" yaml:"keydir" mapstructure:"keydir"`
 	//nolint:lll,revive
 	ConfirmationNum uint64                          `toml:"confirmation_num" yaml:"confirmation_num" mapstructure:"confirmation_num"`
 	ERC20Token      domainCoin.ERC20Token           `toml:"erc20_token" yaml:"erc20_token" mapstructure:"erc20_token"`
 	ERC20s          map[domainCoin.ERC20Token]ERC20 `toml:"erc20s" yaml:"erc20s" mapstructure:"erc20s"`
+	//nolint:lll,revive
+	MaxPriorityFeePerGas uint64 `toml:"max_priority_fee_per_gas" yaml:"max_priority_fee_per_gas" mapstructure:"max_priority_fee_per_gas"` // EIP-1559: priority fee in Gwei (default: 2)
 }
 
 // ERC20 information

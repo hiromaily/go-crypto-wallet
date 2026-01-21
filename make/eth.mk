@@ -76,3 +76,39 @@ generate-eth-key-local:
 # Grafana
 ###############################################################################
 # http://localhost:3000
+
+###############################################################################
+# Anvil (Foundry Local Node)
+###############################################################################
+.PHONY: up-docker-anvil
+up-docker-anvil:
+	docker compose -f compose.eth.yaml up -d anvil
+
+.PHONY: stop-docker-anvil
+stop-docker-anvil:
+	docker compose -f compose.eth.yaml stop anvil
+
+###############################################################################
+# E2E Tests
+###############################################################################
+
+# Pattern 1: Anvil Basic
+.PHONY: eth-e2e-p1-reset
+eth-e2e-p1-reset: build-all
+	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --reset
+
+.PHONY: eth-e2e-p1
+eth-e2e-p1: build-all
+	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh
+
+.PHONY: eth-e2e-p1-verbose
+eth-e2e-p1-verbose: build-all
+	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --verbose
+
+.PHONY: eth-e2e-p1-ci
+eth-e2e-p1-ci: build-all
+	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --non-interactive
+
+.PHONY: eth-e2e-p1-cleanup
+eth-e2e-p1-cleanup:
+	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --cleanup

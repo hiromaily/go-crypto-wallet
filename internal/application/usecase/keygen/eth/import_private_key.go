@@ -31,6 +31,10 @@ func NewImportPrivateKeyUseCase(
 	}
 }
 
+// Import imports private keys from database to local keystore
+// This implementation is Anvil-compatible as it uses local keystore.ImportECDSA()
+// instead of the personal_importRawKey RPC (which Anvil doesn't support).
+// Private keys are written directly to the local filesystem keystore directory.
 func (u *importPrivateKeyUseCase) Import(
 	ctx context.Context,
 	input keygenusecase.ImportPrivateKeyInput,

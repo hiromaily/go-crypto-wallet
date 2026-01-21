@@ -15,6 +15,18 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// Key Management: Anvil Compatibility
+//
+// All key operations in this file use LOCAL FILESYSTEM operations, not RPCs.
+// This makes them fully compatible with Anvil (Foundry's local Ethereum node).
+//
+// - ToECDSA: Converts hex string to ECDSA key (no RPC)
+// - GetPrivKey: Reads key from local keystore directory (no RPC)
+// - readPrivKey: Searches filesystem for key files (no RPC)
+//
+// The actual key import is done via keystore.ImportECDSA() in import_private_key.go,
+// which also uses local filesystem operations instead of personal_importRawKey RPC.
+
 // Note: key filename is different between Geth and Parity
 // Geth
 // - 0x71678cd07cfac46c2dc427f999abf46aae115925

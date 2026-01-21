@@ -29,10 +29,12 @@ type Ethereum struct {
 	chainConf    *chaincfg.Params
 	coinTypeCode domainCoin.CoinTypeCode
 	uuidHandler  uuid.UUIDHandler
+	conf         *config.Ethereum
 	netID        uint16
 	version      string
 	keyDir       string
 	isParity     bool
+	clientType   ClientVersion
 }
 
 // NewEthereum creates ethereum object
@@ -49,6 +51,7 @@ func NewEthereum(
 		rpcClient:    rpcClient,
 		coinTypeCode: coinTypeCode,
 		uuidHandler:  uuidHandler,
+		conf:         conf,
 		keyDir:       conf.KeyDirName,
 	}
 
@@ -56,9 +59,12 @@ func NewEthereum(
 	if eth.keyDir == "" {
 		dirName, err := eth.AdminDataDir(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("fail to call eth.AdminDataDir(): %w", err)
+			// Anvil doesn't support admin_datadir RPC - use default
+			logger.Warn("admin_datadir RPC not supported, using default keydir")
+			eth.keyDir = "./data/keystore"
+		} else {
+			eth.keyDir = dirName + "/keystore"
 		}
-		eth.keyDir = dirName + "/keystore"
 	}
 	logger.Debug("eth.keyDir", "eth.keyDir", eth.keyDir)
 
@@ -83,6 +89,8 @@ func NewEthereum(
 	eth.version = clientVer
 
 	eth.isParity = isParity(clientVer)
+	eth.clientType = DetectClientType(clientVer)
+	logger.Debug("detected client type", "clientType", eth.clientType)
 
 	// check sync progress
 	res, isSyncing, err := eth.Syncing(ctx)

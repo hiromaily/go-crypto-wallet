@@ -8,6 +8,14 @@ import (
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 )
 
+// runImportRawKey imports a raw private key using the personal_importRawKey RPC
+//
+// Deprecated: This command uses personal_importRawKey RPC which is NOT supported by Anvil.
+// For Anvil compatibility, use the modern "import key" command instead:
+//
+//	keygen -coin eth import key --account <account>
+//
+// The modern command uses local keystore.ImportECDSA() and works with both Geth and Anvil.
 func runImportRawKey(eth apieth.Ethereumer, privKey, passPhrase string) error {
 	fmt.Println("import raw key")
 
