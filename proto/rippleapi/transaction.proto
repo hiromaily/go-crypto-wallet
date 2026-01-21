@@ -89,6 +89,38 @@ message RequestPrepareTransaction {
   // qualityOut is used for TrustSet transaction type (optional)
   // - Value outgoing balances on this trust line at the ratio of this number per 1,000,000,000
   uint32 qualityOut = 13;
+
+  // ============================================================================
+  // Escrow transaction fields
+  // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+  // ============================================================================
+
+  // cancelAfter is used for EscrowCreate transaction type
+  // - Time (in seconds since Ripple Epoch) when the escrow expires
+  // - After this time, the escrow can be canceled to return funds to sender
+  uint32 cancelAfter = 14;
+  // finishAfter is used for EscrowCreate transaction type
+  // - Time (in seconds since Ripple Epoch) after which the escrow can be finished
+  // - The escrowed funds cannot be accessed until this time
+  uint32 finishAfter = 15;
+  // condition is used for EscrowCreate and EscrowFinish transaction types
+  // - Hex value representing a PREIMAGE-SHA-256 crypto-condition
+  // - If present on EscrowCreate, the escrow can only be finished with matching fulfillment
+  string condition = 16;
+  // destinationTag is used for EscrowCreate transaction type (optional)
+  // - Arbitrary tag to further specify the destination
+  uint32 destinationTag = 17;
+
+  // owner is used for EscrowFinish and EscrowCancel transaction types
+  // - The address of the account that funded the escrow
+  string owner = 18;
+  // offerSequence is used for EscrowFinish and EscrowCancel transaction types
+  // - The sequence number of the EscrowCreate transaction that created the escrow
+  uint32 offerSequence = 19;
+  // fulfillment is used for EscrowFinish transaction type
+  // - Hex value of the PREIMAGE-SHA-256 crypto-condition fulfillment
+  // - Required if the escrow has a condition
+  string fulfillment = 20;
 }
 
 message ResponsePrepareTransaction {

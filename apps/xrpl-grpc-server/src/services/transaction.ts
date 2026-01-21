@@ -120,6 +120,22 @@ export interface PrepareTransactionRequest {
   qualityIn?: number;
   /** For TrustSet: value outgoing balances at this ratio per 1,000,000,000 (optional) */
   qualityOut?: number;
+
+  // Escrow transaction fields
+  /** For EscrowCreate: time (seconds since Ripple Epoch) when the escrow expires */
+  cancelAfter?: number;
+  /** For EscrowCreate: time (seconds since Ripple Epoch) after which escrow can be finished */
+  finishAfter?: number;
+  /** For EscrowCreate/EscrowFinish: PREIMAGE-SHA-256 crypto-condition (hex) */
+  condition?: string;
+  /** For EscrowCreate: arbitrary tag to further specify the destination */
+  destinationTag?: number;
+  /** For EscrowFinish/EscrowCancel: the account that funded the escrow */
+  owner?: string;
+  /** For EscrowFinish/EscrowCancel: sequence number of EscrowCreate transaction */
+  offerSequence?: number;
+  /** For EscrowFinish: crypto-condition fulfillment (hex) */
+  fulfillment?: string;
 }
 
 /**
@@ -384,6 +400,53 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
             }
             if (request.qualityOut !== undefined && request.qualityOut > 0) {
               tx.QualityOut = request.qualityOut;
+            }
+            break;
+
+          case EnumTransactionType.TX_ESCROW_CREATE:
+            // EscrowCreate transaction for creating time-locked or conditional escrows
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+            tx.Amount = xrpToDrops(request.amount.toString());
+            tx.Destination = request.receiverAccount;
+            if (request.cancelAfter !== undefined && request.cancelAfter > 0) {
+              tx.CancelAfter = request.cancelAfter;
+            }
+            if (request.finishAfter !== undefined && request.finishAfter > 0) {
+              tx.FinishAfter = request.finishAfter;
+            }
+            if (request.condition) {
+              tx.Condition = request.condition;
+            }
+            if (request.destinationTag !== undefined && request.destinationTag > 0) {
+              tx.DestinationTag = request.destinationTag;
+            }
+            break;
+
+          case EnumTransactionType.TX_ESCROW_FINISH:
+            // EscrowFinish transaction for releasing escrowed funds
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            if (request.offerSequence !== undefined) {
+              tx.OfferSequence = request.offerSequence;
+            }
+            if (request.condition) {
+              tx.Condition = request.condition;
+            }
+            if (request.fulfillment) {
+              tx.Fulfillment = request.fulfillment;
+            }
+            break;
+
+          case EnumTransactionType.TX_ESCROW_CANCEL:
+            // EscrowCancel transaction for canceling expired escrows
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            if (request.offerSequence !== undefined) {
+              tx.OfferSequence = request.offerSequence;
             }
             break;
 

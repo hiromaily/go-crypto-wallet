@@ -122,6 +122,14 @@ export function createRouter(): ConnectRouter {
           limitAmount?: { currency: string; issuer: string; value: string };
           qualityIn?: number;
           qualityOut?: number;
+          // Escrow fields
+          cancelAfter?: number;
+          finishAfter?: number;
+          condition?: string;
+          destinationTag?: number;
+          owner?: string;
+          offerSequence?: number;
+          fulfillment?: string;
         };
 
         const serviceRequest: ServiceRequest = {
@@ -168,6 +176,29 @@ export function createRouter(): ConnectRouter {
         }
         if (request.qualityOut > 0) {
           serviceRequest.qualityOut = request.qualityOut;
+        }
+
+        // Map Escrow fields
+        if (request.cancelAfter > 0) {
+          serviceRequest.cancelAfter = request.cancelAfter;
+        }
+        if (request.finishAfter > 0) {
+          serviceRequest.finishAfter = request.finishAfter;
+        }
+        if (request.condition) {
+          serviceRequest.condition = request.condition;
+        }
+        if (request.destinationTag > 0) {
+          serviceRequest.destinationTag = request.destinationTag;
+        }
+        if (request.owner) {
+          serviceRequest.owner = request.owner;
+        }
+        if (request.offerSequence > 0) {
+          serviceRequest.offerSequence = request.offerSequence;
+        }
+        if (request.fulfillment) {
+          serviceRequest.fulfillment = request.fulfillment;
         }
 
         // Map instructions if provided

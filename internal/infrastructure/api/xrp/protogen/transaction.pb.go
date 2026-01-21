@@ -411,6 +411,13 @@ type RequestPrepareTransaction struct {
 	xxx_hidden_LimitAmount     *IssuedCurrencyAmount  `protobuf:"bytes,11,opt,name=limitAmount"`
 	xxx_hidden_QualityIn       uint32                 `protobuf:"varint,12,opt,name=qualityIn"`
 	xxx_hidden_QualityOut      uint32                 `protobuf:"varint,13,opt,name=qualityOut"`
+	xxx_hidden_CancelAfter     uint32                 `protobuf:"varint,14,opt,name=cancelAfter"`
+	xxx_hidden_FinishAfter     uint32                 `protobuf:"varint,15,opt,name=finishAfter"`
+	xxx_hidden_Condition       string                 `protobuf:"bytes,16,opt,name=condition"`
+	xxx_hidden_DestinationTag  uint32                 `protobuf:"varint,17,opt,name=destinationTag"`
+	xxx_hidden_Owner           string                 `protobuf:"bytes,18,opt,name=owner"`
+	xxx_hidden_OfferSequence   uint32                 `protobuf:"varint,19,opt,name=offerSequence"`
+	xxx_hidden_Fulfillment     string                 `protobuf:"bytes,20,opt,name=fulfillment"`
 	unknownFields              protoimpl.UnknownFields
 	sizeCache                  protoimpl.SizeCache
 }
@@ -533,6 +540,55 @@ func (x *RequestPrepareTransaction) GetQualityOut() uint32 {
 	return 0
 }
 
+func (x *RequestPrepareTransaction) GetCancelAfter() uint32 {
+	if x != nil {
+		return x.xxx_hidden_CancelAfter
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetFinishAfter() uint32 {
+	if x != nil {
+		return x.xxx_hidden_FinishAfter
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetCondition() string {
+	if x != nil {
+		return x.xxx_hidden_Condition
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetDestinationTag() uint32 {
+	if x != nil {
+		return x.xxx_hidden_DestinationTag
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetOwner() string {
+	if x != nil {
+		return x.xxx_hidden_Owner
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetOfferSequence() uint32 {
+	if x != nil {
+		return x.xxx_hidden_OfferSequence
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetFulfillment() string {
+	if x != nil {
+		return x.xxx_hidden_Fulfillment
+	}
+	return ""
+}
+
 func (x *RequestPrepareTransaction) SetTxType(v EnumTransactionType) {
 	x.xxx_hidden_TxType = v
 }
@@ -583,6 +639,34 @@ func (x *RequestPrepareTransaction) SetQualityIn(v uint32) {
 
 func (x *RequestPrepareTransaction) SetQualityOut(v uint32) {
 	x.xxx_hidden_QualityOut = v
+}
+
+func (x *RequestPrepareTransaction) SetCancelAfter(v uint32) {
+	x.xxx_hidden_CancelAfter = v
+}
+
+func (x *RequestPrepareTransaction) SetFinishAfter(v uint32) {
+	x.xxx_hidden_FinishAfter = v
+}
+
+func (x *RequestPrepareTransaction) SetCondition(v string) {
+	x.xxx_hidden_Condition = v
+}
+
+func (x *RequestPrepareTransaction) SetDestinationTag(v uint32) {
+	x.xxx_hidden_DestinationTag = v
+}
+
+func (x *RequestPrepareTransaction) SetOwner(v string) {
+	x.xxx_hidden_Owner = v
+}
+
+func (x *RequestPrepareTransaction) SetOfferSequence(v uint32) {
+	x.xxx_hidden_OfferSequence = v
+}
+
+func (x *RequestPrepareTransaction) SetFulfillment(v string) {
+	x.xxx_hidden_Fulfillment = v
 }
 
 func (x *RequestPrepareTransaction) HasInstructions() bool {
@@ -643,6 +727,31 @@ type RequestPrepareTransaction_builder struct {
 	// qualityOut is used for TrustSet transaction type (optional)
 	// - Value outgoing balances on this trust line at the ratio of this number per 1,000,000,000
 	QualityOut uint32
+	// cancelAfter is used for EscrowCreate transaction type
+	// - Time (in seconds since Ripple Epoch) when the escrow expires
+	// - After this time, the escrow can be canceled to return funds to sender
+	CancelAfter uint32
+	// finishAfter is used for EscrowCreate transaction type
+	// - Time (in seconds since Ripple Epoch) after which the escrow can be finished
+	// - The escrowed funds cannot be accessed until this time
+	FinishAfter uint32
+	// condition is used for EscrowCreate and EscrowFinish transaction types
+	// - Hex value representing a PREIMAGE-SHA-256 crypto-condition
+	// - If present on EscrowCreate, the escrow can only be finished with matching fulfillment
+	Condition string
+	// destinationTag is used for EscrowCreate transaction type (optional)
+	// - Arbitrary tag to further specify the destination
+	DestinationTag uint32
+	// owner is used for EscrowFinish and EscrowCancel transaction types
+	// - The address of the account that funded the escrow
+	Owner string
+	// offerSequence is used for EscrowFinish and EscrowCancel transaction types
+	// - The sequence number of the EscrowCreate transaction that created the escrow
+	OfferSequence uint32
+	// fulfillment is used for EscrowFinish transaction type
+	// - Hex value of the PREIMAGE-SHA-256 crypto-condition fulfillment
+	// - Required if the escrow has a condition
+	Fulfillment string
 }
 
 func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
@@ -662,6 +771,13 @@ func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
 	x.xxx_hidden_LimitAmount = b.LimitAmount
 	x.xxx_hidden_QualityIn = b.QualityIn
 	x.xxx_hidden_QualityOut = b.QualityOut
+	x.xxx_hidden_CancelAfter = b.CancelAfter
+	x.xxx_hidden_FinishAfter = b.FinishAfter
+	x.xxx_hidden_Condition = b.Condition
+	x.xxx_hidden_DestinationTag = b.DestinationTag
+	x.xxx_hidden_Owner = b.Owner
+	x.xxx_hidden_OfferSequence = b.OfferSequence
+	x.xxx_hidden_Fulfillment = b.Fulfillment
 	return m0
 }
 
@@ -1348,7 +1464,7 @@ const file_transaction_proto_rawDesc = "" +
 	"\x14IssuedCurrencyAmount\x12\x1a\n" +
 	"\bcurrency\x18\x01 \x01(\tR\bcurrency\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\"\xe4\x04\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\"\xcc\x06\n" +
 	"\x19RequestPrepareTransaction\x12C\n" +
 	"\atx_type\x18\x01 \x01(\x0e2*.rippleapi.transaction.EnumTransactionTypeR\x06txType\x12$\n" +
 	"\rsenderAccount\x18\x02 \x01(\tR\rsenderAccount\x12\x16\n" +
@@ -1367,7 +1483,14 @@ const file_transaction_proto_rawDesc = "" +
 	"\tqualityIn\x18\f \x01(\rR\tqualityIn\x12\x1e\n" +
 	"\n" +
 	"qualityOut\x18\r \x01(\rR\n" +
-	"qualityOut\"}\n" +
+	"qualityOut\x12 \n" +
+	"\vcancelAfter\x18\x0e \x01(\rR\vcancelAfter\x12 \n" +
+	"\vfinishAfter\x18\x0f \x01(\rR\vfinishAfter\x12\x1c\n" +
+	"\tcondition\x18\x10 \x01(\tR\tcondition\x12&\n" +
+	"\x0edestinationTag\x18\x11 \x01(\rR\x0edestinationTag\x12\x14\n" +
+	"\x05owner\x18\x12 \x01(\tR\x05owner\x12$\n" +
+	"\rofferSequence\x18\x13 \x01(\rR\rofferSequence\x12 \n" +
+	"\vfulfillment\x18\x14 \x01(\tR\vfulfillment\"}\n" +
 	"\x1aResponsePrepareTransaction\x12\x16\n" +
 	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12G\n" +
 	"\finstructions\x18\x02 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\"H\n" +

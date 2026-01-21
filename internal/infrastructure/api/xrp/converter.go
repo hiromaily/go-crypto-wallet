@@ -382,3 +382,72 @@ func ToDTOTrustSetTxInput(infra *TrustSetTxInput) *dtoRipple.TrustSetTxInput {
 		Hash:               infra.Hash,
 	}
 }
+
+// ToDTOEscrowCreateTxInput converts infrastructure EscrowCreateTxInput to DTO.
+func ToDTOEscrowCreateTxInput(infra *EscrowCreateTxInput) *dtoRipple.EscrowCreateTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.EscrowCreateTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Amount:             infra.Amount,
+		Destination:        infra.Destination,
+		CancelAfter:        infra.CancelAfter,
+		FinishAfter:        infra.FinishAfter,
+		Condition:          infra.Condition,
+		DestinationTag:     infra.DestinationTag,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOEscrowFinishTxInput converts infrastructure EscrowFinishTxInput to DTO.
+func ToDTOEscrowFinishTxInput(infra *EscrowFinishTxInput) *dtoRipple.EscrowFinishTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.EscrowFinishTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Owner:              infra.Owner,
+		OfferSequence:      infra.OfferSequence,
+		Condition:          infra.Condition,
+		Fulfillment:        infra.Fulfillment,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOEscrowCancelTxInput converts infrastructure EscrowCancelTxInput to DTO.
+func ToDTOEscrowCancelTxInput(infra *EscrowCancelTxInput) *dtoRipple.EscrowCancelTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.EscrowCancelTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Owner:              infra.Owner,
+		OfferSequence:      infra.OfferSequence,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}

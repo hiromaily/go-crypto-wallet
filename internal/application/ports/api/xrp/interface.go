@@ -86,6 +86,35 @@ type RippleAPIer interface {
 		qualityIn, qualityOut uint32,
 		instructions *dtoRipple.Instructions,
 	) (*dtoRipple.TrustSetTxInput, string, error)
+
+	// Escrow operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+	PrepareEscrowCreateTransaction(
+		ctx context.Context,
+		senderAccount, destinationAccount string,
+		amount float64,
+		cancelAfter, finishAfter uint32,
+		condition string,
+		destinationTag uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.EscrowCreateTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
+	PrepareEscrowFinishTransaction(
+		ctx context.Context,
+		senderAccount, owner string,
+		offerSequence uint32,
+		condition, fulfillment string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.EscrowFinishTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
+	PrepareEscrowCancelTransaction(
+		ctx context.Context,
+		senderAccount, owner string,
+		offerSequence uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.EscrowCancelTxInput, string, error)
 }
 
 // RipplePublicer defines the interface for Ripple public node operations.

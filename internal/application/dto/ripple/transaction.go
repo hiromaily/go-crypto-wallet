@@ -147,6 +147,60 @@ type TrustSetTxInput struct {
 	Hash               string
 }
 
+// EscrowCreateTxInput represents an EscrowCreate transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+type EscrowCreateTxInput struct {
+	TransactionType    string
+	Account            string
+	Amount             string
+	Destination        string
+	CancelAfter        uint32
+	FinishAfter        uint32
+	Condition          string
+	DestinationTag     uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// EscrowFinishTxInput represents an EscrowFinish transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
+type EscrowFinishTxInput struct {
+	TransactionType    string
+	Account            string
+	Owner              string
+	OfferSequence      uint32
+	Condition          string
+	Fulfillment        string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// EscrowCancelTxInput represents an EscrowCancel transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
+type EscrowCancelTxInput struct {
+	TransactionType    string
+	Account            string
+	Owner              string
+	OfferSequence      uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
 // XRPKeyType represents the type of XRP cryptographic key.
 type XRPKeyType string
 
