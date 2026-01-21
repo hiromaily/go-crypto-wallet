@@ -5,7 +5,8 @@ networks:
 
 services:
   #########################################################################
-  # xrptipbot/rippled
+  # [DEPRECATED] xrptipbot/rippled
+  # - This service is deprecated and may be removed in a future release
   # - Documentations
   #  - https://github.com/ripple/rippled
   #  - https://xrpl.org/install-rippled.html
@@ -39,3 +40,37 @@ services:
       start_period: 60s
     #command:
     #  - /opt/ripple/bin/rippled --net --conf /etc/opt/ripple/rippled.cfg
+
+  #########################################################################
+  # xrpl-grpc-server
+  # - XRPL gRPC Server using Bun runtime and ConnectRPC
+  # - Documentation: apps/xrpl-grpc-server/README.md
+  #------------------------------------------------------------------------
+  # $ docker compose -f compose.xrp.yaml exec xrpl-grpc-server sh
+  # $ grpcurl -plaintext localhost:50051 list
+  #########################################################################
+  xrpl-grpc-server:
+    build:
+      context: .
+      dockerfile: apps/xrpl-grpc-server/Dockerfile
+    container_name: xrpl-grpc-server
+    ports:
+      - "${GRPC_PORT:-50051}:${GRPC_PORT:-50051}"
+    environment:
+      - GRPC_PORT=${GRPC_PORT:-50051}
+      - GRPC_HOST=0.0.0.0
+      # Connect to local xrp-node via WebSocket (admin port)
+      - XRP_WS_URL=ws://xrp-node:6006
+      - XRP_CONNECTION_TIMEOUT=20000
+    networks:
+      - xrp
+    depends_on:
+      xrp-node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bun", "--eval", "fetch('http://localhost:' + (process.env.GRPC_PORT || 50051) + '/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
