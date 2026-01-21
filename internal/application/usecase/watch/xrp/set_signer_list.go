@@ -16,7 +16,7 @@ import (
 )
 
 type setSignerListUseCase struct {
-	rippler         apixrp.XRPer
+	xrper           apixrp.XRPer
 	uuidHandler     uuid.UUIDHandler
 	signerListRepo  repocold.XRPSignerListRepositorier
 	signerEntryRepo repocold.XRPSignerEntryRepositorier
@@ -25,14 +25,14 @@ type setSignerListUseCase struct {
 
 // NewSetSignerListUseCase creates a new SetSignerListUseCase
 func NewSetSignerListUseCase(
-	rippler apixrp.XRPer,
+	xrper apixrp.XRPer,
 	uuidHandler uuid.UUIDHandler,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	signerEntryRepo repocold.XRPSignerEntryRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 ) watchusecase.SetSignerListUseCase {
 	return &setSignerListUseCase{
-		rippler:         rippler,
+		xrper:           xrper,
 		uuidHandler:     uuidHandler,
 		signerListRepo:  signerListRepo,
 		signerEntryRepo: signerEntryRepo,
@@ -77,7 +77,7 @@ func (u *setSignerListUseCase) Execute(
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 
-	_, txJSON, err := u.rippler.PrepareSignerListSetTransaction(
+	_, txJSON, err := u.xrper.PrepareSignerListSetTransaction(
 		ctx, input.AccountAddress, input.SignerQuorum, apiSignerEntries, instructions)
 	if err != nil {
 		return watchusecase.SetSignerListOutput{},

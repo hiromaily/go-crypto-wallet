@@ -19,7 +19,7 @@ import (
 const DefaultMultisigExpiration = 24 * time.Hour
 
 type createMultisigTxUseCase struct {
-	rippler             apixrp.XRPer
+	xrper               apixrp.XRPer
 	uuidHandler         uuid.UUIDHandler
 	signerListRepo      repocold.XRPSignerListRepositorier
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
@@ -27,13 +27,13 @@ type createMultisigTxUseCase struct {
 
 // NewCreateMultisigTxUseCase creates a new CreateMultisigTxUseCase
 func NewCreateMultisigTxUseCase(
-	rippler apixrp.XRPer,
+	xrper apixrp.XRPer,
 	uuidHandler uuid.UUIDHandler,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,
 ) watchusecase.CreateMultisigTxUseCase {
 	return &createMultisigTxUseCase{
-		rippler:             rippler,
+		xrper:               xrper,
 		uuidHandler:         uuidHandler,
 		signerListRepo:      signerListRepo,
 		pendingMultisigRepo: pendingMultisigRepo,
@@ -71,7 +71,7 @@ func (u *createMultisigTxUseCase) Execute(
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 
-	_, txJSON, err := u.rippler.CreateRawTransaction(
+	_, txJSON, err := u.xrper.CreateRawTransaction(
 		ctx, input.AccountAddress, input.ReceiverAddress, input.Amount, instructions)
 	if err != nil {
 		return watchusecase.CreateMultisigTxOutput{},

@@ -16,7 +16,7 @@ import (
 )
 
 type setRegularKeyUseCase struct {
-	rippler        apixrp.XRPer
+	xrper          apixrp.XRPer
 	uuidHandler    uuid.UUIDHandler
 	regularKeyRepo repocold.XRPRegularKeyRepositorier
 	txFileRepo     file.TransactionFileRepositorier
@@ -24,13 +24,13 @@ type setRegularKeyUseCase struct {
 
 // NewSetRegularKeyUseCase creates a new SetRegularKeyUseCase
 func NewSetRegularKeyUseCase(
-	rippler apixrp.XRPer,
+	xrper apixrp.XRPer,
 	uuidHandler uuid.UUIDHandler,
 	regularKeyRepo repocold.XRPRegularKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 ) watchusecase.SetRegularKeyUseCase {
 	return &setRegularKeyUseCase{
-		rippler:        rippler,
+		xrper:          xrper,
 		uuidHandler:    uuidHandler,
 		regularKeyRepo: regularKeyRepo,
 		txFileRepo:     txFileRepo,
@@ -51,7 +51,7 @@ func (u *setRegularKeyUseCase) Execute(
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 
-	txInput, txJSON, err := u.rippler.PrepareSetRegularKeyTransaction(
+	txInput, txJSON, err := u.xrper.PrepareSetRegularKeyTransaction(
 		ctx, input.AccountAddress, input.RegularKeyAddress, instructions)
 	if err != nil {
 		return watchusecase.SetRegularKeyOutput{},

@@ -12,17 +12,17 @@ import (
 )
 
 type monitorTransactionUseCase struct {
-	rippler  apixrp.XRPer
+	xrper    apixrp.XRPer
 	addrRepo repowatch.AddressRepositorier
 }
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
-	rippler apixrp.XRPer,
+	xrper apixrp.XRPer,
 	addrRepo repowatch.AddressRepositorier,
 ) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{
-		rippler:  rippler,
+		xrper:    xrper,
 		addrRepo: addrRepo,
 	}
 }
@@ -51,7 +51,7 @@ func (u *monitorTransactionUseCase) MonitorBalance(
 		if err != nil {
 			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
 		}
-		total := u.rippler.GetTotalBalance(ctx, addrs)
+		total := u.xrper.GetTotalBalance(ctx, addrs)
 		logger.Info("total balance",
 			"account", acnt.String(),
 			"balance", total)

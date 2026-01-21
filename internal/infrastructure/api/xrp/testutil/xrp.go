@@ -71,31 +71,3 @@ func (xts *XRPTestSuite) SetupTest() {
 func (xts *XRPTestSuite) TearDownTest() {
 	_ = xts.XRP.Close() // Best effort cleanup
 }
-
-// GetRippleAPI returns RippleAPIer
-// func GetRippleAPI() ripple.RippleAPIer {
-//	if api != nil {
-//		return api
-//	}
-//
-//	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
-//	confPath := fmt.Sprintf("%s/config/wallet/xrp_watch.toml", projPath)
-//	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
-//	if err != nil {
-//		log.Fatalf("fail to create config: %v", err)
-//	}
-//	//TODO: if config should be overridden, here
-//
-//	// client
-//	conn, err := ripple.NewGRPCClient(&conf.Ripple.API)
-//	if err != nil {
-//		log.Fatalf("fail to create api instance: %v", err)
-//	}
-//	if conn == nil {
-//		log.Fatal("connection is nil")
-//	}
-//	logger := logger.NewSlogLogger(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
-//	api = xrp.NewRippleAPI(conn, logger)
-//
-//	return api
-//}

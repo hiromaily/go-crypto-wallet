@@ -18,19 +18,19 @@ import (
 )
 
 type sendTransactionUseCase struct {
-	rippler      apixrp.XRPer
+	xrper        apixrp.XRPer
 	txDetailRepo repowatch.XRPDetailTXRepositorier
 	txFileRepo   file.TransactionFileRepositorier
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
-	rippler apixrp.XRPer,
+	xrper apixrp.XRPer,
 	txDetailRepo repowatch.XRPDetailTXRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {
 	return &sendTransactionUseCase{
-		rippler:      rippler,
+		xrper:        xrper,
 		txDetailRepo: txDetailRepo,
 		txFileRepo:   txFileRepo,
 	}
@@ -88,7 +88,7 @@ func (u *sendTransactionUseCase) Execute(
 			// Submit transaction to XRP network
 			var sentTx *dtoxrp.SentTx
 			var earlistLedgerVersion uint64
-			sentTx, earlistLedgerVersion, err = u.rippler.SubmitTransaction(ctx, txBlob)
+			sentTx, earlistLedgerVersion, err = u.xrper.SubmitTransaction(ctx, txBlob)
 			if err != nil {
 				logger.Warn("fail to call xrp.SubmitTransaction()",
 					"tx_id", txID,
@@ -124,7 +124,7 @@ func (u *sendTransactionUseCase) Execute(
 
 			// Wait for transaction validation
 			var ledgerVer uint64
-			ledgerVer, err = u.rippler.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
+			ledgerVer, err = u.xrper.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
 				logger.Warn("fail to call xrp.WaitValidation()",
 					"tx_id", txID,
@@ -140,7 +140,7 @@ func (u *sendTransactionUseCase) Execute(
 
 			// Get transaction info for verification
 			var txInfo *dtoxrp.TxInfo
-			txInfo, err = u.rippler.GetTransaction(ctx, sentTx.TxJSON.Hash, earlistLedgerVersion)
+			txInfo, err = u.xrper.GetTransaction(ctx, sentTx.TxJSON.Hash, earlistLedgerVersion)
 			if err != nil {
 				logger.Warn("fail to call xrp.GetTransaction()",
 					"tx_id", txID,

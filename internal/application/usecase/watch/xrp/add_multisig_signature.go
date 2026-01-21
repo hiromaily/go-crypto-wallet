@@ -13,7 +13,7 @@ import (
 )
 
 type addMultisigSignatureUseCase struct {
-	rippler             apixrp.XRPer
+	xrper               apixrp.XRPer
 	signerListRepo      repocold.XRPSignerListRepositorier
 	signerEntryRepo     repocold.XRPSignerEntryRepositorier
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
@@ -22,14 +22,14 @@ type addMultisigSignatureUseCase struct {
 
 // NewAddMultisigSignatureUseCase creates a new AddMultisigSignatureUseCase
 func NewAddMultisigSignatureUseCase(
-	rippler apixrp.XRPer,
+	xrper apixrp.XRPer,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	signerEntryRepo repocold.XRPSignerEntryRepositorier,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,
 	signatureRepo repowatch.XRPMultisigSignatureRepositorier,
 ) watchusecase.AddMultisigSignatureUseCase {
 	return &addMultisigSignatureUseCase{
-		rippler:             rippler,
+		xrper:               xrper,
 		signerListRepo:      signerListRepo,
 		signerEntryRepo:     signerEntryRepo,
 		pendingMultisigRepo: pendingMultisigRepo,
@@ -193,7 +193,7 @@ func (u *addMultisigSignatureUseCase) handleQuorumIfMet(
 		signedTxBlobs[i] = sig.SignedTxBlob
 	}
 
-	_, combinedTxBlob, err := u.rippler.CombineTransaction(ctx, signedTxBlobs)
+	_, combinedTxBlob, err := u.xrper.CombineTransaction(ctx, signedTxBlobs)
 	if err != nil {
 		return "", fmt.Errorf("failed to combine signatures: %w", err)
 	}
