@@ -428,7 +428,7 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
             if (request.owner) {
               tx.Owner = request.owner;
             }
-            if (request.offerSequence !== undefined) {
+            if (request.offerSequence !== undefined && request.offerSequence > 0) {
               tx.OfferSequence = request.offerSequence;
             }
             if (request.condition) {
@@ -445,7 +445,7 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
             if (request.owner) {
               tx.Owner = request.owner;
             }
-            if (request.offerSequence !== undefined) {
+            if (request.offerSequence !== undefined && request.offerSequence > 0) {
               tx.OfferSequence = request.offerSequence;
             }
             break;
