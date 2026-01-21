@@ -374,6 +374,94 @@ table "xrp_account_key" {
   }
 }
 
+# Table: xrp_regular_key
+# Tracks regular key assignments to XRP accounts for enhanced security
+# Regular keys allow accounts to sign transactions without using the master key
+# Reference: https://xrpl.org/docs/concepts/accounts/cryptographic-keys#regular-key-pair
+table "xrp_regular_key" {
+  schema  = schema.keygen
+  comment = "table for XRP regular key assignments"
+
+  column "id" {
+    type           = bigint
+    null           = false
+    auto_increment = true
+    comment        = "ID"
+  }
+
+  column "account_id" {
+    type    = varchar(255)
+    null    = false
+    comment = "XRP account address (r...) that owns this regular key"
+  }
+
+  column "regular_key_address" {
+    type    = varchar(255)
+    null    = false
+    comment = "Regular key address (r...) authorized to sign for account"
+  }
+
+  column "public_key" {
+    type    = varchar(255)
+    null    = false
+    comment = "Regular key public key"
+  }
+
+  column "public_key_hex" {
+    type    = varchar(255)
+    null    = false
+    comment = "Regular key public key in hex format"
+  }
+
+  column "is_active" {
+    type    = boolean
+    null    = false
+    default = true
+    comment = "true: this regular key is currently active for signing"
+  }
+
+  column "set_tx_hash" {
+    type    = varchar(255)
+    null    = true
+    comment = "Transaction hash of SetRegularKey that activated this key"
+  }
+
+  column "created_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "creation date"
+  }
+
+  column "rotated_at" {
+    type    = datetime
+    null    = true
+    comment = "date when this key was rotated out (set inactive)"
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_account_id" {
+    columns = [column.account_id]
+  }
+
+  index "idx_regular_key_address" {
+    unique  = true
+    columns = [column.regular_key_address]
+  }
+
+  index "idx_is_active" {
+    columns = [column.is_active]
+  }
+
+  index "idx_account_active" {
+    columns = [column.account_id, column.is_active]
+    comment = "Composite index for finding active regular key by account"
+  }
+}
+
 # Table: auth_fullpubkey
 table "auth_fullpubkey" {
   schema  = schema.keygen

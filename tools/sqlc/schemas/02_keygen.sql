@@ -110,3 +110,21 @@ CREATE TABLE xrp_account_key (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='table for xrp keys for any account';
 
 
+CREATE TABLE xrp_regular_key (
+  id bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  account_id varchar(255) NOT NULL COMMENT 'XRP account address (r...) that owns this regular key',
+  regular_key_address varchar(255) NOT NULL COMMENT 'Regular key address (r...) authorized to sign for account',
+  public_key varchar(255) NOT NULL COMMENT 'Regular key public key',
+  public_key_hex varchar(255) NOT NULL COMMENT 'Regular key public key in hex format',
+  is_active tinyint(1) NOT NULL DEFAULT '1' COMMENT 'true: this regular key is currently active for signing',
+  set_tx_hash varchar(255) DEFAULT NULL COMMENT 'Transaction hash of SetRegularKey that activated this key',
+  created_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'creation date',
+  rotated_at datetime DEFAULT NULL COMMENT 'date when this key was rotated out (set inactive)',
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_regular_key_address (regular_key_address),
+  KEY idx_account_active (account_id,is_active) COMMENT 'Composite index for finding active regular key by account',
+  KEY idx_account_id (account_id),
+  KEY idx_is_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='table for XRP regular key assignments';
+
+
