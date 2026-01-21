@@ -244,6 +244,9 @@ type RequestPrepareTransaction struct {
 	xxx_hidden_Amount          float64                `protobuf:"fixed64,3,opt,name=amount"`
 	xxx_hidden_ReceiverAccount string                 `protobuf:"bytes,4,opt,name=receiverAccount"`
 	xxx_hidden_Instructions    *Instructions          `protobuf:"bytes,5,opt,name=instructions"`
+	xxx_hidden_RegularKey      string                 `protobuf:"bytes,6,opt,name=regularKey"`
+	xxx_hidden_SetFlag         uint32                 `protobuf:"varint,7,opt,name=setFlag"`
+	xxx_hidden_ClearFlag       uint32                 `protobuf:"varint,8,opt,name=clearFlag"`
 	unknownFields              protoimpl.UnknownFields
 	sizeCache                  protoimpl.SizeCache
 }
@@ -308,6 +311,27 @@ func (x *RequestPrepareTransaction) GetInstructions() *Instructions {
 	return nil
 }
 
+func (x *RequestPrepareTransaction) GetRegularKey() string {
+	if x != nil {
+		return x.xxx_hidden_RegularKey
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetSetFlag() uint32 {
+	if x != nil {
+		return x.xxx_hidden_SetFlag
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetClearFlag() uint32 {
+	if x != nil {
+		return x.xxx_hidden_ClearFlag
+	}
+	return 0
+}
+
 func (x *RequestPrepareTransaction) SetTxType(v EnumTransactionType) {
 	x.xxx_hidden_TxType = v
 }
@@ -326,6 +350,18 @@ func (x *RequestPrepareTransaction) SetReceiverAccount(v string) {
 
 func (x *RequestPrepareTransaction) SetInstructions(v *Instructions) {
 	x.xxx_hidden_Instructions = v
+}
+
+func (x *RequestPrepareTransaction) SetRegularKey(v string) {
+	x.xxx_hidden_RegularKey = v
+}
+
+func (x *RequestPrepareTransaction) SetSetFlag(v uint32) {
+	x.xxx_hidden_SetFlag = v
+}
+
+func (x *RequestPrepareTransaction) SetClearFlag(v uint32) {
+	x.xxx_hidden_ClearFlag = v
 }
 
 func (x *RequestPrepareTransaction) HasInstructions() bool {
@@ -347,6 +383,16 @@ type RequestPrepareTransaction_builder struct {
 	Amount          float64
 	ReceiverAccount string
 	Instructions    *Instructions
+	// regularKey is used for SetRegularKey transaction type
+	// - Set to a valid XRP address to assign that address as the regular key
+	// - Set to empty string to remove the regular key
+	RegularKey string
+	// setFlag is used for AccountSet transaction type
+	// - 4 (asfDisableMaster): Disable master key signing
+	// - 0: Clear flag (enable master key signing)
+	SetFlag uint32
+	// clearFlag is used for AccountSet transaction type to clear a flag
+	ClearFlag uint32
 }
 
 func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
@@ -358,6 +404,9 @@ func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
 	x.xxx_hidden_Amount = b.Amount
 	x.xxx_hidden_ReceiverAccount = b.ReceiverAccount
 	x.xxx_hidden_Instructions = b.Instructions
+	x.xxx_hidden_RegularKey = b.RegularKey
+	x.xxx_hidden_SetFlag = b.SetFlag
+	x.xxx_hidden_ClearFlag = b.ClearFlag
 	return m0
 }
 
@@ -1037,13 +1086,18 @@ const file_transaction_proto_rawDesc = "" +
 	"\x10maxLedgerVersion\x18\x03 \x01(\x04R\x10maxLedgerVersion\x126\n" +
 	"\x16maxLedgerVersionOffset\x18\x04 \x01(\x04R\x16maxLedgerVersionOffset\x12\x1a\n" +
 	"\bsequence\x18\x05 \x01(\x04R\bsequence\x12\"\n" +
-	"\fsignersCount\x18\x06 \x01(\x04R\fsignersCount\"\x91\x02\n" +
+	"\fsignersCount\x18\x06 \x01(\x04R\fsignersCount\"\xe9\x02\n" +
 	"\x19RequestPrepareTransaction\x12C\n" +
 	"\atx_type\x18\x01 \x01(\x0e2*.rippleapi.transaction.EnumTransactionTypeR\x06txType\x12$\n" +
 	"\rsenderAccount\x18\x02 \x01(\tR\rsenderAccount\x12\x16\n" +
 	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12(\n" +
 	"\x0freceiverAccount\x18\x04 \x01(\tR\x0freceiverAccount\x12G\n" +
-	"\finstructions\x18\x05 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\"}\n" +
+	"\finstructions\x18\x05 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\x12\x1e\n" +
+	"\n" +
+	"regularKey\x18\x06 \x01(\tR\n" +
+	"regularKey\x12\x18\n" +
+	"\asetFlag\x18\a \x01(\rR\asetFlag\x12\x1c\n" +
+	"\tclearFlag\x18\b \x01(\rR\tclearFlag\"}\n" +
 	"\x1aResponsePrepareTransaction\x12\x16\n" +
 	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12G\n" +
 	"\finstructions\x18\x02 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\"H\n" +

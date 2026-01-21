@@ -60,6 +60,28 @@ type XRPAccountKeyRepositorier interface {
 	) (int64, error)
 }
 
+// XRPRegularKeyRepositorier is the repository interface for XRP regular key management.
+// Regular keys allow accounts to sign transactions without using the master key.
+// Reference: https://xrpl.org/docs/concepts/accounts/cryptographic-keys#regular-key-pair
+type XRPRegularKeyRepositorier interface {
+	// GetByAccountID returns the active regular key for an account
+	GetByAccountID(ctx context.Context, accountID string) (*domainXrp.XRPRegularKey, error)
+	// GetAllByAccountID returns all regular keys (active and inactive) for an account
+	GetAllByAccountID(ctx context.Context, accountID string) ([]*domainXrp.XRPRegularKey, error)
+	// GetActiveKeys returns all currently active regular keys
+	GetActiveKeys(ctx context.Context) ([]*domainXrp.XRPRegularKey, error)
+	// GetByAddress returns a regular key by its address
+	GetByAddress(ctx context.Context, regularKeyAddress string) (*domainXrp.XRPRegularKey, error)
+	// Insert creates a new regular key record
+	Insert(ctx context.Context, key *domainXrp.XRPRegularKey) (int64, error)
+	// UpdateStatus updates the active status and rotated_at timestamp
+	UpdateStatus(ctx context.Context, id int64, isActive bool) error
+	// DeactivateByAccountID deactivates all regular keys for an account
+	DeactivateByAccountID(ctx context.Context, accountID string) error
+	// UpdateTxHash updates the SetRegularKey transaction hash
+	UpdateTxHash(ctx context.Context, id int64, txHash string) error
+}
+
 // HDWalletRepo is an interface for HD wallet key storage operations.
 // It abstracts over key storage for different account types (e.g., regular accounts
 // and authorization accounts), allowing the same use case code to work with either.

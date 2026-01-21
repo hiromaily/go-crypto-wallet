@@ -114,6 +114,9 @@ export function createRouter(): ConnectRouter {
             sequence?: bigint;
             signersCount?: bigint;
           };
+          regularKey?: string;
+          setFlag?: number;
+          clearFlag?: number;
         };
 
         const serviceRequest: ServiceRequest = {
@@ -122,6 +125,19 @@ export function createRouter(): ConnectRouter {
           amount: request.amount,
           receiverAccount: request.receiverAccount,
         };
+
+        // Map regular key fields for SetRegularKey transaction
+        if (request.regularKey) {
+          serviceRequest.regularKey = request.regularKey;
+        }
+
+        // Map AccountSet flags for enabling/disabling master key
+        if (request.setFlag) {
+          serviceRequest.setFlag = request.setFlag;
+        }
+        if (request.clearFlag) {
+          serviceRequest.clearFlag = request.clearFlag;
+        }
 
         // Map instructions if provided
         if (request.instructions) {

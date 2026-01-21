@@ -143,6 +143,154 @@ func (r *Ripple) PrepareTransaction(
 	return ToDTOTxInput(&txInput), unquotedJSON, nil
 }
 
+// SetRegularKeyTxInput is the transaction input for SetRegularKey
+type SetRegularKeyTxInput struct {
+	TransactionType    string `json:"TransactionType"`
+	Account            string `json:"Account"`
+	RegularKey         string `json:"RegularKey,omitempty"` // Omit to remove regular key
+	Fee                string `json:"Fee"`
+	Flags              uint64 `json:"Flags"`
+	LastLedgerSequence uint64 `json:"LastLedgerSequence"`
+	Sequence           uint64 `json:"Sequence"`
+	SigningPubKey      string `json:"SigningPubKey,omitempty"`
+	TxnSignature       string `json:"TxnSignature,omitempty"`
+	Hash               string `json:"hash,omitempty"`
+}
+
+// PrepareSetRegularKeyTransaction prepares a SetRegularKey transaction
+// - regularKey: the address to authorize as regular key, or empty to remove
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
+func (r *Ripple) PrepareSetRegularKeyTransaction(
+	ctx context.Context, senderAccount, regularKey string, instructions *dtoRipple.Instructions,
+) (*SetRegularKeyTxInput, string, error) {
+	// Convert DTO to infrastructure type
+	infraInstructions := ToInfraInstructions(instructions)
+
+	req := protogen.RequestPrepareTransaction_builder{
+		TxType:        protogen.EnumTransactionType_TX_SET_REGULAR_KEY,
+		SenderAccount: senderAccount,
+		RegularKey:    regularKey,
+		Instructions:  infraInstructions,
+	}.Build()
+
+	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for SetRegularKey: %w", err)
+	}
+	logger.Debug("response SetRegularKey",
+		"TxJSON", res.GetTxJSON(),
+		"Instructions", res.GetInstructions(),
+	)
+
+	var txInput SetRegularKeyTxInput
+	unquotedJSON, _ := strconv.Unquote(res.GetTxJSON())
+	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
+		return nil, "", fmt.Errorf("fail to call json.Unmarshal(SetRegularKeyTxJSON): %w", err)
+	}
+
+	return &txInput, unquotedJSON, nil
+}
+
+// AccountSetTxInput is the transaction input for AccountSet
+type AccountSetTxInput struct {
+	TransactionType    string `json:"TransactionType"`
+	Account            string `json:"Account"`
+	SetFlag            uint32 `json:"SetFlag,omitempty"`
+	ClearFlag          uint32 `json:"ClearFlag,omitempty"`
+	Fee                string `json:"Fee"`
+	Flags              uint64 `json:"Flags"`
+	LastLedgerSequence uint64 `json:"LastLedgerSequence"`
+	Sequence           uint64 `json:"Sequence"`
+	SigningPubKey      string `json:"SigningPubKey,omitempty"`
+	TxnSignature       string `json:"TxnSignature,omitempty"`
+	Hash               string `json:"hash,omitempty"`
+}
+
+// AccountSet flag constants
+const (
+	// AsfDisableMaster disables the master key from signing transactions
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset#accountset-flags
+	AsfDisableMaster uint32 = 4
+)
+
+// PrepareAccountSetTransaction prepares an AccountSet transaction
+// - setFlag: flag to set (e.g., AsfDisableMaster = 4)
+// - clearFlag: flag to clear
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset
+func (r *Ripple) PrepareAccountSetTransaction(
+	ctx context.Context, senderAccount string, setFlag, clearFlag uint32, instructions *dtoRipple.Instructions,
+) (*AccountSetTxInput, string, error) {
+	// Convert DTO to infrastructure type
+	infraInstructions := ToInfraInstructions(instructions)
+
+	req := protogen.RequestPrepareTransaction_builder{
+		TxType:        protogen.EnumTransactionType_TX_ACCOUNT_SET,
+		SenderAccount: senderAccount,
+		SetFlag:       setFlag,
+		ClearFlag:     clearFlag,
+		Instructions:  infraInstructions,
+	}.Build()
+
+	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for AccountSet: %w", err)
+	}
+	logger.Debug("response AccountSet",
+		"TxJSON", res.GetTxJSON(),
+		"Instructions", res.GetInstructions(),
+	)
+
+	var txInput AccountSetTxInput
+	unquotedJSON, _ := strconv.Unquote(res.GetTxJSON())
+	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
+		return nil, "", fmt.Errorf("fail to call json.Unmarshal(AccountSetTxJSON): %w", err)
+	}
+
+	return &txInput, unquotedJSON, nil
+}
+
+// SignSetRegularKeyTransaction signs a SetRegularKey transaction
+func (r *Ripple) SignSetRegularKeyTransaction(
+	ctx context.Context, txInput *SetRegularKeyTxInput, secret string,
+) (string, string, error) {
+	strJSON, err := json.Marshal(txInput)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to call json.Marshal(SetRegularKeyTxInput): %w", err)
+	}
+	req := protogen.RequestSignTransaction_builder{
+		TxJSON: string(strJSON),
+		Secret: secret,
+	}.Build()
+
+	res, err := r.API.txClient.SignTransaction(ctx, req)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to call client.SignTransaction() for SetRegularKey: %w", err)
+	}
+
+	return res.GetTxID(), res.GetTxBlob(), nil
+}
+
+// SignAccountSetTransaction signs an AccountSet transaction
+func (r *Ripple) SignAccountSetTransaction(
+	ctx context.Context, txInput *AccountSetTxInput, secret string,
+) (string, string, error) {
+	strJSON, err := json.Marshal(txInput)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to call json.Marshal(AccountSetTxInput): %w", err)
+	}
+	req := protogen.RequestSignTransaction_builder{
+		TxJSON: string(strJSON),
+		Secret: secret,
+	}.Build()
+
+	res, err := r.API.txClient.SignTransaction(ctx, req)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to call client.SignTransaction() for AccountSet: %w", err)
+	}
+
+	return res.GetTxID(), res.GetTxBlob(), nil
+}
+
 // SignTransaction calls SignTransaction API
 // Offline functionality
 // - https://xrpl.org/rippleapi-reference.html#offline-functionality

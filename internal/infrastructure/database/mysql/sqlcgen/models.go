@@ -1037,3 +1037,25 @@ type XrpDetailTx struct {
 	// updated date for signed transaction sent
 	SentUpdatedAt sql.NullTime
 }
+
+// table for XRP regular key assignments
+type XrpRegularKey struct {
+	// ID
+	ID int64
+	// XRP account address (r...) that owns this regular key
+	AccountID string
+	// Regular key address (r...) authorized to sign for account
+	RegularKeyAddress string
+	// Regular key public key
+	PublicKey string
+	// Regular key public key in hex format
+	PublicKeyHex string
+	// true: this regular key is currently active for signing
+	IsActive bool
+	// Transaction hash of SetRegularKey that activated this key
+	SetTxHash sql.NullString
+	// creation date
+	CreatedAt sql.NullTime
+	// date when this key was rotated out (set inactive)
+	RotatedAt sql.NullTime
+}

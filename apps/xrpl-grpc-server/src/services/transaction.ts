@@ -87,6 +87,12 @@ export interface PrepareTransactionRequest {
   amount: number;
   receiverAccount: string;
   instructions?: Instructions;
+  /** For SetRegularKey: the address to set as regular key (empty to remove) */
+  regularKey?: string;
+  /** For AccountSet: flag to set (e.g., 4 = asfDisableMaster) */
+  setFlag?: number;
+  /** For AccountSet: flag to clear */
+  clearFlag?: number;
 }
 
 /**
@@ -283,10 +289,40 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
           Account: request.senderAccount,
         };
 
-        // Add amount and destination for Payment transactions
-        if (request.txType === EnumTransactionType.TX_PAYMENT) {
-          tx.Amount = xrpToDrops(request.amount.toString());
-          tx.Destination = request.receiverAccount;
+        // Add transaction-type-specific fields
+        switch (request.txType) {
+          case EnumTransactionType.TX_PAYMENT:
+            tx.Amount = xrpToDrops(request.amount.toString());
+            tx.Destination = request.receiverAccount;
+            break;
+
+          case EnumTransactionType.TX_SET_REGULAR_KEY:
+            // SetRegularKey transaction
+            // - RegularKey field: set to assign, omit to remove regular key
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
+            if (request.regularKey && request.regularKey.length > 0) {
+              tx.RegularKey = request.regularKey;
+            }
+            // If regularKey is empty/undefined, the transaction will remove the regular key
+            break;
+
+          case EnumTransactionType.TX_ACCOUNT_SET:
+            // AccountSet transaction for account configuration
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset
+            // Common flags:
+            //   4 (asfDisableMaster): Disable master key signing
+            //   8 (asfNoFreeze): Permanently give up ability to freeze
+            if (request.setFlag !== undefined && request.setFlag > 0) {
+              tx.SetFlag = request.setFlag;
+            }
+            if (request.clearFlag !== undefined && request.clearFlag > 0) {
+              tx.ClearFlag = request.clearFlag;
+            }
+            break;
+
+          default:
+            // Other transaction types can be added here as needed
+            break;
         }
 
         // Apply instructions if provided
