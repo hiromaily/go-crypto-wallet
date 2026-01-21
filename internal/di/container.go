@@ -91,6 +91,13 @@ type Container interface {
 	NewWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase
 	NewWatchAggregateMuSig2SignaturesUseCase() watchusecase.AggregateMuSig2SignaturesUseCase
 
+	// XRP Watch Use Cases
+	NewXRPWatchSetRegularKeyUseCase() watchusecase.SetRegularKeyUseCase
+	NewXRPWatchSetSignerListUseCase() watchusecase.SetSignerListUseCase
+	NewXRPWatchCreateMultisigTxUseCase() watchusecase.CreateMultisigTxUseCase
+	NewXRPWatchAddMultisigSignatureUseCase() watchusecase.AddMultisigSignatureUseCase
+	NewXRPWatchSubmitMultisigTxUseCase() watchusecase.SubmitMultisigTxUseCase
+
 	// Keygen Use Cases
 	NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase
 	NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase
@@ -646,6 +653,61 @@ func (c *container) newXRPTxDetailRepo() repowatch.XRPDetailTXRepositorier {
 	}
 }
 
+func (c *container) newXRPSignerListRepo() repocold.XRPSignerListRepositorier {
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewXRPSignerListRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "sqlite":
+		panic("XRP signer list repository not implemented for sqlite")
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
+}
+
+func (c *container) newXRPSignerEntryRepo() repocold.XRPSignerEntryRepositorier {
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewXRPSignerEntryRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "sqlite":
+		panic("XRP signer entry repository not implemented for sqlite")
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
+}
+
+func (c *container) newXRPRegularKeyRepo() repocold.XRPRegularKeyRepositorier {
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewXRPRegularKeyRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "sqlite":
+		panic("XRP regular key repository not implemented for sqlite")
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
+}
+
+func (c *container) newXRPPendingMultisigRepo() repowatch.XRPPendingMultisigRepositorier {
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewXRPPendingMultisigRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "sqlite":
+		panic("XRP pending multisig repository not implemented for sqlite")
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
+}
+
+func (c *container) newXRPMultisigSignatureRepo() repowatch.XRPMultisigSignatureRepositorier {
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewXRPMultisigSignatureRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "sqlite":
+		panic("XRP multisig signature repository not implemented for sqlite")
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
+}
+
 func (c *container) newPaymentRequestRepo() repowatch.PaymentRequestRepositorier {
 	switch c.conf.Database.Type {
 	case "mysql":
@@ -999,6 +1061,43 @@ func (c *container) NewWatchAggregateMuSig2SignaturesUseCase() watchusecase.Aggr
 	return c.newBTCWatchAggregateMuSig2SignaturesUseCase()
 }
 
+// XRP Watch Use Cases (Public Interface)
+
+func (c *container) NewXRPWatchSetRegularKeyUseCase() watchusecase.SetRegularKeyUseCase {
+	if c.conf.CoinTypeCode != domainCoin.XRP {
+		panic(fmt.Sprintf("SetRegularKey is XRP-only, not supported for %s", c.conf.CoinTypeCode))
+	}
+	return c.newXRPWatchSetRegularKeyUseCase()
+}
+
+func (c *container) NewXRPWatchSetSignerListUseCase() watchusecase.SetSignerListUseCase {
+	if c.conf.CoinTypeCode != domainCoin.XRP {
+		panic(fmt.Sprintf("SetSignerList is XRP-only, not supported for %s", c.conf.CoinTypeCode))
+	}
+	return c.newXRPWatchSetSignerListUseCase()
+}
+
+func (c *container) NewXRPWatchCreateMultisigTxUseCase() watchusecase.CreateMultisigTxUseCase {
+	if c.conf.CoinTypeCode != domainCoin.XRP {
+		panic(fmt.Sprintf("CreateMultisigTx is XRP-only, not supported for %s", c.conf.CoinTypeCode))
+	}
+	return c.newXRPWatchCreateMultisigTxUseCase()
+}
+
+func (c *container) NewXRPWatchAddMultisigSignatureUseCase() watchusecase.AddMultisigSignatureUseCase {
+	if c.conf.CoinTypeCode != domainCoin.XRP {
+		panic(fmt.Sprintf("AddMultisigSignature is XRP-only, not supported for %s", c.conf.CoinTypeCode))
+	}
+	return c.newXRPWatchAddMultisigSignatureUseCase()
+}
+
+func (c *container) NewXRPWatchSubmitMultisigTxUseCase() watchusecase.SubmitMultisigTxUseCase {
+	if c.conf.CoinTypeCode != domainCoin.XRP {
+		panic(fmt.Sprintf("SubmitMultisigTx is XRP-only, not supported for %s", c.conf.CoinTypeCode))
+	}
+	return c.newXRPWatchSubmitMultisigTxUseCase()
+}
+
 // Keygen Use Cases
 
 func (c *container) NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
@@ -1330,6 +1429,51 @@ func (c *container) newXRPWatchSendTransactionUseCase() watchusecase.SendTransac
 		c.newXRP(),
 		c.newXRPTxDetailRepo(),
 		c.newTxFileRepo(),
+	)
+}
+
+func (c *container) newXRPWatchSetRegularKeyUseCase() watchusecase.SetRegularKeyUseCase {
+	return watchusecasexrp.NewSetRegularKeyUseCase(
+		c.newXRP(),
+		c.pkgContainer.NewUUIDHandler(),
+		c.newXRPRegularKeyRepo(),
+		c.newTxFileRepo(),
+	)
+}
+
+func (c *container) newXRPWatchSetSignerListUseCase() watchusecase.SetSignerListUseCase {
+	return watchusecasexrp.NewSetSignerListUseCase(
+		c.newXRP(),
+		c.pkgContainer.NewUUIDHandler(),
+		c.newXRPSignerListRepo(),
+		c.newXRPSignerEntryRepo(),
+		c.newTxFileRepo(),
+	)
+}
+
+func (c *container) newXRPWatchCreateMultisigTxUseCase() watchusecase.CreateMultisigTxUseCase {
+	return watchusecasexrp.NewCreateMultisigTxUseCase(
+		c.newXRP(),
+		c.pkgContainer.NewUUIDHandler(),
+		c.newXRPSignerListRepo(),
+		c.newXRPPendingMultisigRepo(),
+	)
+}
+
+func (c *container) newXRPWatchAddMultisigSignatureUseCase() watchusecase.AddMultisigSignatureUseCase {
+	return watchusecasexrp.NewAddMultisigSignatureUseCase(
+		c.newXRP(),
+		c.newXRPSignerListRepo(),
+		c.newXRPSignerEntryRepo(),
+		c.newXRPPendingMultisigRepo(),
+		c.newXRPMultisigSignatureRepo(),
+	)
+}
+
+func (c *container) newXRPWatchSubmitMultisigTxUseCase() watchusecase.SubmitMultisigTxUseCase {
+	return watchusecasexrp.NewSubmitMultisigTxUseCase(
+		c.newXRP(),
+		c.newXRPPendingMultisigRepo(),
 	)
 }
 
