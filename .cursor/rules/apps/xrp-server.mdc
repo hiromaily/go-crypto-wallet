@@ -4,6 +4,7 @@ globs: ["apps/ripple-lib-server/**", "apps/xrpl-grpc-server/**"]
 alwaysApply: false
 ---
 
+
 # XRP Server Directory Rules
 
 ## Overview

@@ -38,8 +38,8 @@ bun run build         # Build for production
 bun run proto         # Generate protobuf code
 ```
 
-> **Important**: Use `bunx` instead of `npx` for running CLI tools in xrpl-grpc-server.
-> Example: `bunx biome check .` instead of `npx biome check .`
+> **Important**: See @.claude/rules/apps/bun.md for Bun runtime rules.
+> **DO NOT** use `npm`/`npx` commands - always use `bun`/`bunx` instead.
 
 ### erc20-token (JavaScript/Solidity)
 
@@ -200,4 +200,5 @@ This directory is deprecated. **Do not modify any files.**
 
 ## Related Rules
 
+- @.claude/rules/apps/bun.md - Bun runtime rules (use bun/bunx instead of npm/npx)
 - @.claude/rules/apps/xrp-server.md - XRP server directory rules (ripple-lib-server read-only)
