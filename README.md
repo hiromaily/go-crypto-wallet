@@ -80,11 +80,13 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - Watch wallet import/validate commands for descriptor onboarding (single-key; multisig import intentionally disabled)
   - See [Descriptor User Guide](./docs/descriptor_user_guide.md) and [Descriptor API](./docs/api/descriptor_api.md)
 
-## ✨ Comprehensive Bitcoin E2E Testing
+## ✨ Comprehensive E2E Testing by Chain
 
-This project includes **fully automated E2E tests** covering all 11 Bitcoin transaction patterns from legacy to cutting-edge Taproot. Each pattern is implemented and verified through real transactions on regtest.
+This project includes **fully automated E2E tests** covering transaction patterns from legacy to cutting-edge. Each pattern is implemented and verified through real transactions on regtest.
 
-### Supported Transaction Patterns
+### Bitcoin (BTC) Transaction Patterns
+
+BTC supports 11 transaction patterns from legacy P2PKH to cutting-edge Taproot with MuSig2.
 
 | Pattern | Type | Address Format | Signature | Status |
 |---------|------|----------------|-----------|--------|
@@ -100,18 +102,38 @@ This project includes **fully automated E2E tests** covering all 11 Bitcoin tran
 | **P10** | P2TR MuSig2 N-of-N | `bcrt1p...` | Aggregated | 🔧 Framework |
 | **P11** | P2TR Tapscript M-of-N | `bcrt1p...` | Script Path | 🔧 Framework |
 
+### Bitcoin Cash (BCH) Transaction Patterns
+
+BCH supports P2PKH and P2SH patterns with CashAddr format. SegWit and Taproot are **not supported** on BCH.
+
+| Pattern | Type | Address Format | Signature | Status |
+|---------|------|----------------|-----------|--------|
+| **P1** | P2PKH Single-sig | `bchreg:q...` | 1-of-1 | ✅ Verified |
+| **P2** | P2SH 2-of-3 Multisig | `bchreg:p...` | 2-of-3 | ✅ Verified |
+| **P3** | P2SH 3-of-3 Multisig | `bchreg:p...` | 3-of-3 | ✅ Verified |
+
+> **Note**: BCH uses CashAddr format (`bitcoincash:q...` for P2PKH, `bitcoincash:p...` for P2SH on mainnet).
+> BCH signing requires SIGHASH_FORKID (0x41) for replay protection.
+
 ### Quick Start
 
 ```bash
-# Run any pattern with a single command
+# BTC: Run any pattern with a single command
 make btc-e2e P=1    # P2PKH Single-sig
 make btc-e2e P=9    # P2TR Taproot
 
+# BCH: Run supported patterns
+make bch-e2e P=1    # P2PKH Single-sig
+make bch-e2e P=2    # P2SH 2-of-3 Multisig
+make bch-e2e P=3    # P2SH 3-of-3 Multisig
+
 # Fresh start with full reset
 make btc-e2e-reset P=5
+make bch-e2e-reset P=3
 
 # CI/CD mode (non-interactive)
 make btc-e2e-ci P=3
+make bch-e2e-ci P=3
 ```
 
 ### Why This Matters
