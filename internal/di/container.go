@@ -1459,13 +1459,14 @@ func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUs
 	// Use offline key generation if configured
 	if c.conf.Ripple.OfflineKeyGen {
 		// Parse key algorithm from config (default to Ed25519 if not specified)
-		algorithm := xrpkg.AlgorithmEd25519
-		if c.conf.Ripple.KeyAlgorithm != "" {
-			var err error
-			algorithm, err = xrpkg.ParseKeyAlgorithm(c.conf.Ripple.KeyAlgorithm)
-			if err != nil {
-				panic(fmt.Sprintf("invalid XRP key algorithm in config: %v", err))
-			}
+		keyAlgoStr := c.conf.Ripple.KeyAlgorithm
+		if keyAlgoStr == "" {
+			keyAlgoStr = "ed25519" // Default to ed25519 if not specified
+		}
+
+		algorithm, err := xrpkg.ParseKeyAlgorithm(keyAlgoStr)
+		if err != nil {
+			panic(fmt.Sprintf("invalid XRP key algorithm in config: %v", err))
 		}
 
 		return keygenusecasexrp.NewOfflineGenerateKeyUseCase(
