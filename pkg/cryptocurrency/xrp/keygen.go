@@ -38,6 +38,8 @@ func (a KeyAlgorithm) String() string {
 }
 
 // ParseKeyAlgorithm parses a string into a KeyAlgorithm.
+// Returns an error if the algorithm string is not recognized.
+// Valid values are "secp256k1" and "ed25519".
 func ParseKeyAlgorithm(s string) (KeyAlgorithm, error) {
 	switch s {
 	case "secp256k1":
@@ -45,7 +47,8 @@ func ParseKeyAlgorithm(s string) (KeyAlgorithm, error) {
 	case "ed25519":
 		return AlgorithmEd25519, nil
 	default:
-		return AlgorithmSecp256k1, fmt.Errorf("unknown key algorithm: %s", s)
+		// Return -1 as invalid value to make it clear the parse failed
+		return KeyAlgorithm(-1), fmt.Errorf("unknown key algorithm: %s (valid values: secp256k1, ed25519)", s)
 	}
 }
 
@@ -127,7 +130,11 @@ func (g *KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) 
 	privateKeyBytes := Sha512Half(keyGenData)
 
 	// Create secp256k1 private key
+	// btcec.PrivKeyFromBytes returns (*PrivateKey, *PublicKey)
 	privKey, _ := btcec.PrivKeyFromBytes(privateKeyBytes)
+	if privKey == nil {
+		return nil, errors.New("failed to create secp256k1 private key from seed")
+	}
 
 	// Get compressed public key (33 bytes)
 	pubKeyBytes := privKey.PubKey().SerializeCompressed()

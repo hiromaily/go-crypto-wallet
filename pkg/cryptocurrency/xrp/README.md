@@ -79,5 +79,11 @@ ripple:
 
 ## Original Source
 
-Original address encoding files are from [github.com/rubblelabs/ripple/tree/master/crypto](https://github.com/rubblelabs/ripple/tree/master/crypto)
+The following files are adapted from [github.com/rubblelabs/ripple/tree/master/crypto](https://github.com/rubblelabs/ripple/tree/master/crypto):
+- `base58.go` - Base58 encoding/decoding
+- `hash.go` - XRP hash types and address generation
+- `const.go` - XRP constants and hash versions
+- `util.go` - Cryptographic utility functions
+
+The `keygen.go` file is a new implementation for this project.
 

@@ -27,10 +27,10 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 
 ### Go
 
-- **Required Version**: Go 1.25.5 (specified in `go.mod`)
+- **Required Version**: Go 1.25.6 (specified in `go.mod`)
 - **Check version**: `go version`
 - **Installation**: <https://go.dev/dl/>
-- **Note**: Must match the version specified in `go.mod` (currently `go 1.25.5`)
+- **Note**: Must match the version specified in `go.mod` (currently `go 1.25.6`)
 
 ## Development Tools
 
@@ -98,7 +98,7 @@ Before starting work, verify all required tools are installed and at the correct
 # Essential tools
 git --version
 gh --version
-go version  # Should show go1.25.5
+go version  # Should show go1.25.6
 
 # Development tools
 golangci-lint --version  # Should show v2.8.0

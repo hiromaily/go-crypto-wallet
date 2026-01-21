@@ -4,7 +4,7 @@
 
 ### 1. Dependency Management
 
-- [x] Go version updated to 1.25.5
+- [x] Go version updated to 1.25.6
 - [ ] Run `go mod tidy` regularly
 - [ ] Run `go mod verify` for integrity checks
 - [ ] Identify outdated dependencies (`go list -m -u all`)
@@ -54,7 +54,7 @@
 
 ### Go Version Update
 
-- [x] `go.mod` `go` directive updated to 1.25.5
+- [x] `go.mod` `go` directive updated to 1.25.6
 - [ ] Verify local Go version matches
 - [x] CI environment Go version updated (`.github/workflows/lint-test.yml` uses 1.25)
 - [ ] Fix any build errors
@@ -402,7 +402,7 @@ Current status: `main` functions in `cmd/` use `os.Exit()` directly. Need to imp
 
 ### Completed ✅
 
-- Go version: 1.25.5
+- Go version: 1.25.6
 - Linter configuration: `.golangci.yml` configured
 - CI/CD: Basic workflow exists (`.github/workflows/lint-test.yml`)
 - Integration tests: Build tags implemented

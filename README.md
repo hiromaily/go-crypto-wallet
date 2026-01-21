@@ -26,7 +26,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 
 | Tool | Version | Description |
 |------|---------|-------------|
-| Go | 1.25.5 | Programming language |
+| Go | 1.25.6 | Programming language |
 | MySQL | 8.4+ | Database (via Docker) |
 | Atlas | 1.0.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
@@ -64,7 +64,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - ✅ Application layer (`internal/application/usecase/`) - Use case implementations following Clean Architecture
   - ✅ Infrastructure layer (`internal/infrastructure/`) - External dependencies (API clients, database, repositories)
   - ✅ Interface adapters layer (`internal/interface-adapters/`) - CLI commands and wallet adapters
-  - ✅ Go 1.25.5 with updated major dependencies (btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
+  - ✅ Go 1.25.6 with updated major dependencies (btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
 - ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures
   - 30-50% transaction size/fee reduction compared to legacy multisig
   - Enhanced privacy with indistinguishable spend patterns
@@ -322,7 +322,7 @@ This project provides an **optional** DevContainer configuration for a standardi
 **Key Benefits:**
 
 - ✅ **Safe AI Development**: Isolated environment protects your host system from accidental AI-generated changes
-- ✅ **Consistent Setup**: Pre-configured with Go 1.25.5, golangci-lint v2.8.0, Atlas v1.0.0, and GitHub CLI
+- ✅ **Consistent Setup**: Pre-configured with Go 1.25.6, golangci-lint v2.8.0, Atlas v1.0.0, and GitHub CLI
 - ✅ **Quick Start**: New developers can start coding in minutes
 - ✅ **Zero Impact**: Local development workflow remains completely unchanged
 

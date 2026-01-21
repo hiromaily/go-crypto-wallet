@@ -182,7 +182,7 @@ claude-code
 
 # 5. Claude can verify builds
 # Claude runs: make check-build
-# Go 1.25.5 matches exactly what's in go.mod
+# Go 1.25.6 matches exactly what's in go.mod
 
 # 6. Claude can run tests
 # Claude runs: make gotest
@@ -224,7 +224,7 @@ The DevContainer comes with all project tools pre-configured:
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Go | 1.25.5 | Programming language |
+| Go | 1.25.6 | Programming language |
 | golangci-lint | v2.8.0 | Code linting |
 | Atlas | v1.0.0 | Database migrations |
 | GitHub CLI | Latest | GitHub operations |

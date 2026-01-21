@@ -12,8 +12,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcec/v2"
-
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -146,37 +144,26 @@ func (u *offlineGenerateKeyUseCase) Generate(
 
 // extractPrivateKeyBytes extracts the raw private key bytes from a WalletKey.
 //
-// The WIF field contains the private key in Wallet Import Format.
-// We decode it to get the raw bytes for use as entropy in XRP key generation.
+// The WIF field is expected to contain either:
+// - A hex-encoded 32-byte private key
+// - Raw private key bytes that can be parsed by btcec
+//
+// SECURITY NOTE: This function will fail explicitly if no valid private key
+// can be extracted. We do NOT fall back to public key data as that would be
+// cryptographically insecure.
 func (u *offlineGenerateKeyUseCase) extractPrivateKeyBytes(wk domainKey.WalletKey) ([]byte, error) {
-	// The WIF field should contain the hex-encoded private key or WIF string
-	// Try to decode as hex first
-	if wk.WIF != "" {
-		privKeyBytes, err := hex.DecodeString(wk.WIF)
-		if err == nil && len(privKeyBytes) == 32 {
-			return privKeyBytes, nil
-		}
-
-		// If not hex, try to use as raw private key bytes
-		// btcec.PrivKeyFromBytes expects exactly 32 bytes
-		if len(privKeyBytes) == 32 {
-			privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes)
-			if privKey != nil {
-				return privKey.Serialize(), nil
-			}
-		}
+	if wk.WIF == "" {
+		return nil, errors.New("WIF field is empty: no private key available")
 	}
 
-	// Fallback: use the full public key hash as entropy source
-	// This is less ideal but provides a deterministic fallback
-	if wk.FullPubKey != "" {
-		pubKeyBytes, err := hex.DecodeString(wk.FullPubKey)
-		if err == nil && len(pubKeyBytes) >= 32 {
-			return pubKeyBytes[:32], nil
-		}
+	// Try to decode as hex-encoded private key
+	privKeyBytes, err := hex.DecodeString(wk.WIF)
+	if err == nil && len(privKeyBytes) == 32 {
+		return privKeyBytes, nil
 	}
 
-	return nil, errors.New("unable to extract private key bytes from wallet key")
+	// If hex decode failed or wrong length, the WIF field format is not supported
+	return nil, fmt.Errorf("invalid private key format in WIF field: expected 32-byte hex-encoded key, got %d bytes", len(privKeyBytes))
 }
 
 // convertAlgorithmToKeyType converts xrpkg.KeyAlgorithm to domainXrp.XRPKeyType.

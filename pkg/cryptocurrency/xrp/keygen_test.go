@@ -60,7 +60,7 @@ func TestParseKeyAlgorithm(t *testing.T) {
 		{
 			name:    "unknown algorithm",
 			input:   "unknown",
-			want:    AlgorithmSecp256k1,
+			want:    KeyAlgorithm(-1),
 			wantErr: true,
 		},
 	}
@@ -329,10 +329,10 @@ func TestDifferentAlgorithms_ProduceDifferentAddresses(t *testing.T) {
 		t.Fatalf("ed25519 GenerateFromEntropy() error = %v", err)
 	}
 
-	// Same seed should produce different addresses for different algorithms
+	// Seeds should be identical since they're both derived from the same entropy
+	// using NewFamilySeed(seedBytes) which doesn't depend on the algorithm
 	if secpKeyPair.Seed != edKeyPair.Seed {
-		// Seeds should be the same since they're derived from the same entropy
-		t.Logf("Note: Seeds are different (expected same): secp=%s, ed=%s",
+		t.Errorf("Seeds should match for same entropy: secp=%s, ed=%s",
 			secpKeyPair.Seed, edKeyPair.Seed)
 	}
 
