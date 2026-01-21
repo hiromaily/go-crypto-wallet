@@ -21,6 +21,18 @@ import (
 // - Send XRP https://xrpl.org/send-xrp.html
 // - Payment System Basics https://xrpl.org/payment-system-basics.html
 
+// unquoteJSON attempts to unquote a JSON string. If unquoting fails,
+// it returns the original string. This handles cases where the gRPC
+// response may or may not include extra quotes around the JSON.
+func unquoteJSON(s string) string {
+	unquoted, err := strconv.Unquote(s)
+	if err != nil {
+		// If unquoting fails, assume the string is not quoted
+		return s
+	}
+	return unquoted
+}
+
 // TxInput is transaction input json type
 type TxInput struct {
 	TransactionType    string `json:"TransactionType"`
@@ -134,7 +146,7 @@ func (r *Ripple) PrepareTransaction(
 	)
 
 	var txInput TxInput
-	unquotedJSON, _ := strconv.Unquote(res.GetTxJSON())
+	unquotedJSON := unquoteJSON(res.GetTxJSON())
 	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
 		return nil, "", fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 	}
@@ -183,7 +195,7 @@ func (r *Ripple) PrepareSetRegularKeyTransaction(
 	)
 
 	var txInput SetRegularKeyTxInput
-	unquotedJSON, _ := strconv.Unquote(res.GetTxJSON())
+	unquotedJSON := unquoteJSON(res.GetTxJSON())
 	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
 		return nil, "", fmt.Errorf("fail to call json.Unmarshal(SetRegularKeyTxJSON): %w", err)
 	}
@@ -241,7 +253,7 @@ func (r *Ripple) PrepareAccountSetTransaction(
 	)
 
 	var txInput AccountSetTxInput
-	unquotedJSON, _ := strconv.Unquote(res.GetTxJSON())
+	unquotedJSON := unquoteJSON(res.GetTxJSON())
 	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
 		return nil, "", fmt.Errorf("fail to call json.Unmarshal(AccountSetTxJSON): %w", err)
 	}
