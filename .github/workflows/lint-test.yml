@@ -187,7 +187,7 @@ jobs:
           # Install protoc v33.4 (supports edition 2024)
           PROTOC_VERSION=33.4
           curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip"
-          unzip -o "protoc-${PROTOC_VERSION}-linux-x86_64.zip" -d /usr/local
+          sudo unzip -o "protoc-${PROTOC_VERSION}-linux-x86_64.zip" -d /usr/local
           protoc --version
       - name: Setup buf
         if: steps.proto-tool.outputs.tool == 'buf'
