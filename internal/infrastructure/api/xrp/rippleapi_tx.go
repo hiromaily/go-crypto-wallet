@@ -175,7 +175,7 @@ type SetRegularKeyTxInput struct {
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
 func (r *Ripple) PrepareSetRegularKeyTransaction(
 	ctx context.Context, senderAccount, regularKey string, instructions *dtoRipple.Instructions,
-) (*SetRegularKeyTxInput, string, error) {
+) (*dtoRipple.SetRegularKeyTxInput, string, error) {
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
@@ -201,7 +201,19 @@ func (r *Ripple) PrepareSetRegularKeyTransaction(
 		return nil, "", fmt.Errorf("fail to call json.Unmarshal(SetRegularKeyTxJSON): %w", err)
 	}
 
-	return &txInput, unquotedJSON, nil
+	// Convert to DTO type
+	return &dtoRipple.SetRegularKeyTxInput{
+		TransactionType:    txInput.TransactionType,
+		Account:            txInput.Account,
+		RegularKey:         txInput.RegularKey,
+		Fee:                txInput.Fee,
+		Flags:              txInput.Flags,
+		LastLedgerSequence: txInput.LastLedgerSequence,
+		Sequence:           txInput.Sequence,
+		SigningPubKey:      txInput.SigningPubKey,
+		TxnSignature:       txInput.TxnSignature,
+		Hash:               txInput.Hash,
+	}, unquotedJSON, nil
 }
 
 // AccountSetTxInput is the transaction input for AccountSet
@@ -256,7 +268,7 @@ type SignerListSetTxInput struct {
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset
 func (r *Ripple) PrepareAccountSetTransaction(
 	ctx context.Context, senderAccount string, setFlag, clearFlag uint32, instructions *dtoRipple.Instructions,
-) (*AccountSetTxInput, string, error) {
+) (*dtoRipple.AccountSetTxInput, string, error) {
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
@@ -283,7 +295,20 @@ func (r *Ripple) PrepareAccountSetTransaction(
 		return nil, "", fmt.Errorf("fail to call json.Unmarshal(AccountSetTxJSON): %w", err)
 	}
 
-	return &txInput, unquotedJSON, nil
+	// Convert to DTO type
+	return &dtoRipple.AccountSetTxInput{
+		TransactionType:    txInput.TransactionType,
+		Account:            txInput.Account,
+		SetFlag:            txInput.SetFlag,
+		ClearFlag:          txInput.ClearFlag,
+		Fee:                txInput.Fee,
+		Flags:              txInput.Flags,
+		LastLedgerSequence: txInput.LastLedgerSequence,
+		Sequence:           txInput.Sequence,
+		SigningPubKey:      txInput.SigningPubKey,
+		TxnSignature:       txInput.TxnSignature,
+		Hash:               txInput.Hash,
+	}, unquotedJSON, nil
 }
 
 // PrepareSignerListSetTransaction prepares a SignerListSet transaction
@@ -508,7 +533,8 @@ func (r *Ripple) PrepareEscrowCreateTransaction(
 ) (*dtoRipple.EscrowCreateTxInput, string, error) {
 	// Validate: at least one of cancelAfter, finishAfter, or condition must be set
 	if cancelAfter == 0 && finishAfter == 0 && condition == "" {
-		return nil, "", errors.New("at least one of cancelAfter, finishAfter, or condition must be set for EscrowCreate")
+		return nil, "", errors.New(
+			"at least one of cancelAfter, finishAfter, or condition must be set for EscrowCreate")
 	}
 
 	// Convert DTO to infrastructure type
@@ -1161,7 +1187,8 @@ func (r *Ripple) PrepareNFTokenAcceptOfferTransaction(
 ) (*dtoRipple.NFTokenAcceptOfferTxInput, string, error) {
 	// Validate: at least one offer must be provided
 	if nfTokenSellOffer == "" && nfTokenBuyOffer == "" {
-		return nil, "", errors.New("at least one of nfTokenSellOffer or nfTokenBuyOffer is required for NFTokenAcceptOffer transaction")
+		return nil, "", errors.New(
+			"at least one of nfTokenSellOffer or nfTokenBuyOffer is required for NFTokenAcceptOffer")
 	}
 
 	// Convert DTO to infrastructure type

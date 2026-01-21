@@ -126,3 +126,107 @@ type AggregateMuSig2SignaturesOutput struct {
 	IsComplete bool
 	TxID       string
 }
+
+// XRP Multi-signature and Regular Key Use Cases
+
+// SetRegularKeyUseCase creates SetRegularKey transactions for XRP accounts.
+// This allows an account to authorize a regular key for signing transactions.
+type SetRegularKeyUseCase interface {
+	Execute(ctx context.Context, input SetRegularKeyInput) (SetRegularKeyOutput, error)
+}
+
+// SetSignerListUseCase creates SignerListSet transactions for XRP multi-sig accounts.
+// This configures a signer list enabling multi-signature transactions.
+type SetSignerListUseCase interface {
+	Execute(ctx context.Context, input SetSignerListInput) (SetSignerListOutput, error)
+}
+
+// CreateMultisigTxUseCase creates a pending multi-sig transaction awaiting signatures.
+type CreateMultisigTxUseCase interface {
+	Execute(ctx context.Context, input CreateMultisigTxInput) (CreateMultisigTxOutput, error)
+}
+
+// AddMultisigSignatureUseCase adds a signature to a pending multi-sig transaction.
+type AddMultisigSignatureUseCase interface {
+	Execute(ctx context.Context, input AddMultisigSignatureInput) (AddMultisigSignatureOutput, error)
+}
+
+// SubmitMultisigTxUseCase submits a ready multi-sig transaction to the network.
+type SubmitMultisigTxUseCase interface {
+	Execute(ctx context.Context, input SubmitMultisigTxInput) (SubmitMultisigTxOutput, error)
+}
+
+// SetRegularKeyInput represents input for setting a regular key
+type SetRegularKeyInput struct {
+	AccountAddress    string // XRP account to set regular key for
+	RegularKeyAddress string // Regular key address to authorize (empty to remove)
+}
+
+// SetRegularKeyOutput represents output from setting a regular key
+type SetRegularKeyOutput struct {
+	FileName  string // Generated transaction file
+	TxJSON    string // Transaction JSON
+	AccountID string // Account that was modified
+}
+
+// SignerEntry represents a signer for multi-sig configuration
+type SignerEntry struct {
+	Account string
+	Weight  uint32
+}
+
+// SetSignerListInput represents input for setting a signer list
+type SetSignerListInput struct {
+	AccountAddress string        // XRP account to configure multi-sig for
+	SignerQuorum   uint32        // Minimum weight required for signatures
+	SignerEntries  []SignerEntry // List of authorized signers with weights
+}
+
+// SetSignerListOutput represents output from setting a signer list
+type SetSignerListOutput struct {
+	FileName     string // Generated transaction file
+	TxJSON       string // Transaction JSON
+	SignerListID int64  // Database ID of the created signer list
+}
+
+// CreateMultisigTxInput represents input for creating a pending multi-sig transaction
+type CreateMultisigTxInput struct {
+	AccountAddress  string  // XRP account sending the transaction
+	ReceiverAddress string  // Destination address
+	Amount          float64 // Amount in XRP
+	TxType          string  // Transaction type (e.g., "Payment")
+}
+
+// CreateMultisigTxOutput represents output from creating a pending multi-sig transaction
+type CreateMultisigTxOutput struct {
+	TxUUID         string // Unique identifier for tracking
+	PendingID      int64  // Database ID of the pending transaction
+	UnsignedTxJSON string // JSON of the unsigned transaction
+	RequiredQuorum uint32 // Quorum needed to sign
+}
+
+// AddMultisigSignatureInput represents input for adding a signature
+type AddMultisigSignatureInput struct {
+	TxUUID        string // Transaction UUID to sign
+	SignerAccount string // Account of the signer
+	SignedTxBlob  string // Signed transaction blob from this signer
+}
+
+// AddMultisigSignatureOutput represents output from adding a signature
+type AddMultisigSignatureOutput struct {
+	CurrentWeight  uint32 // Total weight after adding signature
+	RequiredQuorum uint32 // Quorum needed
+	IsReady        bool   // True if quorum is met
+	CombinedTxBlob string // Combined tx blob (only set when ready)
+}
+
+// SubmitMultisigTxInput represents input for submitting a multi-sig transaction
+type SubmitMultisigTxInput struct {
+	TxUUID string // Transaction UUID to submit
+}
+
+// SubmitMultisigTxOutput represents output from submitting a multi-sig transaction
+type SubmitMultisigTxOutput struct {
+	TxHash   string // Submitted transaction hash
+	IsQueued bool   // True if queued for validation
+}

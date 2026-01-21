@@ -343,6 +343,44 @@ type NFTokenCancelOfferTxInput struct {
 	Hash               string
 }
 
+// SetRegularKeyTxInput represents a SetRegularKey transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
+type SetRegularKeyTxInput struct {
+	TransactionType    string
+	Account            string
+	RegularKey         string // The address to authorize, or empty to remove
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// AccountSetTxInput represents an AccountSet transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset
+type AccountSetTxInput struct {
+	TransactionType    string
+	Account            string
+	SetFlag            uint32 // Flag to enable
+	ClearFlag          uint32 // Flag to disable
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// AccountSet flag constants
+const (
+	// AsfDisableMaster disables the master key from signing transactions
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset#accountset-flags
+	AsfDisableMaster uint32 = 4
+)
+
 // XRPKeyType represents the type of XRP cryptographic key.
 type XRPKeyType string
 
