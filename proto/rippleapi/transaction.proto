@@ -51,9 +51,9 @@ message RequestPrepareTransaction {
   // - Set to a valid XRP address to assign that address as the regular key
   // - Set to empty string to remove the regular key
   string regularKey = 6;
-  // setFlag is used for AccountSet transaction type
-  // - 4 (asfDisableMaster): Disable master key signing
-  // - 0: Clear flag (enable master key signing)
+  // setFlag is used for AccountSet transaction type to enable a flag
+  // Common flags: 4 (asfDisableMaster) - Disable master key signing
+  // Use clearFlag to disable/clear a flag instead
   uint32 setFlag = 7;
   // clearFlag is used for AccountSet transaction type to clear a flag
   uint32 clearFlag = 8;

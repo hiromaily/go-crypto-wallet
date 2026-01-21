@@ -132,10 +132,10 @@ export function createRouter(): ConnectRouter {
         }
 
         // Map AccountSet flags for enabling/disabling master key
-        if (request.setFlag) {
+        if (request.setFlag > 0) {
           serviceRequest.setFlag = request.setFlag;
         }
-        if (request.clearFlag) {
+        if (request.clearFlag > 0) {
           serviceRequest.clearFlag = request.clearFlag;
         }
 

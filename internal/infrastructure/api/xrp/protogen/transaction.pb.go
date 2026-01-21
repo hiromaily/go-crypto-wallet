@@ -387,9 +387,9 @@ type RequestPrepareTransaction_builder struct {
 	// - Set to a valid XRP address to assign that address as the regular key
 	// - Set to empty string to remove the regular key
 	RegularKey string
-	// setFlag is used for AccountSet transaction type
-	// - 4 (asfDisableMaster): Disable master key signing
-	// - 0: Clear flag (enable master key signing)
+	// setFlag is used for AccountSet transaction type to enable a flag
+	// Common flags: 4 (asfDisableMaster) - Disable master key signing
+	// Use clearFlag to disable/clear a flag instead
 	SetFlag uint32
 	// clearFlag is used for AccountSet transaction type to clear a flag
 	ClearFlag uint32

@@ -261,13 +261,14 @@ func (r *Ripple) PrepareAccountSetTransaction(
 	return &txInput, unquotedJSON, nil
 }
 
-// SignSetRegularKeyTransaction signs a SetRegularKey transaction
-func (r *Ripple) SignSetRegularKeyTransaction(
-	ctx context.Context, txInput *SetRegularKeyTxInput, secret string,
+// signTransactionJSON is a generic helper that signs any transaction type.
+// It marshals the input to JSON and calls the gRPC SignTransaction API.
+func (r *Ripple) signTransactionJSON(
+	ctx context.Context, txInput any, secret, txTypeName string,
 ) (string, string, error) {
 	strJSON, err := json.Marshal(txInput)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call json.Marshal(SetRegularKeyTxInput): %w", err)
+		return "", "", fmt.Errorf("fail to call json.Marshal(%sTxInput): %w", txTypeName, err)
 	}
 	req := protogen.RequestSignTransaction_builder{
 		TxJSON: string(strJSON),
@@ -276,31 +277,24 @@ func (r *Ripple) SignSetRegularKeyTransaction(
 
 	res, err := r.API.txClient.SignTransaction(ctx, req)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call client.SignTransaction() for SetRegularKey: %w", err)
+		return "", "", fmt.Errorf("fail to call client.SignTransaction() for %s: %w", txTypeName, err)
 	}
 
 	return res.GetTxID(), res.GetTxBlob(), nil
+}
+
+// SignSetRegularKeyTransaction signs a SetRegularKey transaction
+func (r *Ripple) SignSetRegularKeyTransaction(
+	ctx context.Context, txInput *SetRegularKeyTxInput, secret string,
+) (string, string, error) {
+	return r.signTransactionJSON(ctx, txInput, secret, "SetRegularKey")
 }
 
 // SignAccountSetTransaction signs an AccountSet transaction
 func (r *Ripple) SignAccountSetTransaction(
 	ctx context.Context, txInput *AccountSetTxInput, secret string,
 ) (string, string, error) {
-	strJSON, err := json.Marshal(txInput)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call json.Marshal(AccountSetTxInput): %w", err)
-	}
-	req := protogen.RequestSignTransaction_builder{
-		TxJSON: string(strJSON),
-		Secret: secret,
-	}.Build()
-
-	res, err := r.API.txClient.SignTransaction(ctx, req)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call client.SignTransaction() for AccountSet: %w", err)
-	}
-
-	return res.GetTxID(), res.GetTxBlob(), nil
+	return r.signTransactionJSON(ctx, txInput, secret, "AccountSet")
 }
 
 // SignTransaction calls SignTransaction API
