@@ -18,16 +18,24 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+// xrpSignClient defines the interface for XRP operations needed by signTransactionUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpSignClient interface {
+	apixrp.TransactionSigner
+}
+
 type signTransactionUseCase struct {
-	xrp               apixrp.XRPer
+	xrp               xrpSignClient
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
 	txFileRepo        file.TransactionFileRepositorier
 	wtype             domainWallet.WalletType
 }
 
-// NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
+// NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet.
+// The xrpAPI parameter accepts any type that implements xrpSignClient (TransactionSigner).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewSignTransactionUseCase(
-	xrpAPI apixrp.XRPer,
+	xrpAPI xrpSignClient,
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,

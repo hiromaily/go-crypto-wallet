@@ -12,17 +12,25 @@ import (
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 )
 
+// xrpAddMultisigSigClient defines the interface for XRP operations needed by addMultisigSignatureUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpAddMultisigSigClient interface {
+	apixrp.TransactionCombiner
+}
+
 type addMultisigSignatureUseCase struct {
-	xrper               apixrp.XRPer
+	xrper               xrpAddMultisigSigClient
 	signerListRepo      repocold.XRPSignerListRepositorier
 	signerEntryRepo     repocold.XRPSignerEntryRepositorier
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
 	signatureRepo       repowatch.XRPMultisigSignatureRepositorier
 }
 
-// NewAddMultisigSignatureUseCase creates a new AddMultisigSignatureUseCase
+// NewAddMultisigSignatureUseCase creates a new AddMultisigSignatureUseCase.
+// The xrper parameter accepts any type that implements xrpAddMultisigSigClient (TransactionCombiner).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewAddMultisigSignatureUseCase(
-	xrper apixrp.XRPer,
+	xrper xrpAddMultisigSigClient,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	signerEntryRepo repocold.XRPSignerEntryRepositorier,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,

@@ -15,17 +15,25 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
+// xrpSignerListClient defines the interface for XRP operations needed by setSignerListUseCase.
+// This follows the Interface Segregation Principle - depend only on what you need.
+type xrpSignerListClient interface {
+	apixrp.SignerListPreparer
+}
+
 type setSignerListUseCase struct {
-	xrper           apixrp.XRPer
+	xrper           xrpSignerListClient
 	uuidHandler     uuid.UUIDHandler
 	signerListRepo  repocold.XRPSignerListRepositorier
 	signerEntryRepo repocold.XRPSignerEntryRepositorier
 	txFileRepo      file.TransactionFileRepositorier
 }
 
-// NewSetSignerListUseCase creates a new SetSignerListUseCase
+// NewSetSignerListUseCase creates a new SetSignerListUseCase.
+// The xrper parameter accepts any type that implements xrpSignerListClient (SignerListPreparer).
+// Typically, apixrp.XRPer is passed which implements all required methods.
 func NewSetSignerListUseCase(
-	xrper apixrp.XRPer,
+	xrper xrpSignerListClient,
 	uuidHandler uuid.UUIDHandler,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	signerEntryRepo repocold.XRPSignerEntryRepositorier,
