@@ -1,0 +1,153 @@
+package xrp
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
+)
+
+type setSignerListUseCase struct {
+	rippler         apixrp.Rippler
+	uuidHandler     uuid.UUIDHandler
+	signerListRepo  repocold.XRPSignerListRepositorier
+	signerEntryRepo repocold.XRPSignerEntryRepositorier
+	txFileRepo      file.TransactionFileRepositorier
+}
+
+// NewSetSignerListUseCase creates a new SetSignerListUseCase
+func NewSetSignerListUseCase(
+	rippler apixrp.Rippler,
+	uuidHandler uuid.UUIDHandler,
+	signerListRepo repocold.XRPSignerListRepositorier,
+	signerEntryRepo repocold.XRPSignerEntryRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
+) watchusecase.SetSignerListUseCase {
+	return &setSignerListUseCase{
+		rippler:         rippler,
+		uuidHandler:     uuidHandler,
+		signerListRepo:  signerListRepo,
+		signerEntryRepo: signerEntryRepo,
+		txFileRepo:      txFileRepo,
+	}
+}
+
+func (u *setSignerListUseCase) Execute(
+	ctx context.Context,
+	input watchusecase.SetSignerListInput,
+) (watchusecase.SetSignerListOutput, error) {
+	// Validate input
+	if input.AccountAddress == "" {
+		return watchusecase.SetSignerListOutput{}, errors.New("account address is required")
+	}
+
+	// Validate signer entries using domain validator
+	signerInputs := make([]domainXrp.SignerEntryInput, len(input.SignerEntries))
+	for i, entry := range input.SignerEntries {
+		signerInputs[i] = domainXrp.SignerEntryInput{
+			Account: entry.Account,
+			Weight:  entry.Weight,
+		}
+	}
+
+	if err := domainXrp.ValidateSignerEntries(signerInputs, input.SignerQuorum); err != nil {
+		return watchusecase.SetSignerListOutput{},
+			fmt.Errorf("invalid signer entries: %w", err)
+	}
+
+	// Convert to API input format
+	apiSignerEntries := make([]apixrp.SignerEntryInput, len(input.SignerEntries))
+	for i, entry := range input.SignerEntries {
+		apiSignerEntries[i] = apixrp.SignerEntryInput{
+			Account: entry.Account,
+			Weight:  entry.Weight,
+		}
+	}
+
+	// Prepare the SignerListSet transaction
+	instructions := &dtoRipple.Instructions{
+		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
+	}
+
+	_, txJSON, err := u.rippler.PrepareSignerListSetTransaction(
+		ctx, input.AccountAddress, input.SignerQuorum, apiSignerEntries, instructions)
+	if err != nil {
+		return watchusecase.SetSignerListOutput{},
+			fmt.Errorf("failed to prepare SignerListSet transaction: %w", err)
+	}
+
+	// Generate UUID for tracking
+	uid, err := u.uuidHandler.GenerateV7()
+	if err != nil {
+		return watchusecase.SetSignerListOutput{},
+			fmt.Errorf("failed to generate UUID: %w", err)
+	}
+
+	// Deactivate any existing signer lists for this account
+	if err = u.signerListRepo.DeactivateByAccountID(ctx, input.AccountAddress); err != nil {
+		return watchusecase.SetSignerListOutput{},
+			fmt.Errorf("failed to deactivate existing signer lists: %w", err)
+	}
+
+	// Create new signer list record (will be activated after tx is confirmed)
+	signerList, err := domainXrp.NewXRPSignerList(input.AccountAddress, input.SignerQuorum)
+	if err != nil {
+		return watchusecase.SetSignerListOutput{},
+			fmt.Errorf("failed to create signer list entity: %w", err)
+	}
+	signerList.IsActive = false // Will be activated after confirmation
+
+	signerListID, err := u.signerListRepo.Insert(ctx, signerList)
+	if err != nil {
+		return watchusecase.SetSignerListOutput{},
+			fmt.Errorf("failed to insert signer list: %w", err)
+	}
+
+	// Create signer entries
+	for _, entry := range input.SignerEntries {
+		signerEntry, err := domainXrp.NewXRPSignerEntry(signerListID, entry.Account, entry.Weight)
+		if err != nil {
+			return watchusecase.SetSignerListOutput{},
+				fmt.Errorf("failed to create signer entry entity: %w", err)
+		}
+
+		if _, err = u.signerEntryRepo.Insert(ctx, signerEntry); err != nil {
+			return watchusecase.SetSignerListOutput{},
+				fmt.Errorf("failed to insert signer entry for %s: %w", entry.Account, err)
+		}
+	}
+
+	// Serialize transaction for file storage
+	serializedTx := fmt.Sprintf("%s,%s", uid, txJSON)
+
+	// Write transaction to file
+	path := u.txFileRepo.CreateFilePath(
+		domainTx.ActionTypeTransfer, // Using transfer action type for admin operations
+		domainTx.TxTypeUnsigned,
+		0, // No txID yet
+		0,
+	)
+
+	generatedFileName, err := u.txFileRepo.WriteFileSlice(path, []string{
+		input.AccountAddress, // First line is the account
+		serializedTx,
+	})
+	if err != nil {
+		return watchusecase.SetSignerListOutput{},
+			fmt.Errorf("failed to write transaction file: %w", err)
+	}
+
+	return watchusecase.SetSignerListOutput{
+		FileName:     generatedFileName,
+		TxJSON:       txJSON,
+		SignerListID: signerListID,
+	}, nil
+}

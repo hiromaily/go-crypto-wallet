@@ -67,6 +67,23 @@ type RippleAPIer interface {
 	WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error)
 	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoRipple.TxInfo, error)
 
+	// Regular Key operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
+	PrepareSetRegularKeyTransaction(
+		ctx context.Context,
+		senderAccount, regularKey string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.SetRegularKeyTxInput, string, error)
+
+	// Account settings operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset
+	PrepareAccountSetTransaction(
+		ctx context.Context,
+		senderAccount string,
+		setFlag, clearFlag uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.AccountSetTxInput, string, error)
+
 	// Multi-signature operations
 	// Reference: https://xrpl.org/docs/concepts/accounts/multi-signing
 	PrepareSignerListSetTransaction(
