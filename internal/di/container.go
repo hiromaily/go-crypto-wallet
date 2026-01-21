@@ -50,6 +50,7 @@ import (
 	xrpwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
 	pkgdi "github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
@@ -1455,6 +1456,28 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 // XRP Keygen Use Cases
 
 func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
+	// Use offline key generation if configured
+	if c.conf.Ripple.OfflineKeyGen {
+		// Parse key algorithm from config (default to Ed25519 if not specified)
+		keyAlgoStr := c.conf.Ripple.KeyAlgorithm
+		if keyAlgoStr == "" {
+			keyAlgoStr = "ed25519" // Default to ed25519 if not specified
+		}
+
+		algorithm, err := xrpkg.ParseKeyAlgorithm(keyAlgoStr)
+		if err != nil {
+			panic(fmt.Sprintf("invalid XRP key algorithm in config: %v", err))
+		}
+
+		return keygenusecasexrp.NewOfflineGenerateKeyUseCase(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+			c.newXRPAccountKeyRepo(),
+			algorithm,
+		)
+	}
+
+	// Use API-based key generation (legacy behavior)
 	return keygenusecasexrp.NewGenerateKeyUseCase(
 		c.newXRP(),
 		c.pkgContainer.NewDatabaseClient(),

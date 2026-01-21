@@ -20,6 +20,19 @@ ripple:
   websocket_public_url: ""
   websocket_admin_url: ""
   network_type: "testnet" # mainnet, testnet, devnet
+
+  # Key generation settings
+  # offline_keygen: Enable fully offline key generation (recommended for production)
+  # When true, keys are generated using native Go implementation without API calls.
+  # When false, keys are generated via ripple-lib-server API (wallet_propose).
+  offline_keygen: true
+
+  # key_algorithm: Cryptographic algorithm for key generation
+  # - "ed25519": Modern, recommended algorithm (shorter signatures, deterministic)
+  # - "secp256k1": Legacy algorithm (same as Bitcoin)
+  # Default: "ed25519" if not specified
+  key_algorithm: "ed25519"
+
   api:
     url: "127.0.0.1:50051"
     is_secure: false

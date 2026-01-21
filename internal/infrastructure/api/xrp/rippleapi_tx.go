@@ -382,7 +382,7 @@ func (r *Ripple) PrepareTrustSetTransaction(
 ) (*dtoRipple.TrustSetTxInput, string, error) {
 	// Validate required parameter
 	if limitAmount == nil {
-		return nil, "", fmt.Errorf("limitAmount is required for TrustSet transaction")
+		return nil, "", errors.New("limitAmount is required for TrustSet transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -508,7 +508,7 @@ func (r *Ripple) PrepareEscrowCreateTransaction(
 ) (*dtoRipple.EscrowCreateTxInput, string, error) {
 	// Validate: at least one of cancelAfter, finishAfter, or condition must be set
 	if cancelAfter == 0 && finishAfter == 0 && condition == "" {
-		return nil, "", fmt.Errorf("at least one of cancelAfter, finishAfter, or condition must be set for EscrowCreate")
+		return nil, "", errors.New("at least one of cancelAfter, finishAfter, or condition must be set for EscrowCreate")
 	}
 
 	// Convert DTO to infrastructure type
@@ -560,10 +560,10 @@ func (r *Ripple) PrepareEscrowFinishTransaction(
 ) (*dtoRipple.EscrowFinishTxInput, string, error) {
 	// Validate required parameters
 	if owner == "" {
-		return nil, "", fmt.Errorf("owner is required for EscrowFinish transaction")
+		return nil, "", errors.New("owner is required for EscrowFinish transaction")
 	}
 	if offerSequence == 0 {
-		return nil, "", fmt.Errorf("offerSequence is required for EscrowFinish transaction")
+		return nil, "", errors.New("offerSequence is required for EscrowFinish transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -610,10 +610,10 @@ func (r *Ripple) PrepareEscrowCancelTransaction(
 ) (*dtoRipple.EscrowCancelTxInput, string, error) {
 	// Validate required parameters
 	if owner == "" {
-		return nil, "", fmt.Errorf("owner is required for EscrowCancel transaction")
+		return nil, "", errors.New("owner is required for EscrowCancel transaction")
 	}
 	if offerSequence == 0 {
-		return nil, "", fmt.Errorf("offerSequence is required for EscrowCancel transaction")
+		return nil, "", errors.New("offerSequence is required for EscrowCancel transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -749,10 +749,10 @@ func (r *Ripple) PreparePaymentChannelCreateTransaction(
 ) (*dtoRipple.PaymentChannelCreateTxInput, string, error) {
 	// Validate required parameters
 	if settleDelay == 0 {
-		return nil, "", fmt.Errorf("settleDelay is required for PaymentChannelCreate transaction")
+		return nil, "", errors.New("settleDelay is required for PaymentChannelCreate transaction")
 	}
 	if publicKey == "" {
-		return nil, "", fmt.Errorf("publicKey is required for PaymentChannelCreate transaction")
+		return nil, "", errors.New("publicKey is required for PaymentChannelCreate transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -804,7 +804,7 @@ func (r *Ripple) PreparePaymentChannelFundTransaction(
 ) (*dtoRipple.PaymentChannelFundTxInput, string, error) {
 	// Validate required parameters
 	if channel == "" {
-		return nil, "", fmt.Errorf("channel is required for PaymentChannelFund transaction")
+		return nil, "", errors.New("channel is required for PaymentChannelFund transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -855,7 +855,7 @@ func (r *Ripple) PreparePaymentChannelClaimTransaction(
 ) (*dtoRipple.PaymentChannelClaimTxInput, string, error) {
 	// Validate required parameters
 	if channel == "" {
-		return nil, "", fmt.Errorf("channel is required for PaymentChannelClaim transaction")
+		return nil, "", errors.New("channel is required for PaymentChannelClaim transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -1060,7 +1060,7 @@ func (r *Ripple) PrepareNFTokenBurnTransaction(
 ) (*dtoRipple.NFTokenBurnTxInput, string, error) {
 	// Validate required parameters
 	if nfTokenID == "" {
-		return nil, "", fmt.Errorf("nfTokenID is required for NFTokenBurn transaction")
+		return nil, "", errors.New("nfTokenID is required for NFTokenBurn transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -1111,7 +1111,7 @@ func (r *Ripple) PrepareNFTokenCreateOfferTransaction(
 ) (*dtoRipple.NFTokenCreateOfferTxInput, string, error) {
 	// Validate required parameters
 	if nfTokenID == "" {
-		return nil, "", fmt.Errorf("nfTokenID is required for NFTokenCreateOffer transaction")
+		return nil, "", errors.New("nfTokenID is required for NFTokenCreateOffer transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -1161,7 +1161,7 @@ func (r *Ripple) PrepareNFTokenAcceptOfferTransaction(
 ) (*dtoRipple.NFTokenAcceptOfferTxInput, string, error) {
 	// Validate: at least one offer must be provided
 	if nfTokenSellOffer == "" && nfTokenBuyOffer == "" {
-		return nil, "", fmt.Errorf("at least one of nfTokenSellOffer or nfTokenBuyOffer is required for NFTokenAcceptOffer transaction")
+		return nil, "", errors.New("at least one of nfTokenSellOffer or nfTokenBuyOffer is required for NFTokenAcceptOffer transaction")
 	}
 
 	// Convert DTO to infrastructure type
@@ -1206,7 +1206,7 @@ func (r *Ripple) PrepareNFTokenCancelOfferTransaction(
 ) (*dtoRipple.NFTokenCancelOfferTxInput, string, error) {
 	// Validate required parameters
 	if len(nfTokenOffers) == 0 {
-		return nil, "", fmt.Errorf("nfTokenOffers is required for NFTokenCancelOffer transaction")
+		return nil, "", errors.New("nfTokenOffers is required for NFTokenCancelOffer transaction")
 	}
 
 	// Convert DTO to infrastructure type
