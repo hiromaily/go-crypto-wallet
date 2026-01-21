@@ -155,7 +155,6 @@ type RippleAPIer interface {
 		nfTokenTaxon uint32,
 		issuer, uri string,
 		transferFee uint32,
-		flags uint64,
 		instructions *dtoRipple.Instructions,
 	) (*dtoRipple.NFTokenMintTxInput, string, error)
 
@@ -173,7 +172,6 @@ type RippleAPIer interface {
 		amount float64,
 		owner, destination string,
 		expiration uint32,
-		flags uint64,
 		instructions *dtoRipple.Instructions,
 	) (*dtoRipple.NFTokenCreateOfferTxInput, string, error)
 

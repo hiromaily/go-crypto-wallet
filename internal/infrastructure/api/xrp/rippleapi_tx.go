@@ -1003,11 +1003,11 @@ type NFTokenCancelOfferTxInput struct {
 }
 
 // PrepareNFTokenMintTransaction prepares an NFTokenMint transaction
-// - nfTokenTaxon: taxon identifying a collection or category (required)
+// - nfTokenTaxon: taxon identifying a collection or category (required, can be 0)
 // - issuer: issuer of the NFT if different from Account (optional)
 // - uri: hex-encoded URI pointing to NFT metadata (optional)
 // - transferFee: fee (0-50000) charged on secondary sales (optional)
-// - flags: NFT flags (tfBurnable, tfOnlyXRP, tfTransferable, tfMutable)
+// Note: Flags are set via xrpl.js autofill based on transaction requirements
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
 func (r *Ripple) PrepareNFTokenMintTransaction(
 	ctx context.Context,
@@ -1015,7 +1015,6 @@ func (r *Ripple) PrepareNFTokenMintTransaction(
 	nfTokenTaxon uint32,
 	issuer, uri string,
 	transferFee uint32,
-	flags uint64,
 	instructions *dtoRipple.Instructions,
 ) (*dtoRipple.NFTokenMintTxInput, string, error) {
 	// Convert DTO to infrastructure type
@@ -1030,10 +1029,6 @@ func (r *Ripple) PrepareNFTokenMintTransaction(
 		TransferFee:   transferFee,
 		Instructions:  infraInstructions,
 	}.Build()
-	// Set flags separately if needed
-	if flags > 0 {
-		// Flags would need to be added to the proto if not present
-	}
 
 	res, err := r.API.txClient.PrepareTransaction(ctx, req)
 	if err != nil {
@@ -1100,11 +1095,11 @@ func (r *Ripple) PrepareNFTokenBurnTransaction(
 
 // PrepareNFTokenCreateOfferTransaction prepares an NFTokenCreateOffer transaction
 // - nfTokenID: the unique ID of the NFToken (required)
-// - amount: the amount in XRP for the offer (required)
+// - amount: the amount in XRP for the offer (can be 0 for free sell offers)
 // - owner: owner of the NFT for buy offers (optional)
 // - destination: only this account can accept the offer (optional)
 // - expiration: when the offer expires (optional)
-// - flags: tfSellNFToken (1) for sell offers
+// Note: tfSellNFToken flag is determined by whether owner is set (buy offer) or not (sell offer)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
 func (r *Ripple) PrepareNFTokenCreateOfferTransaction(
 	ctx context.Context,
@@ -1112,7 +1107,6 @@ func (r *Ripple) PrepareNFTokenCreateOfferTransaction(
 	amount float64,
 	owner, destination string,
 	expiration uint32,
-	flags uint64,
 	instructions *dtoRipple.Instructions,
 ) (*dtoRipple.NFTokenCreateOfferTxInput, string, error) {
 	// Validate required parameters

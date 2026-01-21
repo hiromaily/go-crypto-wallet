@@ -243,7 +243,8 @@ export function createRouter(): ConnectRouter {
         }
 
         // Map NFToken fields
-        if (request.nfTokenTaxon > 0) {
+        // Note: nfTokenTaxon can be 0 as a valid value, so check !== undefined
+        if (request.nfTokenTaxon !== undefined) {
           serviceRequest.nfTokenTaxon = request.nfTokenTaxon;
         }
         if (request.issuer) {
