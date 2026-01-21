@@ -41,6 +41,12 @@ message Instructions {
   uint64 signersCount = 6;
 }
 
+// SignerEntry represents a single signer in a SignerList
+message SignerEntry {
+  string account = 1;    // XRP address of the signer
+  uint32 weight = 2;     // Weight of this signer (contributes to quorum)
+}
+
 message RequestPrepareTransaction {
   EnumTransactionType tx_type = 1;
   string senderAccount = 2;
@@ -57,6 +63,14 @@ message RequestPrepareTransaction {
   uint32 setFlag = 7;
   // clearFlag is used for AccountSet transaction type to clear a flag
   uint32 clearFlag = 8;
+  // signerQuorum is used for SignerListSet transaction type
+  // - Minimum total weight of signatures required to authorize a transaction
+  // - Set to 0 to remove the signer list
+  uint32 signerQuorum = 9;
+  // signerEntries is used for SignerListSet transaction type
+  // - List of signers with their weights
+  // - Must be empty when signerQuorum is 0 (removing signer list)
+  repeated SignerEntry signerEntries = 10;
 }
 
 message ResponsePrepareTransaction {

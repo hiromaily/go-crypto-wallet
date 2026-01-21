@@ -118,3 +118,28 @@ CREATE TABLE `xrp_regular_key` (
   INDEX `idx_is_active` (`is_active`),
   UNIQUE INDEX `idx_regular_key_address` (`regular_key_address`)
 ) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for XRP regular key assignments";
+-- Create "xrp_signer_entry" table
+CREATE TABLE `xrp_signer_entry` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
+  `signer_list_id` bigint NOT NULL COMMENT "Reference to xrp_signer_list.id",
+  `signer_account` varchar(255) NOT NULL COMMENT "XRP address of the authorized signer (r...)",
+  `signer_weight` int unsigned NOT NULL COMMENT "Weight of this signer (contributes to quorum)",
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "creation date",
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_list_signer` (`signer_list_id`, `signer_account`) COMMENT "Each signer can only appear once per signer list",
+  INDEX `idx_signer_account` (`signer_account`),
+  INDEX `idx_signer_list_id` (`signer_list_id`)
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "Individual signer entries within an XRP signer list";
+-- Create "xrp_signer_list" table
+CREATE TABLE `xrp_signer_list` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
+  `account_id` varchar(255) NOT NULL COMMENT "XRP account address (r...) that owns this signer list",
+  `signer_quorum` int unsigned NOT NULL COMMENT "Minimum total weight of signatures required to authorize a transaction",
+  `is_active` bool NOT NULL DEFAULT 1 COMMENT "true: this signer list is currently active on the ledger",
+  `set_tx_hash` varchar(255) NULL COMMENT "Transaction hash of SignerListSet that created/updated this list",
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "creation date",
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "last update date",
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_account_active` (`account_id`, `is_active`) COMMENT "Only one active signer list per account",
+  INDEX `idx_account_id` (`account_id`)
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "XRP signer list configuration for multi-signature accounts";

@@ -14,6 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -225,6 +226,30 @@ const (
 	AsfDisableMaster uint32 = 4
 )
 
+// SignerListEntry represents a single signer in the SignerList
+type SignerListEntry struct {
+	SignerEntry struct {
+		Account      string `json:"Account"`
+		SignerWeight uint32 `json:"SignerWeight"`
+	} `json:"SignerEntry"`
+}
+
+// SignerListSetTxInput is the transaction input for SignerListSet
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/signerlistset
+type SignerListSetTxInput struct {
+	TransactionType    string            `json:"TransactionType"`
+	Account            string            `json:"Account"`
+	SignerQuorum       uint32            `json:"SignerQuorum"`
+	SignerEntries      []SignerListEntry `json:"SignerEntries,omitempty"`
+	Fee                string            `json:"Fee"`
+	Flags              uint64            `json:"Flags"`
+	LastLedgerSequence uint64            `json:"LastLedgerSequence"`
+	Sequence           uint64            `json:"Sequence"`
+	SigningPubKey      string            `json:"SigningPubKey,omitempty"`
+	TxnSignature       string            `json:"TxnSignature,omitempty"`
+	Hash               string            `json:"hash,omitempty"`
+}
+
 // PrepareAccountSetTransaction prepares an AccountSet transaction
 // - setFlag: flag to set (e.g., AsfDisableMaster = 4)
 // - clearFlag: flag to clear
@@ -259,6 +284,63 @@ func (r *Ripple) PrepareAccountSetTransaction(
 	}
 
 	return &txInput, unquotedJSON, nil
+}
+
+// PrepareSignerListSetTransaction prepares a SignerListSet transaction
+// - signerQuorum: minimum total weight of signatures required (0 to remove signer list)
+// - signerEntries: list of signers with their weights (must be empty if signerQuorum is 0)
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/signerlistset
+func (r *Ripple) PrepareSignerListSetTransaction(
+	ctx context.Context,
+	senderAccount string,
+	signerQuorum uint32,
+	signerEntries []apixrp.SignerEntryInput,
+	instructions *dtoRipple.Instructions,
+) (*dtoRipple.SignerListSetTxInput, string, error) {
+	// Convert DTO to infrastructure type
+	infraInstructions := ToInfraInstructions(instructions)
+
+	// Convert SignerEntryInput to protogen.SignerEntry
+	protoSignerEntries := make([]*protogen.SignerEntry, len(signerEntries))
+	for i, entry := range signerEntries {
+		protoSignerEntries[i] = protogen.SignerEntry_builder{
+			Account: entry.Account,
+			Weight:  entry.Weight,
+		}.Build()
+	}
+
+	req := protogen.RequestPrepareTransaction_builder{
+		TxType:        protogen.EnumTransactionType_TX_SINGER_LIST_SET,
+		SenderAccount: senderAccount,
+		SignerQuorum:  signerQuorum,
+		SignerEntries: protoSignerEntries,
+		Instructions:  infraInstructions,
+	}.Build()
+
+	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for SignerListSet: %w", err)
+	}
+	logger.Debug("response SignerListSet",
+		"TxJSON", res.GetTxJSON(),
+		"Instructions", res.GetInstructions(),
+	)
+
+	var txInput SignerListSetTxInput
+	unquotedJSON := unquoteJSON(res.GetTxJSON())
+	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
+		return nil, "", fmt.Errorf("fail to call json.Unmarshal(SignerListSetTxJSON): %w", err)
+	}
+
+	// Convert infrastructure type to DTO
+	return ToDTOSignerListSetTxInput(&txInput), unquotedJSON, nil
+}
+
+// SignSignerListSetTransaction signs a SignerListSet transaction
+func (r *Ripple) SignSignerListSetTransaction(
+	ctx context.Context, txInput *SignerListSetTxInput, secret string,
+) (string, string, error) {
+	return r.signTransactionJSON(ctx, txInput, secret, "SignerListSet")
 }
 
 // signTransactionJSON is a generic helper that signs any transaction type.

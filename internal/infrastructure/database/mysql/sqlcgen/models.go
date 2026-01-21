@@ -658,6 +658,52 @@ func (ns NullXrpAccountKeyCoin) Value() (driver.Value, error) {
 	return string(ns.XrpAccountKeyCoin), nil
 }
 
+type XrpPendingMultisigStatus string
+
+const (
+	XrpPendingMultisigStatusPending   XrpPendingMultisigStatus = "pending"
+	XrpPendingMultisigStatusReady     XrpPendingMultisigStatus = "ready"
+	XrpPendingMultisigStatusSubmitted XrpPendingMultisigStatus = "submitted"
+	XrpPendingMultisigStatusConfirmed XrpPendingMultisigStatus = "confirmed"
+	XrpPendingMultisigStatusFailed    XrpPendingMultisigStatus = "failed"
+	XrpPendingMultisigStatusExpired   XrpPendingMultisigStatus = "expired"
+)
+
+func (e *XrpPendingMultisigStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = XrpPendingMultisigStatus(s)
+	case string:
+		*e = XrpPendingMultisigStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for XrpPendingMultisigStatus: %T", src)
+	}
+	return nil
+}
+
+type NullXrpPendingMultisigStatus struct {
+	XrpPendingMultisigStatus XrpPendingMultisigStatus
+	Valid                    bool // Valid is true if XrpPendingMultisigStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullXrpPendingMultisigStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.XrpPendingMultisigStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.XrpPendingMultisigStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullXrpPendingMultisigStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.XrpPendingMultisigStatus), nil
+}
+
 // table for account pubkey
 type Address struct {
 	// ID
@@ -1038,6 +1084,52 @@ type XrpDetailTx struct {
 	SentUpdatedAt sql.NullTime
 }
 
+// Collected signatures for XRP multi-signature transactions
+type XrpMultisigSignature struct {
+	// ID
+	ID int64
+	// Reference to xrp_pending_multisig.id
+	PendingMultisigID int64
+	// XRP address of the signer (r...)
+	SignerAccount string
+	// Signed transaction blob from this signer
+	SignedTxBlob string
+	// Weight of this signature
+	SignerWeight uint32
+	// date when signature was collected
+	SignedAt sql.NullTime
+}
+
+// Pending XRP multi-signature transactions awaiting signatures
+type XrpPendingMultisig struct {
+	// ID
+	ID int64
+	// Unique identifier for the transaction
+	TxUuid string
+	// XRP account address (r...) that will sign this transaction
+	AccountID string
+	// JSON representation of the unsigned transaction
+	UnsignedTxJson string
+	// XRP transaction type (Payment, SignerListSet, etc.)
+	XrpTxType string
+	// Total signature weight required for this transaction
+	RequiredQuorum uint32
+	// Current total weight of collected signatures
+	CurrentWeight uint32
+	// Current status of the multi-sig transaction
+	Status XrpPendingMultisigStatus
+	// Combined signed transaction blob (set when status is ready)
+	CombinedTxBlob sql.NullString
+	// Transaction hash after submission to ledger
+	SubmittedTxHash sql.NullString
+	// Expiration time for this pending transaction
+	ExpiresAt sql.NullTime
+	// creation date
+	CreatedAt sql.NullTime
+	// last update date
+	UpdatedAt sql.NullTime
+}
+
 // table for XRP regular key assignments
 type XrpRegularKey struct {
 	// ID
@@ -1058,4 +1150,36 @@ type XrpRegularKey struct {
 	CreatedAt sql.NullTime
 	// date when this key was rotated out (set inactive)
 	RotatedAt sql.NullTime
+}
+
+// Individual signer entries within an XRP signer list
+type XrpSignerEntry struct {
+	// ID
+	ID int64
+	// Reference to xrp_signer_list.id
+	SignerListID int64
+	// XRP address of the authorized signer (r...)
+	SignerAccount string
+	// Weight of this signer (contributes to quorum)
+	SignerWeight uint32
+	// creation date
+	CreatedAt sql.NullTime
+}
+
+// XRP signer list configuration for multi-signature accounts
+type XrpSignerList struct {
+	// ID
+	ID int64
+	// XRP account address (r...) that owns this signer list
+	AccountID string
+	// Minimum total weight of signatures required to authorize a transaction
+	SignerQuorum uint32
+	// true: this signer list is currently active on the ledger
+	IsActive bool
+	// Transaction hash of SignerListSet that created/updated this list
+	SetTxHash sql.NullString
+	// creation date
+	CreatedAt sql.NullTime
+	// last update date
+	UpdatedAt sql.NullTime
 }

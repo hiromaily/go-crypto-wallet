@@ -79,6 +79,14 @@ export interface Instructions {
 }
 
 /**
+ * SignerEntry for SignerListSet transaction
+ */
+export interface SignerEntry {
+  account: string;
+  weight: number;
+}
+
+/**
  * Request for PrepareTransaction RPC
  */
 export interface PrepareTransactionRequest {
@@ -93,6 +101,10 @@ export interface PrepareTransactionRequest {
   setFlag?: number;
   /** For AccountSet: flag to clear */
   clearFlag?: number;
+  /** For SignerListSet: minimum total weight of signatures required (0 to remove signer list) */
+  signerQuorum?: number;
+  /** For SignerListSet: list of signers with their weights */
+  signerEntries?: SignerEntry[];
 }
 
 /**
@@ -318,6 +330,26 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
             if (request.clearFlag !== undefined && request.clearFlag > 0) {
               tx.ClearFlag = request.clearFlag;
             }
+            break;
+
+          case EnumTransactionType.TX_SINGER_LIST_SET:
+            // SignerListSet transaction for multi-signature configuration
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/signerlistset
+            // - SignerQuorum: Minimum weight of signatures required (0 to delete signer list)
+            // - SignerEntries: Array of signers with their weights
+            if (request.signerQuorum !== undefined) {
+              tx.SignerQuorum = request.signerQuorum;
+            }
+            if (request.signerEntries && request.signerEntries.length > 0) {
+              // Convert our SignerEntry format to XRPL SignerEntries format
+              tx.SignerEntries = request.signerEntries.map((entry) => ({
+                SignerEntry: {
+                  Account: entry.account,
+                  SignerWeight: entry.weight,
+                },
+              }));
+            }
+            // If signerQuorum is 0 and no signerEntries, this will remove the signer list
             break;
 
           default:

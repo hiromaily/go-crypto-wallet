@@ -327,3 +327,32 @@ func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoRipple.Respons
 		Warning:       warning,
 	}
 }
+
+// ToDTOSignerListSetTxInput converts infrastructure SignerListSetTxInput to DTO.
+func ToDTOSignerListSetTxInput(infra *SignerListSetTxInput) *dtoRipple.SignerListSetTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	entries := make([]dtoRipple.SignerListEntry, len(infra.SignerEntries))
+	for i, entry := range infra.SignerEntries {
+		entries[i] = dtoRipple.SignerListEntry{
+			Account:      entry.SignerEntry.Account,
+			SignerWeight: entry.SignerEntry.SignerWeight,
+		}
+	}
+
+	return &dtoRipple.SignerListSetTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		SignerQuorum:       infra.SignerQuorum,
+		SignerEntries:      entries,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}

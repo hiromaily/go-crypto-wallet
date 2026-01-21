@@ -568,6 +568,185 @@ table "xrp_detail_tx" {
   }
 }
 
+# Table: xrp_pending_multisig
+# Pending multi-signature transactions waiting for signature collection
+# Reference: https://xrpl.org/docs/concepts/accounts/multi-signing
+table "xrp_pending_multisig" {
+  schema  = schema.watch
+  comment = "Pending XRP multi-signature transactions awaiting signatures"
+
+  column "id" {
+    type           = bigint
+    null           = false
+    auto_increment = true
+    comment        = "ID"
+  }
+
+  column "tx_uuid" {
+    type    = varchar(36)
+    null    = false
+    comment = "Unique identifier for the transaction"
+  }
+
+  column "account_id" {
+    type    = varchar(255)
+    null    = false
+    comment = "XRP account address (r...) that will sign this transaction"
+  }
+
+  column "unsigned_tx_json" {
+    type    = text
+    null    = false
+    comment = "JSON representation of the unsigned transaction"
+  }
+
+  column "xrp_tx_type" {
+    type    = varchar(50)
+    null    = false
+    comment = "XRP transaction type (Payment, SignerListSet, etc.)"
+  }
+
+  column "required_quorum" {
+    type     = int
+    unsigned = true
+    null     = false
+    comment  = "Total signature weight required for this transaction"
+  }
+
+  column "current_weight" {
+    type     = int
+    unsigned = true
+    null     = false
+    default  = 0
+    comment  = "Current total weight of collected signatures"
+  }
+
+  column "status" {
+    type    = enum("pending", "ready", "submitted", "confirmed", "failed", "expired")
+    null    = false
+    default = "pending"
+    comment = "Current status of the multi-sig transaction"
+  }
+
+  column "combined_tx_blob" {
+    type    = text
+    null    = true
+    comment = "Combined signed transaction blob (set when status is ready)"
+  }
+
+  column "submitted_tx_hash" {
+    type    = varchar(255)
+    null    = true
+    comment = "Transaction hash after submission to ledger"
+  }
+
+  column "expires_at" {
+    type    = datetime
+    null    = true
+    comment = "Expiration time for this pending transaction"
+  }
+
+  column "created_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "creation date"
+  }
+
+  column "updated_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "last update date"
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_tx_uuid" {
+    unique  = true
+    columns = [column.tx_uuid]
+  }
+
+  index "idx_account_id" {
+    columns = [column.account_id]
+  }
+
+  index "idx_status" {
+    columns = [column.status]
+  }
+
+  index "idx_account_status" {
+    columns = [column.account_id, column.status]
+    comment = "Find pending transactions for an account"
+  }
+}
+
+# Table: xrp_multisig_signature
+# Collected signatures for pending multi-signature transactions
+table "xrp_multisig_signature" {
+  schema  = schema.watch
+  comment = "Collected signatures for XRP multi-signature transactions"
+
+  column "id" {
+    type           = bigint
+    null           = false
+    auto_increment = true
+    comment        = "ID"
+  }
+
+  column "pending_multisig_id" {
+    type    = bigint
+    null    = false
+    comment = "Reference to xrp_pending_multisig.id"
+  }
+
+  column "signer_account" {
+    type    = varchar(255)
+    null    = false
+    comment = "XRP address of the signer (r...)"
+  }
+
+  column "signed_tx_blob" {
+    type    = text
+    null    = false
+    comment = "Signed transaction blob from this signer"
+  }
+
+  column "signer_weight" {
+    type     = int
+    unsigned = true
+    null     = false
+    comment  = "Weight of this signature"
+  }
+
+  column "signed_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "date when signature was collected"
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_pending_multisig_id" {
+    columns = [column.pending_multisig_id]
+  }
+
+  index "idx_signer_account" {
+    columns = [column.signer_account]
+  }
+
+  index "idx_pending_signer" {
+    unique  = true
+    columns = [column.pending_multisig_id, column.signer_account]
+    comment = "Each signer can only sign once per transaction"
+  }
+}
+
 # Table: address
 table "address" {
   schema  = schema.watch

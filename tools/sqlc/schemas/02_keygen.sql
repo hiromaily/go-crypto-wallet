@@ -128,3 +128,30 @@ CREATE TABLE xrp_regular_key (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='table for XRP regular key assignments';
 
 
+CREATE TABLE xrp_signer_entry (
+  id bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  signer_list_id bigint NOT NULL COMMENT 'Reference to xrp_signer_list.id',
+  signer_account varchar(255) NOT NULL COMMENT 'XRP address of the authorized signer (r...)',
+  signer_weight int unsigned NOT NULL COMMENT 'Weight of this signer (contributes to quorum)',
+  created_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'creation date',
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_list_signer (signer_list_id,signer_account) COMMENT 'Each signer can only appear once per signer list',
+  KEY idx_signer_account (signer_account),
+  KEY idx_signer_list_id (signer_list_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Individual signer entries within an XRP signer list';
+
+
+CREATE TABLE xrp_signer_list (
+  id bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  account_id varchar(255) NOT NULL COMMENT 'XRP account address (r...) that owns this signer list',
+  signer_quorum int unsigned NOT NULL COMMENT 'Minimum total weight of signatures required to authorize a transaction',
+  is_active tinyint(1) NOT NULL DEFAULT '1' COMMENT 'true: this signer list is currently active on the ledger',
+  set_tx_hash varchar(255) DEFAULT NULL COMMENT 'Transaction hash of SignerListSet that created/updated this list',
+  created_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'creation date',
+  updated_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'last update date',
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_account_active (account_id,is_active) COMMENT 'Only one active signer list per account',
+  KEY idx_account_id (account_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='XRP signer list configuration for multi-signature accounts';
+
+

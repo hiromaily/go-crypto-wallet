@@ -39,6 +39,12 @@ type Rippler interface {
 	GetChainConf() *chaincfg.Params
 }
 
+// SignerEntryInput represents a signer for creating SignerListSet transactions
+type SignerEntryInput struct {
+	Account string
+	Weight  uint32
+}
+
 // RippleAPIer defines the interface for Ripple API operations.
 // Implementations handle account management, address generation, and transaction operations.
 type RippleAPIer interface {
@@ -60,6 +66,16 @@ type RippleAPIer interface {
 	SubmitTransaction(ctx context.Context, signedTx string) (*dtoRipple.SentTx, uint64, error)
 	WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error)
 	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoRipple.TxInfo, error)
+
+	// Multi-signature operations
+	// Reference: https://xrpl.org/docs/concepts/accounts/multi-signing
+	PrepareSignerListSetTransaction(
+		ctx context.Context,
+		senderAccount string,
+		signerQuorum uint32,
+		signerEntries []SignerEntryInput,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.SignerListSetTxInput, string, error)
 }
 
 // RipplePublicer defines the interface for Ripple public node operations.

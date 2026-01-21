@@ -98,6 +98,29 @@ type TxOrderbookChange struct {
 	MakerExchangeRate string
 }
 
+// SignerListEntry represents a single signer in a SignerList.
+// Reference: https://xrpl.org/docs/references/protocol/ledger-data/ledger-entry-types/signerlist
+type SignerListEntry struct {
+	Account      string
+	SignerWeight uint32
+}
+
+// SignerListSetTxInput represents a SignerListSet transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/signerlistset
+type SignerListSetTxInput struct {
+	TransactionType    string
+	Account            string
+	SignerQuorum       uint32
+	SignerEntries      []SignerListEntry
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
 // XRPKeyType represents the type of XRP cryptographic key.
 type XRPKeyType string
 
