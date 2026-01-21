@@ -547,6 +547,134 @@ table "auth_fullpubkey" {
   }
 }
 
+# Table: xrp_signer_list
+# XRP Ledger SignerList configuration for multi-signature accounts
+# Reference: https://xrpl.org/docs/concepts/accounts/multi-signing
+table "xrp_signer_list" {
+  schema  = schema.keygen
+  comment = "XRP signer list configuration for multi-signature accounts"
+
+  column "id" {
+    type           = bigint
+    null           = false
+    auto_increment = true
+    comment        = "ID"
+  }
+
+  column "account_id" {
+    type    = varchar(255)
+    null    = false
+    comment = "XRP account address (r...) that owns this signer list"
+  }
+
+  column "signer_quorum" {
+    type     = int
+    unsigned = true
+    null     = false
+    comment  = "Minimum total weight of signatures required to authorize a transaction"
+  }
+
+  column "is_active" {
+    type    = boolean
+    null    = false
+    default = true
+    comment = "true: this signer list is currently active on the ledger"
+  }
+
+  column "set_tx_hash" {
+    type    = varchar(255)
+    null    = true
+    comment = "Transaction hash of SignerListSet that created/updated this list"
+  }
+
+  column "created_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "creation date"
+  }
+
+  column "updated_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "last update date"
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_account_id" {
+    columns = [column.account_id]
+  }
+
+  index "idx_account_active" {
+    unique  = true
+    columns = [column.account_id, column.is_active]
+    comment = "Only one active signer list per account"
+  }
+}
+
+# Table: xrp_signer_entry
+# Individual signer entries within a SignerList
+# Reference: https://xrpl.org/docs/references/protocol/ledger-data/ledger-entry-types/signerlist
+table "xrp_signer_entry" {
+  schema  = schema.keygen
+  comment = "Individual signer entries within an XRP signer list"
+
+  column "id" {
+    type           = bigint
+    null           = false
+    auto_increment = true
+    comment        = "ID"
+  }
+
+  column "signer_list_id" {
+    type    = bigint
+    null    = false
+    comment = "Reference to xrp_signer_list.id"
+  }
+
+  column "signer_account" {
+    type    = varchar(255)
+    null    = false
+    comment = "XRP address of the authorized signer (r...)"
+  }
+
+  column "signer_weight" {
+    type     = int
+    unsigned = true
+    null     = false
+    comment  = "Weight of this signer (contributes to quorum)"
+  }
+
+  column "created_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "creation date"
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_signer_list_id" {
+    columns = [column.signer_list_id]
+  }
+
+  index "idx_signer_account" {
+    columns = [column.signer_account]
+  }
+
+  index "idx_list_signer" {
+    unique  = true
+    columns = [column.signer_list_id, column.signer_account]
+    comment = "Each signer can only appear once per signer list"
+  }
+}
+
 # Table: musig2_nonces
 # MuSig2 nonce commitments for secure storage
 # [SHARED] This table is also defined in: sign.hcl

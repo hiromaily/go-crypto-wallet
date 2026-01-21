@@ -144,3 +144,39 @@ CREATE TABLE xrp_detail_tx (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='table for xrp transaction detail';
 
 
+CREATE TABLE xrp_multisig_signature (
+  id bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  pending_multisig_id bigint NOT NULL COMMENT 'Reference to xrp_pending_multisig.id',
+  signer_account varchar(255) NOT NULL COMMENT 'XRP address of the signer (r...)',
+  signed_tx_blob text NOT NULL COMMENT 'Signed transaction blob from this signer',
+  signer_weight int unsigned NOT NULL COMMENT 'Weight of this signature',
+  signed_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'date when signature was collected',
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_pending_signer (pending_multisig_id,signer_account) COMMENT 'Each signer can only sign once per transaction',
+  KEY idx_pending_multisig_id (pending_multisig_id),
+  KEY idx_signer_account (signer_account)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Collected signatures for XRP multi-signature transactions';
+
+
+CREATE TABLE xrp_pending_multisig (
+  id bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  tx_uuid varchar(36) NOT NULL COMMENT 'Unique identifier for the transaction',
+  account_id varchar(255) NOT NULL COMMENT 'XRP account address (r...) that will sign this transaction',
+  unsigned_tx_json text NOT NULL COMMENT 'JSON representation of the unsigned transaction',
+  xrp_tx_type varchar(50) NOT NULL COMMENT 'XRP transaction type (Payment, SignerListSet, etc.)',
+  required_quorum int unsigned NOT NULL COMMENT 'Total signature weight required for this transaction',
+  current_weight int unsigned NOT NULL DEFAULT '0' COMMENT 'Current total weight of collected signatures',
+  status enum('pending','ready','submitted','confirmed','failed','expired') NOT NULL DEFAULT 'pending' COMMENT 'Current status of the multi-sig transaction',
+  combined_tx_blob text COMMENT 'Combined signed transaction blob (set when status is ready)',
+  submitted_tx_hash varchar(255) DEFAULT NULL COMMENT 'Transaction hash after submission to ledger',
+  expires_at datetime DEFAULT NULL COMMENT 'Expiration time for this pending transaction',
+  created_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'creation date',
+  updated_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'last update date',
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_tx_uuid (tx_uuid),
+  KEY idx_account_id (account_id),
+  KEY idx_account_status (account_id,status) COMMENT 'Find pending transactions for an account',
+  KEY idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Pending XRP multi-signature transactions awaiting signatures';
+
+
