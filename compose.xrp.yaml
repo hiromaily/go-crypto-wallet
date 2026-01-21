@@ -55,9 +55,9 @@ services:
       dockerfile: apps/xrpl-grpc-server/Dockerfile
     container_name: xrpl-grpc-server
     ports:
-      - "${GRPC_PORT:-50051}:50051"
+      - "${GRPC_PORT:-50051}:${GRPC_PORT:-50051}"
     environment:
-      - GRPC_PORT=50051
+      - GRPC_PORT=${GRPC_PORT:-50051}
       - GRPC_HOST=0.0.0.0
       # Connect to local xrp-node via WebSocket (admin port)
       - XRP_WS_URL=ws://xrp-node:6006
@@ -68,7 +68,7 @@ services:
       xrp-node:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bun", "--eval", "fetch('http://localhost:50051/').then(r=>process.exit(r.status===404?0:1)).catch(()=>process.exit(1))"]
+      test: ["CMD", "bun", "--eval", "fetch('http://localhost:' + (process.env.GRPC_PORT || 50051) + '/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3

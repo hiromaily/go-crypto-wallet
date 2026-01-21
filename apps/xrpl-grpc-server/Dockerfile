@@ -81,7 +81,7 @@ ENV GRPC_PORT=50051 \
 # Health check - verify the server is responding
 # ConnectRPC servers return 404 for non-service paths, which indicates the server is running
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD ["bun", "--eval", "fetch('http://localhost:50051/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"]
+    CMD ["bun", "--eval", "fetch('http://localhost:' + (process.env.GRPC_PORT || 50051) + '/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"]
 
 # Start the gRPC server
 CMD ["bun", "run", "src/index.ts"]
