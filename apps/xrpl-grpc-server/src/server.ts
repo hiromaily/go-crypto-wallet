@@ -171,7 +171,8 @@ export function createRouter(): ConnectRouter {
         }
 
         // Map SignerListSet fields
-        if (request.signerQuorum !== undefined && request.signerQuorum > 0) {
+        // Note: signerQuorum can be 0 to remove the signer list, so check !== undefined
+        if (request.signerQuorum !== undefined) {
           serviceRequest.signerQuorum = request.signerQuorum;
         }
         if (request.signerEntries && request.signerEntries.length > 0) {
