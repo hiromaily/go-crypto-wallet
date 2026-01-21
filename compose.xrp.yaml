@@ -5,7 +5,8 @@ networks:
 
 services:
   #########################################################################
-  # xrptipbot/rippled
+  # [DEPRECATED] xrptipbot/rippled
+  # - This service is deprecated and may be removed in a future release
   # - Documentations
   #  - https://github.com/ripple/rippled
   #  - https://xrpl.org/install-rippled.html
