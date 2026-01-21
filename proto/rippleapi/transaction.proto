@@ -121,6 +121,35 @@ message RequestPrepareTransaction {
   // - Hex value of the PREIMAGE-SHA-256 crypto-condition fulfillment
   // - Required if the escrow has a condition
   string fulfillment = 20;
+
+  // ============================================================================
+  // PaymentChannel transaction fields
+  // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+  // ============================================================================
+
+  // settleDelay is used for PaymentChannelCreate transaction type
+  // - Seconds the source must wait to close the channel if unclaimed funds remain
+  uint32 settleDelay = 21;
+  // publicKey is used for PaymentChannelCreate and PaymentChannelClaim transaction types
+  // - Hex-encoded public key for verifying claim signatures
+  string publicKey = 22;
+  // sourceTag is used for PaymentChannelCreate transaction type (optional)
+  // - Arbitrary tag to identify the source of the payment channel
+  uint32 sourceTag = 23;
+
+  // channel is used for PaymentChannelFund and PaymentChannelClaim transaction types
+  // - The unique ID (Hash256) of the payment channel
+  string channel = 24;
+  // expiration is used for PaymentChannelFund transaction type (optional)
+  // - New expiration time (in seconds since Ripple Epoch) for the channel
+  uint32 expiration = 25;
+
+  // balance is used for PaymentChannelClaim transaction type (optional)
+  // - Total XRP in drops delivered after processing this claim
+  string balance = 26;
+  // signature is used for PaymentChannelClaim transaction type (optional)
+  // - Hex-encoded signature over channel ID + amount for claim authorization
+  string signature = 27;
 }
 
 message ResponsePrepareTransaction {

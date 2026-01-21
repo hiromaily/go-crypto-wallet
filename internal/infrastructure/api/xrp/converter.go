@@ -451,3 +451,75 @@ func ToDTOEscrowCancelTxInput(infra *EscrowCancelTxInput) *dtoRipple.EscrowCance
 		Hash:               infra.Hash,
 	}
 }
+
+// ToDTOPaymentChannelCreateTxInput converts infrastructure PaymentChannelCreateTxInput to DTO.
+func ToDTOPaymentChannelCreateTxInput(infra *PaymentChannelCreateTxInput) *dtoRipple.PaymentChannelCreateTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.PaymentChannelCreateTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Amount:             infra.Amount,
+		Destination:        infra.Destination,
+		SettleDelay:        infra.SettleDelay,
+		PublicKey:          infra.PublicKey,
+		CancelAfter:        infra.CancelAfter,
+		DestinationTag:     infra.DestinationTag,
+		SourceTag:          infra.SourceTag,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOPaymentChannelFundTxInput converts infrastructure PaymentChannelFundTxInput to DTO.
+func ToDTOPaymentChannelFundTxInput(infra *PaymentChannelFundTxInput) *dtoRipple.PaymentChannelFundTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.PaymentChannelFundTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Channel:            infra.Channel,
+		Amount:             infra.Amount,
+		Expiration:         infra.Expiration,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOPaymentChannelClaimTxInput converts infrastructure PaymentChannelClaimTxInput to DTO.
+func ToDTOPaymentChannelClaimTxInput(infra *PaymentChannelClaimTxInput) *dtoRipple.PaymentChannelClaimTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.PaymentChannelClaimTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Channel:            infra.Channel,
+		Balance:            infra.Balance,
+		Amount:             infra.Amount,
+		Signature:          infra.Signature,
+		PublicKey:          infra.PublicKey,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}

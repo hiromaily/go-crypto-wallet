@@ -115,6 +115,37 @@ type RippleAPIer interface {
 		offerSequence uint32,
 		instructions *dtoRipple.Instructions,
 	) (*dtoRipple.EscrowCancelTxInput, string, error)
+
+	// PaymentChannel operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+	PreparePaymentChannelCreateTransaction(
+		ctx context.Context,
+		senderAccount, destinationAccount string,
+		amount float64,
+		settleDelay uint32,
+		publicKey string,
+		cancelAfter, destinationTag, sourceTag uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.PaymentChannelCreateTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
+	PreparePaymentChannelFundTransaction(
+		ctx context.Context,
+		senderAccount, channel string,
+		amount float64,
+		expiration uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.PaymentChannelFundTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
+	PreparePaymentChannelClaimTransaction(
+		ctx context.Context,
+		senderAccount, channel string,
+		balance string,
+		amount float64,
+		signature, publicKey string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.PaymentChannelClaimTxInput, string, error)
 }
 
 // RipplePublicer defines the interface for Ripple public node operations.

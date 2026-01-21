@@ -201,6 +201,63 @@ type EscrowCancelTxInput struct {
 	Hash               string
 }
 
+// PaymentChannelCreateTxInput represents a PaymentChannelCreate transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+type PaymentChannelCreateTxInput struct {
+	TransactionType    string
+	Account            string
+	Amount             string
+	Destination        string
+	SettleDelay        uint32
+	PublicKey          string
+	CancelAfter        uint32
+	DestinationTag     uint32
+	SourceTag          uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// PaymentChannelFundTxInput represents a PaymentChannelFund transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
+type PaymentChannelFundTxInput struct {
+	TransactionType    string
+	Account            string
+	Channel            string
+	Amount             string
+	Expiration         uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// PaymentChannelClaimTxInput represents a PaymentChannelClaim transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
+type PaymentChannelClaimTxInput struct {
+	TransactionType    string
+	Account            string
+	Channel            string
+	Balance            string
+	Amount             string
+	Signature          string
+	PublicKey          string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
 // XRPKeyType represents the type of XRP cryptographic key.
 type XRPKeyType string
 

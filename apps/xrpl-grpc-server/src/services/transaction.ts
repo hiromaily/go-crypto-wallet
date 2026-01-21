@@ -136,6 +136,22 @@ export interface PrepareTransactionRequest {
   offerSequence?: number;
   /** For EscrowFinish: crypto-condition fulfillment (hex) */
   fulfillment?: string;
+
+  // PaymentChannel transaction fields
+  /** For PaymentChannelCreate: seconds source must wait to close channel if unclaimed funds remain */
+  settleDelay?: number;
+  /** For PaymentChannelCreate/Claim: hex-encoded public key for verifying claim signatures */
+  publicKey?: string;
+  /** For PaymentChannelCreate: arbitrary tag to identify the source */
+  sourceTag?: number;
+  /** For PaymentChannelFund/Claim: unique ID (Hash256) of the payment channel */
+  channel?: string;
+  /** For PaymentChannelFund: new expiration time (seconds since Ripple Epoch) */
+  expiration?: number;
+  /** For PaymentChannelClaim: total XRP in drops delivered after this claim */
+  balance?: string;
+  /** For PaymentChannelClaim: hex-encoded signature for claim authorization */
+  signature?: string;
 }
 
 /**
@@ -447,6 +463,60 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
             }
             if (request.offerSequence !== undefined && request.offerSequence > 0) {
               tx.OfferSequence = request.offerSequence;
+            }
+            break;
+
+          case EnumTransactionType.TX_PAYMENT_CHANNEL_CREATE:
+            // PaymentChannelCreate transaction for creating and funding a payment channel
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+            tx.Amount = xrpToDrops(request.amount.toString());
+            tx.Destination = request.receiverAccount;
+            if (request.settleDelay !== undefined && request.settleDelay > 0) {
+              tx.SettleDelay = request.settleDelay;
+            }
+            if (request.publicKey) {
+              tx.PublicKey = request.publicKey;
+            }
+            if (request.cancelAfter !== undefined && request.cancelAfter > 0) {
+              tx.CancelAfter = request.cancelAfter;
+            }
+            if (request.destinationTag !== undefined && request.destinationTag > 0) {
+              tx.DestinationTag = request.destinationTag;
+            }
+            if (request.sourceTag !== undefined && request.sourceTag > 0) {
+              tx.SourceTag = request.sourceTag;
+            }
+            break;
+
+          case EnumTransactionType.TX_PAYMENT_CHANNEL_FUND:
+            // PaymentChannelFund transaction for adding XRP to an existing channel
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
+            if (request.channel) {
+              tx.Channel = request.channel;
+            }
+            tx.Amount = xrpToDrops(request.amount.toString());
+            if (request.expiration !== undefined && request.expiration > 0) {
+              tx.Expiration = request.expiration;
+            }
+            break;
+
+          case EnumTransactionType.TX_PAYMENT_CHANNEL_CLAIM:
+            // PaymentChannelClaim transaction for claiming funds from a channel
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
+            if (request.channel) {
+              tx.Channel = request.channel;
+            }
+            if (request.balance) {
+              tx.Balance = request.balance;
+            }
+            if (request.amount > 0) {
+              tx.Amount = xrpToDrops(request.amount.toString());
+            }
+            if (request.signature) {
+              tx.Signature = request.signature;
+            }
+            if (request.publicKey) {
+              tx.PublicKey = request.publicKey;
             }
             break;
 

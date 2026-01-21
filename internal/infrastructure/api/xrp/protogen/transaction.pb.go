@@ -418,6 +418,13 @@ type RequestPrepareTransaction struct {
 	xxx_hidden_Owner           string                 `protobuf:"bytes,18,opt,name=owner"`
 	xxx_hidden_OfferSequence   uint32                 `protobuf:"varint,19,opt,name=offerSequence"`
 	xxx_hidden_Fulfillment     string                 `protobuf:"bytes,20,opt,name=fulfillment"`
+	xxx_hidden_SettleDelay     uint32                 `protobuf:"varint,21,opt,name=settleDelay"`
+	xxx_hidden_PublicKey       string                 `protobuf:"bytes,22,opt,name=publicKey"`
+	xxx_hidden_SourceTag       uint32                 `protobuf:"varint,23,opt,name=sourceTag"`
+	xxx_hidden_Channel         string                 `protobuf:"bytes,24,opt,name=channel"`
+	xxx_hidden_Expiration      uint32                 `protobuf:"varint,25,opt,name=expiration"`
+	xxx_hidden_Balance         string                 `protobuf:"bytes,26,opt,name=balance"`
+	xxx_hidden_Signature       string                 `protobuf:"bytes,27,opt,name=signature"`
 	unknownFields              protoimpl.UnknownFields
 	sizeCache                  protoimpl.SizeCache
 }
@@ -589,6 +596,55 @@ func (x *RequestPrepareTransaction) GetFulfillment() string {
 	return ""
 }
 
+func (x *RequestPrepareTransaction) GetSettleDelay() uint32 {
+	if x != nil {
+		return x.xxx_hidden_SettleDelay
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetPublicKey() string {
+	if x != nil {
+		return x.xxx_hidden_PublicKey
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetSourceTag() uint32 {
+	if x != nil {
+		return x.xxx_hidden_SourceTag
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetChannel() string {
+	if x != nil {
+		return x.xxx_hidden_Channel
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetExpiration() uint32 {
+	if x != nil {
+		return x.xxx_hidden_Expiration
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetBalance() string {
+	if x != nil {
+		return x.xxx_hidden_Balance
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetSignature() string {
+	if x != nil {
+		return x.xxx_hidden_Signature
+	}
+	return ""
+}
+
 func (x *RequestPrepareTransaction) SetTxType(v EnumTransactionType) {
 	x.xxx_hidden_TxType = v
 }
@@ -667,6 +723,34 @@ func (x *RequestPrepareTransaction) SetOfferSequence(v uint32) {
 
 func (x *RequestPrepareTransaction) SetFulfillment(v string) {
 	x.xxx_hidden_Fulfillment = v
+}
+
+func (x *RequestPrepareTransaction) SetSettleDelay(v uint32) {
+	x.xxx_hidden_SettleDelay = v
+}
+
+func (x *RequestPrepareTransaction) SetPublicKey(v string) {
+	x.xxx_hidden_PublicKey = v
+}
+
+func (x *RequestPrepareTransaction) SetSourceTag(v uint32) {
+	x.xxx_hidden_SourceTag = v
+}
+
+func (x *RequestPrepareTransaction) SetChannel(v string) {
+	x.xxx_hidden_Channel = v
+}
+
+func (x *RequestPrepareTransaction) SetExpiration(v uint32) {
+	x.xxx_hidden_Expiration = v
+}
+
+func (x *RequestPrepareTransaction) SetBalance(v string) {
+	x.xxx_hidden_Balance = v
+}
+
+func (x *RequestPrepareTransaction) SetSignature(v string) {
+	x.xxx_hidden_Signature = v
 }
 
 func (x *RequestPrepareTransaction) HasInstructions() bool {
@@ -752,6 +836,27 @@ type RequestPrepareTransaction_builder struct {
 	// - Hex value of the PREIMAGE-SHA-256 crypto-condition fulfillment
 	// - Required if the escrow has a condition
 	Fulfillment string
+	// settleDelay is used for PaymentChannelCreate transaction type
+	// - Seconds the source must wait to close the channel if unclaimed funds remain
+	SettleDelay uint32
+	// publicKey is used for PaymentChannelCreate and PaymentChannelClaim transaction types
+	// - Hex-encoded public key for verifying claim signatures
+	PublicKey string
+	// sourceTag is used for PaymentChannelCreate transaction type (optional)
+	// - Arbitrary tag to identify the source of the payment channel
+	SourceTag uint32
+	// channel is used for PaymentChannelFund and PaymentChannelClaim transaction types
+	// - The unique ID (Hash256) of the payment channel
+	Channel string
+	// expiration is used for PaymentChannelFund transaction type (optional)
+	// - New expiration time (in seconds since Ripple Epoch) for the channel
+	Expiration uint32
+	// balance is used for PaymentChannelClaim transaction type (optional)
+	// - Total XRP in drops delivered after processing this claim
+	Balance string
+	// signature is used for PaymentChannelClaim transaction type (optional)
+	// - Hex-encoded signature over channel ID + amount for claim authorization
+	Signature string
 }
 
 func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
@@ -778,6 +883,13 @@ func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
 	x.xxx_hidden_Owner = b.Owner
 	x.xxx_hidden_OfferSequence = b.OfferSequence
 	x.xxx_hidden_Fulfillment = b.Fulfillment
+	x.xxx_hidden_SettleDelay = b.SettleDelay
+	x.xxx_hidden_PublicKey = b.PublicKey
+	x.xxx_hidden_SourceTag = b.SourceTag
+	x.xxx_hidden_Channel = b.Channel
+	x.xxx_hidden_Expiration = b.Expiration
+	x.xxx_hidden_Balance = b.Balance
+	x.xxx_hidden_Signature = b.Signature
 	return m0
 }
 
@@ -1464,7 +1576,7 @@ const file_transaction_proto_rawDesc = "" +
 	"\x14IssuedCurrencyAmount\x12\x1a\n" +
 	"\bcurrency\x18\x01 \x01(\tR\bcurrency\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\"\xcc\x06\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\"\x9c\b\n" +
 	"\x19RequestPrepareTransaction\x12C\n" +
 	"\atx_type\x18\x01 \x01(\x0e2*.rippleapi.transaction.EnumTransactionTypeR\x06txType\x12$\n" +
 	"\rsenderAccount\x18\x02 \x01(\tR\rsenderAccount\x12\x16\n" +
@@ -1490,7 +1602,16 @@ const file_transaction_proto_rawDesc = "" +
 	"\x0edestinationTag\x18\x11 \x01(\rR\x0edestinationTag\x12\x14\n" +
 	"\x05owner\x18\x12 \x01(\tR\x05owner\x12$\n" +
 	"\rofferSequence\x18\x13 \x01(\rR\rofferSequence\x12 \n" +
-	"\vfulfillment\x18\x14 \x01(\tR\vfulfillment\"}\n" +
+	"\vfulfillment\x18\x14 \x01(\tR\vfulfillment\x12 \n" +
+	"\vsettleDelay\x18\x15 \x01(\rR\vsettleDelay\x12\x1c\n" +
+	"\tpublicKey\x18\x16 \x01(\tR\tpublicKey\x12\x1c\n" +
+	"\tsourceTag\x18\x17 \x01(\rR\tsourceTag\x12\x18\n" +
+	"\achannel\x18\x18 \x01(\tR\achannel\x12\x1e\n" +
+	"\n" +
+	"expiration\x18\x19 \x01(\rR\n" +
+	"expiration\x12\x18\n" +
+	"\abalance\x18\x1a \x01(\tR\abalance\x12\x1c\n" +
+	"\tsignature\x18\x1b \x01(\tR\tsignature\"}\n" +
 	"\x1aResponsePrepareTransaction\x12\x16\n" +
 	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12G\n" +
 	"\finstructions\x18\x02 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\"H\n" +

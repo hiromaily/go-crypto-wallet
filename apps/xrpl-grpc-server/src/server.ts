@@ -130,6 +130,14 @@ export function createRouter(): ConnectRouter {
           owner?: string;
           offerSequence?: number;
           fulfillment?: string;
+          // PaymentChannel fields
+          settleDelay?: number;
+          publicKey?: string;
+          sourceTag?: number;
+          channel?: string;
+          expiration?: number;
+          balance?: string;
+          signature?: string;
         };
 
         const serviceRequest: ServiceRequest = {
@@ -199,6 +207,29 @@ export function createRouter(): ConnectRouter {
         }
         if (request.fulfillment) {
           serviceRequest.fulfillment = request.fulfillment;
+        }
+
+        // Map PaymentChannel fields
+        if (request.settleDelay > 0) {
+          serviceRequest.settleDelay = request.settleDelay;
+        }
+        if (request.publicKey) {
+          serviceRequest.publicKey = request.publicKey;
+        }
+        if (request.sourceTag > 0) {
+          serviceRequest.sourceTag = request.sourceTag;
+        }
+        if (request.channel) {
+          serviceRequest.channel = request.channel;
+        }
+        if (request.expiration > 0) {
+          serviceRequest.expiration = request.expiration;
+        }
+        if (request.balance) {
+          serviceRequest.balance = request.balance;
+        }
+        if (request.signature) {
+          serviceRequest.signature = request.signature;
         }
 
         // Map instructions if provided
