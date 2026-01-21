@@ -12,13 +12,13 @@ import (
 )
 
 type submitMultisigTxUseCase struct {
-	rippler             apixrp.Rippler
+	rippler             apixrp.XRPer
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
 }
 
 // NewSubmitMultisigTxUseCase creates a new SubmitMultisigTxUseCase
 func NewSubmitMultisigTxUseCase(
-	rippler apixrp.Rippler,
+	rippler apixrp.XRPer,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,
 ) watchusecase.SubmitMultisigTxUseCase {
 	return &submitMultisigTxUseCase{

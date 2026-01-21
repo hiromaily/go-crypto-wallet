@@ -1,4 +1,4 @@
-package ripple
+package xrp
 
 // Instructions represents transaction instructions for XRP operations.
 type Instructions struct {

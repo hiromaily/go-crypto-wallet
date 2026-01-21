@@ -290,7 +290,7 @@ func runAddMultisigSignature(
 	if output.IsReady {
 		fmt.Println("\nQuorum met! Transaction is ready for submission.")
 		fmt.Printf("  Combined TX Blob: %s\n", output.CombinedTxBlob)
-		fmt.Printf("\nSubmit with: watch --coin xrp xrp submit-multisig-tx --tx-uuid %s\n", txUUID)
+		fmt.Printf("\nSubmit with: watch --coin xrp submit-multisig-tx --tx-uuid %s\n", txUUID)
 	} else {
 		remaining := output.RequiredQuorum - output.CurrentWeight
 		fmt.Printf("\nNeed %d more weight to meet quorum.\n", remaining)

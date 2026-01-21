@@ -7,14 +7,14 @@ import (
 
 	"google.golang.org/grpc/status"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 )
 
 // CreateRawTransaction creates raw transaction
 // - https://xrpl.org/ja/send-xrp.html
-func (r *Ripple) CreateRawTransaction(
-	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoRipple.Instructions,
-) (*dtoRipple.TxInput, string, error) {
+func (r *XRP) CreateRawTransaction(
+	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoxrp.Instructions,
+) (*dtoxrp.TxInput, string, error) {
 	// validation
 	if senderAccount == "" {
 		return nil, "", errors.New("senderAccount is empty")

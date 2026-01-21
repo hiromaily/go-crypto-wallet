@@ -309,7 +309,7 @@ var File_address_proto protoreflect.FileDescriptor
 
 const file_address_proto_rawDesc = "" +
 	"\n" +
-	"\raddress.proto\x12\x11rippleapi.address\x1a\x1bgoogle/protobuf/empty.proto\"\x8f\x01\n" +
+	"\raddress.proto\x12\x0exrpapi.address\x1a\x1bgoogle/protobuf/empty.proto\"\x8f\x01\n" +
 	"\x17ResponseGenerateAddress\x12\x1a\n" +
 	"\bxAddress\x18\x01 \x01(\tR\bxAddress\x12&\n" +
 	"\x0eclassicAddress\x18\x02 \x01(\tR\x0eclassicAddress\x12\x18\n" +
@@ -321,27 +321,27 @@ const file_address_proto_rawDesc = "" +
 	"\x15RequestIsValidAddress\x12\x18\n" +
 	"\aaddress\x18\x01 \x01(\tR\aaddress\"2\n" +
 	"\x16ResponseIsValidAddress\x12\x18\n" +
-	"\aisValid\x18\x01 \x01(\bR\aisValid2\xaf\x02\n" +
-	"\x10RippleAddressAPI\x12W\n" +
-	"\x0fGenerateAddress\x12\x16.google.protobuf.Empty\x1a*.rippleapi.address.ResponseGenerateAddress\"\x00\x12Y\n" +
-	"\x10GenerateXAddress\x12\x16.google.protobuf.Empty\x1a+.rippleapi.address.ResponseGenerateXAddress\"\x00\x12g\n" +
-	"\x0eIsValidAddress\x12(.rippleapi.address.RequestIsValidAddress\x1a).rippleapi.address.ResponseIsValidAddress\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe9\a"
+	"\aisValid\x18\x01 \x01(\bR\aisValid2\xa0\x02\n" +
+	"\rXRPAddressAPI\x12T\n" +
+	"\x0fGenerateAddress\x12\x16.google.protobuf.Empty\x1a'.xrpapi.address.ResponseGenerateAddress\"\x00\x12V\n" +
+	"\x10GenerateXAddress\x12\x16.google.protobuf.Empty\x1a(.xrpapi.address.ResponseGenerateXAddress\"\x00\x12a\n" +
+	"\x0eIsValidAddress\x12%.xrpapi.address.RequestIsValidAddress\x1a&.xrpapi.address.ResponseIsValidAddress\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe9\a"
 
 var file_address_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_address_proto_goTypes = []any{
-	(*ResponseGenerateAddress)(nil),  // 0: rippleapi.address.ResponseGenerateAddress
-	(*ResponseGenerateXAddress)(nil), // 1: rippleapi.address.ResponseGenerateXAddress
-	(*RequestIsValidAddress)(nil),    // 2: rippleapi.address.RequestIsValidAddress
-	(*ResponseIsValidAddress)(nil),   // 3: rippleapi.address.ResponseIsValidAddress
+	(*ResponseGenerateAddress)(nil),  // 0: xrpapi.address.ResponseGenerateAddress
+	(*ResponseGenerateXAddress)(nil), // 1: xrpapi.address.ResponseGenerateXAddress
+	(*RequestIsValidAddress)(nil),    // 2: xrpapi.address.RequestIsValidAddress
+	(*ResponseIsValidAddress)(nil),   // 3: xrpapi.address.ResponseIsValidAddress
 	(*emptypb.Empty)(nil),            // 4: google.protobuf.Empty
 }
 var file_address_proto_depIdxs = []int32{
-	4, // 0: rippleapi.address.RippleAddressAPI.GenerateAddress:input_type -> google.protobuf.Empty
-	4, // 1: rippleapi.address.RippleAddressAPI.GenerateXAddress:input_type -> google.protobuf.Empty
-	2, // 2: rippleapi.address.RippleAddressAPI.IsValidAddress:input_type -> rippleapi.address.RequestIsValidAddress
-	0, // 3: rippleapi.address.RippleAddressAPI.GenerateAddress:output_type -> rippleapi.address.ResponseGenerateAddress
-	1, // 4: rippleapi.address.RippleAddressAPI.GenerateXAddress:output_type -> rippleapi.address.ResponseGenerateXAddress
-	3, // 5: rippleapi.address.RippleAddressAPI.IsValidAddress:output_type -> rippleapi.address.ResponseIsValidAddress
+	4, // 0: xrpapi.address.XRPAddressAPI.GenerateAddress:input_type -> google.protobuf.Empty
+	4, // 1: xrpapi.address.XRPAddressAPI.GenerateXAddress:input_type -> google.protobuf.Empty
+	2, // 2: xrpapi.address.XRPAddressAPI.IsValidAddress:input_type -> xrpapi.address.RequestIsValidAddress
+	0, // 3: xrpapi.address.XRPAddressAPI.GenerateAddress:output_type -> xrpapi.address.ResponseGenerateAddress
+	1, // 4: xrpapi.address.XRPAddressAPI.GenerateXAddress:output_type -> xrpapi.address.ResponseGenerateXAddress
+	3, // 5: xrpapi.address.XRPAddressAPI.IsValidAddress:output_type -> xrpapi.address.ResponseIsValidAddress
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

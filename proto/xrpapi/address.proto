@@ -1,6 +1,6 @@
 edition = "2024";
 
-package rippleapi.address;
+package xrpapi.address;
 
 import "google/protobuf/empty.proto";
 
@@ -27,8 +27,8 @@ message RequestIsValidAddress { string address = 1; }
 
 message ResponseIsValidAddress { bool isValid = 1; }
 
-// RippleAddressAPI
-service RippleAddressAPI {
+// XRPAddressAPI
+service XRPAddressAPI {
   // https://xrpl.org/rippleapi-reference.html#generateaddress
   rpc GenerateAddress(google.protobuf.Empty) returns (ResponseGenerateAddress) {
   }

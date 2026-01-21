@@ -84,7 +84,7 @@ type ResponseSign struct {
 }
 
 // Sign calls sign method
-func (r *Ripple) Sign(ctx context.Context, txJSON *PublicTxType, secret string, offline bool) (*ResponseSign, error) {
+func (r *XRP) Sign(ctx context.Context, txJSON *PublicTxType, secret string, offline bool) (*ResponseSign, error) {
 	req := Sign{
 		ID:      2,
 		Command: "sign",

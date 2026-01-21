@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -19,7 +19,7 @@ import (
 const DefaultMultisigExpiration = 24 * time.Hour
 
 type createMultisigTxUseCase struct {
-	rippler             apixrp.Rippler
+	rippler             apixrp.XRPer
 	uuidHandler         uuid.UUIDHandler
 	signerListRepo      repocold.XRPSignerListRepositorier
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
@@ -27,7 +27,7 @@ type createMultisigTxUseCase struct {
 
 // NewCreateMultisigTxUseCase creates a new CreateMultisigTxUseCase
 func NewCreateMultisigTxUseCase(
-	rippler apixrp.Rippler,
+	rippler apixrp.XRPer,
 	uuidHandler uuid.UUIDHandler,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,
@@ -67,7 +67,7 @@ func (u *createMultisigTxUseCase) Execute(
 	}
 
 	// Prepare the transaction (Payment for now)
-	instructions := &dtoRipple.Instructions{
+	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 

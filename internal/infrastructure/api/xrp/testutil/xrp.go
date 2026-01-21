@@ -15,11 +15,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/grpc"
 )
 
-var xr apixrp.Rippler
+var xr apixrp.XRPer
 
 // GetXRP returns xrp instance
 // FIXME: hard coded
-func GetXRP() (apixrp.Rippler, error) {
+func GetXRP() (apixrp.XRPer, error) {
 	if xr != nil {
 		return xr, nil
 	}
@@ -47,9 +47,9 @@ func GetXRP() (apixrp.Rippler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to create api instance: %w", err)
 	}
-	grpcAPI := apixrpimpl.NewRippleAPI(conn)
+	grpcAPI := apixrpimpl.NewXRPAPI(conn)
 
-	xr, err = apixrpimpl.NewRippleFromCoinType(wsPublicClient, wsAdminClient, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
+	xr, err = apixrpimpl.NewXRPFromCoinType(wsPublicClient, wsAdminClient, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}
@@ -59,7 +59,7 @@ func GetXRP() (apixrp.Rippler, error) {
 // XRPTestSuite is a test suite for XRP
 type XRPTestSuite struct {
 	suite.Suite
-	XRP apixrp.Rippler
+	XRP apixrp.XRPer
 }
 
 func (xts *XRPTestSuite) SetupTest() {

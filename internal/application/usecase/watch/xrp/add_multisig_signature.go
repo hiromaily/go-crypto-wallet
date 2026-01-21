@@ -13,7 +13,7 @@ import (
 )
 
 type addMultisigSignatureUseCase struct {
-	rippler             apixrp.Rippler
+	rippler             apixrp.XRPer
 	signerListRepo      repocold.XRPSignerListRepositorier
 	signerEntryRepo     repocold.XRPSignerEntryRepositorier
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
@@ -22,7 +22,7 @@ type addMultisigSignatureUseCase struct {
 
 // NewAddMultisigSignatureUseCase creates a new AddMultisigSignatureUseCase
 func NewAddMultisigSignatureUseCase(
-	rippler apixrp.Rippler,
+	rippler apixrp.XRPer,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	signerEntryRepo repocold.XRPSignerEntryRepositorier,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,

@@ -20,20 +20,20 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RippleTransactionAPI_PrepareTransaction_FullMethodName = "/rippleapi.transaction.RippleTransactionAPI/PrepareTransaction"
-	RippleTransactionAPI_SignTransaction_FullMethodName    = "/rippleapi.transaction.RippleTransactionAPI/SignTransaction"
-	RippleTransactionAPI_SubmitTransaction_FullMethodName  = "/rippleapi.transaction.RippleTransactionAPI/SubmitTransaction"
-	RippleTransactionAPI_WaitValidation_FullMethodName     = "/rippleapi.transaction.RippleTransactionAPI/WaitValidation"
-	RippleTransactionAPI_GetTransaction_FullMethodName     = "/rippleapi.transaction.RippleTransactionAPI/GetTransaction"
-	RippleTransactionAPI_CombineTransaction_FullMethodName = "/rippleapi.transaction.RippleTransactionAPI/CombineTransaction"
+	XRPTransactionAPI_PrepareTransaction_FullMethodName = "/xrpapi.transaction.XRPTransactionAPI/PrepareTransaction"
+	XRPTransactionAPI_SignTransaction_FullMethodName    = "/xrpapi.transaction.XRPTransactionAPI/SignTransaction"
+	XRPTransactionAPI_SubmitTransaction_FullMethodName  = "/xrpapi.transaction.XRPTransactionAPI/SubmitTransaction"
+	XRPTransactionAPI_WaitValidation_FullMethodName     = "/xrpapi.transaction.XRPTransactionAPI/WaitValidation"
+	XRPTransactionAPI_GetTransaction_FullMethodName     = "/xrpapi.transaction.XRPTransactionAPI/GetTransaction"
+	XRPTransactionAPI_CombineTransaction_FullMethodName = "/xrpapi.transaction.XRPTransactionAPI/CombineTransaction"
 )
 
-// RippleTransactionAPIClient is the client API for RippleTransactionAPI service.
+// XRPTransactionAPIClient is the client API for XRPTransactionAPI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// RippleTransactionAPI
-type RippleTransactionAPIClient interface {
+// XRPTransactionAPI
+type XRPTransactionAPIClient interface {
 	// https://xrpl.org/rippleapi-reference.html#preparetransaction
 	PrepareTransaction(ctx context.Context, in *RequestPrepareTransaction, opts ...grpc.CallOption) (*ResponsePrepareTransaction, error)
 	SignTransaction(ctx context.Context, in *RequestSignTransaction, opts ...grpc.CallOption) (*ResponseSignTransaction, error)
@@ -43,47 +43,47 @@ type RippleTransactionAPIClient interface {
 	CombineTransaction(ctx context.Context, in *RequestCombineTransaction, opts ...grpc.CallOption) (*ResponseCombineTransaction, error)
 }
 
-type rippleTransactionAPIClient struct {
+type xRPTransactionAPIClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRippleTransactionAPIClient(cc grpc.ClientConnInterface) RippleTransactionAPIClient {
-	return &rippleTransactionAPIClient{cc}
+func NewXRPTransactionAPIClient(cc grpc.ClientConnInterface) XRPTransactionAPIClient {
+	return &xRPTransactionAPIClient{cc}
 }
 
-func (c *rippleTransactionAPIClient) PrepareTransaction(ctx context.Context, in *RequestPrepareTransaction, opts ...grpc.CallOption) (*ResponsePrepareTransaction, error) {
+func (c *xRPTransactionAPIClient) PrepareTransaction(ctx context.Context, in *RequestPrepareTransaction, opts ...grpc.CallOption) (*ResponsePrepareTransaction, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponsePrepareTransaction)
-	err := c.cc.Invoke(ctx, RippleTransactionAPI_PrepareTransaction_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPTransactionAPI_PrepareTransaction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rippleTransactionAPIClient) SignTransaction(ctx context.Context, in *RequestSignTransaction, opts ...grpc.CallOption) (*ResponseSignTransaction, error) {
+func (c *xRPTransactionAPIClient) SignTransaction(ctx context.Context, in *RequestSignTransaction, opts ...grpc.CallOption) (*ResponseSignTransaction, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseSignTransaction)
-	err := c.cc.Invoke(ctx, RippleTransactionAPI_SignTransaction_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPTransactionAPI_SignTransaction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rippleTransactionAPIClient) SubmitTransaction(ctx context.Context, in *RequestSubmitTransaction, opts ...grpc.CallOption) (*ResponseSubmitTransaction, error) {
+func (c *xRPTransactionAPIClient) SubmitTransaction(ctx context.Context, in *RequestSubmitTransaction, opts ...grpc.CallOption) (*ResponseSubmitTransaction, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseSubmitTransaction)
-	err := c.cc.Invoke(ctx, RippleTransactionAPI_SubmitTransaction_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPTransactionAPI_SubmitTransaction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rippleTransactionAPIClient) WaitValidation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ResponseWaitValidation], error) {
+func (c *xRPTransactionAPIClient) WaitValidation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ResponseWaitValidation], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &RippleTransactionAPI_ServiceDesc.Streams[0], RippleTransactionAPI_WaitValidation_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &XRPTransactionAPI_ServiceDesc.Streams[0], XRPTransactionAPI_WaitValidation_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,34 +98,34 @@ func (c *rippleTransactionAPIClient) WaitValidation(ctx context.Context, in *emp
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type RippleTransactionAPI_WaitValidationClient = grpc.ServerStreamingClient[ResponseWaitValidation]
+type XRPTransactionAPI_WaitValidationClient = grpc.ServerStreamingClient[ResponseWaitValidation]
 
-func (c *rippleTransactionAPIClient) GetTransaction(ctx context.Context, in *RequestGetTransaction, opts ...grpc.CallOption) (*ResponseGetTransaction, error) {
+func (c *xRPTransactionAPIClient) GetTransaction(ctx context.Context, in *RequestGetTransaction, opts ...grpc.CallOption) (*ResponseGetTransaction, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseGetTransaction)
-	err := c.cc.Invoke(ctx, RippleTransactionAPI_GetTransaction_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPTransactionAPI_GetTransaction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rippleTransactionAPIClient) CombineTransaction(ctx context.Context, in *RequestCombineTransaction, opts ...grpc.CallOption) (*ResponseCombineTransaction, error) {
+func (c *xRPTransactionAPIClient) CombineTransaction(ctx context.Context, in *RequestCombineTransaction, opts ...grpc.CallOption) (*ResponseCombineTransaction, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseCombineTransaction)
-	err := c.cc.Invoke(ctx, RippleTransactionAPI_CombineTransaction_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPTransactionAPI_CombineTransaction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RippleTransactionAPIServer is the server API for RippleTransactionAPI service.
-// All implementations must embed UnimplementedRippleTransactionAPIServer
+// XRPTransactionAPIServer is the server API for XRPTransactionAPI service.
+// All implementations must embed UnimplementedXRPTransactionAPIServer
 // for forward compatibility.
 //
-// RippleTransactionAPI
-type RippleTransactionAPIServer interface {
+// XRPTransactionAPI
+type XRPTransactionAPIServer interface {
 	// https://xrpl.org/rippleapi-reference.html#preparetransaction
 	PrepareTransaction(context.Context, *RequestPrepareTransaction) (*ResponsePrepareTransaction, error)
 	SignTransaction(context.Context, *RequestSignTransaction) (*ResponseSignTransaction, error)
@@ -133,188 +133,188 @@ type RippleTransactionAPIServer interface {
 	WaitValidation(*emptypb.Empty, grpc.ServerStreamingServer[ResponseWaitValidation]) error
 	GetTransaction(context.Context, *RequestGetTransaction) (*ResponseGetTransaction, error)
 	CombineTransaction(context.Context, *RequestCombineTransaction) (*ResponseCombineTransaction, error)
-	mustEmbedUnimplementedRippleTransactionAPIServer()
+	mustEmbedUnimplementedXRPTransactionAPIServer()
 }
 
-// UnimplementedRippleTransactionAPIServer must be embedded to have
+// UnimplementedXRPTransactionAPIServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedRippleTransactionAPIServer struct{}
+type UnimplementedXRPTransactionAPIServer struct{}
 
-func (UnimplementedRippleTransactionAPIServer) PrepareTransaction(context.Context, *RequestPrepareTransaction) (*ResponsePrepareTransaction, error) {
+func (UnimplementedXRPTransactionAPIServer) PrepareTransaction(context.Context, *RequestPrepareTransaction) (*ResponsePrepareTransaction, error) {
 	return nil, status.Error(codes.Unimplemented, "method PrepareTransaction not implemented")
 }
-func (UnimplementedRippleTransactionAPIServer) SignTransaction(context.Context, *RequestSignTransaction) (*ResponseSignTransaction, error) {
+func (UnimplementedXRPTransactionAPIServer) SignTransaction(context.Context, *RequestSignTransaction) (*ResponseSignTransaction, error) {
 	return nil, status.Error(codes.Unimplemented, "method SignTransaction not implemented")
 }
-func (UnimplementedRippleTransactionAPIServer) SubmitTransaction(context.Context, *RequestSubmitTransaction) (*ResponseSubmitTransaction, error) {
+func (UnimplementedXRPTransactionAPIServer) SubmitTransaction(context.Context, *RequestSubmitTransaction) (*ResponseSubmitTransaction, error) {
 	return nil, status.Error(codes.Unimplemented, "method SubmitTransaction not implemented")
 }
-func (UnimplementedRippleTransactionAPIServer) WaitValidation(*emptypb.Empty, grpc.ServerStreamingServer[ResponseWaitValidation]) error {
+func (UnimplementedXRPTransactionAPIServer) WaitValidation(*emptypb.Empty, grpc.ServerStreamingServer[ResponseWaitValidation]) error {
 	return status.Error(codes.Unimplemented, "method WaitValidation not implemented")
 }
-func (UnimplementedRippleTransactionAPIServer) GetTransaction(context.Context, *RequestGetTransaction) (*ResponseGetTransaction, error) {
+func (UnimplementedXRPTransactionAPIServer) GetTransaction(context.Context, *RequestGetTransaction) (*ResponseGetTransaction, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTransaction not implemented")
 }
-func (UnimplementedRippleTransactionAPIServer) CombineTransaction(context.Context, *RequestCombineTransaction) (*ResponseCombineTransaction, error) {
+func (UnimplementedXRPTransactionAPIServer) CombineTransaction(context.Context, *RequestCombineTransaction) (*ResponseCombineTransaction, error) {
 	return nil, status.Error(codes.Unimplemented, "method CombineTransaction not implemented")
 }
-func (UnimplementedRippleTransactionAPIServer) mustEmbedUnimplementedRippleTransactionAPIServer() {}
-func (UnimplementedRippleTransactionAPIServer) testEmbeddedByValue()                              {}
+func (UnimplementedXRPTransactionAPIServer) mustEmbedUnimplementedXRPTransactionAPIServer() {}
+func (UnimplementedXRPTransactionAPIServer) testEmbeddedByValue()                           {}
 
-// UnsafeRippleTransactionAPIServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RippleTransactionAPIServer will
+// UnsafeXRPTransactionAPIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to XRPTransactionAPIServer will
 // result in compilation errors.
-type UnsafeRippleTransactionAPIServer interface {
-	mustEmbedUnimplementedRippleTransactionAPIServer()
+type UnsafeXRPTransactionAPIServer interface {
+	mustEmbedUnimplementedXRPTransactionAPIServer()
 }
 
-func RegisterRippleTransactionAPIServer(s grpc.ServiceRegistrar, srv RippleTransactionAPIServer) {
-	// If the following call panics, it indicates UnimplementedRippleTransactionAPIServer was
+func RegisterXRPTransactionAPIServer(s grpc.ServiceRegistrar, srv XRPTransactionAPIServer) {
+	// If the following call panics, it indicates UnimplementedXRPTransactionAPIServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&RippleTransactionAPI_ServiceDesc, srv)
+	s.RegisterService(&XRPTransactionAPI_ServiceDesc, srv)
 }
 
-func _RippleTransactionAPI_PrepareTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPTransactionAPI_PrepareTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestPrepareTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleTransactionAPIServer).PrepareTransaction(ctx, in)
+		return srv.(XRPTransactionAPIServer).PrepareTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleTransactionAPI_PrepareTransaction_FullMethodName,
+		FullMethod: XRPTransactionAPI_PrepareTransaction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleTransactionAPIServer).PrepareTransaction(ctx, req.(*RequestPrepareTransaction))
+		return srv.(XRPTransactionAPIServer).PrepareTransaction(ctx, req.(*RequestPrepareTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_SignTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPTransactionAPI_SignTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestSignTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleTransactionAPIServer).SignTransaction(ctx, in)
+		return srv.(XRPTransactionAPIServer).SignTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleTransactionAPI_SignTransaction_FullMethodName,
+		FullMethod: XRPTransactionAPI_SignTransaction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleTransactionAPIServer).SignTransaction(ctx, req.(*RequestSignTransaction))
+		return srv.(XRPTransactionAPIServer).SignTransaction(ctx, req.(*RequestSignTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_SubmitTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPTransactionAPI_SubmitTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestSubmitTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleTransactionAPIServer).SubmitTransaction(ctx, in)
+		return srv.(XRPTransactionAPIServer).SubmitTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleTransactionAPI_SubmitTransaction_FullMethodName,
+		FullMethod: XRPTransactionAPI_SubmitTransaction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleTransactionAPIServer).SubmitTransaction(ctx, req.(*RequestSubmitTransaction))
+		return srv.(XRPTransactionAPIServer).SubmitTransaction(ctx, req.(*RequestSubmitTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_WaitValidation_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _XRPTransactionAPI_WaitValidation_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(emptypb.Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(RippleTransactionAPIServer).WaitValidation(m, &grpc.GenericServerStream[emptypb.Empty, ResponseWaitValidation]{ServerStream: stream})
+	return srv.(XRPTransactionAPIServer).WaitValidation(m, &grpc.GenericServerStream[emptypb.Empty, ResponseWaitValidation]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type RippleTransactionAPI_WaitValidationServer = grpc.ServerStreamingServer[ResponseWaitValidation]
+type XRPTransactionAPI_WaitValidationServer = grpc.ServerStreamingServer[ResponseWaitValidation]
 
-func _RippleTransactionAPI_GetTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPTransactionAPI_GetTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestGetTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleTransactionAPIServer).GetTransaction(ctx, in)
+		return srv.(XRPTransactionAPIServer).GetTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleTransactionAPI_GetTransaction_FullMethodName,
+		FullMethod: XRPTransactionAPI_GetTransaction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleTransactionAPIServer).GetTransaction(ctx, req.(*RequestGetTransaction))
+		return srv.(XRPTransactionAPIServer).GetTransaction(ctx, req.(*RequestGetTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_CombineTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPTransactionAPI_CombineTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestCombineTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleTransactionAPIServer).CombineTransaction(ctx, in)
+		return srv.(XRPTransactionAPIServer).CombineTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleTransactionAPI_CombineTransaction_FullMethodName,
+		FullMethod: XRPTransactionAPI_CombineTransaction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleTransactionAPIServer).CombineTransaction(ctx, req.(*RequestCombineTransaction))
+		return srv.(XRPTransactionAPIServer).CombineTransaction(ctx, req.(*RequestCombineTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// RippleTransactionAPI_ServiceDesc is the grpc.ServiceDesc for RippleTransactionAPI service.
+// XRPTransactionAPI_ServiceDesc is the grpc.ServiceDesc for XRPTransactionAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RippleTransactionAPI_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rippleapi.transaction.RippleTransactionAPI",
-	HandlerType: (*RippleTransactionAPIServer)(nil),
+var XRPTransactionAPI_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "xrpapi.transaction.XRPTransactionAPI",
+	HandlerType: (*XRPTransactionAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "PrepareTransaction",
-			Handler:    _RippleTransactionAPI_PrepareTransaction_Handler,
+			Handler:    _XRPTransactionAPI_PrepareTransaction_Handler,
 		},
 		{
 			MethodName: "SignTransaction",
-			Handler:    _RippleTransactionAPI_SignTransaction_Handler,
+			Handler:    _XRPTransactionAPI_SignTransaction_Handler,
 		},
 		{
 			MethodName: "SubmitTransaction",
-			Handler:    _RippleTransactionAPI_SubmitTransaction_Handler,
+			Handler:    _XRPTransactionAPI_SubmitTransaction_Handler,
 		},
 		{
 			MethodName: "GetTransaction",
-			Handler:    _RippleTransactionAPI_GetTransaction_Handler,
+			Handler:    _XRPTransactionAPI_GetTransaction_Handler,
 		},
 		{
 			MethodName: "CombineTransaction",
-			Handler:    _RippleTransactionAPI_CombineTransaction_Handler,
+			Handler:    _XRPTransactionAPI_CombineTransaction_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "WaitValidation",
-			Handler:       _RippleTransactionAPI_WaitValidation_Handler,
+			Handler:       _XRPTransactionAPI_WaitValidation_Handler,
 			ServerStreams: true,
 		},
 	},

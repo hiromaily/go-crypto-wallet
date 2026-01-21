@@ -1,4 +1,4 @@
-package ripple
+package xrp
 
 // ResponseGetAccountInfo represents the response from GetAccountInfo API call.
 type ResponseGetAccountInfo struct {

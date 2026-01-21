@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strconv"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 )
 
 // ToInfraInstructions converts DTO Instructions to infrastructure Instructions.
-func ToInfraInstructions(dto *dtoRipple.Instructions) *protogen.Instructions {
+func ToInfraInstructions(dto *dtoxrp.Instructions) *protogen.Instructions {
 	if dto == nil {
 		return nil
 	}
@@ -24,11 +24,11 @@ func ToInfraInstructions(dto *dtoRipple.Instructions) *protogen.Instructions {
 }
 
 // ToDTOInstructions converts infrastructure Instructions to DTO Instructions.
-func ToDTOInstructions(infra *protogen.Instructions) *dtoRipple.Instructions {
+func ToDTOInstructions(infra *protogen.Instructions) *dtoxrp.Instructions {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.Instructions{
+	return &dtoxrp.Instructions{
 		Fee:                    infra.GetFee(),
 		MaxFee:                 infra.GetMaxFee(),
 		MaxLedgerVersion:       infra.GetMaxLedgerVersion(),
@@ -39,7 +39,7 @@ func ToDTOInstructions(infra *protogen.Instructions) *dtoRipple.Instructions {
 }
 
 // ToInfraTxInput converts DTO TxInput to infrastructure TxInput.
-func ToInfraTxInput(dto *dtoRipple.TxInput) *TxInput {
+func ToInfraTxInput(dto *dtoxrp.TxInput) *TxInput {
 	if dto == nil {
 		return nil
 	}
@@ -59,11 +59,11 @@ func ToInfraTxInput(dto *dtoRipple.TxInput) *TxInput {
 }
 
 // ToDTOTxInput converts infrastructure TxInput to DTO TxInput.
-func ToDTOTxInput(infra *TxInput) *dtoRipple.TxInput {
+func ToDTOTxInput(infra *TxInput) *dtoxrp.TxInput {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.TxInput{
+	return &dtoxrp.TxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		Amount:             infra.Amount,
@@ -79,11 +79,11 @@ func ToDTOTxInput(infra *TxInput) *dtoRipple.TxInput {
 }
 
 // ToDTOSentTx converts infrastructure SentTx to DTO SentTx.
-func ToDTOSentTx(infra *SentTx) *dtoRipple.SentTx {
+func ToDTOSentTx(infra *SentTx) *dtoxrp.SentTx {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.SentTx{
+	return &dtoxrp.SentTx{
 		ResultCode:          infra.ResultCode,
 		ResultMessage:       infra.ResultMessage,
 		EngineResult:        infra.EngineResult,
@@ -95,17 +95,17 @@ func ToDTOSentTx(infra *SentTx) *dtoRipple.SentTx {
 }
 
 // ToDTOTxInfo converts infrastructure TxInfo to DTO TxInfo.
-func ToDTOTxInfo(infra *TxInfo) *dtoRipple.TxInfo {
+func ToDTOTxInfo(infra *TxInfo) *dtoxrp.TxInfo {
 	if infra == nil {
 		return nil
 	}
 
 	// Convert balance changes
-	balanceChanges := make(map[string][]dtoRipple.TxAmount)
+	balanceChanges := make(map[string][]dtoxrp.TxAmount)
 	for key, amounts := range infra.Outcome.BalanceChanges {
-		dtoAmounts := make([]dtoRipple.TxAmount, len(amounts))
+		dtoAmounts := make([]dtoxrp.TxAmount, len(amounts))
 		for i, amt := range amounts {
-			dtoAmounts[i] = dtoRipple.TxAmount{
+			dtoAmounts[i] = dtoxrp.TxAmount{
 				Currency: amt.Currency,
 				Value:    amt.Value,
 			}
@@ -114,17 +114,17 @@ func ToDTOTxInfo(infra *TxInfo) *dtoRipple.TxInfo {
 	}
 
 	// Convert orderbook changes
-	orderbookChanges := make(map[string][]dtoRipple.TxOrderbookChange)
+	orderbookChanges := make(map[string][]dtoxrp.TxOrderbookChange)
 	for key, changes := range infra.Outcome.OrderbookChanges {
-		dtoChanges := make([]dtoRipple.TxOrderbookChange, len(changes))
+		dtoChanges := make([]dtoxrp.TxOrderbookChange, len(changes))
 		for i, change := range changes {
-			dtoChanges[i] = dtoRipple.TxOrderbookChange{
+			dtoChanges[i] = dtoxrp.TxOrderbookChange{
 				Direction: change.Direction,
-				Quantity: dtoRipple.TxAmount{
+				Quantity: dtoxrp.TxAmount{
 					Currency: change.Quantity.Currency,
 					Value:    change.Quantity.Value,
 				},
-				TotalPrice: dtoRipple.TxTotalPrice{
+				TotalPrice: dtoxrp.TxTotalPrice{
 					Currency:     change.TotalPrice.Currency,
 					Counterparty: change.TotalPrice.Counterparty,
 					Value:        change.TotalPrice.Value,
@@ -137,24 +137,24 @@ func ToDTOTxInfo(infra *TxInfo) *dtoRipple.TxInfo {
 		orderbookChanges[key] = dtoChanges
 	}
 
-	return &dtoRipple.TxInfo{
+	return &dtoxrp.TxInfo{
 		Type:     infra.Type,
 		Address:  infra.Address,
 		Sequence: infra.Sequence,
 		ID:       infra.ID,
-		Specification: dtoRipple.TxSpecification{
-			Source: dtoRipple.TxSpecSource{
+		Specification: dtoxrp.TxSpecification{
+			Source: dtoxrp.TxSpecSource{
 				Address: infra.Specification.Source.Address,
-				MaxAmount: dtoRipple.TxAmount{
+				MaxAmount: dtoxrp.TxAmount{
 					Currency: infra.Specification.Source.MaxAmount.Currency,
 					Value:    infra.Specification.Source.MaxAmount.Value,
 				},
 			},
-			Destination: dtoRipple.TxSpecDestination{
+			Destination: dtoxrp.TxSpecDestination{
 				Address: infra.Specification.Destination.Address,
 			},
 		},
-		Outcome: dtoRipple.TxOutcome{
+		Outcome: dtoxrp.TxOutcome{
 			Result:           infra.Outcome.Result,
 			Timestamp:        infra.Outcome.Timestamp.Format("2006-01-02T15:04:05Z"),
 			Fee:              infra.Outcome.Fee,
@@ -162,7 +162,7 @@ func ToDTOTxInfo(infra *TxInfo) *dtoRipple.TxInfo {
 			OrderbookChanges: orderbookChanges,
 			LedgerVersion:    infra.Outcome.LedgerVersion,
 			IndexInLedger:    infra.Outcome.IndexInLedger,
-			DeliveredAmount: dtoRipple.TxAmount{
+			DeliveredAmount: dtoxrp.TxAmount{
 				Currency: infra.Outcome.DeliveredAmount.Currency,
 				Value:    infra.Outcome.DeliveredAmount.Value,
 			},
@@ -171,21 +171,21 @@ func ToDTOTxInfo(infra *TxInfo) *dtoRipple.TxInfo {
 }
 
 // ToInfraXRPKeyType converts DTO XRPKeyType to infrastructure XRPKeyType.
-func ToInfraXRPKeyType(dto dtoRipple.XRPKeyType) XRPKeyType {
+func ToInfraXRPKeyType(dto dtoxrp.XRPKeyType) XRPKeyType {
 	return XRPKeyType(dto)
 }
 
 // ToDTOXRPKeyType converts infrastructure XRPKeyType to DTO XRPKeyType.
-func ToDTOXRPKeyType(infra XRPKeyType) dtoRipple.XRPKeyType {
-	return dtoRipple.XRPKeyType(infra)
+func ToDTOXRPKeyType(infra XRPKeyType) dtoxrp.XRPKeyType {
+	return dtoxrp.XRPKeyType(infra)
 }
 
 // ToDTOResponseGetAccountInfo converts infrastructure ResponseGetAccountInfo to DTO.
-func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *dtoRipple.ResponseGetAccountInfo {
+func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *dtoxrp.ResponseGetAccountInfo {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.ResponseGetAccountInfo{
+	return &dtoxrp.ResponseGetAccountInfo{
 		Sequence:                       infra.GetSequence(),
 		XrpBalance:                     infra.GetXrpBalance(),
 		OwnerCount:                     infra.GetOwnerCount(),
@@ -195,11 +195,11 @@ func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *dtoRip
 }
 
 // ToDTOResponseGenerateAddress converts infrastructure ResponseGenerateAddress to DTO.
-func ToDTOResponseGenerateAddress(infra *protogen.ResponseGenerateAddress) *dtoRipple.ResponseGenerateAddress {
+func ToDTOResponseGenerateAddress(infra *protogen.ResponseGenerateAddress) *dtoxrp.ResponseGenerateAddress {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.ResponseGenerateAddress{
+	return &dtoxrp.ResponseGenerateAddress{
 		XAddress:       infra.GetXAddress(),
 		ClassicAddress: infra.GetClassicAddress(),
 		Address:        infra.GetAddress(),
@@ -208,25 +208,25 @@ func ToDTOResponseGenerateAddress(infra *protogen.ResponseGenerateAddress) *dtoR
 }
 
 // ToDTOResponseGenerateXAddress converts infrastructure ResponseGenerateXAddress to DTO.
-func ToDTOResponseGenerateXAddress(infra *protogen.ResponseGenerateXAddress) *dtoRipple.ResponseGenerateXAddress {
+func ToDTOResponseGenerateXAddress(infra *protogen.ResponseGenerateXAddress) *dtoxrp.ResponseGenerateXAddress {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.ResponseGenerateXAddress{
+	return &dtoxrp.ResponseGenerateXAddress{
 		XAddress: infra.GetXAddress(),
 		Secret:   infra.GetSecret(),
 	}
 }
 
 // ToDTOResponseAccountChannels converts infrastructure ResponseAccountChannels to DTO.
-func ToDTOResponseAccountChannels(infra *ResponseAccountChannels) *dtoRipple.ResponseAccountChannels {
+func ToDTOResponseAccountChannels(infra *ResponseAccountChannels) *dtoxrp.ResponseAccountChannels {
 	if infra == nil {
 		return nil
 	}
 
-	channels := make([]dtoRipple.AccountChannel, len(infra.Result.Channels))
+	channels := make([]dtoxrp.AccountChannel, len(infra.Result.Channels))
 	for i, ch := range infra.Result.Channels {
-		channels[i] = dtoRipple.AccountChannel{
+		channels[i] = dtoxrp.AccountChannel{
 			ChannelID:      ch.ChannelID,
 			Account:        ch.Account,
 			Destination:    ch.DestinationAccount,
@@ -240,7 +240,7 @@ func ToDTOResponseAccountChannels(infra *ResponseAccountChannels) *dtoRipple.Res
 		}
 	}
 
-	return &dtoRipple.ResponseAccountChannels{
+	return &dtoxrp.ResponseAccountChannels{
 		Account:   infra.Result.Account,
 		Channels:  channels,
 		Validated: infra.Result.Validated,
@@ -248,11 +248,11 @@ func ToDTOResponseAccountChannels(infra *ResponseAccountChannels) *dtoRipple.Res
 }
 
 // ToDTOResponseAccountInfo converts infrastructure ResponseAccountInfo to DTO.
-func ToDTOResponseAccountInfo(infra *ResponseAccountInfo) *dtoRipple.ResponseAccountInfo {
+func ToDTOResponseAccountInfo(infra *ResponseAccountInfo) *dtoxrp.ResponseAccountInfo {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.ResponseAccountInfo{
+	return &dtoxrp.ResponseAccountInfo{
 		Account:            infra.Result.AccountData.Account,
 		Balance:            infra.Result.AccountData.Balance,
 		Sequence:           uint64(infra.Result.AccountData.Sequence),
@@ -264,16 +264,16 @@ func ToDTOResponseAccountInfo(infra *ResponseAccountInfo) *dtoRipple.ResponseAcc
 }
 
 // ToDTOResponseServerInfo converts infrastructure ResponseServerInfo to DTO.
-func ToDTOResponseServerInfo(infra *ResponseServerInfo) *dtoRipple.ResponseServerInfo {
+func ToDTOResponseServerInfo(infra *ResponseServerInfo) *dtoxrp.ResponseServerInfo {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.ResponseServerInfo{
+	return &dtoxrp.ResponseServerInfo{
 		BuildVersion:    infra.Result.Info.BuildVersion,
 		CompleteLedgers: infra.Result.Info.CompleteLedgers,
 		HostID:          infra.Result.Info.Hostid,
 		IOLatencyMS:     uint64(infra.Result.Info.IoLatencyMs),
-		LastClose: dtoRipple.ServerLastClose{
+		LastClose: dtoxrp.ServerLastClose{
 			ConvergeTimeS: infra.Result.Info.LastClose.ConvergeTimeS,
 			Proposers:     uint64(infra.Result.Info.LastClose.Proposers),
 		},
@@ -281,7 +281,7 @@ func ToDTOResponseServerInfo(infra *ResponseServerInfo) *dtoRipple.ResponseServe
 		Peers:       uint64(infra.Result.Info.Peers),
 		PubkeyNode:  infra.Result.Info.PubkeyNode,
 		ServerState: infra.Result.Info.ServerState,
-		ValidatedLedger: dtoRipple.ValidatedLedger{
+		ValidatedLedger: dtoxrp.ValidatedLedger{
 			Age:            uint64(infra.Result.Info.ValidatedLedger.Age),
 			BaseFeeXRP:     fmt.Sprintf("%f", infra.Result.Info.ValidatedLedger.BaseFeeXrp),
 			Hash:           infra.Result.Info.ValidatedLedger.Hash,
@@ -294,11 +294,11 @@ func ToDTOResponseServerInfo(infra *ResponseServerInfo) *dtoRipple.ResponseServe
 }
 
 // ToDTOResponseValidationCreate converts infrastructure ResponseValidationCreate to DTO.
-func ToDTOResponseValidationCreate(infra *ResponseValidationCreate) *dtoRipple.ResponseValidationCreate {
+func ToDTOResponseValidationCreate(infra *ResponseValidationCreate) *dtoxrp.ResponseValidationCreate {
 	if infra == nil {
 		return nil
 	}
-	return &dtoRipple.ResponseValidationCreate{
+	return &dtoxrp.ResponseValidationCreate{
 		ValidationPublicKey: infra.Result.ValidationPublicKey,
 		ValidationSeed:      infra.Result.ValidationSeed,
 		ValidationKey:       infra.Result.ValidationKey,
@@ -306,7 +306,7 @@ func ToDTOResponseValidationCreate(infra *ResponseValidationCreate) *dtoRipple.R
 }
 
 // ToDTOResponseWalletPropose converts infrastructure ResponseWalletPropose to DTO.
-func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoRipple.ResponseWalletPropose {
+func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoxrp.ResponseWalletPropose {
 	if infra == nil {
 		return nil
 	}
@@ -316,7 +316,7 @@ func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoRipple.Respons
 		warning = infra.Error
 	}
 
-	return &dtoRipple.ResponseWalletPropose{
+	return &dtoxrp.ResponseWalletPropose{
 		MasterSeed:    infra.Result.MasterSeed,
 		MasterSeedHex: infra.Result.MasterSeedHex,
 		MasterKey:     infra.Result.MasterKey,
@@ -329,20 +329,20 @@ func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoRipple.Respons
 }
 
 // ToDTOSignerListSetTxInput converts infrastructure SignerListSetTxInput to DTO.
-func ToDTOSignerListSetTxInput(infra *SignerListSetTxInput) *dtoRipple.SignerListSetTxInput {
+func ToDTOSignerListSetTxInput(infra *SignerListSetTxInput) *dtoxrp.SignerListSetTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	entries := make([]dtoRipple.SignerListEntry, len(infra.SignerEntries))
+	entries := make([]dtoxrp.SignerListEntry, len(infra.SignerEntries))
 	for i, entry := range infra.SignerEntries {
-		entries[i] = dtoRipple.SignerListEntry{
+		entries[i] = dtoxrp.SignerListEntry{
 			Account:      entry.SignerEntry.Account,
 			SignerWeight: entry.SignerEntry.SignerWeight,
 		}
 	}
 
-	return &dtoRipple.SignerListSetTxInput{
+	return &dtoxrp.SignerListSetTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		SignerQuorum:       infra.SignerQuorum,
@@ -358,15 +358,15 @@ func ToDTOSignerListSetTxInput(infra *SignerListSetTxInput) *dtoRipple.SignerLis
 }
 
 // ToDTOTrustSetTxInput converts infrastructure TrustSetTxInput to DTO.
-func ToDTOTrustSetTxInput(infra *TrustSetTxInput) *dtoRipple.TrustSetTxInput {
+func ToDTOTrustSetTxInput(infra *TrustSetTxInput) *dtoxrp.TrustSetTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.TrustSetTxInput{
+	return &dtoxrp.TrustSetTxInput{
 		TransactionType: infra.TransactionType,
 		Account:         infra.Account,
-		LimitAmount: dtoRipple.IssuedCurrencyAmount{
+		LimitAmount: dtoxrp.IssuedCurrencyAmount{
 			Currency: infra.LimitAmount.Currency,
 			Issuer:   infra.LimitAmount.Issuer,
 			Value:    infra.LimitAmount.Value,
@@ -384,12 +384,12 @@ func ToDTOTrustSetTxInput(infra *TrustSetTxInput) *dtoRipple.TrustSetTxInput {
 }
 
 // ToDTOEscrowCreateTxInput converts infrastructure EscrowCreateTxInput to DTO.
-func ToDTOEscrowCreateTxInput(infra *EscrowCreateTxInput) *dtoRipple.EscrowCreateTxInput {
+func ToDTOEscrowCreateTxInput(infra *EscrowCreateTxInput) *dtoxrp.EscrowCreateTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.EscrowCreateTxInput{
+	return &dtoxrp.EscrowCreateTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		Amount:             infra.Amount,
@@ -409,12 +409,12 @@ func ToDTOEscrowCreateTxInput(infra *EscrowCreateTxInput) *dtoRipple.EscrowCreat
 }
 
 // ToDTOEscrowFinishTxInput converts infrastructure EscrowFinishTxInput to DTO.
-func ToDTOEscrowFinishTxInput(infra *EscrowFinishTxInput) *dtoRipple.EscrowFinishTxInput {
+func ToDTOEscrowFinishTxInput(infra *EscrowFinishTxInput) *dtoxrp.EscrowFinishTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.EscrowFinishTxInput{
+	return &dtoxrp.EscrowFinishTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		Owner:              infra.Owner,
@@ -432,12 +432,12 @@ func ToDTOEscrowFinishTxInput(infra *EscrowFinishTxInput) *dtoRipple.EscrowFinis
 }
 
 // ToDTOEscrowCancelTxInput converts infrastructure EscrowCancelTxInput to DTO.
-func ToDTOEscrowCancelTxInput(infra *EscrowCancelTxInput) *dtoRipple.EscrowCancelTxInput {
+func ToDTOEscrowCancelTxInput(infra *EscrowCancelTxInput) *dtoxrp.EscrowCancelTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.EscrowCancelTxInput{
+	return &dtoxrp.EscrowCancelTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		Owner:              infra.Owner,
@@ -453,12 +453,12 @@ func ToDTOEscrowCancelTxInput(infra *EscrowCancelTxInput) *dtoRipple.EscrowCance
 }
 
 // ToDTOPaymentChannelCreateTxInput converts infrastructure PaymentChannelCreateTxInput to DTO.
-func ToDTOPaymentChannelCreateTxInput(infra *PaymentChannelCreateTxInput) *dtoRipple.PaymentChannelCreateTxInput {
+func ToDTOPaymentChannelCreateTxInput(infra *PaymentChannelCreateTxInput) *dtoxrp.PaymentChannelCreateTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.PaymentChannelCreateTxInput{
+	return &dtoxrp.PaymentChannelCreateTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		Amount:             infra.Amount,
@@ -479,12 +479,12 @@ func ToDTOPaymentChannelCreateTxInput(infra *PaymentChannelCreateTxInput) *dtoRi
 }
 
 // ToDTOPaymentChannelFundTxInput converts infrastructure PaymentChannelFundTxInput to DTO.
-func ToDTOPaymentChannelFundTxInput(infra *PaymentChannelFundTxInput) *dtoRipple.PaymentChannelFundTxInput {
+func ToDTOPaymentChannelFundTxInput(infra *PaymentChannelFundTxInput) *dtoxrp.PaymentChannelFundTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.PaymentChannelFundTxInput{
+	return &dtoxrp.PaymentChannelFundTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		Channel:            infra.Channel,
@@ -501,12 +501,12 @@ func ToDTOPaymentChannelFundTxInput(infra *PaymentChannelFundTxInput) *dtoRipple
 }
 
 // ToDTOPaymentChannelClaimTxInput converts infrastructure PaymentChannelClaimTxInput to DTO.
-func ToDTOPaymentChannelClaimTxInput(infra *PaymentChannelClaimTxInput) *dtoRipple.PaymentChannelClaimTxInput {
+func ToDTOPaymentChannelClaimTxInput(infra *PaymentChannelClaimTxInput) *dtoxrp.PaymentChannelClaimTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.PaymentChannelClaimTxInput{
+	return &dtoxrp.PaymentChannelClaimTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		Channel:            infra.Channel,
@@ -525,12 +525,12 @@ func ToDTOPaymentChannelClaimTxInput(infra *PaymentChannelClaimTxInput) *dtoRipp
 }
 
 // ToDTONFTokenMintTxInput converts infrastructure NFTokenMintTxInput to DTO.
-func ToDTONFTokenMintTxInput(infra *NFTokenMintTxInput) *dtoRipple.NFTokenMintTxInput {
+func ToDTONFTokenMintTxInput(infra *NFTokenMintTxInput) *dtoxrp.NFTokenMintTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.NFTokenMintTxInput{
+	return &dtoxrp.NFTokenMintTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		NFTokenTaxon:       infra.NFTokenTaxon,
@@ -548,12 +548,12 @@ func ToDTONFTokenMintTxInput(infra *NFTokenMintTxInput) *dtoRipple.NFTokenMintTx
 }
 
 // ToDTONFTokenBurnTxInput converts infrastructure NFTokenBurnTxInput to DTO.
-func ToDTONFTokenBurnTxInput(infra *NFTokenBurnTxInput) *dtoRipple.NFTokenBurnTxInput {
+func ToDTONFTokenBurnTxInput(infra *NFTokenBurnTxInput) *dtoxrp.NFTokenBurnTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.NFTokenBurnTxInput{
+	return &dtoxrp.NFTokenBurnTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		NFTokenID:          infra.NFTokenID,
@@ -569,12 +569,12 @@ func ToDTONFTokenBurnTxInput(infra *NFTokenBurnTxInput) *dtoRipple.NFTokenBurnTx
 }
 
 // ToDTONFTokenCreateOfferTxInput converts infrastructure NFTokenCreateOfferTxInput to DTO.
-func ToDTONFTokenCreateOfferTxInput(infra *NFTokenCreateOfferTxInput) *dtoRipple.NFTokenCreateOfferTxInput {
+func ToDTONFTokenCreateOfferTxInput(infra *NFTokenCreateOfferTxInput) *dtoxrp.NFTokenCreateOfferTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.NFTokenCreateOfferTxInput{
+	return &dtoxrp.NFTokenCreateOfferTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		NFTokenID:          infra.NFTokenID,
@@ -593,12 +593,12 @@ func ToDTONFTokenCreateOfferTxInput(infra *NFTokenCreateOfferTxInput) *dtoRipple
 }
 
 // ToDTONFTokenAcceptOfferTxInput converts infrastructure NFTokenAcceptOfferTxInput to DTO.
-func ToDTONFTokenAcceptOfferTxInput(infra *NFTokenAcceptOfferTxInput) *dtoRipple.NFTokenAcceptOfferTxInput {
+func ToDTONFTokenAcceptOfferTxInput(infra *NFTokenAcceptOfferTxInput) *dtoxrp.NFTokenAcceptOfferTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.NFTokenAcceptOfferTxInput{
+	return &dtoxrp.NFTokenAcceptOfferTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		NFTokenSellOffer:   infra.NFTokenSellOffer,
@@ -615,12 +615,12 @@ func ToDTONFTokenAcceptOfferTxInput(infra *NFTokenAcceptOfferTxInput) *dtoRipple
 }
 
 // ToDTONFTokenCancelOfferTxInput converts infrastructure NFTokenCancelOfferTxInput to DTO.
-func ToDTONFTokenCancelOfferTxInput(infra *NFTokenCancelOfferTxInput) *dtoRipple.NFTokenCancelOfferTxInput {
+func ToDTONFTokenCancelOfferTxInput(infra *NFTokenCancelOfferTxInput) *dtoxrp.NFTokenCancelOfferTxInput {
 	if infra == nil {
 		return nil
 	}
 
-	return &dtoRipple.NFTokenCancelOfferTxInput{
+	return &dtoxrp.NFTokenCancelOfferTxInput{
 		TransactionType:    infra.TransactionType,
 		Account:            infra.Account,
 		NFTokenOffers:      infra.NFTokenOffers,

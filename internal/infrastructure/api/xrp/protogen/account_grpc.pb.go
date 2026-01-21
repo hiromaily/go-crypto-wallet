@@ -19,107 +19,107 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RippleAccountAPI_GetAccountInfo_FullMethodName = "/rippleapi.account.RippleAccountAPI/GetAccountInfo"
+	XRPAccountAPI_GetAccountInfo_FullMethodName = "/xrpapi.account.XRPAccountAPI/GetAccountInfo"
 )
 
-// RippleAccountAPIClient is the client API for RippleAccountAPI service.
+// XRPAccountAPIClient is the client API for XRPAccountAPI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// RippleAccountAPI
-type RippleAccountAPIClient interface {
+// XRPAccountAPI
+type XRPAccountAPIClient interface {
 	// https://xrpl.org/rippleapi-reference.html#getaccountinfo
 	GetAccountInfo(ctx context.Context, in *RequestGetAccountInfo, opts ...grpc.CallOption) (*ResponseGetAccountInfo, error)
 }
 
-type rippleAccountAPIClient struct {
+type xRPAccountAPIClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRippleAccountAPIClient(cc grpc.ClientConnInterface) RippleAccountAPIClient {
-	return &rippleAccountAPIClient{cc}
+func NewXRPAccountAPIClient(cc grpc.ClientConnInterface) XRPAccountAPIClient {
+	return &xRPAccountAPIClient{cc}
 }
 
-func (c *rippleAccountAPIClient) GetAccountInfo(ctx context.Context, in *RequestGetAccountInfo, opts ...grpc.CallOption) (*ResponseGetAccountInfo, error) {
+func (c *xRPAccountAPIClient) GetAccountInfo(ctx context.Context, in *RequestGetAccountInfo, opts ...grpc.CallOption) (*ResponseGetAccountInfo, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseGetAccountInfo)
-	err := c.cc.Invoke(ctx, RippleAccountAPI_GetAccountInfo_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPAccountAPI_GetAccountInfo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RippleAccountAPIServer is the server API for RippleAccountAPI service.
-// All implementations must embed UnimplementedRippleAccountAPIServer
+// XRPAccountAPIServer is the server API for XRPAccountAPI service.
+// All implementations must embed UnimplementedXRPAccountAPIServer
 // for forward compatibility.
 //
-// RippleAccountAPI
-type RippleAccountAPIServer interface {
+// XRPAccountAPI
+type XRPAccountAPIServer interface {
 	// https://xrpl.org/rippleapi-reference.html#getaccountinfo
 	GetAccountInfo(context.Context, *RequestGetAccountInfo) (*ResponseGetAccountInfo, error)
-	mustEmbedUnimplementedRippleAccountAPIServer()
+	mustEmbedUnimplementedXRPAccountAPIServer()
 }
 
-// UnimplementedRippleAccountAPIServer must be embedded to have
+// UnimplementedXRPAccountAPIServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedRippleAccountAPIServer struct{}
+type UnimplementedXRPAccountAPIServer struct{}
 
-func (UnimplementedRippleAccountAPIServer) GetAccountInfo(context.Context, *RequestGetAccountInfo) (*ResponseGetAccountInfo, error) {
+func (UnimplementedXRPAccountAPIServer) GetAccountInfo(context.Context, *RequestGetAccountInfo) (*ResponseGetAccountInfo, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAccountInfo not implemented")
 }
-func (UnimplementedRippleAccountAPIServer) mustEmbedUnimplementedRippleAccountAPIServer() {}
-func (UnimplementedRippleAccountAPIServer) testEmbeddedByValue()                          {}
+func (UnimplementedXRPAccountAPIServer) mustEmbedUnimplementedXRPAccountAPIServer() {}
+func (UnimplementedXRPAccountAPIServer) testEmbeddedByValue()                       {}
 
-// UnsafeRippleAccountAPIServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RippleAccountAPIServer will
+// UnsafeXRPAccountAPIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to XRPAccountAPIServer will
 // result in compilation errors.
-type UnsafeRippleAccountAPIServer interface {
-	mustEmbedUnimplementedRippleAccountAPIServer()
+type UnsafeXRPAccountAPIServer interface {
+	mustEmbedUnimplementedXRPAccountAPIServer()
 }
 
-func RegisterRippleAccountAPIServer(s grpc.ServiceRegistrar, srv RippleAccountAPIServer) {
-	// If the following call panics, it indicates UnimplementedRippleAccountAPIServer was
+func RegisterXRPAccountAPIServer(s grpc.ServiceRegistrar, srv XRPAccountAPIServer) {
+	// If the following call panics, it indicates UnimplementedXRPAccountAPIServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&RippleAccountAPI_ServiceDesc, srv)
+	s.RegisterService(&XRPAccountAPI_ServiceDesc, srv)
 }
 
-func _RippleAccountAPI_GetAccountInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPAccountAPI_GetAccountInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestGetAccountInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleAccountAPIServer).GetAccountInfo(ctx, in)
+		return srv.(XRPAccountAPIServer).GetAccountInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleAccountAPI_GetAccountInfo_FullMethodName,
+		FullMethod: XRPAccountAPI_GetAccountInfo_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleAccountAPIServer).GetAccountInfo(ctx, req.(*RequestGetAccountInfo))
+		return srv.(XRPAccountAPIServer).GetAccountInfo(ctx, req.(*RequestGetAccountInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// RippleAccountAPI_ServiceDesc is the grpc.ServiceDesc for RippleAccountAPI service.
+// XRPAccountAPI_ServiceDesc is the grpc.ServiceDesc for XRPAccountAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RippleAccountAPI_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rippleapi.account.RippleAccountAPI",
-	HandlerType: (*RippleAccountAPIServer)(nil),
+var XRPAccountAPI_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "xrpapi.account.XRPAccountAPI",
+	HandlerType: (*XRPAccountAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GetAccountInfo",
-			Handler:    _RippleAccountAPI_GetAccountInfo_Handler,
+			Handler:    _XRPAccountAPI_GetAccountInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

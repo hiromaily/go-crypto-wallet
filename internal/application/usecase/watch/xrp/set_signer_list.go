@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
@@ -16,7 +16,7 @@ import (
 )
 
 type setSignerListUseCase struct {
-	rippler         apixrp.Rippler
+	rippler         apixrp.XRPer
 	uuidHandler     uuid.UUIDHandler
 	signerListRepo  repocold.XRPSignerListRepositorier
 	signerEntryRepo repocold.XRPSignerEntryRepositorier
@@ -25,7 +25,7 @@ type setSignerListUseCase struct {
 
 // NewSetSignerListUseCase creates a new SetSignerListUseCase
 func NewSetSignerListUseCase(
-	rippler apixrp.Rippler,
+	rippler apixrp.XRPer,
 	uuidHandler uuid.UUIDHandler,
 	signerListRepo repocold.XRPSignerListRepositorier,
 	signerEntryRepo repocold.XRPSignerEntryRepositorier,
@@ -73,7 +73,7 @@ func (u *setSignerListUseCase) Execute(
 	}
 
 	// Prepare the SignerListSet transaction
-	instructions := &dtoRipple.Instructions{
+	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 

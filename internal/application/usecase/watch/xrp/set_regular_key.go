@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
@@ -16,7 +16,7 @@ import (
 )
 
 type setRegularKeyUseCase struct {
-	rippler        apixrp.Rippler
+	rippler        apixrp.XRPer
 	uuidHandler    uuid.UUIDHandler
 	regularKeyRepo repocold.XRPRegularKeyRepositorier
 	txFileRepo     file.TransactionFileRepositorier
@@ -24,7 +24,7 @@ type setRegularKeyUseCase struct {
 
 // NewSetRegularKeyUseCase creates a new SetRegularKeyUseCase
 func NewSetRegularKeyUseCase(
-	rippler apixrp.Rippler,
+	rippler apixrp.XRPer,
 	uuidHandler uuid.UUIDHandler,
 	regularKeyRepo repocold.XRPRegularKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
@@ -47,7 +47,7 @@ func (u *setRegularKeyUseCase) Execute(
 	}
 
 	// Prepare the SetRegularKey transaction
-	instructions := &dtoRipple.Instructions{
+	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 

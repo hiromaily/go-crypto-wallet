@@ -8,25 +8,25 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 )
 
-// Ripple includes client to call JSON-RPC
-// This type implements the interfaces defined in internal/application/ports/ripple
-type Ripple struct {
+// XRP includes client to call JSON-RPC
+// This type implements the interfaces defined in internal/application/ports/api/xrp
+type XRP struct {
 	wsPublic     *websocket.WS
 	wsAdmin      *websocket.WS
-	API          *RippleAPI
+	API          *XRPAPI
 	chainConf    *chaincfg.Params
-	coinTypeCode domainCoin.CoinTypeCode // eth
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
-// NewRipple creates Ripple object
-func NewRipple(
+// NewXRP creates XRP object
+func NewXRP(
 	wsPublic *websocket.WS,
 	wsAdmin *websocket.WS,
-	api *RippleAPI,
+	api *XRPAPI,
 	coinTypeCode domainCoin.CoinTypeCode,
 	conf *config.Ripple,
-) (*Ripple, error) {
-	xrp := &Ripple{
+) (*XRP, error) {
+	xrp := &XRP{
 		wsPublic:     wsPublic,
 		wsAdmin:      wsAdmin,
 		API:          api,
@@ -43,7 +43,7 @@ func NewRipple(
 }
 
 // Close disconnect to server
-func (r *Ripple) Close() error {
+func (r *XRP) Close() error {
 	if r.wsPublic != nil {
 		_ = r.wsPublic.Close() // Best effort cleanup
 	}
@@ -57,11 +57,11 @@ func (r *Ripple) Close() error {
 }
 
 // CoinTypeCode returns coinTypeCode
-func (r *Ripple) CoinTypeCode() domainCoin.CoinTypeCode {
+func (r *XRP) CoinTypeCode() domainCoin.CoinTypeCode {
 	return r.coinTypeCode
 }
 
 // GetChainConf returns chain conf
-func (r *Ripple) GetChainConf() *chaincfg.Params {
+func (r *XRP) GetChainConf() *chaincfg.Params {
 	return r.chainConf
 }

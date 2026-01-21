@@ -144,13 +144,13 @@ type container struct {
 	btc        apibtc.Bitcoiner
 	eth        apieth.Ethereumer
 	erc20      apieth.ERC20er
-	xrp        apixrp.Rippler
+	xrp        apixrp.XRPer
 	// client
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
 	wsXrpPublic  *websocket.WS
 	wsXrpAdmin   *websocket.WS
-	rippleAPI    *apixrpimpl.RippleAPI
+	xrpAPI       *apixrpimpl.XRPAPI
 	// keygen specific
 	multisig *domainAccount.MultisigConfig
 	// sign specific
@@ -522,14 +522,14 @@ func (c *container) newERC20() apieth.ERC20er {
 	return c.erc20
 }
 
-func (c *container) newXRP() apixrp.Rippler {
+func (c *container) newXRP() apixrp.XRPer {
 	if c.xrp == nil {
 		var err error
 		wsPublic, wsAdmin := c.newXRPWSClient()
-		c.xrp, err = apixrpimpl.NewRippleFromCoinType(
+		c.xrp, err = apixrpimpl.NewXRPFromCoinType(
 			wsPublic,
 			wsAdmin,
-			c.newRippleAPI(),
+			c.newXRPAPI(),
 			&c.conf.Ripple,
 			c.conf.CoinTypeCode,
 		)
@@ -540,11 +540,11 @@ func (c *container) newXRP() apixrp.Rippler {
 	return c.xrp
 }
 
-func (c *container) newRippleAPI() *apixrpimpl.RippleAPI {
-	if c.rippleAPI == nil {
-		c.rippleAPI = apixrpimpl.NewRippleAPI(c.pkgContainer.NewGRPCClient())
+func (c *container) newXRPAPI() *apixrpimpl.XRPAPI {
+	if c.xrpAPI == nil {
+		c.xrpAPI = apixrpimpl.NewXRPAPI(c.pkgContainer.NewGRPCClient())
 	}
-	return c.rippleAPI
+	return c.xrpAPI
 }
 
 //

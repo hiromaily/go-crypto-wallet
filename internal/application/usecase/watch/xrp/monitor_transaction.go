@@ -12,13 +12,13 @@ import (
 )
 
 type monitorTransactionUseCase struct {
-	rippler  apixrp.Rippler
+	rippler  apixrp.XRPer
 	addrRepo repowatch.AddressRepositorier
 }
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
-	rippler apixrp.Rippler,
+	rippler apixrp.XRPer,
 	addrRepo repowatch.AddressRepositorier,
 ) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{

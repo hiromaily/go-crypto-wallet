@@ -9,13 +9,13 @@ import (
 	"github.com/bookerzzz/grok"
 	"google.golang.org/grpc/status"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
-func runSendCoin(xrpAPI apixrp.Rippler, txData *config.RippleTxData, receiverAddr string, amount float64) error {
+func runSendCoin(xrpAPI apixrp.XRPer, txData *config.RippleTxData, receiverAddr string, amount float64) error {
 	// validator
 	if receiverAddr == "" {
 		return errors.New("address option [-address] is invalid")
@@ -23,7 +23,7 @@ func runSendCoin(xrpAPI apixrp.Rippler, txData *config.RippleTxData, receiverAdd
 
 	// send coin
 	// PrepareTransaction
-	instructions := &dtoRipple.Instructions{
+	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 	fmt.Printf("sender: %s, receiver: %s, amount: %v\n", txData.Account, receiverAddr, amount)

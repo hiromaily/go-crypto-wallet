@@ -10,7 +10,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/stretchr/testify/suite"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/testutil"
 )
@@ -25,7 +25,7 @@ func (txt *txTest) TestCreateRawTransaction() {
 		sernderAccount  string
 		receiverAccount string
 		amount          float64
-		instructions    *dtoRipple.Instructions
+		instructions    *dtoxrp.Instructions
 	}
 	type want struct{}
 	tests := []struct {
@@ -39,7 +39,7 @@ func (txt *txTest) TestCreateRawTransaction() {
 				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
 				receiverAccount: "rpBzBQ6aWJhuatJCkQgfE3VJT67ukBQopf",
 				amount:          50,
-				instructions: &dtoRipple.Instructions{
+				instructions: &dtoxrp.Instructions{
 					MaxLedgerVersionOffset: apixrpimpl.MaxLedgerVersionOffset,
 				},
 			},

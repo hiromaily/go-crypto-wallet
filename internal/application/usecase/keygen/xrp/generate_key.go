@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
@@ -18,7 +18,7 @@ import (
 )
 
 type generateKeyUseCase struct {
-	xrp               apixrp.Rippler
+	xrp               apixrp.XRPer
 	dbConn            *sql.DB
 	coinTypeCode      domainCoin.CoinTypeCode
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
@@ -26,7 +26,7 @@ type generateKeyUseCase struct {
 
 // NewGenerateKeyUseCase creates a new GenerateKeyUseCase
 func NewGenerateKeyUseCase(
-	xrp apixrp.Rippler,
+	xrp apixrp.XRPer,
 	dbConn *sql.DB,
 	coinTypeCode domainCoin.CoinTypeCode,
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,
@@ -70,7 +70,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		// TODO:
 		// - WIF => badSeed
 		// - P2PKHAddr => badSeed
-		var generatedKey *dtoRipple.ResponseWalletPropose
+		var generatedKey *dtoxrp.ResponseWalletPropose
 		generatedKey, err = u.xrp.WalletPropose(ctx, v.P2SHSegWitAddr)
 		if err != nil {
 			return fmt.Errorf("fail to call xrp.WalletPropose(): %w", err)

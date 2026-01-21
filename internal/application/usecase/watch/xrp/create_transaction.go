@@ -9,7 +9,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -25,7 +25,7 @@ import (
 )
 
 type createTransactionUseCase struct {
-	rippler         apixrp.Rippler
+	rippler         apixrp.XRPer
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        repowatch.AddressRepositorier
@@ -39,7 +39,7 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	rippler apixrp.Rippler,
+	rippler apixrp.XRPer,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo repowatch.AddressRepositorier,
@@ -249,7 +249,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// call CreateRawTransaction
-	instructions := &dtoRipple.Instructions{
+	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 	txJSON, rawTxString, err := u.rippler.CreateRawTransaction(
@@ -362,13 +362,13 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	var sequence uint64
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		instructions := &dtoRipple.Instructions{
+		instructions := &dtoxrp.Instructions{
 			MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		var txJSON *dtoRipple.TxInput
+		var txJSON *dtoxrp.TxInput
 		var rawTxString string
 		txJSON, rawTxString, err = u.rippler.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, instructions)
@@ -499,7 +499,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	var sequence uint64
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		instructions := &dtoRipple.Instructions{
+		instructions := &dtoxrp.Instructions{
 			MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {
