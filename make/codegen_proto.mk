@@ -119,8 +119,8 @@ proto-go-protoc: protoc-version-check clean-pb-go
 		--go_opt=paths=source_relative \
 		--go-grpc_out=$(PROTO_GO_OUT_DIR) \
 		--go-grpc_opt=paths=source_relative \
-		-I proto/rippleapi \
-		proto/rippleapi/*.proto
+		-I proto/xrpapi \
+		proto/xrpapi/*.proto
 
 # Generate TypeScript code using protoc
 # Requires: protoc-gen-es >= 2.x (install via: cd apps/xrpl-grpc-server && bun install)
@@ -139,8 +139,8 @@ proto-ts-protoc: protoc-version-check clean-pb-ts
 		--plugin=protoc-gen-es=apps/xrpl-grpc-server/node_modules/.bin/protoc-gen-es \
 		--es_out=$(PROTO_TS_OUT_DIR) \
 		--es_opt=target=ts \
-		-I proto/rippleapi \
-		proto/rippleapi/*.proto
+		-I proto/xrpapi \
+		proto/xrpapi/*.proto
 
 #------------------------------------------------------------------------------
 # buf-based targets (for future use)

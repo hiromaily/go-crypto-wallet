@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GetAccountInfo calls GetAccountInfo API
-func (r *Ripple) GetAccountInfo(ctx context.Context, address string) (*dtoRipple.ResponseGetAccountInfo, error) {
+func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseGetAccountInfo, error) {
 	// validation
 	if address == "" {
 		return nil, errors.New("address is empty")

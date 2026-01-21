@@ -6,13 +6,13 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GenerateAddress calls GenerateAddress API
-func (r *Ripple) GenerateAddress(ctx context.Context) (*dtoRipple.ResponseGenerateAddress, error) {
+func (r *XRP) GenerateAddress(ctx context.Context) (*dtoxrp.ResponseGenerateAddress, error) {
 	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateAddress(ctx, req)
@@ -31,7 +31,7 @@ func (r *Ripple) GenerateAddress(ctx context.Context) (*dtoRipple.ResponseGenera
 }
 
 // GenerateXAddress calls GenerateXAddress API
-func (r *Ripple) GenerateXAddress(ctx context.Context) (*dtoRipple.ResponseGenerateXAddress, error) {
+func (r *XRP) GenerateXAddress(ctx context.Context) (*dtoxrp.ResponseGenerateXAddress, error) {
 	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateXAddress(ctx, req)
@@ -48,7 +48,7 @@ func (r *Ripple) GenerateXAddress(ctx context.Context) (*dtoRipple.ResponseGener
 }
 
 // IsValidAddress calls IsValidAddress API
-func (r *Ripple) IsValidAddress(ctx context.Context, addr string) (bool, error) {
+func (r *XRP) IsValidAddress(ctx context.Context, addr string) (bool, error) {
 	req := protogen.RequestIsValidAddress_builder{
 		Address: addr,
 	}.Build()

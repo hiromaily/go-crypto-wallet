@@ -20,17 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RippleAddressAPI_GenerateAddress_FullMethodName  = "/rippleapi.address.RippleAddressAPI/GenerateAddress"
-	RippleAddressAPI_GenerateXAddress_FullMethodName = "/rippleapi.address.RippleAddressAPI/GenerateXAddress"
-	RippleAddressAPI_IsValidAddress_FullMethodName   = "/rippleapi.address.RippleAddressAPI/IsValidAddress"
+	XRPAddressAPI_GenerateAddress_FullMethodName  = "/xrpapi.address.XRPAddressAPI/GenerateAddress"
+	XRPAddressAPI_GenerateXAddress_FullMethodName = "/xrpapi.address.XRPAddressAPI/GenerateXAddress"
+	XRPAddressAPI_IsValidAddress_FullMethodName   = "/xrpapi.address.XRPAddressAPI/IsValidAddress"
 )
 
-// RippleAddressAPIClient is the client API for RippleAddressAPI service.
+// XRPAddressAPIClient is the client API for XRPAddressAPI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// RippleAddressAPI
-type RippleAddressAPIClient interface {
+// XRPAddressAPI
+type XRPAddressAPIClient interface {
 	// https://xrpl.org/rippleapi-reference.html#generateaddress
 	GenerateAddress(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ResponseGenerateAddress, error)
 	// https://xrpl.org/rippleapi-reference.html#generatexaddress
@@ -39,168 +39,168 @@ type RippleAddressAPIClient interface {
 	IsValidAddress(ctx context.Context, in *RequestIsValidAddress, opts ...grpc.CallOption) (*ResponseIsValidAddress, error)
 }
 
-type rippleAddressAPIClient struct {
+type xRPAddressAPIClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRippleAddressAPIClient(cc grpc.ClientConnInterface) RippleAddressAPIClient {
-	return &rippleAddressAPIClient{cc}
+func NewXRPAddressAPIClient(cc grpc.ClientConnInterface) XRPAddressAPIClient {
+	return &xRPAddressAPIClient{cc}
 }
 
-func (c *rippleAddressAPIClient) GenerateAddress(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ResponseGenerateAddress, error) {
+func (c *xRPAddressAPIClient) GenerateAddress(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ResponseGenerateAddress, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseGenerateAddress)
-	err := c.cc.Invoke(ctx, RippleAddressAPI_GenerateAddress_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPAddressAPI_GenerateAddress_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rippleAddressAPIClient) GenerateXAddress(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ResponseGenerateXAddress, error) {
+func (c *xRPAddressAPIClient) GenerateXAddress(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ResponseGenerateXAddress, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseGenerateXAddress)
-	err := c.cc.Invoke(ctx, RippleAddressAPI_GenerateXAddress_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPAddressAPI_GenerateXAddress_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rippleAddressAPIClient) IsValidAddress(ctx context.Context, in *RequestIsValidAddress, opts ...grpc.CallOption) (*ResponseIsValidAddress, error) {
+func (c *xRPAddressAPIClient) IsValidAddress(ctx context.Context, in *RequestIsValidAddress, opts ...grpc.CallOption) (*ResponseIsValidAddress, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseIsValidAddress)
-	err := c.cc.Invoke(ctx, RippleAddressAPI_IsValidAddress_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, XRPAddressAPI_IsValidAddress_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RippleAddressAPIServer is the server API for RippleAddressAPI service.
-// All implementations must embed UnimplementedRippleAddressAPIServer
+// XRPAddressAPIServer is the server API for XRPAddressAPI service.
+// All implementations must embed UnimplementedXRPAddressAPIServer
 // for forward compatibility.
 //
-// RippleAddressAPI
-type RippleAddressAPIServer interface {
+// XRPAddressAPI
+type XRPAddressAPIServer interface {
 	// https://xrpl.org/rippleapi-reference.html#generateaddress
 	GenerateAddress(context.Context, *emptypb.Empty) (*ResponseGenerateAddress, error)
 	// https://xrpl.org/rippleapi-reference.html#generatexaddress
 	GenerateXAddress(context.Context, *emptypb.Empty) (*ResponseGenerateXAddress, error)
 	// https://xrpl.org/rippleapi-reference.html#isvalidaddress
 	IsValidAddress(context.Context, *RequestIsValidAddress) (*ResponseIsValidAddress, error)
-	mustEmbedUnimplementedRippleAddressAPIServer()
+	mustEmbedUnimplementedXRPAddressAPIServer()
 }
 
-// UnimplementedRippleAddressAPIServer must be embedded to have
+// UnimplementedXRPAddressAPIServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedRippleAddressAPIServer struct{}
+type UnimplementedXRPAddressAPIServer struct{}
 
-func (UnimplementedRippleAddressAPIServer) GenerateAddress(context.Context, *emptypb.Empty) (*ResponseGenerateAddress, error) {
+func (UnimplementedXRPAddressAPIServer) GenerateAddress(context.Context, *emptypb.Empty) (*ResponseGenerateAddress, error) {
 	return nil, status.Error(codes.Unimplemented, "method GenerateAddress not implemented")
 }
-func (UnimplementedRippleAddressAPIServer) GenerateXAddress(context.Context, *emptypb.Empty) (*ResponseGenerateXAddress, error) {
+func (UnimplementedXRPAddressAPIServer) GenerateXAddress(context.Context, *emptypb.Empty) (*ResponseGenerateXAddress, error) {
 	return nil, status.Error(codes.Unimplemented, "method GenerateXAddress not implemented")
 }
-func (UnimplementedRippleAddressAPIServer) IsValidAddress(context.Context, *RequestIsValidAddress) (*ResponseIsValidAddress, error) {
+func (UnimplementedXRPAddressAPIServer) IsValidAddress(context.Context, *RequestIsValidAddress) (*ResponseIsValidAddress, error) {
 	return nil, status.Error(codes.Unimplemented, "method IsValidAddress not implemented")
 }
-func (UnimplementedRippleAddressAPIServer) mustEmbedUnimplementedRippleAddressAPIServer() {}
-func (UnimplementedRippleAddressAPIServer) testEmbeddedByValue()                          {}
+func (UnimplementedXRPAddressAPIServer) mustEmbedUnimplementedXRPAddressAPIServer() {}
+func (UnimplementedXRPAddressAPIServer) testEmbeddedByValue()                       {}
 
-// UnsafeRippleAddressAPIServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RippleAddressAPIServer will
+// UnsafeXRPAddressAPIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to XRPAddressAPIServer will
 // result in compilation errors.
-type UnsafeRippleAddressAPIServer interface {
-	mustEmbedUnimplementedRippleAddressAPIServer()
+type UnsafeXRPAddressAPIServer interface {
+	mustEmbedUnimplementedXRPAddressAPIServer()
 }
 
-func RegisterRippleAddressAPIServer(s grpc.ServiceRegistrar, srv RippleAddressAPIServer) {
-	// If the following call panics, it indicates UnimplementedRippleAddressAPIServer was
+func RegisterXRPAddressAPIServer(s grpc.ServiceRegistrar, srv XRPAddressAPIServer) {
+	// If the following call panics, it indicates UnimplementedXRPAddressAPIServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&RippleAddressAPI_ServiceDesc, srv)
+	s.RegisterService(&XRPAddressAPI_ServiceDesc, srv)
 }
 
-func _RippleAddressAPI_GenerateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPAddressAPI_GenerateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleAddressAPIServer).GenerateAddress(ctx, in)
+		return srv.(XRPAddressAPIServer).GenerateAddress(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleAddressAPI_GenerateAddress_FullMethodName,
+		FullMethod: XRPAddressAPI_GenerateAddress_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleAddressAPIServer).GenerateAddress(ctx, req.(*emptypb.Empty))
+		return srv.(XRPAddressAPIServer).GenerateAddress(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleAddressAPI_GenerateXAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPAddressAPI_GenerateXAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleAddressAPIServer).GenerateXAddress(ctx, in)
+		return srv.(XRPAddressAPIServer).GenerateXAddress(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleAddressAPI_GenerateXAddress_FullMethodName,
+		FullMethod: XRPAddressAPI_GenerateXAddress_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleAddressAPIServer).GenerateXAddress(ctx, req.(*emptypb.Empty))
+		return srv.(XRPAddressAPIServer).GenerateXAddress(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleAddressAPI_IsValidAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _XRPAddressAPI_IsValidAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestIsValidAddress)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RippleAddressAPIServer).IsValidAddress(ctx, in)
+		return srv.(XRPAddressAPIServer).IsValidAddress(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RippleAddressAPI_IsValidAddress_FullMethodName,
+		FullMethod: XRPAddressAPI_IsValidAddress_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RippleAddressAPIServer).IsValidAddress(ctx, req.(*RequestIsValidAddress))
+		return srv.(XRPAddressAPIServer).IsValidAddress(ctx, req.(*RequestIsValidAddress))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// RippleAddressAPI_ServiceDesc is the grpc.ServiceDesc for RippleAddressAPI service.
+// XRPAddressAPI_ServiceDesc is the grpc.ServiceDesc for XRPAddressAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RippleAddressAPI_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rippleapi.address.RippleAddressAPI",
-	HandlerType: (*RippleAddressAPIServer)(nil),
+var XRPAddressAPI_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "xrpapi.address.XRPAddressAPI",
+	HandlerType: (*XRPAddressAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GenerateAddress",
-			Handler:    _RippleAddressAPI_GenerateAddress_Handler,
+			Handler:    _XRPAddressAPI_GenerateAddress_Handler,
 		},
 		{
 			MethodName: "GenerateXAddress",
-			Handler:    _RippleAddressAPI_GenerateXAddress_Handler,
+			Handler:    _XRPAddressAPI_GenerateXAddress_Handler,
 		},
 		{
 			MethodName: "IsValidAddress",
-			Handler:    _RippleAddressAPI_IsValidAddress_Handler,
+			Handler:    _XRPAddressAPI_IsValidAddress_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

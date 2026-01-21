@@ -15,7 +15,7 @@ import (
 
 // XRPKeygen keygen wallet object
 type XRPKeygen struct {
-	XRP                     apixrp.Rippler
+	XRP                     apixrp.XRPer
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	generateSeedUseCase     keygenusecase.GenerateSeedUseCase
@@ -27,7 +27,7 @@ type XRPKeygen struct {
 
 // NewXRPKeygen returns XRPKeygen object
 func NewXRPKeygen(
-	xrp apixrp.Rippler,
+	xrp apixrp.XRPer,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 	generateSeedUseCase keygenusecase.GenerateSeedUseCase,

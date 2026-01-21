@@ -8,7 +8,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -18,19 +18,19 @@ import (
 )
 
 type sendTransactionUseCase struct {
-	rippler      apixrp.Rippler
+	xrper        apixrp.XRPer
 	txDetailRepo repowatch.XRPDetailTXRepositorier
 	txFileRepo   file.TransactionFileRepositorier
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
-	rippler apixrp.Rippler,
+	xrper apixrp.XRPer,
 	txDetailRepo repowatch.XRPDetailTXRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {
 	return &sendTransactionUseCase{
-		rippler:      rippler,
+		xrper:        xrper,
 		txDetailRepo: txDetailRepo,
 		txFileRepo:   txFileRepo,
 	}
@@ -86,9 +86,9 @@ func (u *sendTransactionUseCase) Execute(
 			txBlob := tmp[2]
 
 			// Submit transaction to XRP network
-			var sentTx *dtoRipple.SentTx
+			var sentTx *dtoxrp.SentTx
 			var earlistLedgerVersion uint64
-			sentTx, earlistLedgerVersion, err = u.rippler.SubmitTransaction(ctx, txBlob)
+			sentTx, earlistLedgerVersion, err = u.xrper.SubmitTransaction(ctx, txBlob)
 			if err != nil {
 				logger.Warn("fail to call xrp.SubmitTransaction()",
 					"tx_id", txID,
@@ -124,7 +124,7 @@ func (u *sendTransactionUseCase) Execute(
 
 			// Wait for transaction validation
 			var ledgerVer uint64
-			ledgerVer, err = u.rippler.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
+			ledgerVer, err = u.xrper.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
 				logger.Warn("fail to call xrp.WaitValidation()",
 					"tx_id", txID,
@@ -139,8 +139,8 @@ func (u *sendTransactionUseCase) Execute(
 			}
 
 			// Get transaction info for verification
-			var txInfo *dtoRipple.TxInfo
-			txInfo, err = u.rippler.GetTransaction(ctx, sentTx.TxJSON.Hash, earlistLedgerVersion)
+			var txInfo *dtoxrp.TxInfo
+			txInfo, err = u.xrper.GetTransaction(ctx, sentTx.TxJSON.Hash, earlistLedgerVersion)
 			if err != nil {
 				logger.Warn("fail to call xrp.GetTransaction()",
 					"tx_id", txID,

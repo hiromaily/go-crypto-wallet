@@ -194,7 +194,7 @@ var File_account_proto protoreflect.FileDescriptor
 
 const file_account_proto_rawDesc = "" +
 	"\n" +
-	"\raccount.proto\x12\x11rippleapi.account\"1\n" +
+	"\raccount.proto\x12\x0exrpapi.account\"1\n" +
 	"\x15RequestGetAccountInfo\x12\x18\n" +
 	"\aaddress\x18\x01 \x01(\tR\aaddress\"\x9a\x02\n" +
 	"\x16ResponseGetAccountInfo\x12\x1a\n" +
@@ -206,18 +206,18 @@ const file_account_proto_rawDesc = "" +
 	"ownerCount\x18\x03 \x01(\x04R\n" +
 	"ownerCount\x12F\n" +
 	"\x1epreviousAffectingTransactionID\x18\x04 \x01(\tR\x1epreviousAffectingTransactionID\x12\\\n" +
-	")previousAffectingTransactionLedgerVersion\x18\x05 \x01(\x04R)previousAffectingTransactionLedgerVersion2{\n" +
-	"\x10RippleAccountAPI\x12g\n" +
-	"\x0eGetAccountInfo\x12(.rippleapi.account.RequestGetAccountInfo\x1a).rippleapi.account.ResponseGetAccountInfo\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe9\a"
+	")previousAffectingTransactionLedgerVersion\x18\x05 \x01(\x04R)previousAffectingTransactionLedgerVersion2r\n" +
+	"\rXRPAccountAPI\x12a\n" +
+	"\x0eGetAccountInfo\x12%.xrpapi.account.RequestGetAccountInfo\x1a&.xrpapi.account.ResponseGetAccountInfo\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe9\a"
 
 var file_account_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_account_proto_goTypes = []any{
-	(*RequestGetAccountInfo)(nil),  // 0: rippleapi.account.RequestGetAccountInfo
-	(*ResponseGetAccountInfo)(nil), // 1: rippleapi.account.ResponseGetAccountInfo
+	(*RequestGetAccountInfo)(nil),  // 0: xrpapi.account.RequestGetAccountInfo
+	(*ResponseGetAccountInfo)(nil), // 1: xrpapi.account.ResponseGetAccountInfo
 }
 var file_account_proto_depIdxs = []int32{
-	0, // 0: rippleapi.account.RippleAccountAPI.GetAccountInfo:input_type -> rippleapi.account.RequestGetAccountInfo
-	1, // 1: rippleapi.account.RippleAccountAPI.GetAccountInfo:output_type -> rippleapi.account.ResponseGetAccountInfo
+	0, // 0: xrpapi.account.XRPAccountAPI.GetAccountInfo:input_type -> xrpapi.account.RequestGetAccountInfo
+	1, // 1: xrpapi.account.XRPAccountAPI.GetAccountInfo:output_type -> xrpapi.account.ResponseGetAccountInfo
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

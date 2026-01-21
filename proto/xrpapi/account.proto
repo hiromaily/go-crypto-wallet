@@ -1,6 +1,6 @@
 edition = "2024";
 
-package rippleapi.account;
+package xrpapi.account;
 
 // Use proto3 semantics for field presence (implicit presence)
 // This maintains backward compatibility with existing Go code
@@ -22,8 +22,8 @@ message ResponseGetAccountInfo {
   uint64 previousAffectingTransactionLedgerVersion = 5;
 }
 
-// RippleAccountAPI
-service RippleAccountAPI {
+// XRPAccountAPI
+service XRPAccountAPI {
   // https://xrpl.org/rippleapi-reference.html#getaccountinfo
   rpc GetAccountInfo(RequestGetAccountInfo) returns (ResponseGetAccountInfo) {}
 }

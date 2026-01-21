@@ -9,7 +9,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -25,7 +25,7 @@ import (
 )
 
 type createTransactionUseCase struct {
-	rippler         apixrp.Rippler
+	xrper           apixrp.XRPer
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        repowatch.AddressRepositorier
@@ -39,7 +39,7 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	rippler apixrp.Rippler,
+	xrper apixrp.XRPer,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo repowatch.AddressRepositorier,
@@ -51,7 +51,7 @@ func NewCreateTransactionUseCase(
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {
 	return &createTransactionUseCase{
-		rippler:         rippler,
+		xrper:           xrper,
 		dbConn:          dbConn,
 		uuidHandler:     uuidHandler,
 		addrRepo:        addrRepo,
@@ -226,9 +226,9 @@ func (u *createTransactionUseCase) createTransferTx(
 	if err != nil {
 		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
-	senderBalance, err := u.rippler.GetBalance(ctx, senderAddr.WalletAddress)
+	senderBalance, err := u.xrper.GetBalance(ctx, senderAddr.WalletAddress)
 	if err != nil {
-		return "", fmt.Errorf("fail to call rippler.GetBalance(): %w", err)
+		return "", fmt.Errorf("fail to call xrper.GetBalance(): %w", err)
 	}
 	if senderBalance <= 20 {
 		return "", errors.New("sender balance is insufficient to send")
@@ -249,14 +249,14 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// call CreateRawTransaction
-	instructions := &dtoRipple.Instructions{
+	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
-	txJSON, rawTxString, err := u.rippler.CreateRawTransaction(
+	txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
 		ctx, senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
 		return "", fmt.Errorf(
-			"fail to call rippler.CreateRawTransaction(), sender address: %s: %w",
+			"fail to call xrper.CreateRawTransaction(), sender address: %s: %w",
 			senderAddr.WalletAddress, err)
 	}
 	logger.Debug("txJSON", "txJSON", txJSON)
@@ -325,9 +325,9 @@ func (u *createTransactionUseCase) getUserAmounts(
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		var balance float64
-		balance, err = u.rippler.GetBalance(ctx, addr.WalletAddress)
+		balance, err = u.xrper.GetBalance(ctx, addr.WalletAddress)
 		if err != nil {
-			logger.Warn("fail to call rippler.GetBalance()",
+			logger.Warn("fail to call xrper.GetBalance()",
 				"address", addr.WalletAddress,
 			)
 		} else {
@@ -362,18 +362,18 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	var sequence uint64
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		instructions := &dtoRipple.Instructions{
+		instructions := &dtoxrp.Instructions{
 			MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		var txJSON *dtoRipple.TxInput
+		var txJSON *dtoxrp.TxInput
 		var rawTxString string
-		txJSON, rawTxString, err = u.rippler.CreateRawTransaction(
+		txJSON, rawTxString, err = u.xrper.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
-			logger.Warn("fail to call rippler.CreateRawTransaction()", "error", err)
+			logger.Warn("fail to call xrper.CreateRawTransaction()", "error", err)
 			continue
 		}
 		logger.Debug("txJSON", "txJSON", txJSON)
@@ -476,9 +476,9 @@ func (u *createTransactionUseCase) validateAmount(
 	senderAddr *domainAddress.Address,
 	totalAmount float64,
 ) error {
-	senderBalance, err := u.rippler.GetBalance(ctx, senderAddr.WalletAddress)
+	senderBalance, err := u.xrper.GetBalance(ctx, senderAddr.WalletAddress)
 	if err != nil {
-		return fmt.Errorf("fail to call rippler.GetBalance(): %w", err)
+		return fmt.Errorf("fail to call xrper.GetBalance(): %w", err)
 	}
 
 	if senderBalance <= totalAmount {
@@ -499,18 +499,18 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	var sequence uint64
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		instructions := &dtoRipple.Instructions{
+		instructions := &dtoxrp.Instructions{
 			MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		txJSON, rawTxString, err := u.rippler.CreateRawTransaction(
+		txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
 			ctx, senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
 		if err != nil {
 			// TODO: which is better to return err or continue?
 			// return error in ethereum logic
-			logger.Warn("fail to call rippler.CreateRawTransaction()", "error", err)
+			logger.Warn("fail to call xrper.CreateRawTransaction()", "error", err)
 			continue
 		}
 		logger.Debug("txJSON", "txJSON", txJSON)

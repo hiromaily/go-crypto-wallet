@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 )
 
 // Note: Admin commands are available only if you connect to rippled on a host and port that
@@ -35,7 +35,7 @@ type ResponseValidationCreate struct {
 }
 
 // ValidationCreate calls validation_create method
-func (r *Ripple) ValidationCreate(ctx context.Context, secret string) (*dtoRipple.ResponseValidationCreate, error) {
+func (r *XRP) ValidationCreate(ctx context.Context, secret string) (*dtoxrp.ResponseValidationCreate, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -85,9 +85,9 @@ type ResponseWalletPropose struct {
 }
 
 // WalletProposeWithKey calls wallet_propose method
-func (r *Ripple) WalletProposeWithKey(
-	ctx context.Context, seed string, keyType dtoRipple.XRPKeyType,
-) (*dtoRipple.ResponseWalletPropose, error) {
+func (r *XRP) WalletProposeWithKey(
+	ctx context.Context, seed string, keyType dtoxrp.XRPKeyType,
+) (*dtoxrp.ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -111,7 +111,7 @@ func (r *Ripple) WalletProposeWithKey(
 
 // WalletPropose calls wallet_propose method
 // - result is same as long as using same passphrase
-func (r *Ripple) WalletPropose(ctx context.Context, passphrase string) (*dtoRipple.ResponseWalletPropose, error) {
+func (r *XRP) WalletPropose(ctx context.Context, passphrase string) (*dtoxrp.ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}

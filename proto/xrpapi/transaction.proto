@@ -1,6 +1,6 @@
 edition = "2024";
 
-package rippleapi.transaction;
+package xrpapi.transaction;
 
 import "google/protobuf/empty.proto";
 
@@ -231,8 +231,8 @@ message ResponseCombineTransaction {
   string txID = 2;
 }
 
-// RippleTransactionAPI
-service RippleTransactionAPI {
+// XRPTransactionAPI
+service XRPTransactionAPI {
   // https://xrpl.org/rippleapi-reference.html#preparetransaction
   rpc PrepareTransaction(RequestPrepareTransaction)
       returns (ResponsePrepareTransaction) {}

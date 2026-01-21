@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 )
 
 // https://xrpl.org/account-methods.html
@@ -83,9 +83,9 @@ type ResponseAccountInfo struct {
 }
 
 // AccountChannels calls account_channels method
-func (r *Ripple) AccountChannels(
+func (r *XRP) AccountChannels(
 	ctx context.Context, sender, receiver string,
-) (*dtoRipple.ResponseAccountChannels, error) {
+) (*dtoxrp.ResponseAccountChannels, error) {
 	req := AccountChannels{
 		ID:                 1,
 		Command:            "account_channels",
@@ -103,7 +103,7 @@ func (r *Ripple) AccountChannels(
 }
 
 // AccountInfo calls account_channels method
-func (r *Ripple) AccountInfo(ctx context.Context, address string) (*dtoRipple.ResponseAccountInfo, error) {
+func (r *XRP) AccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseAccountInfo, error) {
 	req := AccountInfo{
 		ID:          2,
 		Command:     "account_info",

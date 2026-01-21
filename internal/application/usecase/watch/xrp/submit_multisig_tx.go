@@ -12,17 +12,17 @@ import (
 )
 
 type submitMultisigTxUseCase struct {
-	rippler             apixrp.Rippler
+	xrper               apixrp.XRPer
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
 }
 
 // NewSubmitMultisigTxUseCase creates a new SubmitMultisigTxUseCase
 func NewSubmitMultisigTxUseCase(
-	rippler apixrp.Rippler,
+	xrper apixrp.XRPer,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,
 ) watchusecase.SubmitMultisigTxUseCase {
 	return &submitMultisigTxUseCase{
-		rippler:             rippler,
+		xrper:               xrper,
 		pendingMultisigRepo: pendingMultisigRepo,
 	}
 }
@@ -59,7 +59,7 @@ func (u *submitMultisigTxUseCase) Execute(
 	}
 
 	// Submit the combined transaction
-	sentTx, _, err := u.rippler.SubmitTransaction(ctx, *pendingTx.CombinedTxBlob)
+	sentTx, _, err := u.xrper.SubmitTransaction(ctx, *pendingTx.CombinedTxBlob)
 	if err != nil {
 		// Mark as failed
 		if updateErr := u.pendingMultisigRepo.SetFailed(ctx, pendingTx.ID); updateErr != nil {

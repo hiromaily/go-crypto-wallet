@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
@@ -19,7 +19,7 @@ import (
 )
 
 type signTransactionUseCase struct {
-	xrp               apixrp.Rippler
+	xrp               apixrp.XRPer
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
 	txFileRepo        file.TransactionFileRepositorier
 	wtype             domainWallet.WalletType
@@ -27,7 +27,7 @@ type signTransactionUseCase struct {
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
-	xrpAPI apixrp.Rippler,
+	xrpAPI apixrp.XRPer,
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
@@ -74,7 +74,7 @@ func (u *signTransactionUseCase) Sign(
 		uuid := strings.TrimRight(tmp[0], ",")
 		txJSON := tmp[1]
 
-		var txInput dtoRipple.TxInput
+		var txInput dtoxrp.TxInput
 		if err = json.Unmarshal([]byte(txJSON), &txInput); err != nil {
 			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 		}

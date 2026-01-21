@@ -413,7 +413,7 @@ func (b0 IssuedCurrencyAmount_builder) Build() *IssuedCurrencyAmount {
 
 type RequestPrepareTransaction struct {
 	state                       protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_TxType           EnumTransactionType    `protobuf:"varint,1,opt,name=tx_type,json=txType,enum=rippleapi.transaction.EnumTransactionType"`
+	xxx_hidden_TxType           EnumTransactionType    `protobuf:"varint,1,opt,name=tx_type,json=txType,enum=xrpapi.transaction.EnumTransactionType"`
 	xxx_hidden_SenderAccount    string                 `protobuf:"bytes,2,opt,name=senderAccount"`
 	xxx_hidden_Amount           float64                `protobuf:"fixed64,3,opt,name=amount"`
 	xxx_hidden_ReceiverAccount  string                 `protobuf:"bytes,4,opt,name=receiverAccount"`
@@ -1721,7 +1721,7 @@ var File_transaction_proto protoreflect.FileDescriptor
 
 const file_transaction_proto_rawDesc = "" +
 	"\n" +
-	"\x11transaction.proto\x12\x15rippleapi.transaction\x1a\x1bgoogle/protobuf/empty.proto\"\xdc\x01\n" +
+	"\x11transaction.proto\x12\x12xrpapi.transaction\x1a\x1bgoogle/protobuf/empty.proto\"\xdc\x01\n" +
 	"\fInstructions\x12\x10\n" +
 	"\x03fee\x18\x01 \x01(\tR\x03fee\x12\x16\n" +
 	"\x06maxFee\x18\x02 \x01(\tR\x06maxFee\x12*\n" +
@@ -1735,23 +1735,23 @@ const file_transaction_proto_rawDesc = "" +
 	"\x14IssuedCurrencyAmount\x12\x1a\n" +
 	"\bcurrency\x18\x01 \x01(\tR\bcurrency\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\"\xd2\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\"\xc6\n" +
 	"\n" +
-	"\x19RequestPrepareTransaction\x12C\n" +
-	"\atx_type\x18\x01 \x01(\x0e2*.rippleapi.transaction.EnumTransactionTypeR\x06txType\x12$\n" +
+	"\x19RequestPrepareTransaction\x12@\n" +
+	"\atx_type\x18\x01 \x01(\x0e2'.xrpapi.transaction.EnumTransactionTypeR\x06txType\x12$\n" +
 	"\rsenderAccount\x18\x02 \x01(\tR\rsenderAccount\x12\x16\n" +
 	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12(\n" +
-	"\x0freceiverAccount\x18\x04 \x01(\tR\x0freceiverAccount\x12G\n" +
-	"\finstructions\x18\x05 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\x12\x1e\n" +
+	"\x0freceiverAccount\x18\x04 \x01(\tR\x0freceiverAccount\x12D\n" +
+	"\finstructions\x18\x05 \x01(\v2 .xrpapi.transaction.InstructionsR\finstructions\x12\x1e\n" +
 	"\n" +
 	"regularKey\x18\x06 \x01(\tR\n" +
 	"regularKey\x12\x18\n" +
 	"\asetFlag\x18\a \x01(\rR\asetFlag\x12\x1c\n" +
 	"\tclearFlag\x18\b \x01(\rR\tclearFlag\x12\"\n" +
-	"\fsignerQuorum\x18\t \x01(\rR\fsignerQuorum\x12H\n" +
+	"\fsignerQuorum\x18\t \x01(\rR\fsignerQuorum\x12E\n" +
 	"\rsignerEntries\x18\n" +
-	" \x03(\v2\".rippleapi.transaction.SignerEntryR\rsignerEntries\x12M\n" +
-	"\vlimitAmount\x18\v \x01(\v2+.rippleapi.transaction.IssuedCurrencyAmountR\vlimitAmount\x12\x1c\n" +
+	" \x03(\v2\x1f.xrpapi.transaction.SignerEntryR\rsignerEntries\x12J\n" +
+	"\vlimitAmount\x18\v \x01(\v2(.xrpapi.transaction.IssuedCurrencyAmountR\vlimitAmount\x12\x1c\n" +
 	"\tqualityIn\x18\f \x01(\rR\tqualityIn\x12\x1e\n" +
 	"\n" +
 	"qualityOut\x18\r \x01(\rR\n" +
@@ -1780,10 +1780,10 @@ const file_transaction_proto_rawDesc = "" +
 	"\x10nfTokenSellOffer\x18! \x01(\tR\x10nfTokenSellOffer\x12(\n" +
 	"\x0fnfTokenBuyOffer\x18\" \x01(\tR\x0fnfTokenBuyOffer\x12*\n" +
 	"\x10nfTokenBrokerFee\x18# \x01(\x01R\x10nfTokenBrokerFee\x12$\n" +
-	"\rnfTokenOffers\x18$ \x03(\tR\rnfTokenOffers\"}\n" +
+	"\rnfTokenOffers\x18$ \x03(\tR\rnfTokenOffers\"z\n" +
 	"\x1aResponsePrepareTransaction\x12\x16\n" +
-	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12G\n" +
-	"\finstructions\x18\x02 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\"H\n" +
+	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12D\n" +
+	"\finstructions\x18\x02 \x01(\v2 .xrpapi.transaction.InstructionsR\finstructions\"H\n" +
 	"\x16RequestSignTransaction\x12\x16\n" +
 	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12\x16\n" +
 	"\x06secret\x18\x02 \x01(\tR\x06secret\"E\n" +
@@ -1832,53 +1832,53 @@ const file_transaction_proto_rawDesc = "" +
 	"\x0fTX_NFTOKEN_BURN\x10\x13\x12\x1b\n" +
 	"\x17TX_NFTOKEN_CREATE_OFFER\x10\x14\x12\x1b\n" +
 	"\x17TX_NFTOKEN_ACCEPT_OFFER\x10\x15\x12\x1b\n" +
-	"\x17TX_NFTOKEN_CANCEL_OFFER\x10\x162\xcc\x05\n" +
-	"\x14RippleTransactionAPI\x12{\n" +
-	"\x12PrepareTransaction\x120.rippleapi.transaction.RequestPrepareTransaction\x1a1.rippleapi.transaction.ResponsePrepareTransaction\"\x00\x12r\n" +
-	"\x0fSignTransaction\x12-.rippleapi.transaction.RequestSignTransaction\x1a..rippleapi.transaction.ResponseSignTransaction\"\x00\x12x\n" +
-	"\x11SubmitTransaction\x12/.rippleapi.transaction.RequestSubmitTransaction\x1a0.rippleapi.transaction.ResponseSubmitTransaction\"\x00\x12[\n" +
-	"\x0eWaitValidation\x12\x16.google.protobuf.Empty\x1a-.rippleapi.transaction.ResponseWaitValidation\"\x000\x01\x12o\n" +
-	"\x0eGetTransaction\x12,.rippleapi.transaction.RequestGetTransaction\x1a-.rippleapi.transaction.ResponseGetTransaction\"\x00\x12{\n" +
-	"\x12CombineTransaction\x120.rippleapi.transaction.RequestCombineTransaction\x1a1.rippleapi.transaction.ResponseCombineTransaction\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe9\a"
+	"\x17TX_NFTOKEN_CANCEL_OFFER\x10\x162\xa8\x05\n" +
+	"\x11XRPTransactionAPI\x12u\n" +
+	"\x12PrepareTransaction\x12-.xrpapi.transaction.RequestPrepareTransaction\x1a..xrpapi.transaction.ResponsePrepareTransaction\"\x00\x12l\n" +
+	"\x0fSignTransaction\x12*.xrpapi.transaction.RequestSignTransaction\x1a+.xrpapi.transaction.ResponseSignTransaction\"\x00\x12r\n" +
+	"\x11SubmitTransaction\x12,.xrpapi.transaction.RequestSubmitTransaction\x1a-.xrpapi.transaction.ResponseSubmitTransaction\"\x00\x12X\n" +
+	"\x0eWaitValidation\x12\x16.google.protobuf.Empty\x1a*.xrpapi.transaction.ResponseWaitValidation\"\x000\x01\x12i\n" +
+	"\x0eGetTransaction\x12).xrpapi.transaction.RequestGetTransaction\x1a*.xrpapi.transaction.ResponseGetTransaction\"\x00\x12u\n" +
+	"\x12CombineTransaction\x12-.xrpapi.transaction.RequestCombineTransaction\x1a..xrpapi.transaction.ResponseCombineTransaction\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe9\a"
 
 var file_transaction_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_transaction_proto_goTypes = []any{
-	(EnumTransactionType)(0),           // 0: rippleapi.transaction.EnumTransactionType
-	(*Instructions)(nil),               // 1: rippleapi.transaction.Instructions
-	(*SignerEntry)(nil),                // 2: rippleapi.transaction.SignerEntry
-	(*IssuedCurrencyAmount)(nil),       // 3: rippleapi.transaction.IssuedCurrencyAmount
-	(*RequestPrepareTransaction)(nil),  // 4: rippleapi.transaction.RequestPrepareTransaction
-	(*ResponsePrepareTransaction)(nil), // 5: rippleapi.transaction.ResponsePrepareTransaction
-	(*RequestSignTransaction)(nil),     // 6: rippleapi.transaction.RequestSignTransaction
-	(*ResponseSignTransaction)(nil),    // 7: rippleapi.transaction.ResponseSignTransaction
-	(*RequestSubmitTransaction)(nil),   // 8: rippleapi.transaction.RequestSubmitTransaction
-	(*ResponseSubmitTransaction)(nil),  // 9: rippleapi.transaction.ResponseSubmitTransaction
-	(*ResponseWaitValidation)(nil),     // 10: rippleapi.transaction.ResponseWaitValidation
-	(*RequestGetTransaction)(nil),      // 11: rippleapi.transaction.RequestGetTransaction
-	(*ResponseGetTransaction)(nil),     // 12: rippleapi.transaction.ResponseGetTransaction
-	(*RequestCombineTransaction)(nil),  // 13: rippleapi.transaction.RequestCombineTransaction
-	(*ResponseCombineTransaction)(nil), // 14: rippleapi.transaction.ResponseCombineTransaction
+	(EnumTransactionType)(0),           // 0: xrpapi.transaction.EnumTransactionType
+	(*Instructions)(nil),               // 1: xrpapi.transaction.Instructions
+	(*SignerEntry)(nil),                // 2: xrpapi.transaction.SignerEntry
+	(*IssuedCurrencyAmount)(nil),       // 3: xrpapi.transaction.IssuedCurrencyAmount
+	(*RequestPrepareTransaction)(nil),  // 4: xrpapi.transaction.RequestPrepareTransaction
+	(*ResponsePrepareTransaction)(nil), // 5: xrpapi.transaction.ResponsePrepareTransaction
+	(*RequestSignTransaction)(nil),     // 6: xrpapi.transaction.RequestSignTransaction
+	(*ResponseSignTransaction)(nil),    // 7: xrpapi.transaction.ResponseSignTransaction
+	(*RequestSubmitTransaction)(nil),   // 8: xrpapi.transaction.RequestSubmitTransaction
+	(*ResponseSubmitTransaction)(nil),  // 9: xrpapi.transaction.ResponseSubmitTransaction
+	(*ResponseWaitValidation)(nil),     // 10: xrpapi.transaction.ResponseWaitValidation
+	(*RequestGetTransaction)(nil),      // 11: xrpapi.transaction.RequestGetTransaction
+	(*ResponseGetTransaction)(nil),     // 12: xrpapi.transaction.ResponseGetTransaction
+	(*RequestCombineTransaction)(nil),  // 13: xrpapi.transaction.RequestCombineTransaction
+	(*ResponseCombineTransaction)(nil), // 14: xrpapi.transaction.ResponseCombineTransaction
 	(*emptypb.Empty)(nil),              // 15: google.protobuf.Empty
 }
 var file_transaction_proto_depIdxs = []int32{
-	0,  // 0: rippleapi.transaction.RequestPrepareTransaction.tx_type:type_name -> rippleapi.transaction.EnumTransactionType
-	1,  // 1: rippleapi.transaction.RequestPrepareTransaction.instructions:type_name -> rippleapi.transaction.Instructions
-	2,  // 2: rippleapi.transaction.RequestPrepareTransaction.signerEntries:type_name -> rippleapi.transaction.SignerEntry
-	3,  // 3: rippleapi.transaction.RequestPrepareTransaction.limitAmount:type_name -> rippleapi.transaction.IssuedCurrencyAmount
-	1,  // 4: rippleapi.transaction.ResponsePrepareTransaction.instructions:type_name -> rippleapi.transaction.Instructions
-	4,  // 5: rippleapi.transaction.RippleTransactionAPI.PrepareTransaction:input_type -> rippleapi.transaction.RequestPrepareTransaction
-	6,  // 6: rippleapi.transaction.RippleTransactionAPI.SignTransaction:input_type -> rippleapi.transaction.RequestSignTransaction
-	8,  // 7: rippleapi.transaction.RippleTransactionAPI.SubmitTransaction:input_type -> rippleapi.transaction.RequestSubmitTransaction
-	15, // 8: rippleapi.transaction.RippleTransactionAPI.WaitValidation:input_type -> google.protobuf.Empty
-	11, // 9: rippleapi.transaction.RippleTransactionAPI.GetTransaction:input_type -> rippleapi.transaction.RequestGetTransaction
-	13, // 10: rippleapi.transaction.RippleTransactionAPI.CombineTransaction:input_type -> rippleapi.transaction.RequestCombineTransaction
-	5,  // 11: rippleapi.transaction.RippleTransactionAPI.PrepareTransaction:output_type -> rippleapi.transaction.ResponsePrepareTransaction
-	7,  // 12: rippleapi.transaction.RippleTransactionAPI.SignTransaction:output_type -> rippleapi.transaction.ResponseSignTransaction
-	9,  // 13: rippleapi.transaction.RippleTransactionAPI.SubmitTransaction:output_type -> rippleapi.transaction.ResponseSubmitTransaction
-	10, // 14: rippleapi.transaction.RippleTransactionAPI.WaitValidation:output_type -> rippleapi.transaction.ResponseWaitValidation
-	12, // 15: rippleapi.transaction.RippleTransactionAPI.GetTransaction:output_type -> rippleapi.transaction.ResponseGetTransaction
-	14, // 16: rippleapi.transaction.RippleTransactionAPI.CombineTransaction:output_type -> rippleapi.transaction.ResponseCombineTransaction
+	0,  // 0: xrpapi.transaction.RequestPrepareTransaction.tx_type:type_name -> xrpapi.transaction.EnumTransactionType
+	1,  // 1: xrpapi.transaction.RequestPrepareTransaction.instructions:type_name -> xrpapi.transaction.Instructions
+	2,  // 2: xrpapi.transaction.RequestPrepareTransaction.signerEntries:type_name -> xrpapi.transaction.SignerEntry
+	3,  // 3: xrpapi.transaction.RequestPrepareTransaction.limitAmount:type_name -> xrpapi.transaction.IssuedCurrencyAmount
+	1,  // 4: xrpapi.transaction.ResponsePrepareTransaction.instructions:type_name -> xrpapi.transaction.Instructions
+	4,  // 5: xrpapi.transaction.XRPTransactionAPI.PrepareTransaction:input_type -> xrpapi.transaction.RequestPrepareTransaction
+	6,  // 6: xrpapi.transaction.XRPTransactionAPI.SignTransaction:input_type -> xrpapi.transaction.RequestSignTransaction
+	8,  // 7: xrpapi.transaction.XRPTransactionAPI.SubmitTransaction:input_type -> xrpapi.transaction.RequestSubmitTransaction
+	15, // 8: xrpapi.transaction.XRPTransactionAPI.WaitValidation:input_type -> google.protobuf.Empty
+	11, // 9: xrpapi.transaction.XRPTransactionAPI.GetTransaction:input_type -> xrpapi.transaction.RequestGetTransaction
+	13, // 10: xrpapi.transaction.XRPTransactionAPI.CombineTransaction:input_type -> xrpapi.transaction.RequestCombineTransaction
+	5,  // 11: xrpapi.transaction.XRPTransactionAPI.PrepareTransaction:output_type -> xrpapi.transaction.ResponsePrepareTransaction
+	7,  // 12: xrpapi.transaction.XRPTransactionAPI.SignTransaction:output_type -> xrpapi.transaction.ResponseSignTransaction
+	9,  // 13: xrpapi.transaction.XRPTransactionAPI.SubmitTransaction:output_type -> xrpapi.transaction.ResponseSubmitTransaction
+	10, // 14: xrpapi.transaction.XRPTransactionAPI.WaitValidation:output_type -> xrpapi.transaction.ResponseWaitValidation
+	12, // 15: xrpapi.transaction.XRPTransactionAPI.GetTransaction:output_type -> xrpapi.transaction.ResponseGetTransaction
+	14, // 16: xrpapi.transaction.XRPTransactionAPI.CombineTransaction:output_type -> xrpapi.transaction.ResponseCombineTransaction
 	11, // [11:17] is the sub-list for method output_type
 	5,  // [5:11] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name

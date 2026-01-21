@@ -15,7 +15,7 @@ import (
 
 // XRPWatch watch only wallet object
 type XRPWatch struct {
-	XRP                     apixrp.Rippler
+	XRP                     apixrp.XRPer
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	createTxUseCase         watchusecase.CreateTransactionUseCase
@@ -27,7 +27,7 @@ type XRPWatch struct {
 
 // NewXRPWatch returns XRPWatch object
 func NewXRPWatch(
-	xrp apixrp.Rippler,
+	xrp apixrp.XRPer,
 	dbConn *sql.DB,
 	createTxUseCase watchusecase.CreateTransactionUseCase,
 	monitorTxUseCase watchusecase.MonitorTransactionUseCase,

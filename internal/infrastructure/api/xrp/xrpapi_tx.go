@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -123,9 +123,9 @@ type TxOrderbookChange struct {
 }
 
 // PrepareTransaction calls PrepareTransaction API
-func (r *Ripple) PrepareTransaction(
-	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoRipple.Instructions,
-) (*dtoRipple.TxInput, string, error) {
+func (r *XRP) PrepareTransaction(
+	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoxrp.Instructions,
+) (*dtoxrp.TxInput, string, error) {
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
@@ -173,9 +173,9 @@ type SetRegularKeyTxInput struct {
 // PrepareSetRegularKeyTransaction prepares a SetRegularKey transaction
 // - regularKey: the address to authorize as regular key, or empty to remove
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
-func (r *Ripple) PrepareSetRegularKeyTransaction(
-	ctx context.Context, senderAccount, regularKey string, instructions *dtoRipple.Instructions,
-) (*dtoRipple.SetRegularKeyTxInput, string, error) {
+func (r *XRP) PrepareSetRegularKeyTransaction(
+	ctx context.Context, senderAccount, regularKey string, instructions *dtoxrp.Instructions,
+) (*dtoxrp.SetRegularKeyTxInput, string, error) {
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
@@ -202,7 +202,7 @@ func (r *Ripple) PrepareSetRegularKeyTransaction(
 	}
 
 	// Convert to DTO type
-	return &dtoRipple.SetRegularKeyTxInput{
+	return &dtoxrp.SetRegularKeyTxInput{
 		TransactionType:    txInput.TransactionType,
 		Account:            txInput.Account,
 		RegularKey:         txInput.RegularKey,
@@ -266,9 +266,9 @@ type SignerListSetTxInput struct {
 // - setFlag: flag to set (e.g., AsfDisableMaster = 4)
 // - clearFlag: flag to clear
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset
-func (r *Ripple) PrepareAccountSetTransaction(
-	ctx context.Context, senderAccount string, setFlag, clearFlag uint32, instructions *dtoRipple.Instructions,
-) (*dtoRipple.AccountSetTxInput, string, error) {
+func (r *XRP) PrepareAccountSetTransaction(
+	ctx context.Context, senderAccount string, setFlag, clearFlag uint32, instructions *dtoxrp.Instructions,
+) (*dtoxrp.AccountSetTxInput, string, error) {
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
@@ -296,7 +296,7 @@ func (r *Ripple) PrepareAccountSetTransaction(
 	}
 
 	// Convert to DTO type
-	return &dtoRipple.AccountSetTxInput{
+	return &dtoxrp.AccountSetTxInput{
 		TransactionType:    txInput.TransactionType,
 		Account:            txInput.Account,
 		SetFlag:            txInput.SetFlag,
@@ -315,13 +315,13 @@ func (r *Ripple) PrepareAccountSetTransaction(
 // - signerQuorum: minimum total weight of signatures required (0 to remove signer list)
 // - signerEntries: list of signers with their weights (must be empty if signerQuorum is 0)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/signerlistset
-func (r *Ripple) PrepareSignerListSetTransaction(
+func (r *XRP) PrepareSignerListSetTransaction(
 	ctx context.Context,
 	senderAccount string,
 	signerQuorum uint32,
 	signerEntries []apixrp.SignerEntryInput,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.SignerListSetTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.SignerListSetTxInput, string, error) {
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
@@ -362,7 +362,7 @@ func (r *Ripple) PrepareSignerListSetTransaction(
 }
 
 // SignSignerListSetTransaction signs a SignerListSet transaction
-func (r *Ripple) SignSignerListSetTransaction(
+func (r *XRP) SignSignerListSetTransaction(
 	ctx context.Context, txInput *SignerListSetTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "SignerListSet")
@@ -398,13 +398,13 @@ type TrustSetTxInput struct {
 // - qualityIn: value incoming balances at this ratio per 1,000,000,000 (optional, 0 to omit)
 // - qualityOut: value outgoing balances at this ratio per 1,000,000,000 (optional, 0 to omit)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
-func (r *Ripple) PrepareTrustSetTransaction(
+func (r *XRP) PrepareTrustSetTransaction(
 	ctx context.Context,
 	senderAccount string,
-	limitAmount *dtoRipple.IssuedCurrencyAmount,
+	limitAmount *dtoxrp.IssuedCurrencyAmount,
 	qualityIn, qualityOut uint32,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.TrustSetTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.TrustSetTxInput, string, error) {
 	// Validate required parameter
 	if limitAmount == nil {
 		return nil, "", errors.New("limitAmount is required for TrustSet transaction")
@@ -449,7 +449,7 @@ func (r *Ripple) PrepareTrustSetTransaction(
 }
 
 // SignTrustSetTransaction signs a TrustSet transaction
-func (r *Ripple) SignTrustSetTransaction(
+func (r *XRP) SignTrustSetTransaction(
 	ctx context.Context, txInput *TrustSetTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "TrustSet")
@@ -522,15 +522,15 @@ type EscrowCancelTxInput struct {
 // - condition: PREIMAGE-SHA-256 crypto-condition (optional, empty to omit)
 // - destinationTag: arbitrary tag for destination (optional, 0 to omit)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
-func (r *Ripple) PrepareEscrowCreateTransaction(
+func (r *XRP) PrepareEscrowCreateTransaction(
 	ctx context.Context,
 	senderAccount, destinationAccount string,
 	amount float64,
 	cancelAfter, finishAfter uint32,
 	condition string,
 	destinationTag uint32,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.EscrowCreateTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.EscrowCreateTxInput, string, error) {
 	// Validate: at least one of cancelAfter, finishAfter, or condition must be set
 	if cancelAfter == 0 && finishAfter == 0 && condition == "" {
 		return nil, "", errors.New(
@@ -577,13 +577,13 @@ func (r *Ripple) PrepareEscrowCreateTransaction(
 // - condition: crypto-condition (required if escrow has one)
 // - fulfillment: fulfillment matching the condition (required if escrow has condition)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
-func (r *Ripple) PrepareEscrowFinishTransaction(
+func (r *XRP) PrepareEscrowFinishTransaction(
 	ctx context.Context,
 	senderAccount, owner string,
 	offerSequence uint32,
 	condition, fulfillment string,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.EscrowFinishTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.EscrowFinishTxInput, string, error) {
 	// Validate required parameters
 	if owner == "" {
 		return nil, "", errors.New("owner is required for EscrowFinish transaction")
@@ -628,12 +628,12 @@ func (r *Ripple) PrepareEscrowFinishTransaction(
 // - owner: the account that funded the escrow
 // - offerSequence: sequence number of the EscrowCreate transaction
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
-func (r *Ripple) PrepareEscrowCancelTransaction(
+func (r *XRP) PrepareEscrowCancelTransaction(
 	ctx context.Context,
 	senderAccount, owner string,
 	offerSequence uint32,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.EscrowCancelTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.EscrowCancelTxInput, string, error) {
 	// Validate required parameters
 	if owner == "" {
 		return nil, "", errors.New("owner is required for EscrowCancel transaction")
@@ -673,21 +673,21 @@ func (r *Ripple) PrepareEscrowCancelTransaction(
 }
 
 // SignEscrowCreateTransaction signs an EscrowCreate transaction
-func (r *Ripple) SignEscrowCreateTransaction(
+func (r *XRP) SignEscrowCreateTransaction(
 	ctx context.Context, txInput *EscrowCreateTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "EscrowCreate")
 }
 
 // SignEscrowFinishTransaction signs an EscrowFinish transaction
-func (r *Ripple) SignEscrowFinishTransaction(
+func (r *XRP) SignEscrowFinishTransaction(
 	ctx context.Context, txInput *EscrowFinishTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "EscrowFinish")
 }
 
 // SignEscrowCancelTransaction signs an EscrowCancel transaction
-func (r *Ripple) SignEscrowCancelTransaction(
+func (r *XRP) SignEscrowCancelTransaction(
 	ctx context.Context, txInput *EscrowCancelTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "EscrowCancel")
@@ -764,15 +764,15 @@ type PaymentChannelClaimTxInput struct {
 // - destinationTag: tag for destination (optional, 0 to omit)
 // - sourceTag: tag for source (optional, 0 to omit)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
-func (r *Ripple) PreparePaymentChannelCreateTransaction(
+func (r *XRP) PreparePaymentChannelCreateTransaction(
 	ctx context.Context,
 	senderAccount, destinationAccount string,
 	amount float64,
 	settleDelay uint32,
 	publicKey string,
 	cancelAfter, destinationTag, sourceTag uint32,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.PaymentChannelCreateTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.PaymentChannelCreateTxInput, string, error) {
 	// Validate required parameters
 	if settleDelay == 0 {
 		return nil, "", errors.New("settleDelay is required for PaymentChannelCreate transaction")
@@ -821,13 +821,13 @@ func (r *Ripple) PreparePaymentChannelCreateTransaction(
 // - amount: XRP to add to the channel
 // - expiration: new expiration time (optional, 0 to omit)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
-func (r *Ripple) PreparePaymentChannelFundTransaction(
+func (r *XRP) PreparePaymentChannelFundTransaction(
 	ctx context.Context,
 	senderAccount, channel string,
 	amount float64,
 	expiration uint32,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.PaymentChannelFundTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.PaymentChannelFundTxInput, string, error) {
 	// Validate required parameters
 	if channel == "" {
 		return nil, "", errors.New("channel is required for PaymentChannelFund transaction")
@@ -871,14 +871,14 @@ func (r *Ripple) PreparePaymentChannelFundTransaction(
 // - signature: hex-encoded signature for claim authorization (optional)
 // - publicKey: hex-encoded public key for signature verification (optional)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
-func (r *Ripple) PreparePaymentChannelClaimTransaction(
+func (r *XRP) PreparePaymentChannelClaimTransaction(
 	ctx context.Context,
 	senderAccount, channel string,
 	balance string,
 	amount float64,
 	signature, publicKey string,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.PaymentChannelClaimTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.PaymentChannelClaimTxInput, string, error) {
 	// Validate required parameters
 	if channel == "" {
 		return nil, "", errors.New("channel is required for PaymentChannelClaim transaction")
@@ -918,21 +918,21 @@ func (r *Ripple) PreparePaymentChannelClaimTransaction(
 }
 
 // SignPaymentChannelCreateTransaction signs a PaymentChannelCreate transaction
-func (r *Ripple) SignPaymentChannelCreateTransaction(
+func (r *XRP) SignPaymentChannelCreateTransaction(
 	ctx context.Context, txInput *PaymentChannelCreateTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "PaymentChannelCreate")
 }
 
 // SignPaymentChannelFundTransaction signs a PaymentChannelFund transaction
-func (r *Ripple) SignPaymentChannelFundTransaction(
+func (r *XRP) SignPaymentChannelFundTransaction(
 	ctx context.Context, txInput *PaymentChannelFundTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "PaymentChannelFund")
 }
 
 // SignPaymentChannelClaimTransaction signs a PaymentChannelClaim transaction
-func (r *Ripple) SignPaymentChannelClaimTransaction(
+func (r *XRP) SignPaymentChannelClaimTransaction(
 	ctx context.Context, txInput *PaymentChannelClaimTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "PaymentChannelClaim")
@@ -1035,14 +1035,14 @@ type NFTokenCancelOfferTxInput struct {
 // - transferFee: fee (0-50000) charged on secondary sales (optional)
 // Note: Flags are set via xrpl.js autofill based on transaction requirements
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
-func (r *Ripple) PrepareNFTokenMintTransaction(
+func (r *XRP) PrepareNFTokenMintTransaction(
 	ctx context.Context,
 	senderAccount string,
 	nfTokenTaxon uint32,
 	issuer, uri string,
 	transferFee uint32,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.NFTokenMintTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.NFTokenMintTxInput, string, error) {
 	// Convert DTO to infrastructure type
 	infraInstructions := ToInfraInstructions(instructions)
 
@@ -1079,11 +1079,11 @@ func (r *Ripple) PrepareNFTokenMintTransaction(
 // - nfTokenID: the unique ID of the NFToken to burn (required)
 // - owner: the owner of the NFT if issuer is burning (optional)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
-func (r *Ripple) PrepareNFTokenBurnTransaction(
+func (r *XRP) PrepareNFTokenBurnTransaction(
 	ctx context.Context,
 	senderAccount, nfTokenID, owner string,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.NFTokenBurnTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.NFTokenBurnTxInput, string, error) {
 	// Validate required parameters
 	if nfTokenID == "" {
 		return nil, "", errors.New("nfTokenID is required for NFTokenBurn transaction")
@@ -1127,14 +1127,14 @@ func (r *Ripple) PrepareNFTokenBurnTransaction(
 // - expiration: when the offer expires (optional)
 // Note: tfSellNFToken flag is determined by whether owner is set (buy offer) or not (sell offer)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
-func (r *Ripple) PrepareNFTokenCreateOfferTransaction(
+func (r *XRP) PrepareNFTokenCreateOfferTransaction(
 	ctx context.Context,
 	senderAccount, nfTokenID string,
 	amount float64,
 	owner, destination string,
 	expiration uint32,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.NFTokenCreateOfferTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.NFTokenCreateOfferTxInput, string, error) {
 	// Validate required parameters
 	if nfTokenID == "" {
 		return nil, "", errors.New("nfTokenID is required for NFTokenCreateOffer transaction")
@@ -1178,13 +1178,13 @@ func (r *Ripple) PrepareNFTokenCreateOfferTransaction(
 // - nfTokenBuyOffer: ID of the buy offer to accept (optional)
 // - nfTokenBrokerFee: broker fee in XRP for brokered mode (optional)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
-func (r *Ripple) PrepareNFTokenAcceptOfferTransaction(
+func (r *XRP) PrepareNFTokenAcceptOfferTransaction(
 	ctx context.Context,
 	senderAccount string,
 	nfTokenSellOffer, nfTokenBuyOffer string,
 	nfTokenBrokerFee float64,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.NFTokenAcceptOfferTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.NFTokenAcceptOfferTxInput, string, error) {
 	// Validate: at least one offer must be provided
 	if nfTokenSellOffer == "" && nfTokenBuyOffer == "" {
 		return nil, "", errors.New(
@@ -1225,12 +1225,12 @@ func (r *Ripple) PrepareNFTokenAcceptOfferTransaction(
 // PrepareNFTokenCancelOfferTransaction prepares an NFTokenCancelOffer transaction
 // - nfTokenOffers: array of NFTokenOffer IDs to cancel (required)
 // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
-func (r *Ripple) PrepareNFTokenCancelOfferTransaction(
+func (r *XRP) PrepareNFTokenCancelOfferTransaction(
 	ctx context.Context,
 	senderAccount string,
 	nfTokenOffers []string,
-	instructions *dtoRipple.Instructions,
-) (*dtoRipple.NFTokenCancelOfferTxInput, string, error) {
+	instructions *dtoxrp.Instructions,
+) (*dtoxrp.NFTokenCancelOfferTxInput, string, error) {
 	// Validate required parameters
 	if len(nfTokenOffers) == 0 {
 		return nil, "", errors.New("nfTokenOffers is required for NFTokenCancelOffer transaction")
@@ -1266,35 +1266,35 @@ func (r *Ripple) PrepareNFTokenCancelOfferTransaction(
 }
 
 // SignNFTokenMintTransaction signs an NFTokenMint transaction
-func (r *Ripple) SignNFTokenMintTransaction(
+func (r *XRP) SignNFTokenMintTransaction(
 	ctx context.Context, txInput *NFTokenMintTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "NFTokenMint")
 }
 
 // SignNFTokenBurnTransaction signs an NFTokenBurn transaction
-func (r *Ripple) SignNFTokenBurnTransaction(
+func (r *XRP) SignNFTokenBurnTransaction(
 	ctx context.Context, txInput *NFTokenBurnTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "NFTokenBurn")
 }
 
 // SignNFTokenCreateOfferTransaction signs an NFTokenCreateOffer transaction
-func (r *Ripple) SignNFTokenCreateOfferTransaction(
+func (r *XRP) SignNFTokenCreateOfferTransaction(
 	ctx context.Context, txInput *NFTokenCreateOfferTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "NFTokenCreateOffer")
 }
 
 // SignNFTokenAcceptOfferTransaction signs an NFTokenAcceptOffer transaction
-func (r *Ripple) SignNFTokenAcceptOfferTransaction(
+func (r *XRP) SignNFTokenAcceptOfferTransaction(
 	ctx context.Context, txInput *NFTokenAcceptOfferTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "NFTokenAcceptOffer")
 }
 
 // SignNFTokenCancelOfferTransaction signs an NFTokenCancelOffer transaction
-func (r *Ripple) SignNFTokenCancelOfferTransaction(
+func (r *XRP) SignNFTokenCancelOfferTransaction(
 	ctx context.Context, txInput *NFTokenCancelOfferTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "NFTokenCancelOffer")
@@ -1302,7 +1302,7 @@ func (r *Ripple) SignNFTokenCancelOfferTransaction(
 
 // signTransactionJSON is a generic helper that signs any transaction type.
 // It marshals the input to JSON and calls the gRPC SignTransaction API.
-func (r *Ripple) signTransactionJSON(
+func (r *XRP) signTransactionJSON(
 	ctx context.Context, txInput any, secret, txTypeName string,
 ) (string, string, error) {
 	strJSON, err := json.Marshal(txInput)
@@ -1323,14 +1323,14 @@ func (r *Ripple) signTransactionJSON(
 }
 
 // SignSetRegularKeyTransaction signs a SetRegularKey transaction
-func (r *Ripple) SignSetRegularKeyTransaction(
+func (r *XRP) SignSetRegularKeyTransaction(
 	ctx context.Context, txInput *SetRegularKeyTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "SetRegularKey")
 }
 
 // SignAccountSetTransaction signs an AccountSet transaction
-func (r *Ripple) SignAccountSetTransaction(
+func (r *XRP) SignAccountSetTransaction(
 	ctx context.Context, txInput *AccountSetTxInput, secret string,
 ) (string, string, error) {
 	return r.signTransactionJSON(ctx, txInput, secret, "AccountSet")
@@ -1339,8 +1339,8 @@ func (r *Ripple) SignAccountSetTransaction(
 // SignTransaction calls SignTransaction API
 // Offline functionality
 // - https://xrpl.org/rippleapi-reference.html#offline-functionality
-func (r *Ripple) SignTransaction(
-	ctx context.Context, txInput *dtoRipple.TxInput, secret string,
+func (r *XRP) SignTransaction(
+	ctx context.Context, txInput *dtoxrp.TxInput, secret string,
 ) (string, string, error) {
 	// Convert DTO to infrastructure type
 	infraTxInput := ToInfraTxInput(txInput)
@@ -1364,7 +1364,7 @@ func (r *Ripple) SignTransaction(
 
 // CombineTransaction combines signed transactions from multiple accounts for a multisignature transaction.
 // - The signed transaction must subsequently be submitted.
-func (r *Ripple) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {
+func (r *XRP) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {
 	req := protogen.RequestCombineTransaction_builder{
 		SignedTransactions: signedTxs,
 	}.Build()
@@ -1379,7 +1379,7 @@ func (r *Ripple) CombineTransaction(ctx context.Context, signedTxs []string) (st
 
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
-func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*dtoRipple.SentTx, uint64, error) {
+func (r *XRP) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error) {
 	req := protogen.RequestSubmitTransaction_builder{
 		TxBlob: signedTx,
 	}.Build()
@@ -1410,7 +1410,7 @@ func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*dtoRi
 
 // WaitValidation calls WaitValidation API
 // - handling server streaming
-func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error) {
+func (r *XRP) WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error) {
 	req := &emptypb.Empty{}
 	resStream, err := r.API.txClient.WaitValidation(ctx, req)
 	if err != nil {
@@ -1468,9 +1468,9 @@ func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64)
 }
 
 // GetTransaction calls GetTransaction API
-func (r *Ripple) GetTransaction(
+func (r *XRP) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
-) (*dtoRipple.TxInfo, error) {
+) (*dtoxrp.TxInfo, error) {
 	req := protogen.RequestGetTransaction_builder{
 		TxID:             txID,
 		MinLedgerVersion: targetLedgerVersion,

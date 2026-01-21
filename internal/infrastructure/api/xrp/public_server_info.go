@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 )
 
 // https://xrpl.org/server-info-methods.html
@@ -87,7 +87,7 @@ type ResponseServerInfo struct {
 }
 
 // ServerInfo calls server_info method
-func (r *Ripple) ServerInfo(ctx context.Context) (*dtoRipple.ResponseServerInfo, error) {
+func (r *XRP) ServerInfo(ctx context.Context) (*dtoxrp.ResponseServerInfo, error) {
 	req := RequestCommand{
 		ID:      1,
 		Command: "server_info",
