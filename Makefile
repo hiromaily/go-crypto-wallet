@@ -15,14 +15,10 @@
 # - release.mk:      Release and versioning targets
 # - db.mk:           Database-specific targets
 # - ai.mk:           AI-related targets
-# - btc.mk:          Bitcoin-specific targets
-# - bch.mk:          Bitcoin Cash-specific targets
-# - eth.mk:          Ethereum-specific targets
-# - xrp.mk:          XRP/Ripple-specific targets
-# - wallet.mk:       Wallet management operations
-# - watch_op.mk:     Watch wallet operations
-# - keygen_op.mk:    Keygen wallet operations
-# - sign_op.mk:      Sign wallet operations
+# - wallet/btc.mk:   Bitcoin-specific targets
+# - wallet/bch.mk:   Bitcoin Cash-specific targets
+# - wallet/eth.mk:   Ethereum-specific targets
+# - wallet/xrp.mk:   XRP/Ripple-specific targets
 ###############################################################################
 
 # Include modules in logical order based on dependencies
@@ -41,6 +37,7 @@
 
 # 1. Base: Variables (must be first)
 include make/vars.mk
+include make/utils.mk
 
 # 2. Development tools
 include make/install.mk
@@ -52,20 +49,19 @@ include make/lint.mk
 include make/release.mk
 
 # 3. Blockchain-specific
-include make/btc.mk
-include make/bch.mk
-include make/eth.mk
-include make/xrp.mk
+include make/wallet/btc.mk
+include make/wallet/bch.mk
+include make/wallet/eth.mk
+include make/wallet/xrp.mk
 
 # 4. Infrastructure
 include make/db.mk
 
 # 5. Wallet operations
-include make/wallet.mk
-include make/utils.mk
-include make/watch_op.mk
-include make/keygen_op.mk
-include make/sign_op.mk
+#include make/wallet.mk
+#include make/watch_op.mk
+#include make/keygen_op.mk
+#include make/sign_op.mk
 
 ###############################################################################
 # Standard Targets (required by checkmake)
