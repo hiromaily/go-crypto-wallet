@@ -117,6 +117,37 @@ export function createRouter(): ConnectRouter {
           regularKey?: string;
           setFlag?: number;
           clearFlag?: number;
+          signerQuorum?: number;
+          signerEntries?: { account: string; weight: number }[];
+          limitAmount?: { currency: string; issuer: string; value: string };
+          qualityIn?: number;
+          qualityOut?: number;
+          // Escrow fields
+          cancelAfter?: number;
+          finishAfter?: number;
+          condition?: string;
+          destinationTag?: number;
+          owner?: string;
+          offerSequence?: number;
+          fulfillment?: string;
+          // PaymentChannel fields
+          settleDelay?: number;
+          publicKey?: string;
+          sourceTag?: number;
+          channel?: string;
+          expiration?: number;
+          balance?: string;
+          signature?: string;
+          // NFToken fields
+          nfTokenTaxon?: number;
+          issuer?: string;
+          transferFee?: number;
+          uri?: string;
+          nfTokenID?: string;
+          nfTokenSellOffer?: string;
+          nfTokenBuyOffer?: string;
+          nfTokenBrokerFee?: number;
+          nfTokenOffers?: string[];
         };
 
         const serviceRequest: ServiceRequest = {
@@ -137,6 +168,109 @@ export function createRouter(): ConnectRouter {
         }
         if (request.clearFlag > 0) {
           serviceRequest.clearFlag = request.clearFlag;
+        }
+
+        // Map SignerListSet fields
+        // Note: signerQuorum can be 0 to remove the signer list, so check !== undefined
+        if (request.signerQuorum !== undefined) {
+          serviceRequest.signerQuorum = request.signerQuorum;
+        }
+        if (request.signerEntries && request.signerEntries.length > 0) {
+          serviceRequest.signerEntries = request.signerEntries.map((entry) => ({
+            account: entry.account,
+            weight: entry.weight,
+          }));
+        }
+
+        // Map TrustSet fields
+        if (request.limitAmount) {
+          serviceRequest.limitAmount = {
+            currency: request.limitAmount.currency,
+            issuer: request.limitAmount.issuer,
+            value: request.limitAmount.value,
+          };
+        }
+        if (request.qualityIn > 0) {
+          serviceRequest.qualityIn = request.qualityIn;
+        }
+        if (request.qualityOut > 0) {
+          serviceRequest.qualityOut = request.qualityOut;
+        }
+
+        // Map Escrow fields
+        if (request.cancelAfter > 0) {
+          serviceRequest.cancelAfter = request.cancelAfter;
+        }
+        if (request.finishAfter > 0) {
+          serviceRequest.finishAfter = request.finishAfter;
+        }
+        if (request.condition) {
+          serviceRequest.condition = request.condition;
+        }
+        if (request.destinationTag > 0) {
+          serviceRequest.destinationTag = request.destinationTag;
+        }
+        if (request.owner) {
+          serviceRequest.owner = request.owner;
+        }
+        if (request.offerSequence > 0) {
+          serviceRequest.offerSequence = request.offerSequence;
+        }
+        if (request.fulfillment) {
+          serviceRequest.fulfillment = request.fulfillment;
+        }
+
+        // Map PaymentChannel fields
+        if (request.settleDelay > 0) {
+          serviceRequest.settleDelay = request.settleDelay;
+        }
+        if (request.publicKey) {
+          serviceRequest.publicKey = request.publicKey;
+        }
+        if (request.sourceTag > 0) {
+          serviceRequest.sourceTag = request.sourceTag;
+        }
+        if (request.channel) {
+          serviceRequest.channel = request.channel;
+        }
+        if (request.expiration > 0) {
+          serviceRequest.expiration = request.expiration;
+        }
+        if (request.balance) {
+          serviceRequest.balance = request.balance;
+        }
+        if (request.signature) {
+          serviceRequest.signature = request.signature;
+        }
+
+        // Map NFToken fields
+        // Note: nfTokenTaxon can be 0 as a valid value, so check !== undefined
+        if (request.nfTokenTaxon !== undefined) {
+          serviceRequest.nfTokenTaxon = request.nfTokenTaxon;
+        }
+        if (request.issuer) {
+          serviceRequest.issuer = request.issuer;
+        }
+        if (request.transferFee > 0) {
+          serviceRequest.transferFee = request.transferFee;
+        }
+        if (request.uri) {
+          serviceRequest.uri = request.uri;
+        }
+        if (request.nfTokenID) {
+          serviceRequest.nfTokenID = request.nfTokenID;
+        }
+        if (request.nfTokenSellOffer) {
+          serviceRequest.nfTokenSellOffer = request.nfTokenSellOffer;
+        }
+        if (request.nfTokenBuyOffer) {
+          serviceRequest.nfTokenBuyOffer = request.nfTokenBuyOffer;
+        }
+        if (request.nfTokenBrokerFee > 0) {
+          serviceRequest.nfTokenBrokerFee = request.nfTokenBrokerFee;
+        }
+        if (request.nfTokenOffers && request.nfTokenOffers.length > 0) {
+          serviceRequest.nfTokenOffers = [...request.nfTokenOffers];
         }
 
         // Map instructions if provided

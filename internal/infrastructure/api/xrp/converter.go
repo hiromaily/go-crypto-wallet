@@ -356,3 +356,280 @@ func ToDTOSignerListSetTxInput(infra *SignerListSetTxInput) *dtoRipple.SignerLis
 		Hash:               infra.Hash,
 	}
 }
+
+// ToDTOTrustSetTxInput converts infrastructure TrustSetTxInput to DTO.
+func ToDTOTrustSetTxInput(infra *TrustSetTxInput) *dtoRipple.TrustSetTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.TrustSetTxInput{
+		TransactionType: infra.TransactionType,
+		Account:         infra.Account,
+		LimitAmount: dtoRipple.IssuedCurrencyAmount{
+			Currency: infra.LimitAmount.Currency,
+			Issuer:   infra.LimitAmount.Issuer,
+			Value:    infra.LimitAmount.Value,
+		},
+		QualityIn:          infra.QualityIn,
+		QualityOut:         infra.QualityOut,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOEscrowCreateTxInput converts infrastructure EscrowCreateTxInput to DTO.
+func ToDTOEscrowCreateTxInput(infra *EscrowCreateTxInput) *dtoRipple.EscrowCreateTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.EscrowCreateTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Amount:             infra.Amount,
+		Destination:        infra.Destination,
+		CancelAfter:        infra.CancelAfter,
+		FinishAfter:        infra.FinishAfter,
+		Condition:          infra.Condition,
+		DestinationTag:     infra.DestinationTag,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOEscrowFinishTxInput converts infrastructure EscrowFinishTxInput to DTO.
+func ToDTOEscrowFinishTxInput(infra *EscrowFinishTxInput) *dtoRipple.EscrowFinishTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.EscrowFinishTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Owner:              infra.Owner,
+		OfferSequence:      infra.OfferSequence,
+		Condition:          infra.Condition,
+		Fulfillment:        infra.Fulfillment,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOEscrowCancelTxInput converts infrastructure EscrowCancelTxInput to DTO.
+func ToDTOEscrowCancelTxInput(infra *EscrowCancelTxInput) *dtoRipple.EscrowCancelTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.EscrowCancelTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Owner:              infra.Owner,
+		OfferSequence:      infra.OfferSequence,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOPaymentChannelCreateTxInput converts infrastructure PaymentChannelCreateTxInput to DTO.
+func ToDTOPaymentChannelCreateTxInput(infra *PaymentChannelCreateTxInput) *dtoRipple.PaymentChannelCreateTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.PaymentChannelCreateTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Amount:             infra.Amount,
+		Destination:        infra.Destination,
+		SettleDelay:        infra.SettleDelay,
+		PublicKey:          infra.PublicKey,
+		CancelAfter:        infra.CancelAfter,
+		DestinationTag:     infra.DestinationTag,
+		SourceTag:          infra.SourceTag,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOPaymentChannelFundTxInput converts infrastructure PaymentChannelFundTxInput to DTO.
+func ToDTOPaymentChannelFundTxInput(infra *PaymentChannelFundTxInput) *dtoRipple.PaymentChannelFundTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.PaymentChannelFundTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Channel:            infra.Channel,
+		Amount:             infra.Amount,
+		Expiration:         infra.Expiration,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTOPaymentChannelClaimTxInput converts infrastructure PaymentChannelClaimTxInput to DTO.
+func ToDTOPaymentChannelClaimTxInput(infra *PaymentChannelClaimTxInput) *dtoRipple.PaymentChannelClaimTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.PaymentChannelClaimTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		Channel:            infra.Channel,
+		Balance:            infra.Balance,
+		Amount:             infra.Amount,
+		Signature:          infra.Signature,
+		PublicKey:          infra.PublicKey,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTONFTokenMintTxInput converts infrastructure NFTokenMintTxInput to DTO.
+func ToDTONFTokenMintTxInput(infra *NFTokenMintTxInput) *dtoRipple.NFTokenMintTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.NFTokenMintTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		NFTokenTaxon:       infra.NFTokenTaxon,
+		Issuer:             infra.Issuer,
+		TransferFee:        infra.TransferFee,
+		URI:                infra.URI,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTONFTokenBurnTxInput converts infrastructure NFTokenBurnTxInput to DTO.
+func ToDTONFTokenBurnTxInput(infra *NFTokenBurnTxInput) *dtoRipple.NFTokenBurnTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.NFTokenBurnTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		NFTokenID:          infra.NFTokenID,
+		Owner:              infra.Owner,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTONFTokenCreateOfferTxInput converts infrastructure NFTokenCreateOfferTxInput to DTO.
+func ToDTONFTokenCreateOfferTxInput(infra *NFTokenCreateOfferTxInput) *dtoRipple.NFTokenCreateOfferTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.NFTokenCreateOfferTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		NFTokenID:          infra.NFTokenID,
+		Amount:             infra.Amount,
+		Owner:              infra.Owner,
+		Expiration:         infra.Expiration,
+		Destination:        infra.Destination,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTONFTokenAcceptOfferTxInput converts infrastructure NFTokenAcceptOfferTxInput to DTO.
+func ToDTONFTokenAcceptOfferTxInput(infra *NFTokenAcceptOfferTxInput) *dtoRipple.NFTokenAcceptOfferTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.NFTokenAcceptOfferTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		NFTokenSellOffer:   infra.NFTokenSellOffer,
+		NFTokenBuyOffer:    infra.NFTokenBuyOffer,
+		NFTokenBrokerFee:   infra.NFTokenBrokerFee,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}
+
+// ToDTONFTokenCancelOfferTxInput converts infrastructure NFTokenCancelOfferTxInput to DTO.
+func ToDTONFTokenCancelOfferTxInput(infra *NFTokenCancelOfferTxInput) *dtoRipple.NFTokenCancelOfferTxInput {
+	if infra == nil {
+		return nil
+	}
+
+	return &dtoRipple.NFTokenCancelOfferTxInput{
+		TransactionType:    infra.TransactionType,
+		Account:            infra.Account,
+		NFTokenOffers:      infra.NFTokenOffers,
+		Fee:                infra.Fee,
+		Flags:              infra.Flags,
+		LastLedgerSequence: infra.LastLedgerSequence,
+		Sequence:           infra.Sequence,
+		SigningPubKey:      infra.SigningPubKey,
+		TxnSignature:       infra.TxnSignature,
+		Hash:               infra.Hash,
+	}
+}

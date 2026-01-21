@@ -36,6 +36,11 @@ export enum EnumTransactionType {
   TX_SET_REGULAR_KEY = 15,
   TX_SINGER_LIST_SET = 16,
   TX_TRUST_SET = 17,
+  TX_NFTOKEN_MINT = 18,
+  TX_NFTOKEN_BURN = 19,
+  TX_NFTOKEN_CREATE_OFFER = 20,
+  TX_NFTOKEN_ACCEPT_OFFER = 21,
+  TX_NFTOKEN_CANCEL_OFFER = 22,
 }
 
 /**
@@ -60,6 +65,11 @@ const enumToTransactionType: Record<EnumTransactionType, string> = {
   [EnumTransactionType.TX_SET_REGULAR_KEY]: 'SetRegularKey',
   [EnumTransactionType.TX_SINGER_LIST_SET]: 'SignerListSet',
   [EnumTransactionType.TX_TRUST_SET]: 'TrustSet',
+  [EnumTransactionType.TX_NFTOKEN_MINT]: 'NFTokenMint',
+  [EnumTransactionType.TX_NFTOKEN_BURN]: 'NFTokenBurn',
+  [EnumTransactionType.TX_NFTOKEN_CREATE_OFFER]: 'NFTokenCreateOffer',
+  [EnumTransactionType.TX_NFTOKEN_ACCEPT_OFFER]: 'NFTokenAcceptOffer',
+  [EnumTransactionType.TX_NFTOKEN_CANCEL_OFFER]: 'NFTokenCancelOffer',
 };
 
 // ============================================================================
@@ -87,6 +97,15 @@ export interface SignerEntry {
 }
 
 /**
+ * IssuedCurrencyAmount for TrustSet and token transactions
+ */
+export interface IssuedCurrencyAmount {
+  currency: string;
+  issuer: string;
+  value: string;
+}
+
+/**
  * Request for PrepareTransaction RPC
  */
 export interface PrepareTransactionRequest {
@@ -105,6 +124,64 @@ export interface PrepareTransactionRequest {
   signerQuorum?: number;
   /** For SignerListSet: list of signers with their weights */
   signerEntries?: SignerEntry[];
+  /** For TrustSet: the currency amount with issuer for the trust line limit */
+  limitAmount?: IssuedCurrencyAmount;
+  /** For TrustSet: value incoming balances at this ratio per 1,000,000,000 (optional) */
+  qualityIn?: number;
+  /** For TrustSet: value outgoing balances at this ratio per 1,000,000,000 (optional) */
+  qualityOut?: number;
+
+  // Escrow transaction fields
+  /** For EscrowCreate: time (seconds since Ripple Epoch) when the escrow expires */
+  cancelAfter?: number;
+  /** For EscrowCreate: time (seconds since Ripple Epoch) after which escrow can be finished */
+  finishAfter?: number;
+  /** For EscrowCreate/EscrowFinish: PREIMAGE-SHA-256 crypto-condition (hex) */
+  condition?: string;
+  /** For EscrowCreate: arbitrary tag to further specify the destination */
+  destinationTag?: number;
+  /** For EscrowFinish/EscrowCancel: the account that funded the escrow */
+  owner?: string;
+  /** For EscrowFinish/EscrowCancel: sequence number of EscrowCreate transaction */
+  offerSequence?: number;
+  /** For EscrowFinish: crypto-condition fulfillment (hex) */
+  fulfillment?: string;
+
+  // PaymentChannel transaction fields
+  /** For PaymentChannelCreate: seconds source must wait to close channel if unclaimed funds remain */
+  settleDelay?: number;
+  /** For PaymentChannelCreate/Claim: hex-encoded public key for verifying claim signatures */
+  publicKey?: string;
+  /** For PaymentChannelCreate: arbitrary tag to identify the source */
+  sourceTag?: number;
+  /** For PaymentChannelFund/Claim: unique ID (Hash256) of the payment channel */
+  channel?: string;
+  /** For PaymentChannelFund: new expiration time (seconds since Ripple Epoch) */
+  expiration?: number;
+  /** For PaymentChannelClaim: total XRP in drops delivered after this claim */
+  balance?: string;
+  /** For PaymentChannelClaim: hex-encoded signature for claim authorization */
+  signature?: string;
+
+  // NFToken transaction fields
+  /** For NFTokenMint: taxon identifying a collection or category of NFTs */
+  nfTokenTaxon?: number;
+  /** For NFTokenMint: issuer of the NFT (if different from Account) */
+  issuer?: string;
+  /** For NFTokenMint: fee (0-50000) charged on secondary sales */
+  transferFee?: number;
+  /** For NFTokenMint: hex-encoded URI pointing to NFT metadata */
+  uri?: string;
+  /** For NFTokenBurn/NFTokenCreateOffer: unique ID of the NFToken */
+  nfTokenID?: string;
+  /** For NFTokenAcceptOffer: ID of the sell offer to accept */
+  nfTokenSellOffer?: string;
+  /** For NFTokenAcceptOffer: ID of the buy offer to accept */
+  nfTokenBuyOffer?: string;
+  /** For NFTokenAcceptOffer: broker fee in XRP (brokered mode) */
+  nfTokenBrokerFee?: number;
+  /** For NFTokenCancelOffer: array of NFTokenOffer IDs to cancel */
+  nfTokenOffers?: string[];
 }
 
 /**
@@ -350,6 +427,199 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
               }));
             }
             // If signerQuorum is 0 and no signerEntries, this will remove the signer list
+            break;
+
+          case EnumTransactionType.TX_TRUST_SET:
+            // TrustSet transaction for creating/modifying trust lines
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+            // - LimitAmount: Issued currency amount specifying the trust line limit
+            // - QualityIn/QualityOut: Optional exchange rate adjustments
+            if (request.limitAmount) {
+              tx.LimitAmount = {
+                currency: request.limitAmount.currency,
+                issuer: request.limitAmount.issuer,
+                value: request.limitAmount.value,
+              };
+            }
+            if (request.qualityIn !== undefined && request.qualityIn > 0) {
+              tx.QualityIn = request.qualityIn;
+            }
+            if (request.qualityOut !== undefined && request.qualityOut > 0) {
+              tx.QualityOut = request.qualityOut;
+            }
+            break;
+
+          case EnumTransactionType.TX_ESCROW_CREATE:
+            // EscrowCreate transaction for creating time-locked or conditional escrows
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+            tx.Amount = xrpToDrops(request.amount.toString());
+            tx.Destination = request.receiverAccount;
+            if (request.cancelAfter !== undefined && request.cancelAfter > 0) {
+              tx.CancelAfter = request.cancelAfter;
+            }
+            if (request.finishAfter !== undefined && request.finishAfter > 0) {
+              tx.FinishAfter = request.finishAfter;
+            }
+            if (request.condition) {
+              tx.Condition = request.condition;
+            }
+            if (request.destinationTag !== undefined && request.destinationTag > 0) {
+              tx.DestinationTag = request.destinationTag;
+            }
+            break;
+
+          case EnumTransactionType.TX_ESCROW_FINISH:
+            // EscrowFinish transaction for releasing escrowed funds
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            if (request.offerSequence !== undefined && request.offerSequence > 0) {
+              tx.OfferSequence = request.offerSequence;
+            }
+            if (request.condition) {
+              tx.Condition = request.condition;
+            }
+            if (request.fulfillment) {
+              tx.Fulfillment = request.fulfillment;
+            }
+            break;
+
+          case EnumTransactionType.TX_ESCROW_CANCEL:
+            // EscrowCancel transaction for canceling expired escrows
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            if (request.offerSequence !== undefined && request.offerSequence > 0) {
+              tx.OfferSequence = request.offerSequence;
+            }
+            break;
+
+          case EnumTransactionType.TX_PAYMENT_CHANNEL_CREATE:
+            // PaymentChannelCreate transaction for creating and funding a payment channel
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+            tx.Amount = xrpToDrops(request.amount.toString());
+            tx.Destination = request.receiverAccount;
+            if (request.settleDelay !== undefined && request.settleDelay > 0) {
+              tx.SettleDelay = request.settleDelay;
+            }
+            if (request.publicKey) {
+              tx.PublicKey = request.publicKey;
+            }
+            if (request.cancelAfter !== undefined && request.cancelAfter > 0) {
+              tx.CancelAfter = request.cancelAfter;
+            }
+            if (request.destinationTag !== undefined && request.destinationTag > 0) {
+              tx.DestinationTag = request.destinationTag;
+            }
+            if (request.sourceTag !== undefined && request.sourceTag > 0) {
+              tx.SourceTag = request.sourceTag;
+            }
+            break;
+
+          case EnumTransactionType.TX_PAYMENT_CHANNEL_FUND:
+            // PaymentChannelFund transaction for adding XRP to an existing channel
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
+            if (request.channel) {
+              tx.Channel = request.channel;
+            }
+            tx.Amount = xrpToDrops(request.amount.toString());
+            if (request.expiration !== undefined && request.expiration > 0) {
+              tx.Expiration = request.expiration;
+            }
+            break;
+
+          case EnumTransactionType.TX_PAYMENT_CHANNEL_CLAIM:
+            // PaymentChannelClaim transaction for claiming funds from a channel
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
+            if (request.channel) {
+              tx.Channel = request.channel;
+            }
+            if (request.balance) {
+              tx.Balance = request.balance;
+            }
+            if (request.amount > 0) {
+              tx.Amount = xrpToDrops(request.amount.toString());
+            }
+            if (request.signature) {
+              tx.Signature = request.signature;
+            }
+            if (request.publicKey) {
+              tx.PublicKey = request.publicKey;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_MINT:
+            // NFTokenMint transaction for creating (minting) an NFT
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+            if (request.nfTokenTaxon !== undefined) {
+              tx.NFTokenTaxon = request.nfTokenTaxon;
+            }
+            if (request.issuer) {
+              tx.Issuer = request.issuer;
+            }
+            if (request.transferFee !== undefined && request.transferFee > 0) {
+              tx.TransferFee = request.transferFee;
+            }
+            if (request.uri) {
+              tx.URI = request.uri;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_BURN:
+            // NFTokenBurn transaction for destroying an NFT
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
+            if (request.nfTokenID) {
+              tx.NFTokenID = request.nfTokenID;
+            }
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_CREATE_OFFER:
+            // NFTokenCreateOffer transaction for creating buy/sell offers for NFTs
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
+            if (request.nfTokenID) {
+              tx.NFTokenID = request.nfTokenID;
+            }
+            if (request.amount > 0) {
+              tx.Amount = xrpToDrops(request.amount.toString());
+            } else {
+              tx.Amount = '0'; // For free sell offers
+            }
+            if (request.owner) {
+              tx.Owner = request.owner;
+            }
+            if (request.expiration !== undefined && request.expiration > 0) {
+              tx.Expiration = request.expiration;
+            }
+            if (request.receiverAccount) {
+              tx.Destination = request.receiverAccount;
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_ACCEPT_OFFER:
+            // NFTokenAcceptOffer transaction for accepting buy/sell offers
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
+            if (request.nfTokenSellOffer) {
+              tx.NFTokenSellOffer = request.nfTokenSellOffer;
+            }
+            if (request.nfTokenBuyOffer) {
+              tx.NFTokenBuyOffer = request.nfTokenBuyOffer;
+            }
+            if (request.nfTokenBrokerFee !== undefined && request.nfTokenBrokerFee > 0) {
+              tx.NFTokenBrokerFee = xrpToDrops(request.nfTokenBrokerFee.toString());
+            }
+            break;
+
+          case EnumTransactionType.TX_NFTOKEN_CANCEL_OFFER:
+            // NFTokenCancelOffer transaction for canceling NFT offers
+            // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
+            if (request.nfTokenOffers && request.nfTokenOffers.length > 0) {
+              tx.NFTokenOffers = request.nfTokenOffers;
+            }
             break;
 
           default:

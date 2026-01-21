@@ -24,6 +24,20 @@ Rules for modifying Protocol Buffer files (`*.proto`) in go-crypto-wallet.
 | `make proto-lint` | Lint proto files (buf only, requires PROTO_TOOL=buf) | When buf supports Edition 2024 |
 | `make proto-breaking` | Check for breaking changes | Recommended |
 
+## Prohibited Actions
+
+**NEVER use `protoc` command directly.** Always use Make targets for code generation.
+
+```bash
+# ❌ PROHIBITED - Never run protoc directly
+protoc --go_out=... proto/*.proto
+
+# ✅ CORRECT - Always use Make targets
+make proto      # Go only
+make proto-ts   # TypeScript only
+make proto-all  # Both
+```
+
 ## Code Generation
 
 | Command | Purpose |

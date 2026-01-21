@@ -42,6 +42,11 @@ const (
 	EnumTransactionType_TX_SET_REGULAR_KEY        EnumTransactionType = 15 // SetRegularKey
 	EnumTransactionType_TX_SINGER_LIST_SET        EnumTransactionType = 16 // SignerListSet
 	EnumTransactionType_TX_TRUST_SET              EnumTransactionType = 17 // TrustSet
+	EnumTransactionType_TX_NFTOKEN_MINT           EnumTransactionType = 18 // NFTokenMint
+	EnumTransactionType_TX_NFTOKEN_BURN           EnumTransactionType = 19 // NFTokenBurn
+	EnumTransactionType_TX_NFTOKEN_CREATE_OFFER   EnumTransactionType = 20 // NFTokenCreateOffer
+	EnumTransactionType_TX_NFTOKEN_ACCEPT_OFFER   EnumTransactionType = 21 // NFTokenAcceptOffer
+	EnumTransactionType_TX_NFTOKEN_CANCEL_OFFER   EnumTransactionType = 22 // NFTokenCancelOffer
 )
 
 // Enum value maps for EnumTransactionType.
@@ -65,6 +70,11 @@ var (
 		15: "TX_SET_REGULAR_KEY",
 		16: "TX_SINGER_LIST_SET",
 		17: "TX_TRUST_SET",
+		18: "TX_NFTOKEN_MINT",
+		19: "TX_NFTOKEN_BURN",
+		20: "TX_NFTOKEN_CREATE_OFFER",
+		21: "TX_NFTOKEN_ACCEPT_OFFER",
+		22: "TX_NFTOKEN_CANCEL_OFFER",
 	}
 	EnumTransactionType_value = map[string]int32{
 		"TX_ACCOUNT_SET":            0,
@@ -85,6 +95,11 @@ var (
 		"TX_SET_REGULAR_KEY":        15,
 		"TX_SINGER_LIST_SET":        16,
 		"TX_TRUST_SET":              17,
+		"TX_NFTOKEN_MINT":           18,
+		"TX_NFTOKEN_BURN":           19,
+		"TX_NFTOKEN_CREATE_OFFER":   20,
+		"TX_NFTOKEN_ACCEPT_OFFER":   21,
+		"TX_NFTOKEN_CANCEL_OFFER":   22,
 	}
 )
 
@@ -309,25 +324,138 @@ func (b0 SignerEntry_builder) Build() *SignerEntry {
 	return m0
 }
 
+// IssuedCurrencyAmount represents a token amount with currency and issuer
+// Used for TrustSet and other token-related transactions
+type IssuedCurrencyAmount struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Currency string                 `protobuf:"bytes,1,opt,name=currency"`
+	xxx_hidden_Issuer   string                 `protobuf:"bytes,2,opt,name=issuer"`
+	xxx_hidden_Value    string                 `protobuf:"bytes,3,opt,name=value"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *IssuedCurrencyAmount) Reset() {
+	*x = IssuedCurrencyAmount{}
+	mi := &file_transaction_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IssuedCurrencyAmount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IssuedCurrencyAmount) ProtoMessage() {}
+
+func (x *IssuedCurrencyAmount) ProtoReflect() protoreflect.Message {
+	mi := &file_transaction_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *IssuedCurrencyAmount) GetCurrency() string {
+	if x != nil {
+		return x.xxx_hidden_Currency
+	}
+	return ""
+}
+
+func (x *IssuedCurrencyAmount) GetIssuer() string {
+	if x != nil {
+		return x.xxx_hidden_Issuer
+	}
+	return ""
+}
+
+func (x *IssuedCurrencyAmount) GetValue() string {
+	if x != nil {
+		return x.xxx_hidden_Value
+	}
+	return ""
+}
+
+func (x *IssuedCurrencyAmount) SetCurrency(v string) {
+	x.xxx_hidden_Currency = v
+}
+
+func (x *IssuedCurrencyAmount) SetIssuer(v string) {
+	x.xxx_hidden_Issuer = v
+}
+
+func (x *IssuedCurrencyAmount) SetValue(v string) {
+	x.xxx_hidden_Value = v
+}
+
+type IssuedCurrencyAmount_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Currency string
+	Issuer   string
+	Value    string
+}
+
+func (b0 IssuedCurrencyAmount_builder) Build() *IssuedCurrencyAmount {
+	m0 := &IssuedCurrencyAmount{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Currency = b.Currency
+	x.xxx_hidden_Issuer = b.Issuer
+	x.xxx_hidden_Value = b.Value
+	return m0
+}
+
 type RequestPrepareTransaction struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_TxType          EnumTransactionType    `protobuf:"varint,1,opt,name=tx_type,json=txType,enum=rippleapi.transaction.EnumTransactionType"`
-	xxx_hidden_SenderAccount   string                 `protobuf:"bytes,2,opt,name=senderAccount"`
-	xxx_hidden_Amount          float64                `protobuf:"fixed64,3,opt,name=amount"`
-	xxx_hidden_ReceiverAccount string                 `protobuf:"bytes,4,opt,name=receiverAccount"`
-	xxx_hidden_Instructions    *Instructions          `protobuf:"bytes,5,opt,name=instructions"`
-	xxx_hidden_RegularKey      string                 `protobuf:"bytes,6,opt,name=regularKey"`
-	xxx_hidden_SetFlag         uint32                 `protobuf:"varint,7,opt,name=setFlag"`
-	xxx_hidden_ClearFlag       uint32                 `protobuf:"varint,8,opt,name=clearFlag"`
-	xxx_hidden_SignerQuorum    uint32                 `protobuf:"varint,9,opt,name=signerQuorum"`
-	xxx_hidden_SignerEntries   *[]*SignerEntry        `protobuf:"bytes,10,rep,name=signerEntries"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TxType           EnumTransactionType    `protobuf:"varint,1,opt,name=tx_type,json=txType,enum=rippleapi.transaction.EnumTransactionType"`
+	xxx_hidden_SenderAccount    string                 `protobuf:"bytes,2,opt,name=senderAccount"`
+	xxx_hidden_Amount           float64                `protobuf:"fixed64,3,opt,name=amount"`
+	xxx_hidden_ReceiverAccount  string                 `protobuf:"bytes,4,opt,name=receiverAccount"`
+	xxx_hidden_Instructions     *Instructions          `protobuf:"bytes,5,opt,name=instructions"`
+	xxx_hidden_RegularKey       string                 `protobuf:"bytes,6,opt,name=regularKey"`
+	xxx_hidden_SetFlag          uint32                 `protobuf:"varint,7,opt,name=setFlag"`
+	xxx_hidden_ClearFlag        uint32                 `protobuf:"varint,8,opt,name=clearFlag"`
+	xxx_hidden_SignerQuorum     uint32                 `protobuf:"varint,9,opt,name=signerQuorum"`
+	xxx_hidden_SignerEntries    *[]*SignerEntry        `protobuf:"bytes,10,rep,name=signerEntries"`
+	xxx_hidden_LimitAmount      *IssuedCurrencyAmount  `protobuf:"bytes,11,opt,name=limitAmount"`
+	xxx_hidden_QualityIn        uint32                 `protobuf:"varint,12,opt,name=qualityIn"`
+	xxx_hidden_QualityOut       uint32                 `protobuf:"varint,13,opt,name=qualityOut"`
+	xxx_hidden_CancelAfter      uint32                 `protobuf:"varint,14,opt,name=cancelAfter"`
+	xxx_hidden_FinishAfter      uint32                 `protobuf:"varint,15,opt,name=finishAfter"`
+	xxx_hidden_Condition        string                 `protobuf:"bytes,16,opt,name=condition"`
+	xxx_hidden_DestinationTag   uint32                 `protobuf:"varint,17,opt,name=destinationTag"`
+	xxx_hidden_Owner            string                 `protobuf:"bytes,18,opt,name=owner"`
+	xxx_hidden_OfferSequence    uint32                 `protobuf:"varint,19,opt,name=offerSequence"`
+	xxx_hidden_Fulfillment      string                 `protobuf:"bytes,20,opt,name=fulfillment"`
+	xxx_hidden_SettleDelay      uint32                 `protobuf:"varint,21,opt,name=settleDelay"`
+	xxx_hidden_PublicKey        string                 `protobuf:"bytes,22,opt,name=publicKey"`
+	xxx_hidden_SourceTag        uint32                 `protobuf:"varint,23,opt,name=sourceTag"`
+	xxx_hidden_Channel          string                 `protobuf:"bytes,24,opt,name=channel"`
+	xxx_hidden_Expiration       uint32                 `protobuf:"varint,25,opt,name=expiration"`
+	xxx_hidden_Balance          string                 `protobuf:"bytes,26,opt,name=balance"`
+	xxx_hidden_Signature        string                 `protobuf:"bytes,27,opt,name=signature"`
+	xxx_hidden_NfTokenTaxon     uint32                 `protobuf:"varint,28,opt,name=nfTokenTaxon"`
+	xxx_hidden_Issuer           string                 `protobuf:"bytes,29,opt,name=issuer"`
+	xxx_hidden_TransferFee      uint32                 `protobuf:"varint,30,opt,name=transferFee"`
+	xxx_hidden_Uri              string                 `protobuf:"bytes,31,opt,name=uri"`
+	xxx_hidden_NfTokenID        string                 `protobuf:"bytes,32,opt,name=nfTokenID"`
+	xxx_hidden_NfTokenSellOffer string                 `protobuf:"bytes,33,opt,name=nfTokenSellOffer"`
+	xxx_hidden_NfTokenBuyOffer  string                 `protobuf:"bytes,34,opt,name=nfTokenBuyOffer"`
+	xxx_hidden_NfTokenBrokerFee float64                `protobuf:"fixed64,35,opt,name=nfTokenBrokerFee"`
+	xxx_hidden_NfTokenOffers    []string               `protobuf:"bytes,36,rep,name=nfTokenOffers"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *RequestPrepareTransaction) Reset() {
 	*x = RequestPrepareTransaction{}
-	mi := &file_transaction_proto_msgTypes[2]
+	mi := &file_transaction_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -339,7 +467,7 @@ func (x *RequestPrepareTransaction) String() string {
 func (*RequestPrepareTransaction) ProtoMessage() {}
 
 func (x *RequestPrepareTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[2]
+	mi := &file_transaction_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -422,6 +550,188 @@ func (x *RequestPrepareTransaction) GetSignerEntries() []*SignerEntry {
 	return nil
 }
 
+func (x *RequestPrepareTransaction) GetLimitAmount() *IssuedCurrencyAmount {
+	if x != nil {
+		return x.xxx_hidden_LimitAmount
+	}
+	return nil
+}
+
+func (x *RequestPrepareTransaction) GetQualityIn() uint32 {
+	if x != nil {
+		return x.xxx_hidden_QualityIn
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetQualityOut() uint32 {
+	if x != nil {
+		return x.xxx_hidden_QualityOut
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetCancelAfter() uint32 {
+	if x != nil {
+		return x.xxx_hidden_CancelAfter
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetFinishAfter() uint32 {
+	if x != nil {
+		return x.xxx_hidden_FinishAfter
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetCondition() string {
+	if x != nil {
+		return x.xxx_hidden_Condition
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetDestinationTag() uint32 {
+	if x != nil {
+		return x.xxx_hidden_DestinationTag
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetOwner() string {
+	if x != nil {
+		return x.xxx_hidden_Owner
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetOfferSequence() uint32 {
+	if x != nil {
+		return x.xxx_hidden_OfferSequence
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetFulfillment() string {
+	if x != nil {
+		return x.xxx_hidden_Fulfillment
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetSettleDelay() uint32 {
+	if x != nil {
+		return x.xxx_hidden_SettleDelay
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetPublicKey() string {
+	if x != nil {
+		return x.xxx_hidden_PublicKey
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetSourceTag() uint32 {
+	if x != nil {
+		return x.xxx_hidden_SourceTag
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetChannel() string {
+	if x != nil {
+		return x.xxx_hidden_Channel
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetExpiration() uint32 {
+	if x != nil {
+		return x.xxx_hidden_Expiration
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetBalance() string {
+	if x != nil {
+		return x.xxx_hidden_Balance
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetSignature() string {
+	if x != nil {
+		return x.xxx_hidden_Signature
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenTaxon() uint32 {
+	if x != nil {
+		return x.xxx_hidden_NfTokenTaxon
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetIssuer() string {
+	if x != nil {
+		return x.xxx_hidden_Issuer
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetTransferFee() uint32 {
+	if x != nil {
+		return x.xxx_hidden_TransferFee
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetUri() string {
+	if x != nil {
+		return x.xxx_hidden_Uri
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenID() string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenID
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenSellOffer() string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenSellOffer
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenBuyOffer() string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenBuyOffer
+	}
+	return ""
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenBrokerFee() float64 {
+	if x != nil {
+		return x.xxx_hidden_NfTokenBrokerFee
+	}
+	return 0
+}
+
+func (x *RequestPrepareTransaction) GetNfTokenOffers() []string {
+	if x != nil {
+		return x.xxx_hidden_NfTokenOffers
+	}
+	return nil
+}
+
 func (x *RequestPrepareTransaction) SetTxType(v EnumTransactionType) {
 	x.xxx_hidden_TxType = v
 }
@@ -462,6 +772,110 @@ func (x *RequestPrepareTransaction) SetSignerEntries(v []*SignerEntry) {
 	x.xxx_hidden_SignerEntries = &v
 }
 
+func (x *RequestPrepareTransaction) SetLimitAmount(v *IssuedCurrencyAmount) {
+	x.xxx_hidden_LimitAmount = v
+}
+
+func (x *RequestPrepareTransaction) SetQualityIn(v uint32) {
+	x.xxx_hidden_QualityIn = v
+}
+
+func (x *RequestPrepareTransaction) SetQualityOut(v uint32) {
+	x.xxx_hidden_QualityOut = v
+}
+
+func (x *RequestPrepareTransaction) SetCancelAfter(v uint32) {
+	x.xxx_hidden_CancelAfter = v
+}
+
+func (x *RequestPrepareTransaction) SetFinishAfter(v uint32) {
+	x.xxx_hidden_FinishAfter = v
+}
+
+func (x *RequestPrepareTransaction) SetCondition(v string) {
+	x.xxx_hidden_Condition = v
+}
+
+func (x *RequestPrepareTransaction) SetDestinationTag(v uint32) {
+	x.xxx_hidden_DestinationTag = v
+}
+
+func (x *RequestPrepareTransaction) SetOwner(v string) {
+	x.xxx_hidden_Owner = v
+}
+
+func (x *RequestPrepareTransaction) SetOfferSequence(v uint32) {
+	x.xxx_hidden_OfferSequence = v
+}
+
+func (x *RequestPrepareTransaction) SetFulfillment(v string) {
+	x.xxx_hidden_Fulfillment = v
+}
+
+func (x *RequestPrepareTransaction) SetSettleDelay(v uint32) {
+	x.xxx_hidden_SettleDelay = v
+}
+
+func (x *RequestPrepareTransaction) SetPublicKey(v string) {
+	x.xxx_hidden_PublicKey = v
+}
+
+func (x *RequestPrepareTransaction) SetSourceTag(v uint32) {
+	x.xxx_hidden_SourceTag = v
+}
+
+func (x *RequestPrepareTransaction) SetChannel(v string) {
+	x.xxx_hidden_Channel = v
+}
+
+func (x *RequestPrepareTransaction) SetExpiration(v uint32) {
+	x.xxx_hidden_Expiration = v
+}
+
+func (x *RequestPrepareTransaction) SetBalance(v string) {
+	x.xxx_hidden_Balance = v
+}
+
+func (x *RequestPrepareTransaction) SetSignature(v string) {
+	x.xxx_hidden_Signature = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenTaxon(v uint32) {
+	x.xxx_hidden_NfTokenTaxon = v
+}
+
+func (x *RequestPrepareTransaction) SetIssuer(v string) {
+	x.xxx_hidden_Issuer = v
+}
+
+func (x *RequestPrepareTransaction) SetTransferFee(v uint32) {
+	x.xxx_hidden_TransferFee = v
+}
+
+func (x *RequestPrepareTransaction) SetUri(v string) {
+	x.xxx_hidden_Uri = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenID(v string) {
+	x.xxx_hidden_NfTokenID = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenSellOffer(v string) {
+	x.xxx_hidden_NfTokenSellOffer = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenBuyOffer(v string) {
+	x.xxx_hidden_NfTokenBuyOffer = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenBrokerFee(v float64) {
+	x.xxx_hidden_NfTokenBrokerFee = v
+}
+
+func (x *RequestPrepareTransaction) SetNfTokenOffers(v []string) {
+	x.xxx_hidden_NfTokenOffers = v
+}
+
 func (x *RequestPrepareTransaction) HasInstructions() bool {
 	if x == nil {
 		return false
@@ -469,8 +883,19 @@ func (x *RequestPrepareTransaction) HasInstructions() bool {
 	return x.xxx_hidden_Instructions != nil
 }
 
+func (x *RequestPrepareTransaction) HasLimitAmount() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_LimitAmount != nil
+}
+
 func (x *RequestPrepareTransaction) ClearInstructions() {
 	x.xxx_hidden_Instructions = nil
+}
+
+func (x *RequestPrepareTransaction) ClearLimitAmount() {
+	x.xxx_hidden_LimitAmount = nil
 }
 
 type RequestPrepareTransaction_builder struct {
@@ -499,6 +924,89 @@ type RequestPrepareTransaction_builder struct {
 	// - List of signers with their weights
 	// - Must be empty when signerQuorum is 0 (removing signer list)
 	SignerEntries []*SignerEntry
+	// limitAmount is used for TrustSet transaction type
+	// - Specifies the currency, issuer, and trust line limit
+	// - Set value to "0" to remove the trust line
+	LimitAmount *IssuedCurrencyAmount
+	// qualityIn is used for TrustSet transaction type (optional)
+	// - Value incoming balances on this trust line at the ratio of this number per 1,000,000,000
+	QualityIn uint32
+	// qualityOut is used for TrustSet transaction type (optional)
+	// - Value outgoing balances on this trust line at the ratio of this number per 1,000,000,000
+	QualityOut uint32
+	// cancelAfter is used for EscrowCreate transaction type
+	// - Time (in seconds since Ripple Epoch) when the escrow expires
+	// - After this time, the escrow can be canceled to return funds to sender
+	CancelAfter uint32
+	// finishAfter is used for EscrowCreate transaction type
+	// - Time (in seconds since Ripple Epoch) after which the escrow can be finished
+	// - The escrowed funds cannot be accessed until this time
+	FinishAfter uint32
+	// condition is used for EscrowCreate and EscrowFinish transaction types
+	// - Hex value representing a PREIMAGE-SHA-256 crypto-condition
+	// - If present on EscrowCreate, the escrow can only be finished with matching fulfillment
+	Condition string
+	// destinationTag is used for EscrowCreate transaction type (optional)
+	// - Arbitrary tag to further specify the destination
+	DestinationTag uint32
+	// owner is used for EscrowFinish and EscrowCancel transaction types
+	// - The address of the account that funded the escrow
+	Owner string
+	// offerSequence is used for EscrowFinish and EscrowCancel transaction types
+	// - The sequence number of the EscrowCreate transaction that created the escrow
+	OfferSequence uint32
+	// fulfillment is used for EscrowFinish transaction type
+	// - Hex value of the PREIMAGE-SHA-256 crypto-condition fulfillment
+	// - Required if the escrow has a condition
+	Fulfillment string
+	// settleDelay is used for PaymentChannelCreate transaction type
+	// - Seconds the source must wait to close the channel if unclaimed funds remain
+	SettleDelay uint32
+	// publicKey is used for PaymentChannelCreate and PaymentChannelClaim transaction types
+	// - Hex-encoded public key for verifying claim signatures
+	PublicKey string
+	// sourceTag is used for PaymentChannelCreate transaction type (optional)
+	// - Arbitrary tag to identify the source of the payment channel
+	SourceTag uint32
+	// channel is used for PaymentChannelFund and PaymentChannelClaim transaction types
+	// - The unique ID (Hash256) of the payment channel
+	Channel string
+	// expiration is used for PaymentChannelFund transaction type (optional)
+	// - New expiration time (in seconds since Ripple Epoch) for the channel
+	Expiration uint32
+	// balance is used for PaymentChannelClaim transaction type (optional)
+	// - Total XRP in drops delivered after processing this claim
+	Balance string
+	// signature is used for PaymentChannelClaim transaction type (optional)
+	// - Hex-encoded signature over channel ID + amount for claim authorization
+	Signature string
+	// nfTokenTaxon is used for NFTokenMint transaction type
+	// - A taxon identifying a collection or category of NFTs (required)
+	NfTokenTaxon uint32
+	// issuer is used for NFTokenMint transaction type (optional)
+	// - The issuer of the NFT (if different from Account)
+	Issuer string
+	// transferFee is used for NFTokenMint transaction type (optional)
+	// - Fee (0-50000) charged by issuer on secondary sales (0.001% each unit)
+	TransferFee uint32
+	// uri is used for NFTokenMint transaction type (optional)
+	// - Hex-encoded URI pointing to NFT metadata (up to 256 bytes)
+	Uri string
+	// nfTokenID is used for NFTokenBurn, NFTokenCreateOffer transaction types
+	// - The unique ID of the NFToken (Hash256)
+	NfTokenID string
+	// nfTokenSellOffer is used for NFTokenAcceptOffer transaction type
+	// - The ID of the sell offer to accept (Hash256)
+	NfTokenSellOffer string
+	// nfTokenBuyOffer is used for NFTokenAcceptOffer transaction type
+	// - The ID of the buy offer to accept (Hash256)
+	NfTokenBuyOffer string
+	// nfTokenBrokerFee is used for NFTokenAcceptOffer transaction type (optional)
+	// - Fee the broker keeps in brokered mode (in XRP)
+	NfTokenBrokerFee float64
+	// nfTokenOffers is used for NFTokenCancelOffer transaction type
+	// - Array of NFTokenOffer IDs to cancel
+	NfTokenOffers []string
 }
 
 func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
@@ -515,6 +1023,32 @@ func (b0 RequestPrepareTransaction_builder) Build() *RequestPrepareTransaction {
 	x.xxx_hidden_ClearFlag = b.ClearFlag
 	x.xxx_hidden_SignerQuorum = b.SignerQuorum
 	x.xxx_hidden_SignerEntries = &b.SignerEntries
+	x.xxx_hidden_LimitAmount = b.LimitAmount
+	x.xxx_hidden_QualityIn = b.QualityIn
+	x.xxx_hidden_QualityOut = b.QualityOut
+	x.xxx_hidden_CancelAfter = b.CancelAfter
+	x.xxx_hidden_FinishAfter = b.FinishAfter
+	x.xxx_hidden_Condition = b.Condition
+	x.xxx_hidden_DestinationTag = b.DestinationTag
+	x.xxx_hidden_Owner = b.Owner
+	x.xxx_hidden_OfferSequence = b.OfferSequence
+	x.xxx_hidden_Fulfillment = b.Fulfillment
+	x.xxx_hidden_SettleDelay = b.SettleDelay
+	x.xxx_hidden_PublicKey = b.PublicKey
+	x.xxx_hidden_SourceTag = b.SourceTag
+	x.xxx_hidden_Channel = b.Channel
+	x.xxx_hidden_Expiration = b.Expiration
+	x.xxx_hidden_Balance = b.Balance
+	x.xxx_hidden_Signature = b.Signature
+	x.xxx_hidden_NfTokenTaxon = b.NfTokenTaxon
+	x.xxx_hidden_Issuer = b.Issuer
+	x.xxx_hidden_TransferFee = b.TransferFee
+	x.xxx_hidden_Uri = b.Uri
+	x.xxx_hidden_NfTokenID = b.NfTokenID
+	x.xxx_hidden_NfTokenSellOffer = b.NfTokenSellOffer
+	x.xxx_hidden_NfTokenBuyOffer = b.NfTokenBuyOffer
+	x.xxx_hidden_NfTokenBrokerFee = b.NfTokenBrokerFee
+	x.xxx_hidden_NfTokenOffers = b.NfTokenOffers
 	return m0
 }
 
@@ -528,7 +1062,7 @@ type ResponsePrepareTransaction struct {
 
 func (x *ResponsePrepareTransaction) Reset() {
 	*x = ResponsePrepareTransaction{}
-	mi := &file_transaction_proto_msgTypes[3]
+	mi := &file_transaction_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -540,7 +1074,7 @@ func (x *ResponsePrepareTransaction) String() string {
 func (*ResponsePrepareTransaction) ProtoMessage() {}
 
 func (x *ResponsePrepareTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[3]
+	mi := &file_transaction_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -610,7 +1144,7 @@ type RequestSignTransaction struct {
 
 func (x *RequestSignTransaction) Reset() {
 	*x = RequestSignTransaction{}
-	mi := &file_transaction_proto_msgTypes[4]
+	mi := &file_transaction_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -622,7 +1156,7 @@ func (x *RequestSignTransaction) String() string {
 func (*RequestSignTransaction) ProtoMessage() {}
 
 func (x *RequestSignTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[4]
+	mi := &file_transaction_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -681,7 +1215,7 @@ type ResponseSignTransaction struct {
 
 func (x *ResponseSignTransaction) Reset() {
 	*x = ResponseSignTransaction{}
-	mi := &file_transaction_proto_msgTypes[5]
+	mi := &file_transaction_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -693,7 +1227,7 @@ func (x *ResponseSignTransaction) String() string {
 func (*ResponseSignTransaction) ProtoMessage() {}
 
 func (x *ResponseSignTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[5]
+	mi := &file_transaction_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +1285,7 @@ type RequestSubmitTransaction struct {
 
 func (x *RequestSubmitTransaction) Reset() {
 	*x = RequestSubmitTransaction{}
-	mi := &file_transaction_proto_msgTypes[6]
+	mi := &file_transaction_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -763,7 +1297,7 @@ func (x *RequestSubmitTransaction) String() string {
 func (*RequestSubmitTransaction) ProtoMessage() {}
 
 func (x *RequestSubmitTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[6]
+	mi := &file_transaction_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -809,7 +1343,7 @@ type ResponseSubmitTransaction struct {
 
 func (x *ResponseSubmitTransaction) Reset() {
 	*x = ResponseSubmitTransaction{}
-	mi := &file_transaction_proto_msgTypes[7]
+	mi := &file_transaction_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -821,7 +1355,7 @@ func (x *ResponseSubmitTransaction) String() string {
 func (*ResponseSubmitTransaction) ProtoMessage() {}
 
 func (x *ResponseSubmitTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[7]
+	mi := &file_transaction_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -879,7 +1413,7 @@ type ResponseWaitValidation struct {
 
 func (x *ResponseWaitValidation) Reset() {
 	*x = ResponseWaitValidation{}
-	mi := &file_transaction_proto_msgTypes[8]
+	mi := &file_transaction_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -891,7 +1425,7 @@ func (x *ResponseWaitValidation) String() string {
 func (*ResponseWaitValidation) ProtoMessage() {}
 
 func (x *ResponseWaitValidation) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[8]
+	mi := &file_transaction_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -937,7 +1471,7 @@ type RequestGetTransaction struct {
 
 func (x *RequestGetTransaction) Reset() {
 	*x = RequestGetTransaction{}
-	mi := &file_transaction_proto_msgTypes[9]
+	mi := &file_transaction_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -949,7 +1483,7 @@ func (x *RequestGetTransaction) String() string {
 func (*RequestGetTransaction) ProtoMessage() {}
 
 func (x *RequestGetTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[9]
+	mi := &file_transaction_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1007,7 +1541,7 @@ type ResponseGetTransaction struct {
 
 func (x *ResponseGetTransaction) Reset() {
 	*x = ResponseGetTransaction{}
-	mi := &file_transaction_proto_msgTypes[10]
+	mi := &file_transaction_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1019,7 +1553,7 @@ func (x *ResponseGetTransaction) String() string {
 func (*ResponseGetTransaction) ProtoMessage() {}
 
 func (x *ResponseGetTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[10]
+	mi := &file_transaction_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1064,7 +1598,7 @@ type RequestCombineTransaction struct {
 
 func (x *RequestCombineTransaction) Reset() {
 	*x = RequestCombineTransaction{}
-	mi := &file_transaction_proto_msgTypes[11]
+	mi := &file_transaction_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1076,7 +1610,7 @@ func (x *RequestCombineTransaction) String() string {
 func (*RequestCombineTransaction) ProtoMessage() {}
 
 func (x *RequestCombineTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[11]
+	mi := &file_transaction_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1122,7 +1656,7 @@ type ResponseCombineTransaction struct {
 
 func (x *ResponseCombineTransaction) Reset() {
 	*x = ResponseCombineTransaction{}
-	mi := &file_transaction_proto_msgTypes[12]
+	mi := &file_transaction_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1134,7 +1668,7 @@ func (x *ResponseCombineTransaction) String() string {
 func (*ResponseCombineTransaction) ProtoMessage() {}
 
 func (x *ResponseCombineTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_transaction_proto_msgTypes[12]
+	mi := &file_transaction_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1197,7 +1731,12 @@ const file_transaction_proto_rawDesc = "" +
 	"\fsignersCount\x18\x06 \x01(\x04R\fsignersCount\"?\n" +
 	"\vSignerEntry\x12\x18\n" +
 	"\aaccount\x18\x01 \x01(\tR\aaccount\x12\x16\n" +
-	"\x06weight\x18\x02 \x01(\rR\x06weight\"\xd7\x03\n" +
+	"\x06weight\x18\x02 \x01(\rR\x06weight\"`\n" +
+	"\x14IssuedCurrencyAmount\x12\x1a\n" +
+	"\bcurrency\x18\x01 \x01(\tR\bcurrency\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x14\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\"\xd2\n" +
+	"\n" +
 	"\x19RequestPrepareTransaction\x12C\n" +
 	"\atx_type\x18\x01 \x01(\x0e2*.rippleapi.transaction.EnumTransactionTypeR\x06txType\x12$\n" +
 	"\rsenderAccount\x18\x02 \x01(\tR\rsenderAccount\x12\x16\n" +
@@ -1211,7 +1750,37 @@ const file_transaction_proto_rawDesc = "" +
 	"\tclearFlag\x18\b \x01(\rR\tclearFlag\x12\"\n" +
 	"\fsignerQuorum\x18\t \x01(\rR\fsignerQuorum\x12H\n" +
 	"\rsignerEntries\x18\n" +
-	" \x03(\v2\".rippleapi.transaction.SignerEntryR\rsignerEntries\"}\n" +
+	" \x03(\v2\".rippleapi.transaction.SignerEntryR\rsignerEntries\x12M\n" +
+	"\vlimitAmount\x18\v \x01(\v2+.rippleapi.transaction.IssuedCurrencyAmountR\vlimitAmount\x12\x1c\n" +
+	"\tqualityIn\x18\f \x01(\rR\tqualityIn\x12\x1e\n" +
+	"\n" +
+	"qualityOut\x18\r \x01(\rR\n" +
+	"qualityOut\x12 \n" +
+	"\vcancelAfter\x18\x0e \x01(\rR\vcancelAfter\x12 \n" +
+	"\vfinishAfter\x18\x0f \x01(\rR\vfinishAfter\x12\x1c\n" +
+	"\tcondition\x18\x10 \x01(\tR\tcondition\x12&\n" +
+	"\x0edestinationTag\x18\x11 \x01(\rR\x0edestinationTag\x12\x14\n" +
+	"\x05owner\x18\x12 \x01(\tR\x05owner\x12$\n" +
+	"\rofferSequence\x18\x13 \x01(\rR\rofferSequence\x12 \n" +
+	"\vfulfillment\x18\x14 \x01(\tR\vfulfillment\x12 \n" +
+	"\vsettleDelay\x18\x15 \x01(\rR\vsettleDelay\x12\x1c\n" +
+	"\tpublicKey\x18\x16 \x01(\tR\tpublicKey\x12\x1c\n" +
+	"\tsourceTag\x18\x17 \x01(\rR\tsourceTag\x12\x18\n" +
+	"\achannel\x18\x18 \x01(\tR\achannel\x12\x1e\n" +
+	"\n" +
+	"expiration\x18\x19 \x01(\rR\n" +
+	"expiration\x12\x18\n" +
+	"\abalance\x18\x1a \x01(\tR\abalance\x12\x1c\n" +
+	"\tsignature\x18\x1b \x01(\tR\tsignature\x12\"\n" +
+	"\fnfTokenTaxon\x18\x1c \x01(\rR\fnfTokenTaxon\x12\x16\n" +
+	"\x06issuer\x18\x1d \x01(\tR\x06issuer\x12 \n" +
+	"\vtransferFee\x18\x1e \x01(\rR\vtransferFee\x12\x10\n" +
+	"\x03uri\x18\x1f \x01(\tR\x03uri\x12\x1c\n" +
+	"\tnfTokenID\x18  \x01(\tR\tnfTokenID\x12*\n" +
+	"\x10nfTokenSellOffer\x18! \x01(\tR\x10nfTokenSellOffer\x12(\n" +
+	"\x0fnfTokenBuyOffer\x18\" \x01(\tR\x0fnfTokenBuyOffer\x12*\n" +
+	"\x10nfTokenBrokerFee\x18# \x01(\x01R\x10nfTokenBrokerFee\x12$\n" +
+	"\rnfTokenOffers\x18$ \x03(\tR\rnfTokenOffers\"}\n" +
 	"\x1aResponsePrepareTransaction\x12\x16\n" +
 	"\x06txJSON\x18\x01 \x01(\tR\x06txJSON\x12G\n" +
 	"\finstructions\x18\x02 \x01(\v2#.rippleapi.transaction.InstructionsR\finstructions\"H\n" +
@@ -1237,7 +1806,7 @@ const file_transaction_proto_rawDesc = "" +
 	"\x12signedTransactions\x18\x01 \x03(\tR\x12signedTransactions\"^\n" +
 	"\x1aResponseCombineTransaction\x12,\n" +
 	"\x11signedTransaction\x18\x01 \x01(\tR\x11signedTransaction\x12\x12\n" +
-	"\x04txID\x18\x02 \x01(\tR\x04txID*\xad\x03\n" +
+	"\x04txID\x18\x02 \x01(\tR\x04txID*\xae\x04\n" +
 	"\x13EnumTransactionType\x12\x12\n" +
 	"\x0eTX_ACCOUNT_SET\x10\x00\x12\x15\n" +
 	"\x11TX_ACCOUNT_DELETE\x10\x01\x12\x13\n" +
@@ -1258,7 +1827,12 @@ const file_transaction_proto_rawDesc = "" +
 	"\x17TX_PAYMENT_CHANNEL_FUND\x10\x0e\x12\x16\n" +
 	"\x12TX_SET_REGULAR_KEY\x10\x0f\x12\x16\n" +
 	"\x12TX_SINGER_LIST_SET\x10\x10\x12\x10\n" +
-	"\fTX_TRUST_SET\x10\x112\xcc\x05\n" +
+	"\fTX_TRUST_SET\x10\x11\x12\x13\n" +
+	"\x0fTX_NFTOKEN_MINT\x10\x12\x12\x13\n" +
+	"\x0fTX_NFTOKEN_BURN\x10\x13\x12\x1b\n" +
+	"\x17TX_NFTOKEN_CREATE_OFFER\x10\x14\x12\x1b\n" +
+	"\x17TX_NFTOKEN_ACCEPT_OFFER\x10\x15\x12\x1b\n" +
+	"\x17TX_NFTOKEN_CANCEL_OFFER\x10\x162\xcc\x05\n" +
 	"\x14RippleTransactionAPI\x12{\n" +
 	"\x12PrepareTransaction\x120.rippleapi.transaction.RequestPrepareTransaction\x1a1.rippleapi.transaction.ResponsePrepareTransaction\"\x00\x12r\n" +
 	"\x0fSignTransaction\x12-.rippleapi.transaction.RequestSignTransaction\x1a..rippleapi.transaction.ResponseSignTransaction\"\x00\x12x\n" +
@@ -1268,46 +1842,48 @@ const file_transaction_proto_rawDesc = "" +
 	"\x12CombineTransaction\x120.rippleapi.transaction.RequestCombineTransaction\x1a1.rippleapi.transaction.ResponseCombineTransaction\"\x00BUZNgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen\x92\x03\x02\b\x02b\beditionsp\xe9\a"
 
 var file_transaction_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_transaction_proto_goTypes = []any{
 	(EnumTransactionType)(0),           // 0: rippleapi.transaction.EnumTransactionType
 	(*Instructions)(nil),               // 1: rippleapi.transaction.Instructions
 	(*SignerEntry)(nil),                // 2: rippleapi.transaction.SignerEntry
-	(*RequestPrepareTransaction)(nil),  // 3: rippleapi.transaction.RequestPrepareTransaction
-	(*ResponsePrepareTransaction)(nil), // 4: rippleapi.transaction.ResponsePrepareTransaction
-	(*RequestSignTransaction)(nil),     // 5: rippleapi.transaction.RequestSignTransaction
-	(*ResponseSignTransaction)(nil),    // 6: rippleapi.transaction.ResponseSignTransaction
-	(*RequestSubmitTransaction)(nil),   // 7: rippleapi.transaction.RequestSubmitTransaction
-	(*ResponseSubmitTransaction)(nil),  // 8: rippleapi.transaction.ResponseSubmitTransaction
-	(*ResponseWaitValidation)(nil),     // 9: rippleapi.transaction.ResponseWaitValidation
-	(*RequestGetTransaction)(nil),      // 10: rippleapi.transaction.RequestGetTransaction
-	(*ResponseGetTransaction)(nil),     // 11: rippleapi.transaction.ResponseGetTransaction
-	(*RequestCombineTransaction)(nil),  // 12: rippleapi.transaction.RequestCombineTransaction
-	(*ResponseCombineTransaction)(nil), // 13: rippleapi.transaction.ResponseCombineTransaction
-	(*emptypb.Empty)(nil),              // 14: google.protobuf.Empty
+	(*IssuedCurrencyAmount)(nil),       // 3: rippleapi.transaction.IssuedCurrencyAmount
+	(*RequestPrepareTransaction)(nil),  // 4: rippleapi.transaction.RequestPrepareTransaction
+	(*ResponsePrepareTransaction)(nil), // 5: rippleapi.transaction.ResponsePrepareTransaction
+	(*RequestSignTransaction)(nil),     // 6: rippleapi.transaction.RequestSignTransaction
+	(*ResponseSignTransaction)(nil),    // 7: rippleapi.transaction.ResponseSignTransaction
+	(*RequestSubmitTransaction)(nil),   // 8: rippleapi.transaction.RequestSubmitTransaction
+	(*ResponseSubmitTransaction)(nil),  // 9: rippleapi.transaction.ResponseSubmitTransaction
+	(*ResponseWaitValidation)(nil),     // 10: rippleapi.transaction.ResponseWaitValidation
+	(*RequestGetTransaction)(nil),      // 11: rippleapi.transaction.RequestGetTransaction
+	(*ResponseGetTransaction)(nil),     // 12: rippleapi.transaction.ResponseGetTransaction
+	(*RequestCombineTransaction)(nil),  // 13: rippleapi.transaction.RequestCombineTransaction
+	(*ResponseCombineTransaction)(nil), // 14: rippleapi.transaction.ResponseCombineTransaction
+	(*emptypb.Empty)(nil),              // 15: google.protobuf.Empty
 }
 var file_transaction_proto_depIdxs = []int32{
 	0,  // 0: rippleapi.transaction.RequestPrepareTransaction.tx_type:type_name -> rippleapi.transaction.EnumTransactionType
 	1,  // 1: rippleapi.transaction.RequestPrepareTransaction.instructions:type_name -> rippleapi.transaction.Instructions
 	2,  // 2: rippleapi.transaction.RequestPrepareTransaction.signerEntries:type_name -> rippleapi.transaction.SignerEntry
-	1,  // 3: rippleapi.transaction.ResponsePrepareTransaction.instructions:type_name -> rippleapi.transaction.Instructions
-	3,  // 4: rippleapi.transaction.RippleTransactionAPI.PrepareTransaction:input_type -> rippleapi.transaction.RequestPrepareTransaction
-	5,  // 5: rippleapi.transaction.RippleTransactionAPI.SignTransaction:input_type -> rippleapi.transaction.RequestSignTransaction
-	7,  // 6: rippleapi.transaction.RippleTransactionAPI.SubmitTransaction:input_type -> rippleapi.transaction.RequestSubmitTransaction
-	14, // 7: rippleapi.transaction.RippleTransactionAPI.WaitValidation:input_type -> google.protobuf.Empty
-	10, // 8: rippleapi.transaction.RippleTransactionAPI.GetTransaction:input_type -> rippleapi.transaction.RequestGetTransaction
-	12, // 9: rippleapi.transaction.RippleTransactionAPI.CombineTransaction:input_type -> rippleapi.transaction.RequestCombineTransaction
-	4,  // 10: rippleapi.transaction.RippleTransactionAPI.PrepareTransaction:output_type -> rippleapi.transaction.ResponsePrepareTransaction
-	6,  // 11: rippleapi.transaction.RippleTransactionAPI.SignTransaction:output_type -> rippleapi.transaction.ResponseSignTransaction
-	8,  // 12: rippleapi.transaction.RippleTransactionAPI.SubmitTransaction:output_type -> rippleapi.transaction.ResponseSubmitTransaction
-	9,  // 13: rippleapi.transaction.RippleTransactionAPI.WaitValidation:output_type -> rippleapi.transaction.ResponseWaitValidation
-	11, // 14: rippleapi.transaction.RippleTransactionAPI.GetTransaction:output_type -> rippleapi.transaction.ResponseGetTransaction
-	13, // 15: rippleapi.transaction.RippleTransactionAPI.CombineTransaction:output_type -> rippleapi.transaction.ResponseCombineTransaction
-	10, // [10:16] is the sub-list for method output_type
-	4,  // [4:10] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	3,  // 3: rippleapi.transaction.RequestPrepareTransaction.limitAmount:type_name -> rippleapi.transaction.IssuedCurrencyAmount
+	1,  // 4: rippleapi.transaction.ResponsePrepareTransaction.instructions:type_name -> rippleapi.transaction.Instructions
+	4,  // 5: rippleapi.transaction.RippleTransactionAPI.PrepareTransaction:input_type -> rippleapi.transaction.RequestPrepareTransaction
+	6,  // 6: rippleapi.transaction.RippleTransactionAPI.SignTransaction:input_type -> rippleapi.transaction.RequestSignTransaction
+	8,  // 7: rippleapi.transaction.RippleTransactionAPI.SubmitTransaction:input_type -> rippleapi.transaction.RequestSubmitTransaction
+	15, // 8: rippleapi.transaction.RippleTransactionAPI.WaitValidation:input_type -> google.protobuf.Empty
+	11, // 9: rippleapi.transaction.RippleTransactionAPI.GetTransaction:input_type -> rippleapi.transaction.RequestGetTransaction
+	13, // 10: rippleapi.transaction.RippleTransactionAPI.CombineTransaction:input_type -> rippleapi.transaction.RequestCombineTransaction
+	5,  // 11: rippleapi.transaction.RippleTransactionAPI.PrepareTransaction:output_type -> rippleapi.transaction.ResponsePrepareTransaction
+	7,  // 12: rippleapi.transaction.RippleTransactionAPI.SignTransaction:output_type -> rippleapi.transaction.ResponseSignTransaction
+	9,  // 13: rippleapi.transaction.RippleTransactionAPI.SubmitTransaction:output_type -> rippleapi.transaction.ResponseSubmitTransaction
+	10, // 14: rippleapi.transaction.RippleTransactionAPI.WaitValidation:output_type -> rippleapi.transaction.ResponseWaitValidation
+	12, // 15: rippleapi.transaction.RippleTransactionAPI.GetTransaction:output_type -> rippleapi.transaction.ResponseGetTransaction
+	14, // 16: rippleapi.transaction.RippleTransactionAPI.CombineTransaction:output_type -> rippleapi.transaction.ResponseCombineTransaction
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_transaction_proto_init() }
@@ -1321,7 +1897,7 @@ func file_transaction_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_transaction_proto_rawDesc), len(file_transaction_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

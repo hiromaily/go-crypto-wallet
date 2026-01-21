@@ -76,6 +76,121 @@ type RippleAPIer interface {
 		signerEntries []SignerEntryInput,
 		instructions *dtoRipple.Instructions,
 	) (*dtoRipple.SignerListSetTxInput, string, error)
+
+	// Trust line operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+	PrepareTrustSetTransaction(
+		ctx context.Context,
+		senderAccount string,
+		limitAmount *dtoRipple.IssuedCurrencyAmount,
+		qualityIn, qualityOut uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.TrustSetTxInput, string, error)
+
+	// Escrow operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+	PrepareEscrowCreateTransaction(
+		ctx context.Context,
+		senderAccount, destinationAccount string,
+		amount float64,
+		cancelAfter, finishAfter uint32,
+		condition string,
+		destinationTag uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.EscrowCreateTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
+	PrepareEscrowFinishTransaction(
+		ctx context.Context,
+		senderAccount, owner string,
+		offerSequence uint32,
+		condition, fulfillment string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.EscrowFinishTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
+	PrepareEscrowCancelTransaction(
+		ctx context.Context,
+		senderAccount, owner string,
+		offerSequence uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.EscrowCancelTxInput, string, error)
+
+	// PaymentChannel operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+	PreparePaymentChannelCreateTransaction(
+		ctx context.Context,
+		senderAccount, destinationAccount string,
+		amount float64,
+		settleDelay uint32,
+		publicKey string,
+		cancelAfter, destinationTag, sourceTag uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.PaymentChannelCreateTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
+	PreparePaymentChannelFundTransaction(
+		ctx context.Context,
+		senderAccount, channel string,
+		amount float64,
+		expiration uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.PaymentChannelFundTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
+	PreparePaymentChannelClaimTransaction(
+		ctx context.Context,
+		senderAccount, channel string,
+		balance string,
+		amount float64,
+		signature, publicKey string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.PaymentChannelClaimTxInput, string, error)
+
+	// NFToken operations
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+	PrepareNFTokenMintTransaction(
+		ctx context.Context,
+		senderAccount string,
+		nfTokenTaxon uint32,
+		issuer, uri string,
+		transferFee uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenMintTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
+	PrepareNFTokenBurnTransaction(
+		ctx context.Context,
+		senderAccount, nfTokenID, owner string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenBurnTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
+	PrepareNFTokenCreateOfferTransaction(
+		ctx context.Context,
+		senderAccount, nfTokenID string,
+		amount float64,
+		owner, destination string,
+		expiration uint32,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenCreateOfferTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
+	PrepareNFTokenAcceptOfferTransaction(
+		ctx context.Context,
+		senderAccount string,
+		nfTokenSellOffer, nfTokenBuyOffer string,
+		nfTokenBrokerFee float64,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenAcceptOfferTxInput, string, error)
+
+	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
+	PrepareNFTokenCancelOfferTransaction(
+		ctx context.Context,
+		senderAccount string,
+		nfTokenOffers []string,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.NFTokenCancelOfferTxInput, string, error)
 }
 
 // RipplePublicer defines the interface for Ripple public node operations.

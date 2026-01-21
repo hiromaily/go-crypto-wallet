@@ -30,6 +30,11 @@ enum EnumTransactionType {
   TX_SET_REGULAR_KEY = 15;        // SetRegularKey
   TX_SINGER_LIST_SET = 16;        // SignerListSet
   TX_TRUST_SET = 17;              // TrustSet
+  TX_NFTOKEN_MINT = 18;           // NFTokenMint
+  TX_NFTOKEN_BURN = 19;           // NFTokenBurn
+  TX_NFTOKEN_CREATE_OFFER = 20;   // NFTokenCreateOffer
+  TX_NFTOKEN_ACCEPT_OFFER = 21;   // NFTokenAcceptOffer
+  TX_NFTOKEN_CANCEL_OFFER = 22;   // NFTokenCancelOffer
 }
 
 message Instructions {
@@ -45,6 +50,14 @@ message Instructions {
 message SignerEntry {
   string account = 1;    // XRP address of the signer
   uint32 weight = 2;     // Weight of this signer (contributes to quorum)
+}
+
+// IssuedCurrencyAmount represents a token amount with currency and issuer
+// Used for TrustSet and other token-related transactions
+message IssuedCurrencyAmount {
+  string currency = 1;   // Currency code (3-letter or 40-char hex)
+  string issuer = 2;     // XRP address of the token issuer
+  string value = 3;      // Amount as a string (supports high precision)
 }
 
 message RequestPrepareTransaction {
@@ -71,6 +84,113 @@ message RequestPrepareTransaction {
   // - List of signers with their weights
   // - Must be empty when signerQuorum is 0 (removing signer list)
   repeated SignerEntry signerEntries = 10;
+  // limitAmount is used for TrustSet transaction type
+  // - Specifies the currency, issuer, and trust line limit
+  // - Set value to "0" to remove the trust line
+  IssuedCurrencyAmount limitAmount = 11;
+  // qualityIn is used for TrustSet transaction type (optional)
+  // - Value incoming balances on this trust line at the ratio of this number per 1,000,000,000
+  uint32 qualityIn = 12;
+  // qualityOut is used for TrustSet transaction type (optional)
+  // - Value outgoing balances on this trust line at the ratio of this number per 1,000,000,000
+  uint32 qualityOut = 13;
+
+  // ============================================================================
+  // Escrow transaction fields
+  // Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+  // ============================================================================
+
+  // cancelAfter is used for EscrowCreate transaction type
+  // - Time (in seconds since Ripple Epoch) when the escrow expires
+  // - After this time, the escrow can be canceled to return funds to sender
+  uint32 cancelAfter = 14;
+  // finishAfter is used for EscrowCreate transaction type
+  // - Time (in seconds since Ripple Epoch) after which the escrow can be finished
+  // - The escrowed funds cannot be accessed until this time
+  uint32 finishAfter = 15;
+  // condition is used for EscrowCreate and EscrowFinish transaction types
+  // - Hex value representing a PREIMAGE-SHA-256 crypto-condition
+  // - If present on EscrowCreate, the escrow can only be finished with matching fulfillment
+  string condition = 16;
+  // destinationTag is used for EscrowCreate transaction type (optional)
+  // - Arbitrary tag to further specify the destination
+  uint32 destinationTag = 17;
+
+  // owner is used for EscrowFinish and EscrowCancel transaction types
+  // - The address of the account that funded the escrow
+  string owner = 18;
+  // offerSequence is used for EscrowFinish and EscrowCancel transaction types
+  // - The sequence number of the EscrowCreate transaction that created the escrow
+  uint32 offerSequence = 19;
+  // fulfillment is used for EscrowFinish transaction type
+  // - Hex value of the PREIMAGE-SHA-256 crypto-condition fulfillment
+  // - Required if the escrow has a condition
+  string fulfillment = 20;
+
+  // ============================================================================
+  // PaymentChannel transaction fields
+  // Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+  // ============================================================================
+
+  // settleDelay is used for PaymentChannelCreate transaction type
+  // - Seconds the source must wait to close the channel if unclaimed funds remain
+  uint32 settleDelay = 21;
+  // publicKey is used for PaymentChannelCreate and PaymentChannelClaim transaction types
+  // - Hex-encoded public key for verifying claim signatures
+  string publicKey = 22;
+  // sourceTag is used for PaymentChannelCreate transaction type (optional)
+  // - Arbitrary tag to identify the source of the payment channel
+  uint32 sourceTag = 23;
+
+  // channel is used for PaymentChannelFund and PaymentChannelClaim transaction types
+  // - The unique ID (Hash256) of the payment channel
+  string channel = 24;
+  // expiration is used for PaymentChannelFund transaction type (optional)
+  // - New expiration time (in seconds since Ripple Epoch) for the channel
+  uint32 expiration = 25;
+
+  // balance is used for PaymentChannelClaim transaction type (optional)
+  // - Total XRP in drops delivered after processing this claim
+  string balance = 26;
+  // signature is used for PaymentChannelClaim transaction type (optional)
+  // - Hex-encoded signature over channel ID + amount for claim authorization
+  string signature = 27;
+
+  // ============================================================================
+  // NFToken transaction fields
+  // Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+  // ============================================================================
+
+  // nfTokenTaxon is used for NFTokenMint transaction type
+  // - A taxon identifying a collection or category of NFTs (required)
+  uint32 nfTokenTaxon = 28;
+  // issuer is used for NFTokenMint transaction type (optional)
+  // - The issuer of the NFT (if different from Account)
+  string issuer = 29;
+  // transferFee is used for NFTokenMint transaction type (optional)
+  // - Fee (0-50000) charged by issuer on secondary sales (0.001% each unit)
+  uint32 transferFee = 30;
+  // uri is used for NFTokenMint transaction type (optional)
+  // - Hex-encoded URI pointing to NFT metadata (up to 256 bytes)
+  string uri = 31;
+
+  // nfTokenID is used for NFTokenBurn, NFTokenCreateOffer transaction types
+  // - The unique ID of the NFToken (Hash256)
+  string nfTokenID = 32;
+
+  // nfTokenSellOffer is used for NFTokenAcceptOffer transaction type
+  // - The ID of the sell offer to accept (Hash256)
+  string nfTokenSellOffer = 33;
+  // nfTokenBuyOffer is used for NFTokenAcceptOffer transaction type
+  // - The ID of the buy offer to accept (Hash256)
+  string nfTokenBuyOffer = 34;
+  // nfTokenBrokerFee is used for NFTokenAcceptOffer transaction type (optional)
+  // - Fee the broker keeps in brokered mode (in XRP)
+  double nfTokenBrokerFee = 35;
+
+  // nfTokenOffers is used for NFTokenCancelOffer transaction type
+  // - Array of NFTokenOffer IDs to cancel
+  repeated string nfTokenOffers = 36;
 }
 
 message ResponsePrepareTransaction {

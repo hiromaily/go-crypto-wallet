@@ -121,6 +121,228 @@ type SignerListSetTxInput struct {
 	Hash               string
 }
 
+// IssuedCurrencyAmount represents a token amount with currency and issuer.
+// Used for TrustSet and other token-related transactions.
+// Reference: https://xrpl.org/docs/references/protocol/data-types/currency-formats#issued-currency-amount-format
+type IssuedCurrencyAmount struct {
+	Currency string
+	Issuer   string
+	Value    string
+}
+
+// TrustSetTxInput represents a TrustSet transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
+type TrustSetTxInput struct {
+	TransactionType    string
+	Account            string
+	LimitAmount        IssuedCurrencyAmount
+	QualityIn          uint32
+	QualityOut         uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// EscrowCreateTxInput represents an EscrowCreate transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
+type EscrowCreateTxInput struct {
+	TransactionType    string
+	Account            string
+	Amount             string
+	Destination        string
+	CancelAfter        uint32
+	FinishAfter        uint32
+	Condition          string
+	DestinationTag     uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// EscrowFinishTxInput represents an EscrowFinish transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
+type EscrowFinishTxInput struct {
+	TransactionType    string
+	Account            string
+	Owner              string
+	OfferSequence      uint32
+	Condition          string
+	Fulfillment        string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// EscrowCancelTxInput represents an EscrowCancel transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
+type EscrowCancelTxInput struct {
+	TransactionType    string
+	Account            string
+	Owner              string
+	OfferSequence      uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// PaymentChannelCreateTxInput represents a PaymentChannelCreate transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
+type PaymentChannelCreateTxInput struct {
+	TransactionType    string
+	Account            string
+	Amount             string
+	Destination        string
+	SettleDelay        uint32
+	PublicKey          string
+	CancelAfter        uint32
+	DestinationTag     uint32
+	SourceTag          uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// PaymentChannelFundTxInput represents a PaymentChannelFund transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
+type PaymentChannelFundTxInput struct {
+	TransactionType    string
+	Account            string
+	Channel            string
+	Amount             string
+	Expiration         uint32
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// PaymentChannelClaimTxInput represents a PaymentChannelClaim transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
+type PaymentChannelClaimTxInput struct {
+	TransactionType    string
+	Account            string
+	Channel            string
+	Balance            string
+	Amount             string
+	Signature          string
+	PublicKey          string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenMintTxInput represents an NFTokenMint transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
+type NFTokenMintTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenTaxon       uint32
+	Issuer             string
+	TransferFee        uint32
+	URI                string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenBurnTxInput represents an NFTokenBurn transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
+type NFTokenBurnTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenID          string
+	Owner              string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenCreateOfferTxInput represents an NFTokenCreateOffer transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
+type NFTokenCreateOfferTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenID          string
+	Amount             string
+	Owner              string
+	Expiration         uint32
+	Destination        string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenAcceptOfferTxInput represents an NFTokenAcceptOffer transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
+type NFTokenAcceptOfferTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenSellOffer   string
+	NFTokenBuyOffer    string
+	NFTokenBrokerFee   string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
+// NFTokenCancelOfferTxInput represents an NFTokenCancelOffer transaction input.
+// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
+type NFTokenCancelOfferTxInput struct {
+	TransactionType    string
+	Account            string
+	NFTokenOffers      []string
+	Fee                string
+	Flags              uint64
+	LastLedgerSequence uint64
+	Sequence           uint64
+	SigningPubKey      string
+	TxnSignature       string
+	Hash               string
+}
+
 // XRPKeyType represents the type of XRP cryptographic key.
 type XRPKeyType string
 

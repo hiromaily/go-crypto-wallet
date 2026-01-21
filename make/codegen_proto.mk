@@ -123,7 +123,9 @@ proto-go-protoc: protoc-version-check clean-pb-go
 		proto/rippleapi/*.proto
 
 # Generate TypeScript code using protoc
-# Requires: protoc-gen-es, protoc-gen-connect-es (install via: cd apps/xrpl-grpc-server && bun install)
+# Requires: protoc-gen-es >= 2.x (install via: cd apps/xrpl-grpc-server && bun install)
+# Note: protoc-gen-es v2 generates both messages and services in *_pb.ts files
+# Note: protoc-gen-connect-es is NOT used because it doesn't support Edition 2024
 .PHONY: proto-ts-protoc
 proto-ts-protoc: protoc-version-check clean-pb-ts
 	@echo "Generating TypeScript proto files with protoc (edition 2024)..."
@@ -135,11 +137,8 @@ proto-ts-protoc: protoc-version-check clean-pb-ts
 	@mkdir -p $(PROTO_TS_OUT_DIR)
 	protoc \
 		--plugin=protoc-gen-es=apps/xrpl-grpc-server/node_modules/.bin/protoc-gen-es \
-		--plugin=protoc-gen-connect-es=apps/xrpl-grpc-server/node_modules/.bin/protoc-gen-connect-es \
 		--es_out=$(PROTO_TS_OUT_DIR) \
 		--es_opt=target=ts \
-		--connect-es_out=$(PROTO_TS_OUT_DIR) \
-		--connect-es_opt=target=ts \
 		-I proto/rippleapi \
 		proto/rippleapi/*.proto
 
