@@ -5,43 +5,6 @@ networks:
 
 services:
   #########################################################################
-  # [DEPRECATED] xrptipbot/rippled
-  # - This service is deprecated and may be removed in a future release
-  # - Documentations
-  #  - https://github.com/ripple/rippled
-  #  - https://xrpl.org/install-rippled.html
-  #  - https://xrpl.org/configure-rippled.html
-  #  - https://xrpl.org/connect-your-rippled-to-the-xrp-test-net.html
-  # - Build Docker Container for rippled
-  #  - run `./scripts/build-rippled-container.sh` before running docker compose
-  #------------------------------------------------------------------------
-  # $ docker compose -f compose.xrp.yaml exec xrp-node sh
-  #########################################################################
-  xrp-node:
-    image: local-rippled:latest
-    container_name: xrp-node
-    volumes:
-      - ./docker/nodes/xrp/config:/config
-      - ./docker/nodes/xrp/db:/var/lib/rippled/db
-      - ./data/certs:/etc/ssl/certs
-    ports:
-      #- "${WRP_WEBSOCKET_PORT:-51233}:80"
-      - "${WRP_PUBLIC_WEBSOCKET_PORT:-6005}:6005"
-      - "${WRP_ADMIN_WEBSOCKET_PORT:-6006}:6006"
-    stdin_open: true
-    tty: true
-    networks:
-      - xrp
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "--post-data={\"method\":\"server_info\",\"params\":[{}]}", "--header=Content-Type: application/json", "http://localhost:6006"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    #command:
-    #  - /opt/ripple/bin/rippled --net --conf /etc/opt/ripple/rippled.cfg
-
-  #########################################################################
   # xrpl-grpc-server
   # - XRPL gRPC Server using Bun runtime and ConnectRPC
   # - Documentation: apps/xrpl-grpc-server/README.md
@@ -68,9 +31,67 @@ services:
       xrp-node:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bun", "--eval", "fetch('http://localhost:' + (process.env.GRPC_PORT || 50051) + '/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "bun",
+          "--eval",
+          "fetch('http://localhost:' + (process.env.GRPC_PORT || 50051) + '/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
     restart: unless-stopped
+
+  #########################################################################
+  # xrp-node (rippled v3.0.0)
+  # - XRP Ledger node using xrpllabsofficial/xrpld image
+  # - Documentation:
+  #   - https://hub.docker.com/r/xrpllabsofficial/xrpld
+  #   - https://xrpl.org/blog/2025/rippled-3.0.0
+  #   - https://xrpl.org/install-rippled.html
+  # - Configuration: ./docker/nodes/xrp/config/rippled.cfg
+  # - Testnet validators: ./docker/nodes/xrp/config/validators.txt
+  #------------------------------------------------------------------------
+  # $ docker compose -f compose.xrp.yaml exec xrp-node sh
+  # $ docker compose -f compose.xrp.yaml exec xrp-node server_info
+  # $ docker compose -f compose.xrp.yaml logs -f xrp-node
+  #########################################################################
+  xrp-node:
+    image: xrpllabsofficial/xrpld:3.0.0
+    container_name: xrp-node
+    volumes:
+      # Mount custom config (rippled.cfg and validators.txt)
+      - ./docker/nodes/xrp/config:/config:ro
+      # Persistent database storage
+      - xrp-node-db:/var/lib/rippled/db
+    ports:
+      # Peer protocol (for connecting to other nodes)
+      - "${XRP_PEER_PORT:-51235}:51235"
+      # WebSocket public (wss)
+      - "${XRP_PUBLIC_WEBSOCKET_PORT:-6005}:6005"
+      # WebSocket admin (ws) - used by xrpl-grpc-server
+      - "${XRP_ADMIN_WEBSOCKET_PORT:-6006}:6006"
+    networks:
+      - xrp
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O-",
+          '--post-data={"method":"server_info","params":[{}]}',
+          "--header=Content-Type: application/json",
+          "http://localhost:6006",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+
+volumes:
+  xrp-node-db:
+    name: xrp-node-db
