@@ -179,33 +179,8 @@ func (s *NativeSigner) VerifySignature(txInput *dtoxrp.TxInput) (bool, error) {
 		return false, errors.New("missing TxnSignature")
 	}
 
-	// Convert DTO to map including signature fields
-	txFields := make(map[string]any)
-
-	if txInput.TransactionType != "" {
-		txFields["TransactionType"] = txInput.TransactionType
-	}
-	if txInput.Account != "" {
-		txFields["Account"] = txInput.Account
-	}
-	if txInput.Amount != "" {
-		txFields["Amount"] = txInput.Amount
-	}
-	if txInput.Destination != "" {
-		txFields["Destination"] = txInput.Destination
-	}
-	if txInput.Fee != "" {
-		txFields["Fee"] = txInput.Fee
-	}
-	if txInput.Flags != 0 {
-		txFields["Flags"] = txInput.Flags
-	}
-	if txInput.LastLedgerSequence != 0 {
-		txFields["LastLedgerSequence"] = txInput.LastLedgerSequence
-	}
-	if txInput.Sequence != 0 {
-		txFields["Sequence"] = txInput.Sequence
-	}
+	// Reuse dtoTxInputToMap and add signature fields
+	txFields := dtoTxInputToMap(txInput)
 	txFields["SigningPubKey"] = txInput.SigningPubKey
 	txFields["TxnSignature"] = txInput.TxnSignature
 

@@ -390,7 +390,9 @@ func encodeFieldValue(name string, value any, typeCode uint8) ([]byte, error) {
 	}
 }
 
-// toUint64 converts various numeric types to uint64
+// toUint64 converts various numeric types to uint64.
+// Note: float64 is intentionally not supported to enforce type safety
+// at the call site. Transaction fields are expected to be integers.
 func toUint64(value any) (uint64, bool) {
 	switch v := value.(type) {
 	case uint64:
@@ -406,8 +408,6 @@ func toUint64(value any) (uint64, bool) {
 	case int32:
 		return uint64(v), true
 	case int:
-		return uint64(v), true
-	case float64:
 		return uint64(v), true
 	default:
 		return 0, false
@@ -500,7 +500,8 @@ func shouldSkipField(name string, value any) bool {
 	}
 
 	// Skip zero values for optional fields
-	if num, ok := value.(uint64); ok && num == 0 {
+	// Use toUint64 to handle all numeric types (uint32, uint64, etc.)
+	if num, ok := toUint64(value); ok && num == 0 {
 		if name == "Flags" || name == "DestinationTag" || name == "SourceTag" {
 			return true
 		}

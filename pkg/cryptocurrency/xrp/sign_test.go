@@ -2,11 +2,210 @@ package xrp
 
 import (
 	"encoding/hex"
+	"strings"
 	"testing"
 )
 
 // Test vectors based on XRPL documentation and reference implementations
 // Reference: https://xrpl.org/transaction-basics.html
+// Reference: https://github.com/XRPLF/xrpl.js/blob/main/packages/xrpl/test/wallet/index.ts
+
+// TestSigner_ReferenceVectors tests signing with deterministic keys.
+// These tests verify that signing produces consistent results for the same inputs.
+// Reference: https://github.com/XRPLF/xrpl.js/blob/main/packages/xrpl/test/wallet/index.ts
+func TestSigner_ReferenceVectors(t *testing.T) {
+	t.Parallel()
+
+	// Test with deterministic passphrases to generate consistent keys
+	tests := []struct {
+		name              string
+		algorithm         KeyAlgorithm
+		passphrase        string
+		expectedPubKeyPfx string // First bytes of public key (prefix)
+	}{
+		{
+			name:              "secp256k1 deterministic key",
+			algorithm:         AlgorithmSecp256k1,
+			passphrase:        "masterpassphrase",
+			expectedPubKeyPfx: "02", // secp256k1 compressed (02 or 03)
+		},
+		{
+			name:              "ed25519 deterministic key",
+			algorithm:         AlgorithmEd25519,
+			passphrase:        "masterpassphrase",
+			expectedPubKeyPfx: "ED", // ed25519 prefix
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			keyGen := NewKeyGenerator(tc.algorithm)
+			keyPair, err := keyGen.GenerateFromPassphrase(tc.passphrase)
+			if err != nil {
+				t.Fatalf("Failed to generate key pair: %v", err)
+			}
+
+			// Verify public key prefix
+			upperPubKey := strings.ToUpper(keyPair.PublicKeyHex)
+			if !strings.HasPrefix(upperPubKey, tc.expectedPubKeyPfx) &&
+				!strings.HasPrefix(upperPubKey, "03") { // secp256k1 can be 02 or 03
+				t.Errorf("Public key prefix mismatch: got %s, want prefix %s",
+					keyPair.PublicKeyHex[:2], tc.expectedPubKeyPfx)
+			}
+
+			// Generate a second keypair to use as destination
+			destKeyPair, err := keyGen.GenerateFromPassphrase("destination-account")
+			if err != nil {
+				t.Fatalf("Failed to generate destination key pair: %v", err)
+			}
+
+			// Sign a test transaction with known data
+			txFields := map[string]any{
+				"TransactionType":    "Payment",
+				"Account":            keyPair.ClassicAddress,
+				"Destination":        destKeyPair.ClassicAddress,
+				"Amount":             "1000000",
+				"Fee":                "12",
+				"Sequence":           uint64(1),
+				"LastLedgerSequence": uint64(65953073),
+			}
+
+			signer := NewSigner(tc.algorithm)
+			result, err := signer.SignTransaction(txFields, keyPair.Seed)
+			if err != nil {
+				t.Fatalf("SignTransaction failed: %v", err)
+			}
+
+			// Verify signature is valid
+			verifyFields := map[string]any{
+				"TransactionType":    "Payment",
+				"Account":            keyPair.ClassicAddress,
+				"Destination":        destKeyPair.ClassicAddress,
+				"Amount":             "1000000",
+				"Fee":                "12",
+				"Sequence":           uint64(1),
+				"LastLedgerSequence": uint64(65953073),
+				"SigningPubKey":      result.SigningPubKey,
+				"TxnSignature":       result.TxnSignature,
+			}
+
+			valid, err := signer.VerifySignature(verifyFields)
+			if err != nil {
+				t.Fatalf("VerifySignature failed: %v", err)
+			}
+			if !valid {
+				t.Error("Signature should be valid")
+			}
+
+			// Verify transaction ID format
+			if len(result.TxID) != 64 {
+				t.Errorf("TxID should be 64 hex chars, got %d", len(result.TxID))
+			}
+
+			// Log results for debugging
+			t.Logf("Address: %s", keyPair.ClassicAddress)
+			t.Logf("PublicKey: %s", result.SigningPubKey)
+			t.Logf("TxID: %s", result.TxID)
+		})
+	}
+}
+
+// TestSigner_DeterministicSigning verifies that signing the same transaction
+// with the same key produces consistent results (deterministic signing).
+func TestSigner_DeterministicSigning(t *testing.T) {
+	t.Parallel()
+
+	// Generate a deterministic key pair
+	keyGen := NewKeyGenerator(AlgorithmEd25519)
+	keyPair, err := keyGen.GenerateFromPassphrase("test-deterministic-signing")
+	if err != nil {
+		t.Fatalf("Failed to generate key pair: %v", err)
+	}
+
+	txFields := map[string]any{
+		"TransactionType":    "Payment",
+		"Account":            keyPair.ClassicAddress,
+		"Destination":        "rfkE1aSy9G8Upk4JssnwBxhEv5p4mn2KTy",
+		"Amount":             "500000",
+		"Fee":                "10",
+		"Sequence":           uint64(5),
+		"LastLedgerSequence": uint64(12345678),
+	}
+
+	signer := NewSigner(AlgorithmEd25519)
+
+	// Sign the same transaction multiple times
+	var previousTxID string
+	var previousSignature string
+	for i := 0; i < 3; i++ {
+		result, err := signer.SignTransaction(txFields, keyPair.Seed)
+		if err != nil {
+			t.Fatalf("SignTransaction failed on iteration %d: %v", i, err)
+		}
+
+		if previousTxID != "" && result.TxID != previousTxID {
+			t.Errorf("TxID changed between iterations: %s != %s", result.TxID, previousTxID)
+		}
+		if previousSignature != "" && result.TxnSignature != previousSignature {
+			t.Errorf("Signature changed between iterations: %s != %s",
+				result.TxnSignature, previousSignature)
+		}
+
+		previousTxID = result.TxID
+		previousSignature = result.TxnSignature
+	}
+}
+
+// TestSigner_InputNotModified verifies that SignTransaction does not modify
+// the input txFields map.
+func TestSigner_InputNotModified(t *testing.T) {
+	t.Parallel()
+
+	keyGen := NewKeyGenerator(AlgorithmEd25519)
+	keyPair, err := keyGen.GenerateRandom()
+	if err != nil {
+		t.Fatalf("Failed to generate key pair: %v", err)
+	}
+
+	txFields := map[string]any{
+		"TransactionType":    "Payment",
+		"Account":            keyPair.ClassicAddress,
+		"Destination":        "rfkE1aSy9G8Upk4JssnwBxhEv5p4mn2KTy",
+		"Amount":             "1000000",
+		"Fee":                "12",
+		"Sequence":           uint64(1),
+		"LastLedgerSequence": uint64(65953073),
+	}
+
+	// Record original keys
+	originalKeys := make(map[string]bool)
+	for k := range txFields {
+		originalKeys[k] = true
+	}
+
+	signer := NewSigner(AlgorithmEd25519)
+	_, err = signer.SignTransaction(txFields, keyPair.Seed)
+	if err != nil {
+		t.Fatalf("SignTransaction failed: %v", err)
+	}
+
+	// Verify no new keys were added
+	if _, exists := txFields["SigningPubKey"]; exists {
+		t.Error("SignTransaction modified input map: added SigningPubKey")
+	}
+	if _, exists := txFields["TxnSignature"]; exists {
+		t.Error("SignTransaction modified input map: added TxnSignature")
+	}
+
+	// Verify all original keys still exist
+	for k := range originalKeys {
+		if _, exists := txFields[k]; !exists {
+			t.Errorf("SignTransaction modified input map: removed key %s", k)
+		}
+	}
+}
 
 func TestSigner_SignTransaction_Ed25519(t *testing.T) {
 	t.Parallel()

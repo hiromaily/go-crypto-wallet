@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/btcsuite/btcd/btcec/v2"
@@ -43,7 +44,7 @@ type SignResult struct {
 // SignTransaction signs an XRP transaction using the provided seed.
 //
 // Parameters:
-//   - txFields: Transaction fields as a map (from JSON)
+//   - txFields: Transaction fields as a map (from JSON). This map is NOT modified.
 //   - seed: The master seed in XRP format (s... prefix) or hex format
 //
 // Returns the signed transaction blob, transaction ID, and an error if any.
@@ -58,17 +59,21 @@ func (s *Signer) SignTransaction(txFields map[string]any, seed string) (*SignRes
 		return nil, errors.New("seed cannot be empty")
 	}
 
+	// Create a copy of txFields to avoid modifying the caller's map
+	txFieldsCopy := make(map[string]any, len(txFields))
+	maps.Copy(txFieldsCopy, txFields)
+
 	// Derive the key pair from the seed
 	keyPair, err := s.deriveKeyPair(seed)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive key pair: %w", err)
 	}
 
-	// Add the signing public key to the transaction
-	txFields["SigningPubKey"] = keyPair.PublicKeyHex
+	// Add the signing public key to the transaction copy
+	txFieldsCopy["SigningPubKey"] = keyPair.PublicKeyHex
 
 	// Create transaction for serialization
-	tx := NewTransaction(txFields)
+	tx := NewTransaction(txFieldsCopy)
 
 	// Compute the signing hash
 	signingHash, err := s.serializer.ComputeSigningHash(tx)
@@ -84,11 +89,11 @@ func (s *Signer) SignTransaction(txFields map[string]any, seed string) (*SignRes
 
 	signatureHex := strings.ToUpper(hex.EncodeToString(signature))
 
-	// Add signature to transaction
-	txFields["TxnSignature"] = signatureHex
+	// Add signature to transaction copy
+	txFieldsCopy["TxnSignature"] = signatureHex
 
 	// Serialize the complete signed transaction
-	signedTx := NewTransaction(txFields)
+	signedTx := NewTransaction(txFieldsCopy)
 	txBlob, err := s.serializer.SerializeForSubmission(signedTx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize signed transaction: %w", err)
@@ -161,13 +166,8 @@ func (*Signer) signSecp256k1(hash []byte, keyPair *XRPKeyPair) ([]byte, error) {
 		return nil, fmt.Errorf("invalid seed hex: %w", err)
 	}
 
-	// Derive private key same as in keygen
-	seedHash := Sha512Half(seedBytes)
-	sequence := make([]byte, 4)
-	keyGenData := make([]byte, 0, len(seedHash)+len(sequence))
-	keyGenData = append(keyGenData, seedHash...)
-	keyGenData = append(keyGenData, sequence...)
-	privateKeyBytes := Sha512Half(keyGenData)
+	// Use shared helper to derive private key (same as keygen)
+	privateKeyBytes := deriveSecp256k1PrivateKey(seedBytes)
 
 	// Create secp256k1 private key
 	privKey, _ := btcec.PrivKeyFromBytes(privateKeyBytes)
