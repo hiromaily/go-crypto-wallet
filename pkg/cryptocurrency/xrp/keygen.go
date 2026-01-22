@@ -117,8 +117,13 @@ func (g *KeyGenerator) GenerateFromEntropy(entropy []byte) (*XRPKeyPair, error) 
 	}
 }
 
-// generateSecp256k1 generates an XRP key pair using secp256k1.
-func (*KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) {
+// deriveSecp256k1PrivateKey derives a secp256k1 private key from seed bytes.
+// This is used by both key generation and signing.
+//
+// The derivation follows XRP's method:
+// 1. SHA512Half of the seed bytes
+// 2. SHA512Half of (seedHash || sequence) where sequence is 0 for root key
+func deriveSecp256k1PrivateKey(seedBytes []byte) []byte {
 	// Generate the family seed hash
 	seedHash := Sha512Half(seedBytes)
 
@@ -129,7 +134,12 @@ func (*KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) {
 	keyGenData := make([]byte, 0, len(seedHash)+len(sequence))
 	keyGenData = append(keyGenData, seedHash...)
 	keyGenData = append(keyGenData, sequence...)
-	privateKeyBytes := Sha512Half(keyGenData)
+	return Sha512Half(keyGenData)
+}
+
+// generateSecp256k1 generates an XRP key pair using secp256k1.
+func (*KeyGenerator) generateSecp256k1(seedBytes []byte) (*XRPKeyPair, error) {
+	privateKeyBytes := deriveSecp256k1PrivateKey(seedBytes)
 
 	// Create secp256k1 private key
 	// btcec.PrivKeyFromBytes returns (*PrivateKey, *PublicKey)
