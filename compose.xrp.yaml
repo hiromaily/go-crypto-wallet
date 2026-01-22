@@ -45,12 +45,12 @@ services:
     restart: unless-stopped
 
   #########################################################################
-  # xrp-node (rippled)
+  # xrp-node (rippled v3.0.0)
   # - XRP Ledger node using xrpllabsofficial/xrpld image
   # - Documentation:
   #   - https://hub.docker.com/r/xrpllabsofficial/xrpld
+  #   - https://xrpl.org/blog/2025/rippled-3.0.0
   #   - https://xrpl.org/install-rippled.html
-  #   - https://xrpl.org/configure-rippled.html
   # - Configuration: ./docker/nodes/xrp/config/rippled.cfg
   # - Testnet validators: ./docker/nodes/xrp/config/validators.txt
   #------------------------------------------------------------------------
@@ -59,7 +59,7 @@ services:
   # $ docker compose -f compose.xrp.yaml logs -f xrp-node
   #########################################################################
   xrp-node:
-    image: xrpllabsofficial/xrpld:latest
+    image: xrpllabsofficial/xrpld:3.0.0
     container_name: xrp-node
     volumes:
       # Mount custom config (rippled.cfg and validators.txt)
@@ -82,7 +82,7 @@ services:
           "wget",
           "-q",
           "-O-",
-          "--post-data={\"method\":\"server_info\",\"params\":[{}]}",
+          '--post-data={"method":"server_info","params":[{}]}',
           "--header=Content-Type: application/json",
           "http://localhost:6006",
         ]
