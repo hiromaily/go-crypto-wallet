@@ -49,6 +49,7 @@ func TestNewClient(t *testing.T) {
 				ReadTimeout:       30 * time.Second,
 				WriteTimeout:      30 * time.Second,
 				HeartbeatInterval: 10 * time.Second,
+				ValidationTimeout: 10 * time.Minute,
 			},
 			wantErr: false,
 		},
@@ -89,6 +90,9 @@ func TestDefaultConfig(t *testing.T) {
 	}
 	if config.HeartbeatInterval != 5*time.Second {
 		t.Errorf("DefaultConfig().HeartbeatInterval = %v, want %v", config.HeartbeatInterval, 5*time.Second)
+	}
+	if config.ValidationTimeout != 5*time.Minute {
+		t.Errorf("DefaultConfig().ValidationTimeout = %v, want %v", config.ValidationTimeout, 5*time.Minute)
 	}
 }
 
@@ -170,8 +174,18 @@ func TestExtractResult(t *testing.T) {
 			resp: map[string]any{
 				"result": map[string]any{
 					"error":         "actNotFound",
-					"error_code":    19,
+					"error_code":    float64(19),
 					"error_message": "Account not found.",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error with missing error_message",
+			resp: map[string]any{
+				"result": map[string]any{
+					"error":      "actNotFound",
+					"error_code": float64(19),
 				},
 			},
 			wantErr: true,
@@ -210,5 +224,121 @@ func TestClientClose(t *testing.T) {
 	_, err = client.GetAccountInfo(context.Background(), "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh")
 	if err == nil {
 		t.Error("GetAccountInfo() after Close() should return error")
+	}
+}
+
+func TestParseAmount(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		amount   any
+		wantInfo amountInfo
+	}{
+		{
+			name:   "XRP amount as string",
+			amount: "1000000",
+			wantInfo: amountInfo{
+				Value:    "1",
+				Currency: "XRP",
+			},
+		},
+		{
+			name: "token amount as object",
+			amount: map[string]any{
+				"value":    "100.5",
+				"currency": "USD",
+				"issuer":   "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
+			},
+			wantInfo: amountInfo{
+				Value:    "100.5",
+				Currency: "USD",
+				Issuer:   "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
+			},
+		},
+		{
+			name:   "nil amount",
+			amount: nil,
+			wantInfo: amountInfo{
+				Value:    "0",
+				Currency: "XRP",
+			},
+		},
+		{
+			name:   "unexpected type",
+			amount: 12345,
+			wantInfo: amountInfo{
+				Value:    "0",
+				Currency: "XRP",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := parseAmount(tt.amount)
+			if got.Value != tt.wantInfo.Value {
+				t.Errorf("parseAmount().Value = %v, want %v", got.Value, tt.wantInfo.Value)
+			}
+			if got.Currency != tt.wantInfo.Currency {
+				t.Errorf("parseAmount().Currency = %v, want %v", got.Currency, tt.wantInfo.Currency)
+			}
+			if got.Issuer != tt.wantInfo.Issuer {
+				t.Errorf("parseAmount().Issuer = %v, want %v", got.Issuer, tt.wantInfo.Issuer)
+			}
+		})
+	}
+}
+
+// mockLogger implements Logger interface for testing.
+type mockLogger struct {
+	debugCalls []string
+	warnCalls  []string
+	errorCalls []string
+}
+
+func (m *mockLogger) Debug(msg string, _ ...any) { m.debugCalls = append(m.debugCalls, msg) }
+func (m *mockLogger) Warn(msg string, _ ...any)  { m.warnCalls = append(m.warnCalls, msg) }
+func (m *mockLogger) Error(msg string, _ ...any) { m.errorCalls = append(m.errorCalls, msg) }
+
+func TestClientWithLogger(t *testing.T) {
+	t.Parallel()
+
+	logger := &mockLogger{}
+	config := ClientConfig{
+		WebSocketURL: "wss://s.altnet.rippletest.net:51233",
+		Logger:       logger,
+	}
+
+	client, err := NewClient(config)
+	if err != nil {
+		t.Fatalf("NewClient() error = %v", err)
+	}
+	defer func() {
+		_ = client.Close()
+	}()
+
+	// Verify logger was set
+	if client.logger == nil {
+		t.Error("client.logger should not be nil")
+	}
+}
+
+func TestNoopLogger(t *testing.T) {
+	t.Parallel()
+
+	// Ensure noopLogger doesn't panic
+	logger := noopLogger{}
+	logger.Debug("test")
+	logger.Warn("test")
+	logger.Error("test")
+}
+
+func TestDropsInXRPConstant(t *testing.T) {
+	t.Parallel()
+
+	if dropsInXRP != 1_000_000 {
+		t.Errorf("dropsInXRP = %d, want %d", dropsInXRP, 1_000_000)
 	}
 }

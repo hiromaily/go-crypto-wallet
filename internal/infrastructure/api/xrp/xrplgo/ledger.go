@@ -85,9 +85,8 @@ func (c *Client) waitForLedger(ctx context.Context, targetLedgerVersion uint64) 
 		_, _ = client.Unsubscribe([]string{xrpl.StreamTypeLedger})
 	}()
 
-	// Wait for target ledger version with timeout
-	timeout := 5 * time.Minute
-	timer := time.NewTimer(timeout)
+	// Use configurable validation timeout
+	timer := time.NewTimer(c.config.ValidationTimeout)
 	defer timer.Stop()
 
 	for {
@@ -101,7 +100,11 @@ func (c *Client) waitForLedger(ctx context.Context, targetLedgerVersion uint64) 
 			}
 			var msg ledgerClosedMessage
 			if err := json.Unmarshal(ledgerData, &msg); err != nil {
-				continue // Skip malformed messages
+				c.logger.Warn("failed to parse ledger stream message",
+					"error", err.Error(),
+					"data", string(ledgerData),
+				)
+				continue
 			}
 
 			if msg.LedgerIndex >= targetLedgerVersion {
@@ -127,6 +130,7 @@ func (c *Client) waitForLedger(ctx context.Context, targetLedgerVersion uint64) 
 func (c *Client) SubscribeLedger(ctx context.Context) (<-chan uint64, error) {
 	c.mu.RLock()
 	client := c.client
+	logger := c.logger
 	c.mu.RUnlock()
 
 	if client == nil {
@@ -159,6 +163,10 @@ func (c *Client) SubscribeLedger(ctx context.Context) (<-chan uint64, error) {
 				}
 				var msg ledgerClosedMessage
 				if err := json.Unmarshal(ledgerData, &msg); err != nil {
+					logger.Warn("failed to parse ledger stream message",
+						"error", err.Error(),
+						"data", string(ledgerData),
+					)
 					continue
 				}
 

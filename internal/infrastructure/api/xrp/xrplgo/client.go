@@ -4,14 +4,29 @@ package xrplgo
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	xrpl "github.com/xrpscan/xrpl-go"
 )
+
+// Logger defines the logging interface used by this package.
+// This allows the caller to inject their own logger implementation.
+type Logger interface {
+	Debug(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
+}
+
+// noopLogger is a no-op logger used when no logger is provided.
+type noopLogger struct{}
+
+func (noopLogger) Debug(_ string, _ ...any) {}
+func (noopLogger) Warn(_ string, _ ...any)  {}
+func (noopLogger) Error(_ string, _ ...any) {}
 
 // ClientConfig holds configuration for the XRPL client.
 type ClientConfig struct {
@@ -26,6 +41,13 @@ type ClientConfig struct {
 
 	// HeartbeatInterval is the interval between heartbeat messages. Default: 5 seconds.
 	HeartbeatInterval time.Duration
+
+	// ValidationTimeout is the timeout for waiting ledger validation. Default: 5 minutes.
+	ValidationTimeout time.Duration
+
+	// Logger is an optional logger for debugging and error reporting.
+	// If nil, a no-op logger is used.
+	Logger Logger
 }
 
 // DefaultConfig returns a ClientConfig with default values.
@@ -35,6 +57,7 @@ func DefaultConfig(wsURL string) ClientConfig {
 		ReadTimeout:       60 * time.Second,
 		WriteTimeout:      60 * time.Second,
 		HeartbeatInterval: 5 * time.Second,
+		ValidationTimeout: 5 * time.Minute,
 	}
 }
 
@@ -42,6 +65,7 @@ func DefaultConfig(wsURL string) ClientConfig {
 type Client struct {
 	client *xrpl.Client
 	config ClientConfig
+	logger Logger
 	mu     sync.RWMutex
 }
 
@@ -65,11 +89,23 @@ func NewClient(config ClientConfig) (*Client, error) {
 		xrplConfig.HeartbeatInterval = config.HeartbeatInterval
 	}
 
+	// Set default validation timeout if not specified
+	if config.ValidationTimeout == 0 {
+		config.ValidationTimeout = 5 * time.Minute
+	}
+
+	// Use no-op logger if none provided
+	logger := config.Logger
+	if logger == nil {
+		logger = noopLogger{}
+	}
+
 	client := xrpl.NewClient(xrplConfig)
 
 	return &Client{
 		client: client,
 		config: config,
+		logger: logger,
 	}, nil
 }
 
@@ -99,7 +135,7 @@ func (c *Client) request(_ context.Context, req xrpl.BaseRequest) (xrpl.BaseResp
 	return c.client.Request(req)
 }
 
-// extractResult extracts the "result" field from a response and unmarshals it into the target.
+// extractResult extracts the "result" field from a response and decodes it into the target.
 func extractResult(resp xrpl.BaseResponse, target any) error {
 	result, hasResult := resp["result"]
 	if !hasResult {
@@ -109,8 +145,15 @@ func extractResult(resp xrpl.BaseResponse, target any) error {
 	// Check for error in result
 	if resultMap, isMap := result.(map[string]any); isMap {
 		if errMsg, hasError := resultMap["error"].(string); hasError {
-			errCode, _ := resultMap["error_code"].(float64)
-			errMessage, _ := resultMap["error_message"].(string)
+			var errCode float64
+			var errMessage string
+
+			if code, ok := resultMap["error_code"].(float64); ok {
+				errCode = code
+			}
+			if msg, ok := resultMap["error_message"].(string); ok {
+				errMessage = msg
+			}
 			if errMessage == "" {
 				errMessage = errMsg
 			}
@@ -118,14 +161,18 @@ func extractResult(resp xrpl.BaseResponse, target any) error {
 		}
 	}
 
-	// Marshal and unmarshal to convert to target type
-	data, err := json.Marshal(result)
+	// Use mapstructure for efficient decoding from map to struct
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:           target,
+		TagName:          "json",
+		WeaklyTypedInput: true,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to marshal result: %w", err)
+		return fmt.Errorf("failed to create decoder: %w", err)
 	}
 
-	if err := json.Unmarshal(data, target); err != nil {
-		return fmt.Errorf("failed to unmarshal result: %w", err)
+	if err := decoder.Decode(result); err != nil {
+		return fmt.Errorf("failed to decode result: %w", err)
 	}
 
 	return nil

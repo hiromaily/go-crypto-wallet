@@ -18,7 +18,7 @@ type submitResponse struct {
 	TxJSON              struct {
 		TransactionType    string `json:"TransactionType"`
 		Account            string `json:"Account"`
-		Amount             string `json:"Amount"`
+		Amount             any    `json:"Amount"` // Can be string (XRP) or object (token)
 		Destination        string `json:"Destination"`
 		Fee                string `json:"Fee"`
 		Flags              uint64 `json:"Flags"`
@@ -33,7 +33,7 @@ type submitResponse struct {
 // txResponse represents the response from tx command.
 type txResponse struct {
 	Account            string `json:"Account"`
-	Amount             string `json:"Amount,omitempty"`
+	Amount             any    `json:"Amount,omitempty"` // Can be string (XRP) or object (token)
 	Destination        string `json:"Destination,omitempty"`
 	Fee                string `json:"Fee"`
 	Flags              uint64 `json:"Flags"`
@@ -47,10 +47,50 @@ type txResponse struct {
 	Meta               struct {
 		TransactionIndex  int    `json:"TransactionIndex"`
 		TransactionResult string `json:"TransactionResult"`
-		DeliveredAmount   string `json:"delivered_amount,omitempty"`
+		DeliveredAmount   any    `json:"delivered_amount,omitempty"` // Can be string (XRP) or object (token)
 	} `json:"meta"`
 	Validated bool   `json:"validated"`
 	Date      uint64 `json:"date"`
+}
+
+// amountInfo holds parsed amount information.
+type amountInfo struct {
+	Value    string
+	Currency string
+	Issuer   string
+}
+
+// parseAmount parses an amount field which can be either a string (XRP drops) or an object (token).
+// For XRP: the value is a string representing drops.
+// For tokens: the value is an object with "value", "currency", and "issuer" fields.
+func parseAmount(amount any) amountInfo {
+	if amount == nil {
+		return amountInfo{Value: "0", Currency: "XRP"}
+	}
+
+	switch v := amount.(type) {
+	case string:
+		// XRP amount in drops
+		return amountInfo{
+			Value:    dropsToXRP(v),
+			Currency: "XRP",
+		}
+	case map[string]any:
+		// Token amount
+		info := amountInfo{Currency: "XRP"}
+		if val, ok := v["value"].(string); ok {
+			info.Value = val
+		}
+		if curr, ok := v["currency"].(string); ok {
+			info.Currency = curr
+		}
+		if issuer, ok := v["issuer"].(string); ok {
+			info.Issuer = issuer
+		}
+		return info
+	default:
+		return amountInfo{Value: "0", Currency: "XRP"}
+	}
 }
 
 // SubmitTransaction submits a signed transaction to the XRPL network.
@@ -71,6 +111,12 @@ func (c *Client) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxr
 		return nil, 0, fmt.Errorf("failed to parse submit response: %w", err)
 	}
 
+	// Parse amount (handles both XRP and tokens)
+	amountStr := ""
+	if strAmount, ok := result.TxJSON.Amount.(string); ok {
+		amountStr = strAmount
+	}
+
 	sentTx := &dtoxrp.SentTx{
 		ResultCode:          result.EngineResult,
 		ResultMessage:       result.EngineResultMessage,
@@ -81,7 +127,7 @@ func (c *Client) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxr
 		TxJSON: dtoxrp.TxInput{
 			TransactionType:    result.TxJSON.TransactionType,
 			Account:            result.TxJSON.Account,
-			Amount:             result.TxJSON.Amount,
+			Amount:             amountStr,
 			Destination:        result.TxJSON.Destination,
 			Fee:                result.TxJSON.Fee,
 			Flags:              result.TxJSON.Flags,
@@ -126,6 +172,10 @@ func (c *Client) GetTransaction(ctx context.Context, txID string, targetLedgerVe
 		return nil, fmt.Errorf("failed to parse transaction response: %w", err)
 	}
 
+	// Parse amounts (handles both XRP and tokens)
+	sourceAmount := parseAmount(result.Amount)
+	deliveredAmount := parseAmount(result.Meta.DeliveredAmount)
+
 	txInfo := &dtoxrp.TxInfo{
 		Type:     result.TransactionType,
 		Address:  result.Account,
@@ -135,8 +185,8 @@ func (c *Client) GetTransaction(ctx context.Context, txID string, targetLedgerVe
 			Source: dtoxrp.TxSpecSource{
 				Address: result.Account,
 				MaxAmount: dtoxrp.TxAmount{
-					Currency: "XRP",
-					Value:    dropsToXRP(result.Amount),
+					Currency: sourceAmount.Currency,
+					Value:    sourceAmount.Value,
 				},
 			},
 			Destination: dtoxrp.TxSpecDestination{
@@ -149,8 +199,8 @@ func (c *Client) GetTransaction(ctx context.Context, txID string, targetLedgerVe
 			LedgerVersion: result.LedgerIndex,
 			IndexInLedger: result.Meta.TransactionIndex,
 			DeliveredAmount: dtoxrp.TxAmount{
-				Currency: "XRP",
-				Value:    dropsToXRP(result.Meta.DeliveredAmount),
+				Currency: deliveredAmount.Currency,
+				Value:    deliveredAmount.Value,
 			},
 		},
 	}
