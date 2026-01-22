@@ -2,6 +2,7 @@ package xrp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -67,45 +68,49 @@ func (u *sendTransactionUseCase) Execute(
 	// Validate file path and extract transaction metadata
 	actionType, _, txID, _, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeSigned)
 	if err != nil {
-		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
+		return watchusecase.SendTransactionOutput{}, fmt.Errorf("failed to validate file path: %w", err)
 	}
 
 	logger.Debug("send_tx", "action_type", actionType.String())
 
-	// Read hex from file
-	data, err := u.txFileRepo.ReadFileSlice(input.FilePath)
+	// Read and parse JSON transaction file
+	jsonData, err := u.txFileRepo.ReadJSONFile(input.FilePath)
 	if err != nil {
-		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ReadFile(): %w", err)
+		return watchusecase.SendTransactionOutput{}, fmt.Errorf("failed to read JSON file: %w", err)
+	}
+
+	signedFile, err := dtoxrp.SignedTransactionFileFromJSON(jsonData)
+	if err != nil {
+		return watchusecase.SendTransactionOutput{}, fmt.Errorf("failed to parse signed transaction file: %w", err)
+	}
+
+	// Validate that we have signed transactions
+	if len(signedFile.Transactions) == 0 {
+		return watchusecase.SendTransactionOutput{}, errors.New("no signed transactions in file")
 	}
 
 	// Process each signed transaction concurrently
 	var wg sync.WaitGroup
 
-	for _, txHex := range data {
+	for _, signedTx := range signedFile.Transactions {
 		wg.Add(1)
-		go func(line string) {
+		go func(tx dtoxrp.SignedTransactionEntry) {
 			defer wg.Done()
 
-			// Parse transaction data: uuid, signedTxID, txBlob
-			tmp := strings.Split(line, ",")
-			if len(tmp) != 3 {
-				logger.Warn("data format is invalid in file")
+			// Validate transaction has required data
+			if tx.SignedTxBlob == "" {
+				logger.Warn("skipping transaction with empty signed blob", "uuid", tx.UUID)
 				return
 			}
-			uuid := tmp[0]
-			signedTxID := tmp[1]
-			txBlob := tmp[2]
 
 			// Submit transaction to XRP network
-			var sentTx *dtoxrp.SentTx
-			var earlistLedgerVersion uint64
-			sentTx, earlistLedgerVersion, err = u.xrper.SubmitTransaction(ctx, txBlob)
-			if err != nil {
-				logger.Warn("fail to call xrp.SubmitTransaction()",
+			sentTx, earliestLedgerVersion, submitErr := u.xrper.SubmitTransaction(ctx, tx.SignedTxBlob)
+			if submitErr != nil {
+				logger.Warn("failed to submit transaction",
 					"tx_id", txID,
-					"uuid", uuid,
-					"signed_tx_id", signedTxID,
-					"error", err,
+					"uuid", tx.UUID,
+					"signed_tx_id", tx.SignedTxID,
+					"error", submitErr,
 					// https://xrpl.org/tef-codes.html
 					// https://xrpl.org/finality-of-results.html
 					// tefMAX_LEDGER / Ledger sequence too high
@@ -116,50 +121,48 @@ func (u *sendTransactionUseCase) Execute(
 				return
 			}
 			if !strings.Contains(sentTx.ResultCode, "tesSUCCESS") {
-				logger.Warn("fail to call SubmitTransaction",
+				logger.Warn("transaction submission failed",
 					"tx_id", txID,
-					"uuid", uuid,
-					"signed_tx_id", signedTxID,
+					"uuid", tx.UUID,
+					"signed_tx_id", tx.SignedTxID,
 					"result_code", sentTx.ResultCode,
 					"result_message", sentTx.ResultMessage,
 				)
 				return
 			}
-			// txBlob and sentTx.TxBlob is same
 
 			// Debug ledger version info
 			logger.Debug("ledger version",
-				"earlistLedgerVersion", earlistLedgerVersion,
+				"earliestLedgerVersion", earliestLedgerVersion,
+				"lastLedgerSequence", tx.LastLedgerSequence,
 				"sentTx.TxJSON.LastLedgerSequence", sentTx.TxJSON.LastLedgerSequence,
 			)
 
 			// Wait for transaction validation
-			var ledgerVer uint64
-			ledgerVer, err = u.xrper.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
-			if err != nil {
-				logger.Warn("fail to call xrp.WaitValidation()",
+			ledgerVer, waitErr := u.xrper.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
+			if waitErr != nil {
+				logger.Warn("failed to wait for validation",
 					"tx_id", txID,
-					"uuid", uuid,
-					"signed_tx_id", signedTxID,
+					"uuid", tx.UUID,
+					"signed_tx_id", tx.SignedTxID,
 					"lastLedgerSequence", sentTx.TxJSON.LastLedgerSequence,
 					"ledgerVer", ledgerVer,
-					"error", err,
+					"error", waitErr,
 					// Transaction has not been validated yet; try again later
 				)
 				return
 			}
 
 			// Get transaction info for verification
-			var txInfo *dtoxrp.TxInfo
-			txInfo, err = u.xrper.GetTransaction(ctx, sentTx.TxJSON.Hash, earlistLedgerVersion)
-			if err != nil {
-				logger.Warn("fail to call xrp.GetTransaction()",
+			txInfo, getErr := u.xrper.GetTransaction(ctx, sentTx.TxJSON.Hash, earliestLedgerVersion)
+			if getErr != nil {
+				logger.Warn("failed to get transaction info",
 					"tx_id", txID,
-					"uuid", uuid,
-					"signed_tx_id", signedTxID,
+					"uuid", tx.UUID,
+					"signed_tx_id", tx.SignedTxID,
 					"hash", sentTx.TxJSON.Hash,
-					"earlistLedgerVersion", earlistLedgerVersion,
-					"error", err,
+					"earliestLedgerVersion", earliestLedgerVersion,
+					"error", getErr,
 				)
 				return
 			}
@@ -167,20 +170,18 @@ func (u *sendTransactionUseCase) Execute(
 			grok.Value(txInfo)
 
 			// Update xrp_detail_tx table
-			var affectedNum int64
-			affectedNum, err = u.txDetailRepo.UpdateAfterTxSent(
-				uuid, domainTx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
-			if err != nil {
+			affectedNum, updateErr := u.txDetailRepo.UpdateAfterTxSent(
+				tx.UUID, domainTx.TxTypeSent, tx.SignedTxID, tx.SignedTxBlob, earliestLedgerVersion)
+			if updateErr != nil {
 				// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 				logger.Warn(
-					"fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. "+
-						"So database should be updated manually",
+					"failed to update database after tx sent - manual correction required",
 					"tx_id", txID,
-					"uuid", uuid,
-					"signed_tx_id", signedTxID,
+					"uuid", tx.UUID,
+					"signed_tx_id", tx.SignedTxID,
 					"tx_type", domainTx.TxTypeSent.String(),
 					"tx_type_value", domainTx.TxTypeSent.Int8(),
-					"error", err,
+					"error", updateErr,
 				)
 				// "error":"models: unable to update all for xrp_detail_tx: Error 1406:
 				// Data too long for column 'signed_tx_blob' at row 1"
@@ -189,14 +190,22 @@ func (u *sendTransactionUseCase) Execute(
 			if affectedNum == 0 {
 				logger.Info("no records to update tx_table",
 					"tx_id", txID,
-					"uuid", uuid,
-					"signed_tx_id", signedTxID,
+					"uuid", tx.UUID,
+					"signed_tx_id", tx.SignedTxID,
 					"tx_type", domainTx.TxTypeSent.String(),
 					"tx_type_value", domainTx.TxTypeSent.Int8(),
 				)
 				return
 			}
-		}(txHex)
+
+			logger.Info("transaction sent successfully",
+				"uuid", tx.UUID,
+				"signed_tx_id", tx.SignedTxID,
+				"sender", tx.SenderAccount,
+				"receiver", tx.ReceiverAccount,
+				"amount", tx.Amount,
+			)
+		}(signedTx)
 	}
 	wg.Wait()
 

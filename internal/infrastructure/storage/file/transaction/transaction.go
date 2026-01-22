@@ -48,11 +48,14 @@ func (r *TransactionFileRepository) CreateFilePath(
 func (*TransactionFileRepository) GetFileNameType(filePath string) (*file.FileName, error) {
 	// just file path or full path
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209.psbt
+	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209.json
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
 
-	// Strip .psbt extension if present
+	// Strip file extensions (.psbt, .json, .hex)
 	fileName = strings.TrimSuffix(fileName, ".psbt")
+	fileName = strings.TrimSuffix(fileName, ".json")
+	fileName = strings.TrimSuffix(fileName, ".hex")
 
 	// deposit_5_unsigned_0_1534466246366489473
 	// s[0]: actionType
@@ -280,4 +283,49 @@ func (*TransactionFileRepository) createDir(path string) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		_ = os.MkdirAll(dir, 0o700) // Create all parent directories
 	}
+}
+
+// WriteJSONFile writes JSON data to file with .json extension
+// Used by XRP for structured transaction files
+func (*TransactionFileRepository) WriteJSONFile(path string, data []byte) (string, error) {
+	// Add timestamp and .json extension
+	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := path + ts + ".json"
+
+	// Create directory if not existing
+	dir := filepath.Dir(fileName)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	// Write JSON data
+	err := os.WriteFile(fileName, data, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write JSON file %s: %w", fileName, err)
+	}
+
+	return fileName, nil
+}
+
+// ReadJSONFile reads JSON data from a file
+func (r *TransactionFileRepository) ReadJSONFile(path string) ([]byte, error) {
+	// Validate extension (case-insensitive)
+	if !strings.HasSuffix(strings.ToLower(path), ".json") {
+		return nil, fmt.Errorf("invalid JSON file extension: %s (expected .json)", path)
+	}
+
+	// Security: Clean path and prevent path traversal
+	cleanPath := filepath.Clean(path)
+	// Note: r.filePath can be empty in tests
+	if r.filePath != "" && !strings.HasPrefix(cleanPath, filepath.Clean(r.filePath)) {
+		return nil, fmt.Errorf("path traversal attempt detected: %s", path)
+	}
+
+	// Read file
+	data, err := os.ReadFile(cleanPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read JSON file %s: %w", cleanPath, err)
+	}
+
+	return data, nil
 }

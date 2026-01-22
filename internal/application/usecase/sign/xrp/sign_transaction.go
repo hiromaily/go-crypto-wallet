@@ -2,10 +2,8 @@ package xrp
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
@@ -52,72 +50,106 @@ func (u *signTransactionUseCase) Sign(
 	ctx context.Context,
 	input signusecase.SignTransactionInput,
 ) (signusecase.SignTransactionOutput, error) {
-	// get tx_deposit_id from tx file name
+	// Validate file path and extract transaction metadata
 	actionType, _, txID, signedCount, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeUnsigned)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, err
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to validate file path: %w", err)
 	}
 
-	var senderAccount domainAccount.AccountType
-
-	// get hex tx from file
-	data, err := u.txFileRepo.ReadFileSlice(input.FilePath)
+	// Read and parse JSON transaction file
+	jsonData, err := u.txFileRepo.ReadJSONFile(input.FilePath)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ReadFileSlice(): %w", err)
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to read JSON file: %w", err)
 	}
-	if len(data) > 1 {
-		senderAccount = domainAccount.AccountType(data[0])
-	} else {
-		return signusecase.SignTransactionOutput{}, errors.New("file is invalid")
+
+	txFile, err := dtoxrp.TransactionFileFromJSON(jsonData)
+	if err != nil {
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to parse transaction file: %w", err)
 	}
-	serializedTxs := data[1:]
 
-	txHexs := make([]string, 0, len(serializedTxs))
-	for _, serializedTx := range serializedTxs {
-		// uid, txJSON
-		tmp := strings.SplitAfterN(serializedTx, ",", 2)
-		if len(tmp) != 2 {
-			return signusecase.SignTransactionOutput{}, errors.New("data format is invalid in file")
-		}
-		uuid := strings.TrimRight(tmp[0], ",")
-		txJSON := tmp[1]
+	// Validate that transactions are unsigned
+	if !txFile.IsUnsigned() {
+		return signusecase.SignTransactionOutput{},
+			errors.New("transaction file does not contain unsigned transactions")
+	}
 
-		var txInput dtoxrp.TxInput
-		if err = json.Unmarshal([]byte(txJSON), &txInput); err != nil {
-			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
+	// Get sender account type from file metadata
+	senderAccount := domainAccount.AccountType(txFile.SenderAccountType)
+
+	// Create signed transaction file
+	signedFile := dtoxrp.NewSignedTransactionFile(txFile)
+
+	// Sign each transaction
+	for _, txEntry := range txFile.Transactions {
+		if txEntry.UnsignedTx == nil {
+			logger.Warn("skipping transaction entry with nil unsigned tx", "uuid", txEntry.UUID)
+			continue
 		}
-		// TODO: get secret from database by txInput.Account
-		// master_seed from xrp_account_key table
-		var secret string
-		secret, err = u.xrpAccountKeyRepo.GetSecret(ctx, senderAccount, txInput.Account)
+
+		// Get secret from database for the sender address
+		secret, err := u.xrpAccountKeyRepo.GetSecret(ctx, senderAccount, txEntry.SenderAccount)
 		if err != nil {
 			return signusecase.SignTransactionOutput{},
-				fmt.Errorf("fail to call xrpAccountKeyRepo.GetSecret(): %w", err)
+				fmt.Errorf("failed to get secret for account %s: %w", txEntry.SenderAccount, err)
 		}
 
-		// sign
-		var signedTxID string
-		var txBlob string
-		signedTxID, txBlob, err = u.xrp.SignTransaction(ctx, &txInput, secret)
+		// Sign the transaction
+		signedTxID, txBlob, err := u.xrp.SignTransaction(ctx, txEntry.UnsignedTx, secret)
 		if err != nil {
-			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call xrp.SignTransaction(): %w", err)
+			return signusecase.SignTransactionOutput{},
+				fmt.Errorf("failed to sign transaction %s: %w", txEntry.UUID, err)
 		}
+
 		logger.Debug("signed_tx",
-			"uuid", uuid, "signed_tx_id", signedTxID, "signed_tx_blob", txBlob)
-		txHexs = append(txHexs, fmt.Sprintf("%s,%s,%s", uuid, signedTxID, txBlob))
+			"uuid", txEntry.UUID,
+			"signed_tx_id", signedTxID,
+			"signed_tx_blob_len", len(txBlob),
+		)
+
+		// Add signed transaction to the output file
+		signedFile.AddSignedTransaction(
+			txEntry.UUID,
+			signedTxID,
+			txBlob,
+			txEntry.SenderAccount,
+			txEntry.SenderAccountType,
+			txEntry.ReceiverAccount,
+			txEntry.ReceiverAccountType,
+			txEntry.Amount,
+			txEntry.UnsignedTx.LastLedgerSequence,
+			1, // Single signature applied
+			txEntry.RequiredSignatures,
+		)
 	}
 
-	// write file
-	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeSigned, txID, signedCount+1)
-	generatedFileName, err := u.txFileRepo.WriteFileSlice(path, txHexs)
+	// Serialize and write signed transaction file
+	signedJSON, err := signedFile.ToJSON()
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to serialize signed transactions: %w", err)
 	}
 
-	// return hexTx, isSigned, generatedFileName, nil
+	// Write signed JSON file
+	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeSigned, txID, signedCount+1)
+
+	// Note: WriteJSONFile expects path without .json extension, it will add timestamp and .json
+	// However, for signed files, we need to ensure the file can be parsed later
+	generatedFileName, err := u.txFileRepo.WriteJSONFile(path, signedJSON)
+	if err != nil {
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to write signed JSON file: %w", err)
+	}
+
+	// Check if all transactions are complete (have required signatures)
+	isComplete := len(signedFile.Transactions) > 0
+	for _, tx := range signedFile.Transactions {
+		if tx.SignatureCount < tx.RequiredSignatures {
+			isComplete = false
+			break
+		}
+	}
+
 	return signusecase.SignTransactionOutput{
 		SignedData:   "",
-		IsComplete:   true,
+		IsComplete:   isComplete,
 		NextFilePath: generatedFileName,
 	}, nil
 }

@@ -128,7 +128,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 		return "", nil
 	}
 
-	serializedTxs, txDetailItems, err := u.createDepositRawTransactions(ctx, sender, receiver, userAmounts)
+	txEntries, txDetailItems, err := u.createDepositRawTransactions(ctx, sender, receiver, userAmounts)
 	if err != nil {
 		return "", err
 	}
@@ -141,12 +141,12 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 		return "", err
 	}
 
-	// save transaction result to file
+	// save transaction result to JSON file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
+	if len(txEntries) != 0 {
+		generatedFileName, err = u.generateJSONFile(targetAction, sender, txID, txEntries)
 		if err != nil {
-			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("failed to generate JSON file: %w", err)
 		}
 	}
 
@@ -189,7 +189,7 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 	}
 
 	// create raw transaction for each address
-	serializedTxs, txDetailItems := u.createPaymentRawTransactions(ctx, sender, receiver, userPayments, senderAddr)
+	txEntries, txDetailItems := u.createPaymentRawTransactions(ctx, sender, receiver, userPayments, senderAddr)
 	if len(txDetailItems) == 0 {
 		return "", nil
 	}
@@ -199,12 +199,12 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 		return "", err
 	}
 
-	// save transaction result to file
+	// save transaction result to JSON file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
+	if len(txEntries) != 0 {
+		generatedFileName, err = u.generateJSONFile(targetAction, sender, txID, txEntries)
 		if err != nil {
-			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("failed to generate JSON file: %w", err)
 		}
 	}
 
@@ -261,7 +261,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
-	txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
+	txJSON, _, err := u.xrper.CreateRawTransaction(
 		ctx, senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
 		return "", fmt.Errorf(
@@ -277,7 +277,17 @@ func (u *createTransactionUseCase) createTransferTx(
 		return "", fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 	}
 
-	serializedTxs := []string{fmt.Sprintf("%s,%s", uid, rawTxString)}
+	// Create transaction file entry
+	txEntry := txFileEntry{
+		uuid:                uid.String(),
+		unsignedTx:          txJSON,
+		senderAccount:       senderAddr.WalletAddress,
+		senderAccountType:   sender,
+		receiverAccount:     receiverAddr.WalletAddress,
+		receiverAccountType: receiver,
+		amount:              txJSON.Amount,
+	}
+	txEntries := []txFileEntry{txEntry}
 
 	// create insert data for xrp_detail_tx
 	txDetailItem, err := domainXrp.NewXRPDetailTx(
@@ -305,12 +315,12 @@ func (u *createTransactionUseCase) createTransferTx(
 		return "", err
 	}
 
-	// save transaction result to file
+	// save transaction result to JSON file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
+	if len(txEntries) != 0 {
+		generatedFileName, err = u.generateJSONFile(targetAction, sender, txID, txEntries)
 		if err != nil {
-			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("failed to generate JSON file: %w", err)
 		}
 	}
 
@@ -355,7 +365,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []apixrpimpl.UserAmount,
-) ([]string, []*domainXrp.XRPDetailTx, error) {
+) ([]txFileEntry, []*domainXrp.XRPDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -365,7 +375,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	}
 
 	// create raw transaction for each address
-	serializedTxs := make([]string, 0, len(userAmounts))
+	txEntries := make([]txFileEntry, 0, len(userAmounts))
 	txDetailItems := make([]*domainXrp.XRPDetailTx, 0, len(userAmounts))
 
 	var sequence uint64
@@ -378,8 +388,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 			instructions.Sequence = sequence
 		}
 		var txJSON *dtoxrp.TxInput
-		var rawTxString string
-		txJSON, rawTxString, err = u.xrper.CreateRawTransaction(
+		txJSON, _, err = u.xrper.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
 			logger.Warn("fail to call xrper.CreateRawTransaction()", "error", err)
@@ -397,7 +406,17 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 			return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 		}
 
-		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
+		// Create transaction file entry
+		txEntry := txFileEntry{
+			uuid:                uid.String(),
+			unsignedTx:          txJSON,
+			senderAccount:       val.Address,
+			senderAccountType:   sender,
+			receiverAccount:     depositAddr.WalletAddress,
+			receiverAccountType: receiver,
+			amount:              txJSON.Amount,
+		}
+		txEntries = append(txEntries, txEntry)
 
 		// create insert data for xrp_detail_tx
 		txDetailItem, err := domainXrp.NewXRPDetailTx(
@@ -421,7 +440,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 
-	return serializedTxs, txDetailItems, nil
+	return txEntries, txDetailItems, nil
 }
 
 // userPayment represents user's payment address and amount
@@ -502,8 +521,8 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *domainAddress.Address,
-) ([]string, []*domainXrp.XRPDetailTx) {
-	serializedTxs := make([]string, 0, len(userPayments))
+) ([]txFileEntry, []*domainXrp.XRPDetailTx) {
+	txEntries := make([]txFileEntry, 0, len(userPayments))
 	txDetailItems := make([]*domainXrp.XRPDetailTx, 0, len(userPayments))
 	var sequence uint64
 	for _, userPayment := range userPayments {
@@ -514,7 +533,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
+		txJSON, _, err := u.xrper.CreateRawTransaction(
 			ctx, senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
 		if err != nil {
 			// TODO: which is better to return err or continue?
@@ -535,7 +554,17 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 			continue
 		}
 
-		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
+		// Create transaction file entry
+		txEntry := txFileEntry{
+			uuid:                uid.String(),
+			unsignedTx:          txJSON,
+			senderAccount:       senderAddr.WalletAddress,
+			senderAccountType:   sender,
+			receiverAccount:     userPayment.receiverAddr,
+			receiverAccountType: receiver,
+			amount:              txJSON.Amount,
+		}
+		txEntries = append(txEntries, txEntry)
 
 		// create insert data for xrp_detail_tx
 		txDetailItem, err := domainXrp.NewXRPDetailTx(
@@ -559,7 +588,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
-	return serializedTxs, txDetailItems
+	return txEntries, txDetailItems
 }
 
 // updateDB updates database in a transaction
@@ -620,18 +649,59 @@ func (u *createTransactionUseCase) updateDB(
 	return txID, nil
 }
 
-// generateHexFile generates file for hex txID and encoded previous addresses
-func (u *createTransactionUseCase) generateHexFile(
-	actionType domainTx.ActionType, senderAccount domainAccount.AccountType, txID int64, serializedTxs []string,
-) (string, error) {
-	// add senderAccount to first line
-	serializedTxs = append([]string{senderAccount.String()}, serializedTxs...)
+// txFileEntry holds data for a single transaction to be written to file
+type txFileEntry struct {
+	uuid                string
+	unsignedTx          *dtoxrp.TxInput
+	senderAccount       string
+	senderAccountType   domainAccount.AccountType
+	receiverAccount     string
+	receiverAccountType domainAccount.AccountType
+	amount              string
+}
 
-	// create file
-	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, txID, 0)
-	generatedFileName, err := u.txFileRepo.WriteFileSlice(path, serializedTxs)
+// generateJSONFile generates a JSON file containing unsigned transactions.
+// This replaces the old CSV-based format with a structured JSON format
+// that aligns with BTC's PSBT concept for offline signing.
+func (u *createTransactionUseCase) generateJSONFile(
+	actionType domainTx.ActionType,
+	senderAccountType domainAccount.AccountType,
+	txID int64,
+	txEntries []txFileEntry,
+) (string, error) {
+	// Create transaction file with metadata
+	// TODO: Get network from configuration instead of hardcoding
+	txFile := dtoxrp.NewTransactionFile(
+		"testnet",
+		actionType.String(),
+		senderAccountType.String(),
+	)
+
+	// Add each transaction entry
+	for _, entry := range txEntries {
+		txFile.AddTransaction(
+			entry.uuid,
+			entry.unsignedTx,
+			entry.senderAccount,
+			entry.senderAccountType.String(),
+			entry.receiverAccount,
+			entry.receiverAccountType.String(),
+			entry.amount,
+			1, // Single-sig requires 1 signature
+		)
+	}
+
+	// Serialize to JSON
+	jsonData, err := txFile.ToJSON()
 	if err != nil {
-		return "", fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)
+		return "", fmt.Errorf("failed to serialize transaction file: %w", err)
+	}
+
+	// Create file path and write
+	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, txID, 0)
+	generatedFileName, err := u.txFileRepo.WriteJSONFile(path, jsonData)
+	if err != nil {
+		return "", fmt.Errorf("failed to write JSON file: %w", err)
 	}
 
 	return generatedFileName, nil

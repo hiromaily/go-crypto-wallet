@@ -697,3 +697,131 @@ func (_c *MockTransactionFileRepositorier_WriteHexFile_Call) RunAndReturn(run fu
 	_c.Call.Return(run)
 	return _c
 }
+
+// WriteJSONFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) WriteJSONFile(path string, data []byte) (string, error) {
+	ret := _mock.Called(path, data)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WriteJSONFile")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string, []byte) (string, error)); ok {
+		return returnFunc(path, data)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string, []byte) string); ok {
+		r0 = returnFunc(path, data)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(string, []byte) error); ok {
+		r1 = returnFunc(path, data)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_WriteJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WriteJSONFile'
+type MockTransactionFileRepositorier_WriteJSONFile_Call struct {
+	*mock.Call
+}
+
+// WriteJSONFile is a helper method to define mock.On call
+//   - path string
+//   - data []byte
+func (_e *MockTransactionFileRepositorier_Expecter) WriteJSONFile(path interface{}, data interface{}) *MockTransactionFileRepositorier_WriteJSONFile_Call {
+	return &MockTransactionFileRepositorier_WriteJSONFile_Call{Call: _e.mock.On("WriteJSONFile", path, data)}
+}
+
+func (_c *MockTransactionFileRepositorier_WriteJSONFile_Call) Run(run func(path string, data []byte)) *MockTransactionFileRepositorier_WriteJSONFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []byte
+		if args[1] != nil {
+			arg1 = args[1].([]byte)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteJSONFile_Call) Return(s string, err error) *MockTransactionFileRepositorier_WriteJSONFile_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteJSONFile_Call) RunAndReturn(run func(path string, data []byte) (string, error)) *MockTransactionFileRepositorier_WriteJSONFile_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ReadJSONFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) ReadJSONFile(path string) ([]byte, error) {
+	ret := _mock.Called(path)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReadJSONFile")
+	}
+
+	var r0 []byte
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) ([]byte, error)); ok {
+		return returnFunc(path)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) []byte); ok {
+		r0 = returnFunc(path)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(path)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_ReadJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReadJSONFile'
+type MockTransactionFileRepositorier_ReadJSONFile_Call struct {
+	*mock.Call
+}
+
+// ReadJSONFile is a helper method to define mock.On call
+//   - path string
+func (_e *MockTransactionFileRepositorier_Expecter) ReadJSONFile(path interface{}) *MockTransactionFileRepositorier_ReadJSONFile_Call {
+	return &MockTransactionFileRepositorier_ReadJSONFile_Call{Call: _e.mock.On("ReadJSONFile", path)}
+}
+
+func (_c *MockTransactionFileRepositorier_ReadJSONFile_Call) Run(run func(path string)) *MockTransactionFileRepositorier_ReadJSONFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadJSONFile_Call) Return(data []byte, err error) *MockTransactionFileRepositorier_ReadJSONFile_Call {
+	_c.Call.Return(data, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadJSONFile_Call) RunAndReturn(run func(path string) ([]byte, error)) *MockTransactionFileRepositorier_ReadJSONFile_Call {
+	_c.Call.Return(run)
+	return _c
+}
