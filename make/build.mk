@@ -120,3 +120,14 @@ show-version:
 .PHONY: run-watch
 run-watch:
 	go run ./cmd/watch/ -conf ./config/wallet/btc/watch.yaml
+
+#------------------------------------------------------------------------------
+# PHONY Build Docker Image Targets
+#------------------------------------------------------------------------------
+.PHONY: build-docker-watch
+build-docker-watch:
+	docker build --build-arg CMD_PATH=cmd/watch -t wallet:watch -f docker/Dockerfile .
+
+.PHONY: build-docker-keygen
+build-docker-keygen:
+	docker build --build-arg CMD_PATH=cmd/keygen -t wallet:keygen -f docker/Dockerfile .
