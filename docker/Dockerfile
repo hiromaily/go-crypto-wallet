@@ -6,6 +6,12 @@
 FROM golang:1.25.6 AS deps
 WORKDIR /src
 
+# `--mount=type=cache`
+# ここで作られるキャッシュは：
+# ❌ Docker image のレイヤーには含まれない
+# ❌ buildx の type=gha キャッシュにも自動では入らない
+# ✅ BuildKit の内部（builder 内）にだけ存在
+# つまり、そのままだと GitHub Actions のジョブが終わった瞬間に消える一時データ
 RUN --mount=type=bind,source=go.mod,target=/src/go.mod,ro \
     --mount=type=bind,source=go.sum,target=/src/go.sum,ro \
     --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \

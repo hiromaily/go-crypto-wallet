@@ -148,6 +148,18 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
           dockerfile: ${{ env.DOCKERFILE }}
+          # Explicitly map cache mount IDs to their targets.
+          # This avoids fragile Dockerfile parsing and prevents "empty cache" loops.
+          # `cache-map`の必要性について
+          # Dockerfile の RUN --mount=type=cache,... が複数ある場合
+          cache-map: |
+            {
+              "go-mod": "/go/pkg/mod",
+              "go-build": "/root/.cache/go-build"
+            }
+          # ここでいうextractionとは、`RUN --mount=type=cache`` で使われたキャッシュの中身を、
+          # BuildKit の外に“取り出して（extract して）”、actions/cache で保存できる形に変換する処理
+          #
           # FIXED: 空キャッシュ永久ループになるため、mainブランチのみを対象とする
           # skip-extraction: ${{ steps.go-build-cache.outputs.cache-hit }}
           # Condition must be main branch or not.
