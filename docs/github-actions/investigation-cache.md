@@ -1,5 +1,7 @@
 # Github ActionsでCacheが効いていないことの確認
 
+---
+
 ## 1. DockerfileにDebugコードを仕込む
 
 ```dockerfile
@@ -23,11 +25,15 @@ RUN --mount=type=bind,source=.,target=/src,ro \
     du -sh /go/pkg/mod /root/.cache/go-build || true
 ```
 
-## 2. JOBを実行する
+---
+
+## 2. JOBを実行する (1回目)
 
 そのとき、Debug用に手動実行できるworkflowを作成しておくこと
 
-## 3. 結果を解析
+---
+
+## 3. 結果を解析 (1回目)
 
 ### 3.1. Restore cache mounts の出力（cache-hit の行）
 
@@ -78,6 +84,7 @@ BuildKit は id を省略すると、基本的に id=targetパス 相当（少�
 これは、以下のミスマッチが起きている
 
 - 本物のキャッシュ：id=go-mod, id=go-build（ここに 953M/354M 溜まった）
+  - これは、Dockerfile内の、ビルド時に走らせる `du -sh /go/pkg/mod /root/.cache/go-build || true` からわかる。
 - cache-dance が extract してるキャッシュ：id 指定なし（別ID扱い） → 空
 
 **修正ポイント**
@@ -99,3 +106,71 @@ buildkit-cache-dance は cache-map の value をオブジェクトにして targ
       }
     skip-extraction: false
 ```
+
+---
+
+## 4. JOBを実行する (2回目)
+
+---
+
+## 5. 結果を解析 (2回目)
+
+### 5.1. Restore cache mounts の出力（cache-hit の行）
+
+この時点で改善していない。
+
+### 5.2 BuildKit Cache Dance の inject/extractのセクション
+
+```
+Post job cleanup.
+
+FROM ghcr.io/containerd/busybox:latest
+COPY buildstamp buildstamp
+RUN --mount=type=cache,target=/go/pkg/mod,id=go-mod     mkdir -p /var/dance-cache/     && cp -p -R /go/pkg/mod/. /var/dance-cache/ || true
+
+
+FROM ghcr.io/containerd/busybox:latest
+COPY buildstamp buildstamp
+RUN --mount=type=cache,target=/root/.cache/go-build,id=go-build     mkdir -p /var/dance-cache/     && cp -p -R /root/.cache/go-build/. /var/dance-cache/ || true
+```
+
+[改善ポイント] 68sかかっているため、動作していると思われる。
+
+---
+
+## キャッシュが効いていない原因
+
+`actions/cache/save` が `cache-dance` の `extraction（post処理）` より先に走ってしまっている のが原因
+
+ここでいう`extraction`とは、`RUN --mount=type=cache` で使われたキャッシュの中身を、BuildKit の外に“取り出して（extract して）”、`actions/cache` で保存できる形に変換する処理。
+
+**根拠**
+
+- restore は毎回 “~0MB (195B)” を復元している（＝保存されたものが空）
+- なのに cache-dance の inject/extract が 68秒かかる（＝extract で大容量コピーしているっぽい）
+- Dockerfile の before が 8K（＝inject で中身が入っていない）
+
+**なぜそうなるのか**
+
+- `buildkit-cache-dance@v3` の `extraction` は `post step` で走る
+  - ログも Post job cleanup. に出ている
+
+それに対して利用したworkflowは
+
+1. actions/cache/restore（普通のステップ）
+2. cache-dance（普通ステップ＋postでextract）
+3. ビルド
+4. actions/cache/save（普通のステップ）
+
+普通のステップとしての `actions/cache/save` は、post cleanup より先に実行される。
+つまり cache-dance が cache-dir に中身を書き出す前に、空の cache-dir を保存してしまい、結果として ~0MB (195B) のキャッシュだけが永続化され続ける。
+
+**対策**
+
+- `restore/save 分割をやめて actions/cache@v5 を使う。`
+  - `actions/cache@v5`（restore+save一体型）は save が post で走るので、post の順序を利用できる
+  - 重要なのは **postの実行順が“逆順”**ということ
+  - cache action を cache-dance より前に置く
+    - job 終了時、cache-dance の post（extract）が先に走り、その後に cache action の post（save）が走る
+
+**README の公式例は actions/cache の“一体型”を使っている**

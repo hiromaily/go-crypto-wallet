@@ -157,7 +157,7 @@ jobs:
               "go-mod":  { "target": "/go/pkg/mod", "id": "go-mod" },
               "go-build":{ "target": "/root/.cache/go-build", "id": "go-build" }
             }
-          # ここでいうextractionとは、`RUN --mount=type=cache`` で使われたキャッシュの中身を、
+          # ここでいうextractionとは、`RUN --mount=type=cache` で使われたキャッシュの中身を、
           # BuildKit の外に“取り出して（extract して）”、actions/cache で保存できる形に変換する処理
           #
           # FIXED: 空キャッシュ永久ループになるため、mainブランチのみを対象とする
