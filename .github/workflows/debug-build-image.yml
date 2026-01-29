@@ -1,45 +1,35 @@
-# ------------------------------------------------------------------------------
-# MANUAL VALIDATION WORKFLOW (NO PUSH / NO DELETE)
-# ------------------------------------------------------------------------------
-# Purpose:
-# - Run this workflow manually against ANY branch to validate Docker builds
-#   without merging into main.
-#
-# What it DOES:
-# - Builds the Docker image with Buildx + BuildKit cache mounts enabled
-# - Restores cache-mount data (go build cache / module cache) for speed
-# - Optionally loads the image into the runner's local Docker engine (load: true)
-#
-# What it DOES NOT do:
-# - Does NOT login to GHCR
-# - Does NOT push images
-# - Does NOT delete any images/packages
-# - Does NOT save cache mounts (restore-only)
-#
-# Notes:
-# - This workflow still needs full git history/tags because the Dockerfile
-#   resolves APP_VERSION via `git describe --tags`. Therefore fetch-depth=0.
-# - `.git` must be present in Docker build context (do not exclude in .dockerignore)
-# ------------------------------------------------------------------------------
-
-name: docker-build-manual
+name: docker-build-debug
 
 on:
   workflow_dispatch:
+    inputs:
+      run_twice:
+        description: "Build twice in the same job to verify cache hits"
+        type: boolean
+        default: true
+      cache_version:
+        description: "Bump this to force a fresh actions/cache mount set"
+        type: string
+        default: "v2"
 
 permissions:
-  contents: read # minimal; no packages write needed since no push/delete
+  contents: read
+  # packages: write は pushしないなら不要。GHA cache(type=gha) にも不要のはず。
+  # もし環境によって必要になったら付け直してOK。
+  # packages: write
 
 env:
   DOCKERFILE: ./docker/Dockerfile
   CACHE_DIR: cache-mount
   GHA_CACHE_SCOPE: go-crypto-wallet
 
+  # BuildKit cache mounts saved via actions/cache
+  # (override via workflow_dispatch input)
+  CACHE_VERSION: ${{ inputs.cache_version }}
+
+  # Build args
   CMD_PATH: cmd/watch
   APP_VERSION_VAR: main.appVersion
-
-  # Local-only tag for validation
-  LOCAL_IMAGE: local/go-crypto-wallet:validate
 
 jobs:
   build:
@@ -55,39 +45,87 @@ jobs:
         uses: docker/setup-buildx-action@v3
         id: buildx
 
-      # Restore cache mounts (RUN --mount=type=cache) - restore only
+      # ----------------------------
+      # 1) Restore cache mounts (actions/cache)
+      # ----------------------------
       - name: Restore cache mounts (BuildKit cache mounts)
         id: cache-restore
         uses: actions/cache/restore@v5
         with:
           path: ${{ env.CACHE_DIR }}
-          key: ${{ runner.os }}-cache-mount-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
           restore-keys: |
+            ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-
             ${{ runner.os }}-cache-mount-
 
-      # Inject cache mounts into the builder, but DO NOT extract/save after build
-      - name: BuildKit Cache Dance (inject only; no extraction)
+      # ----------------------------
+      # 2) Cache Dance (inject before build; extract in post)
+      # ----------------------------
+      - name: BuildKit Cache Dance (inject; extract in post)
         uses: reproducible-containers/buildkit-cache-dance@v3
         with:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
           dockerfile: ${{ env.DOCKERFILE }}
-          skip-extraction: true
+          cache-map: |
+            {
+              "go-mod": "/go/pkg/mod",
+              "go-build": "/root/.cache/go-build"
+            }
+          # Debug workflowなので常に extraction して、actions/cache/save できる形にする
+          skip-extraction: false
 
-      - name: Build (no push)
+      # ----------------------------
+      # 3) Build (no push)
+      #    - Use buildx GHA cache (cache-from/to)
+      # ----------------------------
+      - name: Build (once)
+        if: ${{ !inputs.run_twice }}
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
-          load: true
-          tags: ${{ env.LOCAL_IMAGE }}
+          # ローカルにロードしたい場合は true にする（任意）
+          # load: true
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
             APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
-          # Use existing caches, but do not write new cache-to
           cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
 
-      # Optional: sanity check that the image exists locally
-      - name: Show built image
-        run: docker images "${{ env.LOCAL_IMAGE }}" --digests || true
+      # 2回ビルドして 2回目が速くなるかを観測（最強のデバッグ）
+      - name: Build (first)
+        if: ${{ inputs.run_twice }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          push: false
+          build-args: |
+            CMD_PATH=${{ env.CMD_PATH }}
+            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
+          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+
+      - name: Build (second; should be faster if caches work)
+        if: ${{ inputs.run_twice }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          push: false
+          build-args: |
+            CMD_PATH=${{ env.CMD_PATH }}
+            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
+          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+
+      # ----------------------------
+      # 4) Save cache mounts (actions/cache)
+      # ----------------------------
+      - name: Save cache mounts (BuildKit cache mounts)
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ env.CACHE_DIR }}
+          key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
