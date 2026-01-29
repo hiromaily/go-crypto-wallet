@@ -48,9 +48,22 @@ jobs:
       # ----------------------------
       # 1) Restore cache mounts (actions/cache)
       # ----------------------------
-      - name: Restore cache mounts (BuildKit cache mounts)
-        id: cache-restore
-        uses: actions/cache/restore@v5
+      # - name: Restore cache mounts (BuildKit cache mounts)
+      #   id: cache-restore
+      #   uses: actions/cache/restore@v5
+      #   with:
+      #     path: ${{ env.CACHE_DIR }}
+      #     key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-
+      #       ${{ runner.os }}-cache-mount-
+
+      # ----------------------------
+      # 1) Restore + Save cache mounts (actions/cache)
+      # ----------------------------
+      # Cache mounts: restore now, save in post (after cache-dance extraction)
+      - name: Cache mounts (restore + save in post)
+        uses: actions/cache@v5
         with:
           path: ${{ env.CACHE_DIR }}
           key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
@@ -121,17 +134,18 @@ jobs:
           cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
           cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
 
-      - name: Debug Inspect cache-dir before save
+      - name: Inspect cache-dir before post steps
         run: |
           set -eux
-          ls -lah ${{ env.CACHE_DIR }} || true
-          du -sh ${{ env.CACHE_DIR }}/* || true
+          ls -lah "${CACHE_DIR}" || true
+          du -sh "${CACHE_DIR}" || true
+          find "${CACHE_DIR}" -maxdepth 2 -type f | head -50 || true
 
       # ----------------------------
       # 4) Save cache mounts (actions/cache)
       # ----------------------------
-      - name: Save cache mounts (BuildKit cache mounts)
-        uses: actions/cache/save@v5
-        with:
-          path: ${{ env.CACHE_DIR }}
-          key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+      # - name: Save cache mounts (BuildKit cache mounts)
+      #   uses: actions/cache/save@v5
+      #   with:
+      #     path: ${{ env.CACHE_DIR }}
+      #     key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
