@@ -195,3 +195,23 @@ jobs:
         with:
           path: ${{ env.CACHE_DIR }}
           key: ${{ runner.os }}-cache-mount-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+
+      # ------------------------------------------------------------
+      # Cleanup (main only): prune old SHA-tagged image versions
+      #
+      # Keeps the newest N versions EXCLUDING those matching ignore-versions.
+      # ignore-versions protects:
+      #   - main / latest
+      #   - release tags like v1.2.3 (anything starting with v)
+      #
+      # This effectively deletes old sha-<commit> versions beyond the keep limit.
+      # ------------------------------------------------------------
+      - name: Cleanup old GHCR image versions (main only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: app
+          package-type: container
+          min-versions-to-keep: 20
+          ignore-versions: "^(main|latest|v.*)$"
+          token: ${{ secrets.GITHUB_TOKEN }}
