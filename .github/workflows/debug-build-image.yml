@@ -10,7 +10,7 @@ on:
       cache_version:
         description: "Bump this to force a fresh actions/cache mount set"
         type: string
-        default: "v4"
+        default: "v4-0130-0000"
 
 permissions:
   contents: read

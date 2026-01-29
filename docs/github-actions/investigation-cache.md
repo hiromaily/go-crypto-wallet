@@ -264,6 +264,24 @@ BuildKit Cache Dance を使ってもキャッシュが取り出せず、保存�
 
 ---
 
+## 9. `buildkit-cache-dance`自身を修正する
+
+[buildkit-cache-dance](https://github.com/reproducible-containers/buildkit-cache-dance) をForkして、新しく[hiromaily/buildkit-cache-dance](https://github.com/hiromaily/buildkit-cache-dance)を作成した。
+
+そして、workflowの参照を差し替えた。
+
+```yml
+  - name: BuildKit Cache Dance (inject; extract in post)
+    #uses: reproducible-containers/buildkit-cache-dance@v3
+    uses: hiromaily/buildkit-cache-dance@v4
+```
+
+---
+
+## 10. バージョン変更後、JOBを実行する (5回目)
+
+---
+
 ## [原点] 問題点の整理**
 
 `RUN --mount=type=cache` の中身は、`buildx cache-to/from (type=gha 等)` だけでは永続化されない（＝昔から課題）というのが広く知られていて、Docker側/BuildKit側にも関連Issueがあります。
