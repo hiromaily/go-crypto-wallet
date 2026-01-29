@@ -69,8 +69,8 @@ jobs:
           dockerfile: ${{ env.DOCKERFILE }}
           cache-map: |
             {
-              "go-mod": "/go/pkg/mod",
-              "go-build": "/root/.cache/go-build"
+              "go-mod":  { "target": "/go/pkg/mod", "id": "go-mod" },
+              "go-build":{ "target": "/root/.cache/go-build", "id": "go-build" }
             }
           # Debug workflowなので常に extraction して、actions/cache/save できる形にする
           skip-extraction: false
@@ -120,6 +120,12 @@ jobs:
             APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
           cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
           cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+
+      - name: Debug Inspect cache-dir before save
+        run: |
+          set -eux
+          ls -lah ${{ env.CACHE_DIR }} || true
+          du -sh ${{ env.CACHE_DIR }}/* || true
 
       # ----------------------------
       # 4) Save cache mounts (actions/cache)
