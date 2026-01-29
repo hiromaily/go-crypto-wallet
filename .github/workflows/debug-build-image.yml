@@ -1,0 +1,93 @@
+# ------------------------------------------------------------------------------
+# MANUAL VALIDATION WORKFLOW (NO PUSH / NO DELETE)
+# ------------------------------------------------------------------------------
+# Purpose:
+# - Run this workflow manually against ANY branch to validate Docker builds
+#   without merging into main.
+#
+# What it DOES:
+# - Builds the Docker image with Buildx + BuildKit cache mounts enabled
+# - Restores cache-mount data (go build cache / module cache) for speed
+# - Optionally loads the image into the runner's local Docker engine (load: true)
+#
+# What it DOES NOT do:
+# - Does NOT login to GHCR
+# - Does NOT push images
+# - Does NOT delete any images/packages
+# - Does NOT save cache mounts (restore-only)
+#
+# Notes:
+# - This workflow still needs full git history/tags because the Dockerfile
+#   resolves APP_VERSION via `git describe --tags`. Therefore fetch-depth=0.
+# - `.git` must be present in Docker build context (do not exclude in .dockerignore)
+# ------------------------------------------------------------------------------
+
+name: docker-build-manual
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read # minimal; no packages write needed since no push/delete
+
+env:
+  DOCKERFILE: ./docker/Dockerfile
+  CACHE_DIR: cache-mount
+  GHA_CACHE_SCOPE: go-crypto-wallet
+
+  CMD_PATH: cmd/watch
+  APP_VERSION_VAR: main.appVersion
+
+  # Local-only tag for validation
+  LOCAL_IMAGE: local/go-crypto-wallet:validate
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (fetch tags)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      # Restore cache mounts (RUN --mount=type=cache) - restore only
+      - name: Restore cache mounts (BuildKit cache mounts)
+        id: cache-restore
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ env.CACHE_DIR }}
+          key: ${{ runner.os }}-cache-mount-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-mount-
+
+      # Inject cache mounts into the builder, but DO NOT extract/save after build
+      - name: BuildKit Cache Dance (inject only; no extraction)
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-dir: ${{ env.CACHE_DIR }}
+          dockerfile: ${{ env.DOCKERFILE }}
+          skip-extraction: true
+
+      - name: Build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          push: false
+          load: true
+          tags: ${{ env.LOCAL_IMAGE }}
+          build-args: |
+            CMD_PATH=${{ env.CMD_PATH }}
+            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
+          # Use existing caches, but do not write new cache-to
+          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+
+      # Optional: sanity check that the image exists locally
+      - name: Show built image
+        run: docker images "${{ env.LOCAL_IMAGE }}" --digests || true
