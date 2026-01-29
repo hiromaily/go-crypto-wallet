@@ -1,0 +1,197 @@
+# ------------------------------------------------------------------------------
+# IMPORTANT NOTES FOR THIS WORKFLOW
+# ------------------------------------------------------------------------------
+#
+# This workflow builds and pushes Docker images to GitHub Container Registry
+# (ghcr.io) using docker/buildx, BuildKit cache mounts, and
+# reproducible-containers/buildkit-cache-dance.
+#
+# BEFORE RUNNING THIS WORKFLOW, YOU MUST ENSURE THE FOLLOWING:
+#
+# 1) Repository Actions permissions (REQUIRED)
+#    - Go to: Repository Settings → Actions → General → Workflow permissions
+#    - Set: "Read and write permissions"
+#    - This is required so GITHUB_TOKEN can push images to ghcr.io
+#
+# 2) Workflow permissions (REQUIRED)
+#    - This workflow explicitly requests:
+#        permissions:
+#          contents: read
+#          packages: write
+#    - Do NOT remove `packages: write`, or GHCR login/push will fail.
+#
+# 3) Git history and tags (REQUIRED)
+#    - The Dockerfile resolves APP_VERSION using `git describe --tags`
+#    - Therefore:
+#        - actions/checkout MUST use `fetch-depth: 0`
+#        - Git tags must exist (e.g. v1.2.3), or version will fall back to "dev"
+#
+# 4) .git must be present in the Docker build context (IMPORTANT)
+#    - The Dockerfile bind-mounts `.git` during `docker build`
+#    - DO NOT exclude `.git` in `.dockerignore`
+#    - If `.git` is excluded, version resolution will fail
+#
+# 5) GitHub Container Registry (ghcr.io) access
+#    - Images are pushed to: ghcr.io/<owner>/<repo>
+#    - For organization repositories:
+#        - Ensure the package allows GitHub Actions write access
+#          (Package settings → Actions access)
+#    - For personal repositories, this usually works by default
+#
+# 6) Cache behavior (DESIGN DECISION)
+#    - BuildKit cache mounts (RUN --mount=type=cache) are persisted using:
+#        - actions/cache + buildkit-cache-dance
+#    - Cache keys are intentionally NOT branch-specific
+#    - Cache saving occurs ONLY on pushes to the `main` branch
+#
+# 7) Runner choice: ubuntu-slim (IMPORTANT)
+#    - This workflow uses `runs-on: ubuntu-slim`
+#    - Characteristics:
+#        - Single CPU
+#        - 15-minute job timeout
+#        - Minimal preinstalled tools
+#    - This workflow assumes the build completes well within that limit
+#
+# 8) Image tagging rules (SUMMARY)
+#    - Push to main:
+#        - :main
+#        - :sha-<commit>
+#    - Tag push (e.g. v1.2.3):
+#        - :v1.2.3
+#        - :latest   (ONLY on tag push)
+#
+# If any of the above conditions are not met, this workflow may fail
+# at Docker login, image push, or version resolution time.
+# ------------------------------------------------------------------------------
+name: docker-build
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "cmd/watch/**" # For now, only watch command
+      - "internal/**"
+      - "pkg/**"
+      - "go.mod"
+      - "go.sum"
+      - "Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/docker-build.yml"
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOCKERFILE: Dockerfile
+  CACHE_DIR: cache-mount
+  GHA_CACHE_SCOPE: go-crypto-wallet
+
+  # ✅ For now, keep it simple: explicitly set the build target here
+  CMD_PATH: cmd/watch
+  APP_VERSION_VAR: main.appVersion
+
+  # Change this if you want a different image name
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/app
+
+jobs:
+  build:
+    # ubuntu-slim is a single-CPU, lightweight runner.
+    # IMPORTANT:
+    # - Job timeout is limited to 15 minutes.
+    # - Preinstalled tools are minimal.
+    # This workflow assumes the build completes well within that limit.
+    runs-on: ubuntu-slim
+
+    steps:
+      - name: Checkout (fetch tags)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Required because APP_VERSION is derived from git tags
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      # Tagging rules:
+      # - main push: tag "main" + sha
+      # - tag push (vX.Y.Z): tag that version; also add :latest
+      - name: Docker metadata
+        uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=${{ startsWith(github.ref, 'refs/tags/') }}
+          tags: |
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=tag
+
+      # Restore BuildKit cache mounts (RUN --mount=type=cache)
+      # Key is intentionally NOT branch-specific to avoid per-branch caches.
+      - name: Restore cache mounts (BuildKit cache mounts)
+        id: cache-restore
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ env.CACHE_DIR }}
+          key: ${{ runner.os }}-cache-mount-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-mount-
+
+      - name: BuildKit Cache Dance (inject; extract in post)
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-dir: ${{ env.CACHE_DIR }}
+          dockerfile: ${{ env.DOCKERFILE }}
+          skip-extraction: ${{ steps.cache-restore.outputs.cache-hit }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build & push (main)
+      - name: Build and push (main; save buildx cache)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            CMD_PATH=${{ env.CMD_PATH }}
+            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
+          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+
+      # Build & push (tag)
+      # Intentionally do NOT write buildx cache on tag runs (to reduce cache churn)
+      - name: Build and push (tag; no buildx cache-to)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            CMD_PATH=${{ env.CMD_PATH }}
+            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
+          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+
+      # Save cache mounts ONLY on main
+      - name: Save cache mounts (BuildKit cache mounts; main only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ env.CACHE_DIR }}
+          key: ${{ runner.os }}-cache-mount-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
