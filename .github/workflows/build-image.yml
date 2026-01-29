@@ -98,12 +98,12 @@ env:
 
 jobs:
   build:
-    # ubuntu-slim is a single-CPU, lightweight runner.
+    # ubuntu-slim can not be used for `buildx` setup step
     # IMPORTANT:
     # - Job timeout is limited to 15 minutes.
     # - Preinstalled tools are minimal.
     # This workflow assumes the build completes well within that limit.
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout (fetch tags)
