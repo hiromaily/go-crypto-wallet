@@ -88,6 +88,7 @@ env:
   DOCKERFILE: ./docker/Dockerfile
   CACHE_DIR: cache-mount
   GHA_CACHE_SCOPE: go-crypto-wallet
+  CACHE_VERSION: v2
 
   # ✅ For now, keep it simple: explicitly set the build target here
   CMD_PATH: cmd/watch
@@ -137,7 +138,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: ${{ env.CACHE_DIR }}
-          key: ${{ runner.os }}-cache-mount-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
           restore-keys: |
             ${{ runner.os }}-cache-mount-
 
@@ -147,7 +148,10 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
           dockerfile: ${{ env.DOCKERFILE }}
-          skip-extraction: ${{ steps.cache-restore.outputs.cache-hit }}
+          # FIXED: 空キャッシュ永久ループになるため、mainブランチのみを対象とする
+          # skip-extraction: ${{ steps.go-build-cache.outputs.cache-hit }}
+          # Condition must be main branch or not.
+          skip-extraction: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -194,7 +198,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: ${{ env.CACHE_DIR }}
-          key: ${{ runner.os }}-cache-mount-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
 
       # ------------------------------------------------------------
       # Cleanup (main only): prune old SHA-tagged image versions
