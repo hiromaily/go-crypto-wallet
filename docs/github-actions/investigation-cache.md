@@ -138,7 +138,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=go-build     mkdir -p /va
 
 ---
 
-## キャッシュが効いていない原因
+## 6. キャッシュが効いていない原因 (ここまでにおいて)
 
 `actions/cache/save` が `cache-dance` の `extraction（post処理）` より先に走ってしまっている のが原因
 
@@ -174,3 +174,113 @@ RUN --mount=type=cache,target=/root/.cache/go-build,id=go-build     mkdir -p /va
     - job 終了時、cache-dance の post（extract）が先に走り、その後に cache action の post（save）が走る
 
 **README の公式例は actions/cache の“一体型”を使っている**
+
+---
+
+## 7. コード変更後、JOBを実行した結果を分析 (3回目)
+
+`Post Cache mounts (restore + save in post)`のセクションにて以下のlogが出力された。
+
+```
+Post Cache mounts (restore + save in post)
+Post job cleanup.
+Cache hit occurred on the primary key Linux-cache-mount-v2-26f17f8f1f45eb19e54c7ec2dce8d9c019e1c8032853d7fe53d6fe19e51dfd43, not saving cache.
+```
+
+`actions/cache@v5` が “primary key で cache hit したから保存しない” という意味。
+つまり 既に存在している（でも中身が空の）キャッシュを primary key で拾ってしまっていて、上書き保存できない状態である。
+
+`actions/cache` は仕様として、primary key で当たった場合は save をスキップします（同じ key に上書きできない）。
+
+決定的なのが、Dockerfile内の`go build`時、Dockerfile の before が 8.0K のまま。
+
+**解決策：空キャッシュを捨てて「新しい key で保存」させる**
+
+1. 最短（確実）：CACHE_VERSION を bump して新規キーにする
+2. restore と save の key を分ける
+   actions/cache@v5 は「primary key で hit すると保存しない」ので、restore は固定key、save は run_id を入れたユニークkeyにする、という回避ができるが、actions/cache@v5 は restore+save一体なので、この方式をやるならまた restore/save 分離に戻す必要があり、かつ post順序の問題も再燃するので、このやり方は不可能。`buildkit-cache-dance@v3`を使う場合は実現できないということ。
+
+## 8. バージョン変更後、JOBを実行する (4回目)
+
+もう一度`V3`で実行したが、ビルド時のbeforeのサイズが依然小さい。
+
+**v3に保存されたキャッシュの中身が本当に大きいか？」を確定すること**
+
+疑う原因
+
+- v3キーに保存されたキャッシュが “実は空”
+- cache-dance が “正しい cache id” を extract/inject できていない
+
+```
+- name: Inspect cache-dir before post steps
+  run: |
+    set -eux
+    ls -lah "${CACHE_DIR}" || true
+    du -sh "${CACHE_DIR}" || true
+    find "${CACHE_DIR}" -maxdepth 2 -type f | head -50 || true
+```
+
+これのlogが、以下だった。
+
+```
++ ls -lah cache-mount total 8.0K
+drwxr-xr-x 2 runner runner 4.0K Jan 29 08:24 .
+drwxr-xr-x 26 runner runner 4.0K Jan 29 11:30 .. + du -sh cache-mount 4.0K cache-mount
+```
+
+**結論**
+
+cache-dance の inject/extract が “cache-dir に何も書いていない” ため、actions/cache@v5 が保存/復元している cache-mount/ が常に空（4KB）のままである。
+
+その結果、
+
+- restore は primary key で hit（でも中身は空）
+- build の before は 8KB（注入されない）
+- Go は毎回 download して 40秒台
+
+という状態になります。
+
+**「なぜ cache-dance が cache-dir に書かないのか？」**
+
+1. cache-map が解釈されていない（＝結局 idなし mount を触ってる / 何もコピーしてない）
+   以前あなたが貼ってくれた cache-dance の post は、id= が無い mount でした。もし今も内部では id 無しの別キャッシュ（空）を触っていると、cache-dir には当然何も出ません。
+2. そもそも cache-dance が参照している Dockerfile が違う（or パス解決の問題）
+   `dockerfile: ${{ env.DOCKERFILE }}` を渡していますが、cache-dance は Dockerfile を解析して cache-map と合わせるので、違うDockerfileを見ていると何もしないことがあります。
+3. cache-dance の “extract 先” が cache-dir 配下ではない（入力ミス/相対パスのズレ）
+   cache-dir: cache-mount は相対パスで、workspace基準で合ってるはずですが、念のため絶対パスにして潰せます。
+
+**いったん id 指定はやめる（READMEの基本形に戻す）**
+
+いまの症状は「cache-map が解釈されてない/動いてない」可能性が高い。まず README の最小構成で “動くこと” を確認するのが早い。
+
+=> cache-dance が id 指定無しで mount してくるなら、Dockerfile 側も合わせる。
+
+この問題は[Issue#33](https://github.com/reproducible-containers/buildkit-cache-dance/issues/33)で報告されている。
+
+BuildKit Cache Dance を使ってもキャッシュが取り出せず、保存されたキャッシュが空になってしまう
+→ 結果として復元しても意味がない（前回の成果物が注入されない）
+
+また、[複数のキャッシュを使うと上書きされる](https://github.com/reproducible-containers/buildkit-cache-dance/issues/39)という問題もある。
+
+---
+
+## [原点] 問題点の整理**
+
+`RUN --mount=type=cache` の中身は、`buildx cache-to/from (type=gha 等)` だけでは永続化されない（＝昔から課題）というのが広く知られていて、Docker側/BuildKit側にも関連Issueがあります。
+その上で、代替案は「mount cache 自体をやめる」か「mount cache を外へ持ち出す別手段を使う」の2系統となる。
+
+### RUN --mount=type=cache をやめて、レイヤーキャッシュ + buildx cache (type=gha) に寄せる
+
+- `COPY go.mod go.sum` → `RUN go mod download`
+- `COPY .` → `RUN go build`
+
+**問題**
+
+ソースが少しでも変わった時に `RUN go build` は“実行し直し”になりやすい
+
+**キーポイント**
+
+Go が速くなる鍵は GOCACHE（コンパイルキャッシュ） と GOMODCACHE（モジュールキャッシュ）
+
+- GOMODCACHE は「COPY go.mod go.sum → RUN go mod download」の層に分けると、ソースが変わっても温存できる（＝依存再DLを避けられる）
+- 一方 GOCACHE は、Dockerビルドを跨いで永続化されないと “前回のコンパイル成果” を使えない。

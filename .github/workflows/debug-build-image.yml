@@ -10,7 +10,7 @@ on:
       cache_version:
         description: "Bump this to force a fresh actions/cache mount set"
         type: string
-        default: "v2"
+        default: "v4"
 
 permissions:
   contents: read
@@ -75,7 +75,8 @@ jobs:
       # 2) Cache Dance (inject before build; extract in post)
       # ----------------------------
       - name: BuildKit Cache Dance (inject; extract in post)
-        uses: reproducible-containers/buildkit-cache-dance@v3
+        #uses: reproducible-containers/buildkit-cache-dance@v3
+        uses: hiromaily/buildkit-cache-dance@v4
         with:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
