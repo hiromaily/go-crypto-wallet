@@ -210,8 +210,9 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: actions/delete-package-versions@v5
         with:
-          package-name: app
+          owner: ${{ github.repository_owner }}
           package-type: container
+          package-name: go-crypto-wallet/app
           min-versions-to-keep: 20
           ignore-versions: "^(main|latest|v.*)$"
           token: ${{ secrets.GITHUB_TOKEN }}
