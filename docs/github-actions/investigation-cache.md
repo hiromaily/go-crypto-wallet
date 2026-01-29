@@ -280,6 +280,8 @@ BuildKit Cache Dance を使ってもキャッシュが取り出せず、保存�
 
 ## 10. バージョン変更後、JOBを実行する (5回目)
 
+まだうまくいかないので、`hiromaily/buildkit-cache-dance`側のコードに`is-debug`でlogが出るように修正する。
+
 ---
 
 ## [原点] 問題点の整理**
