@@ -35,32 +35,32 @@ ARG APP_VERSION_VAR=main.appVersion
 
 WORKDIR /src
 
-# RUN --mount=type=bind,source=.,target=/src,ro \
-#     --mount=type=bind,source=.git,target=/src/.git,ro \
-#     --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
-#     --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
-#     APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
-#     echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
-#     CGO_ENABLED=0 GOOS=linux \
-#     go build -trimpath \
-#       -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
-#       -o /out/app ./${CMD_PATH}
-
-# Debug for build step
-# “before” が常にほぼ0なら、cache-dance / actions/cache のどこかで復元できていない
 RUN --mount=type=bind,source=.,target=/src,ro \
     --mount=type=bind,source=.git,target=/src/.git,ro \
     --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
-    set -eux; \
-    echo "=== before ==="; \
-    du -sh /go/pkg/mod /root/.cache/go-build || true; \
-    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"; \
-    time CGO_ENABLED=0 GOOS=linux go build -trimpath \
+    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
+    echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
+    CGO_ENABLED=0 GOOS=linux \
+    go build -trimpath \
       -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
-      -o /out/app ./${CMD_PATH}; \
-    echo "=== after ==="; \
-    du -sh /go/pkg/mod /root/.cache/go-build || true
+      -o /out/app ./${CMD_PATH}
+
+# Debug for build step
+# “before” が常にほぼ0なら、cache-dance / actions/cache のどこかで復元できていない
+# RUN --mount=type=bind,source=.,target=/src,ro \
+#     --mount=type=bind,source=.git,target=/src/.git,ro \
+#     --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+#     --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
+#     set -eux; \
+#     echo "=== before ==="; \
+#     du -sh /go/pkg/mod /root/.cache/go-build || true; \
+#     APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"; \
+#     time CGO_ENABLED=0 GOOS=linux go build -trimpath \
+#       -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
+#       -o /out/app ./${CMD_PATH}; \
+#     echo "=== after ==="; \
+#     du -sh /go/pkg/mod /root/.cache/go-build || true
 
 
 ############################
