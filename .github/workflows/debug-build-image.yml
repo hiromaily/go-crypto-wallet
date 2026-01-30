@@ -10,7 +10,7 @@ on:
       cache_version:
         description: "Bump this to force a fresh actions/cache mount set"
         type: string
-        default: "v2"
+        default: "v4-0130-1042"
 
 permissions:
   contents: read
@@ -48,9 +48,22 @@ jobs:
       # ----------------------------
       # 1) Restore cache mounts (actions/cache)
       # ----------------------------
-      - name: Restore cache mounts (BuildKit cache mounts)
-        id: cache-restore
-        uses: actions/cache/restore@v5
+      # - name: Restore cache mounts (BuildKit cache mounts)
+      #   id: cache-restore
+      #   uses: actions/cache/restore@v5
+      #   with:
+      #     path: ${{ env.CACHE_DIR }}
+      #     key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-
+      #       ${{ runner.os }}-cache-mount-
+
+      # ----------------------------
+      # 1) Restore + Save cache mounts (actions/cache)
+      # ----------------------------
+      # Cache mounts: restore now, save in post (after cache-dance extraction)
+      - name: Cache mounts (restore + save in post)
+        uses: actions/cache@v5
         with:
           path: ${{ env.CACHE_DIR }}
           key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
@@ -62,25 +75,27 @@ jobs:
       # 2) Cache Dance (inject before build; extract in post)
       # ----------------------------
       - name: BuildKit Cache Dance (inject; extract in post)
-        uses: reproducible-containers/buildkit-cache-dance@v3
+        #uses: reproducible-containers/buildkit-cache-dance@v3
+        uses: hiromaily/buildkit-cache-dance@v4
         with:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
           dockerfile: ${{ env.DOCKERFILE }}
           cache-map: |
             {
-              "go-mod": "/go/pkg/mod",
-              "go-build": "/root/.cache/go-build"
+              "go-mod":  { "target": "/go/pkg/mod", "id": "go-mod" },
+              "go-build":{ "target": "/root/.cache/go-build", "id": "go-build" }
             }
           # Debug workflowなので常に extraction して、actions/cache/save できる形にする
           skip-extraction: false
+          is-debug: true
 
       # ----------------------------
       # 3) Build (no push)
       #    - Use buildx GHA cache (cache-from/to)
       # ----------------------------
-      - name: Build (once)
-        if: ${{ !inputs.run_twice }}
+      # 1回目：常に実行
+      - name: Build (first)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -91,23 +106,12 @@ jobs:
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
             APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
-          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
-          cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+          # cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+          # cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+          cache-from: type=gha,scope=df-${{ hashFiles(env.DOCKERFILE) }}
+          cache-to: type=gha,mode=max,scope=df-${{ hashFiles(env.DOCKERFILE) }}
 
       # 2回ビルドして 2回目が速くなるかを観測（最強のデバッグ）
-      - name: Build (first)
-        if: ${{ inputs.run_twice }}
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ${{ env.DOCKERFILE }}
-          push: false
-          build-args: |
-            CMD_PATH=${{ env.CMD_PATH }}
-            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
-          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
-          cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
-
       - name: Build (second; should be faster if caches work)
         if: ${{ inputs.run_twice }}
         uses: docker/build-push-action@v6
@@ -118,14 +122,23 @@ jobs:
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
             APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
-          cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
-          cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+          # cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+          # cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
+          cache-from: type=gha,scope=df-${{ hashFiles(env.DOCKERFILE) }}
+          cache-to: type=gha,mode=max,scope=df-${{ hashFiles(env.DOCKERFILE) }}
+
+      - name: Inspect cache-dir before post steps
+        run: |
+          set -eux
+          ls -lah "${CACHE_DIR}" || true
+          du -sh "${CACHE_DIR}" || true
+          find "${CACHE_DIR}" -maxdepth 2 -type f | head -50 || true
 
       # ----------------------------
       # 4) Save cache mounts (actions/cache)
       # ----------------------------
-      - name: Save cache mounts (BuildKit cache mounts)
-        uses: actions/cache/save@v5
-        with:
-          path: ${{ env.CACHE_DIR }}
-          key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+      # - name: Save cache mounts (BuildKit cache mounts)
+      #   uses: actions/cache/save@v5
+      #   with:
+      #     path: ${{ env.CACHE_DIR }}
+      #     key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}

@@ -56,12 +56,14 @@ RUN --mount=type=bind,source=.,target=/src,ro \
 #     echo "=== before ==="; \
 #     du -sh /go/pkg/mod /root/.cache/go-build || true; \
 #     APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"; \
-#     time CGO_ENABLED=0 GOOS=linux go build -trimpath \
+#     start="$(date +%s)"; \
+#     CGO_ENABLED=0 GOOS=linux go build -trimpath \
 #       -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
 #       -o /out/app ./${CMD_PATH}; \
+#     end="$(date +%s)"; \
+#     echo "go build seconds=$((end-start))"; \
 #     echo "=== after ==="; \
 #     du -sh /go/pkg/mod /root/.cache/go-build || true
-
 
 ############################
 # 3) runtime: minimal image
