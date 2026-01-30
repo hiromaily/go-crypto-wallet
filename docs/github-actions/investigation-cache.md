@@ -280,7 +280,57 @@ BuildKit Cache Dance を使ってもキャッシュが取り出せず、保存�
 
 ## 10. バージョン変更後、JOBを実行する (5回目)
 
-まだうまくいかないので、`hiromaily/buildkit-cache-dance`側のコードに`is-debug`でlogが出るように修正する。
+まだうまくいかないので、`hiromaily/buildkit-cache-dance`側のコードに`is-debug`でlogが出るように修正した。
+
+**結果**
+
+- buildkit-cache-dance が cache-dir（= cache-mount）を使っていません。
+- 期待：抽出したキャッシュは cache-mount/go-mod, cache-mount/go-build に保存される
+- 実際：抽出したキャッシュは リポジトリ直下の go-mod/ と go-build/ に保存されている
+
+[extract側]
+
+```log
+[DEBUG] cache-dir (absolute): .../cache-mount
+...
+[DEBUG] Moving extracted cache to: go-mod
+[DEBUG] Executing: sudo rm -rf go-mod
+...
+[DEBUG] Directory Inspection: Cache source AFTER extraction (go-mod)
+[DEBUG] Contents (8 items): ... github.com ... golang.org ...
+```
+
+cache-dir が cache-mount なのに、**移動先が go-mod（= repo直下）**になっています。
+
+[inject側]
+
+```log
+[DEBUG] Directory Inspection: Cache source BEFORE injection (go-mod)
+[DEBUG] Path: go-mod
+[DEBUG] Contents (0 items)
+...
+Executing: docker buildx build ... -f scratch/Dancefile.inject ... go-mod
+```
+
+inject の build context が **go-mod**になっていて、これも本来は cache-mount/go-mod であるべきです。
+
+その結果
+
+- actions/cache@v5 が保存するのは cache-mount/ だけ
+- でも cache-mount/ は空（4KB）のまま
+- 一方で、実データは repo 直下の go-mod/ go-build/ に生成される
+- → **「キャッシュが保存されない」「restoreしても空」**が永遠に続く
+
+**`--cache-dir`**
+
+BuildKit の `RUN --mount=type=cache` で使われたキャッシュの実体を、
+ホスト（GitHub Actions runner）上に一時的に“展開（extract）・再注入（inject）するためのルートディレクトリ”
+
+つまり、CACHE_DIR は：
+
+- Docker イメージの中の /go/pkg/mod や /root/.cache/go-build そのものではない
+- BuildKit 内部の cache volume そのものでもない
+- 「BuildKit の外に cache mount の中身を取り出すための“受け皿”」
 
 ---
 
