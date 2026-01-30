@@ -133,3 +133,13 @@ build-docker-watch:
 .PHONY: build-docker-keygen
 build-docker-keygen:
 	$(DOCKER_BUILD) --build-arg CMD_PATH=cmd/keygen -t wallet:keygen .
+
+DOCKER_BUILD2 := docker build --progress=plain -f docker/Dockerfile_without_cache
+
+.PHONY: build-docker-watch2
+build-docker-watch2:
+	$(DOCKER_BUILD2) --build-arg CMD_PATH=cmd/watch -t wallet:watch .
+
+.PHONY: build-docker-keygen2
+build-docker-keygen2:
+	$(DOCKER_BUILD2) --build-arg CMD_PATH=cmd/keygen -t wallet:keygen .
