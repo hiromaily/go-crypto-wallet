@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
 
+# without BuildKit cache mounts and bind mounts
+
 ############################
 # 1) build: resolve git tag + build selected cmd
 # Note: set sha checked by `docker pull golang:1.25.6 && docker inspect`

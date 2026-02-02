@@ -1,14 +1,17 @@
 name: docker-build-debug (without cache-mount)
 
-# 1. code not changed
-# RUN go mod download: CACHED
-# COPY --from=deps /src/go.sum /src/go.sum: DONE 63.0s
-# RUN go build: 40s
-# exporting to GitHub Actions Cache: DONE 36.2s
-# 2. dockerfile go mod download position changed (combined with build)
-# RUN go mod download: 13.2s
-# RUN go build: 38s
-# exporting to GitHub Actions Cache: DONE 92.7s
+# 1. use cache, Dockerfile_without_bindmount (first time):  1m 30s
+# 2. use cache, Dockerfile_without_bindmount (second time): 1m 31s
+# 3. not cache, Dockerfile_without_bindmount (first time):  1m 41s
+# 4. not cache, Dockerfile_without_bindmount (second time): 1m 31s
+# 5. use cache, Dockerfile_without_mount (first time):  1m 38s
+# 6. use cache, Dockerfile_without_mount (second time): 1m 36s
+# 7. not cache, Dockerfile_without_mount (first time):  1m 52s
+# 8. not cache, Dockerfile_without_mount (second time): 1m 44s
+# 9. use cache, Dockerfile (first time):   1m 30s
+# 10. use cache, Dockerfile (second time): 1m 29s
+# 11. not cache, Dockerfile (first time):  1m 14s
+# 12. not cache, Dockerfile (second time): 1m 21s
 
 on:
   workflow_dispatch:
@@ -21,11 +24,11 @@ on:
         description: "Dockerfile path"
         type: choice
         required: true
-        default: "./docker/Dockerfile_without_bindmount"
+        default: "./docker/Dockerfile"
         options:
+          - "./docker/Dockerfile"
           - "./docker/Dockerfile_without_bindmount"
           - "./docker/Dockerfile_without_mount"
-          - "./docker/Dockerfile"
       # dockerfile:
       #   description: "Dockerfile path"
       #   type: string
@@ -41,8 +44,8 @@ permissions:
 
 env:
   DOCKERFILE: ${{ inputs.dockerfile }}
-  #GHA_CACHE_SCOPE: go-crypto-wallet
   CMD_PATH: cmd/watch
+  #GHA_CACHE_SCOPE: go-crypto-wallet
 
 jobs:
   build:
