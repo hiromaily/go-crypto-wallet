@@ -10,12 +10,10 @@ WORKDIR /src
 
 # go mod download (cacheable but extracting cost may be high)
 COPY go.mod go.sum ./
-#RUN go mod download
 RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
     go mod download
 
 ARG CMD_PATH=cmd/watch
-ARG APP_VERSION_VAR=main.appVersion
 
 # copy source (it may require .git as well)
 COPY . .
@@ -27,7 +25,7 @@ RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
     echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
     CGO_ENABLED=0 GOOS=linux \
     go build -trimpath \
-      -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
+      -ldflags="-s -w -X main.appVersion=${APP_VERSION}" \
       -o /out/app ./${CMD_PATH}
 
 ############################

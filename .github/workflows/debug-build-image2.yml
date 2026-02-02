@@ -13,6 +13,23 @@ name: docker-build-debug (without cache-mount)
 on:
   workflow_dispatch:
     inputs:
+      use_cache:
+        description: "Use GitHub Actions Cache (true/false)"
+        type: boolean
+        default: true
+      dockerfile:
+        description: "Dockerfile path"
+        type: choice
+        required: true
+        default: "./docker/Dockerfile_without_bindmount"
+        options:
+          - "./docker/Dockerfile_without_bindmount"
+          - "./docker/Dockerfile_without_mount"
+          - "./docker/Dockerfile"
+      # dockerfile:
+      #   description: "Dockerfile path"
+      #   type: string
+      #   default: "./docker/Dockerfile_without_bindmount"
       run_twice:
         description: "Build twice in the same job to verify cache hits"
         type: boolean
@@ -23,10 +40,9 @@ permissions:
   actions: write # for cache type=gha
 
 env:
-  DOCKERFILE: ./docker/Dockerfile_without_cache
+  DOCKERFILE: ${{ inputs.dockerfile }}
   #GHA_CACHE_SCOPE: go-crypto-wallet
   CMD_PATH: cmd/watch
-  APP_VERSION_VAR: main.appVersion
 
 jobs:
   build:
@@ -54,7 +70,8 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
+          cache-from: ${{ inputs.use_cache == 'true' && format('type=gha,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
+          cache-to: ${{ inputs.use_cache == 'true' && format('type=gha,mode=max,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
           # cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
           # cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
 
@@ -69,6 +86,7 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
+          cache-from: ${{ inputs.use_cache == 'true' && format('type=gha,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
+          cache-to: ${{ inputs.use_cache == 'true' && format('type=gha,mode=max,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
           # cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
           # cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}

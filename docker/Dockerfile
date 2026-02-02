@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
 
+# use BuildKit cache mounts and bind mounts to optimize caching
+
 ############################
 # 1) deps: go mod download via bind mounts
 ############################
