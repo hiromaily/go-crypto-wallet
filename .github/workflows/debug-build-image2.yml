@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: read
+  actions: write # for cache type=gha
 
 env:
   DOCKERFILE: ./docker/Dockerfile_without_cache
