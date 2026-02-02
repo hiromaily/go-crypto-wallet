@@ -40,6 +40,7 @@ jobs:
       # docker driver では cache-to type=gha がexportできない
       - name: Set up Buildx (docker-container driver)
         uses: docker/setup-buildx-action@v3
+        id: buildx
         with:
           driver: docker-container
 
@@ -47,6 +48,7 @@ jobs:
       - name: Build (first)
         uses: docker/build-push-action@v6
         with:
+          builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
@@ -61,6 +63,7 @@ jobs:
         if: ${{ inputs.run_twice }}
         uses: docker/build-push-action@v6
         with:
+          builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
