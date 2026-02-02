@@ -1,5 +1,7 @@
 name: docker-build-debug (BuildKit Cache Dance)
 
+# https://docs.docker.com/build/ci/github-actions/cache/#cache-mounts
+
 on:
   workflow_dispatch:
     inputs:
@@ -22,9 +24,7 @@ on:
 
 permissions:
   contents: read
-  # packages: write は pushしないなら不要。GHA cache(type=gha) にも不要のはず。
-  # もし環境によって必要になったら付け直してOK。
-  # packages: write
+  actions: write # for cache type=gha
 
 env:
   DOCKERFILE: ./docker/Dockerfile
