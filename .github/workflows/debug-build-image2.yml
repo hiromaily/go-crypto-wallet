@@ -1,4 +1,4 @@
-name: docker-build-debug
+name: docker-build-debug (without cache-mount)
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 env:
-  DOCKERFILE: ./docker/Dockerfile
+  DOCKERFILE: ./docker/Dockerfile_without_cache
   #GHA_CACHE_SCOPE: go-crypto-wallet
   CMD_PATH: cmd/watch
   APP_VERSION_VAR: main.appVersion
@@ -22,11 +22,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (fetch tags)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      # 1回目：常に実行
+      # docker driver では cache-to type=gha がexportできない
+      - name: Set up Buildx (docker-container driver)
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      # First: always run
       - name: Build (first)
         uses: docker/build-push-action@v6
         with:
@@ -39,7 +45,7 @@ jobs:
           cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
           cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
 
-      # 2回目：run_twice=true のときだけ
+      # Second: check how it works by cache for debugging
       - name: Build (second; should be faster if caches work)
         if: ${{ inputs.run_twice }}
         uses: docker/build-push-action@v6

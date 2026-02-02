@@ -334,6 +334,59 @@ BuildKit の `RUN --mount=type=cache` で使われたキャッシュの実体を
 
 ---
 
+## 11. cache-danceのInject/Saveのコストの高さ
+
+**全量コピーのコストが高い**
+
+- Inject（ビルド前）: cache-mount/* → cache mount（/go/pkg/mod や /root/.cache/go-build）へ cp -R
+- Post（ビルド後）: cache mount → cache-mount/* へ cp -R
+
+大きいプロジェクトだと /go/pkg/mod も /root/.cache/go-build も巨大になり、毎回“全量コピー”が発生するので 1〜4分かかるだろう。
+
+**EACCES ... permission denied, rmdir .../.github**
+
+前回のキャッシュに root 所有・書込不可のファイルが混ざっていて、cache-dance 側の掃除がうまくいっていない（=余計な手戻りや不整合の温床）可能性
+
+- Go のキャッシュディレクトリを root 以外に寄せる（ビルドユーザーや mount の uid/gid を揃える）
+- cache-dir 側に権限を揃える処理を入れる（例：chmod -R u+rwX）
+
+などで対応すべきか？
+
+**改善案1**
+
+- “保存”を頻度制御する（mainでも毎回extractしない）
+  - go.mod / go.sum が変わった時だけ go-mod を保存する
+
+**改善案2: buildkit-cache-dance が “毎回フルコピー” している問題をFIXする**
+
+-> “差分コピー”にする
+
+Inject / Extract でやっている `cp -p -R SRC/. DST/` を 以下に変更
+
+- `差分だけコピー（rsync / tar+mtime比較 等）`に変更し、
+- スキップできるときはスキップする
+
+[詳細]
+
+- rsync を使った差分同期（最重要・最も効く）
+  - busybox ベースだと rsync が無いので、専用の軽量イメージに変えるのが簡単
+    - FROM alpine:3.xx して apk add --no-cache rsync
+    - もしくは ghcr.io/... に rsync 入りの小さいベースを用意
+
+Injectの置き換え
+
+```
+rsync -a --delete --ignore-existing /var/dance-cache/ /go/pkg/mod/
+```
+
+Extract の置き換え
+
+```
+rsync -a --delete /go/pkg/mod/ /var/dance-cache/
+```
+
+---
+
 ## [原点] 問題点の整理**
 
 `RUN --mount=type=cache` の中身は、`buildx cache-to/from (type=gha 等)` だけでは永続化されない（＝昔から課題）というのが広く知られていて、Docker側/BuildKit側にも関連Issueがあります。
@@ -354,3 +407,59 @@ Go が速くなる鍵は GOCACHE（コンパイルキャッシュ） と GOMODCA
 
 - GOMODCACHE は「COPY go.mod go.sum → RUN go mod download」の層に分けると、ソースが変わっても温存できる（＝依存再DLを避けられる）
 - 一方 GOCACHE は、Dockerビルドを跨いで永続化されないと “前回のコンパイル成果” を使えない。
+
+---
+
+## GHA上では、go-build キャッシュの永続化をやめる（最も効く）
+
+`/root/.cache/go-build` は 更新頻度が高く、容量も大きく、毎回大きく差分が出るので、cache-dance の “全量コピー” と相性が悪い。
+そして、go.modの更新頻度の低さから、go.mod/go.sum を `COPY` して `go mod download` をレイヤーキャッシュに乗せる方が現実的
+
+### 1. Dockerfile を “go.mod/go.sum は COPY でレイヤーキャッシュ” に戻す
+
+```dockerfile
+# syntax=docker/dockerfile:1
+FROM golang:1.25.6 AS build
+WORKDIR /src
+
+ARG CMD_PATH=cmd/watch
+ARG APP_VERSION_VAR=main.appVersion
+
+# (A) Layer cache for module download
+COPY go.mod go.sum ./
+RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+    go mod download
+
+# (B) Source is bind-mounted, not baked into layers
+RUN --mount=type=bind,source=.,target=/src,ro \
+    --mount=type=bind,source=.git,target=/src/.git,ro \
+    --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
+    --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
+    echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
+    CGO_ENABLED=0 GOOS=linux \
+    go build -trimpath \
+      -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
+      -o /out/app ./${CMD_PATH}
+```
+
+ここでのポイント：
+
+- `go mod download` は **レイヤーキャッシュ**でほぼ完結
+  - ただし、`go mod download`が100s以下程度のコストしかかからない場合、レイヤーキャッシュのexportコストのほうが高い可能性がある。
+- `/go/pkg/mod` を `type=cache` にしておくと、同一ビルド内でも効く（必須ではないが安定）
+- ソースは bind のままなので、レイヤーに残らない
+
+### 2. Workflow 側から buildkit-cache-dance を外す（少なくとも go-mod 目的では不要）
+
+- この方式なら、cache-dance の重い Post（数分）自体が不要になります。
+- buildx の `cache-from/to type=gha` はそのままでOKです（レイヤーキャッシュと相性が良い）。
+- GitHub Actions の buildx で「レイヤーキャッシュを効かせる」には
+   `cache-from/to type=gha` が効いている必要があります（あなたは既に設定済み）。
+- `go mod download` レイヤーがキャッシュヒットしてるかは、ログに `CACHED` が出たり、ステップが一瞬で終わることで確認できます。
+
+**まとめ**
+
+- **go.mod の更新頻度が低いなら、layer cache に寄せるのが最適解になりやすい**
+- cache-dance は “mount cache を永続化したい” ケースに有効だが、大規模だとコピーが重い
+- あなたの現状（Post が 3m45s）なら、まず **go-mod は layer cache に戻す**のが一番効く

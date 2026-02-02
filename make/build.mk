@@ -124,17 +124,19 @@ run-watch:
 #------------------------------------------------------------------------------
 # PHONY Build Docker Image Targets
 #------------------------------------------------------------------------------
-DOCKER_BUILD := docker build --progress=plain -f docker/Dockerfile
+DOCKER_BUILD1 := docker build --progress=plain -f docker/Dockerfile
+DOCKER_CHECK_BUILD1 := docker build --check --progress=plain -f docker/Dockerfile
 
 .PHONY: build-docker-watch
 build-docker-watch:
-	$(DOCKER_BUILD) --build-arg CMD_PATH=cmd/watch -t wallet:watch .
+	$(DOCKER_BUILD1) --build-arg CMD_PATH=cmd/watch -t wallet:watch .
 
 .PHONY: build-docker-keygen
 build-docker-keygen:
-	$(DOCKER_BUILD) --build-arg CMD_PATH=cmd/keygen -t wallet:keygen .
+	$(DOCKER_BUILD1) --build-arg CMD_PATH=cmd/keygen -t wallet:keygen .
 
 DOCKER_BUILD2 := docker build --progress=plain -f docker/Dockerfile_without_cache
+DOCKER_CHECK_BUILD2 := docker build --check --progress=plain -f docker/Dockerfile_without_cache
 
 .PHONY: build-docker-watch2
 build-docker-watch2:

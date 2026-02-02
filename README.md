@@ -28,6 +28,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 |------|---------|-------------|
 | Go | 1.25.6 | Programming language |
 | MySQL | 8.4+ | Database (via Docker) |
+| SQLite | 3.0+ | Database |
 | Atlas | 1.0.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
@@ -64,7 +65,6 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - ✅ Application layer (`internal/application/usecase/`) - Use case implementations following Clean Architecture
   - ✅ Infrastructure layer (`internal/infrastructure/`) - External dependencies (API clients, database, repositories)
   - ✅ Interface adapters layer (`internal/interface-adapters/`) - CLI commands and wallet adapters
-  - ✅ Go 1.25.6 with updated major dependencies (btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
 - ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures
   - 30-50% transaction size/fee reduction compared to legacy multisig
   - Enhanced privacy with indistinguishable spend patterns
