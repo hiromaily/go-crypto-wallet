@@ -21,7 +21,9 @@ ARG APP_VERSION_VAR=main.appVersion
 COPY . .
 
 # go build
-RUN APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
+RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
+    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
     echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
     CGO_ENABLED=0 GOOS=linux \
     go build -trimpath \

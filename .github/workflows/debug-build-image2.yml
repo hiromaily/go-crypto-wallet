@@ -70,5 +70,6 @@ jobs:
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
             APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
-          cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
-          cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          # better to use local for the same job at the second build
+          cache-from: type=local,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          cache-to: type=local,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
