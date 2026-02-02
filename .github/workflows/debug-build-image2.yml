@@ -1,5 +1,11 @@
 name: docker-build-debug (without cache-mount)
 
+# code not changed
+# RUN go mod download: CACHED
+# COPY --from=deps /src/go.sum /src/go.sum: DONE 63.0s
+# RUN go build: 40s
+# exporting to GitHub Actions Cache: DONE 36.2s
+
 on:
   workflow_dispatch:
     inputs:
