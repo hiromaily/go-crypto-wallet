@@ -32,9 +32,6 @@ FROM golang:1.25.6 AS build
 # Which cmd to build (e.g. cmd/watch)
 ARG CMD_PATH=cmd/watch
 
-# ldflags variable path (adjust if needed)
-ARG APP_VERSION_VAR=main.appVersion
-
 WORKDIR /src
 
 RUN --mount=type=bind,source=.,target=/src,ro \
@@ -45,7 +42,7 @@ RUN --mount=type=bind,source=.,target=/src,ro \
     echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
     CGO_ENABLED=0 GOOS=linux \
     go build -trimpath \
-      -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
+      -ldflags="-s -w -X main.appVersion==${APP_VERSION}" \
       -o /out/app ./${CMD_PATH}
 
 # Debug for build step
@@ -60,7 +57,7 @@ RUN --mount=type=bind,source=.,target=/src,ro \
 #     APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"; \
 #     start="$(date +%s)"; \
 #     CGO_ENABLED=0 GOOS=linux go build -trimpath \
-#       -ldflags="-s -w -X ${APP_VERSION_VAR}=${APP_VERSION}" \
+#       -ldflags="-s -w -X main.appVersion==${APP_VERSION}" \
 #       -o /out/app ./${CMD_PATH}; \
 #     end="$(date +%s)"; \
 #     echo "go build seconds=$((end-start))"; \

@@ -10,7 +10,7 @@ name: docker-build-debug (without cache-mount)
 # 8. not cache, Dockerfile_without_mount (second time): 1m 44s
 # 9. use cache, Dockerfile (first time):   1m 30s
 # 10. use cache, Dockerfile (second time): 1m 29s
-# 11. not cache, Dockerfile (first time):  1m 14s
+# 11. not cache, Dockerfile (first time):  1m 14s [The best time]
 # 12. not cache, Dockerfile (second time): 1m 21s
 
 on:
@@ -19,7 +19,7 @@ on:
       use_cache:
         description: "Use GitHub Actions Cache (true/false)"
         type: boolean
-        default: true
+        default: false
       dockerfile:
         description: "Dockerfile path"
         type: choice

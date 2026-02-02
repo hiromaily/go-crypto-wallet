@@ -9,6 +9,10 @@ on:
         description: "Bump this to force a fresh actions/cache mount set"
         type: string
         default: "v4-0130-1828"
+      cd_skip_extraction:
+        description: "Skip Cache Dance extraction (true/false)"
+        type: boolean
+        default: false
       cd_rsync_mode:
         description: "Cache Dance rsync mode (true/false)"
         type: boolean
@@ -28,16 +32,10 @@ permissions:
 
 env:
   DOCKERFILE: ./docker/Dockerfile
+  CACHE_VERSION: ${{ inputs.cache_version }}
   CACHE_DIR: cache-mount
   GHA_CACHE_SCOPE: go-crypto-wallet
-
-  # BuildKit cache mounts saved via actions/cache
-  # (override via workflow_dispatch input)
-  CACHE_VERSION: ${{ inputs.cache_version }}
-
-  # Build args
   CMD_PATH: cmd/watch
-  APP_VERSION_VAR: main.appVersion
 
 jobs:
   build:
@@ -95,7 +93,7 @@ jobs:
               "go-build":{ "target": "/root/.cache/go-build", "id": "go-build" }
             }
           # Debug workflowなので常に extraction して、actions/cache/save できる形にする
-          skip-extraction: false
+          skip-extraction: ${{ inputs.cd_skip_extraction }}
           rsync-mode: ${{ inputs.cd_rsync_mode }}
           is-debug: ${{ inputs.cd_is_debug }}
 
@@ -114,7 +112,6 @@ jobs:
           # load: true
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
           # cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
           # cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
           cache-from: type=gha,scope=df-${{ hashFiles(env.DOCKERFILE) }}
@@ -130,13 +127,12 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
           # cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
           # cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
           cache-from: type=gha,scope=df-${{ hashFiles(env.DOCKERFILE) }}
           cache-to: type=gha,mode=max,scope=df-${{ hashFiles(env.DOCKERFILE) }}
 
-      - name: Inspect cache-dir before post steps
+      - name: Inspect cache-dir before post steps (for debug)
         run: |
           set -eux
           ls -lah "${CACHE_DIR}" || true
