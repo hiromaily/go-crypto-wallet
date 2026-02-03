@@ -18,7 +18,10 @@ name: docker-build-debug (BuildKit Cache Dance)
 # => fix rsync mode bug
 # 10. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1): 2m 41s
 # 11. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (2): 2m 29s
+#
 # [cache: go-build]
+# 1. cache_version: v4-0203-2313, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: false, (1): 2m 7s (improved from 2m 41s)
+# 2. cache_version: v4-0203-2313, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: false, (2): 1m 31s (improved from 2m 29s)
 
 on:
   workflow_dispatch:
@@ -35,10 +38,11 @@ on:
         description: "Skip Cache Dance extraction (true/false)"
         type: boolean
         default: false
-      cd_rsync_mode:
-        description: "Cache Dance rsync mode (true/false)"
-        type: boolean
-        default: false
+      # [Default]
+      # cd_rsync_mode:
+      #   description: "Cache Dance rsync mode (true/false)"
+      #   type: boolean
+      #   default: false
       cd_is_debug:
         description: "Cache Dance debug mode (true/false)"
         type: boolean
