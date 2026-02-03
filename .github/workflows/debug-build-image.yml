@@ -2,8 +2,10 @@ name: docker-build-debug (BuildKit Cache Dance)
 
 # https://docs.docker.com/build/ci/github-actions/cache/#cache-mounts
 
-# 1. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false
-# 2. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false
+# 1. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false, (1): 3m 1s
+# 2. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false, (2): 2m 29s
+# 3. cache_version: v4-0203-1832, cd_skip_extraction: true, cd_rsync_mode: false, cd_is_debug: false, (1): 3m 1s
+# 4. cache_version: v4-0203-1832, cd_skip_extraction: true, cd_rsync_mode: false, cd_is_debug: false, (2): 2m 29s
 
 on:
   workflow_dispatch:
@@ -11,7 +13,7 @@ on:
       cache_version:
         description: "Bump this to force a fresh actions/cache mount set"
         type: string
-        default: "v4-0203-1817"
+        default: "v4-0203-1832"
       cd_skip_extraction:
         description: "Skip Cache Dance extraction (true/false)"
         type: boolean
