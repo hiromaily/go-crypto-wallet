@@ -2,6 +2,7 @@ name: docker-build-debug (BuildKit Cache Dance)
 
 # https://docs.docker.com/build/ci/github-actions/cache/#cache-mounts
 
+# [cache: go-mod + go-build]
 # 1. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false, (1): 3m 1s
 # 2. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false, (2): 2m 29s
 # 3. cache_version: v4-0203-1832, cd_skip_extraction: true, cd_rsync_mode: false, cd_is_debug: false, (1): 1m 37s
@@ -15,7 +16,9 @@ name: docker-build-debug (BuildKit Cache Dance)
 # 9. cache_version: v4-0203-2010, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1): 2m 45s
 #  https://github.com/hiromaily/go-crypto-wallet/actions/runs/21627935973/job/62332804344
 # => fix rsync mode bug
-# 10. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1):
+# 10. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1): 2m 41s
+# 11. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (2): 2m 29s
+# [cache: go-build]
 
 on:
   workflow_dispatch:
@@ -23,7 +26,11 @@ on:
       cache_version:
         description: "Bump this to force a fresh actions/cache mount set"
         type: string
-        default: "v4-0203-2125"
+        default: "v4-0203-2313"
+      include_go_mod:
+        description: "true → include go-mod + go-build, false → only go-build"
+        type: boolean
+        default: false
       cd_skip_extraction:
         description: "Skip Cache Dance extraction (true/false)"
         type: boolean
@@ -51,6 +58,10 @@ env:
   CACHE_DIR: cache-mount
   GHA_CACHE_SCOPE: go-crypto-wallet
   CMD_PATH: cmd/watch
+  CACHE_MAP_FULL: >
+    { "go-mod": { "target": "/go/pkg/mod", "id": "go-mod" }, "go-build": { "target": "/root/.cache/go-build", "id": "go-build" } }
+  CACHE_MAP_MIN: >
+    { "go-build": { "target": "/root/.cache/go-build", "id": "go-build" } }
 
 jobs:
   build:
@@ -102,11 +113,12 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
           dockerfile: ${{ env.DOCKERFILE }}
-          cache-map: |
-            {
-              "go-mod":  { "target": "/go/pkg/mod", "id": "go-mod" },
-              "go-build":{ "target": "/root/.cache/go-build", "id": "go-build" }
-            }
+          # cache-map: |
+          #   {
+          #     "go-mod":  { "target": "/go/pkg/mod", "id": "go-mod" },
+          #     "go-build":{ "target": "/root/.cache/go-build", "id": "go-build" }
+          #   }
+          cache-map: ${{ inputs.include_go_mod == 'true' && env.CACHE_MAP_FULL || env.CACHE_MAP_MIN }}
           # Debug workflowなので常に extraction して、actions/cache/save できる形にする
           skip-extraction: ${{ inputs.cd_skip_extraction }}
           rsync-mode: ${{ inputs.cd_rsync_mode }}
