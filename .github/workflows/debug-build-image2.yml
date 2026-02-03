@@ -12,14 +12,21 @@ name: docker-build-debug (without cache-mount)
 # 10. use cache, Dockerfile (second time): 1m 29s
 # 11. not cache, Dockerfile (first time):  1m 14s [The best time]
 # 12. not cache, Dockerfile (second time): 1m 21s
+# Compare cache type: gha / local / registry / none at No.11
 
 on:
   workflow_dispatch:
     inputs:
-      use_cache:
-        description: "Use GitHub Actions Cache (true/false)"
-        type: boolean
-        default: false
+      cache_type:
+        description: "Cache type to use"
+        type: choice
+        required: true
+        default: "none"
+        options:
+          - "none"
+          - "gha"
+          - "local"
+          - "registry"
       dockerfile:
         description: "Dockerfile path"
         type: choice
@@ -45,7 +52,9 @@ permissions:
 env:
   DOCKERFILE: ${{ inputs.dockerfile }}
   CMD_PATH: cmd/watch
-  #GHA_CACHE_SCOPE: go-crypto-wallet
+  LOCAL_CACHE_PATH: /tmp/.buildx-cache
+  # For registry cache, set your registry ref (e.g., ghcr.io/your-org/your-repo:cache)
+  REGISTRY_CACHE_REF: ghcr.io/${{ github.repository }}:buildcache
 
 jobs:
   build:
@@ -63,6 +72,40 @@ jobs:
         with:
           driver: docker-container
 
+      - name: Set cache configuration
+        id: cache-config
+        run: |
+          CACHE_SCOPE="go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}"
+          case "${{ inputs.cache_type }}" in
+            gha)
+              echo "cache-from=type=gha,scope=${CACHE_SCOPE}" >> $GITHUB_OUTPUT
+              echo "cache-to=type=gha,mode=max,scope=${CACHE_SCOPE}" >> $GITHUB_OUTPUT
+              ;;
+            local)
+              echo "cache-from=type=local,src=${{ env.LOCAL_CACHE_PATH }}" >> $GITHUB_OUTPUT
+              echo "cache-to=type=local,dest=${{ env.LOCAL_CACHE_PATH }}-new,mode=max" >> $GITHUB_OUTPUT
+              ;;
+            registry)
+              echo "cache-from=type=registry,ref=${{ env.REGISTRY_CACHE_REF }}" >> $GITHUB_OUTPUT
+              echo "cache-to=type=registry,ref=${{ env.REGISTRY_CACHE_REF }},mode=max" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "cache-from=" >> $GITHUB_OUTPUT
+              echo "cache-to=" >> $GITHUB_OUTPUT
+              ;;
+          esac
+          echo "Cache type: ${{ inputs.cache_type }}"
+
+      # Restore local cache if using local cache type
+      - name: Restore local cache
+        if: inputs.cache_type == 'local'
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.LOCAL_CACHE_PATH }}
+          key: buildx-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          restore-keys: |
+            buildx-
+
       # First: always run
       - name: Build (first)
         uses: docker/build-push-action@v6
@@ -73,10 +116,8 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-          cache-from: ${{ inputs.use_cache == 'true' && format('type=gha,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
-          cache-to: ${{ inputs.use_cache == 'true' && format('type=gha,mode=max,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
-          # cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
-          # cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          cache-from: ${{ steps.cache-config.outputs.cache-from }}
+          cache-to: ${{ steps.cache-config.outputs.cache-to }}
 
       # Second: check how it works by cache for debugging
       - name: Build (second; should be faster if caches work)
@@ -89,7 +130,12 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-          cache-from: ${{ inputs.use_cache == 'true' && format('type=gha,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
-          cache-to: ${{ inputs.use_cache == 'true' && format('type=gha,mode=max,scope=go-{0}', hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum')) || '' }}
-          # cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
-          # cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          cache-from: ${{ steps.cache-config.outputs.cache-from }}
+          cache-to: ${{ steps.cache-config.outputs.cache-to }}
+
+      # Move local cache for next run (avoids cache size growth)
+      - name: Move local cache
+        if: inputs.cache_type == 'local'
+        run: |
+          rm -rf ${{ env.LOCAL_CACHE_PATH }}
+          mv ${{ env.LOCAL_CACHE_PATH }}-new ${{ env.LOCAL_CACHE_PATH }} || true
