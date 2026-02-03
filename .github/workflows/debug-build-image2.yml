@@ -21,8 +21,8 @@ name: docker-build-debug (without BuildKit Cache Dance)
 # 16. cache type: `gha` (second time):   1m 33s
 # 17. cache type: `local` (first time):  1m 34s
 # 18. cache type: `local` (second time): 1m 42s
-# 19. cache type: `registry` (first time):  1m
-# 20. cache type: `registry` (second time): 1m
+# 19. cache type: `registry` (first time):  1m 36s
+# 20. cache type: `registry` (second time): 1m 23s [The best time in cache type]
 
 on:
   workflow_dispatch:
