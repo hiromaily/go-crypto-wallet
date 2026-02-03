@@ -1,4 +1,6 @@
-name: docker-build-debug (without cache-mount)
+name: docker-build-debug (without BuildKit Cache Dance)
+
+# TODO: pattern, code changed, module added, etc.
 
 # 1. use cache, Dockerfile_without_bindmount (first time):  1m 30s
 # 2. use cache, Dockerfile_without_bindmount (second time): 1m 31s
@@ -13,6 +15,14 @@ name: docker-build-debug (without cache-mount)
 # 11. not cache, Dockerfile (first time):  1m 14s [The best time]
 # 12. not cache, Dockerfile (second time): 1m 21s
 # Compare cache type: gha / local / registry / none at No.11
+# 13. cache type: `none` (first time):   1m 30s
+# 14. cache type: `none` (second time):  1m 23s
+# 15. cache type: `gha` (first time):    1m 23s
+# 16. cache type: `gha` (second time):   1m 33s
+# 17. cache type: `local` (first time):  1m 34s
+# 18. cache type: `local` (second time): 1m 42s
+# 19. cache type: `registry` (first time):  1m
+# 20. cache type: `registry` (second time): 1m
 
 on:
   workflow_dispatch:
@@ -48,7 +58,7 @@ on:
 permissions:
   contents: read
   actions: write # for cache type=gha
-
+  packages: write # for cache type=registry (GHCR)
 env:
   DOCKERFILE: ${{ inputs.dockerfile }}
   CMD_PATH: cmd/watch
@@ -71,6 +81,15 @@ jobs:
         id: buildx
         with:
           driver: docker-container
+
+      # Login to GHCR for registry cache
+      - name: Login to GitHub Container Registry
+        if: inputs.cache_type == 'registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set cache configuration
         id: cache-config
