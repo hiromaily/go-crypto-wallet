@@ -12,7 +12,10 @@ name: docker-build-debug (BuildKit Cache Dance)
 # 7. cache_version: v4-0203-1954, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: true, (1): 2m 47s
 #  https://github.com/hiromaily/go-crypto-wallet/actions/runs/21627414312/job/62331033712
 # 8. cache_version: v4-0203-1954, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: true, (2): 2m 50s
-# 9. cache_version: v4-0203-2010, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1):
+# 9. cache_version: v4-0203-2010, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1): 2m 45s
+#  https://github.com/hiromaily/go-crypto-wallet/actions/runs/21627935973/job/62332804344
+# => fix rsync mode bug
+# 10. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1):
 
 on:
   workflow_dispatch:
@@ -20,7 +23,7 @@ on:
       cache_version:
         description: "Bump this to force a fresh actions/cache mount set"
         type: string
-        default: "v4-0203-2010"
+        default: "v4-0203-2125"
       cd_skip_extraction:
         description: "Skip Cache Dance extraction (true/false)"
         type: boolean
