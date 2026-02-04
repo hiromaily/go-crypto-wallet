@@ -31,6 +31,7 @@ FROM golang:1.25.6 AS build
 
 # Which cmd to build (e.g. cmd/watch)
 ARG CMD_PATH=cmd/watch
+ARG APP_VERSION=dev
 
 WORKDIR /src
 

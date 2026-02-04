@@ -91,6 +91,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get APP_VERSION from git
+        id: version
+        run: |
+          APP_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo dev)
+          echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
+          echo "APP_VERSION: ${APP_VERSION}"
+
       - name: Set cache configuration
         id: cache-config
         run: |
@@ -135,6 +142,7 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
+            APP_VERSION=${{ steps.version.outputs.app_version }}
           cache-from: ${{ steps.cache-config.outputs.cache-from }}
           cache-to: ${{ steps.cache-config.outputs.cache-to }}
 
@@ -149,6 +157,7 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
+            APP_VERSION=${{ steps.version.outputs.app_version }}
           cache-from: ${{ steps.cache-config.outputs.cache-from }}
           cache-to: ${{ steps.cache-config.outputs.cache-to }}
 
