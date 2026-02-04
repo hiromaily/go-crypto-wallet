@@ -125,7 +125,7 @@ jobs:
           cache-map: ${{ inputs.include_go_mod == 'true' && env.CACHE_MAP_FULL || env.CACHE_MAP_MIN }}
           # Debug workflowなので常に extraction して、actions/cache/save できる形にする
           skip-extraction: ${{ inputs.cd_skip_extraction }}
-          rsync-mode: ${{ inputs.cd_rsync_mode }}
+          #rsync-mode: ${{ inputs.cd_rsync_mode }}
           is-debug: ${{ inputs.cd_is_debug }}
 
       # ----------------------------
