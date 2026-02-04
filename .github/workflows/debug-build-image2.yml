@@ -43,13 +43,10 @@ on:
         required: true
         default: "./docker/Dockerfile"
         options:
-          - "./docker/Dockerfile"
+          - "./docker/Dockerfile" # with BuildKit cache mount + bind mount
           - "./docker/Dockerfile_without_bindmount"
+          - "./docker/Dockerfile_without_cachemount"
           - "./docker/Dockerfile_without_mount"
-      # dockerfile:
-      #   description: "Dockerfile path"
-      #   type: string
-      #   default: "./docker/Dockerfile_without_bindmount"
       run_twice:
         description: "Build twice in the same job to verify cache hits"
         type: boolean
