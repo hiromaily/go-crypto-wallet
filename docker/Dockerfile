@@ -5,7 +5,8 @@
 ############################
 # 1) deps: go mod download via bind mounts
 ############################
-FROM golang:1.25.6 AS deps
+#FROM golang:1.25.6 AS deps
+FROM golang:1.25.6@sha256:ce63a16e0f7063787ebb4eb28e72d477b00b4726f79874b3205a965ffd797ab2 AS deps
 WORKDIR /src
 
 # 1. `--mount=type=cache`
@@ -25,7 +26,7 @@ RUN --mount=type=bind,source=go.mod,target=/src/go.mod,ro \
 
 
 ############################
-# 2) build: resolve git tag + build selected cmd
+# 2) build
 ############################
 FROM golang:1.25.6 AS build
 
@@ -39,8 +40,6 @@ RUN --mount=type=bind,source=.,target=/src,ro \
     --mount=type=bind,source=.git,target=/src/.git,ro \
     --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
-    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
-    echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
     CGO_ENABLED=0 GOOS=linux \
     go build -trimpath \
       -ldflags="-s -w -X main.appVersion==${APP_VERSION}" \

@@ -3,7 +3,7 @@
 # use only BuildKit cache mounts
 
 ############################
-# 1) build: resolve git tag + build selected cmd
+# 1) build
 # Note: set sha checked by `docker pull golang:1.25.6 && docker inspect`
 ############################
 #FROM golang:1.25.6 AS build
@@ -17,14 +17,12 @@ RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
 
 ARG CMD_PATH=cmd/watch
 ARG APP_VERSION=dev
-# copy source (it may require .git as well)
-COPY . .
+
+COPY cmd pkg internal ./
 
 # go build
 RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
-    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
-    echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
     CGO_ENABLED=0 GOOS=linux \
     go build -trimpath \
       -ldflags="-s -w -X main.appVersion=${APP_VERSION}" \

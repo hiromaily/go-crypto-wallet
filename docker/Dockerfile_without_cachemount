@@ -3,7 +3,7 @@
 # use BuildKit bind mounts
 
 ############################
-# 1) build: resolve git tag + build selected cmd
+# 1) build
 # Note: set sha checked by `docker pull golang:1.25.6 && docker inspect`
 ############################
 #FROM golang:1.25.6 AS build
@@ -20,10 +20,9 @@ ARG APP_VERSION=dev
 
 WORKDIR /src
 
+# go build
 RUN --mount=type=bind,source=.,target=/src,ro \
     --mount=type=bind,source=.git,target=/src/.git,ro \
-    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" && \
-    echo "Building ${CMD_PATH} with version=${APP_VERSION}" && \
     CGO_ENABLED=0 GOOS=linux \
     go build -trimpath \
       -ldflags="-s -w -X main.appVersion==${APP_VERSION}" \
