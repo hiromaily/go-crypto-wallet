@@ -3,25 +3,8 @@ name: docker-build-debug (BuildKit Cache Dance)
 # https://docs.docker.com/build/ci/github-actions/cache/#cache-mounts
 
 # [cache: go-mod + go-build]
-# 1. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false, (1): 3m 1s
-# 2. cache_version: v4-0203-1817, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: false, (2): 2m 29s
-# 3. cache_version: v4-0203-1832, cd_skip_extraction: true, cd_rsync_mode: false, cd_is_debug: false, (1): 1m 37s
-# 4. cache_version: v4-0203-1832, cd_skip_extraction: true, cd_rsync_mode: false, cd_is_debug: false, (2): 1m 50s
-# 5. cache_version: v4-0203-1942, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: false, (1): 3m 20s
-# 6. cache_version: v4-0203-1942, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: false, (2): 2m 32s
-# => rsync mode does not work faster here
-# 7. cache_version: v4-0203-1954, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: true, (1): 2m 47s
-#  https://github.com/hiromaily/go-crypto-wallet/actions/runs/21627414312/job/62331033712
-# 8. cache_version: v4-0203-1954, cd_skip_extraction: false, cd_rsync_mode: false, cd_is_debug: true, (2): 2m 50s
-# 9. cache_version: v4-0203-2010, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1): 2m 45s
-#  https://github.com/hiromaily/go-crypto-wallet/actions/runs/21627935973/job/62332804344
-# => fix rsync mode bug
-# 10. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (1): 2m 41s
-# 11. cache_version: v4-0203-2125, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: true, (2): 2m 29s
-#
-# [cache: go-build]
-# 1. cache_version: v4-0203-2313, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: false, (1): 2m 7s (improved from 2m 41s)
-# 2. cache_version: v4-0203-2313, cd_skip_extraction: false, cd_rsync_mode: true, cd_is_debug: false, (2): 1m 31s (improved from 2m 29s)
+# - skip_extraction makes build faster
+# - cache only go-build makes build faster (go-mod does not need to be cached)
 
 on:
   workflow_dispatch:
@@ -57,7 +40,7 @@ permissions:
   actions: write # for cache type=gha
 
 env:
-  DOCKERFILE: ./docker/Dockerfile
+  DOCKERFILE: ./docker/Dockerfile_mounts
   CACHE_VERSION: ${{ inputs.cache_version }}
   CACHE_DIR: cache-mount
   GHA_CACHE_SCOPE: go-crypto-wallet

@@ -1,0 +1,74 @@
+# syntax=docker/dockerfile:1
+
+# use BuildKit cache mounts and bind mounts to optimize caching
+
+############################
+# 1) deps: go mod download via bind mounts
+############################
+#FROM golang:1.25.6 AS deps
+FROM golang:1.25.6@sha256:ce63a16e0f7063787ebb4eb28e72d477b00b4726f79874b3205a965ffd797ab2 AS deps
+WORKDIR /src
+
+# 1. `--mount=type=cache`
+# ここで作られるキャッシュは：
+# ❌ Docker image のレイヤーには含まれない
+# ❌ buildx の type=gha キャッシュにも自動では入らない
+# ✅ BuildKit の内部（builder 内）にだけ存在
+# つまり、そのままだと GitHub Actions のジョブが終わった瞬間に消える一時データ
+#
+# 2. `--mount=type=bind,source=.,target=/src,ro`
+# Dockerの通常のレイヤーキャッシュ（RUN結果の再利用）はほぼ期待できない
+# その代わりに Go側のキャッシュ（cache mount）で速くなる設計
+RUN --mount=type=bind,source=go.mod,target=/src/go.mod,ro \
+    --mount=type=bind,source=go.sum,target=/src/go.sum,ro \
+    --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+    go mod download
+
+
+############################
+# 2) build
+############################
+FROM golang:1.25.6 AS build
+
+# Which cmd to build (e.g. cmd/watch)
+ARG CMD_PATH=cmd/watch
+ARG APP_VERSION=dev
+
+WORKDIR /src
+
+RUN --mount=type=bind,source=.,target=/src,ro \
+    --mount=type=bind,source=.git,target=/src/.git,ro \
+    --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
+    CGO_ENABLED=0 GOOS=linux \
+    go build -trimpath \
+      -ldflags="-s -w -X main.appVersion==${APP_VERSION}" \
+      -o /out/app ./${CMD_PATH}
+
+# Debug for build step
+# “before” が常にほぼ0なら、cache-dance / actions/cache のどこかで復元できていない
+# RUN --mount=type=bind,source=.,target=/src,ro \
+#     --mount=type=bind,source=.git,target=/src/.git,ro \
+#     --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+#     --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
+#     set -eux; \
+#     echo "=== before ==="; \
+#     du -sh /go/pkg/mod /root/.cache/go-build || true; \
+#     APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"; \
+#     start="$(date +%s)"; \
+#     CGO_ENABLED=0 GOOS=linux go build -trimpath \
+#       -ldflags="-s -w -X main.appVersion==${APP_VERSION}" \
+#       -o /out/app ./${CMD_PATH}; \
+#     end="$(date +%s)"; \
+#     echo "go build seconds=$((end-start))"; \
+#     echo "=== after ==="; \
+#     du -sh /go/pkg/mod /root/.cache/go-build || true
+
+############################
+# 3) runtime: minimal image
+############################
+FROM gcr.io/distroless/static-debian12:nonroot AS runtime
+WORKDIR /
+COPY --from=build /out/app /app
+USER nonroot:nonroot
+ENTRYPOINT ["/app"]

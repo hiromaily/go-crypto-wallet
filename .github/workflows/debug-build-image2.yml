@@ -1,28 +1,25 @@
 name: docker-build-debug (without BuildKit Cache Dance)
 
-# TODO: pattern, code changed, module added, etc.
+# TODO: pattern,
+# - code changed
+# - module added, etc.
 
-# 1. use cache, Dockerfile_without_bindmount (first time):  1m 30s
-# 2. use cache, Dockerfile_without_bindmount (second time): 1m 31s
-# 3. not cache, Dockerfile_without_bindmount (first time):  1m 41s
-# 4. not cache, Dockerfile_without_bindmount (second time): 1m 31s
-# 5. use cache, Dockerfile_without_mount (first time):  1m 38s
-# 6. use cache, Dockerfile_without_mount (second time): 1m 36s
-# 7. not cache, Dockerfile_without_mount (first time):  1m 52s
-# 8. not cache, Dockerfile_without_mount (second time): 1m 44s
-# 9. use cache, Dockerfile (first time):   1m 30s
-# 10. use cache, Dockerfile (second time): 1m 29s
-# 11. not cache, Dockerfile (first time):  1m 14s [The best time]
-# 12. not cache, Dockerfile (second time): 1m 21s
-# Compare cache type: gha / local / registry / none at No.11
-# 13. cache type: `none` (first time):   1m 30s
-# 14. cache type: `none` (second time):  1m 23s
-# 15. cache type: `gha` (first time):    1m 23s
-# 16. cache type: `gha` (second time):   1m 33s
-# 17. cache type: `local` (first time):  1m 34s
-# 18. cache type: `local` (second time): 1m 42s
-# 19. cache type: `registry` (first time):  1m 36s
-# 20. cache type: `registry` (second time): 1m 23s [The best time in cache type]
+# 1. Dockerfile 1 (source must be changed)
+# 2. Dockerfile 2
+# 3. Dockerfile + cache 1 (source must be changed)
+# 4. Dockerfile + cache 2
+# 5. Dockerfile_bind_mount 1 (source must be changed)
+# 6. Dockerfile_bind_mount 2
+# 7. Dockerfile_bind_mount + cache 1 (source must be changed)
+# 8. Dockerfile_bind_mount + cache 2
+# 9. Dockerfile_cache_mount 1 (source must be changed)
+# 10. Dockerfile_cache_mount 2
+# 11. Dockerfile_cache_mount cache 1 (source must be changed)
+# 12. Dockerfile_cache_mount cache 2
+# 13. Dockerfile_mounts 1 (source must be changed)
+# 14. Dockerfile_mounts 2
+# 15. Dockerfile_mounts cache 1 (source must be changed)
+# 16. Dockerfile_mounts cache 2
 
 on:
   workflow_dispatch:
@@ -44,9 +41,9 @@ on:
         default: "./docker/Dockerfile"
         options:
           - "./docker/Dockerfile" # with BuildKit cache mount + bind mount
-          - "./docker/Dockerfile_without_bindmount"
-          - "./docker/Dockerfile_without_cachemount"
-          - "./docker/Dockerfile_without_mount"
+          - "./docker/Dockerfile_cache_mount"
+          - "./docker/Dockerfile_bind_mount"
+          - "./docker/Dockerfile_mounts"
       run_twice:
         description: "Build twice in the same job to verify cache hits"
         type: boolean
