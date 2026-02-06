@@ -92,6 +92,8 @@ jobs:
           echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
           echo "APP_VERSION: ${APP_VERSION}"
 
+      # CACHE_SCOPE: BuildKit キャッシュの「衝突防止」
+      # type=gha や type=registry のキャッシュは同じリポジトリ・同じ Actions ストレージを共有する
       - name: Set cache configuration
         id: cache-config
         run: |
