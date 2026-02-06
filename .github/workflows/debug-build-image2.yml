@@ -11,15 +11,15 @@ name: docker-build-debug (without BuildKit Cache Dance)
 # 5. Dockerfile_bind_mount 1 (source must be changed): 1m 40s
 # 6. Dockerfile_bind_mount 2:                          1m 47s
 # 7. Dockerfile_bind_mount + cache 1 (source must be changed): 4m 15s
-# 8. Dockerfile_bind_mount + cache 2:                          2m 22s [cache doesn't work enough]
+# 8. Dockerfile_bind_mount + cache 2:                          2m 22s [cache doesn't work]
 # 9. Dockerfile_cache_mount 1 (source must be changed): 1m 37s
 # 10. Dockerfile_cache_mount 2:                         1m 32s
 # 11. Dockerfile_cache_mount cache 1 (source must be changed): 1m 42s
 # 12. Dockerfile_cache_mount cache 2:                             31s [cache works]
-# 13. Dockerfile_mounts 1 (source must be changed): 1m 22s [the fastest without cache]
+# 13. Dockerfile_mounts 1 (source must be changed): 1m 22s [the fastest without cache] <- best
 # 14. Dockerfile_mounts 2:                          1m 24s
-# 15. Dockerfile_mounts cache 1 (source must be changed):
-# 16. Dockerfile_mounts cache 2
+# 15. Dockerfile_mounts cache 1 (source must be changed): 1m 37s
+# 16. Dockerfile_mounts cache 2:                          1m 30s [cache doesn't work at all]
 
 on:
   workflow_dispatch:
