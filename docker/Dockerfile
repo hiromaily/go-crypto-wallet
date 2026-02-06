@@ -17,7 +17,10 @@ RUN go mod download
 ARG CMD_PATH=cmd/watch
 ARG APP_VERSION=dev
 
-COPY cmd pkg internal ./
+#COPY cmd pkg internal ./
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY pkg/ ./pkg/
 
 # go build
 RUN CGO_ENABLED=0 GOOS=linux \
