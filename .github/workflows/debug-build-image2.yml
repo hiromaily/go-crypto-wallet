@@ -14,8 +14,8 @@ name: docker-build-debug (without BuildKit Cache Dance)
 # 8. Dockerfile_bind_mount + cache 2:                          2m 22s [cache doesn't work enough]
 # 9. Dockerfile_cache_mount 1 (source must be changed): 1m 37s
 # 10. Dockerfile_cache_mount 2:                         1m 32s
-# 11. Dockerfile_cache_mount cache 1 (source must be changed)
-# 12. Dockerfile_cache_mount cache 2
+# 11. Dockerfile_cache_mount cache 1 (source must be changed): 1m 42s
+# 12. Dockerfile_cache_mount cache 2:                          31s     [cache works]
 # 13. Dockerfile_mounts 1 (source must be changed)
 # 14. Dockerfile_mounts 2
 # 15. Dockerfile_mounts cache 1 (source must be changed)

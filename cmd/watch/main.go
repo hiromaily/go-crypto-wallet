@@ -19,7 +19,7 @@ import (
 //   this wallet works online, so bitcoin network is required to call APIs
 //   create unsigned transaction
 //   send signed transaction
-// Debug: incremental number: 8
+// Debug: incremental number: 9
 
 var (
 	walletType = domainWallet.WalletTypeWatchOnly
