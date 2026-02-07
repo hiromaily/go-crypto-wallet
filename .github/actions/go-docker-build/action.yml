@@ -7,7 +7,6 @@ description: "Build Docker image with Buildx. Cache type selectable (none/gha/lo
 #   with:
 #     cache_type: ${{ inputs.cache_type }}
 #     dockerfile: ${{ inputs.dockerfile }}
-#     run_twice: ${{ inputs.run_twice }}
 
 inputs:
   cache_type:
@@ -22,10 +21,6 @@ inputs:
     description: "Go cmd path passed to Docker build as CMD_PATH"
     required: false
     default: "cmd/watch"
-  image_name:
-    description: "Image name (without tag) for optional load/tag output"
-    required: false
-    default: "myapp"
   image_tag:
     description: "Image tag. If empty, use git tag (git describe --tags --abbrev=0) or 'dev'."
     required: false
@@ -38,6 +33,25 @@ inputs:
     description: "Registry cache ref (used when cache_type=registry). If empty, default ghcr.io/${{ github.repository }}:buildcache"
     required: false
     default: ""
+
+  # push/tag/labels
+  push:
+    description: "Whether to push image to registry (true|false)"
+    required: false
+    default: "false"
+  tags:
+    description: "Docker image tags (newline or comma separated). Typically from docker/metadata-action outputs.tags"
+    required: false
+    default: ""
+  labels:
+    description: "Docker image labels (newline separated). Typically from docker/metadata-action outputs.labels"
+    required: false
+    default: ""
+  # e.g main:true、tag:false
+  write_cache:
+    description: "Whether to write cache (cache-to) (true|false)"
+    required: false
+    default: "false"
 
 outputs:
   app_version:
@@ -57,9 +71,9 @@ runs:
       with:
         driver: docker-container
 
-    # Login to GHCR for registry cache
+    # Login to GHCR (needed for push and/or registry cache)
     - name: Login to GitHub Container Registry
-      if: ${{ inputs.cache_type == 'registry' }}
+      if: ${{ inputs.push == 'true' || inputs.cache_type == 'registry' }}
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
@@ -81,14 +95,13 @@ runs:
         echo "app_version=${APP_VERSION}" >> "$GITHUB_OUTPUT"
         echo "APP_VERSION: ${APP_VERSION}"
 
-    # Cache config
+    # Cache config (outputs cache_from/cache_to strings)
     - name: Set cache configuration
       id: cache-config
       shell: bash
       run: |
         set -euo pipefail
 
-        DOCKERFILE="${{ inputs.dockerfile }}"
         LOCAL_CACHE_PATH="${{ inputs.local_cache_path }}"
         CACHE_TYPE="${{ inputs.cache_type }}"
 
@@ -99,34 +112,40 @@ runs:
           REGISTRY_CACHE_REF="ghcr.io/${{ github.repository }}:buildcache"
         fi
 
-        CACHE_SCOPE="go-$(sha256sum <(printf "%s" "${{ hashFiles(inputs.dockerfile, 'go.mod', 'go.sum') }}") | awk '{print $1}')"
-        # ↑ hashFiles の結果をそのまま scope にしても良いが、空になった時の事故を避けるため一段噛ませてます
-        # シンプルにするなら: CACHE_SCOPE="go-${{ hashFiles(inputs.dockerfile, 'go.mod', 'go.sum') }}"
+        # cache scope derived from Dockerfile + go.mod/go.sum
+        HF="${{ hashFiles(inputs.dockerfile, 'go.mod', 'go.sum') }}"
+        CACHE_SCOPE="go-$(sha256sum <(printf "%s" "${HF}") | awk '{print $1}')"
 
         echo "cache_scope=${CACHE_SCOPE}" >> "$GITHUB_OUTPUT"
         echo "registry_cache_ref=${REGISTRY_CACHE_REF}" >> "$GITHUB_OUTPUT"
 
+        CACHE_FROM=""
+        CACHE_TO=""
+
         case "${CACHE_TYPE}" in
           gha)
-            echo "cache-from=type=gha,scope=${CACHE_SCOPE}" >> "$GITHUB_OUTPUT"
-            echo "cache-to=type=gha,mode=max,scope=${CACHE_SCOPE}" >> "$GITHUB_OUTPUT"
+            CACHE_FROM="type=gha,scope=${CACHE_SCOPE}"
+            CACHE_TO="type=gha,mode=max,scope=${CACHE_SCOPE}"
             ;;
           local)
-            echo "cache-from=type=local,src=${LOCAL_CACHE_PATH}" >> "$GITHUB_OUTPUT"
-            echo "cache-to=type=local,dest=${LOCAL_CACHE_PATH}-new,mode=max" >> "$GITHUB_OUTPUT"
+            CACHE_FROM="type=local,src=${LOCAL_CACHE_PATH}"
+            CACHE_TO="type=local,dest=${LOCAL_CACHE_PATH}-new,mode=max"
             ;;
           registry)
-            echo "cache-from=type=registry,ref=${REGISTRY_CACHE_REF}" >> "$GITHUB_OUTPUT"
-            echo "cache-to=type=registry,ref=${REGISTRY_CACHE_REF},mode=max" >> "$GITHUB_OUTPUT"
+            CACHE_FROM="type=registry,ref=${REGISTRY_CACHE_REF}"
+            CACHE_TO="type=registry,ref=${REGISTRY_CACHE_REF},mode=max"
             ;;
           *)
-            echo "cache-from=" >> "$GITHUB_OUTPUT"
-            echo "cache-to=" >> "$GITHUB_OUTPUT"
+            CACHE_FROM=""
+            CACHE_TO=""
             ;;
         esac
 
+        echo "cache_from=${CACHE_FROM}" >> "$GITHUB_OUTPUT"
+        echo "cache_to=${CACHE_TO}" >> "$GITHUB_OUTPUT"
+
         echo "Cache type: ${CACHE_TYPE}"
-        echo "Dockerfile: ${DOCKERFILE}"
+        echo "Cache scope: ${CACHE_SCOPE}"
 
     # Restore local cache (only when local)
     - name: Restore local cache
@@ -138,23 +157,44 @@ runs:
         restore-keys: |
           buildx-
 
-    - name: Build (first)
+    # -----------------------------
+    # Build & (optional) push
+    # - pass cache-to when write_cache=true
+    # -----------------------------
+    - name: Build & push (with cache-to)
+      if: ${{ inputs.write_cache == 'true' }}
       uses: docker/build-push-action@v6
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: .
         file: ${{ inputs.dockerfile }}
-        push: false
+        push: ${{ inputs.push == 'true' }}
+        tags: ${{ inputs.tags }}
+        labels: ${{ inputs.labels }}
         build-args: |
           CMD_PATH=${{ inputs.cmd_path }}
           APP_VERSION=${{ steps.version.outputs.app_version }}
-        cache-from: ${{ steps.cache-config.outputs.cache-from }}
-        cache-to: ${{ steps.cache-config.outputs.cache-to }}
-        #provenance: false # debug use for performance
-        #sbom: false # debug use for performance
+        cache-from: ${{ steps.cache-config.outputs.cache_from }}
+        cache-to: ${{ steps.cache-config.outputs.cache_to }}
 
+    - name: Build & push (no cache-to)
+      if: ${{ inputs.write_cache != 'true' }}
+      uses: docker/build-push-action@v6
+      with:
+        builder: ${{ steps.buildx.outputs.name }}
+        context: .
+        file: ${{ inputs.dockerfile }}
+        push: ${{ inputs.push == 'true' }}
+        tags: ${{ inputs.tags }}
+        labels: ${{ inputs.labels }}
+        build-args: |
+          CMD_PATH=${{ inputs.cmd_path }}
+          APP_VERSION=${{ steps.version.outputs.app_version }}
+        cache-from: ${{ steps.cache-config.outputs.cache_from }}
+
+    # Move local cache only when we wrote it (local + write_cache=true)
     - name: Move local cache
-      if: ${{ inputs.cache_type == 'local' }}
+      if: ${{ inputs.cache_type == 'local' && inputs.write_cache == 'true' }}
       shell: bash
       run: |
         set -euo pipefail
