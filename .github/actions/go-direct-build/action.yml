@@ -1,0 +1,118 @@
+name: "go-build (runtime docker image)"
+description: "Build Go binary and build a runtime-only Docker image (ephemeral Dockerfile)."
+
+# How to use this action:
+# - name: Build + Docker image
+#   id: build
+#   uses: ./.github/actions/go-direct-build
+#   with:
+#     cmd_path: ${{ inputs.cmd_path }}
+#     run_twice: ${{ inputs.run_twice }}
+#     go_version: "1.25.6"
+#     image_name: "myapp"
+#     # image_tag: "" # git tag or dev is used if empty
+# - name: Echo outputs
+#   run: |
+#     echo "app_version=${{ steps.build.outputs.app_version }}"
+#     echo "image_ref=${{ steps.build.outputs.image_ref }}"
+
+inputs:
+  cmd_path:
+    description: "Go package path to build (e.g. cmd/watch)"
+    required: true
+    default: "cmd/watch"
+  go_version:
+    description: "Go version to use"
+    required: true
+    default: "1.25.6"
+  image_name:
+    description: "Docker image name (without tag)"
+    required: true
+    default: "myapp"
+  image_tag:
+    description: "Docker image tag. If empty, use git tag (git describe --tags --abbrev=0) or 'dev'."
+    required: false
+    default: ""
+
+outputs:
+  app_version:
+    description: "Resolved app version (tag)"
+    value: ${{ steps.version.outputs.app_version }}
+  image_ref:
+    description: "Built image reference (name:tag)"
+    value: ${{ steps.meta.outputs.image_ref }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: ${{ inputs.go_version }}
+        cache: true
+        cache-dependency-path: |
+          go.sum
+
+    - name: Resolve APP_VERSION
+      id: version
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -n "${{ inputs.image_tag }}" ]]; then
+          APP_VERSION="${{ inputs.image_tag }}"
+        else
+          APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"
+        fi
+
+        echo "app_version=${APP_VERSION}" >> "$GITHUB_OUTPUT"
+        echo "APP_VERSION: ${APP_VERSION}"
+
+    - name: Go build
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p dist
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+        go build -trimpath \
+          -ldflags="-s -w -X main.appVersion=${{ steps.version.outputs.app_version }}" \
+          -o dist/app ./${{ inputs.cmd_path }}
+        ls -lah dist/app
+        file dist/app
+
+    - name: Generate runtime-only Dockerfile (ephemeral)
+      shell: bash
+      run: |
+        set -euo pipefail
+        cat > Dockerfile.runtime <<'EOF'
+        FROM gcr.io/distroless/static-debian12:nonroot
+        WORKDIR /
+        COPY dist/app /app
+        USER nonroot:nonroot
+        ENTRYPOINT ["/app"]
+        EOF
+        echo "=== Dockerfile.runtime ==="
+        cat Dockerfile.runtime
+
+    - name: Docker build (runtime image only)
+      shell: bash
+      run: |
+        set -euo pipefail
+        docker build \
+          -f Dockerfile.runtime \
+          -t "${{ inputs.image_name }}:${{ steps.version.outputs.app_version }}" \
+          .
+
+    - name: Set outputs
+      id: meta
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "image_ref=${{ inputs.image_name }}:${{ steps.version.outputs.app_version }}" >> "$GITHUB_OUTPUT"
+
+    - name: Show image
+      shell: bash
+      run: |
+        set -euo pipefail
+        docker images | head -n 20
+        docker run --rm "${{ inputs.image_name }}:${{ steps.version.outputs.app_version }}" --help || true

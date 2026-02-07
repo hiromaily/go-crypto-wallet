@@ -1,0 +1,162 @@
+name: "go-docker-build (cache selectable)"
+description: "Build Docker image with Buildx. Cache type selectable (none/gha/local/registry). Default: no cache, Dockerfile_mounts."
+
+# How to use this action:
+# - name: Build image
+#   uses: ./.github/actions/docker-buildx-go
+#   with:
+#     cache_type: ${{ inputs.cache_type }}
+#     dockerfile: ${{ inputs.dockerfile }}
+#     run_twice: ${{ inputs.run_twice }}
+
+inputs:
+  cache_type:
+    description: "Cache type to use (none|gha|local|registry)"
+    required: false
+    default: "none"
+  dockerfile:
+    description: "Dockerfile path"
+    required: false
+    default: "./docker/Dockerfile_mounts"
+  cmd_path:
+    description: "Go cmd path passed to Docker build as CMD_PATH"
+    required: false
+    default: "cmd/watch"
+  image_name:
+    description: "Image name (without tag) for optional load/tag output"
+    required: false
+    default: "myapp"
+  image_tag:
+    description: "Image tag. If empty, use git tag (git describe --tags --abbrev=0) or 'dev'."
+    required: false
+    default: ""
+  local_cache_path:
+    description: "Path for local buildx cache"
+    required: false
+    default: "/tmp/.buildx-cache"
+  registry_cache_ref:
+    description: "Registry cache ref (used when cache_type=registry). If empty, default ghcr.io/${{ github.repository }}:buildcache"
+    required: false
+    default: ""
+
+outputs:
+  app_version:
+    description: "Resolved app version"
+    value: ${{ steps.version.outputs.app_version }}
+  cache_scope:
+    description: "Resolved cache scope"
+    value: ${{ steps.cache-config.outputs.cache_scope }}
+
+runs:
+  using: "composite"
+  steps:
+    # Buildx (docker-container driver)
+    - name: Set up Buildx (docker-container driver)
+      uses: docker/setup-buildx-action@v3
+      id: buildx
+      with:
+        driver: docker-container
+
+    # Login to GHCR for registry cache
+    - name: Login to GitHub Container Registry
+      if: ${{ inputs.cache_type == 'registry' }}
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+
+    - name: Resolve APP_VERSION
+      id: version
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -n "${{ inputs.image_tag }}" ]]; then
+          APP_VERSION="${{ inputs.image_tag }}"
+        else
+          APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"
+        fi
+
+        echo "app_version=${APP_VERSION}" >> "$GITHUB_OUTPUT"
+        echo "APP_VERSION: ${APP_VERSION}"
+
+    # Cache config
+    - name: Set cache configuration
+      id: cache-config
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        DOCKERFILE="${{ inputs.dockerfile }}"
+        LOCAL_CACHE_PATH="${{ inputs.local_cache_path }}"
+        CACHE_TYPE="${{ inputs.cache_type }}"
+
+        # default registry cache ref
+        if [[ -n "${{ inputs.registry_cache_ref }}" ]]; then
+          REGISTRY_CACHE_REF="${{ inputs.registry_cache_ref }}"
+        else
+          REGISTRY_CACHE_REF="ghcr.io/${{ github.repository }}:buildcache"
+        fi
+
+        CACHE_SCOPE="go-$(sha256sum <(printf "%s" "${{ hashFiles(inputs.dockerfile, 'go.mod', 'go.sum') }}") | awk '{print $1}')"
+        # ↑ hashFiles の結果をそのまま scope にしても良いが、空になった時の事故を避けるため一段噛ませてます
+        # シンプルにするなら: CACHE_SCOPE="go-${{ hashFiles(inputs.dockerfile, 'go.mod', 'go.sum') }}"
+
+        echo "cache_scope=${CACHE_SCOPE}" >> "$GITHUB_OUTPUT"
+        echo "registry_cache_ref=${REGISTRY_CACHE_REF}" >> "$GITHUB_OUTPUT"
+
+        case "${CACHE_TYPE}" in
+          gha)
+            echo "cache-from=type=gha,scope=${CACHE_SCOPE}" >> "$GITHUB_OUTPUT"
+            echo "cache-to=type=gha,mode=max,scope=${CACHE_SCOPE}" >> "$GITHUB_OUTPUT"
+            ;;
+          local)
+            echo "cache-from=type=local,src=${LOCAL_CACHE_PATH}" >> "$GITHUB_OUTPUT"
+            echo "cache-to=type=local,dest=${LOCAL_CACHE_PATH}-new,mode=max" >> "$GITHUB_OUTPUT"
+            ;;
+          registry)
+            echo "cache-from=type=registry,ref=${REGISTRY_CACHE_REF}" >> "$GITHUB_OUTPUT"
+            echo "cache-to=type=registry,ref=${REGISTRY_CACHE_REF},mode=max" >> "$GITHUB_OUTPUT"
+            ;;
+          *)
+            echo "cache-from=" >> "$GITHUB_OUTPUT"
+            echo "cache-to=" >> "$GITHUB_OUTPUT"
+            ;;
+        esac
+
+        echo "Cache type: ${CACHE_TYPE}"
+        echo "Dockerfile: ${DOCKERFILE}"
+
+    # Restore local cache (only when local)
+    - name: Restore local cache
+      if: ${{ inputs.cache_type == 'local' }}
+      uses: actions/cache@v5
+      with:
+        path: ${{ inputs.local_cache_path }}
+        key: buildx-${{ hashFiles(inputs.dockerfile, 'go.mod', 'go.sum') }}
+        restore-keys: |
+          buildx-
+
+    - name: Build (first)
+      uses: docker/build-push-action@v6
+      with:
+        builder: ${{ steps.buildx.outputs.name }}
+        context: .
+        file: ${{ inputs.dockerfile }}
+        push: false
+        build-args: |
+          CMD_PATH=${{ inputs.cmd_path }}
+          APP_VERSION=${{ steps.version.outputs.app_version }}
+        cache-from: ${{ steps.cache-config.outputs.cache-from }}
+        cache-to: ${{ steps.cache-config.outputs.cache-to }}
+        #provenance: false # debug use for performance
+        #sbom: false # debug use for performance
+
+    - name: Move local cache
+      if: ${{ inputs.cache_type == 'local' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        rm -rf "${{ inputs.local_cache_path }}"
+        mv "${{ inputs.local_cache_path }}-new" "${{ inputs.local_cache_path }}" || true

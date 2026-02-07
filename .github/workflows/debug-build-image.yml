@@ -100,13 +100,18 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
           dockerfile: ${{ env.DOCKERFILE }}
+          # Explicitly map cache mount IDs to their targets.
+          # This avoids fragile Dockerfile parsing and prevents "empty cache" loops.
+          # when `cache-map` is required
+          # Dockerfile has multiple `RUN --mount=type=cache,...`
           # cache-map: |
           #   {
           #     "go-mod":  { "target": "/go/pkg/mod", "id": "go-mod" },
           #     "go-build":{ "target": "/root/.cache/go-build", "id": "go-build" }
           #   }
           cache-map: ${{ inputs.include_go_mod == 'true' && env.CACHE_MAP_FULL || env.CACHE_MAP_MIN }}
-          # Debug workflowなので常に extraction して、actions/cache/save できる形にする
+          # Always run extraction to do actions/cache/save due to debugging workflow
+          #skip-extraction: ${{ steps.go-build-cache.outputs.cache-hit }}
           skip-extraction: ${{ inputs.cd_skip_extraction }}
           #rsync-mode: ${{ inputs.cd_rsync_mode }}
           is-debug: ${{ inputs.cd_is_debug }}

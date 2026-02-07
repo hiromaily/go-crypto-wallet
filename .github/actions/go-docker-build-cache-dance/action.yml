@@ -1,0 +1,113 @@
+name: "docker-build (BuildKit Cache Dance)"
+description: "Build with BuildKit cache mounts via buildkit-cache-dance + actions/cache, and optional go-mod cache."
+
+inputs:
+  dockerfile:
+    description: "Dockerfile path"
+    required: false
+    default: "./docker/Dockerfile_mounts"
+
+  cache_version:
+    description: "Bump this to force a fresh actions/cache mount set"
+    required: false
+    default: "v1"
+
+  include_go_mod:
+    description: "true: include go-mod + go-build, false: only go-build"
+    required: false
+    default: "false"
+
+  cd_skip_extraction:
+    description: "Skip Cache Dance extraction (true/false)"
+    required: false
+    default: "true"
+
+  cd_is_debug:
+    description: "Cache Dance debug mode (true/false)"
+    required: false
+    default: "false"
+
+  cache_dir:
+    description: "Directory for cache mounts saved by actions/cache"
+    required: false
+    default: "cache-mount"
+
+  cmd_path:
+    description: "CMD_PATH build-arg"
+    required: false
+    default: "cmd/watch"
+
+  gha_cache_scope_prefix:
+    description: "Prefix for buildx GHA cache scope used in docker/build-push-action"
+    required: false
+    default: "df"
+
+outputs:
+  dockerfile_hash:
+    description: "Hash of dockerfile used for gha cache scope"
+    value: ${{ steps.hash.outputs.dockerfile_hash }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Buildx
+      uses: docker/setup-buildx-action@v3
+      id: buildx
+
+    - name: Compute dockerfile hash
+      id: hash
+      shell: bash
+      run: |
+        set -euo pipefail
+        DF_HASH="${{ hashFiles(inputs.dockerfile) }}"
+        echo "dockerfile_hash=${DF_HASH}" >> "$GITHUB_OUTPUT"
+        echo "DOCKERFILE=${{ inputs.dockerfile }}"
+        echo "DOCKERFILE_HASH=${DF_HASH}"
+
+    # ★ ここで cache-map を「文字列として」作って outputs に載せる
+    - name: Decide cache-map json
+      id: cachemap
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ "${{ inputs.include_go_mod }}" == "true" ]]; then
+          CACHE_MAP='{"go-mod":{"target":"/go/pkg/mod","id":"go-mod"},"go-build":{"target":"/root/.cache/go-build","id":"go-build"}}'
+        else
+          CACHE_MAP='{"go-build":{"target":"/root/.cache/go-build","id":"go-build"}}'
+        fi
+        echo "cache_map=${CACHE_MAP}" >> "$GITHUB_OUTPUT"
+        echo "CACHE_MAP=${CACHE_MAP}"
+
+    # 1) Restore + Save cache mounts (actions/cache)
+    - name: Cache mounts (restore + save in post)
+      uses: actions/cache@v5
+      with:
+        path: ${{ inputs.cache_dir }}
+        key: ${{ runner.os }}-cache-mount-${{ inputs.cache_version }}-${{ hashFiles(inputs.dockerfile, 'go.mod', 'go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-cache-mount-${{ inputs.cache_version }}-
+          ${{ runner.os }}-cache-mount-
+
+    # 2) Cache Dance
+    - name: BuildKit Cache Dance (inject; extract in post)
+      uses: hiromaily/buildkit-cache-dance@v4
+      with:
+        builder: ${{ steps.buildx.outputs.name }}
+        cache-dir: ${{ inputs.cache_dir }}
+        dockerfile: ${{ inputs.dockerfile }}
+        cache-map: ${{ steps.cachemap.outputs.cache_map }}
+        skip-extraction: ${{ github.ref != 'refs/heads/main' }} && ${{ inputs.cd_skip_extraction }}
+        is-debug: ${{ inputs.cd_is_debug }}
+
+    # 3) Build (no push)
+    - name: Build (first)
+      uses: docker/build-push-action@v6
+      with:
+        builder: ${{ steps.buildx.outputs.name }}
+        context: .
+        file: ${{ inputs.dockerfile }}
+        push: false
+        build-args: |
+          CMD_PATH=${{ inputs.cmd_path }}
+        cache-from: type=gha,scope=${{ inputs.gha_cache_scope_prefix }}-${{ steps.hash.outputs.dockerfile_hash }}
+        cache-to: type=gha,mode=max,scope=${{ inputs.gha_cache_scope_prefix }}-${{ steps.hash.outputs.dockerfile_hash }}
