@@ -1,5 +1,8 @@
 name: 'docker-build-debug (no Dockerfile build)'
 
+# 1. first: 1m 00s
+# 2. second:1m 03s
+
 on:
   workflow_dispatch:
     inputs:

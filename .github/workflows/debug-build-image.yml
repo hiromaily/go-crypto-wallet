@@ -122,12 +122,9 @@ jobs:
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
-          # ローカルにロードしたい場合は true にする（任意）
           # load: true
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-          # cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
-          # cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
           cache-from: type=gha,scope=df-${{ hashFiles(env.DOCKERFILE) }}
           cache-to: type=gha,mode=max,scope=df-${{ hashFiles(env.DOCKERFILE) }}
 
@@ -141,8 +138,6 @@ jobs:
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-          # cache-from: type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
-          # cache-to: type=gha,mode=max,scope=${{ env.GHA_CACHE_SCOPE }}
           cache-from: type=gha,scope=df-${{ hashFiles(env.DOCKERFILE) }}
           cache-to: type=gha,mode=max,scope=df-${{ hashFiles(env.DOCKERFILE) }}
 
