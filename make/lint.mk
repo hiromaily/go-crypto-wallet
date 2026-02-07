@@ -87,6 +87,7 @@ mk-lint:
 ###############################################################################
 yaml-fmt:
 	go tool yamlfmt .github/workflows
+	go tool yamlfmt .github/actions
 	go tool yamlfmt .devcontainer
 	go tool yamlfmt config
 

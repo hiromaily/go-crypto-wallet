@@ -148,10 +148,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           cache-dir: ${{ env.CACHE_DIR }}
           dockerfile: ${{ env.DOCKERFILE }}
-          # Explicitly map cache mount IDs to their targets.
-          # This avoids fragile Dockerfile parsing and prevents "empty cache" loops.
-          # `cache-map`の必要性について
-          # Dockerfile の RUN --mount=type=cache,... が複数ある場合
           cache-map: |
             {
               "go-mod":  { "target": "/go/pkg/mod", "id": "go-mod" },
