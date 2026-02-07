@@ -8,10 +8,10 @@ description: "Build with BuildKit cache mounts via buildkit-cache-dance + action
 # - name: Build with Cache Dance
 #   uses: ./.github/actions/go-docker-build-cache-dance
 #   with:
-#     cache_version: ${{ inputs.cache_version }}
-#     include_go_mod: ${{ inputs.include_go_mod }}
-#     cd_skip_extraction: ${{ inputs.cd_skip_extraction }}
-#     cd_is_debug: ${{ inputs.cd_is_debug }}
+#     cache_version: ${{ inputs.cache_version }}           # 'v1'
+#     include_go_mod: ${{ inputs.include_go_mod }}         # false
+#     cd_skip_extraction: ${{ inputs.cd_skip_extraction }} # true
+#     cd_is_debug: ${{ inputs.cd_is_debug }}               # false
 #     # dockerfile: "./docker/Dockerfile_mounts" # default
 #     # cmd_path: "cmd/watch" # default
 
