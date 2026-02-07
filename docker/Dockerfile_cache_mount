@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-# without BuildKit cache mounts and bind mounts
+# use only BuildKit cache mounts
 
 ############################
 # 1) build
@@ -12,7 +12,8 @@ WORKDIR /src
 
 # go mod download (cacheable but extracting cost may be high)
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+    go mod download
 
 ARG CMD_PATH=cmd/watch
 ARG APP_VERSION=dev
@@ -23,7 +24,9 @@ COPY internal/ ./internal/
 COPY pkg/ ./pkg/
 
 # go build
-RUN CGO_ENABLED=0 GOOS=linux \
+RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,id=go-build,target=/root/.cache/go-build,sharing=locked \
+    CGO_ENABLED=0 GOOS=linux \
     go build -trimpath \
       -ldflags="-s -w -X main.appVersion=${APP_VERSION}" \
       -o /out/app ./${CMD_PATH}

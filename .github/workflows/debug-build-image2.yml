@@ -1,8 +1,49 @@
-name: docker-build-debug (without cache-mount)
+name: docker-build-debug (without BuildKit Cache Dance)
+
+# TODO: pattern,
+# - code changed
+# - module added, etc.
+
+# 1. Dockerfile 1 (source must be changed): 1m 44s
+# 2. Dockerfile 2:                          1m 34s
+# 3. Dockerfile + gha cache 1 (source must be changed): 3m 40s
+# 4. Dockerfile + gha cache 2:                             24s [cache works]
+# 5. Dockerfile_bind_mount 1 (source must be changed): 1m 40s
+# 6. Dockerfile_bind_mount 2:                          1m 47s
+# 7. Dockerfile_bind_mount + cache 1 (source must be changed): 4m 15s
+# 8. Dockerfile_bind_mount + cache 2:                          2m 22s [cache doesn't work]
+# 9. Dockerfile_cache_mount 1 (source must be changed): 1m 37s
+# 10. Dockerfile_cache_mount 2:                         1m 32s
+# 11. Dockerfile_cache_mount cache 1 (source must be changed): 1m 42s
+# 12. Dockerfile_cache_mount cache 2:                             31s [cache works]
+# 13. Dockerfile_mounts 1 (source must be changed): 1m 22s [the fastest without cache] <- best
+# 14. Dockerfile_mounts 2:                          1m 24s
+# 15. Dockerfile_mounts cache 1 (source must be changed): 1m 37s
+# 16. Dockerfile_mounts cache 2:                          1m 30s [cache doesn't work at all]
 
 on:
   workflow_dispatch:
     inputs:
+      cache_type:
+        description: "Cache type to use"
+        type: choice
+        required: true
+        default: "none"
+        options:
+          - "none"
+          - "gha"
+          - "local"
+          - "registry"
+      dockerfile:
+        description: "Dockerfile path"
+        type: choice
+        required: true
+        default: "./docker/Dockerfile"
+        options:
+          - "./docker/Dockerfile" # with BuildKit cache mount + bind mount
+          - "./docker/Dockerfile_cache_mount"
+          - "./docker/Dockerfile_bind_mount"
+          - "./docker/Dockerfile_mounts"
       run_twice:
         description: "Build twice in the same job to verify cache hits"
         type: boolean
@@ -10,12 +51,14 @@ on:
 
 permissions:
   contents: read
-
+  actions: write # for cache type=gha
+  packages: write # for cache type=registry (GHCR)
 env:
-  DOCKERFILE: ./docker/Dockerfile_without_cache
-  #GHA_CACHE_SCOPE: go-crypto-wallet
+  DOCKERFILE: ${{ inputs.dockerfile }}
   CMD_PATH: cmd/watch
-  APP_VERSION_VAR: main.appVersion
+  LOCAL_CACHE_PATH: /tmp/.buildx-cache
+  # For registry cache, set your registry ref (e.g., ghcr.io/your-org/your-repo:cache)
+  REGISTRY_CACHE_REF: ghcr.io/${{ github.repository }}:buildcache
 
 jobs:
   build:
@@ -29,32 +72,94 @@ jobs:
       # docker driver では cache-to type=gha がexportできない
       - name: Set up Buildx (docker-container driver)
         uses: docker/setup-buildx-action@v3
+        id: buildx
         with:
           driver: docker-container
+
+      # Login to GHCR for registry cache
+      - name: Login to GitHub Container Registry
+        if: inputs.cache_type == 'registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get APP_VERSION from git
+        id: version
+        run: |
+          APP_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo dev)
+          echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
+          echo "APP_VERSION: ${APP_VERSION}"
+
+      # CACHE_SCOPE: BuildKit キャッシュの「衝突防止」
+      # type=gha や type=registry のキャッシュは同じリポジトリ・同じ Actions ストレージを共有する
+      - name: Set cache configuration
+        id: cache-config
+        run: |
+          CACHE_SCOPE="go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}"
+          case "${{ inputs.cache_type }}" in
+            gha)
+              echo "cache-from=type=gha,scope=${CACHE_SCOPE}" >> $GITHUB_OUTPUT
+              echo "cache-to=type=gha,mode=max,scope=${CACHE_SCOPE}" >> $GITHUB_OUTPUT
+              ;;
+            local)
+              echo "cache-from=type=local,src=${{ env.LOCAL_CACHE_PATH }}" >> $GITHUB_OUTPUT
+              echo "cache-to=type=local,dest=${{ env.LOCAL_CACHE_PATH }}-new,mode=max" >> $GITHUB_OUTPUT
+              ;;
+            registry)
+              echo "cache-from=type=registry,ref=${{ env.REGISTRY_CACHE_REF }}" >> $GITHUB_OUTPUT
+              echo "cache-to=type=registry,ref=${{ env.REGISTRY_CACHE_REF }},mode=max" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "cache-from=" >> $GITHUB_OUTPUT
+              echo "cache-to=" >> $GITHUB_OUTPUT
+              ;;
+          esac
+          echo "Cache type: ${{ inputs.cache_type }}"
+
+      # Restore local cache if using local cache type
+      - name: Restore local cache
+        if: inputs.cache_type == 'local'
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.LOCAL_CACHE_PATH }}
+          key: buildx-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+          restore-keys: |
+            buildx-
 
       # First: always run
       - name: Build (first)
         uses: docker/build-push-action@v6
         with:
+          builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
-          cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
-          cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+            APP_VERSION=${{ steps.version.outputs.app_version }}
+          cache-from: ${{ steps.cache-config.outputs.cache-from }}
+          cache-to: ${{ steps.cache-config.outputs.cache-to }}
 
       # Second: check how it works by cache for debugging
       - name: Build (second; should be faster if caches work)
         if: ${{ inputs.run_twice }}
         uses: docker/build-push-action@v6
         with:
+          builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
-            APP_VERSION_VAR=${{ env.APP_VERSION_VAR }}
-          cache-from: type=gha,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
-          cache-to: type=gha,mode=max,scope=go-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+            APP_VERSION=${{ steps.version.outputs.app_version }}
+          cache-from: ${{ steps.cache-config.outputs.cache-from }}
+          cache-to: ${{ steps.cache-config.outputs.cache-to }}
+
+      # Move local cache for next run (avoids cache size growth)
+      - name: Move local cache
+        if: inputs.cache_type == 'local'
+        run: |
+          rm -rf ${{ env.LOCAL_CACHE_PATH }}
+          mv ${{ env.LOCAL_CACHE_PATH }}-new ${{ env.LOCAL_CACHE_PATH }} || true

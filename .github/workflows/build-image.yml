@@ -85,7 +85,7 @@ permissions:
   packages: write
 
 env:
-  DOCKERFILE: ./docker/Dockerfile
+  DOCKERFILE: ./docker/Dockerfile_mounts
   CACHE_DIR: cache-mount
   GHA_CACHE_SCOPE: go-crypto-wallet
   CACHE_VERSION: v2

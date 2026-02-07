@@ -32,3 +32,22 @@ rm-files:
 .PHONY: find-empty-dirs
 find-empty-dirs:
 	find . -type d -empty
+
+# clear gha cache within 1 day not accessed
+.PHONY: clear-gha-cache-1d
+clear-gha-cache-1d:
+	gh cache list --limit 500 --json id,createdAt,lastAccessedAt | \
+	jq -r '
+		.[]
+		| select(.createdAt == .lastAccessedAt)
+		| select((now - (.createdAt | fromdateiso8601)) > 1*24*3600)
+		| .id
+	' | \
+	xargs -r -I {} gh cache delete {}
+
+# clear gha cache
+.PHONY: clear-gha-cache
+clear-gha-cache:
+	gh cache list --limit 500 --json id,createdAt,lastAccessedAt | \
+	jq -r '.[] | select(.createdAt == .lastAccessedAt) | .id' | \
+	xargs -I {} gh cache delete {}
