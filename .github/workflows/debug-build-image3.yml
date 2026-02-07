@@ -1,10 +1,10 @@
-name: docker-build-debug (no Dockerfile build)
+name: 'docker-build-debug (no Dockerfile build)'
 
 on:
   workflow_dispatch:
     inputs:
       cmd_path:
-        description: "Go package path to build (e.g., cmd/watch)"
+        description: "Go package path to build"
         type: string
         required: true
         default: "cmd/watch"
