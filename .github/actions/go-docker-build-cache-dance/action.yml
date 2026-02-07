@@ -78,7 +78,7 @@ runs:
         echo "DOCKERFILE=${{ inputs.dockerfile }}"
         echo "DOCKERFILE_HASH=${DF_HASH}"
 
-    # ★ ここで cache-map を「文字列として」作って outputs に載せる
+    # create cache-map as string then used for outputs
     - name: Decide cache-map json
       id: cachemap
       shell: bash
