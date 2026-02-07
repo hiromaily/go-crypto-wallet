@@ -1,0 +1,146 @@
+# ------------------------------------------------------------------------------
+# IMPORTANT NOTES FOR THIS WORKFLOW
+# ------------------------------------------------------------------------------
+#
+# This workflow builds and pushes Docker images to GitHub Container Registry
+# (ghcr.io) using docker/buildx, BuildKit cache mounts, and
+# hiromaily/buildkit-cache-dance.
+#
+# BEFORE RUNNING THIS WORKFLOW, YOU MUST ENSURE THE FOLLOWING:
+#
+# 1) Repository Actions permissions (REQUIRED)
+#    - Go to: Repository Settings → Actions → General → Workflow permissions
+#    - Set: "Read and write permissions"
+#    - This is required so GITHUB_TOKEN can push images to `ghcr.io`
+#
+# 2) Workflow permissions (REQUIRED)
+#    - This workflow explicitly requests:
+#        permissions:
+#          contents: read
+#          packages: write
+#    - Do NOT remove `packages: write`, or GHCR login/push will fail.
+#
+# 3) GitHub Container Registry (ghcr.io) access
+#    - Images are pushed to: ghcr.io/<owner>/<repo>
+#    - For organization repositories:
+#        - Ensure the package allows GitHub Actions write access
+#          (Package settings → Actions access)
+#    - For personal repositories, this usually works by default
+#
+# 4) Cache behavior (DESIGN DECISION)
+#    - BuildKit cache mounts (RUN --mount=type=cache) are persisted using:
+#        - actions/cache + buildkit-cache-dance
+#    - Cache keys are intentionally NOT branch-specific
+#    - Cache saving occurs ONLY on pushes to the `main` branch
+#
+# 5) Image tagging rules (SUMMARY)
+#    - Push to main:
+#        - :main
+#        - :sha-<commit>
+#    - Tag push (e.g. v1.2.3):
+#        - :v1.2.3
+#        - :latest   (ONLY on tag push)
+#
+# If any of the above conditions are not met, this workflow may fail
+# at Docker login, image push, or version resolution time.
+# ------------------------------------------------------------------------------
+name: build-go-docker-image
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "cmd/watch/**"
+      - "internal/**"
+      - "pkg/**"
+      - "go.mod"
+      - "go.sum"
+      - "docker/Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/build-go-image.yml"
+      - ".github/actions/go-docker-build/**"
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      cache_type_main:
+        description: "Cache type for main builds (none|gha|local|registry)"
+        required: false
+        default: "none"
+      cache_type_tag:
+        description: "Cache type for tag builds (none|gha|local|registry)"
+        required: false
+        default: "none"
+
+permissions:
+  contents: read
+  actions: write # for cache type=gha
+  packages: write # for cache type=registry (GHCR)
+
+env:
+  DOCKERFILE: ./docker/Dockerfile_mounts
+  CMD_PATH: cmd/watch
+  APP_VERSION_VAR: main.appVersion
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/app
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (fetch tags)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # Tagging rules:
+      # - main push: tag "main" + sha
+      # - tag push (vX.Y.Z): tag that version; also add :latest
+      - name: Docker metadata
+        uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=${{ startsWith(github.ref, 'refs/tags/') }}
+          tags: |
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=tag
+
+      # A. main: with cache-to（write_cache=true）
+      - name: Build & push via composite action (main)
+        if: github.ref == 'refs/heads/main'
+        uses: ./.github/actions/go-docker-build
+        with:
+          cache_type: ${{ inputs.cache_type_main || 'none' }}
+          dockerfile: ${{ env.DOCKERFILE }}
+          cmd_path: ${{ env.CMD_PATH }}
+          push: "true"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          write_cache: "true"
+
+      # B tag: without cache-to（write_cache=false）
+      - name: Build & push via composite action (tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: ./.github/actions/go-docker-build
+        with:
+          cache_type: ${{ inputs.cache_type_tag || 'none' }}
+          dockerfile: ${{ env.DOCKERFILE }}
+          cmd_path: ${{ env.CMD_PATH }}
+          push: "true"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          write_cache: "false"
+
+      # Cleanup old GHCR image versions (main only)
+      - name: Cleanup old GHCR image versions (main only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/delete-package-versions@v5
+        with:
+          owner: ${{ github.repository_owner }}
+          package-type: container
+          package-name: go-crypto-wallet/app
+          min-versions-to-keep: 20
+          ignore-versions: "^(main|latest|v.*)$"
+          token: ${{ secrets.GITHUB_TOKEN }}
