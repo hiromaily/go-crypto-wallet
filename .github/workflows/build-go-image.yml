@@ -80,7 +80,7 @@ env:
   DOCKERFILE: ./docker/Dockerfile_mounts
   CMD_PATH: cmd/watch
   APP_VERSION_VAR: main.appVersion
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/app
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
 
 jobs:
   build:
