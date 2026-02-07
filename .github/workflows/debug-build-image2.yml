@@ -40,7 +40,7 @@ on:
         required: true
         default: "./docker/Dockerfile"
         options:
-          - "./docker/Dockerfile" # with BuildKit cache mount + bind mount
+          - "./docker/Dockerfile" # without mount
           - "./docker/Dockerfile_cache_mount"
           - "./docker/Dockerfile_bind_mount"
           - "./docker/Dockerfile_mounts"
@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # docker driver では cache-to type=gha がexportできない
+      # Note: docker driver can't export by `cache-to type=gha`
       - name: Set up Buildx (docker-container driver)
         uses: docker/setup-buildx-action@v3
         id: buildx
@@ -92,8 +92,8 @@ jobs:
           echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
           echo "APP_VERSION: ${APP_VERSION}"
 
-      # CACHE_SCOPE: BuildKit キャッシュの「衝突防止」
-      # type=gha や type=registry のキャッシュは同じリポジトリ・同じ Actions ストレージを共有する
+      # CACHE_SCOPE: BuildKit cache collision prevention
+      # `type=gha` and `type=registry` caches share the same repository and the same Actions storage
       - name: Set cache configuration
         id: cache-config
         run: |
