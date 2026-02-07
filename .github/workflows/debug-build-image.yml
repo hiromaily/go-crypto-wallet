@@ -153,11 +153,11 @@ jobs:
           du -sh "${CACHE_DIR}" || true
           find "${CACHE_DIR}" -maxdepth 2 -type f | head -50 || true
 
-      # ----------------------------
-      # 4) Save cache mounts (actions/cache)
-      # ----------------------------
-      # - name: Save cache mounts (BuildKit cache mounts)
-      #   uses: actions/cache/save@v5
-      #   with:
-      #     path: ${{ env.CACHE_DIR }}
-      #     key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
+    # ----------------------------
+    # 4) Save cache mounts (actions/cache)
+    # ----------------------------
+    # - name: Save cache mounts (BuildKit cache mounts)
+    #   uses: actions/cache/save@v5
+    #   with:
+    #     path: ${{ env.CACHE_DIR }}
+    #     key: ${{ runner.os }}-cache-mount-${{ env.CACHE_VERSION }}-${{ hashFiles(env.DOCKERFILE, 'go.mod', 'go.sum') }}
