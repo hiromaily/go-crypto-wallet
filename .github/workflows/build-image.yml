@@ -4,14 +4,14 @@
 #
 # This workflow builds and pushes Docker images to GitHub Container Registry
 # (ghcr.io) using docker/buildx, BuildKit cache mounts, and
-# reproducible-containers/buildkit-cache-dance.
+# hiromaily/buildkit-cache-dance.
 #
 # BEFORE RUNNING THIS WORKFLOW, YOU MUST ENSURE THE FOLLOWING:
 #
 # 1) Repository Actions permissions (REQUIRED)
 #    - Go to: Repository Settings → Actions → General → Workflow permissions
 #    - Set: "Read and write permissions"
-#    - This is required so GITHUB_TOKEN can push images to ghcr.io
+#    - This is required so GITHUB_TOKEN can push images to `ghcr.io`
 #
 # 2) Workflow permissions (REQUIRED)
 #    - This workflow explicitly requests:
@@ -20,39 +20,20 @@
 #          packages: write
 #    - Do NOT remove `packages: write`, or GHCR login/push will fail.
 #
-# 3) Git history and tags (REQUIRED)
-#    - The Dockerfile resolves APP_VERSION using `git describe --tags`
-#    - Therefore:
-#        - actions/checkout MUST use `fetch-depth: 0`
-#        - Git tags must exist (e.g. v1.2.3), or version will fall back to "dev"
-#
-# 4) .git must be present in the Docker build context (IMPORTANT)
-#    - The Dockerfile bind-mounts `.git` during `docker build`
-#    - DO NOT exclude `.git` in `.dockerignore`
-#    - If `.git` is excluded, version resolution will fail
-#
-# 5) GitHub Container Registry (ghcr.io) access
+# 3) GitHub Container Registry (ghcr.io) access
 #    - Images are pushed to: ghcr.io/<owner>/<repo>
 #    - For organization repositories:
 #        - Ensure the package allows GitHub Actions write access
 #          (Package settings → Actions access)
 #    - For personal repositories, this usually works by default
 #
-# 6) Cache behavior (DESIGN DECISION)
+# 4) Cache behavior (DESIGN DECISION)
 #    - BuildKit cache mounts (RUN --mount=type=cache) are persisted using:
 #        - actions/cache + buildkit-cache-dance
 #    - Cache keys are intentionally NOT branch-specific
 #    - Cache saving occurs ONLY on pushes to the `main` branch
 #
-# 7) Runner choice: ubuntu-slim (IMPORTANT)
-#    - This workflow uses `runs-on: ubuntu-slim`
-#    - Characteristics:
-#        - Single CPU
-#        - 15-minute job timeout
-#        - Minimal preinstalled tools
-#    - This workflow assumes the build completes well within that limit
-#
-# 8) Image tagging rules (SUMMARY)
+# 5) Image tagging rules (SUMMARY)
 #    - Push to main:
 #        - :main
 #        - :sha-<commit>
@@ -109,8 +90,8 @@ jobs:
     steps:
       - name: Checkout (fetch tags)
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0 # Required because APP_VERSION is derived from git tags
+        # with:
+        #   fetch-depth: 0 # Required because APP_VERSION is derived from git tags
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3

@@ -1,6 +1,20 @@
 name: "docker-build (BuildKit Cache Dance)"
 description: "Build with BuildKit cache mounts via buildkit-cache-dance + actions/cache, and optional go-mod cache."
 
+# How to use this action:
+# - name: Checkout (fetch tags)
+#   uses: actions/checkout@v6
+
+# - name: Build with Cache Dance
+#   uses: ./.github/actions/go-docker-build-cache-dance
+#   with:
+#     cache_version: ${{ inputs.cache_version }}
+#     include_go_mod: ${{ inputs.include_go_mod }}
+#     cd_skip_extraction: ${{ inputs.cd_skip_extraction }}
+#     cd_is_debug: ${{ inputs.cd_is_debug }}
+#     # dockerfile: "./docker/Dockerfile_mounts" # default
+#     # cmd_path: "cmd/watch" # default
+
 inputs:
   dockerfile:
     description: "Dockerfile path"

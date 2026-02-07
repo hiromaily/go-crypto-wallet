@@ -3,7 +3,7 @@ description: "Build Docker image with Buildx. Cache type selectable (none/gha/lo
 
 # How to use this action:
 # - name: Build image
-#   uses: ./.github/actions/docker-buildx-go
+#   uses: ./.github/actions/go-docker-build
 #   with:
 #     cache_type: ${{ inputs.cache_type }}
 #     dockerfile: ${{ inputs.dockerfile }}
