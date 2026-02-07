@@ -30,7 +30,7 @@ inputs:
     required: false
     default: "/tmp/.buildx-cache"
   registry_cache_ref:
-    description: "Registry cache ref (used when cache_type=registry). If empty, default ghcr.io/${{ github.repository }}:buildcache"
+    description: "Registry cache ref (used when cache_type=registry). If empty, default ghcr.io/<owner>/<repo>:buildcache"
     required: false
     default: ""
 
