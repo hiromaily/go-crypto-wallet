@@ -1,0 +1,94 @@
+name: go-build-then-dockerize (no Dockerfile build)
+
+on:
+  workflow_dispatch:
+    inputs:
+      cmd_path:
+        description: "Go package path to build (e.g., cmd/watch)"
+        type: string
+        required: true
+        default: "cmd/watch"
+      run_twice:
+        description: "Build twice in the same job to verify Go caches"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: "1.25.6"
+  CMD_PATH: ${{ inputs.cmd_path }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (fetch tags)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          # go.sum が無い/複数ある場合は適宜変更
+          cache-dependency-path: |
+            go.sum
+
+      - name: Get APP_VERSION from git
+        id: version
+        shell: bash
+        run: |
+          APP_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo dev)
+          echo "app_version=${APP_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "APP_VERSION: ${APP_VERSION}"
+
+      - name: Go build (first)
+        shell: bash
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+          go build -trimpath \
+            -ldflags="-s -w -X main.appVersion=${{ steps.version.outputs.app_version }}" \
+            -o dist/app ./${{ env.CMD_PATH }}
+          ls -lah dist/app
+          file dist/app
+
+      # Go の module/cache が効いているか確認したい場合（手元計測用）
+      - name: Go build (second; should be faster if caches work)
+        if: ${{ inputs.run_twice }}
+        shell: bash
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+          go build -trimpath \
+            -ldflags="-s -w -X main.appVersion=${{ steps.version.outputs.app_version }}" \
+            -o dist/app ./${{ env.CMD_PATH }}
+
+      - name: Generate runtime-only Dockerfile (ephemeral)
+        shell: bash
+        run: |
+          cat > Dockerfile.runtime <<'EOF'
+          FROM gcr.io/distroless/static-debian12:nonroot
+          WORKDIR /
+          COPY dist/app /app
+          USER nonroot:nonroot
+          ENTRYPOINT ["/app"]
+          EOF
+          cat Dockerfile.runtime
+
+      - name: Docker build (runtime image only)
+        shell: bash
+        run: |
+          docker build \
+            -f Dockerfile.runtime \
+            -t myapp:${{ steps.version.outputs.app_version }} \
+            .
+
+      - name: Show image
+        shell: bash
+        run: |
+          docker images | head -n 20
+          docker run --rm myapp:${{ steps.version.outputs.app_version }} --help || true
