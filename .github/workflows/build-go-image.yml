@@ -57,7 +57,7 @@ on:
       - "go.sum"
       - "docker/Dockerfile"
       - ".dockerignore"
-      - ".github/workflows/build-image.yml"
+      - ".github/workflows/build-go-image.yml"
       - ".github/actions/go-docker-build/**"
     tags: ["v*"]
   workflow_dispatch:
