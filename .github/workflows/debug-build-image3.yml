@@ -29,8 +29,8 @@ jobs:
     steps:
       - name: Checkout (fetch tags)
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+        # with:
+        #   fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v6
