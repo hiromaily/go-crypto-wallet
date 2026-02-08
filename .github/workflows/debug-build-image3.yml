@@ -49,6 +49,7 @@ jobs:
           echo "app_version=${APP_VERSION}" >> "$GITHUB_OUTPUT"
           echo "APP_VERSION: ${APP_VERSION}"
 
+      # `go mod download` is not run separately here
       - name: Go build (first)
         shell: bash
         run: |
@@ -60,7 +61,6 @@ jobs:
           ls -lah dist/app
           file dist/app
 
-      # Go の module/cache が効いているか確認したい場合（手元計測用）
       - name: Go build (second; should be faster if caches work)
         if: ${{ inputs.run_twice }}
         shell: bash

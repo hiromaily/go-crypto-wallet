@@ -85,25 +85,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: '[Debug] Runner arch & cpu'
-        run: |
-          echo "RUNNER_OS=$RUNNER_OS"
-          echo "RUNNER_ARCH=$RUNNER_ARCH"
-          uname -a
-          uname -m
-          nproc
-
-      - name: '[Debug] Cgroup cpu limits on runner'
-        if: runner.os == 'Linux'
-        run: |
-          echo "nproc=$(nproc)"
-          echo "cpu.max (cgroup v2, if exists):"
-          cat /sys/fs/cgroup/cpu.max 2>/dev/null || echo "N/A"
-          echo "cpu.cfs_quota_us (cgroup v1, if exists):"
-          cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us 2>/dev/null || echo "N/A"
-          echo "cpu.cfs_period_us (cgroup v1, if exists):"
-          cat /sys/fs/cgroup/cpu/cpu.cfs_period_us 2>/dev/null || echo "N/A"
-
       - name: Get APP_VERSION from git
         id: version
         run: |
@@ -155,7 +136,7 @@ jobs:
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
-          progress: plain
+          #progress: plain
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
             APP_VERSION=${{ steps.version.outputs.app_version }}
