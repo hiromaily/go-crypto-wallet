@@ -21,7 +21,6 @@
     "IBM.output-colorizer",
     "emilast.LogFileHighlighter",
     // Protocol Buffers
-    "zxh404.vscode-proto3",
     // HCL (HashiCorp Configuration Language - for Atlas)
     "hashicorp.hcl",
     // Solidity (for ERC20 contracts)
