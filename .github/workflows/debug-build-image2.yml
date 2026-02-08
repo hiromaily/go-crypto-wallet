@@ -155,6 +155,7 @@ jobs:
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
+          progress: plain
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
             APP_VERSION=${{ steps.version.outputs.app_version }}
