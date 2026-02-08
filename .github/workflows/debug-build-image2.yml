@@ -20,6 +20,7 @@ name: docker-build-debug (without BuildKit Cache Dance)
 # 14. Dockerfile_mounts 2:                          1m 24s
 # 15. Dockerfile_mounts cache 1 (source must be changed): 1m 37s
 # 16. Dockerfile_mounts cache 2:                          1m 30s [cache doesn't work at all]
+# 17. Dockerfile_no_gomoddownload 1 (source must be changed): 1m 20s <- best without go mod download
 
 on:
   workflow_dispatch:
@@ -44,6 +45,7 @@ on:
           - "./docker/Dockerfile_cache_mount"
           - "./docker/Dockerfile_bind_mount"
           - "./docker/Dockerfile_mounts"
+          - "./docker/Dockerfile_no_gomoddownload"
       run_twice:
         description: "Build twice in the same job to verify cache hits"
         type: boolean
@@ -136,6 +138,7 @@ jobs:
           context: .
           file: ${{ env.DOCKERFILE }}
           push: false
+          #progress: plain
           build-args: |
             CMD_PATH=${{ env.CMD_PATH }}
             APP_VERSION=${{ steps.version.outputs.app_version }}
