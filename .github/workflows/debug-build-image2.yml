@@ -44,6 +44,7 @@ on:
           - "./docker/Dockerfile_cache_mount"
           - "./docker/Dockerfile_bind_mount"
           - "./docker/Dockerfile_mounts"
+          - "./docker/Dockerfile_no_gomoddownload"
       run_twice:
         description: "Build twice in the same job to verify cache hits"
         type: boolean
