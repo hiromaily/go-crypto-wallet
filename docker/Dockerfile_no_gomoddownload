@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# without BuildKit cache mounts and bind mounts
+# This file demonstrates a basic build pattern without an explicit `go mod download` step.
+# It's less efficient for iterative builds as it doesn't leverage Docker layer caching for Go modules.
 
 ############################
 # 1) build
