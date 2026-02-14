@@ -23,7 +23,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ### 2. JSON Transaction File Format Implementation
 
-- [ ] 2.1 (P) Create XRP transaction file DTOs with validation
+- [x] 2.1 (P) Create XRP transaction file DTOs with validation
   - Define `XRPTransactionFile` struct in `application/dto/xrp/transaction_file.go`
   - Define `XRPTransactionEntry` struct with all required fields (UUID, unsigned data, signature count, etc.)
   - Add JSON struct tags following Google JSON Style Guide (lowercase field names)
@@ -33,7 +33,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Verify signedBlob is null when signatureCount is 0
   - _Requirements: 1.2, 1.4, 1.5, 2.4_
 
-- [ ] 2.2 Extend transaction file repository with JSON methods
+- [x] 2.2 Extend transaction file repository with JSON methods
   - Implement `ReadJSONTransactionFile()` in TransactionFileRepository
   - Implement `WriteJSONTransactionFile()` in TransactionFileRepository
   - Reuse existing file path naming convention (`{actionType}_{txID}_{txType}_{signedCount}_{timestamp}.json`)

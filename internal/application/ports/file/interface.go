@@ -1,6 +1,7 @@
 package file
 
 import (
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
@@ -24,6 +25,10 @@ type TransactionFileRepositorier interface {
 
 	// Hex file methods (for raw transaction hex - used by BCH)
 	WriteHexFile(path, hexTx string) (string, error)
+
+	// JSON transaction file methods (for XRP)
+	ReadJSONTransactionFile(path string) (*dtoxrp.XRPTransactionFile, error)
+	WriteJSONTransactionFile(path string, data *dtoxrp.XRPTransactionFile) (string, error)
 }
 
 // FileName is object for items in fine name

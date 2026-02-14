@@ -3,6 +3,7 @@ package transaction
 import (
 	"bufio"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
@@ -280,4 +282,73 @@ func (*TransactionFileRepository) createDir(path string) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		_ = os.MkdirAll(dir, 0o700) // Create all parent directories
 	}
+}
+
+// ReadJSONTransactionFile reads a JSON transaction file for XRP transactions
+func (r *TransactionFileRepository) ReadJSONTransactionFile(path string) (*dtoxrp.XRPTransactionFile, error) {
+	// Validate extension (case-insensitive)
+	if !strings.HasSuffix(strings.ToLower(path), ".json") {
+		return nil, fmt.Errorf("invalid JSON file extension: %s (expected .json)", path)
+	}
+
+	// Security: Clean path and prevent path traversal
+	cleanPath := filepath.Clean(path)
+	// Note: r.filePath can be empty in tests
+	if r.filePath != "" && !strings.HasPrefix(cleanPath, filepath.Clean(r.filePath)) {
+		return nil, fmt.Errorf("path traversal attempt detected: %s", path)
+	}
+
+	// Read file
+	data, err := os.ReadFile(cleanPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read JSON transaction file %s: %w", cleanPath, err)
+	}
+
+	// Parse JSON
+	var txFile dtoxrp.XRPTransactionFile
+	if err := json.Unmarshal(data, &txFile); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON transaction file %s: %w", cleanPath, err)
+	}
+
+	// Validate transaction file data
+	if err := txFile.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid transaction file data in %s: %w", cleanPath, err)
+	}
+
+	return &txFile, nil
+}
+
+// WriteJSONTransactionFile writes an XRP transaction file in JSON format with .json extension
+func (*TransactionFileRepository) WriteJSONTransactionFile(
+	path string,
+	data *dtoxrp.XRPTransactionFile,
+) (string, error) {
+	// Validate transaction file data before writing
+	if err := data.Validate(); err != nil {
+		return "", fmt.Errorf("invalid transaction file data: %w", err)
+	}
+
+	// Add timestamp and .json extension
+	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := path + ts + ".json"
+
+	// Create directory if not existing
+	dir := filepath.Dir(fileName)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	// Marshal to JSON with indentation for readability
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal transaction data: %w", err)
+	}
+
+	// Write JSON file
+	err = os.WriteFile(fileName, jsonData, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write JSON transaction file %s: %w", fileName, err)
+	}
+
+	return fileName, nil
 }
