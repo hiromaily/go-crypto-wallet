@@ -14,13 +14,10 @@ Workflow for TypeScript/JavaScript code changes in `apps/` directory.
 
 ## Applicable Directories
 
-| App | Language | Runtime | Path | Status |
-|-----|----------|---------|------|--------|
-| xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **Active** |
-| erc20-token | JavaScript | Node.js | `apps/erc20-token/` | Active |
-| ripple-lib-server | TypeScript | Node.js | `apps/ripple-lib-server/` | **Deprecated (READ-ONLY)** |
-
-> **Important**: `ripple-lib-server` is deprecated. All XRP server work should be done in `xrpl-grpc-server`.
+| App              | Language   | Runtime | Path                     | Status                     |
+| ---------------- | ---------- | ------- | ------------------------ | -------------------------- |
+| xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **Deprecated (READ-ONLY)** |
+| erc20-token      | JavaScript | Node.js | `apps/erc20-token/`      | Active                     |
 
 ## Workflow
 
@@ -47,10 +44,10 @@ cd apps/erc20-token && npm run lint-js && npm run fmt
 
 ## Command Summary
 
-| App | Lint | Format | Type Check |
-|-----|------|--------|------------|
-| xrpl-grpc-server | `bun run lint` | `bun run format` | `bun run typecheck` |
-| erc20-token | `npm run lint-js` | `npm run fmt` | - |
+| App              | Lint              | Format           | Type Check          |
+| ---------------- | ----------------- | ---------------- | ------------------- |
+| xrpl-grpc-server | `bun run lint`    | `bun run format` | `bun run typecheck` |
+| erc20-token      | `npm run lint-js` | `npm run fmt`    | -                   |
 
 ## Related
 

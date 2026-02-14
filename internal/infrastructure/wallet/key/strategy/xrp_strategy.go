@@ -28,7 +28,7 @@ import (
 // Special Notes:
 // - XRP addresses start with 'r' for mainnet
 // - P2SHSegWitAddr field is reused to store Ethereum address (used as passphrase for API operations)
-// - This is a workaround for generating deterministic keys via ripple-lib-server API
+// - This is a workaround for generating deterministic keys via xrpl-grpc-server API
 type XRPKeyStrategy struct{}
 
 // Compile-time check that XRPKeyStrategy implements CoinKeyStrategy
@@ -46,7 +46,7 @@ func (*XRPKeyStrategy) CoinTypeCode() domainCoin.CoinTypeCode {
 
 // GenerateWalletKey generates XRP addresses from a private key.
 // Note: P2SHSegWitAddr is used to store an Ethereum address, which serves as
-// a passphrase for API operations with ripple-lib-server.
+// a passphrase for API operations with xrpl-grpc-server.
 func (s *XRPKeyStrategy) GenerateWalletKey(privKey *btcec.PrivateKey) (*domainKey.WalletKey, error) {
 	// Generate XRP address, public key, and private key
 	xrpAddr, xrpPubKey, xrpPrivKey, err := s.generateXRPKeys(privKey)

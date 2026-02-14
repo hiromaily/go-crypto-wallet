@@ -33,7 +33,7 @@ type offlineGenerateKeyUseCase struct {
 // NewOfflineGenerateKeyUseCase creates a new GenerateKeyUseCase that operates entirely offline.
 //
 // This implementation uses native Go cryptographic libraries to generate XRP keys
-// without requiring any API calls to external services like ripple-lib-server.
+// without requiring any API calls to external services.
 //
 // Parameters:
 //   - dbConn: Database connection for storing generated keys

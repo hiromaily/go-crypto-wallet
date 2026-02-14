@@ -1,11 +1,12 @@
 # XRP (Ripple) Reference
 
+TODO: updating
+
 ## Overview
 
 | 項目 | 値 |
 |------|-----|
 | トランザクションモデル | アカウント型 |
-| 通信方式 | gRPC (ripple-lib-server経由) |
 | アドレス形式 | r... (Base58) |
 | 特殊機能 | Destination Tag, アカウントリザーブ |
 
@@ -140,15 +141,15 @@ type Payment struct {
 
 ## gRPC Communication
 
-### ripple-lib-server
+### xrpl-grpc-server [Deprecated]
 
-XRPはripple-lib-serverを経由してgRPCで通信：
+XRPは`xrpl-grpc-server`を経由してgRPCで通信：
 
 ```
-[Wallet] --gRPC--> [ripple-lib-server] --WebSocket--> [XRPL]
+[Wallet] --gRPC--> [xrpl-grpc-server] --WebSocket--> [XRPL]
 ```
 
-サーバー実装: `apps/ripple-lib-server/`
+サーバー実装: `apps/xrpl-grpc-server/`
 
 ### Proto定義
 
@@ -211,7 +212,7 @@ coin_type: xrp
 network_type: mainnet  # mainnet, testnet
 
 ripple:
-  # ripple-lib-server接続設定
+  # xrpl-grpc-server接続設定
   host: localhost
   port: 50051
 ```
@@ -243,36 +244,13 @@ go test ./internal/infrastructure/api/xrp/xrp/...
 | 送信 | Watch | `watch/xrp/send_transaction.go` |
 | 残高確認 | Watch | Infrastructure gRPC API |
 
-## ripple-lib-server
-
-### 起動
-
-```bash
-cd apps/ripple-lib-server
-yarn install
-yarn start
-```
-
-### 構成
-
-```
-apps/ripple-lib-server/
-├── src/
-│   ├── grpc/           # gRPCサービス実装
-│   ├── ripple/         # XRPL接続
-│   └── index.ts        # エントリーポイント
-├── package.json
-└── tsconfig.json
-```
-
 ## ⚠️ Implementation Notes
 
-1. **gRPC依存**: XRP操作にはripple-lib-serverの起動が必要
-2. **Sequence管理**: トランザクション送信前に最新のSequenceを取得
-3. **Drops変換**: 金額操作時はDrops単位で計算
-4. **アカウントリザーブ**: 新規アカウントには10XRP以上の初期送金が必要
-5. **Destination Tag**: 取引所への送金時は必須の場合が多い
-6. **Proto更新**: `.proto` ファイルを変更した場合は `make proto-all` でコード再生成
+1. **Sequence管理**: トランザクション送信前に最新のSequenceを取得
+2. **Drops変換**: 金額操作時はDrops単位で計算
+3. **アカウントリザーブ**: 新規アカウントには10XRP以上の初期送金が必要
+4. **Destination Tag**: 取引所への送金時は必須の場合が多い
+5. **Proto更新**: `.proto` ファイルを変更した場合は `make proto-all` でコード再生成
 
 ## Comparison with Other Chains
 
@@ -283,4 +261,3 @@ apps/ripple-lib-server/
 | 順序管理 | Sequence | Nonce | UTXO |
 | 手数料 | Drops (固定的) | Gas (変動) | sat/vB |
 | 最低残高 | 10 XRP | なし | なし |
-

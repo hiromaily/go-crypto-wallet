@@ -31,10 +31,10 @@ make go-lint && make tidy && make check-build && make gotest
 ### TypeScript
 
 ```bash
-cd apps/ripple-lib-server
-npm run lint
+cd apps/xrpl-grpc-server
+bun run lint
 # Fix errors
-npm run lint && npm run build && npm test
+bun run lint && bun run build && bun test
 ```
 
 ### Solidity

@@ -1,5 +1,5 @@
 ---
-paths: ["apps/ripple-lib-server/**", "apps/xrpl-grpc-server/**"]
+paths: ["apps/xrpl-grpc-server/**"]
 ---
 
 # XRP Server Directory Rules
@@ -10,22 +10,11 @@ Rules for working with XRP/Ripple-related server applications in the `apps/` dir
 
 ## Directory Status
 
-| Directory | Status | Description |
-|-----------|--------|-------------|
-| `apps/ripple-lib-server/` | **READ-ONLY** | Legacy server (deprecated) |
+| Directory                | Status     | Description         |
+| ------------------------ | ---------- | ------------------- |
 | `apps/xrpl-grpc-server/` | **Active** | Current work target |
 
 ## Critical Rules
-
-### `apps/ripple-lib-server/` - DO NOT MODIFY
-
-This directory is **write-prohibited**. It contains the legacy Ripple library server that is being deprecated.
-
-- **DO NOT** create, edit, or delete any files in this directory
-- **DO NOT** add new features or fix bugs here
-- **READ ONLY** for reference purposes
-
-If you need to understand the legacy implementation, you may read files for reference only.
 
 ### `apps/xrpl-grpc-server/` - Active Development
 
@@ -39,7 +28,6 @@ This is the **active work target** for XRP server functionality.
 
 The project is migrating from:
 
-- **Old**: `ripple-lib-server` (legacy ripple-lib)
 - **New**: `xrpl-grpc-server` (modern xrpl.js with gRPC)
 
 See `apps/xrpl-grpc-server/docs/MIGRATION-GUIDE.md` for migration details.
@@ -58,11 +46,10 @@ bun run dev           # Run server in dev mode
 
 ## Quick Reference
 
-| Action | Correct Target |
-|--------|----------------|
+| Action          | Correct Target           |
+| --------------- | ------------------------ |
 | Add XRP feature | `apps/xrpl-grpc-server/` |
-| Fix XRP bug | `apps/xrpl-grpc-server/` |
-| Reference old code | `apps/ripple-lib-server/` (read-only) |
+| Fix XRP bug     | `apps/xrpl-grpc-server/` |
 
 ## Related Documentation
 

@@ -173,8 +173,6 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
   - `transaction_pb.ts` - Transaction message types
   - `transaction_connect.ts` - Transaction service client
 
-**Note**: Used by the xrpl-grpc-server project. The older ripple-lib-server is deprecated.
-
 ## Web Project Build Artifacts
 
 **Tool**: Various build tools (Truffle, webpack, etc.)

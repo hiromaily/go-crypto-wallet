@@ -243,9 +243,9 @@ The codebase is organized into `internal/` (new architecture) and `pkg/` (shared
 - `docs/` ... Documentation
 - `scripts/` ... Operation and setup scripts
 - `tools/` ... Development tools (sqlc configuration)
-- `web/` ... Web-related projects
+- `app/` ... Web-related projects
   - `erc20-token/` ... ERC-20 token contract
-  - `ripple-lib-server/` ... Ripple gRPC server
+  - `xrpl-grpc-server/` ... XRP Leger (Ripple) gRPC server [Deprecated]
 
 ### `internal/` Directory Structure (New Architecture)
 
@@ -279,7 +279,7 @@ External dependencies and implementations:
 - `infrastructure/api/eth/` ... Ethereum JSON-RPC API clients
   - [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
 - `infrastructure/api/xrp/` ... Ripple gRPC API clients
-  - Communicates with [ripple-lib-server](./web/ripple-lib-server/)
+  - Communicates with [xrpl-grpc-server](./app/xrpl-grpc-server/) [Deprecated]
 - `infrastructure/database/` ... Database connections and generated code
   - `mysql/` ... MySQL connection management
   - `sqlc/` ... SQLC generated database code
@@ -330,10 +330,10 @@ The `pkg/` directory contains shared utilities and legacy/transitional code:
 
 ## Components inside repository
 
-- ripple-lib-server
-  - ./web/ripple-lib-server
+- xrpl-grpc-server [Deprecated]
+  - ./app/xrpl-grpc-server
 - erc20-token
-  - ./web/erc20-token
+  - ./app/erc20-token
 
 ## Development Environment
 

@@ -24,7 +24,7 @@ ripple:
   # Key generation settings
   # offline_keygen: Enable fully offline key generation (recommended for production)
   # When true, keys are generated using native Go implementation without API calls.
-  # When false, keys are generated via ripple-lib-server API (wallet_propose).
+  # When false, keys are generated via xrp functionality (wallet_propose).
   offline_keygen: true
 
   # key_algorithm: Cryptographic algorithm for key generation

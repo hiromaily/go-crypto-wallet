@@ -10,13 +10,10 @@ Rules for modifying TypeScript (`*.ts`, `*.tsx`) and JavaScript (`*.js`, `*.jsx`
 
 ## Applicable Directories
 
-| App | Language | Runtime | Path | Status |
-|-----|----------|---------|------|--------|
-| xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **Active** |
-| erc20-token | JavaScript/TypeScript | Node.js | `apps/erc20-token/` | Active |
-| ripple-lib-server | TypeScript | Node.js | `apps/ripple-lib-server/` | **READ-ONLY** (deprecated) |
-
-> **Important**: `ripple-lib-server` is deprecated. All XRP server work should be done in `xrpl-grpc-server`. See `apps/xrpl-grpc-server/docs/MIGRATION-GUIDE.md` for details.
+| App              | Language              | Runtime | Path                     | Status                     |
+| ---------------- | --------------------- | ------- | ------------------------ | -------------------------- |
+| xrpl-grpc-server | TypeScript            | **Bun** | `apps/xrpl-grpc-server/` | **READ-ONLY** (deprecated) |
+| erc20-token      | JavaScript/TypeScript | Node.js | `apps/erc20-token/`      | Active                     |
 
 ## Verification Commands
 
@@ -50,18 +47,12 @@ npm run build         # Compile contracts with Truffle
 npm run test-all      # Run all tests
 ```
 
-### ripple-lib-server (Deprecated - READ ONLY)
-
-This directory is **read-only**. Do not modify files here.
-Reference only for migration purposes.
-
 ## Command Summary
 
-| App | Lint | Format | Build | Test |
-|-----|------|--------|-------|------|
-| xrpl-grpc-server | `bun run lint` | `bun run format` | `bun run build` | `bun run typecheck` |
-| erc20-token | `npm run lint-js` | `npm run fmt` | `npm run build` | `npm run test-all` |
-| ripple-lib-server | - | - | - | - (read-only) |
+| App              | Lint              | Format           | Build           | Test                |
+| ---------------- | ----------------- | ---------------- | --------------- | ------------------- |
+| xrpl-grpc-server | `bun run lint`    | `bun run format` | `bun run build` | `bun run typecheck` |
+| erc20-token      | `npm run lint-js` | `npm run fmt`    | `npm run build` | `npm run test-all`  |
 
 ## Code Style
 
@@ -95,11 +86,11 @@ Instead, throw an error to fail fast and prevent silent failures.
 
 ```typescript
 // Bad: Silently returns empty string if seed is undefined
-const secret = wallet.seed ?? '';
+const secret = wallet.seed ?? "";
 
 // Good: Fail fast with explicit error
 if (!wallet.seed) {
-  throw new Error('Failed to generate a wallet seed.');
+  throw new Error("Failed to generate a wallet seed.");
 }
 const secret = wallet.seed;
 ```
@@ -137,22 +128,21 @@ import { AccountService } from "./services/account";
 #### erc20-token
 
 ```typescript
-import * as path from 'path';
+import * as path from "path";
 
-import { ethers } from 'ethers';
+import { ethers } from "ethers";
 
-import { TokenService } from './services/token';
+import { TokenService } from "./services/token";
 ```
 
 ## Auto-Generated Files
 
 **DO NOT EDIT:**
 
-| App | Generated Files |
-|-----|-----------------|
+| App              | Generated Files                                             |
+| ---------------- | ----------------------------------------------------------- |
 | xrpl-grpc-server | `apps/xrpl-grpc-server/src/gen/` (Buf/ConnectRPC generated) |
-| erc20-token | `apps/erc20-token/build/` (Truffle build artifacts) |
-| ripple-lib-server | `apps/ripple-lib-server/src/pb/` (deprecated - entire directory is read-only) |
+| erc20-token      | `apps/erc20-token/build/` (Truffle build artifacts)         |
 
 ## Security
 
@@ -179,10 +169,6 @@ import { TokenService } from './services/token';
 - [ ] `npm run build` passes
 - [ ] `npm run test-all` passes
 
-### ripple-lib-server (READ-ONLY)
-
-This directory is deprecated. **Do not modify any files.**
-
 ## Related Documentation
 
 - @apps/xrpl-grpc-server/README.md - xrpl-grpc-server documentation
@@ -198,4 +184,4 @@ This directory is deprecated. **Do not modify any files.**
 ## Related Rules
 
 - @.claude/rules/apps/bun.md - Bun runtime rules (use bun/bunx instead of npm/npx)
-- @.claude/rules/apps/xrp-server.md - XRP server directory rules (ripple-lib-server read-only)
+- @.claude/rules/apps/xrp-server.md - XRP server directory rules

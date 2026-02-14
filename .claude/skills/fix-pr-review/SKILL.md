@@ -39,29 +39,29 @@ gh api repos/{owner}/{repo}/pulls/{pr_number}/comments
 
 ## Step 2: Classify by Modified Files
 
-| Files Modified | Development Skill |
-|----------------|-------------------|
-| `internal/`, `pkg/`, `cmd/`, `*.go` | `go-development` |
-| `apps/ripple-lib-server/`, `*.ts` | `typescript-development` |
-| `apps/erc20-token/contracts/`, `*.sol` | `solidity-development` |
-| `scripts/`, `*.sh` | `shell-scripts` |
-| `Makefile`, `make/*.mk` | `makefile-update` |
-| `tools/atlas/`, `*.sql`, `*.hcl` | `db-migration` |
-| `docs/`, `*.md` | `docs-update` |
+| Files Modified                         | Development Skill        |
+| -------------------------------------- | ------------------------ |
+| `internal/`, `pkg/`, `cmd/`, `*.go`    | `go-development`         |
+| `apps/xrpl-grpc-server/`, `*.ts`       | `typescript-development` |
+| `apps/erc20-token/contracts/`, `*.sol` | `solidity-development`   |
+| `scripts/`, `*.sh`                     | `shell-scripts`          |
+| `Makefile`, `make/*.mk`                | `makefile-update`        |
+| `tools/atlas/`, `*.sql`, `*.hcl`       | `db-migration`           |
+| `docs/`, `*.md`                        | `docs-update`            |
 
 ## Step 3: Load Development Skill
 
 Based on classification, load the appropriate skill:
 
-| Skill | Path |
-|-------|------|
-| Go | `.claude/skills/go-development/SKILL.md` |
+| Skill      | Path                                             |
+| ---------- | ------------------------------------------------ |
+| Go         | `.claude/skills/go-development/SKILL.md`         |
 | TypeScript | `.claude/skills/typescript-development/SKILL.md` |
-| Solidity | `.claude/skills/solidity-development/SKILL.md` |
-| Shell | `.claude/skills/shell-scripts/SKILL.md` |
-| Makefile | `.claude/skills/makefile-update/SKILL.md` |
-| Database | `.claude/skills/db-migration/SKILL.md` |
-| Docs | `.claude/skills/docs-update/SKILL.md` |
+| Solidity   | `.claude/skills/solidity-development/SKILL.md`   |
+| Shell      | `.claude/skills/shell-scripts/SKILL.md`          |
+| Makefile   | `.claude/skills/makefile-update/SKILL.md`        |
+| Database   | `.claude/skills/db-migration/SKILL.md`           |
+| Docs       | `.claude/skills/docs-update/SKILL.md`            |
 
 ## Step 4: Address Comments
 
@@ -73,13 +73,13 @@ Based on classification, load the appropriate skill:
 
 ### Comment Categories
 
-| Category | Action |
-|----------|--------|
-| Bug fix requested | Fix the issue, add test if applicable |
-| Refactoring suggestion | Apply if improves readability |
-| Style/naming | Follow project conventions |
-| Documentation | Add/update comments |
-| Question | Respond in code comment or PR |
+| Category               | Action                                |
+| ---------------------- | ------------------------------------- |
+| Bug fix requested      | Fix the issue, add test if applicable |
+| Refactoring suggestion | Apply if improves readability         |
+| Style/naming           | Follow project conventions            |
+| Documentation          | Add/update comments                   |
+| Question               | Respond in code comment or PR         |
 
 ## Step 5: Run Verification
 
@@ -94,7 +94,7 @@ make go-lint && make tidy && make check-build && make gotest
 ### TypeScript Files
 
 ```bash
-cd apps/ripple-lib-server && npm run lint && npm run build && npm test
+cd apps/xrpl-grpc-server && bun run lint && bun run build && bun test
 ```
 
 ### Shell Scripts
