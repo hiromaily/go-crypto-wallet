@@ -149,7 +149,7 @@ graph TB
 
 | Layer | Choice / Version | Role in Feature | Notes |
 |-------|------------------|-----------------|-------|
-| **Backend / Services** | Go 1.25.6 | Core implementation language | Existing project constraint |
+| **Backend / Services** | Go 1.23+ | Core implementation language | Existing project constraint |
 | **XRP Signing Library** | Peersyst/xrpl-go (latest) | Native Go transaction signing (NEW) | Replaces gRPC signing; provides `wallet.Sign()` and `wallet.Multisign()` |
 | **XRP Submission Library** | xrpscan/xrpl-go v0.2.11 | WebSocket communication and transaction submission | Existing integration; already used for `SubmitTransaction` |
 | **Data / Storage** | JSON (Go stdlib encoding/json) | Transaction file format | Replaces text CSV format; supports versioning and metadata |
@@ -1210,8 +1210,18 @@ graph LR
 }
 ```
 
-### XRP Multi-Signature Fee Calculation
+### XRP Transaction Fee Calculation
 
+#### Standard Single-Signature Transactions
+**Formula**: `Fee = BaseFee`
+
+Where:
+- BaseFee = Current XRP Ledger minimum fee (typically 0.00001 XRP = 10 drops)
+
+**Example**:
+- Single signature: Fee = 10 drops
+
+#### Multi-Signature Transactions
 **Formula**: `Fee = (N + 1) × BaseFee`
 
 Where:
@@ -1219,7 +1229,6 @@ Where:
 - BaseFee = Current XRP Ledger minimum fee (typically 0.00001 XRP = 10 drops)
 
 **Example**:
-- Single signature: Fee = (1 + 1) × 10 drops = 20 drops
 - 2-of-3 multisig (2 signatures): Fee = (2 + 1) × 10 drops = 30 drops
 - 3-of-5 multisig (3 signatures): Fee = (3 + 1) × 10 drops = 40 drops
 

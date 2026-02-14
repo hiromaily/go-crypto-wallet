@@ -1,10 +1,20 @@
-# XRPL (XRP Ledger) Architecture for go-crypto-wallet (Deprecated)
+# XRPL (XRP Ledger) Architecture for go-crypto-wallet (OBSOLETE)
 
-**Note: This documentation is deprecated.**
+> **⚠️ OBSOLETE: This document is no longer valid and contradicts the current project direction.**
+>
+> **Current Approach**: The project has adopted native Go signing using the `xrpl-go` library to eliminate gRPC dependencies and simplify the architecture. This document represents a previous architectural exploration that is no longer being pursued.
+>
+> **For current XRP implementation details, see**:
+> - `.kiro/specs/xrp-transaction-flow-alignment/` - Current specification
+> - `docs/crypto/xrp/` - Current XRP documentation (excluding this file)
+>
+> **This file is retained for historical reference only.**
 
-## gRPC Bridge via TypeScript (xrpl.js) + Go CLI Integration
+---
 
-This document proposes an XRPL module architecture for **go-crypto-wallet** under the constraint that **Go has limited XRPL library maturity**, so XRPL functionality is implemented in a **TypeScript gRPC server** built on **xrpl.js**, and the **Go CLI calls that gRPC endpoint**.
+## gRPC Bridge via TypeScript (xrpl.js) + Go CLI Integration (Historical Proposal)
+
+This document proposed an XRPL module architecture for **go-crypto-wallet** under the constraint that **Go has limited XRPL library maturity**, so XRPL functionality would be implemented in a **TypeScript gRPC server** built on **xrpl.js**, and the **Go CLI would call that gRPC endpoint**.
 
 - TypeScript SDK: `xrpl.js` (XRPLF) — <https://github.com/XRPLF/xrpl.js>
 - gRPC server location: `apps/xrpl-grpc-server/`
