@@ -1,6 +1,10 @@
-# About [xrpl-go](https://github.com/xrpscan/xrpl-go)
+# About [xrpscan/xrpl-go](https://github.com/xrpscan/xrpl-go)
 
-[xrpl-go](https://github.com/xrpscan/xrpl-go) does *not* provide full offline transaction building/signing + submission without network access. It *can* do some offline work (keypairs, serialization, signing), but **most useful functionality still assumes a connection to an XRPL node (via WebSocket or RPC)** to query ledger state and submit transactions.
+> **Note**: This document covers **xrpscan/xrpl-go** specifically. For the overall library selection strategy (why we use both xrpscan and Peersyst), see [library-selection.md](./library-selection.md).
+
+[xrpscan/xrpl-go](https://github.com/xrpscan/xrpl-go) does *not* provide full offline transaction building/signing + submission without network access. It *can* do some offline work (keypairs, serialization, signing), but **most useful functionality still assumes a connection to an XRPL node (via WebSocket or RPC)** to query ledger state and submit transactions.
+
+**In go-crypto-wallet**: We use xrpscan/xrpl-go primarily for **transaction submission** and **ledger queries** (online operations on the watch wallet).
 
 ---
 
@@ -43,3 +47,50 @@ Even the XRPL documentation uses the library **to connect to the XRP Ledger netw
 | Reliable submission (confirm validation) | —                 | ✅            |
 
 So **`xrpl-go` does not replace the need to talk to XRPL nodes** — it is a library for interacting *with* XRPL, not a full offline SDK that builds every required field by itself
+
+---
+
+## How xrpscan/xrpl-go Fits in go-crypto-wallet
+
+### Current Usage (2026)
+
+| Component | Uses xrpscan/xrpl-go For |
+|-----------|--------------------------|
+| **Watch Wallet** | ✅ Account queries (`GetAccountInfo`, `GetBalance`) |
+| **Watch Wallet** | ✅ Transaction submission (`SubmitTransaction`) |
+| **Watch Wallet** | ✅ Validation waiting (`WaitValidation`) |
+| **Keygen/Sign Wallets** | ❌ Not used (offline wallets) |
+
+### What We DON'T Use xrpscan For
+
+| Feature | Why Not | Alternative |
+|---------|---------|-------------|
+| Transaction Signing | Limited wallet API | ✅ Peersyst/xrpl-go (`wallet.Sign()`) |
+| Multi-Signature | No `Multisign()` method | ✅ Peersyst/xrpl-go (`wallet.Multisign()`) |
+| Offline Operations | Requires node connection | ✅ Peersyst/xrpl-go (zero network) |
+
+### Specialized Roles
+
+```
+┌─────────────────────────────────────┐
+│         Watch Wallet (Online)        │
+│  ┌───────────────────────────────┐  │
+│  │    xrpscan/xrpl-go v0.2.11    │  │
+│  │  • Query account info          │  │
+│  │  • Submit transactions         │  │
+│  │  • Wait for validation         │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│    Keygen/Sign Wallets (Offline)    │
+│  ┌───────────────────────────────┐  │
+│  │   Peersyst/xrpl-go v0.1.15    │  │
+│  │  • Derive wallets from seed    │  │
+│  │  • Sign transactions (offline) │  │
+│  │  • Multi-signature support     │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+```
+
+**For the complete rationale**, see [library-selection.md](./library-selection.md).

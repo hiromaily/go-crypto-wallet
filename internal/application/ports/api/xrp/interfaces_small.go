@@ -26,11 +26,6 @@ type BalanceChecker interface {
 	GetTotalBalance(ctx context.Context, addrs []string) float64
 }
 
-// AccountInfoProvider provides account information operations.
-type AccountInfoProvider interface {
-	GetAccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseGetAccountInfo, error)
-}
-
 // TransactionPreparer prepares raw transactions.
 type TransactionPreparer interface {
 	CreateRawTransaction(
@@ -41,27 +36,23 @@ type TransactionPreparer interface {
 	) (*dtoxrp.TxInput, string, error)
 }
 
-// TransactionSigner signs transactions.
-type TransactionSigner interface {
-	SignTransaction(ctx context.Context, txJSON *dtoxrp.TxInput, secret string) (string, string, error)
-}
-
 // TransactionCombiner combines multiple signed transactions (for multisig).
 type TransactionCombiner interface {
 	CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error)
 }
 
-// TransactionSubmitter submits transactions to the network.
-type TransactionSubmitter interface {
-	SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error)
-}
-
 // LedgerWaiter waits for ledger validation.
+//
+// Deprecated: Use TransactionSubmitter.WaitValidation instead.
+// This interface is kept for backward compatibility.
 type LedgerWaiter interface {
 	WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error)
 }
 
 // TransactionGetter retrieves transaction information.
+//
+// Deprecated: Use TransactionSubmitter.GetTransaction instead.
+// This interface is kept for backward compatibility.
 type TransactionGetter interface {
 	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoxrp.TxInfo, error)
 }
