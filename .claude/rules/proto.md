@@ -4,15 +4,21 @@ paths: ["**/*.proto"]
 
 # Protocol Buffer File Rules
 
+> **⚠️ XRP Protocol Buffers DEPRECATED**
+>
+> **Status**: `proto/rippleapi/` is **DEPRECATED** and no longer used.
+>
+> **Reason**: XRP functionality migrated to native Go implementation. gRPC server (`apps/xrpl-grpc-server/`) has been replaced with native xrpl-go libraries.
+
 ## Overview
 
 Rules for modifying Protocol Buffer files (`*.proto`) in go-crypto-wallet.
 
 ## Applicable Directories
 
-| Directory | Description |
-|-----------|-------------|
-| `proto/rippleapi/` | Ripple API definitions |
+| Directory | Description | Status |
+|-----------|-------------|--------|
+| `proto/rippleapi/` | Ripple API definitions | ❌ DEPRECATED |
 
 ## Verification Commands
 
@@ -35,15 +41,17 @@ make proto-ts   # TypeScript only
 make proto-all  # Both
 ```
 
-## Code Generation
+## Code Generation [DEPRECATED for XRP]
 
-| Command | Purpose |
-|---------|---------|
-| `make proto` | Generate Go code from proto files |
-| `make proto-ts` | Generate TypeScript code from proto files |
-| `make proto-all` | Generate all proto files (Go + TypeScript) |
-| `make proto-fmt` | Format proto files |
-| `make clean-pb` | Clean all generated protobuf files |
+> **⚠️ Note**: Proto generation commands no longer needed for XRP.
+
+| Command | Purpose | XRP Status |
+|---------|---------|------------|
+| `make proto` | Generate Go code from proto files | ⚠️ No longer generates XRP |
+| `make proto-ts` | Generate TypeScript code from proto files | ❌ XRP TypeScript deprecated |
+| `make proto-all` | Generate all proto files (Go + TypeScript) | ⚠️ XRP not included |
+| `make proto-fmt` | Format proto files | ⚠️ XRP protos deprecated |
+| `make clean-pb` | Clean all generated protobuf files | ⚠️ XRP files no longer generated |
 
 ### Generation Workflow
 

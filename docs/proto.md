@@ -1,5 +1,13 @@
 # Protocol Buffer Configuration
 
+> **⚠️ XRP Protocol Buffers DEPRECATED**
+>
+> **Status**: `proto/rippleapi/` is **DEPRECATED** and no longer used.
+>
+> **Reason**: XRP functionality migrated to native Go implementation using xrpl-go libraries. gRPC architecture (`apps/xrpl-grpc-server/`) has been replaced.
+>
+> **Current State**: This document remains for reference but proto files are no longer actively maintained or generated for XRP.
+
 This document describes the Protocol Buffer (protobuf) setup in go-crypto-wallet.
 
 ## Edition 2024
@@ -21,15 +29,17 @@ Reference: [Protobuf Editions Overview](https://protobuf.dev/editions/overview/)
 - Better defaults: Improved naming conventions and field presence semantics
 - Compatibility: Uses feature flags for backward compatibility
 
-## Proto Files
+## Proto Files [DEPRECATED]
 
-Location: `proto/rippleapi/`
+Location: `proto/rippleapi/` [DEPRECATED - No longer used]
 
-| File | Description |
-|------|-------------|
-| `account.proto` | XRP account information API |
-| `address.proto` | XRP address generation API |
-| `transaction.proto` | XRP transaction API |
+| File | Description | Status |
+|------|-------------|--------|
+| `account.proto` | XRP account information API | ❌ Deprecated |
+| `address.proto` | XRP address generation API | ❌ Deprecated |
+| `transaction.proto` | XRP transaction API | ❌ Deprecated |
+
+**Note**: All XRP proto files are deprecated. XRP functionality now uses native Go implementation.
 
 ### Feature Flags
 
@@ -45,12 +55,14 @@ option features.field_presence = IMPLICIT;
 option features.enforce_naming_style = STYLE_LEGACY;
 ```
 
-## Code Generation
+## Code Generation [DEPRECATED for XRP]
+
+> **⚠️ Note**: Proto code generation is no longer needed for XRP. Commands below are kept for reference only.
 
 ### Recommended: protoc (for Edition 2024)
 
 ```bash
-make proto
+make proto  # ⚠️ No longer generates XRP files
 ```
 
 This uses `protoc` directly, which fully supports Edition 2024.
