@@ -42,15 +42,17 @@ type TransactionCombiner interface {
 }
 
 // LedgerWaiter waits for ledger validation.
-// NOTE: Prefer using TransactionSubmitter.WaitValidation for new code.
-// This interface is kept for backward compatibility with existing code.
+//
+// Deprecated: Use TransactionSubmitter.WaitValidation instead.
+// This interface is kept for backward compatibility.
 type LedgerWaiter interface {
 	WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error)
 }
 
 // TransactionGetter retrieves transaction information.
-// NOTE: Prefer using TransactionSubmitter.GetTransaction for new code.
-// This interface is kept for backward compatibility with existing code.
+//
+// Deprecated: Use TransactionSubmitter.GetTransaction instead.
+// This interface is kept for backward compatibility.
 type TransactionGetter interface {
 	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoxrp.TxInfo, error)
 }
