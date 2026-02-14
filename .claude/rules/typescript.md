@@ -139,10 +139,10 @@ import { TokenService } from "./services/token";
 
 **DO NOT EDIT:**
 
-| App              | Generated Files                                             |
-| ---------------- | ----------------------------------------------------------- |
-| xrpl-grpc-server | `apps/xrpl-grpc-server/src/gen/` (Buf/ConnectRPC generated) |
-| erc20-token      | `apps/erc20-token/build/` (Truffle build artifacts)         |
+| App              | Generated Files                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| xrpl-grpc-server | `apps/xrpl-grpc-server/src/protogen/` (Buf/ConnectRPC generated) |
+| erc20-token      | `apps/erc20-token/build/` (Truffle build artifacts)              |
 
 ## Security
 

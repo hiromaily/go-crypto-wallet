@@ -144,7 +144,7 @@ import { TokenService } from './services/token';
 
 | App | Generated Files |
 |-----|-----------------|
-| xrpl-grpc-server | `apps/xrpl-grpc-server/src/gen/` (Buf/ConnectRPC generated) (deprecated - entire directory is read-only) |
+| xrpl-grpc-server | `apps/xrpl-grpc-server/src/protogen/` (Buf/ConnectRPC generated) (deprecated - entire directory is read-only) |
 | erc20-token | `apps/erc20-token/build/` (Truffle build artifacts) |
 
 ## Security

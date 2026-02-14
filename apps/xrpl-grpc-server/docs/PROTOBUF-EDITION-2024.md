@@ -44,9 +44,9 @@ To generate the protobuf types (without Connect stubs):
 
 ```bash
 # From workspace root
-mkdir -p apps/xrpl-grpc-server/src/gen && protoc \
+mkdir -p apps/xrpl-grpc-server/src/protogen && protoc \
   --plugin=protoc-gen-es=apps/xrpl-grpc-server/node_modules/.bin/protoc-gen-es \
-  --es_out=apps/xrpl-grpc-server/src/gen \
+  --es_out=apps/xrpl-grpc-server/src/protogen \
   --es_opt=target=ts \
   -I proto/rippleapi \
   proto/rippleapi/account.proto proto/rippleapi/address.proto proto/rippleapi/transaction.proto
@@ -107,6 +107,7 @@ src/gen/*_pb.ts           src/gen/*_connect.ts (generated stubs)
 Migrate when `@connectrpc/protoc-gen-connect-es` releases a version that supports Edition 2024 (likely v2.x).
 
 Check for updates:
+
 - [ConnectRPC GitHub](https://github.com/connectrpc/connect-es)
 - [npm package](https://www.npmjs.com/package/@connectrpc/protoc-gen-connect-es)
 
@@ -139,7 +140,7 @@ Check for updates:
    ```typescript
    // Before (manual)
    import { RippleAccountAPI } from './gen/account_pb';
-   
+
    export function createRouter(): ConnectRouter {
      return createConnectRouter()
        .service(RippleAccountAPI, {
@@ -148,10 +149,10 @@ Check for updates:
          },
        });
    }
-   
+
    // After (generated stubs)
    import { RippleAccountAPI } from './gen/account_connect';
-   
+
    export function createRouter(): ConnectRouter {
      return createConnectRouter()
        .service(RippleAccountAPI, accountServiceImpl);
