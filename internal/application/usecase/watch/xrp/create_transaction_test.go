@@ -212,6 +212,63 @@ func TestCreateTransactionUseCase_Execute_GetAddressError(t *testing.T) {
 	deps.addrRepo.AssertExpectations(t)
 }
 
+func TestCreateTransactionUseCase_Execute_NilSenderAddress(t *testing.T) {
+	deps := newTestDependencies(t)
+	useCase := createUseCase(deps)
+
+	// Setup mocks - repository returns nil address without error (no unallocated address exists)
+	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypePayment).
+		Return((*domainAddress.Address)(nil), nil)
+
+	input := watchusecase.CreateTransactionInput{
+		ActionType:      domainTx.ActionTypeTransfer.String(),
+		SenderAccount:   domainAccount.AccountTypePayment,
+		ReceiverAccount: domainAccount.AccountTypeDeposit,
+		Amount:          10.0,
+	}
+
+	output, err := useCase.Execute(context.Background(), input)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no unallocated address found")
+	assert.Contains(t, err.Error(), "sender account")
+	assert.Empty(t, output.FileName)
+	deps.addrRepo.AssertExpectations(t)
+}
+
+func TestCreateTransactionUseCase_Execute_NilReceiverAddress(t *testing.T) {
+	deps := newTestDependencies(t)
+	useCase := createUseCase(deps)
+
+	senderAddr := &domainAddress.Address{
+		ID:            1,
+		WalletAddress: "rSenderAddress123",
+	}
+
+	// Setup mocks
+	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypePayment).Return(senderAddr, nil)
+	deps.accountInfo.On("GetBalance", mock.Anything, "rSenderAddress123").Return(100.0, nil)
+	// Receiver address returns nil without error
+	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypeDeposit).
+		Return((*domainAddress.Address)(nil), nil)
+
+	input := watchusecase.CreateTransactionInput{
+		ActionType:      domainTx.ActionTypeTransfer.String(),
+		SenderAccount:   domainAccount.AccountTypePayment,
+		ReceiverAccount: domainAccount.AccountTypeDeposit,
+		Amount:          10.0,
+	}
+
+	output, err := useCase.Execute(context.Background(), input)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no unallocated address found")
+	assert.Contains(t, err.Error(), "receiver account")
+	assert.Empty(t, output.FileName)
+	deps.addrRepo.AssertExpectations(t)
+	deps.accountInfo.AssertExpectations(t)
+}
+
 func TestCreateTransactionUseCase_Dependencies(t *testing.T) {
 	t.Run("uses segregated interfaces instead of full XRPer interface", func(t *testing.T) {
 		deps := newTestDependencies(t)
