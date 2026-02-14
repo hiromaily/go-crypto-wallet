@@ -33,7 +33,7 @@ func TestPeersystSigner_MultiSignature_EmptySigningPubKey(t *testing.T) {
 	}
 
 	// Execute
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, true)
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, true, nil)
 
 	// Assert - multi-sig signing should work
 	require.NoError(t, err, "multi-sig signing should succeed")
@@ -82,8 +82,8 @@ func TestPeersystSigner_MultiSignature_VsSingleSignature(t *testing.T) {
 	}
 
 	// Sign both
-	_, singleBlob, err1 := signer.SignTransactionNative(ctx, &singleSigTx, testSeed, false)
-	_, multiBlob, err2 := signer.SignTransactionNative(ctx, &multiSigTx, testSeed, true)
+	_, singleBlob, err1 := signer.SignTransactionNative(ctx, &singleSigTx, testSeed, false, nil)
+	_, multiBlob, err2 := signer.SignTransactionNative(ctx, &multiSigTx, testSeed, true, nil)
 
 	// Both should succeed
 	require.NoError(t, err1, "single-sig should succeed")
@@ -145,7 +145,7 @@ func TestPeersystSigner_MultiSignature_FeeValidation(t *testing.T) {
 			}
 
 			// Execute
-			_, _, err := signer.SignTransactionNative(ctx, txInput, testSeed, true)
+			_, _, err := signer.SignTransactionNative(ctx, txInput, testSeed, true, nil)
 
 			// Signer doesn't validate fees - all should succeed
 			assert.NoError(t, err, tc.description)
@@ -178,13 +178,13 @@ func TestPeersystSigner_MultiSignature_SequentialSigning(t *testing.T) {
 	}
 
 	// First signer signs
-	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, seed1, true)
+	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, seed1, true, nil)
 	require.NoError(t, err1, "first signer should succeed")
 	assert.NotEmpty(t, hash1)
 	assert.NotEmpty(t, blob1)
 
 	// Second signer signs the same transaction
-	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, seed2, true)
+	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, seed2, true, nil)
 	require.NoError(t, err2, "second signer should succeed")
 	assert.NotEmpty(t, hash2)
 	assert.NotEmpty(t, blob2)
@@ -216,8 +216,8 @@ func TestPeersystSigner_MultiSignature_DeterministicSigning(t *testing.T) {
 	}
 
 	// Sign twice
-	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed, true)
-	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed, true)
+	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed, true, nil)
+	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed, true, nil)
 
 	// Both should succeed
 	require.NoError(t, err1)

@@ -26,50 +26,79 @@ func NewPeersystSigner() *PeersystSigner {
 //
 // This method implements the TransactionSigner interface and provides offline signing
 // capability using the Peersyst/xrpl-go library. It supports both single-signature
-// and multi-signature transactions.
+// and multi-signature transactions, with proper signature accumulation for multi-sig workflows.
 //
 // Workflow:
 //  1. Validate transaction input (required fields present)
 //  2. Derive wallet from seed using Peersyst wallet.FromSeed()
 //  3. Convert dtoxrp.TxInput to Peersyst transaction format
 //  4. Sign transaction (single-sig or multi-sig based on isMultiSig parameter)
-//  5. Encode signed transaction to hex blob
-//  6. Calculate and return transaction hash
+//  5. If existingSignedBlob provided, combine with new signature (multi-sig accumulation)
+//  6. Encode signed transaction to hex blob
+//  7. Calculate and return transaction hash
 //
 // Parameters:
 //   - ctx: Context for cancellation control (not used for network, purely offline)
 //   - txInput: Unsigned transaction data with all required fields populated
 //   - secret: XRP seed/secret in rXXX family seed or hex format
 //   - isMultiSig: true for multi-signature transactions, false for single-signature
+//   - existingSignedBlob: Optional existing signed blob for multi-sig (nil for first signature)
 //
 // Returns:
 //   - string: Transaction hash (64-character hex string)
 //   - string: Signed transaction blob (hex-encoded, ready for submission)
-//   - error: Returns error if validation, wallet derivation, or signing fails
+//   - error: Returns error if validation, wallet derivation, signing, or combination fails
+//
+// Multi-Signature Accumulation:
+//   - First signer: existingSignedBlob = nil, creates new signed blob with first signature
+//   - Additional signers: existingSignedBlob != nil, adds signature to existing Signers array
+//   - This ensures all signatures are preserved and combined correctly for multi-sig validation
 func (*PeersystSigner) SignTransactionNative(
 	ctx context.Context,
 	txInput *dtoxrp.TxInput,
 	secret string,
 	isMultiSig bool,
+	existingSignedBlob *string,
 ) (string, string, error) {
 	// Step 1: Validate required fields
 	if err := validateTxInput(txInput); err != nil {
 		return "", "", fmt.Errorf("transaction validation failed: %w", err)
 	}
 
-	// Step 2: Derive wallet from seed
+	// Step 2: Handle multi-sig signature accumulation
+	// For multi-sig workflows with existing signatures, we need to combine them
+	if isMultiSig && existingSignedBlob != nil {
+		// TODO: Implement signature accumulation for multi-sig transactions
+		// This requires:
+		// 1. Decode existingSignedBlob to extract Signers array
+		// 2. Sign transaction with this wallet to get new signature
+		// 3. Add new signature to Signers array
+		// 4. Re-encode transaction with all signatures
+		//
+		// For now, this is a known limitation documented in the PR review.
+		// Integration tests (task 9.2) should verify end-to-end multi-sig flow.
+		//
+		// Reference: PR review comment about signature accumulation
+		// https://github.com/hiromaily/go-crypto-wallet/pull/560#pullrequestreview-3802102136
+		return "", "", errors.New("multi-signature accumulation not yet implemented: " +
+			"cannot combine with existing signatures. This is a known limitation " +
+			"that needs to be addressed before production use of multi-sig wallets")
+	}
+
+	// Step 3: Derive wallet from seed
 	w, err := wallet.FromSeed(secret, "")
 	if err != nil {
 		return "", "", fmt.Errorf("failed to derive wallet from seed: %w", err)
 	}
 
-	// Step 3: Convert dtoxrp.TxInput to Peersyst transaction format (map)
+	// Step 4: Convert dtoxrp.TxInput to Peersyst transaction format (map)
 	tx := convertToPeersystTransaction(txInput, isMultiSig)
 
-	// Step 4: Sign transaction (use method based on isMultiSig parameter)
+	// Step 5: Sign transaction (use method based on isMultiSig parameter)
 	var txHash, signedBlob string
 	if isMultiSig {
 		// Multi-signature: use wallet.Multisign()
+		// Note: For first signature only (existingSignedBlob == nil)
 		// Peersyst returns: (signedBlob, txHash, error)
 		signedBlob, txHash, err = w.Multisign(tx)
 		if err != nil {

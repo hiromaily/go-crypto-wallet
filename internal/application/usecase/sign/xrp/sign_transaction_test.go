@@ -39,8 +39,9 @@ func (m *MockXRPSignClient) SignTransactionNative(
 	txInput *dtoxrp.TxInput,
 	secret string,
 	isMultiSig bool,
+	existingSignedBlob *string,
 ) (string, string, error) {
-	args := m.Called(ctx, txInput, secret, isMultiSig)
+	args := m.Called(ctx, txInput, secret, isMultiSig, existingSignedBlob)
 	return args.String(0), args.String(1), args.Error(2)
 }
 
@@ -186,9 +187,14 @@ func TestSignTransactionUseCase_Sign_SingleSignature(t *testing.T) {
 		FilePath: "/path/to/unsigned.json",
 	}
 
-	// Mock ValidateFilePath
-	mockFileRepo.On("ValidateFilePath", input.FilePath, domainTx.TxTypeUnsigned).
-		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, int64(1), 0, nil)
+	// Mock GetFileNameType
+	mockFileRepo.On("GetFileNameType", input.FilePath).
+		Return(&file.FileName{
+			ActionType:  domainTx.ActionTypeDeposit,
+			TxType:      domainTx.TxTypeUnsigned,
+			TxID:        1,
+			SignedCount: 0,
+		}, nil)
 
 	// Mock ReadXRPJSONFile - unsigned transaction
 	txInput := dtoxrp.TxInput{
@@ -225,8 +231,9 @@ func TestSignTransactionUseCase_Sign_SingleSignature(t *testing.T) {
 	mockKeyRepo.On("GetSecret", ctx, domainAccount.AccountType("client"), "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH").
 		Return("sEdTM1uX8pu2do5XvTnutH6HsouMaM2", nil)
 
-	// Mock SignTransactionNative
-	mockXRP.On("SignTransactionNative", ctx, &txInput, "sEdTM1uX8pu2do5XvTnutH6HsouMaM2", false).
+	// Mock SignTransactionNative (no existing blob for first/only signature)
+	var nilBlob *string
+	mockXRP.On("SignTransactionNative", ctx, &txInput, "sEdTM1uX8pu2do5XvTnutH6HsouMaM2", false, nilBlob).
 		Return(
 			"3E3C6E8F1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF12345678",
 			"120000228000000024000000002A61400000000000F424068400000000000000C732103ABCDEF...",
@@ -279,9 +286,17 @@ func TestSignTransactionUseCase_Sign_MultiSignature_FirstSigner(t *testing.T) {
 		FilePath: "/path/to/unsigned.json",
 	}
 
-	// Mock ValidateFilePath
-	mockFileRepo.On("ValidateFilePath", input.FilePath, domainTx.TxTypeUnsigned).
-		Return(domainTx.ActionTypePayment, domainTx.TxTypeUnsigned, int64(2), 0, nil)
+	// Define nil blob for mock expectations (no existing signatures)
+	var nilBlob *string
+
+	// Mock GetFileNameType
+	mockFileRepo.On("GetFileNameType", input.FilePath).
+		Return(&file.FileName{
+			ActionType:  domainTx.ActionTypePayment,
+			TxType:      domainTx.TxTypeUnsigned,
+			TxID:        2,
+			SignedCount: 0,
+		}, nil)
 
 	// Mock ReadXRPJSONFile - unsigned multi-sig transaction
 	txInput := dtoxrp.TxInput{
@@ -318,8 +333,8 @@ func TestSignTransactionUseCase_Sign_MultiSignature_FirstSigner(t *testing.T) {
 	mockKeyRepo.On("GetSecret", ctx, domainAccount.AccountType("payment"), "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH").
 		Return("sEdSigner1Secret", nil)
 
-	// Mock SignTransactionNative (multi-sig = true for RequiredSignatures > 1)
-	mockXRP.On("SignTransactionNative", ctx, &txInput, "sEdSigner1Secret", true).
+	// Mock SignTransactionNative (multi-sig = true for RequiredSignatures > 1, no existing blob for first signature)
+	mockXRP.On("SignTransactionNative", ctx, &txInput, "sEdSigner1Secret", true, nilBlob).
 		Return(
 			"4F4D7F9A1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF12345678",
 			"120000228000000024000000002A61400000000000F424068400000000000000C732103MULTISIG...",
@@ -372,9 +387,14 @@ func TestSignTransactionUseCase_Sign_SkipAlreadyComplete(t *testing.T) {
 		FilePath: "/path/to/signed_1.json",
 	}
 
-	// Mock ValidateFilePath
-	mockFileRepo.On("ValidateFilePath", input.FilePath, domainTx.TxTypeUnsigned).
-		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(1), 1, nil)
+	// Mock GetFileNameType
+	mockFileRepo.On("GetFileNameType", input.FilePath).
+		Return(&file.FileName{
+			ActionType:  domainTx.ActionTypeDeposit,
+			TxType:      domainTx.TxTypeSigned,
+			TxID:        1,
+			SignedCount: 1,
+		}, nil)
 
 	// Mock ReadXRPJSONFile - already complete transaction
 	signedBlob := "120000228000000024000000002A61400000000000F424068400000000000000C732103COMPLETE..."
@@ -440,9 +460,14 @@ func TestSignTransactionUseCase_Sign_ErrorSecretRetrieval(t *testing.T) {
 		FilePath: "/path/to/unsigned.json",
 	}
 
-	// Mock ValidateFilePath
-	mockFileRepo.On("ValidateFilePath", input.FilePath, domainTx.TxTypeUnsigned).
-		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, int64(1), 0, nil)
+	// Mock GetFileNameType
+	mockFileRepo.On("GetFileNameType", input.FilePath).
+		Return(&file.FileName{
+			ActionType:  domainTx.ActionTypeDeposit,
+			TxType:      domainTx.TxTypeUnsigned,
+			TxID:        1,
+			SignedCount: 0,
+		}, nil)
 
 	// Mock ReadXRPJSONFile
 	txInput := dtoxrp.TxInput{
@@ -503,9 +528,17 @@ func TestSignTransactionUseCase_Sign_ErrorSigning(t *testing.T) {
 		FilePath: "/path/to/unsigned.json",
 	}
 
-	// Mock ValidateFilePath
-	mockFileRepo.On("ValidateFilePath", input.FilePath, domainTx.TxTypeUnsigned).
-		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, int64(1), 0, nil)
+	// Define nil blob for mock expectations (no existing signatures)
+	var nilBlob *string
+
+	// Mock GetFileNameType
+	mockFileRepo.On("GetFileNameType", input.FilePath).
+		Return(&file.FileName{
+			ActionType:  domainTx.ActionTypeDeposit,
+			TxType:      domainTx.TxTypeUnsigned,
+			TxID:        1,
+			SignedCount: 0,
+		}, nil)
 
 	// Mock ReadXRPJSONFile
 	txInput := dtoxrp.TxInput{
@@ -538,8 +571,8 @@ func TestSignTransactionUseCase_Sign_ErrorSigning(t *testing.T) {
 	mockKeyRepo.On("GetSecret", ctx, domainAccount.AccountType("client"), "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH").
 		Return("sEdTM1uX8pu2do5XvTnutH6HsouMaM2", nil)
 
-	// Mock SignTransactionNative returns error
-	mockXRP.On("SignTransactionNative", ctx, &txInput, "sEdTM1uX8pu2do5XvTnutH6HsouMaM2", false).
+	// Mock SignTransactionNative returns error (no existing blob)
+	mockXRP.On("SignTransactionNative", ctx, &txInput, "sEdTM1uX8pu2do5XvTnutH6HsouMaM2", false, nilBlob).
 		Return("", "", errors.New("invalid transaction"))
 
 	// Act
@@ -572,9 +605,14 @@ func TestSignTransactionUseCase_Sign_EmptyTransactions(t *testing.T) {
 		FilePath: "/path/to/empty.json",
 	}
 
-	// Mock ValidateFilePath
-	mockFileRepo.On("ValidateFilePath", input.FilePath, domainTx.TxTypeUnsigned).
-		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, int64(1), 0, nil)
+	// Mock GetFileNameType
+	mockFileRepo.On("GetFileNameType", input.FilePath).
+		Return(&file.FileName{
+			ActionType:  domainTx.ActionTypeDeposit,
+			TxType:      domainTx.TxTypeUnsigned,
+			TxID:        1,
+			SignedCount: 0,
+		}, nil)
 
 	// Mock ReadXRPJSONFile - file with no transactions
 	emptyTxFile := &dtoxrp.XRPTransactionFile{
@@ -591,7 +629,7 @@ func TestSignTransactionUseCase_Sign_EmptyTransactions(t *testing.T) {
 
 	// Assert
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "transaction file contains no transactions")
+	assert.Contains(t, err.Error(), "invalid transaction file: transactions array cannot be empty")
 	assert.Equal(t, "", output.NextFilePath)
 	mockFileRepo.AssertExpectations(t)
 	// No signing or secret retrieval should happen
@@ -617,9 +655,14 @@ func TestSignTransactionUseCase_Sign_MultiSignature_SecondSigner(t *testing.T) {
 		FilePath: "/path/to/signed_1.json",
 	}
 
-	// Mock ValidateFilePath - reading a file that already has 1 signature
-	mockFileRepo.On("ValidateFilePath", input.FilePath, domainTx.TxTypeUnsigned).
-		Return(domainTx.ActionTypePayment, domainTx.TxTypeSigned, int64(2), 1, nil)
+	// Mock GetFileNameType - reading a file that already has 1 signature
+	mockFileRepo.On("GetFileNameType", input.FilePath).
+		Return(&file.FileName{
+			ActionType:  domainTx.ActionTypePayment,
+			TxType:      domainTx.TxTypeSigned, // Already signed once
+			TxID:        2,
+			SignedCount: 1, // Has 1 signature already
+		}, nil)
 
 	// Mock ReadXRPJSONFile - partially signed transaction (1 of 2 signatures)
 	txInput := dtoxrp.TxInput{
@@ -657,14 +700,15 @@ func TestSignTransactionUseCase_Sign_MultiSignature_SecondSigner(t *testing.T) {
 	mockKeyRepo.On("GetSecret", ctx, domainAccount.AccountType("payment"), "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH").
 		Return("sEdSigner2Secret", nil)
 
-	// Mock SignTransactionNative - should receive existing signed blob, not unsigned data
-	// The key here is that we need to add a signature to the existing blob
+	// Mock SignTransactionNative - should receive existing signed blob to add signature
+	// The key here is that we pass the existing blob so signatures can be accumulated
 	mockXRP.On(
 		"SignTransactionNative",
 		ctx,
 		&txInput,
 		"sEdSigner2Secret",
-		true, // multi-sig
+		true,                // multi-sig
+		&existingSignedBlob, // Pass existing blob for signature accumulation
 	).Return(
 		"5F5E8FAB1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF12345678",
 		"120000228000000024000000002A61400000000000F424068400000000000024C7"+

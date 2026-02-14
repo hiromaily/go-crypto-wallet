@@ -49,11 +49,21 @@ func (u *signTransactionUseCase) Sign(
 	ctx context.Context,
 	input signusecase.SignTransactionInput,
 ) (signusecase.SignTransactionOutput, error) {
-	// Step 1: Validate file path and extract metadata
-	actionType, _, txID, signedCount, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeUnsigned)
+	// Step 1: Extract file metadata (supports both unsigned and partially signed files for multi-sig)
+	fileInfo, err := u.txFileRepo.GetFileNameType(input.FilePath)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to validate file path: %w", err)
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to parse file path: %w", err)
 	}
+
+	// Validate that file type is either unsigned or signed (multi-sig workflow)
+	if fileInfo.TxType != domainTx.TxTypeUnsigned && fileInfo.TxType != domainTx.TxTypeSigned {
+		return signusecase.SignTransactionOutput{},
+			fmt.Errorf("invalid transaction type: %s (expected unsigned or signed)", fileInfo.TxType)
+	}
+
+	actionType := fileInfo.ActionType
+	txID := fileInfo.TxID
+	signedCount := fileInfo.SignedCount
 
 	// Step 2: Read JSON transaction file
 	txFile, err := u.txFileRepo.ReadXRPJSONFile(input.FilePath)
@@ -61,13 +71,20 @@ func (u *signTransactionUseCase) Sign(
 		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to read JSON transaction file: %w", err)
 	}
 
-	// Step 3: Validate transaction file has entries
+	// Step 3: Validate transaction file structure and invariants
+	// This prevents cross-network replay attacks and ensures file integrity
+	if err := txFile.Validate(); err != nil {
+		return signusecase.SignTransactionOutput{},
+			fmt.Errorf("invalid transaction file: %w", err)
+	}
+
+	// Step 4: Validate transaction file has entries
 	if len(txFile.Transactions) == 0 {
 		return signusecase.SignTransactionOutput{},
 			errors.New("transaction file contains no transactions")
 	}
 
-	// Step 4: Process each transaction entry
+	// Step 5: Process each transaction entry
 	var (
 		signaturesAdded        = false // Track if we added any signatures
 		hasIncompleteAfterSign = false // Track if any transactions remain incomplete
@@ -98,11 +115,18 @@ func (u *signTransactionUseCase) Sign(
 		isMultiSig := tx.RequiredSignatures > 1
 
 		// Sign transaction using native Go implementation
-		signedTxID, txBlob, err := u.xrp.SignTransactionNative(ctx, &tx.UnsignedData, secret, isMultiSig)
+		// For multi-sig workflows, pass existing signed blob if available (signature accumulation)
+		signedTxID, txBlob, err := u.xrp.SignTransactionNative(
+			ctx,
+			&tx.UnsignedData,
+			secret,
+			isMultiSig,
+			tx.SignedBlob, // Pass existing blob for multi-sig accumulation
+		)
 		if err != nil {
 			return signusecase.SignTransactionOutput{},
-				fmt.Errorf("failed to sign transaction %s (multi-sig: %t): %w",
-					tx.UUID, isMultiSig, err)
+				fmt.Errorf("failed to sign transaction %s (multi-sig: %t, has existing signatures: %t): %w",
+					tx.UUID, isMultiSig, tx.SignedBlob != nil, err)
 		}
 
 		// Update transaction entry with signature
@@ -132,11 +156,11 @@ func (u *signTransactionUseCase) Sign(
 			"signedTxID", signedTxID)
 	}
 
-	// Step 5: Determine overall completion status
+	// Step 6: Determine overall completion status
 	// File is complete only if ALL transactions are complete
 	allComplete := !hasIncompleteAfterSign
 
-	// Step 6: Write updated JSON file
+	// Step 7: Write updated JSON file
 	// Only increment signed count if we actually added signatures
 	newSignedCount := signedCount
 	if signaturesAdded {

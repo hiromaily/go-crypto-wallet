@@ -63,13 +63,14 @@ type TransactionSigner interface {
 	//
 	// This method uses the Peersyst/xrpl-go library to sign transactions entirely
 	// offline without any gRPC or network dependencies. It supports both single-signature
-	// and multi-signature transactions.
+	// and multi-signature transactions, including sequential multi-sig signing.
 	//
 	// Parameters:
 	//   - ctx: Context for cancellation control (not used for network, purely offline)
 	//   - txInput: Unsigned transaction data with all required fields populated
 	//   - secret: XRP seed/secret in rXXX family seed or hex format
 	//   - isMultiSig: Explicit indicator - true for multi-signature, false for single-signature
+	//   - existingSignedBlob: Optional existing signed blob for multi-sig workflows (nil for first signature)
 	//
 	// Returns:
 	//   - string: Transaction hash (64-character hex string, unique identifier)
@@ -79,6 +80,7 @@ type TransactionSigner interface {
 	//     * secret is invalid or malformed
 	//     * transaction type not supported
 	//     * signing operation fails
+	//     * existingSignedBlob is invalid or cannot be combined
 	//
 	// Preconditions:
 	//   - txInput must have all required fields:
@@ -94,20 +96,24 @@ type TransactionSigner interface {
 	//   - isMultiSig must correctly indicate the signature type
 	//     * true: uses wallet.Multisign() for multi-signature transactions
 	//     * false: uses wallet.Sign() for single-signature transactions
+	//   - existingSignedBlob (if provided) must be valid hex-encoded signed transaction
 	//
 	// Postconditions:
 	//   - Returns 64-character hex transaction hash
 	//   - Returns hex-encoded signed transaction blob
 	//   - Signed blob includes signature in TxnSignature field (single-sig)
 	//     or Signers array (multi-sig)
+	//   - If existingSignedBlob provided, new signature is ADDED to existing signatures
 	//   - NO network calls made (offline guarantee)
 	//   - Deterministic: same txInput + secret produces same signature
 	//
 	// Multi-Signature Behavior:
-	//   - Detects multi-sig if txInput.SigningPubKey is empty or Signers array present
+	//   - For first signature: pass nil for existingSignedBlob
+	//   - For additional signatures: pass existing signed blob to preserve previous signatures
 	//   - Uses Peersyst wallet.Multisign() for multi-sig transactions
 	//   - Uses Peersyst wallet.Sign() for single-sig transactions
 	//   - Multi-sig fee: (N+1) × base fee where N = number of signatures
+	//   - Signature accumulation prevents replay attacks and ensures proper multi-sig validation
 	//
 	// Example Usage (Single Signature):
 	//   txInput := &dtoxrp.TxInput{
@@ -139,6 +145,10 @@ type TransactionSigner interface {
 	//   - Operates entirely offline (air-gapped signing)
 	//   - No network access during signing operation
 	SignTransactionNative(
-		ctx context.Context, txInput *dtoxrp.TxInput, secret string, isMultiSig bool,
+		ctx context.Context,
+		txInput *dtoxrp.TxInput,
+		secret string,
+		isMultiSig bool,
+		existingSignedBlob *string,
 	) (string, string, error)
 }

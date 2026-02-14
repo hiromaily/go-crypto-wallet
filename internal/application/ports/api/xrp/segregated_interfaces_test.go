@@ -208,6 +208,7 @@ func (*mockTransactionSigner) SignTransactionNative(
 	txInput *dtoxrp.TxInput,
 	secret string,
 	isMultiSig bool,
+	existingSignedBlob *string,
 ) (string, string, error) {
 	return "", "", nil
 }
