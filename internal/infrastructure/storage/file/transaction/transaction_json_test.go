@@ -10,7 +10,7 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
-func TestWriteJSONTransactionFile(t *testing.T) {
+func TestWriteXRPJSONFile(t *testing.T) {
 	// Create temp directory for tests
 	tempDir := t.TempDir()
 
@@ -138,22 +138,22 @@ func TestWriteJSONTransactionFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := NewTransactionFileRepository("")
-			fileName, err := repo.WriteJSONTransactionFile(tt.path, tt.data)
+			fileName, err := repo.WriteXRPJSONFile(tt.path, tt.data)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("WriteJSONTransactionFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("WriteXRPJSONFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if !tt.wantErr {
 				// Check file was created
 				if _, err := os.Stat(fileName); os.IsNotExist(err) {
-					t.Errorf("WriteJSONTransactionFile() did not create file: %v", fileName)
+					t.Errorf("WriteXRPJSONFile() did not create file: %v", fileName)
 				}
 
 				// Check file has .json extension
 				if !strings.HasSuffix(fileName, tt.checkSuffix) {
-					t.Errorf("WriteJSONTransactionFile() file name = %v, want suffix %v", fileName, tt.checkSuffix)
+					t.Errorf("WriteXRPJSONFile() file name = %v, want suffix %v", fileName, tt.checkSuffix)
 				}
 
 				// Read and verify content is valid JSON
@@ -167,7 +167,7 @@ func TestWriteJSONTransactionFile(t *testing.T) {
 				if err := readBack.Validate(); err == nil {
 					// This shouldn't work if content is empty
 					if len(content) == 0 {
-						t.Error("WriteJSONTransactionFile() wrote empty file")
+						t.Error("WriteXRPJSONFile() wrote empty file")
 					}
 				}
 
@@ -178,7 +178,7 @@ func TestWriteJSONTransactionFile(t *testing.T) {
 	}
 }
 
-func TestReadJSONTransactionFile(t *testing.T) {
+func TestReadXRPJSONFile(t *testing.T) {
 	// Create temp directory for tests
 	tempDir := t.TempDir()
 
@@ -272,35 +272,35 @@ func TestReadJSONTransactionFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := NewTransactionFileRepository("")
-			got, err := repo.ReadJSONTransactionFile(tt.path)
+			got, err := repo.ReadXRPJSONFile(tt.path)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadJSONTransactionFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ReadXRPJSONFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if !tt.wantErr {
 				// Validate the returned data
 				if err := got.Validate(); err != nil {
-					t.Errorf("ReadJSONTransactionFile() returned invalid data: %v", err)
+					t.Errorf("ReadXRPJSONFile() returned invalid data: %v", err)
 				}
 
 				// Check basic fields
 				if got.Version != "1.0.0" {
-					t.Errorf("ReadJSONTransactionFile() version = %v, want 1.0.0", got.Version)
+					t.Errorf("ReadXRPJSONFile() version = %v, want 1.0.0", got.Version)
 				}
 				if got.Chain != "XRP" {
-					t.Errorf("ReadJSONTransactionFile() chain = %v, want XRP", got.Chain)
+					t.Errorf("ReadXRPJSONFile() chain = %v, want XRP", got.Chain)
 				}
 				if len(got.Transactions) == 0 {
-					t.Error("ReadJSONTransactionFile() transactions is empty")
+					t.Error("ReadXRPJSONFile() transactions is empty")
 				}
 			}
 		})
 	}
 }
 
-func TestJSONRoundTrip(t *testing.T) {
+func TestXRPJSONRoundTrip(t *testing.T) {
 	// Create temp directory for tests
 	tempDir := t.TempDir()
 
@@ -333,16 +333,16 @@ func TestJSONRoundTrip(t *testing.T) {
 	path := repo.CreateFilePath(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, 8, 0)
 
 	// Write JSON
-	fileName, err := repo.WriteJSONTransactionFile(path, txData)
+	fileName, err := repo.WriteXRPJSONFile(path, txData)
 	if err != nil {
-		t.Fatalf("WriteJSONTransactionFile() error = %v", err)
+		t.Fatalf("WriteXRPJSONFile() error = %v", err)
 	}
 	defer func() { _ = os.Remove(fileName) }()
 
 	// Read JSON back
-	gotData, err := repo.ReadJSONTransactionFile(fileName)
+	gotData, err := repo.ReadXRPJSONFile(fileName)
 	if err != nil {
-		t.Fatalf("ReadJSONTransactionFile() error = %v", err)
+		t.Fatalf("ReadXRPJSONFile() error = %v", err)
 	}
 
 	// Verify data matches
@@ -370,7 +370,7 @@ func TestJSONRoundTrip(t *testing.T) {
 	}
 }
 
-func TestReadJSONTransactionFilePathTraversal(t *testing.T) {
+func TestReadXRPJSONFilePathTraversal(t *testing.T) {
 	// Create temp directory structure
 	tempDir := t.TempDir()
 	jsonDir := filepath.Join(tempDir, "json")
@@ -445,24 +445,24 @@ func TestReadJSONTransactionFilePathTraversal(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := NewTransactionFileRepository(tt.basePath)
-			got, err := repo.ReadJSONTransactionFile(tt.readPath)
+			got, err := repo.ReadXRPJSONFile(tt.readPath)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadJSONTransactionFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ReadXRPJSONFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if tt.wantErr && tt.errContain != "" {
 				if err == nil || !strings.Contains(err.Error(), tt.errContain) {
-					t.Errorf("ReadJSONTransactionFile() error = %v, want error containing %q", err, tt.errContain)
+					t.Errorf("ReadXRPJSONFile() error = %v, want error containing %q", err, tt.errContain)
 				}
 			}
 
 			if !tt.wantErr {
 				if got == nil {
-					t.Error("ReadJSONTransactionFile() returned nil data")
+					t.Error("ReadXRPJSONFile() returned nil data")
 				} else if got.Version != "1.0.0" {
-					t.Errorf("ReadJSONTransactionFile() version = %v, want 1.0.0", got.Version)
+					t.Errorf("ReadXRPJSONFile() version = %v, want 1.0.0", got.Version)
 				}
 			}
 		})

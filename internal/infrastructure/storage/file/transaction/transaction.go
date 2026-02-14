@@ -284,8 +284,8 @@ func (*TransactionFileRepository) createDir(path string) {
 	}
 }
 
-// ReadJSONTransactionFile reads a JSON transaction file for XRP transactions
-func (r *TransactionFileRepository) ReadJSONTransactionFile(path string) (*dtoxrp.XRPTransactionFile, error) {
+// ReadXRPJSONFile reads a JSON transaction file for XRP transactions
+func (r *TransactionFileRepository) ReadXRPJSONFile(path string) (*dtoxrp.XRPTransactionFile, error) {
 	// Validate extension (case-insensitive)
 	if !strings.HasSuffix(strings.ToLower(path), ".json") {
 		return nil, fmt.Errorf("invalid JSON file extension: %s (expected .json)", path)
@@ -318,8 +318,8 @@ func (r *TransactionFileRepository) ReadJSONTransactionFile(path string) (*dtoxr
 	return &txFile, nil
 }
 
-// WriteJSONTransactionFile writes an XRP transaction file in JSON format with .json extension
-func (*TransactionFileRepository) WriteJSONTransactionFile(
+// WriteXRPJSONFile writes an XRP transaction file in JSON format with .json extension
+func (*TransactionFileRepository) WriteXRPJSONFile(
 	path string,
 	data *dtoxrp.XRPTransactionFile,
 ) (string, error) {

@@ -26,9 +26,9 @@ type TransactionFileRepositorier interface {
 	// Hex file methods (for raw transaction hex - used by BCH)
 	WriteHexFile(path, hexTx string) (string, error)
 
-	// JSON transaction file methods (for XRP)
-	ReadJSONTransactionFile(path string) (*dtoxrp.XRPTransactionFile, error)
-	WriteJSONTransactionFile(path string, data *dtoxrp.XRPTransactionFile) (string, error)
+	// XRP JSON transaction file methods
+	ReadXRPJSONFile(path string) (*dtoxrp.XRPTransactionFile, error)
+	WriteXRPJSONFile(path string, data *dtoxrp.XRPTransactionFile) (string, error)
 }
 
 // FileName is object for items in fine name
