@@ -5,6 +5,8 @@
     // Markdown
     "DavidAnson.vscode-markdownlint",
     "yzhang.markdown-all-in-one",
+    // Mermaid Chart extension
+    "MermaidChart.vscode-mermaid-chart",
     // Shell Script
     "timonwong.shellcheck",
     "foxundermoon.shell-format",
