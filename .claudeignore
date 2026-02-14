@@ -11,7 +11,7 @@ internal/infrastructure/api/ripple/xrp/*.pb.go
 internal/infrastructure/contract/token-abi.go
 
 # Apps project generated files
-apps/ripple-lib-server/src/pb/
+#apps/xrpl-grpc-server/src/protogen/
 apps/erc20-token/build/
 
 # Dependency lock files

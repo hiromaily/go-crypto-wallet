@@ -98,7 +98,7 @@ type Ripple struct {
 	KeyAlgorithm string `toml:"key_algorithm" yaml:"key_algorithm" mapstructure:"key_algorithm" validate:"omitempty,oneof=ed25519 secp256k1"`
 	// OfflineKeyGen enables fully offline key generation without API dependencies.
 	// When true, keys are generated using native Go implementation.
-	// When false (default), keys are generated via ripple-lib-server API.
+	// When false (default), keys are generated via xrpl-grpc-server API.
 	//nolint:lll
 	OfflineKeyGen bool `toml:"offline_keygen" yaml:"offline_keygen" mapstructure:"offline_keygen"`
 }

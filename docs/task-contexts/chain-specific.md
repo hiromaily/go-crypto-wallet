@@ -200,7 +200,6 @@ internal/interface-adapters/cli/
 | 特徴 | 詳細 |
 |------|------|
 | トランザクションモデル | アカウント型 |
-| 通信方式 | gRPC (ripple-lib-server経由) |
 | 特殊機能 | Sequence番号、Destination Tag |
 | 注意 | アカウントリザーブ要件 |
 
@@ -209,6 +208,7 @@ internal/interface-adapters/cli/
 ### 新しい機能をチェーンに追加する場合
 
 1. **既存実装の確認**
+
    ```bash
    # 同じチェーンの既存Use Caseを確認
    ls internal/application/usecase/{wallet-type}/{coin}/
@@ -218,6 +218,7 @@ internal/interface-adapters/cli/
    ```
 
 2. **レイヤー順に実装**
+
    ```
    1. Domain (必要な場合)
    2. Ports (インターフェース定義)
@@ -333,4 +334,3 @@ Agent Actions:
 - [Multi-Chain Support](../guidelines/multi-chain.md) - マルチチェーンアーキテクチャ詳細
 - [Architecture Guidelines](../guidelines/architecture.md) - レイヤー構造
 - [Chain References](./chains/) - 各チェーンの詳細リファレンス
-

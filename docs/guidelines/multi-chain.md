@@ -91,9 +91,11 @@ The project implements three types of wallets, each with specific roles:
 - `eth/`: Ethereum JSON-RPC client
 - `erc20/`: ERC-20 token client
 
-### XRP (Ripple gRPC)
+### XRP
 
-**Implementation**: Communication via gRPC with ripple-lib-server
+TODO: updating
+
+**Implementation**: Communication via
 
 **Location**: `internal/infrastructure/api/xrp/`
 
@@ -106,7 +108,7 @@ The project implements three types of wallets, each with specific roles:
 
 **API Client**:
 
-- `xrp/`: Ripple gRPC client
+- `xrp/`: Ripple gRPC client [Deprecated]
 
 **Note**: XRP uses protocol buffers for gRPC communication. See [Code Generation Guidelines](code-generation.md) for protobuf code generation.
 

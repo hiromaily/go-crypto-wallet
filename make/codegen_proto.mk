@@ -30,7 +30,7 @@ PROTO_TOOL ?= protoc
 
 # Output directories
 PROTO_GO_OUT_DIR := internal/infrastructure/api/xrp/protogen
-PROTO_TS_OUT_DIR := apps/xrpl-grpc-server/src/gen
+PROTO_TS_OUT_DIR := apps/xrpl-grpc-server/src/protogen
 
 # Minimum versions required for edition 2024
 PROTOC_MIN_VERSION := 33

@@ -26,12 +26,12 @@ plugins:
   # these will work with the edition 2024 proto files.
   # Until then, generation will fail with "edition 2024 not yet fully supported"
   - local: protoc-gen-es
-    out: apps/xrpl-grpc-server/src/gen
+    out: apps/xrpl-grpc-server/src/protogen
     opt: target=ts
 
   # Generate Connect-ES service code for gRPC-web
   - local: protoc-gen-connect-es
-    out: apps/xrpl-grpc-server/src/gen
+    out: apps/xrpl-grpc-server/src/protogen
     opt: target=ts
 
 # Input directories

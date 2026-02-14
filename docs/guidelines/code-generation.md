@@ -165,15 +165,13 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 **Generated Files**:
 
-- `apps/xrpl-grpc-server/src/gen/*.ts` - TypeScript protocol buffer code
+- `apps/xrpl-grpc-server/src/protogen/*.ts` - TypeScript protocol buffer code
   - `account_pb.ts` - Account message types
   - `account_connect.ts` - Account service client
   - `address_pb.ts` - Address message types
   - `address_connect.ts` - Address service client
   - `transaction_pb.ts` - Transaction message types
   - `transaction_connect.ts` - Transaction service client
-
-**Note**: Used by the xrpl-grpc-server project. The older ripple-lib-server is deprecated.
 
 ## Web Project Build Artifacts
 
@@ -220,7 +218,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 | Mockery | `.mockery.yaml` + interface definitions | `make mockery` | `internal/infrastructure/*/mocks/*.go` |
 | Protocol Buffers (Go) | `proto/rippleapi/*.proto` | `make proto` | `internal/infrastructure/api/xrp/protogen/*.pb.go` |
 | Smart Contract ABI | `contracts/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
-| Protocol Buffers (TS) | `proto/rippleapi/*.proto` | `make proto-ts` | `apps/xrpl-grpc-server/src/gen/*.ts` |
+| Protocol Buffers (TS) | `proto/rippleapi/*.proto` | `make proto-ts` | `apps/xrpl-grpc-server/src/protogen/*.ts` |
 
 ## See Also
 

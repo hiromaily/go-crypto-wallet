@@ -4,7 +4,7 @@ Modern XRP Ledger gRPC server built with Bun runtime.
 
 ## Overview
 
-This server provides gRPC endpoints for interacting with the XRP Ledger, replacing the older `ripple-lib-server` implementation with modern tooling.
+This server provides gRPC endpoints for interacting with the XRP Ledger, implementation with modern tooling.
 
 ## Tech Stack
 
@@ -113,16 +113,6 @@ apps/xrpl-grpc-server/
 ├── Makefile            # Build commands
 └── README.md           # This file
 ```
-
-## Migration
-
-This server replaces the deprecated `ripple-lib-server`. See [MIGRATION-GUIDE.md](docs/MIGRATION-GUIDE.md) for detailed migration instructions from ripple-lib 1.x to xrpl.js 4.5.0.
-
-Key changes:
-- Runtime: Node.js + ts-node → **Bun**
-- XRP Library: ripple-lib 1.10.1 → **xrpl.js 4.5.0**
-- gRPC: grpc (deprecated) → **ConnectRPC**
-- Linter: ESLint + Prettier → **Biome**
 
 ## References
 

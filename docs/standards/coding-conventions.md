@@ -22,9 +22,6 @@ For detailed rules, format commands, and verification commands, see the correspo
 # Go files
 make go-lint && make tidy && make check-build && make gotest
 
-# TypeScript (ripple-lib-server)
-cd apps/ripple-lib-server && yarn lint && yarn test
-
 # Database schema (HCL)
 make atlas-fmt && make atlas-lint
 

@@ -15,17 +15,14 @@ Rules for modifying TypeScript (`*.ts`, `*.tsx`) and JavaScript (`*.js`, `*.jsx`
 
 | App | Language | Runtime | Path | Status |
 |-----|----------|---------|------|--------|
-| xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **Active** |
+| xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **READ-ONLY** (deprecated) |
 | erc20-token | JavaScript/TypeScript | Node.js | `apps/erc20-token/` | Active |
-| ripple-lib-server | TypeScript | Node.js | `apps/ripple-lib-server/` | **READ-ONLY** (deprecated) |
-
-> **Important**: `ripple-lib-server` is deprecated. All XRP server work should be done in `xrpl-grpc-server`. See `apps/xrpl-grpc-server/docs/MIGRATION-GUIDE.md` for details.
 
 ## Verification Commands
 
 **Navigate to app directory first:**
 
-### xrpl-grpc-server (TypeScript + Bun) - Active Development
+### xrpl-grpc-server (TypeScript + Bun) -  (Deprecated - READ ONLY)
 
 ```bash
 cd apps/xrpl-grpc-server
@@ -53,18 +50,12 @@ npm run build         # Compile contracts with Truffle
 npm run test-all      # Run all tests
 ```
 
-### ripple-lib-server (Deprecated - READ ONLY)
-
-This directory is **read-only**. Do not modify files here.
-Reference only for migration purposes.
-
 ## Command Summary
 
 | App | Lint | Format | Build | Test |
 |-----|------|--------|-------|------|
 | xrpl-grpc-server | `bun run lint` | `bun run format` | `bun run build` | `bun run typecheck` |
 | erc20-token | `npm run lint-js` | `npm run fmt` | `npm run build` | `npm run test-all` |
-| ripple-lib-server | - | - | - | - (read-only) |
 
 ## Code Style
 
@@ -153,9 +144,8 @@ import { TokenService } from './services/token';
 
 | App | Generated Files |
 |-----|-----------------|
-| xrpl-grpc-server | `apps/xrpl-grpc-server/src/gen/` (Buf/ConnectRPC generated) |
+| xrpl-grpc-server | `apps/xrpl-grpc-server/src/protogen/` (Buf/ConnectRPC generated) (deprecated - entire directory is read-only) |
 | erc20-token | `apps/erc20-token/build/` (Truffle build artifacts) |
-| ripple-lib-server | `apps/ripple-lib-server/src/pb/` (deprecated - entire directory is read-only) |
 
 ## Security
 
@@ -182,10 +172,6 @@ import { TokenService } from './services/token';
 - [ ] `npm run build` passes
 - [ ] `npm run test-all` passes
 
-### ripple-lib-server (READ-ONLY)
-
-This directory is deprecated. **Do not modify any files.**
-
 ## Related Documentation
 
 - @apps/xrpl-grpc-server/README.md - xrpl-grpc-server documentation
@@ -201,4 +187,4 @@ This directory is deprecated. **Do not modify any files.**
 ## Related Rules
 
 - @.claude/rules/apps/bun.md - Bun runtime rules (use bun/bunx instead of npm/npx)
-- @.claude/rules/apps/xrp-server.md - XRP server directory rules (ripple-lib-server read-only)
+- @.claude/rules/apps/xrp-server.md - XRP server directory rules
