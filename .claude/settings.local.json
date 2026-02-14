@@ -38,7 +38,10 @@
       "Bash(then)",
       "Bash(fi)",
       "Bash(python3:*)",
-      "WebFetch(domain:api.github.com)"
+      "WebFetch(domain:api.github.com)",
+      "Bash(bun run lint:*)",
+      "Bash(bun run build:*)",
+      "Bash(bun run typecheck:*)"
     ]
   },
   "hooks": {

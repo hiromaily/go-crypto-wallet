@@ -182,7 +182,7 @@ export class XRPLClientManager {
     if (this.client?.isConnected()) {
       return this.client;
     }
-    return this.connect();
+    return await this.connect();
   }
 
   /**
@@ -299,7 +299,7 @@ export function getClientManager(config?: Partial<XRPLConfig>, logger?: Logger):
  * For more control, use getClientManager().
  */
 export async function getClient(): Promise<Client> {
-  return getClientManager().getClient();
+  return await getClientManager().getClient();
 }
 
 /**

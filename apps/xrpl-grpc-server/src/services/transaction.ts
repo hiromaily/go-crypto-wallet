@@ -675,7 +675,7 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
      * @returns Signed transaction ID and blob
      * @throws SignTransactionError if signing fails
      */
-    signTransaction: async (request: SignTransactionRequest): Promise<SignTransactionResponse> => {
+    signTransaction: (request: SignTransactionRequest): SignTransactionResponse => {
       try {
         const wallet = Wallet.fromSeed(request.secret);
         const tx = JSON.parse(request.txJson);
@@ -780,9 +780,7 @@ export function createTransactionService(clientGetter: () => Promise<Client>) {
      * @returns Combined signed transaction
      * @throws CombineTransactionError if combination fails
      */
-    combineTransaction: async (
-      request: CombineTransactionRequest,
-    ): Promise<CombineTransactionResponse> => {
+    combineTransaction: (request: CombineTransactionRequest): CombineTransactionResponse => {
       // Validate input before calling external library
       if (request.signedTransactions.length < 2) {
         throw new CombineTransactionError(

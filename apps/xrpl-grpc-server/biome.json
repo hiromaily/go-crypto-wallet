@@ -7,12 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": [
-      "src/**/*.ts",
-      "!**/node_modules",
-      "!**/dist",
-      "!**/src/protogen"
-    ]
+    "includes": ["src/**/*.ts", "!**/node_modules", "!**/dist", "!**/src/protogen"]
   },
   "formatter": {
     "enabled": true,
@@ -161,9 +156,7 @@
     }
   },
   "javascript": {
-    "globals": [
-      "Bun"
-    ],
+    "globals": ["Bun"],
     "formatter": {
       "quoteStyle": "single",
       "jsxQuoteStyle": "double",
