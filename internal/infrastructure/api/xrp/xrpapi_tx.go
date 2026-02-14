@@ -1370,7 +1370,7 @@ func (r *XRP) SignTransaction(
 //
 // TODO(task-3.1): Implement native Go signing using Peersyst/xrpl-go library.
 func (*XRP) SignTransactionNative(
-	_ context.Context, _ *dtoxrp.TxInput, _ string,
+	_ context.Context, _ *dtoxrp.TxInput, _ string, _ bool,
 ) (string, string, error) {
 	// Stub implementation - to be completed in task 3.1
 	return "", "", errors.New("SignTransactionNative not yet implemented (task 3.1)")

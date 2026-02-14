@@ -69,6 +69,7 @@ type TransactionSigner interface {
 	//   - ctx: Context for cancellation control (not used for network, purely offline)
 	//   - txInput: Unsigned transaction data with all required fields populated
 	//   - secret: XRP seed/secret in rXXX family seed or hex format
+	//   - isMultiSig: Explicit indicator - true for multi-signature, false for single-signature
 	//
 	// Returns:
 	//   - string: Transaction hash (64-character hex string, unique identifier)
@@ -90,9 +91,9 @@ type TransactionSigner interface {
 	//   - secret must be valid XRP seed format:
 	//     * rXXX family seed format, OR
 	//     * ed25519/secp256k1 hex seed format
-	//   - For multi-signature transactions:
-	//     * txInput.SigningPubKey must be empty string
-	//     * Signers array should be present for multi-sig detection
+	//   - isMultiSig must correctly indicate the signature type
+	//     * true: uses wallet.Multisign() for multi-signature transactions
+	//     * false: uses wallet.Sign() for single-signature transactions
 	//
 	// Postconditions:
 	//   - Returns 64-character hex transaction hash
@@ -117,7 +118,7 @@ type TransactionSigner interface {
 	//       Sequence:           42,
 	//       LastLedgerSequence: 1000000,
 	//   }
-	//   txID, signedBlob, err := signer.SignTransactionNative(ctx, txInput, "sEdTM1uX8pu2do5XvTnutH6HsouMaM2")
+	//   txID, signedBlob, err := signer.SignTransactionNative(ctx, txInput, "sEdTM1uX8pu2do5XvTnutH6HsouMaM2", false)
 	//   if err != nil {
 	//       return fmt.Errorf("failed to sign transaction: %w", err)
 	//   }
@@ -129,14 +130,15 @@ type TransactionSigner interface {
 	//       Amount:             "1000000",
 	//       Fee:                "36",  // (2+1) × 12 for 2-of-3 multisig
 	//       Sequence:           42,
-	//       SigningPubKey:      "",    // Empty for multi-sig
 	//       LastLedgerSequence: 1000000,
 	//   }
-	//   txID, signedBlob, err := signer.SignTransactionNative(ctx, txInput, secret)
+	//   txID, signedBlob, err := signer.SignTransactionNative(ctx, txInput, secret, true)
 	//
 	// Security Notes:
 	//   - secret parameter is NEVER logged
 	//   - Operates entirely offline (air-gapped signing)
 	//   - No network access during signing operation
-	SignTransactionNative(ctx context.Context, txInput *dtoxrp.TxInput, secret string) (string, string, error)
+	SignTransactionNative(
+		ctx context.Context, txInput *dtoxrp.TxInput, secret string, isMultiSig bool,
+	) (string, string, error)
 }

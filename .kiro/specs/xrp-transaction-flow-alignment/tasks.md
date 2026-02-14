@@ -43,7 +43,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ### 3. Native Go Transaction Signing Implementation
 
-- [ ] 3.1 Implement PeersystSigner with offline signing capability
+- [x] 3.1 Implement PeersystSigner with offline signing capability
   - Create `PeersystSigner` struct in `infrastructure/api/xrp/peersyst_signer.go`
   - Implement `SignTransactionNative()` method using Peersyst wallet.Sign()
   - Handle wallet derivation from seed using Peersyst wallet.FromSeed()
@@ -53,7 +53,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Implement deterministic signing (same input + secret = same signature)
   - _Requirements: 3.2, 5.1, 5.2, 5.3_
 
-- [ ] 3.2 Add multi-signature signing support
+- [x] 3.2 Add multi-signature signing support
   - Detect multi-sig transactions (empty SigningPubKey or Signers array present)
   - Implement multi-sig flow using Peersyst wallet.Multisign()
   - Combine multiple signatures into single signed blob
