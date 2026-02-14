@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	binarycodec "github.com/Peersyst/xrpl-go/binary-codec"
 	"github.com/Peersyst/xrpl-go/xrpl/wallet"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
@@ -68,21 +69,7 @@ func (*PeersystSigner) SignTransactionNative(
 	// Step 2: Handle multi-sig signature accumulation
 	// For multi-sig workflows with existing signatures, we need to combine them
 	if isMultiSig && existingSignedBlob != nil {
-		// TODO: Implement signature accumulation for multi-sig transactions
-		// This requires:
-		// 1. Decode existingSignedBlob to extract Signers array
-		// 2. Sign transaction with this wallet to get new signature
-		// 3. Add new signature to Signers array
-		// 4. Re-encode transaction with all signatures
-		//
-		// For now, this is a known limitation documented in the PR review.
-		// Integration tests (task 9.2) should verify end-to-end multi-sig flow.
-		//
-		// Reference: PR review comment about signature accumulation
-		// https://github.com/hiromaily/go-crypto-wallet/pull/560#pullrequestreview-3802102136
-		return "", "", errors.New("multi-signature accumulation not yet implemented: " +
-			"cannot combine with existing signatures. This is a known limitation " +
-			"that needs to be addressed before production use of multi-sig wallets")
+		return combineMultiSigSignatures(txInput, secret, *existingSignedBlob)
 	}
 
 	// Step 3: Derive wallet from seed
@@ -184,4 +171,87 @@ func convertToPeersystTransaction(txInput *dtoxrp.TxInput, isMultiSig bool) map[
 	}
 
 	return tx
+}
+
+// combineMultiSigSignatures combines an existing multi-sig transaction blob with a new signature.
+//
+// This function implements the multi-signature accumulation workflow:
+//  1. Decode the existing signed blob to extract the Signers array
+//  2. Sign the original transaction with the new wallet to get a new signature
+//  3. Decode the newly signed blob to extract the new Signer entry
+//  4. Combine both Signers arrays (existing + new)
+//  5. Create the final transaction with the combined Signers array
+//  6. Re-encode and calculate the transaction hash
+//
+// Parameters:
+//   - txInput: Original unsigned transaction data
+//   - secret: Seed/secret for the new signer
+//   - existingSignedBlob: Hex-encoded signed transaction blob with existing signatures
+//
+// Returns:
+//   - string: Transaction hash (64-character hex string)
+//   - string: Combined signed transaction blob (hex-encoded, ready for submission)
+//   - error: Returns error if decoding, signing, or combination fails
+func combineMultiSigSignatures(
+	txInput *dtoxrp.TxInput,
+	secret string,
+	existingSignedBlob string,
+) (string, string, error) {
+	// Step 1: Decode existing signed blob to extract Signers array
+	existingTx, err := binarycodec.Decode(existingSignedBlob)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to decode existing signed blob: %w", err)
+	}
+
+	// Extract existing Signers array
+	existingSigners, ok := existingTx["Signers"].([]any)
+	if !ok {
+		return "", "", errors.New("existing signed blob does not contain valid Signers array")
+	}
+
+	// Step 2: Sign the original transaction with the new wallet
+	w, err := wallet.FromSeed(secret, "")
+	if err != nil {
+		return "", "", fmt.Errorf("failed to derive wallet from seed: %w", err)
+	}
+
+	// Convert txInput to transaction map for signing
+	tx := convertToPeersystTransaction(txInput, true)
+
+	// Sign with the new wallet to get a new signature
+	// Note: Multisign returns (blob, hash, error) - we need the hash for the final result
+	newSignedBlob, txHash, err := w.Multisign(tx)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to multisign transaction: %w", err)
+	}
+
+	// Step 3: Decode the newly signed blob to extract the new Signer entry
+	newTx, err := binarycodec.Decode(newSignedBlob)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to decode newly signed blob: %w", err)
+	}
+
+	newSigners, ok := newTx["Signers"].([]any)
+	if !ok || len(newSigners) == 0 {
+		return "", "", errors.New("newly signed blob does not contain valid Signers array")
+	}
+
+	// Step 4: Combine Signers arrays (existing + new)
+	// The Signers array should contain all signatures
+	existingSigners = append(existingSigners, newSigners[0])
+
+	// Step 5: Create the final transaction with combined Signers array
+	// Use the original transaction structure but with combined Signers
+	finalTx := convertToPeersystTransaction(txInput, true)
+	finalTx["Signers"] = existingSigners
+
+	// Step 6: Re-encode the combined transaction
+	combinedBlob, err := binarycodec.Encode(finalTx)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to encode combined transaction: %w", err)
+	}
+
+	// Return the transaction hash from the new signature (same for all signers of the same tx)
+	// and the combined blob with all signatures
+	return txHash, combinedBlob, nil
 }

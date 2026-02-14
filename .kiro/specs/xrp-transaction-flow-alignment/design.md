@@ -417,35 +417,50 @@ func (s *PeersystSigner) SignTransactionNative(
     ctx context.Context,
     txInput *dtoxrp.TxInput,
     secret string,
+    isMultiSig bool,
+    existingSignedBlob *string,
 ) (string, string, error) {
-    // 1. Derive wallet from secret using Peersyst wallet.FromSeed()
-    // 2. Convert dtoxrp.TxInput to Peersyst transaction struct
-    // 3. Call wallet.Sign(transaction) for single-sig OR wallet.Multisign(transaction) for multi-sig
-    // 4. Return transaction hash and signed blob (hex-encoded)
+    // 1. Handle multi-sig accumulation if existingSignedBlob provided
+    //    - Decode existing blob to extract Signers array
+    //    - Sign transaction to get new signature
+    //    - Combine Signers arrays and re-encode
+    // 2. Otherwise: Derive wallet from secret using Peersyst wallet.FromSeed()
+    // 3. Convert dtoxrp.TxInput to Peersyst transaction struct
+    // 4. Call wallet.Sign(transaction) for single-sig OR wallet.Multisign(transaction) for multi-sig
+    // 5. Return transaction hash and signed blob (hex-encoded)
 }
 ```
 
 **Preconditions**:
 - `txInput` must have all required fields populated (Account, Destination, Amount, Fee, Sequence, LastLedgerSequence)
 - `secret` must be valid XRP seed format (rXXX family seed or ed25519/secp256k1 hex seed)
+- `isMultiSig` must correctly indicate signature type (true for multi-sig, false for single-sig)
+- `existingSignedBlob` must be nil for first signature, or valid hex-encoded blob for subsequent signatures
 - For multi-sig: `txInput.SigningPubKey` must be empty string
 
 **Postconditions**:
 - Returns 64-character hex transaction hash (unique identifier)
 - Returns hex-encoded signed transaction blob ready for submission
-- Signed blob includes signature in `TxnSignature` field (or `Signers` array for multi-sig)
+- Signed blob includes signature in `TxnSignature` field (single-sig) or `Signers` array (multi-sig)
+- If existingSignedBlob provided, new signature is ADDED to existing signatures (accumulation)
 
 **Invariants**:
 - No network calls during signing (offline operation)
 - Signing deterministic (same input + secret = same signature)
 
 **Implementation Notes**
-- **Integration**: Add `github.com/Peersyst/xrpl-go` to go.mod; import wallet package
-- **Conversion**: Map `dtoxrp.TxInput` fields to Peersyst `transactions.Payment` struct (or appropriate transaction type)
-- **Multi-sig Detection**: If `txInput.Signers` array present, use `wallet.Multisign`; else `wallet.Sign`
+- **Integration**: Add `github.com/Peersyst/xrpl-go` to go.mod; import wallet and binary-codec packages
+- **Conversion**: Map `dtoxrp.TxInput` fields to Peersyst transaction map format
+- **Multi-sig Signing**: Use `wallet.Multisign()` for multi-sig, `wallet.Sign()` for single-sig
+- **Signature Accumulation** (implemented):
+  - Uses `binary-codec.Decode()` to extract existing Signers array from blob
+  - Creates new signature with `wallet.Multisign()`
+  - Combines Signers arrays (existing + new)
+  - Re-encodes with `binary-codec.Encode()` to produce final combined blob
+  - Returns transaction hash from new signature (same for all signers of same tx)
 - **Error Handling**: Wrap Peersyst errors with context (e.g., "failed to derive wallet from seed: %w")
 - **Testing**: Verify signed blob compatibility with xrpscan/xrpl-go submission (integration test)
-- **Risks**: Peersyst transaction struct may differ from xrpscan; require type conversion and validation
+- **Security**: Transaction hash verification ensures signature integrity; offline operation prevents network attacks
 
 ### Application / Ports
 
@@ -698,7 +713,7 @@ type SignTransactionOutput struct {
 - **Completion Logic**: Set `isComplete = (signatureCount >= requiredSignatures)` after signing
 - **Error Handling**: Wrap signing errors with transaction UUID context
 - **Security**: Never log `secret` parameter; log only success/failure with transaction UUID
-- **Risks**: Multi-signature blob combination complexity (verify Peersyst handles correctly)
+- **Multi-sig Accumulation**: Implemented using binary-codec for decode/encode and signature combining (verified in unit tests)
 
 #### SendTransactionUseCase (Refactored)
 
