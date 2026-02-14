@@ -24,15 +24,9 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
-// xrpCreateTxClient defines the interface for XRP operations needed by createTransactionUseCase.
-// This follows the Interface Segregation Principle - depend only on what you need.
-type xrpCreateTxClient interface {
-	apixrp.BalanceChecker
-	apixrp.TransactionPreparer
-}
-
 type createTransactionUseCase struct {
-	xrper           xrpCreateTxClient
+	accountInfo     apixrp.AccountInfoProvider
+	txPreparer      apixrp.TransactionPreparer
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        repowatch.AddressRepositorier
@@ -45,10 +39,19 @@ type createTransactionUseCase struct {
 }
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase.
-// The xrper parameter accepts any type that implements xrpCreateTxClient (BalanceChecker + TransactionPreparer).
-// Typically, apixrp.XRPer is passed which implements all required methods.
+//
+// This constructor follows the Interface Segregation Principle by depending on focused interfaces
+// (AccountInfoProvider, TransactionPreparer) instead of the monolithic XRPer interface.
+//
+// Parameters:
+//   - accountInfo: Provides account balance and information queries
+//   - txPreparer: Prepares unsigned raw transactions
+//
+// Note: Typically both interfaces are implemented by the same XRPer concrete type,
+// but accepting them separately allows for better testability and clearer dependencies.
 func NewCreateTransactionUseCase(
-	xrper xrpCreateTxClient,
+	accountInfo apixrp.AccountInfoProvider,
+	txPreparer apixrp.TransactionPreparer,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo repowatch.AddressRepositorier,
@@ -60,7 +63,8 @@ func NewCreateTransactionUseCase(
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {
 	return &createTransactionUseCase{
-		xrper:           xrper,
+		accountInfo:     accountInfo,
+		txPreparer:      txPreparer,
 		dbConn:          dbConn,
 		uuidHandler:     uuidHandler,
 		addrRepo:        addrRepo,
@@ -233,17 +237,20 @@ func (u *createTransactionUseCase) createTransferTx(
 	// check sender's balance
 	senderAddr, err := u.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
+		return "", fmt.Errorf("failed to get sender address for account %s: %w", sender.String(), err)
 	}
-	senderBalance, err := u.xrper.GetBalance(ctx, senderAddr.WalletAddress)
+	senderBalance, err := u.accountInfo.GetBalance(ctx, senderAddr.WalletAddress)
 	if err != nil {
-		return "", fmt.Errorf("fail to call xrper.GetBalance(): %w", err)
+		return "", fmt.Errorf("failed to get balance for sender address %s: %w", senderAddr.WalletAddress, err)
 	}
 	if senderBalance <= 20 {
-		return "", errors.New("sender balance is insufficient to send")
+		return "", fmt.Errorf(
+			"sender balance %.2f XRP is insufficient (minimum 20 XRP required for account reserve)",
+			senderBalance,
+		)
 	}
 	if floatValue != 0 && senderBalance <= floatValue {
-		return "", errors.New("sender balance is insufficient to send")
+		return "", fmt.Errorf("sender balance %.2f XRP is insufficient to send %.2f XRP", senderBalance, floatValue)
 	}
 
 	logger.Debug("amount",
@@ -261,7 +268,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
-	txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
+	txJSON, rawTxString, err := u.txPreparer.CreateRawTransaction(
 		ctx, senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
 		return "", fmt.Errorf(
@@ -334,7 +341,7 @@ func (u *createTransactionUseCase) getUserAmounts(
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		var balance float64
-		balance, err = u.xrper.GetBalance(ctx, addr.WalletAddress)
+		balance, err = u.accountInfo.GetBalance(ctx, addr.WalletAddress)
 		if err != nil {
 			logger.Warn("fail to call xrper.GetBalance()",
 				"address", addr.WalletAddress,
@@ -379,7 +386,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		}
 		var txJSON *dtoxrp.TxInput
 		var rawTxString string
-		txJSON, rawTxString, err = u.xrper.CreateRawTransaction(
+		txJSON, rawTxString, err = u.txPreparer.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
 			logger.Warn("fail to call xrper.CreateRawTransaction()", "error", err)
@@ -485,13 +492,16 @@ func (u *createTransactionUseCase) validateAmount(
 	senderAddr *domainAddress.Address,
 	totalAmount float64,
 ) error {
-	senderBalance, err := u.xrper.GetBalance(ctx, senderAddr.WalletAddress)
+	senderBalance, err := u.accountInfo.GetBalance(ctx, senderAddr.WalletAddress)
 	if err != nil {
-		return fmt.Errorf("fail to call xrper.GetBalance(): %w", err)
+		return fmt.Errorf("failed to get balance for address %s: %w", senderAddr.WalletAddress, err)
 	}
 
 	if senderBalance <= totalAmount {
-		return errors.New("sender balance is insufficient to send")
+		return fmt.Errorf(
+			"insufficient balance: sender has %.2f XRP, but %.2f XRP required",
+			senderBalance, totalAmount,
+		)
 	}
 	return nil
 }
@@ -514,7 +524,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
+		txJSON, rawTxString, err := u.txPreparer.CreateRawTransaction(
 			ctx, senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
 		if err != nil {
 			// TODO: which is better to return err or continue?

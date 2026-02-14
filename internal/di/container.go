@@ -1403,8 +1403,10 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 // XRP Watch Use Cases
 
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
+	xrpClient := c.newXRP() // XRP client implements both AccountInfoProvider and TransactionPreparer
 	return watchusecasexrp.NewCreateTransactionUseCase(
-		c.newXRP(),
+		xrpClient, // AccountInfoProvider
+		xrpClient, // TransactionPreparer
 		c.pkgContainer.NewDatabaseClient(),
 		c.pkgContainer.NewUUIDHandler(),
 		c.newAddressRepo(),

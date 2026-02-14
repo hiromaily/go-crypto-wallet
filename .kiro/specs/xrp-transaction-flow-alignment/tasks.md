@@ -62,7 +62,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ### 4. Create Transaction Use Case Refactoring
 
-- [ ] 4.1 Refactor CreateTransactionUseCase for JSON output with error handling
+- [x] 4.1 Refactor CreateTransactionUseCase for JSON output with error handling
   - Replace dependency from full `XRPer` interface to `AccountInfoProvider`
   - Generate JSON transaction file using `WriteJSONTransactionFile()`
   - Initialize transactions with signatureCount = 0 and signedBlob = null
