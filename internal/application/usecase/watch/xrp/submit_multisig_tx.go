@@ -11,22 +11,16 @@ import (
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 )
 
-// xrpSubmitMultisigClient defines the interface for XRP operations needed by submitMultisigTxUseCase.
-// This follows the Interface Segregation Principle - depend only on what you need.
-type xrpSubmitMultisigClient interface {
-	apixrp.TransactionSubmitter
-}
-
 type submitMultisigTxUseCase struct {
-	xrper               xrpSubmitMultisigClient
+	xrper               apixrp.TransactionSubmitter
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier
 }
 
 // NewSubmitMultisigTxUseCase creates a new SubmitMultisigTxUseCase.
-// The xrper parameter accepts any type that implements xrpSubmitMultisigClient (TransactionSubmitter).
+// The xrper parameter accepts any type that implements TransactionSubmitter.
 // Typically, apixrp.XRPer is passed which implements all required methods.
 func NewSubmitMultisigTxUseCase(
-	xrper xrpSubmitMultisigClient,
+	xrper apixrp.TransactionSubmitter,
 	pendingMultisigRepo repowatch.XRPPendingMultisigRepositorier,
 ) watchusecase.SubmitMultisigTxUseCase {
 	return &submitMultisigTxUseCase{

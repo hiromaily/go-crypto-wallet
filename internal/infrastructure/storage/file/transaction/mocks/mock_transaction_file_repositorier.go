@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	xrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	mock "github.com/stretchr/testify/mock"
@@ -694,6 +695,129 @@ func (_c *MockTransactionFileRepositorier_WriteHexFile_Call) Return(s string, er
 }
 
 func (_c *MockTransactionFileRepositorier_WriteHexFile_Call) RunAndReturn(run func(path string, hexTx string) (string, error)) *MockTransactionFileRepositorier_WriteHexFile_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ReadXRPJSONFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) ReadXRPJSONFile(path string) (*xrp.XRPTransactionFile, error) {
+	ret := _mock.Called(path)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReadXRPJSONFile")
+	}
+
+	var r0 *xrp.XRPTransactionFile
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (*xrp.XRPTransactionFile, error)); ok {
+		return returnFunc(path)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) *xrp.XRPTransactionFile); ok {
+		r0 = returnFunc(path)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*xrp.XRPTransactionFile)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(path)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_ReadXRPJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReadXRPJSONFile'
+type MockTransactionFileRepositorier_ReadXRPJSONFile_Call struct {
+	*mock.Call
+}
+
+// ReadXRPJSONFile is a helper method to define mock.On call
+//   - path string
+func (_e *MockTransactionFileRepositorier_Expecter) ReadXRPJSONFile(path interface{}) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	return &MockTransactionFileRepositorier_ReadXRPJSONFile_Call{Call: _e.mock.On("ReadXRPJSONFile", path)}
+}
+
+func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) Run(run func(path string)) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(arg0)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) Return(txFile *xrp.XRPTransactionFile, err error) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	_c.Call.Return(txFile, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) RunAndReturn(run func(path string) (*xrp.XRPTransactionFile, error)) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WriteXRPJSONFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) WriteXRPJSONFile(path string, data *xrp.XRPTransactionFile) (string, error) {
+	ret := _mock.Called(path, data)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WriteXRPJSONFile")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string, *xrp.XRPTransactionFile) (string, error)); ok {
+		return returnFunc(path, data)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string, *xrp.XRPTransactionFile) string); ok {
+		r0 = returnFunc(path, data)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(string, *xrp.XRPTransactionFile) error); ok {
+		r1 = returnFunc(path, data)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_WriteXRPJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WriteXRPJSONFile'
+type MockTransactionFileRepositorier_WriteXRPJSONFile_Call struct {
+	*mock.Call
+}
+
+// WriteXRPJSONFile is a helper method to define mock.On call
+//   - path string
+//   - data *xrp.XRPTransactionFile
+func (_e *MockTransactionFileRepositorier_Expecter) WriteXRPJSONFile(path interface{}, data interface{}) *MockTransactionFileRepositorier_WriteXRPJSONFile_Call {
+	return &MockTransactionFileRepositorier_WriteXRPJSONFile_Call{Call: _e.mock.On("WriteXRPJSONFile", path, data)}
+}
+
+func (_c *MockTransactionFileRepositorier_WriteXRPJSONFile_Call) Run(run func(path string, data *xrp.XRPTransactionFile)) *MockTransactionFileRepositorier_WriteXRPJSONFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 *xrp.XRPTransactionFile
+		if args[1] != nil {
+			arg1 = args[1].(*xrp.XRPTransactionFile)
+		}
+		run(arg0, arg1)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteXRPJSONFile_Call) Return(s string, err error) *MockTransactionFileRepositorier_WriteXRPJSONFile_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteXRPJSONFile_Call) RunAndReturn(run func(path string, data *xrp.XRPTransactionFile) (string, error)) *MockTransactionFileRepositorier_WriteXRPJSONFile_Call {
 	_c.Call.Return(run)
 	return _c
 }
