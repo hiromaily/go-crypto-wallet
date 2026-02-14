@@ -24,15 +24,9 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
-// xrpCreateTxClient defines the interface for XRP operations needed by createTransactionUseCase.
-// This follows the Interface Segregation Principle - depend only on what you need.
-type xrpCreateTxClient interface {
-	apixrp.BalanceChecker
-	apixrp.TransactionPreparer
-}
-
 type createTransactionUseCase struct {
-	xrper           xrpCreateTxClient
+	accountInfo     apixrp.AccountInfoProvider
+	txPreparer      apixrp.TransactionPreparer
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        repowatch.AddressRepositorier
@@ -45,10 +39,19 @@ type createTransactionUseCase struct {
 }
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase.
-// The xrper parameter accepts any type that implements xrpCreateTxClient (BalanceChecker + TransactionPreparer).
-// Typically, apixrp.XRPer is passed which implements all required methods.
+//
+// This constructor follows the Interface Segregation Principle by depending on focused interfaces
+// (AccountInfoProvider, TransactionPreparer) instead of the monolithic XRPer interface.
+//
+// Parameters:
+//   - accountInfo: Provides account balance and information queries
+//   - txPreparer: Prepares unsigned raw transactions
+//
+// Note: Typically both interfaces are implemented by the same XRPer concrete type,
+// but accepting them separately allows for better testability and clearer dependencies.
 func NewCreateTransactionUseCase(
-	xrper xrpCreateTxClient,
+	accountInfo apixrp.AccountInfoProvider,
+	txPreparer apixrp.TransactionPreparer,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo repowatch.AddressRepositorier,
@@ -60,7 +63,8 @@ func NewCreateTransactionUseCase(
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {
 	return &createTransactionUseCase{
-		xrper:           xrper,
+		accountInfo:     accountInfo,
+		txPreparer:      txPreparer,
 		dbConn:          dbConn,
 		uuidHandler:     uuidHandler,
 		addrRepo:        addrRepo,
@@ -180,9 +184,9 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 	}
 
 	// check sender's total balance
-	senderAddr, err := u.addrRepo.GetOneUnAllocated(sender)
+	senderAddr, err := u.getAndValidateAddress(sender, "sender")
 	if err != nil {
-		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(): %w", err)
+		return "", err
 	}
 	if err = u.validateAmount(ctx, senderAddr, totalAmount); err != nil {
 		return "", nil
@@ -215,6 +219,32 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 // FIXME: for now, receiver account covers fee, but this should be flexible
 // - sender pays fee
 // - any internal account should have only one address in XRP because no utxo
+// validateTransferAccounts validates that sender and receiver accounts are valid for transfer
+func (*createTransactionUseCase) validateTransferAccounts(sender, receiver domainAccount.AccountType) error {
+	if receiver == domainAccount.AccountTypeClient || receiver == domainAccount.AccountTypeAuthorization {
+		return errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
+	}
+	if sender == receiver {
+		return errors.New("invalid account. sender and receiver is same")
+	}
+	return nil
+}
+
+// getAndValidateAddress retrieves an unallocated address and validates it's not nil
+func (u *createTransactionUseCase) getAndValidateAddress(
+	accountType domainAccount.AccountType,
+	role string,
+) (*domainAddress.Address, error) {
+	addr, err := u.addrRepo.GetOneUnAllocated(accountType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get %s address for account %s: %w", role, accountType.String(), err)
+	}
+	if addr == nil {
+		return nil, fmt.Errorf("no unallocated address found for %s account %s", role, accountType.String())
+	}
+	return addr, nil
+}
+
 func (u *createTransactionUseCase) createTransferTx(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
@@ -223,27 +253,28 @@ func (u *createTransactionUseCase) createTransferTx(
 	targetAction := domainTx.ActionTypeTransfer
 
 	// validation account
-	if receiver == domainAccount.AccountTypeClient || receiver == domainAccount.AccountTypeAuthorization {
-		return "", errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
-	}
-	if sender == receiver {
-		return "", errors.New("invalid account. sender and receiver is same")
+	if err := u.validateTransferAccounts(sender, receiver); err != nil {
+		return "", err
 	}
 
-	// check sender's balance
-	senderAddr, err := u.addrRepo.GetOneUnAllocated(sender)
+	// get sender address and check balance
+	senderAddr, err := u.getAndValidateAddress(sender, "sender")
 	if err != nil {
-		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
+		return "", err
 	}
-	senderBalance, err := u.xrper.GetBalance(ctx, senderAddr.WalletAddress)
+
+	senderBalance, err := u.accountInfo.GetBalance(ctx, senderAddr.WalletAddress)
 	if err != nil {
-		return "", fmt.Errorf("fail to call xrper.GetBalance(): %w", err)
+		return "", fmt.Errorf("failed to get balance for sender address %s: %w", senderAddr.WalletAddress, err)
 	}
 	if senderBalance <= 20 {
-		return "", errors.New("sender balance is insufficient to send")
+		return "", fmt.Errorf(
+			"sender balance %.2f XRP is insufficient (minimum 20 XRP required for account reserve)",
+			senderBalance,
+		)
 	}
 	if floatValue != 0 && senderBalance <= floatValue {
-		return "", errors.New("sender balance is insufficient to send")
+		return "", fmt.Errorf("sender balance %.2f XRP is insufficient to send %.2f XRP", senderBalance, floatValue)
 	}
 
 	logger.Debug("amount",
@@ -252,20 +283,20 @@ func (u *createTransactionUseCase) createTransferTx(
 	)
 
 	// get receiver address
-	receiverAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
+	receiverAddr, err := u.getAndValidateAddress(receiver, "receiver")
 	if err != nil {
-		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(receiver): %w", err)
+		return "", err
 	}
 
 	// call CreateRawTransaction
 	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
-	txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
+	txJSON, rawTxString, err := u.txPreparer.CreateRawTransaction(
 		ctx, senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
 		return "", fmt.Errorf(
-			"fail to call xrper.CreateRawTransaction(), sender address: %s: %w",
+			"failed to call txPreparer.CreateRawTransaction() for sender address %s: %w",
 			senderAddr.WalletAddress, err)
 	}
 	logger.Debug("txJSON", "txJSON", txJSON)
@@ -334,9 +365,9 @@ func (u *createTransactionUseCase) getUserAmounts(
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		var balance float64
-		balance, err = u.xrper.GetBalance(ctx, addr.WalletAddress)
+		balance, err = u.accountInfo.GetBalance(ctx, addr.WalletAddress)
 		if err != nil {
-			logger.Warn("fail to call xrper.GetBalance()",
+			logger.Warn("failed to call accountInfo.GetBalance()",
 				"address", addr.WalletAddress,
 			)
 		} else {
@@ -357,11 +388,9 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	userAmounts []apixrpimpl.UserAmount,
 ) ([]string, []*domainXrp.XRPDetailTx, error) {
 	// get address for deposit account
-	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
+	depositAddr, err := u.getAndValidateAddress(receiver, "deposit")
 	if err != nil {
-		return nil, nil, fmt.Errorf(
-			"fail to call addrRepo.GetOneUnAllocated(): %w", err,
-		)
+		return nil, nil, err
 	}
 
 	// create raw transaction for each address
@@ -379,10 +408,10 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		}
 		var txJSON *dtoxrp.TxInput
 		var rawTxString string
-		txJSON, rawTxString, err = u.xrper.CreateRawTransaction(
+		txJSON, rawTxString, err = u.txPreparer.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
-			logger.Warn("fail to call xrper.CreateRawTransaction()", "error", err)
+			logger.Warn("failed to call txPreparer.CreateRawTransaction()", "error", err)
 			continue
 		}
 		logger.Debug("txJSON", "txJSON", txJSON)
@@ -485,13 +514,16 @@ func (u *createTransactionUseCase) validateAmount(
 	senderAddr *domainAddress.Address,
 	totalAmount float64,
 ) error {
-	senderBalance, err := u.xrper.GetBalance(ctx, senderAddr.WalletAddress)
+	senderBalance, err := u.accountInfo.GetBalance(ctx, senderAddr.WalletAddress)
 	if err != nil {
-		return fmt.Errorf("fail to call xrper.GetBalance(): %w", err)
+		return fmt.Errorf("failed to get balance for address %s: %w", senderAddr.WalletAddress, err)
 	}
 
 	if senderBalance <= totalAmount {
-		return errors.New("sender balance is insufficient to send")
+		return fmt.Errorf(
+			"insufficient balance: sender has %.2f XRP, but %.2f XRP required",
+			senderBalance, totalAmount,
+		)
 	}
 	return nil
 }
@@ -514,12 +546,12 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		txJSON, rawTxString, err := u.xrper.CreateRawTransaction(
+		txJSON, rawTxString, err := u.txPreparer.CreateRawTransaction(
 			ctx, senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
 		if err != nil {
 			// TODO: which is better to return err or continue?
 			// return error in ethereum logic
-			logger.Warn("fail to call xrper.CreateRawTransaction()", "error", err)
+			logger.Warn("failed to call txPreparer.CreateRawTransaction()", "error", err)
 			continue
 		}
 		logger.Debug("txJSON", "txJSON", txJSON)
