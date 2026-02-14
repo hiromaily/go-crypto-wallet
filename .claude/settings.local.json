@@ -45,7 +45,8 @@
       "Bash(bun:*)",
       "Bash(env:*)",
       "Bash(test:*)",
-      "Bash(.kiro/specs/xrp-transaction-flow-alignment/spec.json:*)"
+      "Bash(.kiro/specs/*/spec.json:*)",
+      "Bash(mockery)"
     ]
   },
   "hooks": {

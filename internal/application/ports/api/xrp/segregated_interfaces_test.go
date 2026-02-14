@@ -55,14 +55,26 @@ func TestTransactionSignerInterface(t *testing.T) {
 	// Verify SignTransaction method (legacy, for backward compatibility)
 	signLegacyMethod, found := interfaceType.MethodByName("SignTransaction")
 	assert.True(t, found, "SignTransaction method should exist for backward compatibility")
-	assert.Equal(t, 3, signLegacyMethod.Type.NumIn(), "SignTransaction should have 3 inputs (ctx, txJSON, secret)")
-	assert.Equal(t, 3, signLegacyMethod.Type.NumOut(), "SignTransaction should have 3 outputs (txID, signedBlob, error)")
+	assert.Equal(
+		t, 3, signLegacyMethod.Type.NumIn(),
+		"SignTransaction should have 3 inputs (ctx, txJSON, secret)",
+	)
+	assert.Equal(
+		t, 3, signLegacyMethod.Type.NumOut(),
+		"SignTransaction should have 3 outputs (txID, signedBlob, error)",
+	)
 
 	// Verify SignTransactionNative method (new, for native Go signing)
 	signMethod, found := interfaceType.MethodByName("SignTransactionNative")
 	assert.True(t, found, "SignTransactionNative method should exist for native Go signing")
-	assert.Equal(t, 3, signMethod.Type.NumIn(), "SignTransactionNative should have 3 inputs (ctx, txInput, secret)")
-	assert.Equal(t, 3, signMethod.Type.NumOut(), "SignTransactionNative should have 3 outputs (txID, signedBlob, error)")
+	assert.Equal(
+		t, 3, signMethod.Type.NumIn(),
+		"SignTransactionNative should have 3 inputs (ctx, txInput, secret)",
+	)
+	assert.Equal(
+		t, 3, signMethod.Type.NumOut(),
+		"SignTransactionNative should have 3 outputs (txID, signedBlob, error)",
+	)
 }
 
 // TestTransactionSubmitterInterface verifies that TransactionSubmitter interface
@@ -82,8 +94,14 @@ func TestTransactionSubmitterInterface(t *testing.T) {
 	// Verify SubmitTransaction method signature
 	submitMethod, found := interfaceType.MethodByName("SubmitTransaction")
 	assert.True(t, found, "SubmitTransaction method should exist")
-	assert.Equal(t, 2, submitMethod.Type.NumIn(), "SubmitTransaction should have 2 inputs (ctx, signedTx)")
-	assert.Equal(t, 3, submitMethod.Type.NumOut(), "SubmitTransaction should have 3 outputs (SentTx, ledgerVersion, error)")
+	assert.Equal(
+		t, 2, submitMethod.Type.NumIn(),
+		"SubmitTransaction should have 2 inputs (ctx, signedTx)",
+	)
+	assert.Equal(
+		t, 3, submitMethod.Type.NumOut(),
+		"SubmitTransaction should have 3 outputs (SentTx, ledgerVersion, error)",
+	)
 
 	// Verify WaitValidation method signature
 	waitMethod, found := interfaceType.MethodByName("WaitValidation")
@@ -164,35 +182,56 @@ func TestInterfacesAreInSeparateFiles(t *testing.T) {
 
 type mockAccountInfoProvider struct{}
 
-func (m *mockAccountInfoProvider) GetAccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseGetAccountInfo, error) {
+func (*mockAccountInfoProvider) GetAccountInfo(
+	ctx context.Context,
+	address string,
+) (*dtoxrp.ResponseGetAccountInfo, error) {
 	return nil, nil
 }
 
-func (m *mockAccountInfoProvider) GetBalance(ctx context.Context, addr string) (float64, error) {
+func (*mockAccountInfoProvider) GetBalance(ctx context.Context, addr string) (float64, error) {
 	return 0, nil
 }
 
 type mockTransactionSigner struct{}
 
-func (m *mockTransactionSigner) SignTransaction(ctx context.Context, txJSON *dtoxrp.TxInput, secret string) (string, string, error) {
+func (*mockTransactionSigner) SignTransaction(
+	ctx context.Context,
+	txJSON *dtoxrp.TxInput,
+	secret string,
+) (string, string, error) {
 	return "", "", nil
 }
 
-func (m *mockTransactionSigner) SignTransactionNative(ctx context.Context, txInput *dtoxrp.TxInput, secret string) (string, string, error) {
+func (*mockTransactionSigner) SignTransactionNative(
+	ctx context.Context,
+	txInput *dtoxrp.TxInput,
+	secret string,
+) (string, string, error) {
 	return "", "", nil
 }
 
 type mockTransactionSubmitter struct{}
 
-func (m *mockTransactionSubmitter) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error) {
+func (*mockTransactionSubmitter) SubmitTransaction(
+	ctx context.Context,
+	signedTx string,
+) (*dtoxrp.SentTx, uint64, error) {
 	return nil, 0, nil
 }
 
-func (m *mockTransactionSubmitter) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error) {
+func (*mockTransactionSubmitter) WaitValidation(
+	ctx context.Context,
+	targetLedgerVersion uint64,
+) (uint64, error) {
 	return 0, nil
 }
 
-func (m *mockTransactionSubmitter) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoxrp.TxInfo, error) {
+func (*mockTransactionSubmitter) GetTransaction(
+	ctx context.Context,
+	txID string,
+	targetLedgerVersion uint64,
+) (*dtoxrp.TxInfo, error) {
 	return nil, nil
 }
 

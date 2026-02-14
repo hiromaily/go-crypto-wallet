@@ -27,6 +27,7 @@ func TestAddMuSig2Commands(t *testing.T) {
 
 	if musig2Cmd == nil {
 		t.Fatal("musig2 command is nil")
+		return
 	}
 
 	if musig2Cmd.Use != "musig2" {
