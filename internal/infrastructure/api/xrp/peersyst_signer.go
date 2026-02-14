@@ -32,7 +32,7 @@ func NewPeersystSigner() *PeersystSigner {
 //  1. Validate transaction input (required fields present)
 //  2. Derive wallet from seed using Peersyst wallet.FromSeed()
 //  3. Convert dtoxrp.TxInput to Peersyst transaction format
-//  4. Sign transaction (single-sig or multi-sig based on SigningPubKey field)
+//  4. Sign transaction (single-sig or multi-sig based on isMultiSig parameter)
 //  5. Encode signed transaction to hex blob
 //  6. Calculate and return transaction hash
 //
@@ -40,6 +40,7 @@ func NewPeersystSigner() *PeersystSigner {
 //   - ctx: Context for cancellation control (not used for network, purely offline)
 //   - txInput: Unsigned transaction data with all required fields populated
 //   - secret: XRP seed/secret in rXXX family seed or hex format
+//   - isMultiSig: true for multi-signature transactions, false for single-signature
 //
 // Returns:
 //   - string: Transaction hash (64-character hex string)
@@ -49,6 +50,7 @@ func (*PeersystSigner) SignTransactionNative(
 	ctx context.Context,
 	txInput *dtoxrp.TxInput,
 	secret string,
+	isMultiSig bool,
 ) (string, string, error) {
 	// Step 1: Validate required fields
 	if err := validateTxInput(txInput); err != nil {
@@ -62,19 +64,19 @@ func (*PeersystSigner) SignTransactionNative(
 	}
 
 	// Step 3: Convert dtoxrp.TxInput to Peersyst transaction format (map)
-	tx, needsMultiSig := convertToPeersystTransaction(txInput)
+	tx := convertToPeersystTransaction(txInput, isMultiSig)
 
-	// Step 4: Sign transaction (use method indicated by conversion)
+	// Step 4: Sign transaction (use method based on isMultiSig parameter)
 	var txHash, signedBlob string
-	if needsMultiSig {
-		// Multi-signature: transaction has SigningPubKey set to empty string
+	if isMultiSig {
+		// Multi-signature: use wallet.Multisign()
 		// Peersyst returns: (signedBlob, txHash, error)
 		signedBlob, txHash, err = w.Multisign(tx)
 		if err != nil {
 			return "", "", fmt.Errorf("failed to multisign transaction: %w", err)
 		}
 	} else {
-		// Single signature: normal signing
+		// Single signature: use wallet.Sign()
 		// Peersyst returns: (signedBlob, txHash, error)
 		signedBlob, txHash, err = w.Sign(tx)
 		if err != nil {
@@ -121,15 +123,18 @@ func validateTxInput(txInput *dtoxrp.TxInput) error {
 }
 
 // convertToPeersystTransaction converts a dtoxrp.TxInput to a Peersyst transaction map format.
-// Returns the transaction map and a boolean indicating if multi-signature signing is needed.
 //
-// Multi-sig detection uses fee-based heuristic (see isMultiSigTransaction):
+// Multi-sig handling:
 //   - Single-sig: Don't add SigningPubKey to map (wallet.Sign adds it automatically)
 //   - Multi-sig: Add SigningPubKey = "" to map (required for wallet.Multisign)
-func convertToPeersystTransaction(txInput *dtoxrp.TxInput) (map[string]any, bool) {
+//
+// Parameters:
+//   - txInput: Transaction input data
+//   - isMultiSig: Explicit indicator from caller - true for multi-sig, false for single-sig
+func convertToPeersystTransaction(txInput *dtoxrp.TxInput, isMultiSig bool) map[string]any {
 	// Build base transaction map
 	tx := map[string]any{
-		"TransactionType":    "Payment",
+		"TransactionType":    txInput.TransactionType,
 		"Account":            txInput.Account,
 		"Destination":        txInput.Destination,
 		"Amount":             txInput.Amount,
@@ -138,12 +143,8 @@ func convertToPeersystTransaction(txInput *dtoxrp.TxInput) (map[string]any, bool
 		"LastLedgerSequence": txInput.LastLedgerSequence,
 	}
 
-	// Detect if this is a multi-signature transaction
-	// For multi-sig, we need to explicitly set SigningPubKey to empty string
-	needsMultiSig := isMultiSigTransaction(txInput)
-
-	if needsMultiSig {
-		// Multi-signature: explicitly set empty SigningPubKey
+	// For multi-sig, explicitly set empty SigningPubKey (XRP Ledger requirement)
+	if isMultiSig {
 		tx["SigningPubKey"] = ""
 	}
 	// For single-sig: don't include SigningPubKey (wallet.Sign will add it)
@@ -153,39 +154,5 @@ func convertToPeersystTransaction(txInput *dtoxrp.TxInput) (map[string]any, bool
 		tx["Flags"] = txInput.Flags
 	}
 
-	return tx, needsMultiSig
-}
-
-// isMultiSigTransaction determines if a transaction should use multi-signature signing.
-// Since we can't distinguish between "not set" and "set to empty" for SigningPubKey,
-// we use other transaction characteristics as indicators.
-func isMultiSigTransaction(txInput *dtoxrp.TxInput) bool {
-	// Heuristic: Multi-sig transactions typically have:
-	// 1. Higher fees: (N+1) × base fee where base fee is typically 10-12 drops
-	// 2. SigningPubKey that should be empty
-	//
-	// We'll use fee as the primary indicator:
-	// - Single-sig: fee <= 20 drops (base fee + some buffer)
-	// - Multi-sig: fee > 20 drops
-	//
-	// This is a practical heuristic that works for typical cases.
-	// Base fee is usually 10-12 drops, so 20 is a safe threshold.
-
-	// Parse fee to check if it's multi-sig level
-	fee := parseFeeDrops(txInput.Fee)
-
-	// If fee is greater than 20 drops, likely multi-sig
-	// This catches (2+1)×12=36, (3+1)×12=48, etc.
-	return fee > 20
-}
-
-// parseFeeDrops parses the fee string to an integer (drops).
-// Returns 0 if parsing fails.
-func parseFeeDrops(feeStr string) int {
-	var fee int
-	_, err := fmt.Sscanf(feeStr, "%d", &fee)
-	if err != nil {
-		return 0
-	}
-	return fee
+	return tx
 }

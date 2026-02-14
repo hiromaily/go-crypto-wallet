@@ -26,14 +26,14 @@ func TestPeersystSigner_MultiSignature_EmptySigningPubKey(t *testing.T) {
 		Account:            "rG31cLyErnqeVj2eomEjBZtq7PYaupGYzL",
 		Destination:        "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY",
 		Amount:             "1000000",
-		Fee:                "36", // Multi-sig fee: (2+1) × 12
+		Fee:                "36",
 		Sequence:           1,
-		SigningPubKey:      "", // Empty indicates multi-sig
+		SigningPubKey:      "", // Empty string indicates multi-sig
 		LastLedgerSequence: 10000000,
 	}
 
 	// Execute
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed)
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, true)
 
 	// Assert - multi-sig signing should work
 	require.NoError(t, err, "multi-sig signing should succeed")
@@ -54,28 +54,36 @@ func TestPeersystSigner_MultiSignature_VsSingleSignature(t *testing.T) {
 	ctx := context.Background()
 	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
 
-	// Create identical transactions, one single-sig and one multi-sig
-	baseTx := dtoxrp.TxInput{
+	// Single-sig transaction
+	// Note: For single-sig, we rely on wallet.Sign() to add SigningPubKey automatically
+	// The absence of explicit SigningPubKey field setting means we'll skip adding it to the tx map
+	singleSigTx := dtoxrp.TxInput{
 		TransactionType:    "Payment",
 		Account:            "rG31cLyErnqeVj2eomEjBZtq7PYaupGYzL",
 		Destination:        "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY",
 		Amount:             "1000000",
+		Fee:                "12",
 		Sequence:           1,
 		LastLedgerSequence: 10000000,
+		// SigningPubKey deliberately not set - will be added by wallet.Sign()
 	}
 
-	// Single-sig transaction (no SigningPubKey field set)
-	singleSigTx := baseTx
-	singleSigTx.Fee = "12" // Base fee
-
-	// Multi-sig transaction (empty SigningPubKey)
-	multiSigTx := baseTx
-	multiSigTx.Fee = "36"         // Multi-sig fee: (2+1) × 12
-	multiSigTx.SigningPubKey = "" // Empty for multi-sig
+	// Multi-sig transaction
+	// CRITICAL: SigningPubKey must be explicitly set to "" for multi-sig
+	multiSigTx := dtoxrp.TxInput{
+		TransactionType:    "Payment",
+		Account:            "rG31cLyErnqeVj2eomEjBZtq7PYaupGYzL",
+		Destination:        "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY",
+		Amount:             "1000000",
+		Fee:                "12",
+		Sequence:           1,
+		LastLedgerSequence: 10000000,
+		SigningPubKey:      "", // MUST be explicitly set for multi-sig
+	}
 
 	// Sign both
-	_, singleBlob, err1 := signer.SignTransactionNative(ctx, &singleSigTx, testSeed)
-	_, multiBlob, err2 := signer.SignTransactionNative(ctx, &multiSigTx, testSeed)
+	_, singleBlob, err1 := signer.SignTransactionNative(ctx, &singleSigTx, testSeed, false)
+	_, multiBlob, err2 := signer.SignTransactionNative(ctx, &multiSigTx, testSeed, true)
 
 	// Both should succeed
 	require.NoError(t, err1, "single-sig should succeed")
@@ -90,33 +98,30 @@ func TestPeersystSigner_MultiSignature_VsSingleSignature(t *testing.T) {
 }
 
 // TestPeersystSigner_MultiSignature_FeeValidation tests that multi-signature
-// transactions have appropriate fee calculation.
+// transactions can be signed with various fee amounts.
+// Note: Fee validation is done by XRP Ledger, not the signer.
 func TestPeersystSigner_MultiSignature_FeeValidation(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
-		name          string
-		fee           string
-		expectedValid bool
-		description   string
+		name        string
+		fee         string
+		description string
 	}{
 		{
-			name:          "correct multi-sig fee for 2 signers",
-			fee:           "36", // (2+1) × 12
-			expectedValid: true,
-			description:   "Fee should be at least (N+1) × base fee",
+			name:        "multi-sig fee for 2 signers",
+			fee:         "36", // (2+1) × 12
+			description: "Standard multi-sig fee calculation",
 		},
 		{
-			name:          "correct multi-sig fee for 3 signers",
-			fee:           "48", // (3+1) × 12
-			expectedValid: true,
-			description:   "Higher multi-sig fee is acceptable",
+			name:        "multi-sig fee for 3 signers",
+			fee:         "48", // (3+1) × 12
+			description: "Higher multi-sig fee is acceptable",
 		},
 		{
-			name:          "too low fee for multi-sig",
-			fee:           "12", // Base fee, not enough for multi-sig
-			expectedValid: true, // XRP Ledger will validate, not our signer
-			description:   "Low fee will be rejected by ledger, not signer",
+			name:        "base fee with multi-sig structure",
+			fee:         "12", // Base fee
+			description: "Low fee is accepted by signer but may be rejected by ledger",
 		},
 	}
 
@@ -135,20 +140,15 @@ func TestPeersystSigner_MultiSignature_FeeValidation(t *testing.T) {
 				Amount:             "1000000",
 				Fee:                tc.fee,
 				Sequence:           1,
-				SigningPubKey:      "", // Multi-sig
+				SigningPubKey:      "", // Multi-sig indicator
 				LastLedgerSequence: 10000000,
 			}
 
 			// Execute
-			_, _, err := signer.SignTransactionNative(ctx, txInput, testSeed)
+			_, _, err := signer.SignTransactionNative(ctx, txInput, testSeed, true)
 
-			// For now, signer doesn't validate fees (XRP Ledger does)
-			// So all should succeed at signing stage
-			if tc.expectedValid {
-				assert.NoError(t, err, tc.description)
-			} else {
-				assert.Error(t, err, tc.description)
-			}
+			// Signer doesn't validate fees - all should succeed
+			assert.NoError(t, err, tc.description)
 		})
 	}
 }
@@ -178,13 +178,13 @@ func TestPeersystSigner_MultiSignature_SequentialSigning(t *testing.T) {
 	}
 
 	// First signer signs
-	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, seed1)
+	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, seed1, true)
 	require.NoError(t, err1, "first signer should succeed")
 	assert.NotEmpty(t, hash1)
 	assert.NotEmpty(t, blob1)
 
 	// Second signer signs the same transaction
-	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, seed2)
+	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, seed2, true)
 	require.NoError(t, err2, "second signer should succeed")
 	assert.NotEmpty(t, hash2)
 	assert.NotEmpty(t, blob2)
@@ -216,8 +216,8 @@ func TestPeersystSigner_MultiSignature_DeterministicSigning(t *testing.T) {
 	}
 
 	// Sign twice
-	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed)
-	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed)
+	hash1, blob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed, true)
+	hash2, blob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed, true)
 
 	// Both should succeed
 	require.NoError(t, err1)

@@ -36,7 +36,7 @@ func TestPeersystSigner_SignTransactionNative_SingleSignature(t *testing.T) {
 	}
 
 	// Execute
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed)
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, false)
 
 	// Assert
 	require.NoError(t, err, "signing should succeed")
@@ -67,8 +67,8 @@ func TestPeersystSigner_SignTransactionNative_DeterministicSigning(t *testing.T)
 	}
 
 	// Sign twice with same input
-	txHash1, signedBlob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed)
-	txHash2, signedBlob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed)
+	txHash1, signedBlob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed, false)
+	txHash2, signedBlob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed, false)
 
 	// Assert deterministic behavior
 	require.NoError(t, err1)
@@ -97,7 +97,7 @@ func TestPeersystSigner_SignTransactionNative_InvalidSeed(t *testing.T) {
 	}
 
 	// Execute with invalid seed
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, "invalid-seed-format")
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, "invalid-seed-format", false)
 
 	// Assert error
 	require.Error(t, err, "should return error for invalid seed")
@@ -162,7 +162,7 @@ func TestPeersystSigner_SignTransactionNative_MissingRequiredFields(t *testing.T
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			// Execute
-			txHash, signedBlob, err := signer.SignTransactionNative(ctx, tc.txInput, testSeed)
+			txHash, signedBlob, err := signer.SignTransactionNative(ctx, tc.txInput, testSeed, false)
 
 			// Assert
 			require.Error(t, err, "should return error for missing field")
@@ -171,38 +171,6 @@ func TestPeersystSigner_SignTransactionNative_MissingRequiredFields(t *testing.T
 			assert.Contains(t, err.Error(), tc.errMsg, "error should mention missing field")
 		})
 	}
-}
-
-// TestPeersystSigner_SignTransactionNative_MultiSignature tests multi-signature
-// transaction signing when SigningPubKey is empty.
-func TestPeersystSigner_SignTransactionNative_MultiSignature(t *testing.T) {
-	t.Parallel()
-
-	// Setup
-	signer := apixrpimpl.NewPeersystSigner()
-	ctx := context.Background()
-	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
-
-	// Create a multi-signature transaction (empty SigningPubKey)
-	txInput := &dtoxrp.TxInput{
-		TransactionType:    "Payment",
-		Account:            "rG31cLyErnqeVj2eomEjBZtq7PYaupGYzL", // Address from test seed
-		Destination:        "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY", // Known valid address
-		Amount:             "1000000",
-		Fee:                "36", // Multi-sig fee: (2+1) × 12
-		Sequence:           1,
-		SigningPubKey:      "", // Empty for multi-sig
-		LastLedgerSequence: 10000000,
-	}
-
-	// Execute
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed)
-
-	// Assert
-	require.NoError(t, err, "multi-sig signing should succeed")
-	assert.NotEmpty(t, txHash, "transaction hash should not be empty")
-	assert.NotEmpty(t, signedBlob, "signed blob should not be empty")
-	assert.Len(t, txHash, 64, "transaction hash should be 64 characters")
 }
 
 // TestPeersystSigner_SignTransactionNative_OfflineCapability tests that
@@ -231,7 +199,7 @@ func TestPeersystSigner_SignTransactionNative_OfflineCapability(t *testing.T) {
 	}
 
 	// Execute - should complete without network access
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed)
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, false)
 
 	// Assert offline signing works
 	require.NoError(t, err, "offline signing should succeed")

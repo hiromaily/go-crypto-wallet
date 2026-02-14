@@ -62,7 +62,9 @@ type XRPAPIer interface {
 		instructions *dtoxrp.Instructions,
 	) (*dtoxrp.TxInput, string, error)
 	SignTransaction(ctx context.Context, txJSON *dtoxrp.TxInput, secret string) (string, string, error)
-	SignTransactionNative(ctx context.Context, txInput *dtoxrp.TxInput, secret string) (string, string, error)
+	SignTransactionNative(
+		ctx context.Context, txInput *dtoxrp.TxInput, secret string, isMultiSig bool,
+	) (string, string, error)
 	CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error)
 	SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error)
 	WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error)
