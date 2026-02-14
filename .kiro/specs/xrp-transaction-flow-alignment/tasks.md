@@ -8,13 +8,13 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ### 1. Infrastructure and Dependencies Setup
 
-- [ ] 1.1 Add Peersyst xrpl-go dependency
+- [x] 1.1 Add Peersyst xrpl-go dependency
   - Add `github.com/Peersyst/xrpl-go` to go.mod with appropriate version
   - Verify compatibility with existing xrpscan/xrpl-go dependency (no conflicts)
   - Run `go mod tidy` and verify build passes
   - _Requirements: 3.2, 5.1_
 
-- [ ] 1.2 Create segregated port interfaces
+- [x] 1.2 Create segregated port interfaces
   - Define `AccountInfoProvider` interface in `application/ports/api/xrp/account_info.go`
   - Define `TransactionSigner` interface in `application/ports/api/xrp/transaction_signer.go`
   - Define `TransactionSubmitter` interface in `application/ports/api/xrp/transaction_submitter.go`

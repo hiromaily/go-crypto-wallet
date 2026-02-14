@@ -1362,6 +1362,20 @@ func (r *XRP) SignTransaction(
 	return res.GetTxID(), res.GetTxBlob(), nil
 }
 
+// SignTransactionNative signs a transaction using native Go implementation (Peersyst/xrpl-go).
+// This method provides offline signing capability without gRPC dependencies.
+//
+// NOTE: This is a stub implementation for task 1.2 (interface segregation).
+// Full implementation will be provided in task 3.1 (PeersystSigner).
+//
+// TODO(task-3.1): Implement native Go signing using Peersyst/xrpl-go library.
+func (*XRP) SignTransactionNative(
+	_ context.Context, _ *dtoxrp.TxInput, _ string,
+) (string, string, error) {
+	// Stub implementation - to be completed in task 3.1
+	return "", "", errors.New("SignTransactionNative not yet implemented (task 3.1)")
+}
+
 // CombineTransaction combines signed transactions from multiple accounts for a multisignature transaction.
 // - The signed transaction must subsequently be submitted.
 func (r *XRP) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {

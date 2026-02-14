@@ -4,6 +4,7 @@ go 1.25.6
 
 require (
 	github.com/LanfordCai/ava v0.1.3
+	github.com/Peersyst/xrpl-go v0.1.15
 	github.com/bookerzzz/grok v0.0.0
 	github.com/btcsuite/btcd v0.25.0
 	github.com/btcsuite/btcd/btcec/v2 v2.3.6
@@ -82,6 +83,7 @@ require (
 	github.com/breml/errchkjson v0.4.1 // indirect
 	github.com/briandowns/spinner v1.23.2 // indirect
 	github.com/brunoga/deep v1.2.4 // indirect
+	github.com/bsv-blockchain/go-sdk v1.2.9 // indirect
 	github.com/btcsuite/btclog v1.0.0 // indirect
 	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd // indirect
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792 // indirect
@@ -115,6 +117,7 @@ require (
 	github.com/dchest/siphash v1.2.3 // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.1.0 // indirect
+	github.com/decred/dcrd/crypto/ripemd160 v1.0.2 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/deepmap/oapi-codegen v1.6.0 // indirect
 	github.com/denis-tingaikin/go-header v0.5.0 // indirect
@@ -316,6 +319,7 @@ require (
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/tomarrell/wrapcheck/v2 v2.12.0 // indirect
 	github.com/tommy-muehle/go-mnd/v2 v2.5.1 // indirect
+	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/ultraware/funlen v0.2.0 // indirect
 	github.com/ultraware/whitespace v0.2.0 // indirect
 	github.com/urfave/cli/v2 v2.27.5 // indirect
