@@ -1,4 +1,6 @@
-# XRPL (XRP Ledger) Architecture for go-crypto-wallet (2026)
+# XRPL (XRP Ledger) Architecture for go-crypto-wallet (Deprecated)
+
+**Note: This documentation is deprecated.**
 
 ## gRPC Bridge via TypeScript (xrpl.js) + Go CLI Integration
 
