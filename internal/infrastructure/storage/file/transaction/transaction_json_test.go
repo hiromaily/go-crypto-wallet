@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -162,13 +163,18 @@ func TestWriteXRPJSONFile(t *testing.T) {
 					t.Errorf("Failed to read written file: %v", err)
 				}
 
-				// Verify it's valid JSON by attempting to parse
+				// Verify content is not empty
+				if len(content) == 0 {
+					t.Error("WriteXRPJSONFile() wrote empty file")
+				}
+
+				// Verify it's valid JSON by parsing and validating
 				var readBack dtoxrp.XRPTransactionFile
-				if err := readBack.Validate(); err == nil {
-					// This shouldn't work if content is empty
-					if len(content) == 0 {
-						t.Error("WriteXRPJSONFile() wrote empty file")
-					}
+				if err := json.Unmarshal(content, &readBack); err != nil {
+					t.Errorf("WriteXRPJSONFile() wrote invalid JSON: %v", err)
+				}
+				if err := readBack.Validate(); err != nil {
+					t.Errorf("WriteXRPJSONFile() wrote invalid transaction data: %v", err)
 				}
 
 				// Cleanup
@@ -464,6 +470,108 @@ func TestReadXRPJSONFilePathTraversal(t *testing.T) {
 				} else if got.Version != "1.0.0" {
 					t.Errorf("ReadXRPJSONFile() version = %v, want 1.0.0", got.Version)
 				}
+			}
+		})
+	}
+}
+
+func TestWriteXRPJSONFilePathTraversal(t *testing.T) {
+	// Create temp directory structure
+	tempDir := t.TempDir()
+	jsonDir := filepath.Join(tempDir, "json")
+	if err := os.MkdirAll(jsonDir, 0o700); err != nil {
+		t.Fatalf("Failed to create test directory: %v", err)
+	}
+
+	// Valid transaction data for testing
+	validData := &dtoxrp.XRPTransactionFile{
+		Version:   "1.0.0",
+		Chain:     "XRP",
+		Network:   "mainnet",
+		CreatedAt: "2024-02-14T00:00:00Z",
+		Transactions: []dtoxrp.XRPTransactionEntry{
+			{
+				UUID: "01234567-89ab-cdef-0123-456789abcdef",
+				UnsignedData: dtoxrp.TxInput{
+					Account:     "rN7n7otQDd6FczFgLdlqtyMVrn3HMfgnj",
+					Destination: "rLHzPsX6oXkzU9jNbPGJcEKvxbqBKzhqgN",
+					Amount:      "1000000",
+					Fee:         "12",
+				},
+				SenderAccount:      "rN7n7otQDd6FczFgLdlqtyMVrn3HMfgnj",
+				SenderAccountType:  "client",
+				SignatureCount:     0,
+				RequiredSignatures: 1,
+				SignedBlob:         nil,
+				IsComplete:         false,
+			},
+		},
+	}
+
+	tests := []struct {
+		name       string
+		basePath   string
+		writePath  string
+		wantErr    bool
+		errContain string
+	}{
+		{
+			name:      "write file within allowed directory",
+			basePath:  jsonDir + "/",
+			writePath: filepath.Join(jsonDir, "test_"),
+			wantErr:   false,
+		},
+		{
+			name:       "reject path traversal with ../",
+			basePath:   jsonDir + "/",
+			writePath:  filepath.Join(jsonDir, "../../../etc/passwd_"),
+			wantErr:    true,
+			errContain: "path traversal attempt detected",
+		},
+		{
+			name:       "reject absolute path outside base",
+			basePath:   jsonDir + "/",
+			writePath:  "/tmp/malicious_",
+			wantErr:    true,
+			errContain: "path traversal attempt detected",
+		},
+		{
+			name:      "allow write when basePath is empty (test mode)",
+			basePath:  "",
+			writePath: filepath.Join(tempDir, "test_mode_"),
+			wantErr:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := NewTransactionFileRepository(tt.basePath)
+			fileName, err := repo.WriteXRPJSONFile(tt.writePath, validData)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("WriteXRPJSONFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if tt.wantErr && tt.errContain != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.errContain) {
+					t.Errorf("WriteXRPJSONFile() error = %v, want error containing %q", err, tt.errContain)
+				}
+			}
+
+			if !tt.wantErr {
+				// Verify file was created
+				if _, err := os.Stat(fileName); os.IsNotExist(err) {
+					t.Errorf("WriteXRPJSONFile() did not create file: %v", fileName)
+				}
+
+				// Verify file has .json extension
+				if !strings.HasSuffix(fileName, ".json") {
+					t.Errorf("WriteXRPJSONFile() file name = %v, want suffix .json", fileName)
+				}
+
+				// Cleanup
+				_ = os.Remove(fileName)
 			}
 		})
 	}

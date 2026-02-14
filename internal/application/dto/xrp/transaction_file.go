@@ -30,6 +30,8 @@ type XRPTransactionEntry struct {
 var (
 	// semVerPattern matches semantic versioning pattern (Major.Minor.Patch)
 	semVerPattern = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
+	// iso8601Pattern matches ISO 8601 timestamp format (e.g., "2024-02-14T00:00:00Z" or with milliseconds)
+	iso8601Pattern = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$`)
 
 	// ErrInvalidVersion is returned when version format is invalid
 	ErrInvalidVersion = errors.New("version must follow semantic versioning pattern")
@@ -37,6 +39,8 @@ var (
 	ErrInvalidChain = errors.New("chain must be XRP")
 	// ErrInvalidNetwork is returned when network is not mainnet or testnet
 	ErrInvalidNetwork = errors.New("network must be mainnet or testnet")
+	// ErrInvalidCreatedAt is returned when createdAt timestamp format is invalid
+	ErrInvalidCreatedAt = errors.New("createdAt must be in ISO 8601 format (e.g., 2024-02-14T00:00:00Z)")
 	// ErrEmptyTransactions is returned when transactions array is empty
 	ErrEmptyTransactions = errors.New("transactions array cannot be empty")
 	// ErrInvalidSignatureCount is returned when signature count is invalid
@@ -62,6 +66,11 @@ func (f *XRPTransactionFile) Validate() error {
 	// Validate network
 	if f.Network != "mainnet" && f.Network != "testnet" {
 		return ErrInvalidNetwork
+	}
+
+	// Validate createdAt timestamp format (ISO 8601)
+	if !iso8601Pattern.MatchString(f.CreatedAt) {
+		return ErrInvalidCreatedAt
 	}
 
 	// Validate transactions array is not empty

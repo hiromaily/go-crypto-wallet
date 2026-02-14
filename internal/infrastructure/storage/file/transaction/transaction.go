@@ -294,8 +294,12 @@ func (r *TransactionFileRepository) ReadXRPJSONFile(path string) (*dtoxrp.XRPTra
 	// Security: Clean path and prevent path traversal
 	cleanPath := filepath.Clean(path)
 	// Note: r.filePath can be empty in tests
-	if r.filePath != "" && !strings.HasPrefix(cleanPath, filepath.Clean(r.filePath)) {
-		return nil, fmt.Errorf("path traversal attempt detected: %s", path)
+	if r.filePath != "" {
+		baseDir := filepath.Clean(r.filePath)
+		rel, err := filepath.Rel(baseDir, cleanPath)
+		if err != nil || strings.HasPrefix(rel, "..") {
+			return nil, fmt.Errorf("path traversal attempt detected: %s", path)
+		}
 	}
 
 	// Read file
@@ -319,7 +323,7 @@ func (r *TransactionFileRepository) ReadXRPJSONFile(path string) (*dtoxrp.XRPTra
 }
 
 // WriteXRPJSONFile writes an XRP transaction file in JSON format with .json extension
-func (*TransactionFileRepository) WriteXRPJSONFile(
+func (r *TransactionFileRepository) WriteXRPJSONFile(
 	path string,
 	data *dtoxrp.XRPTransactionFile,
 ) (string, error) {
@@ -332,8 +336,18 @@ func (*TransactionFileRepository) WriteXRPJSONFile(
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 	fileName := path + ts + ".json"
 
+	// Security: Prevent path traversal
+	cleanPath := filepath.Clean(fileName)
+	if r.filePath != "" {
+		baseDir := filepath.Clean(r.filePath)
+		rel, err := filepath.Rel(baseDir, cleanPath)
+		if err != nil || strings.HasPrefix(rel, "..") {
+			return "", fmt.Errorf("path traversal attempt detected: %s", fileName)
+		}
+	}
+
 	// Create directory if not existing
-	dir := filepath.Dir(fileName)
+	dir := filepath.Dir(cleanPath)
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
 	}
@@ -345,10 +359,10 @@ func (*TransactionFileRepository) WriteXRPJSONFile(
 	}
 
 	// Write JSON file
-	err = os.WriteFile(fileName, jsonData, 0o644)
+	err = os.WriteFile(cleanPath, jsonData, 0o644)
 	if err != nil {
-		return "", fmt.Errorf("failed to write JSON transaction file %s: %w", fileName, err)
+		return "", fmt.Errorf("failed to write JSON transaction file %s: %w", cleanPath, err)
 	}
 
-	return fileName, nil
+	return cleanPath, nil
 }

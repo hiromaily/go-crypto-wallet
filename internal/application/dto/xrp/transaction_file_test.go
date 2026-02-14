@@ -75,6 +75,18 @@ func TestXRPTransactionFile_Validate(t *testing.T) {
 			errMsg:  "network must be mainnet or testnet",
 		},
 		{
+			name: "invalid createdAt timestamp format",
+			file: &XRPTransactionFile{
+				Version:      "1.0.0",
+				Chain:        "XRP",
+				Network:      "mainnet",
+				CreatedAt:    "2024-02-14 00:00:00",
+				Transactions: []XRPTransactionEntry{},
+			},
+			wantErr: true,
+			errMsg:  "createdAt must be in ISO 8601 format (e.g., 2024-02-14T00:00:00Z)",
+		},
+		{
 			name: "empty transactions",
 			file: &XRPTransactionFile{
 				Version:      "1.0.0",
@@ -230,6 +242,48 @@ func TestXRPTransactionEntry_Validate(t *testing.T) {
 				IsComplete:         true,
 			},
 			wantErr: false,
+		},
+		{
+			name: "invalid negative signature count",
+			entry: &XRPTransactionEntry{
+				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
+				SenderAccount:      "rN7n7otQDd6FczFgLdlqtyMVrn3HMfgnj",
+				SenderAccountType:  "client",
+				SignatureCount:     -1,
+				RequiredSignatures: 1,
+				SignedBlob:         nil,
+				IsComplete:         false,
+			},
+			wantErr: true,
+			errMsg:  "signatureCount must be >= 0",
+		},
+		{
+			name: "invalid signature count exceeds required",
+			entry: &XRPTransactionEntry{
+				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
+				SenderAccount:      "rN7n7otQDd6FczFgLdlqtyMVrn3HMfgnj",
+				SenderAccountType:  "client",
+				SignatureCount:     3,
+				RequiredSignatures: 2,
+				SignedBlob:         stringPtr("signed-blob-hex"),
+				IsComplete:         true,
+			},
+			wantErr: true,
+			errMsg:  "signatureCount cannot exceed requiredSignatures",
+		},
+		{
+			name: "invalid signedBlob not null when signatureCount is 0",
+			entry: &XRPTransactionEntry{
+				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
+				SenderAccount:      "rN7n7otQDd6FczFgLdlqtyMVrn3HMfgnj",
+				SenderAccountType:  "client",
+				SignatureCount:     0,
+				RequiredSignatures: 1,
+				SignedBlob:         stringPtr("should-be-null"),
+				IsComplete:         false,
+			},
+			wantErr: true,
+			errMsg:  "signedBlob must be null when signatureCount is 0",
 		},
 	}
 
