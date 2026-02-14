@@ -43,7 +43,9 @@
       "Bash(bun run build:*)",
       "Bash(bun run typecheck:*)",
       "Bash(bun:*)",
-      "Bash(env:*)"
+      "Bash(env:*)",
+      "Bash(test:*)",
+      "Bash(.kiro/specs/xrp-transaction-flow-alignment/spec.json:*)"
     ]
   },
   "hooks": {

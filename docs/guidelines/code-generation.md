@@ -54,23 +54,29 @@ This project uses several code generation tools. **All auto-generated files cont
 
 **Note**: SQLC generates type-safe Go code from SQL queries and schemas.
 
-## Protocol Buffer Code (Go)
+## Protocol Buffer Code (Go) [DEPRECATED for XRP]
+
+> **⚠️ DEPRECATED**: XRP protocol buffers (`proto/rippleapi/`) are no longer used.
+>
+> **Status**: `apps/xrpl-grpc-server/` and `proto/xrpapi/` are deprecated. XRP functionality now uses native Go implementation with xrpl-go libraries.
+>
+> **Migration**: See `.kiro/specs/xrp-transaction-flow-alignment/` for current architecture.
 
 **Tool**: protoc (or buf when Edition 2024 is supported)
-**Source**: `proto/rippleapi/*.proto`
-**Command**: `make proto`
+**Source**: `proto/rippleapi/*.proto` [DEPRECATED]
+**Command**: `make proto` [NO LONGER NEEDED FOR XRP]
 
-**Generated Files**:
+**Generated Files** [DEPRECATED]:
 
-- `internal/infrastructure/api/xrp/xrp/*.pb.go` (6 files)
-  - `account.pb.go` - Account message types
-  - `account_grpc.pb.go` - Account gRPC service code
-  - `address.pb.go` - Address message types
-  - `address_grpc.pb.go` - Address gRPC service code
-  - `transaction.pb.go` - Transaction message types
-  - `transaction_grpc.pb.go` - Transaction gRPC service code
+- `internal/infrastructure/api/xrp/xrp/*.pb.go` (6 files) [No longer generated]
+  - `account.pb.go` - Account message types [Deprecated]
+  - `account_grpc.pb.go` - Account gRPC service code [Deprecated]
+  - `address.pb.go` - Address message types [Deprecated]
+  - `address_grpc.pb.go` - Address gRPC service code [Deprecated]
+  - `transaction.pb.go` - Transaction message types [Deprecated]
+  - `transaction_grpc.pb.go` - Transaction gRPC service code [Deprecated]
 
-**Note**: Protocol buffers are used for XRP (Ripple) gRPC communication.
+**Note**: Protocol buffers were previously used for XRP (Ripple) gRPC communication. This is no longer the case.
 
 ## Smart Contract ABI Code
 
@@ -157,21 +163,25 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 **Note**: See [Testing Guidelines](testing.md) for mock usage examples and best practices.
 
-## Protocol Buffer Code (TypeScript)
+## Protocol Buffer Code (TypeScript) [DEPRECATED]
 
-**Tool**: protoc with protoc-gen-es and protoc-gen-connect-es
-**Source**: `proto/rippleapi/*.proto`
-**Command**: `make proto-ts`
+> **⚠️ DEPRECATED**: XRP gRPC server (`apps/xrpl-grpc-server/`) is no longer used.
+>
+> **Status**: All XRP functionality migrated to native Go implementation. TypeScript protobuf code generation is no longer needed.
 
-**Generated Files**:
+**Tool**: protoc with protoc-gen-es and protoc-gen-connect-es [NO LONGER USED]
+**Source**: `proto/rippleapi/*.proto` [DEPRECATED]
+**Command**: `make proto-ts` [NO LONGER NEEDED]
 
-- `apps/xrpl-grpc-server/src/protogen/*.ts` - TypeScript protocol buffer code
-  - `account_pb.ts` - Account message types
-  - `account_connect.ts` - Account service client
-  - `address_pb.ts` - Address message types
-  - `address_connect.ts` - Address service client
-  - `transaction_pb.ts` - Transaction message types
-  - `transaction_connect.ts` - Transaction service client
+**Generated Files** [DEPRECATED]:
+
+- `apps/xrpl-grpc-server/src/protogen/*.ts` - TypeScript protocol buffer code [No longer generated]
+  - `account_pb.ts` - Account message types [Deprecated]
+  - `account_connect.ts` - Account service client [Deprecated]
+  - `address_pb.ts` - Address message types [Deprecated]
+  - `address_connect.ts` - Address service client [Deprecated]
+  - `transaction_pb.ts` - Transaction message types [Deprecated]
+  - `transaction_connect.ts` - Transaction service client [Deprecated]
 
 ## Web Project Build Artifacts
 
@@ -216,9 +226,9 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 | SQLC Schema Extract | `data/dump/sql/dump_*.sql` | `make extract-sqlc-schema-all` | `tools/sqlc/schemas/*.sql` |
 | SQLC | `tools/sqlc/schemas/*.sql` + `tools/sqlc/queries/*.sql` | `make sqlc` | `internal/infrastructure/database/sqlc/*.go` |
 | Mockery | `.mockery.yaml` + interface definitions | `make mockery` | `internal/infrastructure/*/mocks/*.go` |
-| Protocol Buffers (Go) | `proto/rippleapi/*.proto` | `make proto` | `internal/infrastructure/api/xrp/protogen/*.pb.go` |
+| ~~Protocol Buffers (Go)~~ [DEPRECATED] | ~~`proto/rippleapi/*.proto`~~ | ~~`make proto`~~ | ~~(XRP protobufs no longer used)~~ |
 | Smart Contract ABI | `contracts/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
-| Protocol Buffers (TS) | `proto/rippleapi/*.proto` | `make proto-ts` | `apps/xrpl-grpc-server/src/protogen/*.ts` |
+| ~~Protocol Buffers (TS)~~ [DEPRECATED] | ~~`proto/rippleapi/*.proto`~~ | ~~`make proto-ts`~~ | ~~(XRP gRPC server no longer used)~~ |
 
 ## See Also
 

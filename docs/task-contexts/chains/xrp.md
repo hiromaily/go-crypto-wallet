@@ -1,6 +1,12 @@
 # XRP (Ripple) Reference
 
-TODO: updating
+> **⚠️ IMPORTANT: Architecture Change**
+>
+> **DEPRECATED**: `apps/xrpl-grpc-server/` and `proto/xrpapi/` are no longer used.
+>
+> **Current Approach**: Native Go implementation using xrpl-go libraries. All XRP functionality is now directly implemented in the Go codebase without gRPC dependencies.
+>
+> **Active Specification**: See `.kiro/specs/xrp-transaction-flow-alignment/` for current implementation details.
 
 ## Overview
 
@@ -9,6 +15,7 @@ TODO: updating
 | トランザクションモデル | アカウント型 |
 | アドレス形式 | r... (Base58) |
 | 特殊機能 | Destination Tag, アカウントリザーブ |
+| 実装方式 | Native Go (xrpl-go) |
 
 ## Directory Structure
 
@@ -18,45 +25,75 @@ TODO: updating
 internal/application/usecase/
 ├── keygen/xrp/
 │   ├── generate_key.go          # 鍵生成
+│   ├── generate_key_offline.go  # オフライン鍵生成
 │   └── sign_transaction.go      # トランザクション署名
 ├── sign/xrp/
 │   └── sign_transaction.go      # トランザクション署名
 └── watch/xrp/
     ├── create_transaction.go    # トランザクション作成
+    ├── create_multisig_tx.go    # マルチシグトランザクション作成
+    ├── add_multisig_signature.go # マルチシグ署名追加
+    ├── submit_multisig_tx.go    # マルチシグトランザクション送信
     ├── monitor_transaction.go   # トランザクション監視
-    └── send_transaction.go      # トランザクション送信
+    ├── send_transaction.go      # トランザクション送信
+    ├── set_regular_key.go       # レギュラーキー設定
+    └── set_signer_list.go       # 署名者リスト設定
 ```
 
 ### Infrastructure Layer
 
 ```
 internal/infrastructure/api/xrp/
-├── connection.go                # gRPC接続
-└── xrp/
-    ├── ripple.go                # クライアント初期化
-    ├── ripppleapi.go            # API実装
-    ├── rippleapi_account.go     # アカウントAPI
-    ├── rippleapi_address.go     # アドレスAPI
-    ├── rippleapi_tx.go          # トランザクションAPI
-    ├── public_account.go        # 公開アカウントAPI
-    ├── public_ledger.go         # 台帳API
-    ├── public_server_info.go    # サーバー情報
-    ├── public_transaction.go    # 公開トランザクションAPI
-    ├── admin_keygen.go          # 管理者鍵生成
-    ├── balance.go               # 残高
-    ├── amount.go                # 金額
-    ├── transaction.go           # トランザクション
-    ├── converter.go             # 型変換
-    ├── errors.go                # エラー定義
-    └── types.go                 # 型定義
-
-# gRPC生成ファイル
-    ├── account_grpc.pb.go
-    ├── account.pb.go
-    ├── address_grpc.pb.go
-    ├── address.pb.go
-    ├── transaction_grpc.pb.go
-    └── transaction.pb.go
+├── xrp.go                       # クライアント初期化
+├── xrpapi.go                    # API実装
+├── xrpapi_account.go            # アカウントAPI
+├── xrpapi_account_test.go       # アカウントAPIテスト
+├── xrpapi_address.go            # アドレスAPI
+├── xrpapi_address_test.go       # アドレスAPIテスト
+├── xrpapi_tx.go                 # トランザクションAPI
+├── xrpapi_tx_test.go            # トランザクションAPIテスト
+├── connection.go                # 接続管理
+├── request_response.go          # リクエスト/レスポンス定義
+├── public_account.go            # 公開アカウントAPI
+├── public_account_test.go       # 公開アカウントAPIテスト
+├── public_ledger.go             # 台帳API
+├── public_path_orderbook.go     # パス/オーダーブックAPI
+├── public_payment_channel.go    # ペイメントチャネルAPI
+├── public_server_info.go        # サーバー情報
+├── public_server_info_test.go   # サーバー情報テスト
+├── public_subscription.go       # サブスクリプションAPI
+├── public_transaction.go        # 公開トランザクションAPI
+├── public_utility.go            # ユーティリティAPI
+├── admin_keygen.go              # 管理者鍵生成
+├── admin_keygen_test.go         # 管理者鍵生成テスト
+├── admin_logging_data.go        # 管理者ログデータ
+├── admin_peer.go                # 管理者ピア管理
+├── admin_server_control.go      # 管理者サーバー制御
+├── admin_status_debugging.go    # 管理者ステータス/デバッグ
+├── balance.go                   # 残高
+├── amount.go                    # 金額
+├── transaction.go               # トランザクション
+├── transaction_test.go          # トランザクションテスト
+├── converter.go                 # 型変換
+├── errors.go                    # エラー定義
+├── types.go                     # 型定義
+├── util.go                      # ユーティリティ
+├── util_test.go                 # ユーティリティテスト
+├── protogen/                    # [DEPRECATED] gRPC生成コード
+│   ├── account.pb.go
+│   ├── account_grpc.pb.go
+│   ├── address.pb.go
+│   ├── address_grpc.pb.go
+│   ├── transaction.pb.go
+│   └── transaction_grpc.pb.go
+├── testutil/
+│   └── xrp.go                  # テストユーティリティ
+└── xrplgo/                      # Native Go実装 (xrpl-go)
+    ├── client.go                # クライアント
+    ├── client_test.go           # クライアントテスト
+    ├── account.go               # アカウント操作
+    ├── ledger.go                # 台帳操作
+    └── transaction.go           # トランザクション操作
 ```
 
 ### CLI Layer
@@ -67,14 +104,16 @@ internal/interface-adapters/cli/watch/api/xrp/
 └── sendcoin.go                  # 送金コマンド
 ```
 
-### Protocol Buffers
+### Protocol Buffers [DEPRECATED]
 
 ```
-proto/rippleapi/
-├── account.proto                # アカウントサービス定義
-├── address.proto                # アドレスサービス定義
-└── transaction.proto            # トランザクションサービス定義
+proto/rippleapi/  [DEPRECATED - No longer used]
+├── account.proto                # [Deprecated]
+├── address.proto                # [Deprecated]
+└── transaction.proto            # [Deprecated]
 ```
+
+**Note**: Protocol buffers are no longer used. XRP operations now use native Go implementation with xrpl-go libraries.
 
 ## Key Concepts
 
@@ -139,37 +178,34 @@ type Payment struct {
 }
 ```
 
-## gRPC Communication
+## Native Go Communication
 
-### xrpl-grpc-server [Deprecated]
+### Direct XRP Ledger Access
 
-XRPは`xrpl-grpc-server`を経由してgRPCで通信：
+XRPは`xrpl-go`ライブラリを使用して直接通信：
 
 ```
-[Wallet] --gRPC--> [xrpl-grpc-server] --WebSocket--> [XRPL]
+[Wallet] --xrpl-go (WebSocket/HTTP)--> [XRPL]
 ```
 
-サーバー実装: `apps/xrpl-grpc-server/`
+実装: `internal/infrastructure/api/xrp/xrplgo/`
 
-### Proto定義
+**使用ライブラリ**:
 
-```protobuf
-// proto/rippleapi/transaction.proto
-service TransactionService {
-    rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
-    rpc SignTransaction(SignTransactionRequest) returns (SignTransactionResponse);
-    rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
-}
+- **xrpscan/xrpl-go** (v0.2.11): WebSocket通信、トランザクション送信
+- **Peersyst/xrpl-go** (予定): ネイティブGoトランザクション署名
+
+### 旧gRPCアーキテクチャ [DEPRECATED]
+
+```
+[Wallet] --gRPC--> [xrpl-grpc-server] --WebSocket--> [XRPL]  [NO LONGER USED]
 ```
 
-### コード生成
+**Deprecated Components**:
 
-```bash
-# protobuf/gRPCコード生成
-make proto      # Go
-make proto-ts   # TypeScript
-make proto-all  # 両方
-```
+- `apps/xrpl-grpc-server/` - TypeScript gRPCサーバー [廃止]
+- `proto/rippleapi/*.proto` - Protocol Buffers定義 [廃止]
+- `make proto`, `make proto-ts` - コード生成コマンド [不要]
 
 ## Implementation Patterns
 
@@ -212,9 +248,10 @@ coin_type: xrp
 network_type: mainnet  # mainnet, testnet
 
 ripple:
-  # xrpl-grpc-server接続設定
-  host: localhost
-  port: 50051
+  # XRP Ledger接続設定 (Native Go xrpl-go)
+  ws_url: wss://s.altnet.rippletest.net:51233  # WebSocket URL
+  # または
+  http_url: https://s.altnet.rippletest.net:51234  # HTTP URL
 ```
 
 ## Testing
@@ -232,7 +269,8 @@ go test ./internal/infrastructure/api/xrp/xrp/...
 ## Related Documentation
 
 - [XRP README](../../../../docs/crypto/xrp/README.md) - 詳細なXRPドキュメント
-- [Code Generation](../../guidelines/code-generation.md) - protobuf生成
+- [XRP Transaction Flow Alignment Spec](.kiro/specs/xrp-transaction-flow-alignment/) - 現在の実装仕様
+- [Code Generation](../../guidelines/code-generation.md) - コード生成ガイド
 
 ## Common Operations
 
@@ -250,14 +288,14 @@ go test ./internal/infrastructure/api/xrp/xrp/...
 2. **Drops変換**: 金額操作時はDrops単位で計算
 3. **アカウントリザーブ**: 新規アカウントには10XRP以上の初期送金が必要
 4. **Destination Tag**: 取引所への送金時は必須の場合が多い
-5. **Proto更新**: `.proto` ファイルを変更した場合は `make proto-all` でコード再生成
+5. **Native Go実装**: gRPC依存を削除し、xrpl-goライブラリを直接使用
 
 ## Comparison with Other Chains
 
 | 項目 | XRP | ETH | BTC |
 |------|-----|-----|-----|
 | モデル | アカウント | アカウント | UTXO |
-| 通信 | gRPC | JSON-RPC | RPC |
+| 通信 | WebSocket (xrpl-go) | JSON-RPC | RPC |
 | 順序管理 | Sequence | Nonce | UTXO |
 | 手数料 | Drops (固定的) | Gas (変動) | sat/vB |
 | 最低残高 | 10 XRP | なし | なし |
