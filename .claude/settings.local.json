@@ -41,7 +41,9 @@
       "WebFetch(domain:api.github.com)",
       "Bash(bun run lint:*)",
       "Bash(bun run build:*)",
-      "Bash(bun run typecheck:*)"
+      "Bash(bun run typecheck:*)",
+      "Bash(bun:*)",
+      "Bash(env:*)"
     ]
   },
   "hooks": {

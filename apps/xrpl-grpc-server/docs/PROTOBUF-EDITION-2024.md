@@ -30,7 +30,7 @@ option features.enforce_naming_style = STYLE_LEGACY;
 Since `protoc-gen-connect-es` v1.7.0 does not support Edition 2024, we use a **manual implementation** approach:
 
 1. **Generate protobuf types only** using `protoc-gen-es` v2.10.2
-   - This generates message types and service descriptors in `src/gen/`
+   - This generates message types and service descriptors in `src/protogen/`
    - Files: `account_pb.ts`, `address_pb.ts`, `transaction_pb.ts`
 
 2. **Manually implement ConnectRPC handlers** in `src/server.ts`
@@ -74,7 +74,7 @@ proto/rippleapi/*.proto (Edition 2024)
   protoc-gen-es v2.10.2
         │
         ▼
-src/gen/*_pb.ts (message types + service descriptors)
+src/protogen/*_pb.ts (message types + service descriptors)
         │
         ▼
 src/server.ts (manual ConnectRPC handlers)
@@ -93,7 +93,7 @@ proto/rippleapi/*.proto (Edition 2024)
   protoc-gen-es v2.x      protoc-gen-connect-es v2.x (when released)
         │                          │
         ▼                          ▼
-src/gen/*_pb.ts           src/gen/*_connect.ts (generated stubs)
+src/protogen/*_pb.ts      src/protogen/*_connect.ts (generated stubs)
         │                          │
         └──────────────────────────┤
                                    ▼
@@ -130,8 +130,8 @@ Check for updates:
    ```
 
    This should now succeed and generate both:
-   - `src/gen/*_pb.ts` - Message types
-   - `src/gen/*_connect.ts` - Connect service stubs
+   - `src/protogen/*_pb.ts` - Message types
+   - `src/protogen/*_connect.ts` - Connect service stubs
 
 3. **Simplify server.ts**
 
@@ -139,7 +139,7 @@ Check for updates:
 
    ```typescript
    // Before (manual)
-   import { RippleAccountAPI } from './gen/account_pb';
+   import { RippleAccountAPI } from './protogen/account_pb';
 
    export function createRouter(): ConnectRouter {
      return createConnectRouter()
@@ -151,7 +151,7 @@ Check for updates:
    }
 
    // After (generated stubs)
-   import { RippleAccountAPI } from './gen/account_connect';
+   import { RippleAccountAPI } from './protogen/account_connect';
 
    export function createRouter(): ConnectRouter {
      return createConnectRouter()
@@ -193,7 +193,7 @@ bun run dev
 | File | Description |
 |------|-------------|
 | `proto/rippleapi/*.proto` | Edition 2024 proto definitions |
-| `src/gen/*_pb.ts` | Generated message types (protoc-gen-es) |
+| `src/protogen/*_pb.ts` | Generated message types (protoc-gen-es) |
 | `src/server.ts` | Manual ConnectRPC handler implementation |
 | `src/services/*.ts` | Service layer implementations |
 | `make/codegen_proto.mk` | Proto generation makefile |

@@ -29,7 +29,7 @@ make check-protoc
    make proto-ts
    ```
 
-   This will generate TypeScript files in `src/gen/` from proto files in `proto/rippleapi/`.
+   This will generate TypeScript files in `src/protogen/` from proto files in `proto/rippleapi/`.
 
 3. **Verify the setup**
 
@@ -59,7 +59,7 @@ make check-protoc
 After running `bun run proto`, the following structure will be created:
 
 ```
-src/gen/
+src/protogen/
 ├── rippleapi/
 │   ├── account_pb.ts           # Account message types
 │   ├── account_connect.ts      # Account service client

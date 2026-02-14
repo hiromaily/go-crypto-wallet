@@ -16,14 +16,14 @@ import {
   type RequestGetAccountInfo,
   ResponseGetAccountInfoSchema,
   RippleAccountAPI,
-} from './gen/account_pb';
+} from './protogen/account_pb';
 import {
   type RequestIsValidAddress,
   ResponseGenerateAddressSchema,
   ResponseGenerateXAddressSchema,
   ResponseIsValidAddressSchema,
   RippleAddressAPI,
-} from './gen/address_pb';
+} from './protogen/address_pb';
 import {
   type EnumTransactionType,
   type RequestCombineTransaction,
@@ -38,7 +38,7 @@ import {
   ResponseSubmitTransactionSchema,
   ResponseWaitValidationSchema,
   RippleTransactionAPI,
-} from './gen/transaction_pb';
+} from './protogen/transaction_pb';
 import { accountService } from './services/account';
 import { addressService } from './services/address';
 import {
