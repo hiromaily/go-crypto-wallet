@@ -135,7 +135,7 @@ proto-ts-protoc: protoc-version-check clean-pb-ts
 		exit 1; \
 	}
 	@mkdir -p $(PROTO_TS_OUT_DIR)
-	protoc \
+	NODE_NO_WARNINGS=1 protoc \
 		--plugin=protoc-gen-es=apps/xrpl-grpc-server/node_modules/.bin/protoc-gen-es \
 		--es_out=$(PROTO_TS_OUT_DIR) \
 		--es_opt=target=ts \

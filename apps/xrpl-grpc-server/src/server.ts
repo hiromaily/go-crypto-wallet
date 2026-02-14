@@ -6,7 +6,8 @@
  */
 
 import { create } from '@bufbuild/protobuf';
-import { type ConnectRouter, createConnectRouter } from '@connectrpc/connect';
+import type { Empty } from '@bufbuild/protobuf/wkt';
+import { type ConnectRouter, createConnectRouter, type HandlerContext } from '@connectrpc/connect';
 import {
   universalServerRequestFromFetch,
   universalServerResponseToFetch,
@@ -15,15 +16,15 @@ import {
 import {
   type RequestGetAccountInfo,
   ResponseGetAccountInfoSchema,
-  RippleAccountAPI,
-} from './gen/account_pb';
+  XRPAccountAPI,
+} from './protogen/account_pb';
 import {
   type RequestIsValidAddress,
   ResponseGenerateAddressSchema,
   ResponseGenerateXAddressSchema,
   ResponseIsValidAddressSchema,
-  RippleAddressAPI,
-} from './gen/address_pb';
+  XRPAddressAPI,
+} from './protogen/address_pb';
 import {
   type EnumTransactionType,
   type RequestCombineTransaction,
@@ -37,8 +38,8 @@ import {
   ResponseSignTransactionSchema,
   ResponseSubmitTransactionSchema,
   ResponseWaitValidationSchema,
-  RippleTransactionAPI,
-} from './gen/transaction_pb';
+  XRPTransactionAPI,
+} from './protogen/transaction_pb';
 import { accountService } from './services/account';
 import { addressService } from './services/address';
 import {
@@ -53,7 +54,7 @@ import {
  */
 export function createRouter(): ConnectRouter {
   return createConnectRouter()
-    .service(RippleAccountAPI, {
+    .service(XRPAccountAPI, {
       getAccountInfo: async (request: RequestGetAccountInfo) => {
         const result = await accountService.getAccountInfo({
           address: request.address,
@@ -69,7 +70,7 @@ export function createRouter(): ConnectRouter {
         });
       },
     })
-    .service(RippleAddressAPI, {
+    .service(XRPAddressAPI, {
       generateAddress: () => {
         const result = addressService.generateAddress();
 
@@ -98,7 +99,7 @@ export function createRouter(): ConnectRouter {
         });
       },
     })
-    .service(RippleTransactionAPI, {
+    .service(XRPTransactionAPI, {
       prepareTransaction: async (request: RequestPrepareTransaction) => {
         // Build the request object
         type ServiceRequest = {
@@ -369,7 +370,7 @@ export function createRouter(): ConnectRouter {
           txID: result.txId,
         });
       },
-      waitValidation: async function* (_, context) {
+      waitValidation: async function* (_: Empty, context: HandlerContext) {
         for await (const response of transactionService.waitValidation({
           signal: context.signal,
         })) {

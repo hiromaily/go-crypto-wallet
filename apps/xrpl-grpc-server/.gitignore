@@ -6,7 +6,7 @@ dist/
 *.tsbuildinfo
 
 # Generated proto files
-src/gen/
+src/protogen/
 
 # Environment
 .env

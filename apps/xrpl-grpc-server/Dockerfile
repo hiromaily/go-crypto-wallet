@@ -36,7 +36,7 @@ COPY apps/xrpl-grpc-server/src ./src
 COPY apps/xrpl-grpc-server/tsconfig.json ./
 
 # Verify proto files exist
-RUN test -f src/gen/account_pb.ts || \
+RUN test -f src/protogen/account_pb.ts || \
     (echo "Error: Proto files not found. Run 'make proto-ts' before building Docker image." && exit 1)
 
 # Type check (optional build verification)
