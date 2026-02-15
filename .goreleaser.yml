@@ -84,10 +84,7 @@ archives:
   - id: default
     format: tar.gz
     name_template: >-
-      {{ .ProjectName }}_
-      {{- .Version }}_
-      {{- .Os }}_
-      {{- .Arch }}
+      {{ .ProjectName }}_ {{- .Version }}_ {{- .Os }}_ {{- .Arch }}
     # Use zip for windows
     format_overrides:
       - goos: windows

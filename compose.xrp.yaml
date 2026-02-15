@@ -5,47 +5,43 @@ networks:
 
 services:
   #########################################################################
-  # xrpl-grpc-server
-  # - XRPL gRPC Server using Bun runtime and ConnectRPC
-  # - Documentation: apps/xrpl-grpc-server/README.md
+  # rippled (rippled v3.1.0) using standalone
+  # - XRP Ledger node using xrpllabsofficial/xrpld image
+  # - Documentation:
+  #   - https://hub.docker.com/r/rippleci/rippled
+  #   - https://xrpl.org/blog/2025/rippled-3.0.0
+  #   - https://xrpl.org/install-rippled.html
+  # - Configuration: ./docker/nodes/xrp/config/rippled.cfg
+  # - Testnet validators: ./docker/nodes/xrp/config/validators.txt
   #------------------------------------------------------------------------
-  # $ docker compose -f compose.xrp.yaml exec xrpl-grpc-server sh
-  # $ grpcurl -plaintext localhost:50051 list
+  # $ docker compose -f compose.xrp.yaml exec rippled sh
+  # $ docker compose -f compose.xrp.yaml exec rippled server_info
+  # $ docker compose -f compose.xrp.yaml logs -f rippled
   #########################################################################
-  xrpl-grpc-server:
-    build:
-      context: .
-      dockerfile: apps/xrpl-grpc-server/Dockerfile
-    container_name: xrpl-grpc-server
+  rippled:
+    image: rippleci/rippled:3.1.0
+    container_name: rippled
+    volumes:
+      # Mount custom config (rippled.cfg and validators.txt)
+      - ./docker/nodes/xrp/config:/config:ro
+      # Persistent database storage
+      - xrp-node-db:/var/lib/rippled/db
+    # Expose WS/JSON-RPC port to the host if your app/CLI runs outside Docker.
+    # If your app/CLI also runs as a compose service, you can skip ports and use service DNS "rippled".
     ports:
-      - "${GRPC_PORT:-50051}:${GRPC_PORT:-50051}"
-    environment:
-      - GRPC_PORT=${GRPC_PORT:-50051}
-      - GRPC_HOST=0.0.0.0
-      # Connect to local xrp-node via WebSocket (admin port)
-      - XRP_WS_URL=ws://xrp-node:6006
-      - XRP_CONNECTION_TIMEOUT=20000
+      - "51233:51233"
     networks:
       - xrp
-    depends_on:
-      xrp-node:
-        condition: service_healthy
+    # Healthcheck ensures CI waits until rippled is ready.
     healthcheck:
-      test:
-        [
-          "CMD",
-          "bun",
-          "--eval",
-          "fetch('http://localhost:' + (process.env.GRPC_PORT || 50051) + '/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-    restart: unless-stopped
+      test: ["CMD", "rippled", "--silent", "server_info"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    command: ["standalone"]
 
   #########################################################################
-  # xrp-node (rippled v3.0.0)
+  # xrp-node (rippled v3.1.0)
   # - XRP Ledger node using xrpllabsofficial/xrpld image
   # - Documentation:
   #   - https://hub.docker.com/r/xrpllabsofficial/xrpld
@@ -54,43 +50,74 @@ services:
   # - Configuration: ./docker/nodes/xrp/config/rippled.cfg
   # - Testnet validators: ./docker/nodes/xrp/config/validators.txt
   #------------------------------------------------------------------------
-  # $ docker compose -f compose.xrp.yaml exec xrp-node sh
-  # $ docker compose -f compose.xrp.yaml exec xrp-node server_info
-  # $ docker compose -f compose.xrp.yaml logs -f xrp-node
+  # $ docker compose -f compose.xrp.yaml exec xrpld sh
+  # $ docker compose -f compose.xrp.yaml exec xrpld server_info
+  # $ docker compose -f compose.xrp.yaml logs -f xrpld
   #########################################################################
-  xrp-node:
-    image: xrpllabsofficial/xrpld:3.0.0
-    container_name: xrp-node
-    volumes:
-      # Mount custom config (rippled.cfg and validators.txt)
-      - ./docker/nodes/xrp/config:/config:ro
-      # Persistent database storage
-      - xrp-node-db:/var/lib/rippled/db
-    ports:
-      # Peer protocol (for connecting to other nodes)
-      - "${XRP_PEER_PORT:-51235}:51235"
-      # WebSocket public (wss)
-      - "${XRP_PUBLIC_WEBSOCKET_PORT:-6005}:6005"
-      # WebSocket admin (ws) - used by xrpl-grpc-server
-      - "${XRP_ADMIN_WEBSOCKET_PORT:-6006}:6006"
-    networks:
-      - xrp
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "-q",
-          "-O-",
-          '--post-data={"method":"server_info","params":[{}]}',
-          "--header=Content-Type: application/json",
-          "http://localhost:6006",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
-    restart: unless-stopped
+  # xrpld:
+  #   image: xrpllabsofficial/xrpld:3.1.0
+  #   container_name: xrp-node
+  #   volumes:
+  #     # Mount custom config (rippled.cfg and validators.txt)
+  #     - ./docker/nodes/xrp/config:/config:ro
+  #     # Persistent database storage
+  #     - xrp-node-db:/var/lib/rippled/db
+  #   ports:
+  #     # Peer protocol (for connecting to other nodes)
+  #     - "${XRP_PEER_PORT:-51235}:51235"
+  #     # WebSocket public (wss)
+  #     - "${XRP_PUBLIC_WEBSOCKET_PORT:-6005}:6005"
+  #     # WebSocket admin (ws) - used by xrpl-grpc-server
+  #     - "${XRP_ADMIN_WEBSOCKET_PORT:-6006}:6006"
+  #   networks:
+  #     - xrp
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "-O-", '--post-data={"method":"server_info","params":[{}]}', "--header=Content-Type: application/json", "http://localhost:6006"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 120s
+  #   restart: unless-stopped
+
+  #########################################################################
+  # xrpl-grpc-server: Deprecated
+  # - XRPL gRPC Server using Bun runtime and ConnectRPC
+  # - Documentation: apps/xrpl-grpc-server/README.md
+  #------------------------------------------------------------------------
+  # $ docker compose -f compose.xrp.yaml exec xrpl-grpc-server sh
+  # $ grpcurl -plaintext localhost:50051 list
+  #########################################################################
+  # xrpl-grpc-server:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/xrpl-grpc-server/Dockerfile
+  #   container_name: xrpl-grpc-server
+  #   ports:
+  #     - "${GRPC_PORT:-50051}:${GRPC_PORT:-50051}"
+  #   environment:
+  #     - GRPC_PORT=${GRPC_PORT:-50051}
+  #     - GRPC_HOST=0.0.0.0
+  #     # Connect to local xrp-node via WebSocket (admin port)
+  #     - XRP_WS_URL=ws://xrp-node:6006
+  #     - XRP_CONNECTION_TIMEOUT=20000
+  #   networks:
+  #     - xrp
+  #   depends_on:
+  #     xrp-node:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test:
+  #       [
+  #         "CMD",
+  #         "bun",
+  #         "--eval",
+  #         "fetch('http://localhost:' + (process.env.GRPC_PORT || 50051) + '/').then(r => process.exit(r.status === 404 ? 0 : 1)).catch(() => process.exit(1))",
+  #       ]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 15s
+  #   restart: unless-stopped
 
 volumes:
   xrp-node-db:

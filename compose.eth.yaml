@@ -33,13 +33,7 @@ services:
       test:
         - CMD-SHELL
         - >
-          bash -c 'payload="{\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}";
-          length=$$(printf "%s" "$$payload" | wc -c | tr -d " ");
-          request=$$(printf "POST / HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: %s\r\nConnection: close\r\n\r\n%s" "$$length" "$$payload");
-          exec 3<>/dev/tcp/localhost/8545 &&
-          printf "%s" "$$request" >&3 &&
-          read -r line <&3 &&
-          echo "$$line" | grep -q "200"'
+          bash -c 'payload="{\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}"; length=$$(printf "%s" "$$payload" | wc -c | tr -d " "); request=$$(printf "POST / HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: %s\r\nConnection: close\r\n\r\n%s" "$$length" "$$payload"); exec 3<>/dev/tcp/localhost/8545 && printf "%s" "$$request" >&3 && read -r line <&3 && echo "$$line" | grep -q "200"'
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,11 +41,9 @@ services:
     entrypoint: ["bash", "-c"]
     command:
       - >
-        ANVIL_ARGS="";
-        if [ -n "${ANVIL_FORK_URL:-}" ]; then
+        ANVIL_ARGS=""; if [ -n "${ANVIL_FORK_URL:-}" ]; then
           ANVIL_ARGS="--fork-url ${ANVIL_FORK_URL:-}";
-        fi;
-        exec anvil --host 0.0.0.0 --port 8545 --chain-id ${ANVIL_CHAIN_ID:-31337} --mnemonic "${ANVIL_MNEMONIC:-toy echo orbit embrace opinion file client report history bomb regret life}" --block-time ${ANVIL_BLOCK_TIME:-1} $${ANVIL_ARGS}
+        fi; exec anvil --host 0.0.0.0 --port 8545 --chain-id ${ANVIL_CHAIN_ID:-31337} --mnemonic "${ANVIL_MNEMONIC:-toy echo orbit embrace opinion file client report history bomb regret life}" --block-time ${ANVIL_BLOCK_TIME:-1} $${ANVIL_ARGS}
 
   #########################################################################
   # ethereum/client-go
@@ -109,18 +101,7 @@ services:
     networks:
       - eth
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-X",
-          "POST",
-          "-H",
-          "Content-Type: application/json",
-          "--data",
-          '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x0", false]}',
-          "http://127.0.0.1:${GETH_HTTP_PORT:-8545}",
-        ]
+      test: ["CMD", "curl", "-X", "POST", "-H", "Content-Type: application/json", "--data", '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x0", false]}', "http://127.0.0.1:${GETH_HTTP_PORT:-8545}"]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -164,13 +145,7 @@ services:
     networks:
       - eth
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-f",
-          "http://localhost:${BEACON_HTTP_PORT:-9596}/eth/v1/node/health",
-        ]
+      test: ["CMD", "curl", "-f", "http://localhost:${BEACON_HTTP_PORT:-9596}/eth/v1/node/health"]
       interval: 10s
       timeout: 5s
       retries: 5

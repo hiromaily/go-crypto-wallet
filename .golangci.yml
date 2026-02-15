@@ -105,8 +105,8 @@ linters:
         - G115 # G115: integer overflow conversion;
         - G306 # G306: Expect WriteFile permissions to be 0600 or less (too restrictive; also flags "0o644" permissions)
         - G307 # G307: Deferring unsafe method
-      # G103: Use of unsafe calls should be audited (includes panic detection)
-      # Note: panic is allowed only in instance construction phase (main.go and pkg/di)
+        # G103: Use of unsafe calls should be audited (includes panic detection)
+        # Note: panic is allowed only in instance construction phase (main.go and pkg/di)
 
     govet:
       enable:
@@ -149,8 +149,8 @@ linters:
           alias: apierc20impl
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp
           alias: apixrpimpl
-        # - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/db/mysql/sqlcgen
-        #   alias: sqlcgen
+          # - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/db/mysql/sqlcgen
+          #   alias: sqlcgen
     nakedret:
       # Disallow naked returns if func has more lines of code than this setting.
       # Default: 30
@@ -170,7 +170,7 @@ linters:
         - name: unused-receiver # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unused-receiver
         - name: use-any # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#use-any
         - name: use-errors-new # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#use-errors-new
-        # - name: import-shadowing  # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#import-shadowing
+          # - name: import-shadowing  # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#import-shadowing
 
     usetesting:
       os-chdir: false # FIXME(thaJeztah): Disable `os.Chdir()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
