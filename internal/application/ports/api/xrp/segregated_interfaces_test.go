@@ -68,8 +68,8 @@ func TestTransactionSignerInterface(t *testing.T) {
 	signMethod, found := interfaceType.MethodByName("SignTransactionNative")
 	assert.True(t, found, "SignTransactionNative method should exist for native Go signing")
 	assert.Equal(
-		t, 4, signMethod.Type.NumIn(),
-		"SignTransactionNative should have 4 inputs (ctx, txInput, secret, isMultiSig)",
+		t, 5, signMethod.Type.NumIn(),
+		"SignTransactionNative should have 5 inputs (ctx, txInput, secret, isMultiSig, existingSignedBlob)",
 	)
 	assert.Equal(
 		t, 3, signMethod.Type.NumOut(),
@@ -208,6 +208,7 @@ func (*mockTransactionSigner) SignTransactionNative(
 	txInput *dtoxrp.TxInput,
 	secret string,
 	isMultiSig bool,
+	existingSignedBlob *string,
 ) (string, string, error) {
 	return "", "", nil
 }

@@ -2,12 +2,9 @@ package xrp
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
@@ -52,72 +49,140 @@ func (u *signTransactionUseCase) Sign(
 	ctx context.Context,
 	input signusecase.SignTransactionInput,
 ) (signusecase.SignTransactionOutput, error) {
-	// get tx_deposit_id from tx file name
-	actionType, _, txID, signedCount, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeUnsigned)
+	// Step 1: Extract file metadata (supports both unsigned and partially signed files for multi-sig)
+	fileInfo, err := u.txFileRepo.GetFileNameType(input.FilePath)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, err
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to parse file path: %w", err)
 	}
 
-	var senderAccount domainAccount.AccountType
+	// Validate that file type is either unsigned or signed (multi-sig workflow)
+	if fileInfo.TxType != domainTx.TxTypeUnsigned && fileInfo.TxType != domainTx.TxTypeSigned {
+		return signusecase.SignTransactionOutput{},
+			fmt.Errorf("invalid transaction type: %s (expected unsigned or signed)", fileInfo.TxType)
+	}
 
-	// get hex tx from file
-	data, err := u.txFileRepo.ReadFileSlice(input.FilePath)
+	actionType := fileInfo.ActionType
+	txID := fileInfo.TxID
+	signedCount := fileInfo.SignedCount
+
+	// Step 2: Read JSON transaction file
+	txFile, err := u.txFileRepo.ReadXRPJSONFile(input.FilePath)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ReadFileSlice(): %w", err)
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("failed to read JSON transaction file: %w", err)
 	}
-	if len(data) > 1 {
-		senderAccount = domainAccount.AccountType(data[0])
-	} else {
-		return signusecase.SignTransactionOutput{}, errors.New("file is invalid")
+
+	// Step 3: Validate transaction file structure and invariants
+	// This prevents cross-network replay attacks and ensures file integrity
+	if err := txFile.Validate(); err != nil {
+		return signusecase.SignTransactionOutput{},
+			fmt.Errorf("invalid transaction file: %w", err)
 	}
-	serializedTxs := data[1:]
 
-	txHexs := make([]string, 0, len(serializedTxs))
-	for _, serializedTx := range serializedTxs {
-		// uid, txJSON
-		tmp := strings.SplitAfterN(serializedTx, ",", 2)
-		if len(tmp) != 2 {
-			return signusecase.SignTransactionOutput{}, errors.New("data format is invalid in file")
-		}
-		uuid := strings.TrimRight(tmp[0], ",")
-		txJSON := tmp[1]
+	// Step 4: Validate transaction file has entries
+	if len(txFile.Transactions) == 0 {
+		return signusecase.SignTransactionOutput{},
+			errors.New("transaction file contains no transactions")
+	}
 
-		var txInput dtoxrp.TxInput
-		if err = json.Unmarshal([]byte(txJSON), &txInput); err != nil {
-			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
+	// Step 5: Process each transaction entry
+	var (
+		signaturesAdded        = false // Track if we added any signatures
+		hasIncompleteAfterSign = false // Track if any transactions remain incomplete
+	)
+
+	for i := range txFile.Transactions {
+		tx := &txFile.Transactions[i]
+
+		// Skip if transaction is already complete
+		if tx.IsComplete {
+			logger.Debug("transaction already complete, skipping",
+				"uuid", tx.UUID,
+				"signatureCount", tx.SignatureCount,
+				"requiredSignatures", tx.RequiredSignatures)
+			continue
 		}
-		// TODO: get secret from database by txInput.Account
-		// master_seed from xrp_account_key table
-		var secret string
-		secret, err = u.xrpAccountKeyRepo.GetSecret(ctx, senderAccount, txInput.Account)
+
+		// Get signing secret from database
+		senderAccountType := domainAccount.AccountType(tx.SenderAccountType)
+		secret, err := u.xrpAccountKeyRepo.GetSecret(ctx, senderAccountType, tx.SenderAccount)
 		if err != nil {
 			return signusecase.SignTransactionOutput{},
-				fmt.Errorf("fail to call xrpAccountKeyRepo.GetSecret(): %w", err)
+				fmt.Errorf("failed to get secret for transaction %s (account type: %s): %w",
+					tx.UUID, senderAccountType, err)
 		}
 
-		// sign
-		var signedTxID string
-		var txBlob string
-		signedTxID, txBlob, err = u.xrp.SignTransaction(ctx, &txInput, secret)
+		// Determine if multi-signature is required
+		isMultiSig := tx.RequiredSignatures > 1
+
+		// Sign transaction using native Go implementation
+		// For multi-sig workflows, pass existing signed blob if available (signature accumulation)
+		signedTxID, txBlob, err := u.xrp.SignTransactionNative(
+			ctx,
+			&tx.UnsignedData,
+			secret,
+			isMultiSig,
+			tx.SignedBlob, // Pass existing blob for multi-sig accumulation
+		)
 		if err != nil {
-			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call xrp.SignTransaction(): %w", err)
+			return signusecase.SignTransactionOutput{},
+				fmt.Errorf("failed to sign transaction %s (multi-sig: %t, has existing signatures: %t): %w",
+					tx.UUID, isMultiSig, tx.SignedBlob != nil, err)
 		}
-		logger.Debug("signed_tx",
-			"uuid", uuid, "signed_tx_id", signedTxID, "signed_tx_blob", txBlob)
-		txHexs = append(txHexs, fmt.Sprintf("%s,%s,%s", uuid, signedTxID, txBlob))
+
+		// Update transaction entry with signature
+		tx.SignedBlob = &txBlob
+		tx.SignatureCount++
+		signaturesAdded = true
+
+		// Determine if signing is complete for this transaction
+		if tx.SignatureCount >= tx.RequiredSignatures {
+			tx.IsComplete = true
+			logger.Debug("transaction signing complete",
+				"uuid", tx.UUID,
+				"signatureCount", tx.SignatureCount,
+				"requiredSignatures", tx.RequiredSignatures)
+		} else {
+			hasIncompleteAfterSign = true
+			logger.Debug("transaction partially signed",
+				"uuid", tx.UUID,
+				"signatureCount", tx.SignatureCount,
+				"requiredSignatures", tx.RequiredSignatures,
+				"remainingSignatures", tx.RequiredSignatures-tx.SignatureCount)
+		}
+
+		// Log transaction hash (never log secret)
+		logger.Debug("transaction signed successfully",
+			"uuid", tx.UUID,
+			"signedTxID", signedTxID)
 	}
 
-	// write file
-	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeSigned, txID, signedCount+1)
-	generatedFileName, err := u.txFileRepo.WriteFileSlice(path, txHexs)
+	// Step 6: Determine overall completion status
+	// File is complete only if ALL transactions are complete
+	allComplete := !hasIncompleteAfterSign
+
+	// Step 7: Write updated JSON file
+	// Only increment signed count if we actually added signatures
+	newSignedCount := signedCount
+	if signaturesAdded {
+		newSignedCount++
+	}
+
+	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeSigned, txID, newSignedCount)
+	generatedFileName, err := u.txFileRepo.WriteXRPJSONFile(path, txFile)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)
+		return signusecase.SignTransactionOutput{},
+			fmt.Errorf("failed to write signed JSON file to %s: %w", path, err)
 	}
 
-	// return hexTx, isSigned, generatedFileName, nil
+	logger.Debug("signing operation completed",
+		"inputFile", input.FilePath,
+		"outputFile", generatedFileName,
+		"signaturesAdded", signaturesAdded,
+		"allComplete", allComplete)
+
 	return signusecase.SignTransactionOutput{
 		SignedData:   "",
-		IsComplete:   true,
+		IsComplete:   allComplete,
 		NextFilePath: generatedFileName,
 	}, nil
 }

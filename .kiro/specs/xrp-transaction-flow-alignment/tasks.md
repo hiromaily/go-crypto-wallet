@@ -76,7 +76,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ### 5. Sign Transaction Use Case Refactoring
 
-- [ ] 5.1 Refactor SignTransactionUseCase for JSON parsing and native signing
+- [x] 5.1 Refactor SignTransactionUseCase for JSON parsing and native signing
   - Replace CSV file parsing with `ReadJSONTransactionFile()`
   - Replace gRPC signing dependency with `TransactionSigner` interface
   - Retrieve signing secrets from XRPAccountKeyRepositorier
@@ -87,19 +87,20 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Log signature count and completion status at DEBUG level
   - _Requirements: 3.1, 3.2, 3.6, 10.1, 10.2, 10.4, 10.5, 10.6_
 
-- [ ] 5.2 Implement signature completion logic
+- [x] 5.2 Implement signature completion logic
   - Calculate completion status (signatureCount >= requiredSignatures)
   - Set `isComplete` flag when quorum is met
   - Skip re-signing if transaction already complete
   - Generate output file with updated signature count in filename
   - _Requirements: 3.3, 3.4, 3.7, 6.3, 6.4_
 
-- [ ] 5.3 Add multi-signature workflow support
-  - Support sequential signing by multiple operators
-  - Preserve existing signatures when adding new signature
-  - Update signed blob with combined signatures
-  - Generate sequential file names (unsigned → signed-1 → signed-2 → signed-final)
+- [x] 5.3 Add multi-signature workflow support
+  - Support sequential signing by multiple operators ✅
+  - Preserve existing signatures when adding new signature ✅
+  - Update signed blob with combined signatures ✅
+  - Generate sequential file names (unsigned → signed-1 → signed-2 → signed-final) ✅
   - _Requirements: 6.2, 6.5_
+  - _Implementation: Uses binary-codec to decode existing blob, extract Signers array, add new signature, and re-encode with all signatures combined._
 
 ### 6. Send Transaction Use Case Refactoring
 

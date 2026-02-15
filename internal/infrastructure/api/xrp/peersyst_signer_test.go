@@ -36,7 +36,7 @@ func TestPeersystSigner_SignTransactionNative_SingleSignature(t *testing.T) {
 	}
 
 	// Execute
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, false)
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, false, nil)
 
 	// Assert
 	require.NoError(t, err, "signing should succeed")
@@ -67,8 +67,8 @@ func TestPeersystSigner_SignTransactionNative_DeterministicSigning(t *testing.T)
 	}
 
 	// Sign twice with same input
-	txHash1, signedBlob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed, false)
-	txHash2, signedBlob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed, false)
+	txHash1, signedBlob1, err1 := signer.SignTransactionNative(ctx, txInput, testSeed, false, nil)
+	txHash2, signedBlob2, err2 := signer.SignTransactionNative(ctx, txInput, testSeed, false, nil)
 
 	// Assert deterministic behavior
 	require.NoError(t, err1)
@@ -97,7 +97,7 @@ func TestPeersystSigner_SignTransactionNative_InvalidSeed(t *testing.T) {
 	}
 
 	// Execute with invalid seed
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, "invalid-seed-format", false)
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, "invalid-seed-format", false, nil)
 
 	// Assert error
 	require.Error(t, err, "should return error for invalid seed")
@@ -162,7 +162,7 @@ func TestPeersystSigner_SignTransactionNative_MissingRequiredFields(t *testing.T
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			// Execute
-			txHash, signedBlob, err := signer.SignTransactionNative(ctx, tc.txInput, testSeed, false)
+			txHash, signedBlob, err := signer.SignTransactionNative(ctx, tc.txInput, testSeed, false, nil)
 
 			// Assert
 			require.Error(t, err, "should return error for missing field")
@@ -199,7 +199,7 @@ func TestPeersystSigner_SignTransactionNative_OfflineCapability(t *testing.T) {
 	}
 
 	// Execute - should complete without network access
-	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, false)
+	txHash, signedBlob, err := signer.SignTransactionNative(ctx, txInput, testSeed, false, nil)
 
 	// Assert offline signing works
 	require.NoError(t, err, "offline signing should succeed")
