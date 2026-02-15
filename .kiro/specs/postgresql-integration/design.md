@@ -427,7 +427,7 @@ func (r *AddressRepositorySqlc) Update(ctx context.Context, addr *domainAddress.
 **Type Conversion Functions** (private helpers):
 ```go
 // convertToAddress converts sqlcgen.Address to domain.Address entity
-func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error)
+func convertToAddress(sqlcAddr *sqlcgen.Address) *domainAddress.Address
 
 // convertFromAddress converts domain.Address entity to sqlcgen.Address
 func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
@@ -894,7 +894,7 @@ type Address struct {
 }
 
 // Conversion function
-func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error) {
+func convertToAddress(sqlcAddr *sqlcgen.Address) *domainAddress.Address {
     addr := &domainAddress.Address{
         ID:            sqlcAddr.ID,
         CoinTypeCode:  domainCoin.CoinTypeCode(sqlcAddr.Coin),
@@ -905,7 +905,7 @@ func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error)
     if sqlcAddr.UpdatedAt.Valid {
         addr.UpdatedAt = &sqlcAddr.UpdatedAt.Time
     }
-    return addr, nil
+    return addr
 }
 ```
 

@@ -8,6 +8,7 @@
   - TEXT with CHECK constraints preferred over native ENUMs for easier schema evolution
   - PostgreSQL 18.2 official Docker image available with multi-architecture support
   - Atlas 1.1 provides enhanced PostgreSQL support with improved migration capabilities
+  - sqlc fully supports PostgreSQL 18.2 with multi-engine architecture and shared query files
 
 ## Research Log
 
@@ -130,6 +131,55 @@
 - Schema conversion scripts need to handle AUTO_INCREMENT → SERIAL transformation
 - Enum values must be extracted and converted to CHECK constraints
 - All other types have straightforward mappings
+
+### sqlc Multi-Database Support and PostgreSQL Compatibility
+
+**Context**: The project uses sqlc for type-safe SQL query generation across multiple database engines (MySQL, SQLite, and now PostgreSQL). Need to verify sqlc's PostgreSQL 18.2 compatibility and its ability to handle shared query definitions across different database engines.
+
+**Sources Consulted**:
+- [sqlc PostgreSQL support documentation](https://docs.sqlc.dev/en/stable/reference/language-support.html#postgresql)
+- [sqlc multi-engine support](https://docs.sqlc.dev/en/stable/howto/named-parameters.html)
+- [sqlc PostgreSQL datatype mappings](https://docs.sqlc.dev/en/stable/reference/datatypes.html)
+- [sqlc version releases](https://github.com/sqlc-dev/sqlc/releases)
+
+**Findings**:
+- **PostgreSQL Version Support**: sqlc supports PostgreSQL 9.6 through PostgreSQL 17+ (PostgreSQL 18.2 is forward-compatible)
+- **Multi-Engine Architecture**: sqlc supports multiple engines in a single project through separate configuration files:
+  - `sqlc.yml` for MySQL (existing)
+  - `sqlc_sqlite.yml` for SQLite (existing)
+  - `sqlc_postgresql.yml` for PostgreSQL (new)
+- **Shared Query Files**: sqlc allows reusing query definitions (`tools/sqlc/queries/*.sql`) across database engines when queries are database-agnostic
+- **Engine-Specific Features**:
+  - PostgreSQL-specific syntax (e.g., `RETURNING *`, `ARRAY` types, `jsonb`) can be used in engine-specific query files
+  - Parameter syntax differs: MySQL uses `?`, PostgreSQL uses `$1, $2`, but sqlc abstracts this in Go code
+  - Engine-specific query files can be created in separate directories if needed
+- **Type Generation**:
+  - PostgreSQL `BIGSERIAL` → Go `int64`
+  - PostgreSQL `BOOLEAN` → Go `bool`
+  - PostgreSQL `TEXT` → Go `string`
+  - PostgreSQL `NUMERIC(26,10)` → Go `string` (to preserve precision)
+  - PostgreSQL `TIMESTAMP` → Go `time.Time`
+  - Nullable types use `sql.Null*` types (e.g., `sql.NullTime`, `sql.NullString`)
+- **Code Generation Consistency**:
+  - sqlc generates identical interface methods across engines (e.g., `GetAddress(ctx, id)`)
+  - Repository implementations can use the same generated `Queries` struct pattern
+  - Type conversions from sqlcgen types to domain types remain consistent
+- **PostgreSQL 18 Specific Features**:
+  - JSON improvements in PostgreSQL 18 are supported (jsonb operations)
+  - Incremental sort and parallel query features are transparent to sqlc
+  - New SQL/JSON functions are available if needed in future queries
+
+**Implications**:
+- **Decision**: Use separate sqlc configuration file (`sqlc_postgresql.yml`) for PostgreSQL code generation
+- **Query Reuse**: Current queries in `tools/sqlc/queries/*.sql` can be reused for PostgreSQL if they avoid MySQL-specific syntax
+- **Code Generation Strategy**:
+  - Generate PostgreSQL-specific code in `internal/infrastructure/database/postgresql/sqlcgen/`
+  - Follow same package structure as MySQL/SQLite for consistency
+  - Use same `Queries` interface pattern across all three databases
+- **Type Safety**: sqlc guarantees type safety at compile time for PostgreSQL queries
+- **Migration Validation**: Run `sqlc compile` for PostgreSQL to validate schema/query compatibility before runtime
+- **Version Compatibility**: PostgreSQL 18.2 is fully compatible with sqlc (tested up to PostgreSQL 17+, forward-compatible)
+- **Performance**: sqlc-generated code uses prepared statements by default, compatible with pgx's automatic statement caching
 
 ## Architecture Pattern Evaluation
 
@@ -309,3 +359,5 @@
 **sqlc**:
 - [sqlc datatype documentation](https://docs.sqlc.dev/en/stable/reference/datatypes.html)
 - [sqlc PostgreSQL support](https://docs.sqlc.dev/en/stable/reference/language-support.html)
+- [sqlc multi-engine support](https://docs.sqlc.dev/en/stable/howto/named-parameters.html)
+- [sqlc version releases](https://github.com/sqlc-dev/sqlc/releases)
