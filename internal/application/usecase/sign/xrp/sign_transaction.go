@@ -2,7 +2,6 @@ package xrp
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
@@ -73,18 +72,13 @@ func (u *signTransactionUseCase) Sign(
 
 	// Step 3: Validate transaction file structure and invariants
 	// This prevents cross-network replay attacks and ensures file integrity
+	// Note: Validate() checks all invariants including non-empty transactions array
 	if err := txFile.Validate(); err != nil {
 		return signusecase.SignTransactionOutput{},
 			fmt.Errorf("invalid transaction file: %w", err)
 	}
 
-	// Step 4: Validate transaction file has entries
-	if len(txFile.Transactions) == 0 {
-		return signusecase.SignTransactionOutput{},
-			errors.New("transaction file contains no transactions")
-	}
-
-	// Step 5: Process each transaction entry
+	// Step 4: Process each transaction entry
 	var (
 		signaturesAdded        = false // Track if we added any signatures
 		hasIncompleteAfterSign = false // Track if any transactions remain incomplete
@@ -156,11 +150,11 @@ func (u *signTransactionUseCase) Sign(
 			"signedTxID", signedTxID)
 	}
 
-	// Step 6: Determine overall completion status
+	// Step 5: Determine overall completion status
 	// File is complete only if ALL transactions are complete
 	allComplete := !hasIncompleteAfterSign
 
-	// Step 7: Write updated JSON file
+	// Step 6: Write updated JSON file
 	// Only increment signed count if we actually added signatures
 	newSignedCount := signedCount
 	if signaturesAdded {

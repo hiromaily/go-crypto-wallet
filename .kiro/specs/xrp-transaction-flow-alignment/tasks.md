@@ -131,15 +131,16 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ### 8. Unit Testing
 
-- [ ] 8.1 (P) Test JSON transaction file serialization
+- [x] 8.1 (P) Test JSON transaction file serialization
   - Verify JSON marshaling/unmarshaling correctness for XRPTransactionFile
   - Test schema validation (version, chain, network fields)
   - Validate signature count invariants enforcement
   - Test file path naming convention
   - Test error handling for invalid JSON and missing files
   - _Requirements: 8.1_
+  - _Implementation: `internal/application/dto/xrp/transaction_file_test.go`_
 
-- [ ] 8.2 (P) Test PeersystSigner implementation
+- [x] 8.2 (P) Test PeersystSigner implementation
   - Verify wallet derivation from seed produces correct addresses
   - Test transaction signing output format (hex-encoded blob and hash)
   - Validate multi-signature signing flow produces correct combined signatures
@@ -147,8 +148,9 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Verify offline signing capability (no network calls during signing)
   - Test deterministic signing (same input produces same signature)
   - _Requirements: 8.2, 5.1, 5.2, 5.3_
+  - _Implementation: `internal/infrastructure/api/xrp/peersyst_signer_test.go`, `peersyst_multisig_test.go`_
 
-- [ ] 8.3 (P) Test CreateTransactionUseCase
+- [x] 8.3 (P) Test CreateTransactionUseCase
   - Verify JSON file generation with correct metadata structure
   - Test signature count initialized to 0
   - Verify required signatures set based on account configuration
@@ -156,8 +158,10 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Test balance validation logic
   - Test destination address format validation
   - _Requirements: 8.5_
+  - _Implementation: `internal/application/usecase/watch/xrp/create_transaction_test.go`_
+  - _Note: Comprehensive integration test skipped (requires DB transaction mocking); unit tests cover validation and error handling_
 
-- [ ] 8.4 (P) Test SignTransactionUseCase
+- [x] 8.4 (P) Test SignTransactionUseCase
   - Verify signature count tracking and incrementation
   - Test completion status detection (signatureCount >= requiredSignatures)
   - Verify skip re-signing logic for completed transactions
@@ -165,14 +169,16 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Verify secret values never logged
   - Test error context wrapping with transaction UUID
   - _Requirements: 8.5_
+  - _Implementation: `internal/application/usecase/sign/xrp/sign_transaction_test.go`_
 
-- [ ] 8.5 (P) Test SendTransactionUseCase
+- [x] 8.5 (P) Test SendTransactionUseCase
   - Verify completion validation before submission
   - Test error handling for incomplete transactions
   - Verify signed blob extraction and submission
   - Test batch transaction handling (successes and errors)
   - Test XRP Ledger error code propagation
   - _Requirements: 8.5_
+  - _Implementation: `internal/application/usecase/watch/xrp/send_transaction_test.go`_
 
 ### 9. Integration Testing
 
