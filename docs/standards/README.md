@@ -19,6 +19,13 @@ For comprehensive documentation (including AI-specific context), see:
 
 - [Detailed AI Agent Guidelines](../ai-agents/guidelines/) - Full guidelines with examples
 
+### Database Management
+
+- [Database Schema Changes](../guidelines/database-schema-changes.md) - **Complete workflow** for schema modifications across multiple databases (MySQL, SQLite, PostgreSQL)
+- [Database Quick Reference](../guidelines/database-quick-reference.md) - **Cheat sheet** for common database operations and commands
+- [Database Management](../guidelines/database.md) - Overview of database architecture and tools
+- [Database Architecture](../development/database.md) - Detailed database setup and operations
+
 ## How to Use
 
 ### For AI Agents

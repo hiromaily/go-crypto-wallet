@@ -335,6 +335,14 @@
 - **Risk**: PostgreSQL 18-specific behaviors
   - **Mitigation**: Use Docker for consistent local environment; document PostgreSQL version requirements; test against multiple PostgreSQL versions if possible
 
+## Project Documentation
+
+**Database Management Guides** (Created 2024-02-15):
+- [Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md) - Complete workflow for multi-database schema modifications
+- [Database Quick Reference](../../../docs/guidelines/database-quick-reference.md) - Command cheat sheet and data type mapping tables
+- [Database Management](../../../docs/guidelines/database.md) - Overview of database tools and architecture
+- [Database Architecture](../../../docs/development/database.md) - Detailed database setup and operations
+
 ## References
 
 **PostgreSQL Drivers**:

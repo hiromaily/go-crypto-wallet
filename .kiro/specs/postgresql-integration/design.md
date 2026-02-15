@@ -10,6 +10,11 @@ This feature adds PostgreSQL 18.2 as a third database backend option to go-crypt
 
 **Impact**: This change extends the existing database abstraction layer without modifying the core wallet logic. All three databases (MySQL, SQLite, PostgreSQL) will coexist with identical query interfaces and schemas, allowing seamless database migration and selection based on deployment requirements.
 
+**📚 Implementation References**:
+- [Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md) - Complete workflow for multi-database schema modifications
+- [Database Quick Reference](../../../docs/guidelines/database-quick-reference.md) - Command cheat sheet and data type mappings
+- [Database Management](../../../docs/guidelines/database.md) - Overview of database tools and architecture
+
 ### Goals
 
 - Add PostgreSQL 18.2 as a fully supported database backend with feature parity to MySQL/SQLite
@@ -471,6 +476,8 @@ func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
 - Three separate schema files: 01_watch.sql, 02_keygen.sql, 03_sign.sql
 
 **Data Type Mappings**:
+
+**📘 Complete reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/guidelines/database-quick-reference.md#-data-type-mapping) for comprehensive mapping across MySQL, SQLite, and PostgreSQL.
 
 | MySQL Type | PostgreSQL Type | Conversion Notes |
 |------------|-----------------|------------------|
@@ -1015,6 +1022,8 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 - Establish baseline metrics for regression detection
 
 ## Migration Strategy
+
+**📘 Complete workflow guide**: See [Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md) for detailed step-by-step schema modification workflow across all databases.
 
 ### Phase 1: Schema Creation (Manual Conversion)
 

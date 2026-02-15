@@ -1,15 +1,18 @@
 # Database Management
 
-This document describes the database schema management workflow and SQLC code generation for the go-crypto-wallet project.
+This document provides a quick reference for database schema management and SQLC code generation in the go-crypto-wallet project.
+
+**📘 For detailed schema change workflows, see [Database Schema Changes Guide](database-schema-changes.md)**
 
 ## Supported Databases
 
-The project supports two database backends:
+The project supports three database backends:
 
-| Database | Use Case | Configuration |
-|----------|----------|---------------|
-| **MySQL** | Production, full integration testing | Docker container |
-| **SQLite** | E2E testing, CI/CD, lightweight testing | Local file |
+| Database | Status | Use Case | Configuration |
+|----------|--------|----------|---------------|
+| **MySQL 8.4** | ✅ Production | Production, full integration testing | Docker container |
+| **SQLite** | ✅ Production | E2E testing, CI/CD, lightweight testing | Local file |
+| **PostgreSQL 18.2** | 🚧 In Development | Production alternative, advanced features | Docker container |
 
 ### Database Type Configuration
 
@@ -37,85 +40,53 @@ export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
 
 ## Database Schema Changes
 
-This project uses [Atlas](https://atlasgo.io/) for database schema management with HCL (HashiCorp Configuration Language) as the source of truth.
+**🚀 Quick Workflow**:
+1. Edit HCL schema (`tools/atlas/schemas/*.hcl`)
+2. Format and lint (`make atlas-fmt && make atlas-lint`)
+3. Regenerate migrations (`make atlas-dev-reset`)
+4. Apply to database (`docker compose down -v && docker compose up`)
+5. Update SQLC schemas for all databases (MySQL, SQLite, PostgreSQL)
+6. Regenerate SQLC code (`make sqlc-all`)
+7. Verify build (`make check-build`)
 
-### Schema Files
+**📘 For complete step-by-step workflow with examples, see [Database Schema Changes Guide](database-schema-changes.md)**
 
-There are 3 schema files corresponding to each wallet type:
+### Schema Files (Source of Truth)
+
+There are 3 HCL schema files corresponding to each wallet type:
 
 - `tools/atlas/schemas/watch.hcl` - Watch wallet schema (online wallet)
 - `tools/atlas/schemas/keygen.hcl` - Keygen wallet schema (offline, key generation)
 - `tools/atlas/schemas/sign.hcl` - Sign wallet schema (offline, signing)
 
-### How to Change Database Schema
+**CRITICAL**: These HCL files are the **single source of truth**. Never edit migration SQL files or generated code directly.
 
-**Step 1: Modify the HCL schema file**
+### Multi-Database Workflow
 
-Edit the appropriate `.hcl` file in `tools/atlas/schemas/` directory. These files are the single source of truth for database schema.
+When making schema changes, you must update schemas for **all supported databases**:
 
-**Step 2: Format and lint the schema files**
+1. **MySQL**: Automatically updated via Atlas migrations
+2. **SQLite**: Manually convert MySQL schema with type mappings
+3. **PostgreSQL** *(coming soon)*: Manually convert MySQL schema with type mappings
 
-Run the following commands to format and validate the HCL schema files:
+**Data Type Mapping Quick Reference**:
 
-```bash
-make atlas-fmt
-make atlas-lint
-```
+| MySQL | SQLite | PostgreSQL |
+|-------|--------|------------|
+| `AUTO_INCREMENT` | `AUTOINCREMENT` | `BIGSERIAL` |
+| `TINYINT(1)` | `INTEGER` | `BOOLEAN` |
+| `ENUM('a','b')` | `TEXT CHECK(...)` | `TEXT CHECK(...)` |
+| `DATETIME` | `TEXT` | `TIMESTAMP` |
+| `DECIMAL(26,10)` | `TEXT` | `NUMERIC(26,10)` |
 
-This will:
+See [Database Schema Changes Guide](database-schema-changes.md) for complete mapping table.
 
-- Format all HCL schema files for consistency
-- Validate the schema syntax and structure
-- Ensure no errors exist before generating migrations
+### Important Principles
 
-**Step 3: Regenerate migration files**
-
-Run the following command to regenerate migration files from scratch:
-
-```bash
-make atlas-dev-reset
-```
-
-This command will:
-
-- Delete all existing migration files
-- Generate new migration files from the HCL schemas
-- Prompt for confirmation before proceeding
-
-**Step 4: Verify the migration**
-
-Test the migration by recreating the database:
-
-```bash
-docker compose down -v
-docker compose up
-```
-
-This will:
-
-- Remove existing database volumes (`-v` flag)
-- Start fresh containers and apply migrations
-- Verify that no errors occur during migration
-
-**Step 5: Regenerate SQLC code (if needed)**
-
-If the schema changes affect queries, regenerate SQLC code:
-
-```bash
-make sqlc
-```
-
-**Step 6: Verify the build**
-
-```bash
-make check-build
-```
-
-### Important Notes
-
-- **Always modify HCL files first** - Never edit migration SQL files directly
-- **HCL files are the source of truth** - Migration files are auto-generated from HCL
-- **Test locally before committing** - Always run the full `docker compose down -v && docker compose up` cycle
+- **HCL as source of truth** - Always modify HCL files first
+- **Schema parity** - All databases must have identical table/column names
+- **Test all databases** - Verify changes work with MySQL, SQLite, and PostgreSQL
+- **Atomic commits** - Commit HCL changes, migrations, and generated code together
 
 ## Database Migrations (Atlas)
 
