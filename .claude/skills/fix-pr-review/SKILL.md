@@ -7,21 +7,30 @@ description: Address PR review comments by selecting appropriate skills based on
 
 Workflow for addressing review comments on pull requests.
 
+## Input Formats
+
+User may provide either:
+- **PR number**: `563`, `#563`
+- **Full review URL**: `https://github.com/{owner}/{repo}/pull/{pr_number}#pullrequestreview-{review_id}`
+
+Extract `{pr_number}` (and optionally `{review_id}`) from the input.
+
 ## Prerequisites
 
-- PR number is required
+- PR number or review URL is required
 - Use `git-workflow` Skill for commit conventions
 
 ## Process Overview
 
 ```
-1. Fetch PR details
-2. Get review comments
+1. Parse input (PR number or review URL)
+2. Fetch PR details and review comments
 3. Classify by file type
 4. Load appropriate development skill
 5. Fix each comment
 6. Run verification
-7. Push changes
+7. Display summary table
+8. Commit and push changes
 ```
 
 ## Step 1: Fetch PR Information
@@ -33,7 +42,13 @@ gh pr view {pr_number}
 # Get PR diff to see modified files
 gh pr diff {pr_number} --name-only
 
-# Get review comments
+# Get review comments (all reviews)
+gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews
+
+# Get review comments for a specific review (if review_id is provided)
+gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews/{review_id}/comments
+
+# Get all inline comments on the PR
 gh api repos/{owner}/{repo}/pulls/{pr_number}/comments
 ```
 
@@ -63,7 +78,16 @@ Based on classification, load the appropriate skill:
 | Database   | `.claude/skills/db-migration/SKILL.md`           |
 | Docs       | `.claude/skills/docs-update/SKILL.md`            |
 
-## Step 4: Address Comments
+## Step 4: Address ALL Comments
+
+**IMPORTANT**: Every review comment must be addressed. Do not skip or miss any comment.
+
+### Procedure
+
+1. **List all comments** - Enumerate every review comment from the API response
+2. **Sort by priority** - Security > Functionality > Code Quality
+3. **Fix each one** - Address every comment, one by one
+4. **Track status** - Record the outcome for each comment (FIXED, ALREADY APPLIED, or SKIPPED)
 
 ### Priority Order
 
@@ -107,7 +131,33 @@ make shfmt
 
 If PR modifies multiple file types, run all applicable verification commands.
 
-## Step 6: Commit and Push
+## Step 6: Display Summary
+
+After fixing all comments, display a summary table:
+
+```
+Summary
+
+┌─────────────────────────┬────────────────────┬──────────────────────────────┐
+│     Review Comment      │       Status       │           Details            │
+├─────────────────────────┼────────────────────┼──────────────────────────────┤
+│ [comment description]   │ ✅ FIXED           │ [what was changed]           │
+├─────────────────────────┼────────────────────┼──────────────────────────────┤
+│ [comment description]   │ ✅ ALREADY APPLIED │ Applied in commit [hash]     │
+├─────────────────────────┼────────────────────┼──────────────────────────────┤
+│ [comment description]   │ ⏭️ SKIPPED         │ [reason for skipping]        │
+└─────────────────────────┴────────────────────┴──────────────────────────────┘
+```
+
+### Status Values
+
+| Status             | Meaning                                          |
+| ------------------ | ------------------------------------------------ |
+| ✅ FIXED           | Comment addressed with new code changes           |
+| ✅ ALREADY APPLIED | Already fixed in a previous commit                |
+| ⏭️ SKIPPED         | Not applicable or intentionally not addressed     |
+
+## Step 7: Commit and Push
 
 ```bash
 # Stage changes
