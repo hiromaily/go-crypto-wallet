@@ -104,22 +104,22 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ### 6. Send Transaction Use Case Refactoring
 
-- [ ] 6.1 Refactor SendTransactionUseCase for JSON validation with error handling
-  - Replace CSV parsing with `ReadJSONTransactionFile()`
-  - Validate all transactions have `isComplete == true` before submission
-  - Verify `signedBlob` is non-null and hex-encoded
-  - Extract signed blobs for ledger submission
-  - Return descriptive errors for incomplete transactions (insufficient signatures)
-  - Propagate XRP Ledger error codes and messages (tefPAST_SEQ, tecUNFUNDED_PAYMENT, etc.)
-  - Log file path and error details at ERROR level for parsing failures
-  - Handle batch transaction submission (collect successes and errors)
+- [x] 6.1 Refactor SendTransactionUseCase for JSON validation with error handling
+  - Replace CSV parsing with `ReadJSONTransactionFile()` ✅
+  - Validate all transactions have `isComplete == true` before submission ✅
+  - Verify `signedBlob` is non-null and hex-encoded ✅
+  - Extract signed blobs for ledger submission ✅
+  - Return descriptive errors for incomplete transactions (insufficient signatures) ✅
+  - Propagate XRP Ledger error codes and messages (tefPAST_SEQ, tecUNFUNDED_PAYMENT, etc.) ✅
+  - Log file path and error details at ERROR level for parsing failures ✅
+  - Handle batch transaction submission (collect successes and errors) ✅
   - _Requirements: 4.1, 4.3, 4.5, 4.6, 10.1, 10.3_
 
-- [ ] 6.2 Implement transaction submission via TransactionSubmitter
-  - Replace direct xrpl-go calls with `TransactionSubmitter` interface dependency
-  - Submit signed transaction blobs to XRP Ledger
-  - Return transaction hash and ledger version on success
-  - Update database transaction status (sent → done)
+- [x] 6.2 Implement transaction submission via TransactionSubmitter
+  - Replace direct xrpl-go calls with `TransactionSubmitter` interface dependency ✅
+  - Submit signed transaction blobs to XRP Ledger ✅
+  - Return transaction hash and ledger version on success ✅
+  - Update database transaction status (sent → done) ✅
   - _Requirements: 4.2, 4.4_
 
 ### 7. Backward Compatibility Implementation
