@@ -122,14 +122,12 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - [x] Update database transaction status (sent → done)
   - _Requirements: 4.2, 4.4_
 
-### 7. Backward Compatibility Implementation
+### 7. ~~Backward Compatibility Implementation~~ (CANCELED)
 
-- [ ] 7.1 Implement legacy text format detection
-  - Create `parseTransactionFile` helper that detects format (JSON vs text) based on extension
-  - Fall back to text parsing when JSON parsing fails
-  - Log deprecation warnings when processing text format files
-  - Ensure JSON format always used for new transactions
-  - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
+- ~7.1 Implement legacy text format detection~ — **CANCELED**
+  - Legacy text format support is not needed.
+    The project fully adopts JSON format; no backward compatibility shim required.
+  - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5 — N/A (canceled)_
 
 ### 8. Unit Testing
 
@@ -201,12 +199,8 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Confirm transaction appears on ledger explorer
   - _Requirements: 3.2_
 
-- [ ] 9.4 (P) Test backward compatibility
-  - Parse legacy text format transaction files
-  - Verify deprecation warnings logged
-  - Ensure text format parsing still functional
-  - Confirm new transactions always use JSON format
-  - _Requirements: 7.1, 7.2, 7.4, 8.6_
+- ~9.4 (P) Test backward compatibility~ — **CANCELED** (depends on canceled task 7.1)
+  - _Requirements: 7.1, 7.2, 7.4, 8.6 — N/A (canceled)_
 
 ### 10. System Integration and Validation
 
@@ -301,7 +295,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 - **Group A** (after 1.1, 1.2): 2.1
 - **Group B** (after 2.2, 3.2): All use case refactoring (4.1, 5.1, 6.1)
 - **Group C** (after 3.1, 5.1, 6.1): All unit tests (8.1-8.5)
-- **Group D** (after 9.1): 9.4
+- **Group D** (after 9.1): ~~9.4~~ (canceled)
 
 ## Key Improvements from Review
 
@@ -321,7 +315,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
 
 ## Estimated Effort
 
-- **Total Tasks**: 10 major tasks, 28 sub-tasks (reduced from 33)
+- **Total Tasks**: 10 major tasks, 26 sub-tasks (7.1, 9.4 canceled)
 - **Average Sub-task**: 1.5-2.5 hours
 - **Total Effort**: ~45-70 hours
 - **Critical Path**: ~22-30 hours (with parallelization)
