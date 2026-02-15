@@ -42,7 +42,7 @@ gh pr view {pr_number}
 # Get PR diff to see modified files
 gh pr diff {pr_number} --name-only
 
-# Get review comments (all reviews)
+# Get all reviews for a PR (includes summary comments)
 gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews
 
 # Get review comments for a specific review (if review_id is provided)
