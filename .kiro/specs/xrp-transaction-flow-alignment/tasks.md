@@ -148,7 +148,7 @@ This implementation plan translates the XRP Transaction Flow Alignment design in
   - Verify offline signing capability (no network calls during signing)
   - Test deterministic signing (same input produces same signature)
   - _Requirements: 8.2, 5.1, 5.2, 5.3_
-  - _Implementation: `internal/infrastructure/api/xrp/peersyst_signer_test.go`, `peersyst_multisig_test.go`_
+  - _Implementation: `internal/infrastructure/api/xrp/peersyst_signer_test.go`, `internal/infrastructure/api/xrp/peersyst_multisig_test.go`_
 
 - [x] 8.3 (P) Test CreateTransactionUseCase
   - Verify JSON file generation with correct metadata structure
