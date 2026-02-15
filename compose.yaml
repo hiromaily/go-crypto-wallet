@@ -61,8 +61,7 @@ services:
     networks:
       - db
     healthcheck:
-      test:
-        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -91,7 +90,7 @@ services:
   # Watch schema migration service
   # Inherits common configuration from &migration-base using <<: *migration-base
   wallet-db-migrate-watch:
-    <<: *migration-base
+    !!merge <<: *migration-base
     container_name: wallet-db-migrate-watch
     command:
       - migrate
@@ -104,7 +103,7 @@ services:
   # Keygen schema migration service
   # Inherits common configuration from &migration-base using <<: *migration-base
   wallet-db-migrate-keygen:
-    <<: *migration-base
+    !!merge <<: *migration-base
     container_name: wallet-db-migrate-keygen
     command:
       - migrate
@@ -117,7 +116,7 @@ services:
   # Sign schema migration service
   # Inherits common configuration from &migration-base using <<: *migration-base
   wallet-db-migrate-sign:
-    <<: *migration-base
+    !!merge <<: *migration-base
     container_name: wallet-db-migrate-sign
     command:
       - migrate
@@ -130,7 +129,7 @@ services:
   # Sign2 schema migration service (separate database for second sign wallet)
   # Inherits common configuration from &migration-base using <<: *migration-base
   wallet-db-migrate-sign2:
-    <<: *migration-base
+    !!merge <<: *migration-base
     container_name: wallet-db-migrate-sign2
     command:
       - migrate

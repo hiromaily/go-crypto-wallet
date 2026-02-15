@@ -34,15 +34,7 @@ services:
     networks:
       - btc
     healthcheck:
-      test:
-        [
-          "CMD",
-          "bitcoin-cli",
-          "-regtest",
-          "-rpcuser=xyz",
-          "-rpcpassword=xyz",
-          "getblockchaininfo",
-        ]
+      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=xyz", "-rpcpassword=xyz", "getblockchaininfo"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -61,15 +53,7 @@ services:
     networks:
       - btc
     healthcheck:
-      test:
-        [
-          "CMD",
-          "bitcoin-cli",
-          "-regtest",
-          "-rpcuser=xyz",
-          "-rpcpassword=xyz",
-          "getblockchaininfo",
-        ]
+      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=xyz", "-rpcpassword=xyz", "getblockchaininfo"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -88,15 +72,7 @@ services:
     networks:
       - btc
     healthcheck:
-      test:
-        [
-          "CMD",
-          "bitcoin-cli",
-          "-regtest",
-          "-rpcuser=xyz",
-          "-rpcpassword=xyz",
-          "getblockchaininfo",
-        ]
+      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=xyz", "-rpcpassword=xyz", "getblockchaininfo"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -115,15 +91,7 @@ services:
     networks:
       - btc
     healthcheck:
-      test:
-        [
-          "CMD",
-          "bitcoin-cli",
-          "-regtest",
-          "-rpcuser=xyz",
-          "-rpcpassword=xyz",
-          "getblockchaininfo",
-        ]
+      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=xyz", "-rpcpassword=xyz", "getblockchaininfo"]
       interval: 30s
       timeout: 10s
       retries: 5
