@@ -20,13 +20,13 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 ### Phase 1: Foundation & Configuration
 
 - [ ] 1. Add PostgreSQL configuration support
-- [ ] 1.1 (P) Extend database configuration struct for PostgreSQL
+- [x] 1.1 (P) Extend database configuration struct for PostgreSQL
   - Add PostgreSQL struct to pkg/config/wallet.go with fields: Host, Port, DB, User, Pass, SSLMode, Debug
   - Update Database struct to include PostgreSQL field
   - Update validation tag from `oneof=mysql sqlite` to `oneof=mysql sqlite postgresql`
   - _Requirements: 1.1, 1.6_
 
-- [ ] 1.2 (P) Implement PostgreSQL configuration validation
+- [x] 1.2 (P) Implement PostgreSQL configuration validation
   - Add PostgreSQL case to validateDatabase() switch statement
   - Validate required fields: Host, DB, User, Pass (return descriptive errors if empty)
   - Support optional fields: Port (default 5432), SSLMode (default "prefer"), Debug
