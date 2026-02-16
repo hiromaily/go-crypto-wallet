@@ -28,7 +28,7 @@ Starts the required infrastructure containers:
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
-│   wallet-mysql     │     │   bch-watch     │
+│   wallet-mysql  │     │   bch-watch     │
 │   (MySQL)       │     │   (BCH Node)    │
 └─────────────────┘     └─────────────────┘
                         ┌─────────────────┐
@@ -361,7 +361,7 @@ Bitcoin Cash uses CashAddr format. If you see address format errors:
 
 - ✅ Prerequisites check
 - ✅ Infrastructure setup
-- ✅ Wallet creation  
+- ✅ Wallet creation
 - ✅ HD key generation
 - ✅ Address import
 - ✅ UTXO generation (50 BCH)
