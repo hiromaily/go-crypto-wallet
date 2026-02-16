@@ -142,9 +142,11 @@ type TracerDetail struct {
 
 // Database config for database type selection
 type Database struct {
-	Type   string `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite"`
-	MySQL  MySQL  `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
-	SQLite SQLite `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
+	//nolint:lll,revive
+	Type       string     `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite postgresql"`
+	MySQL      MySQL      `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
+	SQLite     SQLite     `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
+	PostgreSQL PostgreSQL `toml:"postgresql" yaml:"postgresql" mapstructure:"postgresql"`
 }
 
 // MySQL info
@@ -167,6 +169,22 @@ type SQLite struct {
 	// Default: 2 (if not specified or set to 0)
 	MaxOpenConns int  `toml:"max_open_conns" yaml:"max_open_conns" mapstructure:"max_open_conns"`
 	Debug        bool `toml:"debug" yaml:"debug" mapstructure:"debug"`
+}
+
+// PostgreSQL info
+type PostgreSQL struct {
+	Host string `toml:"host" yaml:"host" mapstructure:"host"`
+	// Port specifies the PostgreSQL server port.
+	// Optional: defaults to 5432 if not specified or set to 0
+	Port int    `toml:"port" yaml:"port" mapstructure:"port"`
+	DB   string `toml:"dbname" yaml:"dbname" mapstructure:"dbname"`
+	User string `toml:"user" yaml:"user" mapstructure:"user"`
+	Pass string `toml:"pass" yaml:"pass" mapstructure:"pass"`
+	// SSLMode controls the SSL/TLS connection mode.
+	// Optional: defaults to "prefer" if not specified.
+	// Common values: "disable", "require", "verify-ca", "verify-full"
+	SSLMode string `toml:"sslmode" yaml:"sslmode" mapstructure:"sslmode"`
+	Debug   bool   `toml:"debug" yaml:"debug" mapstructure:"debug"`
 }
 
 // FilePath if file path group
@@ -287,8 +305,22 @@ func (c *WalletRoot) validateDatabase() error {
 		if c.Database.SQLite.Path == "" {
 			return errors.New("database.sqlite.path is required when database.type is sqlite")
 		}
+	case "postgresql":
+		// Validate PostgreSQL configuration
+		if c.Database.PostgreSQL.Host == "" {
+			return errors.New("database.postgresql.host is required when database.type is postgresql")
+		}
+		if c.Database.PostgreSQL.DB == "" {
+			return errors.New("database.postgresql.dbname is required when database.type is postgresql")
+		}
+		if c.Database.PostgreSQL.User == "" {
+			return errors.New("database.postgresql.user is required when database.type is postgresql")
+		}
+		if c.Database.PostgreSQL.Pass == "" {
+			return errors.New("database.postgresql.pass is required when database.type is postgresql")
+		}
 	default:
-		return fmt.Errorf("unsupported database type: %s (must be mysql or sqlite)", c.Database.Type)
+		return fmt.Errorf("unsupported database type: %s (must be mysql, sqlite, or postgresql)", c.Database.Type)
 	}
 
 	return nil
