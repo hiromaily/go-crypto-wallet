@@ -208,7 +208,7 @@ wait_for_port() {
 wait_for_migrations() {
 	local max_wait=${1:-120}
 	local counter=0
-	local migration_containers=("wallet-db-migrate-watch" "wallet-db-migrate-keygen" "wallet-db-migrate-sign" "wallet-db-migrate-sign2")
+	local migration_containers=("wallet-mysql-migrate-watch" "wallet-mysql-migrate-keygen" "wallet-mysql-migrate-sign" "wallet-mysql-migrate-sign2")
 
 	log_info "Waiting for database migrations to complete..."
 

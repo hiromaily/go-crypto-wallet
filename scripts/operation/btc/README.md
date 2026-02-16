@@ -150,7 +150,7 @@ Starts the required infrastructure containers:
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
-│   wallet-db     │     │   btc-watch     │
+│   wallet-mysql     │     │   btc-watch     │
 │   (MySQL)       │     │   (Bitcoin Node)│
 └─────────────────┘     └─────────────────┘
                         ┌─────────────────┐

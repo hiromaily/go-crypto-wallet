@@ -50,7 +50,7 @@ make atlas-dev-reset
 
 # 4. Reset database and apply
 docker compose down -v
-docker compose up -d
+docker compose --profile mysql up -d
 
 # 5. Regenerate SQLC (if schema affects queries)
 make extract-sqlc-schema-all
@@ -160,7 +160,7 @@ Regenerate with `make atlas-dev-reset`.
 
 - [ ] `make atlas-fmt` passes
 - [ ] `make atlas-lint` passes
-- [ ] Migration applies cleanly (`docker compose down -v && docker compose up -d`)
+- [ ] Migration applies cleanly (`docker compose down -v && docker compose --profile mysql up -d`)
 - [ ] `make sqlc` generates correctly (if schema changed)
 - [ ] `make check-build` passes
 - [ ] `make gotest` passes

@@ -27,7 +27,7 @@ go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 2. run Database containers
 
 ```
-docker compose up wallet-db
+docker compose up wallet-mysql
 ```
 
 ## Bitcoind Setup

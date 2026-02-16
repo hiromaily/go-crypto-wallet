@@ -10,25 +10,25 @@ Rules for modifying HCL (HashiCorp Configuration Language) files (`*.hcl`) in go
 
 ## Applicable Directories
 
-| Path | Description |
-|------|-------------|
-| `tools/atlas/schemas/` | Database schema definitions (source of truth) |
-| `tools/atlas/atlas.hcl` | Atlas configuration |
+| Path                    | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `tools/atlas/schemas/`  | Database schema definitions (source of truth) |
+| `tools/atlas/atlas.hcl` | Atlas configuration                           |
 
 ## Schema Files
 
-| File | Description |
-|------|-------------|
-| `tools/atlas/schemas/watch.hcl` | Watch wallet schema (online) |
+| File                             | Description                    |
+| -------------------------------- | ------------------------------ |
+| `tools/atlas/schemas/watch.hcl`  | Watch wallet schema (online)   |
 | `tools/atlas/schemas/keygen.hcl` | Keygen wallet schema (offline) |
-| `tools/atlas/schemas/sign.hcl` | Sign wallet schema (offline) |
+| `tools/atlas/schemas/sign.hcl`   | Sign wallet schema (offline)   |
 
 ## Verification Commands
 
-| Command | Purpose | Required |
-|---------|---------|----------|
-| `make atlas-fmt` | Format HCL files | ✅ Yes |
-| `make atlas-lint` | Lint and validate schemas | ✅ Yes |
+| Command               | Purpose                      | Required    |
+| --------------------- | ---------------------------- | ----------- |
+| `make atlas-fmt`      | Format HCL files             | ✅ Yes      |
+| `make atlas-lint`     | Lint and validate schemas    | ✅ Yes      |
 | `make atlas-validate` | Validate Atlas configuration | Recommended |
 
 ## Complete Workflow
@@ -45,9 +45,9 @@ make atlas-lint
 # 3. Regenerate migrations
 make atlas-dev-reset
 
-# 4. Reset database and apply
+# 4. Reset mysql database and apply
 docker compose down -v
-docker compose up -d
+docker compose --profile mysql up -d
 
 # 5. Regenerate SQLC (if schema affects queries)
 make extract-sqlc-schema-all
@@ -118,9 +118,9 @@ index "idx_unique_account" {
 
 **DO NOT EDIT** files generated from HCL:
 
-| Path | Description |
-|------|-------------|
-| `tools/atlas/migrations/**/*.sql` | Migration SQL files |
+| Path                                 | Description         |
+| ------------------------------------ | ------------------- |
+| `tools/atlas/migrations/**/*.sql`    | Migration SQL files |
 | `tools/atlas/migrations/*/atlas.sum` | Migration checksums |
 
 Regenerate with `make atlas-dev-reset`.
@@ -136,14 +136,14 @@ Regenerate with `make atlas-dev-reset`.
 
 ### Column Types
 
-| MySQL Type | HCL Type |
-|------------|----------|
-| BIGINT | `bigint` |
-| INT | `int` |
-| VARCHAR(n) | `varchar(n)` |
-| TEXT | `text` |
-| TIMESTAMP | `timestamp` |
-| BOOLEAN | `bool` |
+| MySQL Type   | HCL Type       |
+| ------------ | -------------- |
+| BIGINT       | `bigint`       |
+| INT          | `int`          |
+| VARCHAR(n)   | `varchar(n)`   |
+| TEXT         | `text`         |
+| TIMESTAMP    | `timestamp`    |
+| BOOLEAN      | `bool`         |
 | DECIMAL(p,s) | `decimal(p,s)` |
 
 ### Naming Conventions
@@ -157,7 +157,7 @@ Regenerate with `make atlas-dev-reset`.
 
 - [ ] `make atlas-fmt` passes
 - [ ] `make atlas-lint` passes
-- [ ] Migration applies cleanly (`docker compose down -v && docker compose up -d`)
+- [ ] Migration applies cleanly (`docker compose down -v && docker compose --profile mysql up -d`)
 - [ ] `make sqlc` generates correctly (if schema changed)
 - [ ] `make check-build` passes
 - [ ] `make gotest` passes

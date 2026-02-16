@@ -1,5 +1,6 @@
 volumes:
-  wallet-db: {}
+  wallet-mysql: {}
+  wallet-postgres: {}
 
 networks:
   db:
@@ -15,14 +16,15 @@ networks:
 #       [references]: https://docs.docker.com/reference/compose-file/extension/
 #
 # Common migration service configuration template
-# Using YAML anchor (&migration-base) to define reusable configuration
-x-migration-base: &migration-base
+# Using YAML anchor (&mysql-migration-base) to define reusable configuration
+x-mysql-migration-base: &mysql-migration-base
   image: arigaio/atlas:1.0.0
+  profiles: ["mysql"]
   volumes:
     - "./tools/atlas:/app/atlas"
   working_dir: /app/atlas
   depends_on:
-    wallet-db:
+    wallet-mysql:
       condition: service_healthy
   networks:
     - db
@@ -45,11 +47,12 @@ services:
   #   - Connection string: mysql://user:pass@localhost:3306/db?tls=true
   #   - Go DSN: user:pass@tcp(localhost:3306)/db?tls=true
   #
-  wallet-db:
+  wallet-mysql:
     image: mysql:8.4
-    container_name: wallet-db
+    profiles: ["mysql"]
+    container_name: wallet-mysql
     volumes:
-      - wallet-db:/var/lib/mysql
+      - wallet-mysql:/var/lib/mysql
       - "./docker/mysql/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -68,14 +71,38 @@ services:
       start_period: 30s
 
   #########################################################################
+  # PostgreSQL Database
+  #########################################################################
+  wallet-postgres:
+    image: postgres:18.2
+    profiles: ["postgres"]
+    container_name: wallet-postgres
+    volumes:
+      - wallet-postgres:/var/lib/postgresql/data
+      - "./docker/postgresql/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${POSTGRESQL_PORT:-5432}:5432"
+    networks:
+      - db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  #########################################################################
   # Database Migration (Atlas)
   #########################################################################
   # Atlas migration services for database schema management
   # These services automatically run migrations when the database is ready.
   # Each service applies migrations for one schema and exits.
   #
-  # When you run `docker compose up`, these services will:
-  #   1. Wait for wallet-db to be healthy (depends_on with condition: service_healthy)
+  # When you run `docker compose --profile mysql up`, these services will:
+  #   1. Wait for wallet-mysql to be healthy (depends_on with condition: service_healthy)
   #   2. Automatically apply migrations for each schema
   #   3. Exit after completion (restart: "no")
   #
@@ -89,52 +116,52 @@ services:
   #
   # Watch schema migration service
   # Inherits common configuration from &migration-base using <<: *migration-base
-  wallet-db-migrate-watch:
-    !!merge <<: *migration-base
-    container_name: wallet-db-migrate-watch
+  wallet-mysql-migrate-watch:
+    !!merge <<: *mysql-migration-base
+    container_name: wallet-mysql-migrate-watch
     command:
       - migrate
       - apply
       - --dir
       - file://migrations/watch
       - --url
-      - "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
+      - "mysql://root:root@wallet-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
 
   # Keygen schema migration service
   # Inherits common configuration from &migration-base using <<: *migration-base
-  wallet-db-migrate-keygen:
-    !!merge <<: *migration-base
-    container_name: wallet-db-migrate-keygen
+  wallet-mysql-migrate-keygen:
+    !!merge <<: *mysql-migration-base
+    container_name: wallet-mysql-migrate-keygen
     command:
       - migrate
       - apply
       - --dir
       - file://migrations/keygen
       - --url
-      - "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
+      - "mysql://root:root@wallet-mysql:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
 
   # Sign schema migration service
   # Inherits common configuration from &migration-base using <<: *migration-base
-  wallet-db-migrate-sign:
-    !!merge <<: *migration-base
-    container_name: wallet-db-migrate-sign
+  wallet-mysql-migrate-sign:
+    !!merge <<: *mysql-migration-base
+    container_name: wallet-mysql-migrate-sign
     command:
       - migrate
       - apply
       - --dir
       - file://migrations/sign
       - --url
-      - "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
+      - "mysql://root:root@wallet-mysql:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
 
   # Sign2 schema migration service (separate database for second sign wallet)
   # Inherits common configuration from &migration-base using <<: *migration-base
-  wallet-db-migrate-sign2:
-    !!merge <<: *migration-base
-    container_name: wallet-db-migrate-sign2
+  wallet-mysql-migrate-sign2:
+    !!merge <<: *mysql-migration-base
+    container_name: wallet-mysql-migrate-sign2
     command:
       - migrate
       - apply
       - --dir
       - file://migrations/sign
       - --url
-      - "mysql://root:root@wallet-db:3306/sign2?charset=utf8mb4&parseTime=True&loc=Local"
+      - "mysql://root:root@wallet-mysql:3306/sign2?charset=utf8mb4&parseTime=True&loc=Local"

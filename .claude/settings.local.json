@@ -46,7 +46,9 @@
       "Bash(env:*)",
       "Bash(test:*)",
       "Bash(.kiro/specs/*/spec.json:*)",
-      "Bash(mockery)"
+      "Bash(mockery)",
+      "Bash(chmod:*)",
+      "Bash(atlas version:*)"
     ]
   },
   "hooks": {

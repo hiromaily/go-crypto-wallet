@@ -124,5 +124,5 @@ if [[ "${HAS_CHANGES}" -eq 0 ]]; then
 else
 	echo ""
 	log_success "Migrations regenerated with content changes."
-	echo "  Run 'make reset-docker-db' to apply."
+	echo "  Run 'make reset-docker-mysql' to apply."
 fi

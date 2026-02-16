@@ -15,10 +15,10 @@ Workflow for database schema and migration changes.
 
 ## Applicable Files
 
-| Path | Description |
-|------|-------------|
+| Path                        | Description                              |
+| --------------------------- | ---------------------------------------- |
 | `tools/atlas/schemas/*.hcl` | HCL schema definitions (source of truth) |
-| `tools/sqlc/queries/*.sql` | SQLC query definitions |
+| `tools/sqlc/queries/*.sql`  | SQLC query definitions                   |
 
 ## Workflow
 
@@ -41,7 +41,7 @@ make atlas-dev-reset
 ### 4. Test Migration
 
 ```bash
-docker compose down -v && docker compose up -d
+docker compose down -v && docker compose --profile mysql up -d
 ```
 
 ### 5. Regenerate SQLC (from rules/sql.md)

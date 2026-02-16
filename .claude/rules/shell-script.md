@@ -43,14 +43,14 @@ cat nonexistent.txt | grep "pattern"  # Fails immediately if cat fails
 
 ```bash
 # Hardcoded volume name - brittle if project name changes
-docker volume rm "go-crypto-wallet_wallet-db"
+docker volume rm "go-crypto-wallet_wallet-mysql"
 ```
 
 **Good:**
 
 ```bash
 # Configurable with default
-DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
+DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-mysql}"
 docker volume rm "$DOCKER_VOLUME_NAME"
 ```
 
@@ -68,7 +68,7 @@ Use descriptive, uppercase names with underscores:
 RPC_USER="${RPC_USER:-xyz}"
 RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
-DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
+DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-mysql}"
 ```
 
 ### Use Environment Variables Instead of Modifying Config Files

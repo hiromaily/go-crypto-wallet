@@ -17,7 +17,7 @@ make atlas-fmt && make atlas-lint
 make atlas-dev-reset
 
 # 4. Apply to database
-docker compose down -v && docker compose up -d wallet-db
+docker compose down -v && docker compose up -d wallet-mysql
 make atlas-migrate-docker
 
 # 5. Extract and convert schemas
@@ -52,11 +52,11 @@ vim internal/infrastructure/repository/watch/mysql/address_sqlc.go
 ```bash
 # Complete reset (all data lost)
 docker compose down -v
-docker compose up -d wallet-db
+docker compose up -d wallet-mysql
 make atlas-migrate-docker
 
 # Reset specific schema
-docker compose exec wallet-db mysql -uroot -proot \
+docker compose exec wallet-mysql mysql -uroot -proot \
   -e "DROP DATABASE watch; CREATE DATABASE watch;"
 make atlas-migrate-docker
 ```
@@ -137,10 +137,10 @@ internal/infrastructure/database/
 
 | Command | Description |
 |---------|-------------|
-| `docker compose up -d wallet-db` | Start MySQL database |
+| `docker compose up -d wallet-mysql` | Start MySQL database |
 | `docker compose down -v` | Stop and remove database (data lost) |
-| `docker compose exec wallet-db mysql -uroot -proot watch` | Access watch schema |
-| `docker compose logs wallet-db` | View database logs |
+| `docker compose exec wallet-mysql mysql -uroot -proot watch` | Access watch schema |
+| `docker compose logs wallet-mysql` | View database logs |
 
 ## 🗄️ Database Configuration
 
@@ -221,7 +221,7 @@ make check-build
 
 ```bash
 # MySQL
-docker compose exec wallet-db mysql -uroot -proot watch -e "SHOW TABLES;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
 
 # SQLite
 sqlite3 ./data/sqlite/btc/e2e.db ".tables"
@@ -234,7 +234,7 @@ docker compose exec wallet-db-postgres psql -U hiromaily -d watch -c "\dt"
 
 ```bash
 # MySQL
-docker compose exec wallet-db mysql -uroot -proot watch -e "DESCRIBE address;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "DESCRIBE address;"
 
 # SQLite
 sqlite3 ./data/sqlite/btc/e2e.db "PRAGMA table_info(address);"
@@ -247,7 +247,7 @@ docker compose exec wallet-db-postgres psql -U hiromaily -d watch -c "\d address
 
 ```bash
 # MySQL
-docker compose exec wallet-db mysql -uroot -proot watch \
+docker compose exec wallet-mysql mysql -uroot -proot watch \
   -e "SELECT * FROM atlas_schema_revisions ORDER BY version DESC LIMIT 5;"
 
 # SQLite
@@ -285,7 +285,7 @@ make atlas-lint
 
 # Reset and retry
 docker compose down -v
-docker compose up -d wallet-db
+docker compose up -d wallet-mysql
 make atlas-dev-reset
 make atlas-migrate-docker
 ```
@@ -294,7 +294,7 @@ make atlas-migrate-docker
 
 ```bash
 # Check schema syntax
-docker compose exec wallet-db mysql -uroot -proot watch < tools/sqlc/schemas/01_watch.sql
+docker compose exec wallet-mysql mysql -uroot -proot watch < tools/sqlc/schemas/01_watch.sql
 
 # Run sqlc with verbose output
 cd tools/sqlc && sqlc generate --experimental

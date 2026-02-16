@@ -276,7 +276,7 @@ make gotest
 make go-lint
 
 # 5. Docker Compose works through mounted socket
-docker compose up -d
+docker compose --profile mysql up -d
 docker compose down
 
 # 6. Git operations work normally
@@ -290,7 +290,7 @@ git push
 
 ```bash
 # Start database services
-docker compose up -d
+docker compose --profile mysql up -d
 
 # Wait for database to be ready
 docker compose exec db mysql -u root -proot -e "SELECT 1"

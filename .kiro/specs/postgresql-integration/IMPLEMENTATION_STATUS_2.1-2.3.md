@@ -13,6 +13,7 @@ Successfully configured Atlas for PostgreSQL migrations by adding six new enviro
 ### ✅ Task 2.1: Add PostgreSQL Environments to Atlas Configuration
 
 **Changes Made**:
+
 - Updated Atlas version from 1.0.0 to 1.1.0 in configuration header
 - Added three PostgreSQL local development environments:
   - `local_postgresql_watch` - Watch wallet schema
@@ -20,6 +21,7 @@ Successfully configured Atlas for PostgreSQL migrations by adding six new enviro
   - `local_postgresql_sign` - Sign wallet schema
 
 **Configuration Details**:
+
 - Database URL: `postgres://postgres:postgres@localhost:5432/{database}?sslmode=disable`
 - Schema source: Reuses existing HCL files (`file://schemas/{watch|keygen|sign}.hcl`)
 - Migration directories: `file://migrations/postgresql_{watch|keygen|sign}`
@@ -33,12 +35,14 @@ Successfully configured Atlas for PostgreSQL migrations by adding six new enviro
 ### ✅ Task 2.2: Add PostgreSQL Admin Environments to Atlas Configuration
 
 **Changes Made**:
+
 - Added three PostgreSQL admin environments for schema-level operations:
   - `admin_postgresql_watch`
   - `admin_postgresql_keygen`
   - `admin_postgresql_sign`
 
 **Configuration Details**:
+
 - Database URL: `postgres://postgres:postgres@localhost:5432/?sslmode=disable` (no database specified)
 - Purpose: Allow schema-level operations (`atlas schema clean`, `drop schema`)
 - Schema source: Same HCL files as local environments
@@ -53,6 +57,7 @@ Successfully configured Atlas for PostgreSQL migrations by adding six new enviro
 **Status**: **Pending - Requires Docker**
 
 **Completed**:
+
 - ✅ Created migration directories:
   - `tools/atlas/migrations/postgresql_watch/`
   - `tools/atlas/migrations/postgresql_keygen/`
@@ -74,13 +79,16 @@ Successfully configured Atlas for PostgreSQL migrations by adding six new enviro
 ## Next Steps to Complete Task 2.3
 
 ### Prerequisites
+
 1. Ensure Docker is installed and running:
+
    ```bash
    docker --version
    docker ps
    ```
 
 2. Verify Atlas CLI is available:
+
    ```bash
    atlas version  # Should show 1.1.0 or later
    ```
@@ -130,7 +138,7 @@ Once generated, test applying migrations:
 
 ```bash
 # Start PostgreSQL (if using Docker Compose)
-docker compose up -d wallet-db-postgresql
+docker compose --profile mysql up -d wallet-db-postgresql
 
 # Apply migrations
 atlas migrate apply --env local_postgresql_watch
@@ -146,14 +154,17 @@ atlas schema diff --env local_postgresql_watch  # Should show "Schemas are synce
 ## Files Modified
 
 ### Configuration
+
 - `tools/atlas/atlas.hcl` (+66 lines, -2 lines)
   - Updated Atlas version: 1.0.0 → 1.1.0
   - Added 6 PostgreSQL environments (3 local + 3 admin)
 
 ### Documentation
+
 - `.kiro/specs/postgresql-integration/tasks.md` (updated checkboxes and status)
 
 ### Created Directories
+
 - `tools/atlas/migrations/postgresql_watch/` with README.md (1.4KB)
 - `tools/atlas/migrations/postgresql_keygen/` with README.md (1.1KB)
 - `tools/atlas/migrations/postgresql_sign/` with README.md (1.1KB)

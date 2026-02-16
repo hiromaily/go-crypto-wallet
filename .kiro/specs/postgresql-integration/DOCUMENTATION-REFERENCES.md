@@ -42,6 +42,7 @@ This document tracks all references to database management documentation within 
 ### design.md
 
 **Line ~13**: Overview section
+
 ```markdown
 **📚 Implementation References**:
 - [Database Schema Changes Guide] - Complete workflow for multi-database schema modifications
@@ -50,12 +51,14 @@ This document tracks all references to database management documentation within 
 ```
 
 **Line ~481**: Data Type Mappings section
+
 ```markdown
 **📘 Complete reference**: See [Database Quick Reference - Data Type Mapping]
 for comprehensive mapping across MySQL, SQLite, and PostgreSQL.
 ```
 
 **Line ~1027**: Migration Strategy section
+
 ```markdown
 **📘 Complete workflow guide**: See [Database Schema Changes Guide]
 for detailed step-by-step schema modification workflow across all databases.
@@ -64,6 +67,7 @@ for detailed step-by-step schema modification workflow across all databases.
 ### research.md
 
 **Line ~289**: New "Project Documentation" section
+
 ```markdown
 ## Project Documentation
 
@@ -77,6 +81,7 @@ for detailed step-by-step schema modification workflow across all databases.
 ### tasks.md
 
 **Line ~11**: Overview section
+
 ```markdown
 **📘 Implementation References**:
 - [Database Schema Changes Guide] - Complete workflow for schema modifications
@@ -85,12 +90,14 @@ for detailed step-by-step schema modification workflow across all databases.
 ```
 
 **Line ~37**: Phase 2 header
+
 ```markdown
 **📘 Reference**: See [Database Quick Reference - Data Type Mapping]
 for MySQL→PostgreSQL conversion table.
 ```
 
 **Line ~103**: Phase 3 header
+
 ```markdown
 **📘 Reference**: Follow [Database Schema Changes Guide - Scenario 1]
 for complete schema extraction and sqlc workflow.
@@ -141,7 +148,7 @@ From [Database Quick Reference](../../../docs/guidelines/database-quick-referenc
 # Schema change workflow
 make atlas-fmt && make atlas-lint
 make atlas-dev-reset
-docker compose down -v && docker compose up -d
+docker compose down -v && docker compose --profile mysql up -d
 make atlas-migrate-docker
 make sqlc && make sqlc-sqlite && make sqlc-postgresql
 
@@ -156,6 +163,7 @@ make go-lint && make check-build && make gotest
 **Reference**: [Database Quick Reference - Data Type Mapping](../../../docs/guidelines/database-quick-reference.md#-data-type-mapping)
 
 **Use For**:
+
 - Converting MySQL types to PostgreSQL
 - Understanding ENUM → TEXT CHECK conversion
 - Verifying AUTO_INCREMENT → BIGSERIAL mapping
@@ -165,6 +173,7 @@ make go-lint && make check-build && make gotest
 **Reference**: [Database Schema Changes Guide - Scenario 1](../../../docs/guidelines/database-schema-changes.md#scenario-1-adding-a-new-column)
 
 **Use For**:
+
 - Understanding the complete workflow: HCL → migrations → database → dump → extract → sqlc
 - Following the established pattern for schema extraction
 - Implementing pg_dump wrapper scripts
@@ -174,6 +183,7 @@ make go-lint && make check-build && make gotest
 **Reference**: [Database Schema Changes Guide - Repository Pattern](../../../docs/guidelines/database-schema-changes.md#repository-pattern)
 
 **Use For**:
+
 - Understanding the repository pattern structure
 - DI container integration examples
 - Type-safe sqlc-generated code usage
@@ -183,6 +193,7 @@ make go-lint && make check-build && make gotest
 **Reference**: [Database Schema Changes Guide - Testing Schema Changes](../../../docs/guidelines/database-schema-changes.md#testing-schema-changes)
 
 **Use For**:
+
 - Testing with all three databases
 - Cross-database compatibility testing
 - Integration test patterns
@@ -192,6 +203,7 @@ make go-lint && make check-build && make gotest
 **Reference**: All database management guides
 
 **Use For**:
+
 - Migration documentation structure
 - Configuration examples
 - Best practices and common pitfalls
@@ -244,12 +256,14 @@ make go-lint && make check-build && make gotest
 ## Maintenance
 
 **When to Update References**:
+
 - New documentation added to `docs/guidelines/`
 - Workflow changes or improvements
 - New database features added
 - Breaking changes in tools (Atlas, sqlc)
 
 **How to Update**:
+
 1. Update relevant documentation in `docs/guidelines/`
 2. Verify references in specs still point to correct sections
 3. Test workflows to ensure accuracy

@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    CREATE DATABASE watch;
+    CREATE DATABASE keygen;
+    CREATE DATABASE sign;
+    CREATE DATABASE sign2;
+    GRANT ALL PRIVILEGES ON DATABASE watch TO postgres;
+    GRANT ALL PRIVILEGES ON DATABASE keygen TO postgres;
+    GRANT ALL PRIVILEGES ON DATABASE sign TO postgres;
+    GRANT ALL PRIVILEGES ON DATABASE sign2 TO postgres;
+EOSQL

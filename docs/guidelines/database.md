@@ -41,10 +41,11 @@ export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
 ## Database Schema Changes
 
 **🚀 Quick Workflow**:
+
 1. Edit HCL schema (`tools/atlas/schemas/*.hcl`)
 2. Format and lint (`make atlas-fmt && make atlas-lint`)
 3. Regenerate migrations (`make atlas-dev-reset`)
-4. Apply to database (`docker compose down -v && docker compose up`)
+4. Apply to database (`docker compose down -v && docker compose --profile mysql up`)
 5. Update SQLC schemas for all databases (MySQL, SQLite, PostgreSQL)
 6. Regenerate SQLC code (`make sqlc-all`)
 7. Verify build (`make check-build`)

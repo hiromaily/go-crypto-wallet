@@ -96,4 +96,4 @@ reset-payment-request:
 
 .PHONY: reset-payment-request-docker
 reset-payment-request-docker:
-	docker compose exec wallet-db mysql -u root -proot watch -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
+	docker compose exec wallet-mysql mysql -u root -proot watch -e "$(cat ./docker/mysql/sqls/payment_request.sql)"

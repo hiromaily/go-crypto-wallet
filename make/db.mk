@@ -7,11 +7,15 @@
 ###############################################################################
 
 # run consolidated database
-.PHONY: reset-docker-db
-reset-docker-db:
+.PHONY: reset-docker-mysql
+reset-docker-mysql:
 	docker compose down -v
-	docker compose up
+	docker compose --profile mysql up
 
+.PHONY: reset-docker-postgres
+reset-docker-postgres:
+	docker compose down -v
+	docker compose --profile postgres up
 
 ###############################################################################
 # DB Related Targets
@@ -28,7 +32,7 @@ include make/db_sqlc.mk
 # Regenerate everything after Atlas HCL schema changes
 # This runs all steps needed after modifying tools/atlas/schemas/*.hcl files:
 # 1. atlas-dev-reset: Regenerate migration files from HCL schemas
-# 2. reset-docker-db: Restart DB container to apply migrations
+# 2. reset-docker-mysql: Restart DB container to apply migrations
 # 3. Wait for DB to be ready
 # 4. extract-sqlc-schema-all: Extract sqlc schemas from running DB
 # 5. sqlc: Generate Go code from schemas and queries
@@ -42,16 +46,16 @@ regenerate-all-from-atlas:
 	@echo ""
 	@echo "=== Step 2/5: Restarting Docker DB ==="
 	docker compose down -v
-	docker compose up -d
+	docker compose --profile mysql up -d
 	@echo ""
 	@echo "=== Step 3/5: Waiting for DB and migrations to be ready ==="
 	@# Use 'docker compose wait' to wait for all migration services to complete.
-	@# Migration services depend on wallet-db with 'condition: service_healthy',
+	@# Migration services depend on wallet-mysql with 'condition: service_healthy',
 	@# so MySQL is guaranteed to be ready when migrations complete.
 	@# This command blocks until each specified service exits and returns their exit codes.
 	@# If any migration fails (non-zero exit), the command will fail and stop the workflow.
 	@# Requires Docker Compose v2.21 or later.
-	docker compose wait wallet-db-migrate-watch wallet-db-migrate-keygen wallet-db-migrate-sign
+	docker compose wait wallet-mysql-migrate-watch wallet-mysql-migrate-keygen wallet-mysql-migrate-sign
 	@echo "✓ Database is ready and all migrations completed"
 	@echo ""
 	@echo "=== Step 4/5: Extracting sqlc schemas from DB ==="

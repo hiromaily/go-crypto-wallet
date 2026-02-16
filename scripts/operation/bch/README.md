@@ -28,7 +28,7 @@ Starts the required infrastructure containers:
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
-│   wallet-db     │     │   bch-watch     │
+│   wallet-mysql     │     │   bch-watch     │
 │   (MySQL)       │     │   (BCH Node)    │
 └─────────────────┘     └─────────────────┘
                         ┌─────────────────┐

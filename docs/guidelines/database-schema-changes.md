@@ -174,7 +174,7 @@ Are you sure you want to delete all migration files? [y/N]: y
 ```bash
 # Stop and recreate database containers
 docker compose down -v
-docker compose up -d wallet-db
+docker compose up -d wallet-mysql
 
 # Apply migrations
 make atlas-migrate-docker
@@ -492,11 +492,11 @@ func (c *Container) CreateAddressRepository() repository.AddressRepository {
 ```bash
 # Reset database and apply migrations
 docker compose down -v
-docker compose up -d wallet-db
+docker compose up -d wallet-mysql
 make atlas-migrate-docker
 
 # Verify schema
-docker compose exec wallet-db mysql -uroot -proot watch -e "DESCRIBE new_table;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "DESCRIBE new_table;"
 
 # Run integration tests
 make integration-test
@@ -669,7 +669,7 @@ Error: atlas migrate apply failed
 
 2. **Verify database is running**:
    ```bash
-   docker compose ps wallet-db
+   docker compose ps wallet-mysql
    ```
 
 3. **Check migration history**:
@@ -680,7 +680,7 @@ Error: atlas migrate apply failed
 4. **Reset and retry**:
    ```bash
    docker compose down -v
-   docker compose up -d wallet-db
+   docker compose up -d wallet-mysql
    make atlas-dev-reset
    make atlas-migrate-docker
    ```
@@ -697,7 +697,7 @@ Error: sqlc generate failed
 1. **Check schema file syntax**:
    ```bash
    # Validate MySQL syntax
-   docker compose exec wallet-db mysql -uroot -proot watch < tools/sqlc/schemas/01_watch.sql
+   docker compose exec wallet-mysql mysql -uroot -proot watch < tools/sqlc/schemas/01_watch.sql
    ```
 
 2. **Check query file syntax**:
@@ -757,7 +757,7 @@ Error: migration checksum mismatch
 
 2. **Clear migration history**:
    ```bash
-   docker compose exec wallet-db mysql -uroot -proot watch \
+   docker compose exec wallet-mysql mysql -uroot -proot watch \
      -e "DROP TABLE IF EXISTS atlas_schema_revisions;"
    make atlas-migrate-docker
    ```
@@ -786,7 +786,7 @@ vim tools/atlas/migrations/watch/20240215120000.sql  # WRONG!
 ```bash
 # Complete local test cycle
 docker compose down -v
-docker compose up -d wallet-db
+docker compose up -d wallet-mysql
 make atlas-migrate-docker
 make sqlc-all
 make go-lint
@@ -875,7 +875,7 @@ Ensure CI tests schema changes:
 # .github/workflows/test.yml
 - name: Test schema migrations
   run: |
-    docker compose up -d wallet-db
+    docker compose up -d wallet-mysql
     make atlas-migrate-docker
     make sqlc-all
     make check-build

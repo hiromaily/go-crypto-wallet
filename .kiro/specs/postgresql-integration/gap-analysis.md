@@ -213,14 +213,14 @@ func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
 ### 9. Docker Compose (`compose.yaml`)
 
 **Existing Assets**:
-- `wallet-db` service: MySQL 8.4 container
-- Migration services: `wallet-db-migrate-{watch,keygen,sign}` using Atlas 1.0.0
+- `wallet-mysql` service: MySQL 8.4 container
+- Migration services: `wallet-mysql-migrate-{watch,keygen,sign}` using Atlas 1.0.0
 - Pattern:
 ```yaml
 x-migration-base: &migration-base
   image: arigaio/atlas:1.0.0
   depends_on:
-    wallet-db:
+    wallet-mysql:
       condition: service_healthy
 ```
 
