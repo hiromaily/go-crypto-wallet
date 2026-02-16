@@ -138,7 +138,7 @@ Once generated, test applying migrations:
 
 ```bash
 # Start PostgreSQL (if using Docker Compose)
-docker compose --profile mysql up -d wallet-db-postgresql
+docker compose --profile postgres up -d wallet-postgres
 
 # Apply migrations
 atlas migrate apply --env local_postgresql_watch

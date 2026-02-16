@@ -18,7 +18,7 @@ networks:
 # Common migration service configuration template
 # Using YAML anchor (&mysql-migration-base) to define reusable configuration
 x-mysql-migration-base: &mysql-migration-base
-  image: arigaio/atlas:1.0.0
+  image: arigaio/atlas:1.1.0
   profiles: ["mysql"]
   volumes:
     - "./tools/atlas:/app/atlas"

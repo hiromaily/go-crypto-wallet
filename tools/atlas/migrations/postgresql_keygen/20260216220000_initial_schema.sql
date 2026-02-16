@@ -1,6 +1,18 @@
+-- SECURITY NOTE:
+-- This schema stores cryptographic keys and seeds. In production deployments:
+-- 1. Use database-level encryption (PostgreSQL Transparent Data Encryption)
+-- 2. Consider external Key Management Systems (KMS) or Hardware Security Modules (HSM)
+-- 3. Implement application-level encryption before database persistence
+-- 4. Restrict database access with role-based permissions
+-- 5. Enable audit logging for sensitive table access
+-- 
+-- The offline wallet architecture (keygen/sign separated from watch) provides
+-- air-gapped security, but database-level protections remain critical.
+
+
 -- Create "auth_fullpubkey" table
 CREATE TABLE "auth_fullpubkey" (
-  "id" smallint NOT NULL AUTO_INCREMENT COMMENT "ID",
+  "id" smallserial NOT NULL COMMENT "ID",
   "coin" text NOT NULL CHECK ("coin" IN ('btc','bch')) COMMENT "coin type code",
   "auth_account" varchar(20) NOT NULL COMMENT "auth type",
   "purpose" smallint NOT NULL DEFAULT 49 COMMENT "BIP purpose (44, 49, 84, 86) - default 49 for backward compatibility",
@@ -72,7 +84,7 @@ CREATE TABLE "musig2_nonces" (
 ) COMMENT "MuSig2 nonce commitments for secure storage";
 -- Create "seed" table
 CREATE TABLE "seed" (
-  "id" smallint NOT NULL AUTO_INCREMENT COMMENT "ID",
+  "id" smallserial NOT NULL COMMENT "ID",
   "coin" text NOT NULL CHECK ("coin" IN ('btc','bch','eth','xrp','hyt')) COMMENT "coin type code",
   "seed" varchar(255) NOT NULL COMMENT "seed",
   "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
