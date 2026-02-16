@@ -37,7 +37,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 **📘 Reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/guidelines/database-quick-reference.md#-data-type-mapping) for MySQL→PostgreSQL conversion table.
 
 - [ ] 2. Configure Atlas for PostgreSQL migrations
-- [ ] 2.1 (P) Add PostgreSQL environments to Atlas configuration
+- [x] 2.1 (P) Add PostgreSQL environments to Atlas configuration
   - Edit tools/atlas/atlas.hcl to add local_postgresql_watch environment
   - Set URL: postgres://postgres:postgres@localhost:5432/watch?sslmode=disable
   - Configure src: file://schemas/watch.hcl (reuse existing HCL — Atlas HCL is database-agnostic)
@@ -46,7 +46,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Add similar environments for keygen and sign databases
   - _Requirements: 7.1, 7.2, 7.3, 7.5, 7.7_
 
-- [ ] 2.2 (P) Add PostgreSQL admin environments to Atlas configuration
+- [x] 2.2 (P) Add PostgreSQL admin environments to Atlas configuration
   - Add admin_postgresql_watch environment without database in URL
   - Configure for schema-level operations (clean, drop)
   - Add admin environments for keygen and sign
@@ -58,6 +58,8 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Verify migration SQL contains PostgreSQL syntax (BIGSERIAL, CHECK, etc.)
   - Validate migrations don't reference MySQL-specific features
   - Creates files: tools/atlas/migrations/postgresql_watch/, postgresql_keygen/, postgresql_sign/
+  - **Status**: Migration directories created with README documentation. Requires Docker to run Atlas CLI for migration generation.
+  - **To complete**: Ensure Docker is running, then execute commands documented in `tools/atlas/migrations/postgresql_*/README.md`
   - _Requirements: 7.3, 7.4, 7.6_
 
 - [ ] 3. Add PostgreSQL to Docker Compose environment

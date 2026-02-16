@@ -1,7 +1,7 @@
 # Atlas Configuration for go-crypto-wallet
 # Manages three separate schemas: watch, keygen, sign
 # Uses HCL schema files for declarative schema management
-# Atlas version: 1.0.0
+# Atlas version: 1.1.0
 
 # Variable to control destructive changes (drop schema/table/column)
 variable "destructive" {
@@ -96,6 +96,70 @@ env "admin_sign" {
   url     = "mysql://root:root@127.0.0.1:3306/?charset=utf8mb4&parseTime=True&loc=Local"
   src     = "file://schemas/sign.hcl"
   schemas = ["sign"]
+}
+
+###############################################################################
+# PostgreSQL environments for local development
+# Uses PostgreSQL 18.2 Docker container
+###############################################################################
+
+# Local development environment - PostgreSQL Watch schema
+env "local_postgresql_watch" {
+  url     = "postgres://postgres:postgres@localhost:5432/watch?sslmode=disable"
+  src     = "file://schemas/watch.hcl"
+  schemas = ["public"]
+  migration {
+    dir = "file://migrations/postgresql_watch"
+  }
+  dev = "docker://postgres/18/watch"
+}
+
+# Local development environment - PostgreSQL Keygen schema
+env "local_postgresql_keygen" {
+  url     = "postgres://postgres:postgres@localhost:5432/keygen?sslmode=disable"
+  src     = "file://schemas/keygen.hcl"
+  schemas = ["public"]
+  migration {
+    dir = "file://migrations/postgresql_keygen"
+  }
+  dev = "docker://postgres/18/keygen"
+}
+
+# Local development environment - PostgreSQL Sign schema
+env "local_postgresql_sign" {
+  url     = "postgres://postgres:postgres@localhost:5432/sign?sslmode=disable"
+  src     = "file://schemas/sign.hcl"
+  schemas = ["public"]
+  migration {
+    dir = "file://migrations/postgresql_sign"
+  }
+  dev = "docker://postgres/18/sign"
+}
+
+###############################################################################
+# PostgreSQL Admin environments for schema-level operations
+# These environments use URLs without database name for ModifySchema operations
+###############################################################################
+
+# Admin environment - PostgreSQL Watch schema
+env "admin_postgresql_watch" {
+  url     = "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
+  src     = "file://schemas/watch.hcl"
+  schemas = ["public"]
+}
+
+# Admin environment - PostgreSQL Keygen schema
+env "admin_postgresql_keygen" {
+  url     = "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
+  src     = "file://schemas/keygen.hcl"
+  schemas = ["public"]
+}
+
+# Admin environment - PostgreSQL Sign schema
+env "admin_postgresql_sign" {
+  url     = "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
+  src     = "file://schemas/sign.hcl"
+  schemas = ["public"]
 }
 
 # Usage examples:
