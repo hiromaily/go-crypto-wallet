@@ -6,10 +6,10 @@ Security requirements for go-crypto-wallet. **Security is non-negotiable** in th
 
 | Rule | Description |
 |------|-------------|
-| ❌ Never log private keys | No sensitive data in logs, errors, or commits |
-| ❌ Never hardcode secrets | Use secure input methods, not CLI arguments |
-| ✅ Zero-clear memory | Clear sensitive data from memory when done |
-| ✅ Security review | Required for changes involving sensitive data |
+| Never log private keys | No sensitive data in logs, errors, or commits |
+| Never hardcode secrets | Use secure input methods, not CLI arguments |
+| Zero-clear memory | Clear sensitive data from memory when done |
+| Security review | Required for changes involving sensitive data |
 
 ## Security-Critical Areas
 
@@ -52,4 +52,4 @@ Run for:
 
 ## Detailed Guidelines
 
-See [docs/guidelines/core.md](../guidelines/core.md) for full security guidelines.
+See [core.md](core.md) for full security guidelines including error handling, panic usage, and core patterns.

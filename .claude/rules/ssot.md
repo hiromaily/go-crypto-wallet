@@ -14,23 +14,23 @@ This project follows SSOT principles. When editing documentation, always identif
 
 ### AI Agent Configuration
 
-| Category | SSOT Location | Auto-Generated |
-|----------|---------------|----------------|
-| File-type Rules | `.claude/rules/*.md` | `.cursor/rules/*.mdc` |
-| Skills | `.claude/skills/*/SKILL.md` | - |
-| Commands | `.claude/commands/` | - |
+| Category        | SSOT Location               | Auto-Generated        |
+| --------------- | --------------------------- | --------------------- |
+| File-type Rules | `.claude/rules/*.md`        | `.cursor/rules/*.mdc` |
+| Skills          | `.claude/skills/*/SKILL.md` | -                     |
+| Commands        | `.claude/commands/`         | -                     |
 
 ### Project Documentation
 
-| Category | SSOT Location | References |
-|----------|---------------|------------|
-| Coding Standards | `.claude/rules/*.md` (per file type) | `docs/standards/coding-conventions.md` |
-| Security | `docs/standards/security.md` | `.claude/rules/security.md` |
-| Testing | `docs/standards/testing.md` | - |
-| Workflow | `docs/standards/workflow.md` | - |
-| Database | `docs/guidelines/database.md` | `.claude/rules/sql.md`, `.claude/rules/hcl.md` |
-| Architecture | `ARCHITECTURE.md` | - |
-| Agent Behavior | `AGENTS.md` | - |
+| Category         | SSOT Location                        | References                                     |
+| ---------------- | ------------------------------------ | ---------------------------------------------- |
+| Coding Standards | `.claude/rules/*.md` (per file type) | `docs/guidelines/coding-conventions.md`         |
+| Security         | `docs/guidelines/security.md`         | `.claude/rules/security.md`                    |
+| Testing          | `docs/guidelines/testing.md`          | -                                              |
+| Workflow         | `docs/guidelines/workflow.md`         | -                                              |
+| Database         | `docs/database/database.md`          | `.claude/rules/sql.md`, `.claude/rules/hcl.md` |
+| Architecture     | `ARCHITECTURE.md`                    | -                                              |
+| Agent Behavior   | `AGENTS.md`                          | -                                              |
 
 ## Key Principles
 
@@ -53,13 +53,16 @@ Before editing, ask:
 ### 3. Reference Patterns
 
 **Good (reference):**
+
 ```markdown
 For verification commands, see `.claude/rules/go.md`.
 ```
 
 **Bad (duplication):**
+
 ```markdown
 ## Verification Commands
+
 make go-lint
 make check-build
 ... (duplicating content from rules/go.md)
@@ -67,15 +70,15 @@ make check-build
 
 ## File-Type Rules SSOT
 
-| File Type | SSOT Rule File |
-|-----------|----------------|
-| `*.go` | `.claude/rules/go.md` |
-| `*.ts`, `*.js` | `.claude/rules/typescript.md` |
-| `*.sh` | `.claude/rules/shell-script.md` |
-| `*.sql` | `.claude/rules/sql.md` |
-| `*.hcl` | `.claude/rules/hcl.md` |
-| `*.proto` | `.claude/rules/proto.md` |
-| `*.yaml` | `.claude/rules/yaml.md` |
+| File Type       | SSOT Rule File                      |
+| --------------- | ----------------------------------- |
+| `*.go`          | `.claude/rules/go.md`               |
+| `*.ts`, `*.js`  | `.claude/rules/typescript.md`       |
+| `*.sh`          | `.claude/rules/shell-script.md`     |
+| `*.sql`         | `.claude/rules/sql.md`              |
+| `*.hcl`         | `.claude/rules/hcl.md`              |
+| `*.proto`       | `.claude/rules/proto.md`            |
+| `*.yaml`        | `.claude/rules/yaml.md`             |
 | `*.md`, `*.mdc` | `.claude/rules/ssot.md` (this file) |
 
 ## Sync Requirements
@@ -112,5 +115,5 @@ This generates `.cursor/rules/*.mdc` automatically.
 ## Related Documentation
 
 - @AGENTS.md - SSOT structure overview
-- @docs/standards/ - Project standards
+- @docs/guidelines/ - Project standards
 - @.claude/rules/ - File-type specific rules (SSOT)

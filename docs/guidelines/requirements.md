@@ -38,7 +38,7 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 
 - **Required Version**: v2.8.0 (specified in `make/vars.mk`)
 - **Check version**: `golangci-lint --version`
-- **Installation**: See [Coding Standards](coding-standards.md)
+- **Installation**: See [Coding Standards](coding-conventions.md)
 - **Note**: Used for code linting and formatting
 
 ### Atlas
@@ -121,4 +121,4 @@ docker compose version    # Should show v2.x.x or later
 
 - [Workflow Guidelines](workflow.md) - Development workflow and common steps
 - [Database Management](database.md) - Atlas usage for database migrations
-- [Coding Standards](coding-standards.md) - golangci-lint configuration and usage
+- [Coding Standards](coding-conventions.md) - golangci-lint configuration and usage

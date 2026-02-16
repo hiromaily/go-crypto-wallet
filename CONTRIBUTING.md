@@ -206,8 +206,7 @@ This project handles private keys and cryptocurrency transactions.
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
-- [docs/standards/](docs/standards/) - Coding standards
-- [docs/guidelines/](docs/guidelines/) - Detailed guidelines
+- [docs/guidelines/](docs/guidelines/) - Project guidelines and standards
 
 ## Questions?
 

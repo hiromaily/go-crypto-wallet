@@ -11,9 +11,10 @@ This feature adds PostgreSQL 18.2 as a third database backend option to go-crypt
 **Impact**: This change extends the existing database abstraction layer without modifying the core wallet logic. All three databases (MySQL, SQLite, PostgreSQL) will coexist with identical query interfaces and schemas, allowing seamless database migration and selection based on deployment requirements.
 
 **📚 Implementation References**:
-- [Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md) - Complete workflow for multi-database schema modifications
-- [Database Quick Reference](../../../docs/guidelines/database-quick-reference.md) - Command cheat sheet and data type mappings
-- [Database Management](../../../docs/guidelines/database.md) - Overview of database tools and architecture
+
+- [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md) - Complete workflow for multi-database schema modifications
+- [Database Quick Reference](../../../docs/database/database-quick-reference.md) - Command cheat sheet and data type mappings
+- [Database Management](../../../docs/database/database.md) - Overview of database tools and architecture
 
 ### Goals
 
@@ -39,12 +40,14 @@ This feature adds PostgreSQL 18.2 as a third database backend option to go-crypt
 The go-crypto-wallet project follows **Clean Architecture** with strict layer separation:
 
 **Layer Structure**:
+
 - **Domain** (`internal/domain/`): Pure business logic with ZERO infrastructure dependencies
 - **Application** (`internal/application/`): Use case orchestration and port interfaces
 - **Infrastructure** (`internal/infrastructure/`): Database, API clients, and external service implementations
 - **Interface Adapters** (`internal/interface-adapters/`): CLI commands and wallet adapters
 
 **Current Database Support Pattern**:
+
 - Database selection via `config.Database.Type` field (currently `mysql` or `sqlite`)
 - Separate repository implementations per database engine (repository pattern)
 - sqlc-generated type-safe query code in database-specific packages:
@@ -55,6 +58,7 @@ The go-crypto-wallet project follows **Clean Architecture** with strict layer se
 - Three database schemas: watch (online), keygen (offline), sign (offline)
 
 **Integration Points**:
+
 - Configuration validation in `pkg/config/wallet.go`
 - Connection factories in `pkg/db/{mysql,sqlite}/`
 - Repository interfaces in `internal/application/ports/repository/`
@@ -62,6 +66,7 @@ The go-crypto-wallet project follows **Clean Architecture** with strict layer se
 - Build system targets in `make/db_sqlc.mk` and `make/db_atlas.mk`
 
 **Constraints to Preserve**:
+
 - Clean Architecture dependency direction (Infrastructure→Application→Domain)
 - Repository pattern (one implementation per database per entity)
 - Type safety through sqlc code generation
@@ -128,6 +133,7 @@ graph TB
 ```
 
 **Architecture Integration**:
+
 - Selected pattern: Repository Pattern (maintains existing MySQL/SQLite approach)
 - Domain/feature boundaries: Database implementation isolated to Infrastructure layer; Application layer remains database-agnostic
 - Existing patterns preserved: Clean Architecture layers, Repository pattern, DI container selection
@@ -149,6 +155,7 @@ graph TB
 | Infrastructure / Runtime | Docker Compose | Local development environment | PostgreSQL 18.2 container + migration services |
 
 **Key Technology Decisions** (see `research.md` for detailed investigation):
+
 - **pgx over lib/pq**: 50-100% performance improvement, active maintenance, built-in connection pooling ([source](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgresql-golang-driver/))
 - **TEXT+CHECK over ENUM**: Schema evolution flexibility, SHARE UPDATE EXCLUSIVE lock (allows concurrent updates) ([source](https://making.close.com/posts/native-enums-or-check-constraints-in-postgresql/))
 - **Atlas 1.1**: Enhanced PostgreSQL support for partitions, functions, procedures ([Atlas releases](https://github.com/ariga/atlas/releases))
@@ -181,6 +188,7 @@ sequenceDiagram
 ```
 
 **Key Decisions**:
+
 - Config validation occurs before connection attempt (fail-fast principle)
 - DI container owns database selection logic via switch on database.type
 - Connection pooling configured at factory level (pgx native pool support)
@@ -209,6 +217,7 @@ sequenceDiagram
 ```
 
 **Key Decisions**:
+
 - HCL schemas remain database-agnostic (reuse existing watch.hcl, keygen.hcl, sign.hcl)
 - Migrations are database-specific (separate directories per engine)
 - Dev database (`docker://postgres/18`) validates migrations before application
@@ -253,12 +262,14 @@ sequenceDiagram
 | Requirements | 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7 |
 
 **Responsibilities & Constraints**:
+
 - Store PostgreSQL-specific connection parameters (host, port, database, user, password, SSL mode)
 - Enforce required field validation (host, dbname, user, pass)
 - Support optional connection pool configuration (max connections, idle connections, connection lifetime)
 - Domain boundary: Configuration layer only, no business logic
 
 **Dependencies**:
+
 - Inbound: Config loader from TOML/YAML files
 - Outbound: PostgreSQL Connection Factory consumes this configuration
 - External: None
@@ -268,6 +279,7 @@ sequenceDiagram
 ##### State Management
 
 **State Model**:
+
 ```go
 // PostgreSQL connection configuration
 type PostgreSQL struct {
@@ -290,6 +302,7 @@ type Database struct {
 ```
 
 **Validation Rules** (in validateDatabase()):
+
 ```go
 case "postgresql":
     if c.Database.PostgreSQL.Host == "" {
@@ -309,6 +322,7 @@ case "postgresql":
 **Persistence & Consistency**: Loaded from TOML configuration file; immutable after parsing
 
 **Implementation Notes**:
+
 - Integration: Extend existing Database struct in `pkg/config/wallet.go`
 - Validation: Add PostgreSQL case to validateDatabase() switch statement
 - Risks: None - follows existing MySQL/SQLite pattern exactly
@@ -323,6 +337,7 @@ case "postgresql":
 | Requirements | 4.1, 4.2, 4.3, 4.4, 4.5 |
 
 **Responsibilities & Constraints**:
+
 - Create PostgreSQL connections using pgx driver with proper SSL configuration
 - Configure connection pool (max open connections, max idle connections, connection lifetime)
 - Verify connection health via Ping before returning
@@ -330,6 +345,7 @@ case "postgresql":
 - Transaction boundary: Per-connection (repository manages transactions)
 
 **Dependencies**:
+
 - Inbound: DI container requests connection during initialization
 - Outbound: pgx driver (github.com/jackc/pgx/v5/stdlib) (P0 - Critical)
 - External: PostgreSQL database server (P0 - Critical)
@@ -356,21 +372,25 @@ func NewPostgreSQL(conf *config.PostgreSQL) (*sql.DB, error)
 ```
 
 **Preconditions**:
+
 - conf must not be nil
 - conf.Host, conf.DB, conf.User, conf.Pass must be non-empty (validated by config layer)
 - PostgreSQL server must be accessible at conf.Host:conf.Port
 
 **Postconditions**:
+
 - Returns *sql.DB with established connection OR error
 - Connection verified via Ping
 - Connection pool configured appropriately for PostgreSQL
 
 **Invariants**:
+
 - Connection pool size > 0 (default: 10 max open connections)
 - SSL mode defaults to "prefer" if not specified
 - Connection lifetime defaults to unlimited if not specified
 
 **Implementation Notes**:
+
 - Integration: New package `pkg/db/postgresql/connection.go`
 - Connection string format: `postgres://user:pass@host:port/dbname?sslmode=<mode>`
 - Connection pool configuration follows PostgreSQL best practices (see research.md)
@@ -385,6 +405,7 @@ func NewPostgreSQL(conf *config.PostgreSQL) (*sql.DB, error)
 | Requirements | 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2 |
 
 **Responsibilities & Constraints**:
+
 - Implement repository interfaces defined in `internal/application/ports/repository/`
 - Convert between domain entities and sqlcgen-generated types
 - Execute type-safe queries via sqlcgen.Queries
@@ -393,6 +414,7 @@ func NewPostgreSQL(conf *config.PostgreSQL) (*sql.DB, error)
 - Data ownership: Repository owns database schema access for its entity
 
 **Dependencies**:
+
 - Inbound: Use cases invoke repository methods (P0 - Critical)
 - Outbound: PostgreSQL sqlcgen.Queries interface (P0 - Critical), domain entity types (P0 - Critical)
 - External: PostgreSQL database via *sql.DB (P0 - Critical)
@@ -430,6 +452,7 @@ func (r *AddressRepositorySqlc) Update(ctx context.Context, addr *domainAddress.
 ```
 
 **Type Conversion Functions** (private helpers):
+
 ```go
 // convertToAddress converts sqlcgen.Address to domain.Address entity
 func convertToAddress(sqlcAddr *sqlcgen.Address) *domainAddress.Address
@@ -439,21 +462,25 @@ func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
 ```
 
 **Preconditions**:
+
 - dbConn must be non-nil and connected
 - coinTypeCode must be valid (btc, bch, eth, xrp)
 - Context must not be nil for all methods
 
 **Postconditions**:
+
 - Returns domain entities OR error (never partial results)
 - Database state consistent after operations
 - Errors include context for debugging
 
 **Invariants**:
+
 - Repository only operates on its assigned coin type
 - All queries scoped by coin type
 - Domain entities remain independent of database schema
 
 **Implementation Notes**:
+
 - Integration: Create ~40 repository files in `internal/infrastructure/repository/{cold,watch}/postgresql/`
 - Pattern: Copy-paste from MySQL implementations, update import paths to PostgreSQL sqlcgen
 - Validation: Repository validates domain entity invariants before database operations
@@ -469,6 +496,7 @@ func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
 | Requirements | 2.1, 2.2, 2.3, 2.4, 2.5 |
 
 **Responsibilities & Constraints**:
+
 - Store PostgreSQL DDL for all wallet tables
 - Convert MySQL-specific types to PostgreSQL equivalents
 - Preserve referential integrity constraints
@@ -477,7 +505,7 @@ func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
 
 **Data Type Mappings**:
 
-**📘 Complete reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/guidelines/database-quick-reference.md#-data-type-mapping) for comprehensive mapping across MySQL, SQLite, and PostgreSQL.
+**📘 Complete reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/database/database-quick-reference.md#-data-type-mapping) for comprehensive mapping across MySQL, SQLite, and PostgreSQL.
 
 | MySQL Type | PostgreSQL Type | Conversion Notes |
 |------------|-----------------|------------------|
@@ -491,16 +519,18 @@ func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
 | bigint | BIGINT | Direct mapping |
 
 **Enum Conversion Example**:
+
 ```sql
 -- MySQL
 coin enum('btc','bch','eth','xrp','hyt') NOT NULL COMMENT 'coin type code'
 
 -- PostgreSQL
-coin TEXT NOT NULL CHECK (coin IN ('btc','bch','eth','xrp','hyt')) 
+coin TEXT NOT NULL CHECK (coin IN ('btc','bch','eth','xrp','hyt'))
 -- COMMENT ON COLUMN table.coin IS 'coin type code';
 ```
 
 **Implementation Notes**:
+
 - Location: `tools/sqlc/schemas_postgresql/01_watch.sql`, `02_keygen.sql`, `03_sign.sql`
 - Conversion method: Manual conversion with validation (see research.md for rationale)
 - Comments: Use PostgreSQL COMMENT syntax for column/table descriptions
@@ -514,6 +544,7 @@ coin TEXT NOT NULL CHECK (coin IN ('btc','bch','eth','xrp','hyt'))
 | Requirements | 3.1, 3.2, 3.3, 3.4, 3.5 |
 
 **Configuration File** (`tools/sqlc/sqlc_postgresql.yml`):
+
 ```yaml
 version: "2"
 sql:
@@ -527,12 +558,14 @@ sql:
 ```
 
 **Generated Code Structure**:
+
 - `internal/infrastructure/database/postgresql/sqlcgen/`
   - `db.go` - Database interface wrapper
   - `models.go` - Go structs matching database schema
   - `*.sql.go` - Query implementations (one file per query file)
 
 **Implementation Notes**:
+
 - Shared queries: Uses same `tools/sqlc/queries/*.sql` files as MySQL/SQLite
 - Query validation: sqlc validates PostgreSQL syntax and types at generation time
 - Risks: If queries contain database-specific syntax, sqlc will fail compilation (intentional safety)
@@ -545,6 +578,7 @@ sql:
 | Requirements | 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 10.1, 10.2 |
 
 **Atlas Configuration Extension** (`tools/atlas/atlas.hcl`):
+
 ```hcl
 # PostgreSQL Local Environments
 env "local_postgresql_watch" {
@@ -587,6 +621,7 @@ env "admin_postgresql_watch" {
 ```
 
 **Implementation Notes**:
+
 - HCL schemas: Reuse existing `schemas/watch.hcl`, `keygen.hcl`, `sign.hcl` (database-agnostic)
 - Migrations: Separate directories per database (`migrations/postgresql_watch/`, etc.)
 - Dev database: Uses PostgreSQL 18 Docker container for migration validation
@@ -603,6 +638,7 @@ env "admin_postgresql_watch" {
 | Requirements | 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8 |
 
 **Docker Compose Service Definition** (`compose.yaml`):
+
 ```yaml
 services:
   # PostgreSQL Database Service
@@ -652,6 +688,7 @@ services:
 ```
 
 **Database Initialization Script** (`docker/postgresql/init.d/01_create_databases.sh`):
+
 ```bash
 #!/bin/bash
 set -e
@@ -667,12 +704,14 @@ EOSQL
 ```
 
 **Volumes**:
+
 ```yaml
 volumes:
   wallet-db-postgresql: {}
 ```
 
 **Implementation Notes**:
+
 - PostgreSQL version: 18.2 (official postgres image)
 - Coexistence: PostgreSQL and MySQL containers run simultaneously for migration testing
 - Healthcheck: Uses pg_isready for readiness verification
@@ -687,48 +726,50 @@ volumes:
 | Requirements | 5.1, 5.2, 5.3, 5.4, 5.5, 10.1, 10.4, 10.6 |
 
 **Makefile Extensions** (`make/db_sqlc.mk`):
+
 ```makefile
 # SQLC compilation for PostgreSQL
 .PHONY: sqlc-compile
 sqlc-compile:
-	@echo "Compiling MySQL SQL queries and schemas..."
-	@cd tools/sqlc && sqlc compile
-	@echo "✓ MySQL SQL compilation successful"
-	@echo "Compiling SQLite SQL queries and schemas..."
-	@cd tools/sqlc && sqlc compile -f sqlc_sqlite.yml
-	@echo "✓ SQLite SQL compilation successful"
-	@echo "Compiling PostgreSQL SQL queries and schemas..."
-	@cd tools/sqlc && sqlc compile -f sqlc_postgresql.yml
-	@echo "✓ PostgreSQL SQL compilation successful"
+ @echo "Compiling MySQL SQL queries and schemas..."
+ @cd tools/sqlc && sqlc compile
+ @echo "✓ MySQL SQL compilation successful"
+ @echo "Compiling SQLite SQL queries and schemas..."
+ @cd tools/sqlc && sqlc compile -f sqlc_sqlite.yml
+ @echo "✓ SQLite SQL compilation successful"
+ @echo "Compiling PostgreSQL SQL queries and schemas..."
+ @cd tools/sqlc && sqlc compile -f sqlc_postgresql.yml
+ @echo "✓ PostgreSQL SQL compilation successful"
 
 # SQLC vet for PostgreSQL
 .PHONY: sqlc-vet
 sqlc-vet:
-	@echo "Vetting MySQL SQL queries..."
-	@cd tools/sqlc && sqlc vet
-	@echo "✓ MySQL SQL queries passed vetting"
-	@echo "Vetting SQLite SQL queries..."
-	@cd tools/sqlc && sqlc vet -f sqlc_sqlite.yml
-	@echo "✓ SQLite SQL queries passed vetting"
-	@echo "Vetting PostgreSQL SQL queries..."
-	@cd tools/sqlc && sqlc vet -f sqlc_postgresql.yml
-	@echo "✓ PostgreSQL SQL queries passed vetting"
+ @echo "Vetting MySQL SQL queries..."
+ @cd tools/sqlc && sqlc vet
+ @echo "✓ MySQL SQL queries passed vetting"
+ @echo "Vetting SQLite SQL queries..."
+ @cd tools/sqlc && sqlc vet -f sqlc_sqlite.yml
+ @echo "✓ SQLite SQL queries passed vetting"
+ @echo "Vetting PostgreSQL SQL queries..."
+ @cd tools/sqlc && sqlc vet -f sqlc_postgresql.yml
+ @echo "✓ PostgreSQL SQL queries passed vetting"
 
 # Generate SQLC code for all databases
 .PHONY: sqlc
 sqlc:
-	@echo "Generating MySQL sqlc code..."
-	@cd tools/sqlc && sqlc generate
-	@echo "✓ MySQL sqlc code generated"
-	@echo "Generating SQLite sqlc code..."
-	@cd tools/sqlc && sqlc generate -f sqlc_sqlite.yml
-	@echo "✓ SQLite sqlc code generated"
-	@echo "Generating PostgreSQL sqlc code..."
-	@cd tools/sqlc && sqlc generate -f sqlc_postgresql.yml
-	@echo "✓ PostgreSQL sqlc code generated"
+ @echo "Generating MySQL sqlc code..."
+ @cd tools/sqlc && sqlc generate
+ @echo "✓ MySQL sqlc code generated"
+ @echo "Generating SQLite sqlc code..."
+ @cd tools/sqlc && sqlc generate -f sqlc_sqlite.yml
+ @echo "✓ SQLite sqlc code generated"
+ @echo "Generating PostgreSQL sqlc code..."
+ @cd tools/sqlc && sqlc generate -f sqlc_postgresql.yml
+ @echo "✓ PostgreSQL sqlc code generated"
 ```
 
 **Makefile Extensions** (`make/db_atlas.mk`):
+
 ```makefile
 # Atlas PostgreSQL environments
 ATLAS_POSTGRESQL_SCHEMAS := postgresql_watch postgresql_keygen postgresql_sign
@@ -736,22 +777,23 @@ ATLAS_POSTGRESQL_SCHEMAS := postgresql_watch postgresql_keygen postgresql_sign
 # Lint PostgreSQL schemas
 .PHONY: atlas-lint-postgresql
 atlas-lint-postgresql:
-	@echo "Linting PostgreSQL Atlas HCL schema files..."
-	@for schema in $(ATLAS_POSTGRESQL_SCHEMAS); do \
-		echo "=== Linting $$schema schema ==="; \
-		(cd tools/atlas && atlas schema lint --config file://atlas.hcl --env local_$$schema) || exit 1; \
-	done
-	@echo "✓ All PostgreSQL schemas passed linting"
+ @echo "Linting PostgreSQL Atlas HCL schema files..."
+ @for schema in $(ATLAS_POSTGRESQL_SCHEMAS); do \
+  echo "=== Linting $$schema schema ==="; \
+  (cd tools/atlas && atlas schema lint --config file://atlas.hcl --env local_$$schema) || exit 1; \
+ done
+ @echo "✓ All PostgreSQL schemas passed linting"
 
 # Combined lint (all databases)
 .PHONY: atlas-lint
 atlas-lint: atlas-lint-mysql atlas-lint-postgresql
-	@echo "✓ All database schemas passed linting"
+ @echo "✓ All database schemas passed linting"
 ```
 
 **Contracts**: Batch [x]
 
 **Batch Contract**:
+
 - Trigger: Manual execution via `make sqlc` or `make atlas-lint`
 - Input: Schema files (`schemas_postgresql/*.sql`) and HCL files (`schemas/*.hcl`)
 - Output: Generated Go code or validation results
@@ -759,6 +801,7 @@ atlas-lint: atlas-lint-mysql atlas-lint-postgresql
 - Recovery: Regenerate code on failure; validation errors prevent commits
 
 **Implementation Notes**:
+
 - Atlas version update: Change all `arigaio/atlas:1.0.0` references to `1.1.0` in compose.yaml and Makefile comments
 - Integration: Extend existing targets rather than create new top-level targets
 - Validation: All three databases must pass before allowing commit
@@ -774,6 +817,7 @@ atlas-lint: atlas-lint-mysql atlas-lint-postgresql
 | Requirements | 4.1, 4.2 |
 
 **DI Container Modifications** (`internal/di/container.go`):
+
 ```go
 // Example: Address Repository factory
 func (c *container) newAddressRepo() repowatch.AddressRepositorier {
@@ -800,6 +844,7 @@ func (c *container) newAddressRepo() repowatch.AddressRepositorier {
 ```
 
 **pkg Container Extension** (`pkg/di/container.go` or similar):
+
 ```go
 // NewPostgreSQLClient creates PostgreSQL database connection
 func (c *pkgContainer) NewPostgreSQLClient() *sql.DB {
@@ -815,6 +860,7 @@ func (c *pkgContainer) NewPostgreSQLClient() *sql.DB {
 ```
 
 **Implementation Notes**:
+
 - Modification count: ~20 repository factory methods require PostgreSQL case addition
 - Pattern: Identical structure to MySQL/SQLite cases
 - Risks: Easy to miss a factory method during implementation (mitigate with grep search)
@@ -826,6 +872,7 @@ func (c *pkgContainer) NewPostgreSQLClient() *sql.DB {
 **Structure**: Three separate databases (watch, keygen, sign) with PostgreSQL-specific schema syntax.
 
 **Watch Schema** (Example Table):
+
 ```sql
 -- Table: address (watch database)
 CREATE TABLE address (
@@ -847,6 +894,7 @@ COMMENT ON COLUMN address.is_allocated IS 'true: address is allocated(used)';
 ```
 
 **Keygen Schema** (Example Table):
+
 ```sql
 -- Table: btc_account_key (keygen database)
 CREATE TABLE btc_account_key (
@@ -870,6 +918,7 @@ COMMENT ON TABLE btc_account_key IS 'table for btc account pubkey';
 **Sign Schema** (Similar structure to keygen for offline signing)
 
 **Key Constraints**:
+
 - Primary keys: BIGSERIAL (auto-incrementing 64-bit integers)
 - Foreign keys: Preserved from MySQL schema
 - Unique constraints: Preserved from MySQL schema
@@ -879,6 +928,7 @@ COMMENT ON TABLE btc_account_key IS 'table for btc account pubkey';
 ### Data Contracts & Integration
 
 **Type Conversion Interface** (sqlcgen to domain):
+
 ```go
 // PostgreSQL sqlcgen types (auto-generated)
 type Address struct {
@@ -917,6 +967,7 @@ func convertToAddress(sqlcAddr *sqlcgen.Address) *domainAddress.Address {
 ```
 
 **Cross-Database Data Management**:
+
 - No distributed transactions (each wallet database is independent)
 - Data synchronization: File-based export/import for offline wallets (keygen/sign)
 - Eventual consistency: Not applicable (no distributed state)
@@ -929,12 +980,14 @@ func convertToAddress(sqlcAddr *sqlcgen.Address) *domainAddress.Address {
 PostgreSQL-specific error handling follows the existing repository error pattern:
 
 **Error Categories**:
+
 1. **Connection Errors** (Infrastructure): Network failures, authentication failures, SSL handshake errors
 2. **Query Errors** (Application): Syntax errors, type mismatches, constraint violations
 3. **Transaction Errors** (Application): Deadlocks, serialization failures, timeout errors
 4. **Data Errors** (Domain): Validation failures, business rule violations
 
 **Error Responses**:
+
 - **Connection Errors**: Fail fast with descriptive error; log connection parameters (excluding password); suggest network/configuration checks
 - **Query Errors**: Wrap with context (query name, parameters); sqlc provides compile-time safety for most syntax errors
 - **Transaction Errors**: Retry logic for transient errors (deadlocks); abort for fatal errors
@@ -943,10 +996,11 @@ PostgreSQL-specific error handling follows the existing repository error pattern
 ### Error Categories and Responses
 
 **PostgreSQL-Specific Errors**:
+
 ```go
 // Connection establishment errors
 if err := db.Ping(); err != nil {
-    return nil, fmt.Errorf("failed to ping PostgreSQL database at %s:%d: %w", 
+    return nil, fmt.Errorf("failed to ping PostgreSQL database at %s:%d: %w",
         conf.Host, conf.Port, err)
 }
 
@@ -966,6 +1020,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 ```
 
 **Monitoring**:
+
 - Log all connection failures with host/port/database information (exclude credentials)
 - Log query execution failures with query name and duration
 - Metrics: Connection pool utilization, query latency percentiles, error rates by category
@@ -976,6 +1031,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 ### Unit Tests
 
 **Connection Factory Tests** (`pkg/db/postgresql/connection_test.go`):
+
 - Test successful connection with valid configuration
 - Test connection failure with invalid host
 - Test connection failure with invalid credentials
@@ -983,6 +1039,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 - Test SSL mode variations (disable, require, verify-ca, verify-full)
 
 **Repository Tests** (example: `internal/infrastructure/repository/watch/postgresql/address_sqlc_test.go`):
+
 - Test type conversion (sqlcgen.Address ↔ domain.Address)
 - Test CRUD operations (Insert, GetByID, GetAll, Update)
 - Test query filtering (by coin type, account type)
@@ -992,6 +1049,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 ### Integration Tests
 
 **Database Operations** (`internal/integration_test/postgresql/`):
+
 - Test end-to-end flow: config load → connection → repository → query execution
 - Test transaction handling (commit, rollback)
 - Test concurrent access (multiple connections)
@@ -999,12 +1057,14 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 - Test data consistency: Insert via PostgreSQL repo, read via domain query
 
 **Schema Migration Tests**:
+
 - Test Atlas migration application (`atlas migrate apply`)
 - Test migration rollback scenarios
 - Test schema validation (`atlas schema diff` shows no differences after migration)
 - Test idempotency (apply migrations multiple times)
 
 **Cross-Database Compatibility Tests**:
+
 - Test identical query results across MySQL, SQLite, PostgreSQL
 - Test data type precision (especially NUMERIC for cryptocurrency amounts)
 - Test enum-like field validation (CHECK constraints work like MySQL ENUMs)
@@ -1012,18 +1072,20 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 ### Performance Tests
 
 **Connection Pool Tests**:
+
 - Test connection acquisition under load (100 concurrent requests)
 - Test connection pool exhaustion handling
 - Test connection lifetime and idle timeout behavior
 
 **Query Performance Tests** (baseline, not optimization):
+
 - Measure query latency for common operations (GetAll, GetByID, Insert)
 - Compare performance across MySQL, SQLite, PostgreSQL (informational only)
 - Establish baseline metrics for regression detection
 
 ## Migration Strategy
 
-**📘 Complete workflow guide**: See [Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md) for detailed step-by-step schema modification workflow across all databases.
+**📘 Complete workflow guide**: See [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md) for detailed step-by-step schema modification workflow across all databases.
 
 ### Phase 1: Schema Creation (Manual Conversion)
 
@@ -1042,6 +1104,7 @@ flowchart TB
 ```
 
 **Conversion Checklist**:
+
 - [ ] Convert all AUTO_INCREMENT columns to SERIAL/BIGSERIAL
 - [ ] Convert all tinyint(1) columns to BOOLEAN
 - [ ] Convert all ENUM columns to TEXT with CHECK constraints
@@ -1057,10 +1120,12 @@ flowchart TB
 ### Phase 2: Data Migration (MySQL → PostgreSQL)
 
 **Migration Tools**:
+
 - **pgloader** (recommended): Automated migration tool with type conversion
 - **Manual dump/restore**: For custom data transformations
 
 **pgloader Configuration** (example for watch database):
+
 ```lisp
 LOAD DATABASE
     FROM mysql://hiromaily:hiromaily@localhost:3306/watch
@@ -1084,6 +1149,7 @@ CAST type decimal(26,10) to numeric(26,10)
 ```
 
 **Migration Process**:
+
 1. Backup source database (mysqldump or pg_dump)
 2. Create PostgreSQL schemas (Atlas migration)
 3. Run pgloader for data transfer
@@ -1092,6 +1158,7 @@ CAST type decimal(26,10) to numeric(26,10)
 6. Rollback triggers: Data loss, precision errors, constraint violations
 
 **Rollback Strategy**:
+
 - Keep original database untouched during migration
 - Test migration on copy first
 - Document rollback procedure (restore from backup)
@@ -1099,21 +1166,25 @@ CAST type decimal(26,10) to numeric(26,10)
 ## Security Considerations
 
 **PostgreSQL Connection Security**:
+
 - SSL mode configuration: Support disable, require, verify-ca, verify-full
 - Password security: Never log passwords; use environment variables or secrets management
 - Connection string sanitization: Redact passwords in logs and errors
 
 **Authentication**:
+
 - Use role-based access control in PostgreSQL (separate users for watch/keygen/sign)
 - Minimum privilege principle: Grant only necessary permissions to application user
 - Credential rotation: Document procedure for updating database passwords
 
 **Data Protection**:
+
 - Encryption at rest: PostgreSQL supports tablespace encryption (deployment decision)
 - Encryption in transit: Enforce SSL for production deployments
 - Sensitive data: Never log private keys, seeds, or passwords (existing rule maintained)
 
 **Audit Logging**:
+
 - PostgreSQL audit logs for DDL operations (schema changes)
 - Application logs for data access patterns
 - Compliance: Maintain audit trail for regulatory requirements
@@ -1121,12 +1192,14 @@ CAST type decimal(26,10) to numeric(26,10)
 ## Performance & Scalability
 
 **Target Metrics** (informational baseline, not optimization targets):
+
 - Connection pool utilization: < 80% under normal load
 - Query latency: P95 < 100ms for single-record queries, P95 < 500ms for batch operations
 - Connection acquisition: < 10ms under normal load
 - Transaction throughput: > 100 TPS for wallet operations
 
 **Connection Pool Configuration**:
+
 ```go
 // PostgreSQL connection pool (pkg/db/postgresql/connection.go)
 db.SetMaxOpenConns(25)           // Maximum concurrent connections
@@ -1136,19 +1209,21 @@ db.SetConnMaxIdleTime(1 * time.Minute) // Close unused connections
 ```
 
 **Indexing Strategy**:
+
 - Preserve all MySQL indexes for PostgreSQL schemas
 - Add coin type and account type indexes for filtering queries
 - Consider composite indexes for multi-column filters (coin + account)
 - Monitor query plans with EXPLAIN ANALYZE during integration testing
 
 **Scaling Approaches**:
+
 - Vertical scaling: Increase PostgreSQL server resources (CPU, memory, storage)
 - Read replicas: PostgreSQL replication for read-heavy workloads (future consideration)
 - Connection pooling: External pgbouncer for high-concurrency scenarios (if needed)
 - Partitioning: Table partitioning for large transaction history tables (future consideration)
 
 **Caching Strategy**:
+
 - Application-level caching: Not in scope for this feature
 - PostgreSQL query cache: Automatic (PostgreSQL handles internally)
 - Connection reuse: Connection pool provides implicit caching
-

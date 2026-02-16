@@ -546,6 +546,6 @@ If you can't connect to the database:
 
 ## Related Documentation
 
-- [Database Architecture Documentation](../../docs/development/database.md)
+- [Database Architecture Documentation](../../docs/database/architecture.md)
 - [Atlas Official Documentation](https://atlasgo.io/)
 - [Atlas MySQL Guide](https://atlasgo.io/guides/mysql)

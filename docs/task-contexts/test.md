@@ -20,9 +20,9 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Testing Standards | `docs/standards/testing.md` | Test strategy, coverage requirements |
-| Coding Standards | `docs/standards/coding-conventions.md` | Coding conventions |
-| Workflow Guidelines | `docs/standards/workflow.md` | Verification steps |
+| Testing Standards | `docs/guidelines/testing.md` | Test strategy, coverage requirements |
+| Coding Standards | `docs/guidelines/coding-conventions.md` | Coding conventions |
+| Workflow Guidelines | `docs/guidelines/workflow.md` | Verification steps |
 
 ### Conditional Read
 
@@ -31,7 +31,7 @@ version: 1.0.0
 | Integration tests | Architecture | `ARCHITECTURE.md` |
 | E2E tests | E2E Script Rules | `.claude/rules/btc/e2e-script.md` |
 | Mock creation | Internal Guidelines | `internal/AGENTS.md` |
-| DB-related tests | Database Guidelines | `docs/guidelines/database.md` |
+| DB-related tests | Database Guidelines | `docs/database/database.md` |
 
 ## Test Types
 
@@ -234,7 +234,7 @@ git commit -m "test: add tests for {feature}
 User: "Add unit tests for Transaction creation"
 
 Agent Actions:
-1. Read docs/standards/testing.md
+1. Read docs/guidelines/testing.md
 2. Review internal/domain/transaction/ implementation
 3. Review existing test patterns
 4. Design test cases
@@ -248,7 +248,7 @@ Agent Actions:
 User: "Add integration tests for BTC address generation"
 
 Agent Actions:
-1. Read docs/standards/testing.md
+1. Read docs/guidelines/testing.md
 2. Review existing patterns in test/integration/
 3. Identify required external dependencies
 4. Implement tests
@@ -269,6 +269,6 @@ Agent Actions:
 
 ## Related Documents
 
-- [Testing Standards](../standards/testing.md) - Detailed test strategy
+- [Testing Standards](../guidelines/testing.md) - Detailed test strategy
 - [Go Development Skill](../../.claude/skills/go-development/SKILL.md) - Go development workflow
-- [Task Classification](../standards/task-classification.md) - Task classification SSOT
+- [Task Classification](../guidelines/task-classification.md) - Task classification SSOT

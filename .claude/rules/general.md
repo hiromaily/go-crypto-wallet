@@ -7,12 +7,12 @@ General rules for Claude Code when working on go-crypto-wallet.
 ## Behavior Guidelines
 
 - Follow @AGENTS.md for behavior guidelines
-- Refer to @docs/standards/ for detailed conventions
+- Refer to @docs/guidelines/ for detailed conventions
 - Read @ARCHITECTURE.md for system design
 
 ## Code Quality
 
-Refer to @docs/standards/coding-conventions.md
+Refer to @docs/guidelines/coding-conventions.md
 
 Key rules:
 - Follow Clean Architecture layer separation
@@ -22,11 +22,11 @@ Key rules:
 
 ## Testing
 
-Refer to @docs/standards/testing.md
+Refer to @docs/guidelines/testing.md
 
 ## Workflow
 
-Refer to @docs/standards/workflow.md
+Refer to @docs/guidelines/workflow.md
 
 Key rules:
 - **Check current branch FIRST** before starting any task (never work on `main`)

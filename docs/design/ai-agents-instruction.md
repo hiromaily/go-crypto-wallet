@@ -193,7 +193,7 @@ Information flows from authoritative sources:
 .github/labels.yml          ← GitHub label definitions
         │
         ▼
-docs/standards/task-classification.md  ← SSOT for label semantics
+docs/guidelines/task-classification.md  ← SSOT for label semantics
         │
         ▼
 .claude/skills/label-context-mapping/  ← Operational mappings
@@ -208,11 +208,11 @@ Commands and Skills         ← Reference, don't duplicate
 
 | Category | SSOT Location | Description |
 |----------|---------------|-------------|
-| Label definitions | `docs/standards/task-classification.md` | All label types and meanings |
+| Label definitions | `docs/guidelines/task-classification.md` | All label types and meanings |
 | Label → Skill mapping | `.claude/skills/label-context-mapping/` | Operational routing |
-| Coding conventions | `docs/standards/coding-conventions.md` | Code style |
-| Security rules | `docs/standards/security.md` | Security requirements |
-| Testing standards | `docs/standards/testing.md` | Test requirements |
+| Coding conventions | `docs/guidelines/coding-conventions.md` | Code style |
+| Security rules | `docs/guidelines/security.md` | Security requirements |
+| Testing standards | `docs/guidelines/testing.md` | Test requirements |
 
 ### Claude vs Cursor
 
@@ -323,7 +323,7 @@ fix-issue command (simple interface)
 ## Related Documents
 
 - [AGENTS.md](../../../AGENTS.md) - Entry point for all agents
-- [Task Classification](../standards/task-classification.md) - SSOT for labels
+- [Task Classification](../guidelines/task-classification.md) - SSOT for labels
 - [label-context-mapping](../../.claude/skills/label-context-mapping/SKILL.md) - Mapping skill
 - [Commands Documentation](../commands/README.md) - Command reference
 - [Skills Documentation](../agent-skills.md) - Skills reference

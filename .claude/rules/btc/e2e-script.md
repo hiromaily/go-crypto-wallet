@@ -270,7 +270,7 @@ make shfmt
 
 - ❌ Do NOT log private keys
 - ❌ Do NOT use test passphrases/RPC credentials in production
-- Reference: `docs/standards/security.md`
+- Reference: `docs/guidelines/security.md`
 
 ## Avoiding Impact on Other Patterns
 

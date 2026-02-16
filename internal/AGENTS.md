@@ -111,17 +111,14 @@ make tidy         # go mod tidy
 - `.claude/rules/go/repository.md` - Repository pattern
 - `.claude/rules/go/usecase.md` - Use case pattern
 
-### Standards (SSOT)
-
-- [Coding Conventions](../docs/standards/coding-conventions.md)
-- [Security](../docs/standards/security.md)
-- [Testing](../docs/standards/testing.md)
-- [Workflow](../docs/standards/workflow.md)
-
 ### Guidelines
 
+- [Coding Conventions](../docs/guidelines/coding-conventions.md)
+- [Security](../docs/guidelines/security.md)
+- [Testing](../docs/guidelines/testing.md)
+- [Workflow](../docs/guidelines/workflow.md)
 - [Architecture](../docs/guidelines/architecture.md)
-- [Database](../docs/guidelines/database.md)
+- [Database](../docs/database/database.md)
 - [Code Generation](../docs/guidelines/code-generation.md)
 
 ### Other

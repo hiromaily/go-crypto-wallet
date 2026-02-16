@@ -32,7 +32,7 @@ version: 1.0.0
 | Condition | Document | Path |
 |-----------|----------|------|
 | アーキテクチャ関連のバグ | Architecture | `docs/guidelines/architecture.md` |
-| データベース関連のバグ | Database | `docs/guidelines/database.md` |
+| データベース関連のバグ | Database | `docs/database/database.md` |
 | 特定チェーン固有の問題 | Multi-Chain | `docs/guidelines/multi-chain.md` |
 | セキュリティ関連のバグ | Core (Security) | `docs/guidelines/core.md` |
 | テスト関連の問題 | Testing | `docs/guidelines/testing.md` |
@@ -185,7 +185,7 @@ User: "Issue #456: アドレス検索で重複結果が返される"
 
 Agent Actions:
 1. gh issue view 456 でIssue内容を確認
-2. docs/guidelines/database.md を追加で読み込み
+2. docs/database/database.md を追加で読み込み
 3. クエリロジックを調査
 4. DISTINCT追加やクエリ修正
 5. 単体テストとSQLCクエリテストを追加

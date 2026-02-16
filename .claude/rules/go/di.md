@@ -223,5 +223,5 @@ func TestCreateTransaction(t *testing.T) {
 ## Related Documentation
 
 - @ARCHITECTURE.md - System architecture
-- @docs/standards/coding-conventions.md - Coding standards
+- @docs/guidelines/coding-conventions.md - Coding standards
 - @internal/AGENTS.md - Internal package guidelines

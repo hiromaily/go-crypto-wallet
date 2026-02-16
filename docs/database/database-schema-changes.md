@@ -145,6 +145,7 @@ make atlas-lint
 ```
 
 **Output**:
+
 ```
 ✓ Format complete
 ✓ No linting errors
@@ -157,11 +158,13 @@ make atlas-dev-reset
 ```
 
 **What happens**:
+
 1. Prompts for confirmation (deletes existing migrations)
 2. Generates new migration files from HCL
 3. Creates migrations for all schemas (watch, keygen, sign)
 
 **Output**:
+
 ```
 Are you sure you want to delete all migration files? [y/N]: y
 ✓ Deleted tools/atlas/migrations/watch/*
@@ -181,6 +184,7 @@ make atlas-migrate-docker
 ```
 
 **Output**:
+
 ```
 ✓ Migrating to version 20240215120000 (1 migration)
   └─ watch: OK
@@ -228,6 +232,7 @@ make sqlc-sqlite
 ```
 
 **Generated files**:
+
 - `internal/infrastructure/database/mysql/sqlcgen/*.go`
 - `internal/infrastructure/database/sqlite/sqlcgen/*.go`
 - (Future) `internal/infrastructure/database/postgresql/sqlcgen/*.go`
@@ -353,6 +358,7 @@ table "audit_log" {
 Follow Steps 2-10 from Scenario 1.
 
 **Additional Considerations**:
+
 - Create corresponding queries in `tools/sqlc/queries/audit_log.sql`
 - Implement repository interface and implementations for all databases
 - Add integration tests for the new table
@@ -391,6 +397,7 @@ Same as Scenario 1, Steps 2-10.
 ### Schema Parity Requirements
 
 **CRITICAL**: All three databases (MySQL, SQLite, PostgreSQL) MUST maintain identical:
+
 - Table names
 - Column names
 - Column order
@@ -417,11 +424,13 @@ When adding a new column, choose types carefully:
 ### Enum Handling
 
 **MySQL**:
+
 ```sql
 coin ENUM('btc','bch','eth','xrp') NOT NULL
 ```
 
 **SQLite & PostgreSQL**:
+
 ```sql
 coin TEXT NOT NULL CHECK (coin IN ('btc','bch','eth','xrp'))
 ```
@@ -547,6 +556,7 @@ func TestSchemaParity(t *testing.T) {
 ### Pattern 1: Adding Created/Updated Timestamps
 
 **MySQL**:
+
 ```hcl
 column "created_at" {
   type = datetime
@@ -560,12 +570,14 @@ column "updated_at" {
 ```
 
 **SQLite** (in `.sql` file):
+
 ```sql
 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
 updated_at TEXT
 ```
 
 **PostgreSQL**:
+
 ```sql
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP
@@ -574,6 +586,7 @@ updated_at TIMESTAMP
 ### Pattern 2: Nullable vs NOT NULL
 
 **Prefer NULL for optional fields**:
+
 ```hcl
 column "email" {
   type = varchar(255)
@@ -582,6 +595,7 @@ column "email" {
 ```
 
 **Use NOT NULL for required fields**:
+
 ```hcl
 column "wallet_address" {
   type = varchar(500)
@@ -592,6 +606,7 @@ column "wallet_address" {
 ### Pattern 3: Foreign Keys
 
 **MySQL/PostgreSQL** (HCL):
+
 ```hcl
 table "btc_tx_input" {
   // ...
@@ -610,6 +625,7 @@ table "btc_tx_input" {
 ```
 
 **SQLite** (limited FK support):
+
 ```sql
 -- SQLite supports FK but they're not enforced by default
 -- PRAGMA foreign_keys = ON; required
@@ -620,6 +636,7 @@ FOREIGN KEY (tx_id) REFERENCES btc_tx(id) ON DELETE CASCADE
 ### Pattern 4: Indexes for Performance
 
 **HCL**:
+
 ```hcl
 table "address" {
   // ...
@@ -636,6 +653,7 @@ table "address" {
 ### Pattern 5: Unique Constraints
 
 **HCL**:
+
 ```hcl
 table "address" {
   // ...
@@ -656,6 +674,7 @@ table "address" {
 ### Issue: Atlas Migration Fails
 
 **Symptoms**:
+
 ```
 Error: atlas migrate apply failed
 ```
@@ -663,21 +682,25 @@ Error: atlas migrate apply failed
 **Solutions**:
 
 1. **Check HCL syntax**:
+
    ```bash
    make atlas-lint
    ```
 
 2. **Verify database is running**:
+
    ```bash
    docker compose ps wallet-mysql
    ```
 
 3. **Check migration history**:
+
    ```bash
    make atlas-status-docker
    ```
 
 4. **Reset and retry**:
+
    ```bash
    docker compose down -v
    docker compose up -d wallet-mysql
@@ -688,6 +711,7 @@ Error: atlas migrate apply failed
 ### Issue: SQLC Generation Fails
 
 **Symptoms**:
+
 ```
 Error: sqlc generate failed
 ```
@@ -695,18 +719,21 @@ Error: sqlc generate failed
 **Solutions**:
 
 1. **Check schema file syntax**:
+
    ```bash
    # Validate MySQL syntax
    docker compose exec wallet-mysql mysql -uroot -proot watch < tools/sqlc/schemas/01_watch.sql
    ```
 
 2. **Check query file syntax**:
+
    ```bash
    # Run sqlc with verbose output
    cd tools/sqlc && sqlc generate --experimental
    ```
 
 3. **Verify engine configuration**:
+
    ```yaml
    # tools/sqlc/sqlc.yml
    version: "2"
@@ -719,12 +746,14 @@ Error: sqlc generate failed
 ### Issue: Schema Mismatch Between Databases
 
 **Symptoms**:
+
 - Tests pass with MySQL but fail with SQLite
 - Repository code works differently across databases
 
 **Solutions**:
 
 1. **Compare schema files**:
+
    ```bash
    # Compare table structures
    diff -u tools/sqlc/schemas/01_watch.sql tools/sqlc/schemas_sqlite/01_watch.sql
@@ -735,6 +764,7 @@ Error: sqlc generate failed
    - Ensure ENUM → CHECK constraint conversion is correct
 
 3. **Check sqlc generated models**:
+
    ```bash
    # Compare generated models
    diff -u internal/infrastructure/database/mysql/sqlcgen/models.go \
@@ -744,6 +774,7 @@ Error: sqlc generate failed
 ### Issue: Migration Conflict
 
 **Symptoms**:
+
 ```
 Error: migration checksum mismatch
 ```
@@ -751,11 +782,13 @@ Error: migration checksum mismatch
 **Solutions**:
 
 1. **Regenerate from scratch**:
+
    ```bash
    make atlas-dev-reset
    ```
 
 2. **Clear migration history**:
+
    ```bash
    docker compose exec wallet-mysql mysql -uroot -proot watch \
      -e "DROP TABLE IF EXISTS atlas_schema_revisions;"
@@ -767,6 +800,7 @@ Error: migration checksum mismatch
 ### 1. Always Use HCL as Source of Truth
 
 ✅ **DO**:
+
 ```bash
 # Edit HCL file
 vim tools/atlas/schemas/watch.hcl
@@ -776,6 +810,7 @@ make atlas-dev-reset
 ```
 
 ❌ **DON'T**:
+
 ```bash
 # Never edit migration files directly
 vim tools/atlas/migrations/watch/20240215120000.sql  # WRONG!
@@ -797,11 +832,13 @@ make gotest
 ### 3. Keep Migrations Small and Focused
 
 ✅ **Good**: One logical change per commit
+
 - Add `email` column to `address` table
 - Create `audit_log` table
 - Add index on `created_at`
 
 ❌ **Bad**: Multiple unrelated changes
+
 - Add `email` column, create `audit_log` table, modify `btc_tx` structure
 
 ### 4. Document Schema Changes
@@ -819,6 +856,7 @@ column "email" {
 ### 5. Backward Compatibility
 
 When modifying schemas:
+
 - **Adding columns**: Always make them nullable or provide default values
 - **Removing columns**: Deprecated first, remove in next major version
 - **Changing types**: Ensure data can be migrated without loss
@@ -826,6 +864,7 @@ When modifying schemas:
 ### 6. Security for Sensitive Columns
 
 For sensitive data (seeds, private keys):
+
 - Use appropriate encryption
 - Never log sensitive column values
 - Consider separate schemas for hot/cold storage
@@ -847,6 +886,7 @@ table "seed" {
 ### 7. Index Strategy
 
 Add indexes for:
+
 - Foreign key columns
 - Frequently queried columns
 - Columns used in WHERE clauses
@@ -861,6 +901,7 @@ index "idx_coin_account" {
 ### 8. Version Control
 
 Commit in this order:
+
 1. HCL schema changes
 2. Generated migration files
 3. Updated SQLC schema files
@@ -871,6 +912,7 @@ Commit in this order:
 ### 9. CI/CD Integration
 
 Ensure CI tests schema changes:
+
 ```yaml
 # .github/workflows/test.yml
 - name: Test schema migrations
@@ -885,7 +927,8 @@ Ensure CI tests schema changes:
 ### 10. Documentation
 
 Update these files when schema changes:
-- `docs/development/database.md` - Database architecture
+
+- `docs/database/architecture.md` - Database architecture
 - This file - If new patterns emerge
 - `tools/atlas/README.md` - Atlas-specific details
 - Schema-specific docs (if applicable)

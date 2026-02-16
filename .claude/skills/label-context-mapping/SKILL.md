@@ -7,7 +7,7 @@ description: Maps GitHub labels to Skills and Context documents. Use when creati
 
 Central mapping from GitHub labels to Skills and Context documents.
 
-**SSOT**: This skill defines the operational mappings. Label definitions are in [Task Classification](../../../docs/standards/task-classification.md).
+**SSOT**: This skill defines the operational mappings. Label definitions are in [Task Classification](../../../docs/guidelines/task-classification.md).
 
 ## When to Use
 
@@ -119,7 +119,7 @@ Chain label → Chain context (domain knowledge)
 
 ## Related
 
-- [Task Classification SSOT](../../../docs/standards/task-classification.md) - Label definitions
+- [Task Classification SSOT](../../../docs/guidelines/task-classification.md) - Label definitions
 - [GitHub Labels](.github/labels.yml) - Label configuration
 - `github-issue-creation` - Uses this mapping for issue creation
 - `fix-issue` command - Uses this mapping for issue work

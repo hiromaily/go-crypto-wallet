@@ -161,8 +161,8 @@ func (c *container) NewFooUseCase() FooUseCase {
 
 ## Related Documentation
 
-- @docs/standards/coding-conventions.md - Coding standards
-- @docs/standards/security.md - Security requirements
+- @docs/guidelines/coding-conventions.md - Coding standards
+- @docs/guidelines/security.md - Security requirements
 - @internal/AGENTS.md - Internal package guidelines
 - @pkg/AGENTS.md - Public package guidelines
 

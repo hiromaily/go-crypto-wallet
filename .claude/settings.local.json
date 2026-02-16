@@ -48,7 +48,8 @@
       "Bash(.kiro/specs/*/spec.json:*)",
       "Bash(mockery)",
       "Bash(chmod:*)",
-      "Bash(atlas version:*)"
+      "Bash(atlas version:*)",
+      "Bash(done)"
     ]
   },
   "hooks": {

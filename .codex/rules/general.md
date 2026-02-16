@@ -7,14 +7,14 @@ This file defines general rules for OpenAI Codex CLI when working on this reposi
 ## General Behavior
 
 - Follow [AGENTS.md](../../AGENTS.md) for behavior guidelines
-- Refer to [docs/standards/](../../docs/standards/) for detailed conventions
+- Refer to [docs/guidelines/](../../docs/guidelines/) for detailed conventions
 - Read [ARCHITECTURE.md](../../ARCHITECTURE.md) for system design
 
 ## Security
 
 **Security is paramount** - this project handles private keys and cryptocurrency transactions.
 
-Refer to [docs/standards/security.md](../../docs/standards/security.md) for full details.
+Refer to [docs/guidelines/security.md](../../docs/guidelines/security.md) for full details.
 
 Key rules:
 - **NEVER** log private keys or sensitive information
@@ -23,7 +23,7 @@ Key rules:
 
 ## Code Quality
 
-Refer to [docs/standards/coding-conventions.md](../../docs/standards/coding-conventions.md)
+Refer to [docs/guidelines/coding-conventions.md](../../docs/guidelines/coding-conventions.md)
 
 Key rules:
 - Follow Clean Architecture layer separation
@@ -32,11 +32,11 @@ Key rules:
 
 ## Testing
 
-Refer to [docs/standards/testing.md](../../docs/standards/testing.md)
+Refer to [docs/guidelines/testing.md](../../docs/guidelines/testing.md)
 
 ## Workflow
 
-Refer to [docs/standards/workflow.md](../../docs/standards/workflow.md)
+Refer to [docs/guidelines/workflow.md](../../docs/guidelines/workflow.md)
 
 Key rules:
 - Create feature branches for changes

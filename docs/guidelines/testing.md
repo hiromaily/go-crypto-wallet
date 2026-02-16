@@ -550,6 +550,6 @@ func TestFunction(t *testing.T) {
 ## See Also
 
 - [Architecture Guidelines](architecture.md) - Layer structure and responsibilities
-- [Coding Standards](coding-standards.md) - Code quality and verification commands
+- [Coding Standards](coding-conventions.md) - Code quality and verification commands
 - [Code Generation](code-generation.md) - Mock generation and other code generation tools
 - [Workflow Guidelines](workflow.md) - Running tests in CI/CD workflow

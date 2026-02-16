@@ -164,7 +164,7 @@ Regenerate with `make atlas-dev-reset`.
 
 ## Related Documentation
 
-- @docs/guidelines/database.md - Database management guide
+- @docs/database/database.md - Database management guide
 - @tools/atlas/atlas.hcl - Atlas configuration
 
 ## Related Skills

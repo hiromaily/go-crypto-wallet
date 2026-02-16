@@ -7,7 +7,7 @@ Security rules for Claude Code when working on go-crypto-wallet.
 
 ## Detailed Rules
 
-Refer to @docs/standards/security.md for full security requirements.
+Refer to @docs/guidelines/security.md for full security requirements.
 
 ## Quick Reference
 

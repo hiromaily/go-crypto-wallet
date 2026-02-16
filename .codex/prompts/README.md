@@ -50,7 +50,7 @@ approval_mode = "suggest"
 
 For now, Codex should use:
 
-- `.codex/rules/general.md` - General guidelines (references docs/standards/)
+- `.codex/rules/general.md` - General guidelines (references docs/guidelines/)
 
 Prompt-based workflows (like `/fix-issue`) are **not yet implemented** for Codex.
 
