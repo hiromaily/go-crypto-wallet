@@ -405,14 +405,14 @@ watch  -coin xrp tx status ...
 # 10. Suggested Repository Placement
 
 ```
-docs/crypto/xrp/architecture.md
+docs/chains/xrp/architecture.md
 ```
 
 Optional:
 
 ```
-docs/crypto/xrp/operations/
-docs/crypto/xrp/tx-lifecycle.md
+docs/chains/xrp/operations/
+docs/chains/xrp/tx-lifecycle.md
 ```
 
 ---

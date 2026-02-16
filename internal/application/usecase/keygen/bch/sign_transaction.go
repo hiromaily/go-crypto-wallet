@@ -108,7 +108,7 @@ func (u *signTransactionUseCase) Sign(
 	//
 	// Detection: Use non-nil multisigAccount to determine if transaction is multisig.
 	//
-	// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+	// Reference: docs/chains/bch/README.md - "Known Issues and Workarounds"
 	// Related: Issue #485, Issue #433
 	isMultisig := u.multisigAccount != nil
 	if bchutil.ShouldIncludePrevTxMetadata(isSigned, isMultisig) {

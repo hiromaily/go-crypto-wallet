@@ -38,7 +38,7 @@ Read the following documents before creating or modifying scripts:
 | Document | Contents |
 |----------|----------|
 | `docs/task-contexts/chains/bch.md` | **CRITICAL**: BCH vs BTC differences, prohibited features |
-| `docs/crypto/bch/README.md` | Detailed BCH technical reference |
+| `docs/chains/bch/README.md` | Detailed BCH technical reference |
 | `scripts/operation/bch/bch_common.sh` | BCH common utility functions |
 | `scripts/operation/common.sh` | Shared utility functions |
 
@@ -316,5 +316,5 @@ internal/application/usecase/*/btc/*descriptor*.go
 ## Related Documentation
 
 - [BCH Task Context](../../../docs/task-contexts/chains/bch.md) - **CRITICAL**: Read first
-- [BCH Technical Reference](../../../docs/crypto/bch/README.md)
+- [BCH Technical Reference](../../../docs/chains/bch/README.md)
 - [BCH E2E README](../../../scripts/operation/bch/README.md)

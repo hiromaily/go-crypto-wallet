@@ -546,7 +546,7 @@ func (b *BitcoinCash) ExistingBTCMethod() (*Result, error) {
 
 | Document | Purpose |
 |----------|---------|
-| `docs/crypto/bch/interface-separation.md` | Interface separation requirements between BTC and BCH |
+| `docs/chains/bch/interface-separation.md` | Interface separation requirements between BTC and BCH |
 
 ### Related GitHub Issues
 

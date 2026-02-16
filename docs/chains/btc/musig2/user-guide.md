@@ -72,6 +72,7 @@ Aggregation (Watch Wallet)
 ```
 
 **Key Security Feature:**
+
 - Each wallet generates a **nonce** (random value) in Round 1
 - Nonces must be **unique per transaction** and **never reused**
 - Reusing nonces can leak private keys - this is critical!
@@ -91,6 +92,7 @@ Aggregation (Watch Wallet)
 ### Required Features
 
 MuSig2 builds on top of existing wallet features:
+
 - ✅ **Phase 1**: Taproot support (BIP340 Schnorr signatures)
 - ✅ **Phase 2**: PSBT support (BIP174)
 - ✅ **Phase 3**: MuSig2 implementation (current)
@@ -119,7 +121,7 @@ config/wallet/btc/sign1.yaml
 ./sign1 --config config/wallet/btc/sign1.yaml --coin btc sign --file tx.psbt
 ```
 
-See `docs/crypto/btc/operation_example.md` for configuration details.
+See `docs/chains/btc/operation_example.md` for configuration details.
 
 ---
 
@@ -137,6 +139,7 @@ bc1p = Bech32m Taproot address prefix
 ```
 
 **Key Properties:**
+
 - Starts with `bc1p` on mainnet, `tb1p` on testnet
 - 62 characters long (Bech32m encoding)
 - Contains aggregated public key (looks like single-sig)
@@ -153,6 +156,7 @@ MuSig2 transactions use PSBT format with extension fields:
 ```
 
 **Examples:**
+
 ```
 payment_15_unsigned_0_1735680000000000000.psbt       # Unsigned (no nonces)
 payment_15_nonce_0_1735680000000000001.psbt          # After Round 1 (nonces)
@@ -205,6 +209,7 @@ A MuSig2 transaction progresses through these states:
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 Taproot addresses created
 Account: payment
@@ -222,6 +227,7 @@ Example address: tb1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxq...
 ```
 
 **Output:**
+
 ```
 Created unsigned MuSig2 transaction: payment_15_unsigned_0_1735680000000000000.psbt
 Transaction ID: 15
@@ -234,6 +240,7 @@ Round 1: Ready for nonce generation
 ```
 
 **File Generated:**
+
 - `data/tx/btc/payment_15_unsigned_0_1735680000000000000.psbt`
 
 #### Step 3: Round 1 - Generate Nonces (All Wallets, Parallel)
@@ -249,6 +256,7 @@ Round 1: Ready for nonce generation
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 nonce generated successfully
 Wallet: Keygen
@@ -267,6 +275,7 @@ Next: Transfer to Sign wallets for their nonce generation
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 nonce generated successfully
 Wallet: Sign (auth1)
@@ -285,6 +294,7 @@ Next: Transfer to Sign wallet #2 for nonce generation
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 nonce generated successfully
 Wallet: Sign (auth2)
@@ -309,6 +319,7 @@ Next: Round 2 - Partial signature creation
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 partial signature created
 Wallet: Keygen
@@ -327,6 +338,7 @@ Next: Transfer to Sign wallet #1 for signing
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 partial signature created
 Wallet: Sign (auth1)
@@ -345,6 +357,7 @@ Next: Transfer to Sign wallet #2 for signing
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 partial signature created
 Wallet: Sign (auth2)
@@ -363,6 +376,7 @@ Next: Transfer to Watch wallet for signature aggregation
 ```
 
 **Output:**
+
 ```
 ✓ MuSig2 signatures aggregated successfully
 Final signature size: 64 bytes (Schnorr)
@@ -383,6 +397,7 @@ Fee reduction: 41.9%
 ```
 
 **Output:**
+
 ```
 ✓ Transaction broadcast successfully
 Transaction hash: a1b2c3d4e5f6789...
@@ -482,6 +497,7 @@ data/tx/btc/
 #### For Air-Gapped Systems
 
 1. **Use USB Drives**
+
    ```bash
    # Mount USB
    mount /dev/sdb1 /media/usb
@@ -494,6 +510,7 @@ data/tx/btc/
    ```
 
 2. **Verify File Integrity**
+
    ```bash
    # Generate checksum
    sha256sum payment_15_unsigned_0_*.psbt > checksum.txt
@@ -503,6 +520,7 @@ data/tx/btc/
    ```
 
 3. **Track PSBT State**
+
    ```bash
    # Check PSBT status
    ./keygen musig2 status --file payment_15_unsigned_0_*.psbt
@@ -526,6 +544,7 @@ data/tx/btc/
 ```
 
 **Critical Rules:**
+
 - Each transaction needs fresh nonces
 - Nonces are stored securely during Round 1
 - Nonces are deleted after signing (Round 2)
@@ -534,6 +553,7 @@ data/tx/btc/
 #### Nonce Storage
 
 Nonces are stored in:
+
 - **PSBT proprietary fields** (during transaction flow)
 - **Wallet database** (temporary, for Round 2 signing)
 
@@ -582,6 +602,7 @@ Next: Export addresses to Watch wallet
 ### Address Properties
 
 MuSig2 addresses have these characteristics:
+
 - **Address Type**: P2TR (Taproot)
 - **Public Key**: Aggregated from all signers
 - **On-Chain**: Looks like single-sig address
@@ -608,6 +629,7 @@ MuSig2 addresses have these characteristics:
 #### Error: "Nonce already used for this transaction"
 
 **Symptom:**
+
 ```
 Error: nonce reuse detected - cannot sign with same nonce
 Transaction ID: 15
@@ -616,6 +638,7 @@ Transaction ID: 15
 **Cause:** Attempting to reuse a nonce (critical security violation).
 
 **Solution:**
+
 - **Never reuse nonces** - this will leak your private key
 - Generate fresh nonces for each transaction
 - If nonces were already generated, create a new transaction
@@ -623,6 +646,7 @@ Transaction ID: 15
 #### Error: "Not all nonces collected"
 
 **Symptom:**
+
 ```
 Error: cannot proceed to Round 2 - missing nonces
 Expected: 3 nonces
@@ -632,6 +656,7 @@ Received: 2 nonces
 **Cause:** Trying to sign before all nonces are generated.
 
 **Solution:**
+
 ```bash
 # Check PSBT status
 ./keygen musig2 status --file payment_15_unsigned_0_*.psbt
@@ -645,6 +670,7 @@ Received: 2 nonces
 #### Error: "Invalid partial signature"
 
 **Symptom:**
+
 ```
 Error: partial signature verification failed
 Signer: auth1
@@ -653,6 +679,7 @@ Signer: auth1
 **Cause:** Partial signature doesn't match expected format or is corrupted.
 
 **Solution:**
+
 ```bash
 # Verify PSBT integrity
 sha256sum payment_15_unsigned_2_*.psbt
@@ -664,6 +691,7 @@ sha256sum payment_15_unsigned_2_*.psbt
 #### Error: "Signature aggregation failed"
 
 **Symptom:**
+
 ```
 Error: failed to aggregate signatures - verification failed
 ```
@@ -671,6 +699,7 @@ Error: failed to aggregate signatures - verification failed
 **Cause:** One or more partial signatures are invalid or missing.
 
 **Solution:**
+
 ```bash
 # Check all partial signatures are present
 ./watch musig2 status --file payment_15_unsigned_3_*.psbt
@@ -685,6 +714,7 @@ Error: failed to aggregate signatures - verification failed
 #### Error: "MuSig2 not supported by Bitcoin Core"
 
 **Symptom:**
+
 ```
 Error: Bitcoin Core does not support Taproot/MuSig2
 Current version: v21.0
@@ -693,6 +723,7 @@ Current version: v21.0
 **Cause:** Bitcoin Core version is too old.
 
 **Solution:**
+
 - Upgrade Bitcoin Core to v22.0 or higher
 - Taproot and Schnorr signatures require Bitcoin Core 22.0+
 
@@ -706,6 +737,7 @@ Current version: v21.0
 ```
 
 **Output:**
+
 ```
 PSBT Status:
   Transaction ID: 15
@@ -727,6 +759,7 @@ PSBT Status:
 ```
 
 **Output:**
+
 ```
 ✓ All nonces are unique
 ✓ No nonce reuse detected
@@ -741,6 +774,7 @@ PSBT Status:
 ```
 
 **Output:**
+
 ```
 Partial Signature Verification:
   ✓ Keygen signature: valid
@@ -853,6 +887,7 @@ Partial Signature Verification:
 ### Privacy Benefits
 
 **Traditional Multisig:**
+
 ```
 On-Chain: Clearly visible as multisig
 - Multiple signatures visible
@@ -862,6 +897,7 @@ On-Chain: Clearly visible as multisig
 ```
 
 **MuSig2:**
+
 ```
 On-Chain: Looks like single-sig transaction
 - Single aggregated signature

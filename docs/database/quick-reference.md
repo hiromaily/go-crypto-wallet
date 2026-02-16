@@ -95,6 +95,7 @@ internal/infrastructure/database/
 ```
 
 **Legend**:
+
 - ✏️  Manual editing allowed/required
 - 🔒 Auto-generated - Do not edit
 - 🔄 Extracted from database
@@ -269,7 +270,7 @@ sqlite3 ./data/sqlite/btc/e2e.db \
 
 ## 📚 Documentation Links
 
-- **Complete Workflow**: [Database Schema Changes Guide](database-schema-changes.md)
+- **Complete Workflow**: [Database Schema Changes Guide](schema-changes.md)
 - **Database Architecture**: [Development Database Docs](../development/database.md)
 - **Atlas Details**: `tools/atlas/README.md`
 - **Code Generation**: [Code Generation Guidelines](code-generation.md)
@@ -323,4 +324,4 @@ diff -u tools/sqlc/schemas/01_watch.sql tools/sqlc/schemas_sqlite/01_watch.sql
 
 ---
 
-**📘 For detailed explanations and complete workflows, see [Database Schema Changes Guide](database-schema-changes.md)**
+**📘 For detailed explanations and complete workflows, see [Database Schema Changes Guide](schema-changes.md)**

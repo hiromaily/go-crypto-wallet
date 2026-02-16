@@ -134,6 +134,7 @@ sqlite3 data/db/btc_watch.db "SELECT id, tx_type, action FROM btc_tx WHERE tx_ty
 ```
 
 **Action Required:**
+
 - Complete all pending CSV transactions before migration
 - Or convert to PSBT format (see conversion section)
 
@@ -237,6 +238,7 @@ vim config/wallet/btc/watch_testnet.yaml
 #### 2.3 Verify Test Results
 
 **Checklist:**
+
 - [ ] Unsigned PSBT created successfully
 - [ ] First signature completed (Keygen)
 - [ ] Second signature completed (Sign, for multisig)
@@ -250,11 +252,13 @@ vim config/wallet/btc/watch_testnet.yaml
 #### 3.1 Schedule Maintenance Window
 
 **Recommended Window:**
+
 - **Duration**: 2-4 hours
 - **Timing**: Off-peak hours
 - **Communication**: Notify stakeholders 1 week in advance
 
 **Maintenance Window Checklist:**
+
 - [ ] Schedule announced to stakeholders
 - [ ] Backup procedures verified
 - [ ] Rollback plan documented
@@ -314,11 +318,13 @@ sqlite3 data/db/btc_watch.db \
 **Options:**
 
 **Option A: Complete CSV Transactions**
+
 - Finish all pending CSV transactions normally
 - Quickest, safest option
 - Recommended if pending count is low (<10)
 
 **Option B: Convert to PSBT** (Advanced)
+
 - Convert pending CSV to PSBT format
 - Requires custom conversion script
 - Only if many pending transactions
@@ -444,6 +450,7 @@ sqlite3 data/db/btc_watch.db \
 Monitor the following during first 24-48 hours:
 
 - **Transaction Success Rate**
+
   ```bash
   # Check successful broadcasts
   sqlite3 data/db/btc_watch.db \
@@ -451,18 +458,21 @@ Monitor the following during first 24-48 hours:
   ```
 
 - **Transaction Failures**
+
   ```bash
   # Check for failures (should be 0)
   grep -i "error" logs/watch.log | grep -i "psbt" | tail -20
   ```
 
 - **File Format**
+
   ```bash
   # Verify all new files are PSBT
   ls -la data/tx/btc/*.psbt | tail -10
   ```
 
 - **Signing Success**
+
   ```bash
   # Check signing operations
   grep -i "signing completed" logs/keygen.log | tail -10
@@ -644,6 +654,7 @@ A: Yes, PSBT files contain more metadata (UTXO info, scripts, derivation paths).
 **Q: Can I inspect PSBT contents?**
 
 A: Yes, use Bitcoin Core:
+
 ```bash
 bitcoin-cli decodepsbt "$(cat transaction.psbt)"
 ```
@@ -669,6 +680,7 @@ A: Same as CSV files - use USB drives, QR codes, or secure file transfer. PSBT f
 **Q: Do commands change with PSBT?**
 
 A: No, commands remain the same. The format change is transparent to operators:
+
 ```bash
 # Same commands work with PSBT
 ./watch create deposit --fee 0.0001
@@ -679,6 +691,7 @@ A: No, commands remain the same. The format change is transparent to operators:
 **Q: How do I know if a PSBT is fully signed?**
 
 A: Check the filename:
+
 - `_unsigned_0_*.psbt` - No signatures
 - `_unsigned_1_*.psbt` - Partially signed (1 signature)
 - `_signed_2_*.psbt` - Fully signed (2 signatures)
@@ -692,6 +705,7 @@ A: PSBT files can be recreated from database transaction records. Contact suppor
 **Q: Error: "PSBT is not fully signed"**
 
 A: The PSBT needs more signatures. For multisig:
+
 1. Check current signature count in filename
 2. Send to next signer (Keygen → Sign)
 3. Verify all required signatures collected
@@ -699,6 +713,7 @@ A: The PSBT needs more signatures. For multisig:
 **Q: Error: "Invalid PSBT format"**
 
 A: PSBT file may be corrupted:
+
 1. Verify file integrity (checksum)
 2. Don't edit PSBT files manually
 3. Re-create transaction if needed
@@ -706,6 +721,7 @@ A: PSBT file may be corrupted:
 **Q: Error: "Failed to read PSBT file"**
 
 A: Check file extension:
+
 ```bash
 # Must have .psbt extension
 mv transaction transaction.psbt
@@ -722,11 +738,13 @@ A: No, never edit PSBT files manually. They are base64-encoded binary data. Use 
 ### Pre-Migration Support
 
 **Documentation:**
+
 - [PSBT User Guide](psbt_user_guide.md)
 - [PSBT Developer Guide](psbt_developer_guide.md)
 - [PSBT Implementation](psbt_implementation.md)
 
 **Testing:**
+
 - Test on Bitcoin testnet before mainnet
 - Test with small amounts first
 - Test complete workflow end-to-end
@@ -734,11 +752,13 @@ A: No, never edit PSBT files manually. They are base64-encoded binary data. Use 
 ### Migration Assistance
 
 **Resources:**
+
 - GitHub Issues: [https://github.com/hiromaily/go-crypto-wallet/issues](https://github.com/hiromaily/go-crypto-wallet/issues)
-- Documentation: `docs/crypto/btc/`
+- Documentation: `docs/chains/btc/`
 - Example Scripts: `scripts/examples/`
 
 **Emergency Contact:**
+
 - Critical issues during migration
 - Rollback assistance
 - Data recovery

@@ -20,7 +20,7 @@ import (
 // the BCH Node RPC bug where signrawtransactionwithkey incorrectly reports
 // complete=true for partially signed multisig transactions.
 //
-// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+// Reference: docs/chains/bch/README.md - "Known Issues and Workarounds"
 type PrevTx struct {
 	TxID         string
 	Vout         uint32
@@ -40,7 +40,7 @@ type PrevTx struct {
 // signers to add their signatures. This metadata is preserved as a workaround for
 // the BCH Node RPC bug.
 //
-// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+// Reference: docs/chains/bch/README.md - "Known Issues and Workarounds"
 func ParseRawTxContent(content string) (string, []PrevTx, error) {
 	lines := strings.Split(strings.TrimSpace(content), "\n")
 	if len(lines) == 0 {
@@ -116,7 +116,7 @@ func ConvertPrevTxsToDTO(prevTxs []PrevTx) []dtobtc.PreviousTx {
 // The prevTx metadata is included to enable subsequent signers (Sign1, Sign2) to
 // add their signatures. This is critical for the BCH Node RPC bug workaround.
 //
-// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+// Reference: docs/chains/bch/README.md - "Known Issues and Workarounds"
 func FormatSignedTxContent(txHex string, prevTxs []PrevTx) string {
 	var builder strings.Builder
 	builder.WriteString(txHex)
@@ -152,7 +152,7 @@ func FormatSignedTxContent(txHex string, prevTxs []PrevTx) string {
 //
 // Returns: true if prevTx metadata should be included in the transaction file
 //
-// Reference: docs/crypto/bch/README.md - "Known Issues and Workarounds"
+// Reference: docs/chains/bch/README.md - "Known Issues and Workarounds"
 // Related: Issue #485, Issue #433
 func ShouldIncludePrevTxMetadata(isSigned bool, isMultisig bool) bool {
 	// For multisig transactions, always include prevTx metadata for subsequent signers,

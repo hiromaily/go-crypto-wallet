@@ -208,6 +208,6 @@ atlas schema diff --env local_postgresql_watch  # Should show "Schemas are synce
 
 ## Related Documentation
 
-- [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md)
-- [Database Quick Reference](../../../docs/database/database-quick-reference.md)
+- [Database Schema Changes Guide](../../../docs/database/schema-changes.md)
+- [Database Quick Reference](../../../docs/database/quick-reference.md)
 - [Atlas Migration README](../../../tools/atlas/migrations/postgresql_watch/README.md)

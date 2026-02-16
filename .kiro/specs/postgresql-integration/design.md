@@ -12,9 +12,9 @@ This feature adds PostgreSQL 18.2 as a third database backend option to go-crypt
 
 **📚 Implementation References**:
 
-- [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md) - Complete workflow for multi-database schema modifications
-- [Database Quick Reference](../../../docs/database/database-quick-reference.md) - Command cheat sheet and data type mappings
-- [Database Management](../../../docs/database/database.md) - Overview of database tools and architecture
+- [Database Schema Changes Guide](../../../docs/database/schema-changes.md) - Complete workflow for multi-database schema modifications
+- [Database Quick Reference](../../../docs/database/quick-reference.md) - Command cheat sheet and data type mappings
+- [Database Management](../../../docs/database/db-management.md) - Overview of database tools and architecture
 
 ### Goals
 
@@ -505,7 +505,7 @@ func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
 
 **Data Type Mappings**:
 
-**📘 Complete reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/database/database-quick-reference.md#-data-type-mapping) for comprehensive mapping across MySQL, SQLite, and PostgreSQL.
+**📘 Complete reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/database/quick-reference.md#-data-type-mapping) for comprehensive mapping across MySQL, SQLite, and PostgreSQL.
 
 | MySQL Type | PostgreSQL Type | Conversion Notes |
 |------------|-----------------|------------------|
@@ -1085,7 +1085,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 
 ## Migration Strategy
 
-**📘 Complete workflow guide**: See [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md) for detailed step-by-step schema modification workflow across all databases.
+**📘 Complete workflow guide**: See [Database Schema Changes Guide](../../../docs/database/schema-changes.md) for detailed step-by-step schema modification workflow across all databases.
 
 ### Phase 1: Schema Creation (Manual Conversion)
 

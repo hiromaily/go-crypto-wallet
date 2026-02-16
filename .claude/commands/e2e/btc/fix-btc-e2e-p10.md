@@ -8,7 +8,7 @@ Fix errors in BTC E2E test (Pattern 10: P2TR MuSig2 N-of-N).
 
 - @.claude/rules/btc/e2e-script.md (common rules, errors, debug commands)
 - @.claude/skills/btc-terminology/SKILL.md (**CRITICAL**: taproot vs bech32m)
-- @docs/crypto/btc/musig2/user-guide.md (MuSig2 protocol)
+- @docs/chains/btc/musig2/user-guide.md (MuSig2 protocol)
 
 ## Pattern 10 Specifications
 

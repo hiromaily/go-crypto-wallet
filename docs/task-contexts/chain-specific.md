@@ -56,13 +56,13 @@ version: 1.0.0
 | Chain | Document | Path |
 |-------|----------|------|
 | BTC | BTC Reference | `docs/task-contexts/chains/btc.md` |
-| BTC | BTC Documentation | `docs/crypto/btc/README.md` |
+| BTC | BTC Documentation | `docs/chains/btc/README.md` |
 | BCH | BCH Reference | `docs/task-contexts/chains/bch.md` |
-| BCH | BCH Documentation | `docs/crypto/bch/README.md` |
+| BCH | BCH Documentation | `docs/chains/bch/README.md` |
 | ETH | ETH Reference | `docs/task-contexts/chains/eth.md` |
-| ETH | ETH Documentation | `docs/crypto/eth/README.md` |
+| ETH | ETH Documentation | `docs/chains/eth/README.md` |
 | XRP | XRP Reference | `docs/task-contexts/chains/xrp.md` |
-| XRP | XRP Documentation | `docs/crypto/xrp/README.md` |
+| XRP | XRP Documentation | `docs/chains/xrp/README.md` |
 
 ## Wallet Types
 

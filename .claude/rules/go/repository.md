@@ -301,5 +301,5 @@ func TestAddressRepository_GetAll(t *testing.T) {
 
 - @.claude/rules/go/di.md - Dependency injection rules
 - @.claude/rules/go/usecase.md - Use case pattern
-- @docs/database/database.md - Database guidelines
+- @docs/database/db-management.md - Database guidelines
 - @internal/application/ports/ - Port interface definitions

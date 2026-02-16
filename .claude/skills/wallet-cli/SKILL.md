@@ -18,12 +18,12 @@ Guide for running the three wallet types: watch, keygen, and sign.
 
 All wallet commands require the `--config` flag:
 
-| Flag | Short | Required | Description |
-|------|-------|----------|-------------|
-| `--config` | `-c` | **Yes** | Path to configuration file |
-| `--coin` | | No | Coin type: `btc`, `bch`, `eth`, `xrp`, `hyt` (default: `btc`) |
-| `--account-config` | | No | Path to account config for multisig |
-| `--wallet` | `-w` | No | Bitcoin Core wallet name (BTC/BCH only) |
+| Flag               | Short | Required | Description                                                   |
+| ------------------ | ----- | -------- | ------------------------------------------------------------- |
+| `--config`         | `-c`  | **Yes**  | Path to configuration file                                    |
+| `--coin`           |       | No       | Coin type: `btc`, `bch`, `eth`, `xrp`, `hyt` (default: `btc`) |
+| `--account-config` |       | No       | Path to account config for multisig                           |
+| `--wallet`         | `-w`  | No       | Bitcoin Core wallet name (BTC/BCH only)                       |
 
 ## Configuration Files
 
@@ -193,5 +193,5 @@ Ensure `--coin` flag has valid value:
 ## Related
 
 - `docs/commands.md` - Full command reference
-- `docs/crypto/btc/psbt/user-guide.md` - PSBT workflow
-- `docs/crypto/btc/taproot/user-guide.md` - Taproot usage
+- `docs/chains/btc/psbt/user-guide.md` - PSBT workflow
+- `docs/chains/btc/taproot/user-guide.md` - Taproot usage

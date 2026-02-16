@@ -9,23 +9,23 @@ description: Critical Bitcoin terminology rules to prevent confusion between bec
 
 **This is a common source of bugs.** Do NOT confuse these terms:
 
-| Term | What It Is | Where Used |
-|------|------------|------------|
+| Term        | What It Is                                  | Where Used                      |
+| ----------- | ------------------------------------------- | ------------------------------- |
 | **bech32m** | Encoding format (HOW address is serialized) | Bitcoin Core RPC, shell scripts |
-| **taproot** | Address type (WHAT the address represents) | Config files, domain model |
+| **taproot** | Address type (WHAT the address represents)  | Config files, domain model      |
 
 **Key Rule:** `bech32m` ≠ `taproot` — They are related but NOT interchangeable.
 
 ## Quick Reference Table
 
-| Context | Correct Term | Example |
-|---------|--------------|---------|
-| Config YAML/TOML files | `taproot` | `address_type: "taproot"` |
-| Environment variables | `taproot` | `WALLET_ADDRESS_TYPE="taproot"` |
-| Bitcoin Core CLI/RPC | `bech32m` | `bitcoin-cli getnewaddress "" bech32m` |
-| Shell scripts (receiver addresses) | `bech32m` | `getnewaddress "" bech32m` |
-| Go domain code (`internal/domain/address/`) | `taproot` | `AddrTypeTaproot` |
-| Go Bitcoin Core interface (`internal/domain/bitcoin/`) | `bech32m` | `AddressTypeTaproot = "bech32m"` |
+| Context                                                | Correct Term | Example                                |
+| ------------------------------------------------------ | ------------ | -------------------------------------- |
+| Config YAML/TOML files                                 | `taproot`    | `address_type: "taproot"`              |
+| Environment variables                                  | `taproot`    | `WALLET_ADDRESS_TYPE="taproot"`        |
+| Bitcoin Core CLI/RPC                                   | `bech32m`    | `bitcoin-cli getnewaddress "" bech32m` |
+| Shell scripts (receiver addresses)                     | `bech32m`    | `getnewaddress "" bech32m`             |
+| Go domain code (`internal/domain/address/`)            | `taproot`    | `AddrTypeTaproot`                      |
+| Go Bitcoin Core interface (`internal/domain/bitcoin/`) | `bech32m`    | `AddressTypeTaproot = "bech32m"`       |
 
 ## Common Mistakes
 
@@ -33,7 +33,7 @@ description: Critical Bitcoin terminology rules to prevent confusion between bec
 
 ```yaml
 # Config file - DON'T use bech32m
-address_type: "bech32m"  # WRONG!
+address_type: "bech32m" # WRONG!
 ```
 
 ```bash
@@ -45,7 +45,7 @@ bitcoin-cli getnewaddress "" taproot  # WRONG!
 
 ```yaml
 # Config file - Use taproot
-address_type: "taproot"  # CORRECT!
+address_type: "taproot" # CORRECT!
 ```
 
 ```bash
@@ -67,12 +67,12 @@ All Taproot addresses are encoded using bech32m, but:
 
 ### Address Format Comparison
 
-| Encoding | SegWit Version | Address Type | Prefix | Config Value |
-|----------|----------------|--------------|--------|--------------|
-| Base58 | N/A | P2PKH | `1...` | `legacy` |
-| Base58 | N/A | P2SH | `3...` | `p2sh-segwit` |
-| Bech32 | v0 | P2WPKH | `bc1q...` | `bech32` |
-| **Bech32m** | **v1** | **P2TR** | **`bc1p...`** | **`taproot`** |
+| Encoding    | SegWit Version | Address Type | Prefix        | Config Value  |
+| ----------- | -------------- | ------------ | ------------- | ------------- |
+| Base58      | N/A            | P2PKH        | `1...`        | `legacy`      |
+| Base58      | N/A            | P2SH         | `3...`        | `p2sh-segwit` |
+| Bech32      | v0             | P2WPKH       | `bc1q...`     | `bech32`      |
+| **Bech32m** | **v1**         | **P2TR**     | **`bc1p...`** | **`taproot`** |
 
 ## Codebase Mapping
 
@@ -110,12 +110,12 @@ When working with Taproot/Bech32m code:
 
 ## Related Files
 
-| File | Purpose |
-|------|---------|
-| `internal/domain/address/types.go` | User-facing `AddrType` definitions |
-| `internal/domain/bitcoin/address_type.go` | Bitcoin Core `AddressType` definitions |
-| `internal/infrastructure/api/btc/btc/mapper.go` | Type conversion functions |
-| `docs/crypto/btc/taproot/user-guide.md` | Taproot user guide |
+| File                                            | Purpose                                |
+| ----------------------------------------------- | -------------------------------------- |
+| `internal/domain/address/types.go`              | User-facing `AddrType` definitions     |
+| `internal/domain/bitcoin/address_type.go`       | Bitcoin Core `AddressType` definitions |
+| `internal/infrastructure/api/btc/btc/mapper.go` | Type conversion functions              |
+| `docs/chains/btc/taproot/user-guide.md`         | Taproot user guide                     |
 
 ## Related Documentation
 

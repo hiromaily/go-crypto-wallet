@@ -608,7 +608,7 @@ source "${SCRIPT_DIR}/common.sh"
 #   RPC_PASSWORD      Bitcoin RPC password (default: xyz)
 #
 # Reference Documentation:
-#   docs/crypto/btc/operations/e2e-transaction-patterns.md
+#   docs/chains/btc/operations/e2e-transaction-patterns.md
 ```
 
 ### Function Documentation

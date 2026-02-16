@@ -58,6 +58,7 @@ MuSig2 transactions are 30-50% smaller than traditional P2WSH multisig:
 | **Fee (50 sat/vB)** | 18,500-20,000 sats | 10,000-12,500 sats | **40-45%** |
 
 **Annual Savings Example**: If you make 1,000 transactions per year at 50 sat/vB:
+
 - Traditional P2WSH: ~19,250,000 sats (~0.19 BTC)
 - MuSig2: ~11,250,000 sats (~0.11 BTC)
 - **Savings**: ~8,000,000 sats (~0.08 BTC)
@@ -87,6 +88,7 @@ MuSig2 Taproot (bc1p...):
 #### Two-Round Signing Process
 
 Traditional P2WSH:
+
 ```
 1. Create unsigned transaction
 2. Each signer signs independently (can be parallel)
@@ -95,6 +97,7 @@ Traditional P2WSH:
 ```
 
 MuSig2:
+
 ```
 1. Create unsigned transaction
 2. Round 1: Each signer generates nonce (parallel)
@@ -161,6 +164,7 @@ bitcoin-cli -version
 ```
 
 If using older version:
+
 1. Backup wallet data
 2. Stop Bitcoin Core
 3. Upgrade to v25.0 or higher
@@ -189,6 +193,7 @@ DESCRIBE account_key;
 ```
 
 If columns are missing, run migration:
+
 ```bash
 # Apply database migrations
 make db-migrate
@@ -201,6 +206,7 @@ make db-migrate
 **CRITICAL**: Always test migration in testnet first.
 
 Required test setup:
+
 1. **Testnet Bitcoin Core node**
    - Testnet fully synced
    - RPC credentials configured
@@ -215,6 +221,7 @@ Required test setup:
 #### Production Environment
 
 Before migrating production:
+
 1. **Backup Strategy**
    - Full database backup
    - Keystore backups
@@ -238,7 +245,7 @@ Your team should understand:
    - Two-round protocol
    - Nonce security requirements
    - Key aggregation
-   - Read: `docs/crypto/btc/musig2/user-guide.md`
+   - Read: `docs/chains/btc/musig2/user-guide.md`
 
 2. **Security Implications**
    - Nonce reuse consequences
@@ -250,7 +257,7 @@ Your team should understand:
    - File management
    - Error recovery
    - Monitoring
-   - Read: `docs/crypto/btc/musig2/user-guide.md` (Best Practices)
+   - Read: `docs/chains/btc/musig2/user-guide.md` (Best Practices)
 
 #### Training Checklist
 
@@ -440,11 +447,13 @@ Size Reduction: 40-45% smaller
 ```
 
 **Advantages**:
+
 - Simple: One round of signing
 - Parallel: All signers can sign simultaneously
 - Independent: Signers don't need to coordinate
 
 **Disadvantages**:
+
 - Larger transactions (multiple signatures on-chain)
 - Higher fees
 - Privacy leak (multisig visible)
@@ -472,11 +481,13 @@ Size Reduction: 40-45% smaller
 ```
 
 **Advantages**:
+
 - Smaller transactions (single aggregated signature)
 - Lower fees (30-50% reduction)
 - Better privacy (looks like single-sig)
 
 **Disadvantages**:
+
 - More complex: Two rounds of signing
 - Coordination: Must collect all nonces before Round 2
 - Security: Nonce reuse can leak private keys
@@ -564,6 +575,7 @@ ls -la config/wallet/
 ```
 
 Document findings:
+
 - Total P2WSH addresses: ___
 - Active addresses (with UTXOs): ___
 - Total BTC in P2WSH addresses: ___
@@ -644,6 +656,7 @@ Create risk register:
 Document rollback triggers:
 
 **Rollback Immediately If**:
+
 - Nonce reuse detected
 - Private key leakage
 - Unable to sign transactions
@@ -967,12 +980,14 @@ scripts/monitoring/check_musig2_transactions.sh
 #### Step 4.3: Gradual Increase
 
 Week 1:
+
 ```bash
 # Create 10 more addresses, use for 10% of new transactions
 keygen create musig2-address --account deposit --count 10
 ```
 
 Week 2:
+
 ```bash
 # Create 50 more addresses, use for 30% of new transactions
 keygen create musig2-address --account deposit --count 50
@@ -980,6 +995,7 @@ keygen create musig2-address --account payment --count 20
 ```
 
 Week 3:
+
 ```bash
 # Create 100 more addresses, use for 50% of new transactions
 keygen create musig2-address --account deposit --count 100
@@ -987,6 +1003,7 @@ keygen create musig2-address --account payment --count 50
 ```
 
 Week 4:
+
 ```bash
 # Use MuSig2 for 100% of new addresses
 # All new addresses use MuSig2 by default
@@ -1128,7 +1145,7 @@ GROUP BY account;
 mv docs/procedures/p2wsh_signing.md docs/procedures/archive/
 
 # 3. Create new MuSig2 procedures
-cp docs/crypto/btc/musig2/user-guide.md docs/procedures/musig2_signing.md
+cp docs/chains/btc/musig2/user-guide.md docs/procedures/musig2_signing.md
 # Customize for your operational environment
 ```
 
@@ -1212,6 +1229,7 @@ Create migration report:
    - Wallet crashes during MuSig2 operations
 
 **Do NOT Rollback For**:
+
 - Minor coordination issues (solvable with training)
 - Individual transaction failures (investigate first)
 - Operator errors (training issue, not system issue)
@@ -1426,6 +1444,7 @@ keygen create multisig-address --account deposit --count 5 --type p2wsh
 Different workflows for different address types:
 
 **P2WSH Inputs (Traditional)**:
+
 ```bash
 # 1. Create unsigned PSBT
 watch create payment --from-address bc1q... --to bc1q... --amount 0.01
@@ -1439,6 +1458,7 @@ watch send --file payment_15_signed_final.psbt
 ```
 
 **MuSig2 Inputs (Taproot)**:
+
 ```bash
 # 1. Create unsigned PSBT
 watch create payment --from-address bc1p... --to bc1p... --amount 0.01
@@ -1459,6 +1479,7 @@ watch send --file payment_15_signed_3.psbt
 ```
 
 **Mixed Inputs (Both Types)**:
+
 ```bash
 # Transaction with both P2WSH and MuSig2 inputs
 # 1. Create unsigned PSBT (watch wallet handles mixing)
@@ -1507,12 +1528,14 @@ SELECT * FROM utxo WHERE address LIKE 'bc1p%';
 ### Long-Term Coexistence Considerations
 
 #### Pros of Long-Term Coexistence
+
 - Flexibility to choose address type per use case
 - Backward compatibility maintained
 - Gradual learning curve for team
 - Risk mitigation (eggs not all in one basket)
 
 #### Cons of Long-Term Coexistence
+
 - Increased operational complexity
 - Two workflows to maintain
 - Potential for confusion/errors
@@ -1523,6 +1546,7 @@ SELECT * FROM utxo WHERE address LIKE 'bc1p%';
 **Short-term** (during migration): Coexistence is necessary and beneficial.
 
 **Long-term** (after 6-12 months): Consider full migration to MuSig2 for simplicity, unless:
+
 - Regulatory requirements mandate traditional multisig
 - External integrations require P2WSH
 - Risk tolerance demands redundancy
@@ -1679,6 +1703,7 @@ POST /api/v1/address/create
 #### Q: What happens if a nonce is reused?
 
 **A**: **CRITICAL SECURITY ISSUE**. Nonce reuse leaks the private key. The system has multiple protections:
+
 1. Database unique constraints prevent storage of duplicate nonces
 2. Application-level validation before signing
 3. Error handling stops signing if duplicate detected
@@ -1688,6 +1713,7 @@ Never override these protections. See [Security Documentation](../security/musig
 #### Q: How do I verify a MuSig2 transaction before broadcast?
 
 **A**:
+
 ```bash
 # 1. Decode PSBT
 watch btc api decodepsbt $(cat payment_15_signed_3.psbt)
@@ -1705,6 +1731,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: Can I recover if I lose a PSBT file during signing?
 
 **A**:
+
 - **During Round 1 (nonce generation)**: Regenerate nonces. The Watch wallet recreates the PSBT from the transaction.
 - **During Round 2 (signing)**: More complex. You may need to restart the entire signing process.
 - **Best Practice**: Always backup PSBT files after each step.
@@ -1714,7 +1741,8 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: How do I train my team on MuSig2?
 
 **A**: Recommended approach:
-1. **Read Documentation**: All operators read `docs/crypto/btc/musig2/user-guide.md` and `docs/security/musig2_security.md`
+
+1. **Read Documentation**: All operators read `docs/chains/btc/musig2/user-guide.md` and `docs/security/musig2_security.md`
 2. **Testnet Practice**: Each operator practices full workflow on testnet (5-10 transactions)
 3. **Shadow Production**: Observe experienced operator in production
 4. **Supervised Production**: Perform under supervision
@@ -1723,6 +1751,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: What monitoring should I set up?
 
 **A**:
+
 1. **Nonce Tracking**: Alert on any nonce reuse attempts
 2. **Transaction Success Rate**: Alert if success rate drops below 95%
 3. **PSBT File Management**: Alert on missing or stale files
@@ -1732,6 +1761,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: How do I handle emergency situations?
 
 **A**: See [Rollback Procedures](#rollback-procedures). Key points:
+
 - Always complete in-flight transactions first
 - Document the issue thoroughly
 - Don't panic-rollback for operator errors (training issue)
@@ -1740,6 +1770,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: Can I automate the signing workflow?
 
 **A**: **Partial automation possible**, but:
+
 - ✅ Nonce generation can be automated (Round 1)
 - ✅ Partial signature creation can be automated (Round 2)
 - ❌ **Never automate**: Private key access, nonce reuse checks, final broadcast approval
@@ -1750,6 +1781,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: Should I migrate all accounts at once?
 
 **A**: **No**. Start with low-risk accounts (e.g., deposit), then gradually expand. This allows you to:
+
 - Build team confidence
 - Identify issues in low-risk environment
 - Adjust procedures based on lessons learned
@@ -1757,6 +1789,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: What if I discover an issue after sweeping funds?
 
 **A**:
+
 1. **Stop**: Don't create more MuSig2 transactions
 2. **Assess**: Determine if funds are at risk
 3. **Secure**: If funds are safe, plan fix; if at risk, execute emergency rollback
@@ -1767,6 +1800,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: How do I calculate break-even point for migration?
 
 **A**:
+
 ```bash
 # Migration costs:
 SETUP_TIME=40        # hours (team time)
@@ -1801,6 +1835,7 @@ echo "Break-even in $BREAK_EVEN_MONTHS months"
 #### Q: Can I migrate without downtime?
 
 **A**: **Yes**. The gradual migration approach allows zero-downtime migration:
+
 1. Create MuSig2 addresses alongside P2WSH
 2. Gradually shift new transactions to MuSig2
 3. P2WSH remains fully operational during migration
@@ -1809,6 +1844,7 @@ echo "Break-even in $BREAK_EVEN_MONTHS months"
 #### Q: What if Bitcoin Core introduces MuSig2 wallet support?
 
 **A**: Future Bitcoin Core versions may add native MuSig2 wallet support. When that happens:
+
 - Your addresses remain valid (standard P2TR)
 - Your keys remain valid
 - You may be able to import keys into Bitcoin Core wallet
@@ -1831,6 +1867,7 @@ This migration guide provides a comprehensive strategy for transitioning from tr
 ### Expected Outcomes
 
 After successful migration, you'll achieve:
+
 - **40-50% fee savings** on multisig transactions
 - **Improved privacy** (transactions indistinguishable from single-sig)
 - **Modern infrastructure** using latest Bitcoin standards
@@ -1846,11 +1883,11 @@ After successful migration, you'll achieve:
 
 ### Support and Resources
 
-- **Documentation**: `docs/crypto/btc/musig2/user-guide.md`
+- **Documentation**: `docs/chains/btc/musig2/user-guide.md`
 - **Security**: `docs/security/musig2_security.md`
 - **Architecture**: `docs/architecture/musig2_architecture.md`
 - **Issues**: GitHub Issues - Report bugs or ask questions
-- **Bitcoin Core**: https://bitcoincore.org/ (v22.0+ required)
+- **Bitcoin Core**: <https://bitcoincore.org/> (v22.0+ required)
 
 ---
 

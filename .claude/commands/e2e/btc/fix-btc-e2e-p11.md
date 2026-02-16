@@ -8,7 +8,7 @@ Fix errors in BTC E2E test (Pattern 11: P2TR Tapscript M-of-N).
 
 - @.claude/rules/btc/e2e-script.md (common rules, errors, debug commands)
 - @.claude/skills/btc-terminology/SKILL.md (**CRITICAL**: taproot vs bech32m)
-- @docs/crypto/btc/taproot/user-guide.md (Tapscript)
+- @docs/chains/btc/taproot/user-guide.md (Tapscript)
 
 ## Pattern 11 Specifications
 

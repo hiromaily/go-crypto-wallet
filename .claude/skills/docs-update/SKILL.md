@@ -18,16 +18,16 @@ Workflow for documentation changes with SSOT awareness.
 
 ### SSOT Locations
 
-| Category | SSOT Location | Description |
-|----------|---------------|-------------|
-| Agent behavior | `AGENTS.md` | Entry point for all agents |
-| Agent instruction design | `docs/design/ai-agents-instruction.md` | Command/Skill/Rule architecture |
-| Label definitions | `docs/guidelines/task-classification.md` | All label types and meanings |
-| Label → Skill mapping | `.claude/skills/label-context-mapping/` | Operational routing |
-| Coding conventions | `docs/guidelines/coding-conventions.md` | Code style rules |
-| Security rules | `docs/guidelines/security.md` | Security requirements |
-| Testing standards | `docs/guidelines/testing.md` | Test requirements |
-| Workflow | `docs/guidelines/workflow.md` | Development workflow |
+| Category                 | SSOT Location                            | Description                     |
+| ------------------------ | ---------------------------------------- | ------------------------------- |
+| Agent behavior           | `AGENTS.md`                              | Entry point for all agents      |
+| Agent instruction design | `docs/design/ai-agents-instruction.md`   | Command/Skill/Rule architecture |
+| Label definitions        | `docs/guidelines/task-classification.md` | All label types and meanings    |
+| Label → Skill mapping    | `.claude/skills/label-context-mapping/`  | Operational routing             |
+| Coding conventions       | `docs/guidelines/coding-conventions.md`  | Code style rules                |
+| Security rules           | `docs/guidelines/security.md`            | Security requirements           |
+| Testing standards        | `docs/guidelines/testing.md`             | Test requirements               |
+| Workflow                 | `docs/guidelines/workflow.md`            | Development workflow            |
 
 ### SSOT Rules
 
@@ -37,16 +37,16 @@ Workflow for documentation changes with SSOT awareness.
 
 ## Applicable Files
 
-| Path | Type | Description |
-|------|------|-------------|
-| `AGENTS.md` | SSOT | Agent behavior entry point |
-| `ARCHITECTURE.md` | SSOT | System architecture |
-| `docs/guidelines/` | SSOT | Project guidelines and standards |
-| `docs/design/` | Reference | Design documents |
-| `docs/crypto/` | Reference | Chain-specific documentation |
-| `docs/task-contexts/` | Context | Task-specific procedures |
-| `internal/AGENTS.md` | Scoped SSOT | Internal package guidelines |
-| `pkg/AGENTS.md` | Scoped SSOT | Public package guidelines |
+| Path                  | Type        | Description                      |
+| --------------------- | ----------- | -------------------------------- |
+| `AGENTS.md`           | SSOT        | Agent behavior entry point       |
+| `ARCHITECTURE.md`     | SSOT        | System architecture              |
+| `docs/guidelines/`    | SSOT        | Project guidelines and standards |
+| `docs/design/`        | Reference   | Design documents                 |
+| `docs/chains/`        | Reference   | Chain-specific documentation     |
+| `docs/task-contexts/` | Context     | Task-specific procedures         |
+| `internal/AGENTS.md`  | Scoped SSOT | Internal package guidelines      |
+| `pkg/AGENTS.md`       | Scoped SSOT | Public package guidelines        |
 
 ## Documentation Hierarchy
 
@@ -112,7 +112,9 @@ After changes:
 
 ```markdown
 # Top Level (document title)
+
 ## Section
+
 ### Subsection
 ```
 
@@ -120,16 +122,17 @@ After changes:
 
 Always specify language:
 
-```markdown
+````markdown
 ```go
 func example() {}
 ```
+````
 
 ```bash
 make go-lint
 ```
 
-```
+````
 
 ### Tables
 
@@ -139,7 +142,7 @@ Use tables for structured data:
 | Column 1 | Column 2 |
 |----------|----------|
 | Value 1  | Value 2  |
-```
+````
 
 ### Links
 

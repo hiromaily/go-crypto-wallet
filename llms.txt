@@ -68,8 +68,8 @@ docs/          → Documentation
 ### Architecture & Design
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Clean Architecture overview
-- [docs/crypto/btc/](docs/crypto/btc/) - Bitcoin-specific documentation
-- [docs/crypto/eth/](docs/crypto/eth/) - Ethereum-specific documentation
+- [docs/chains/btc/](docs/chains/btc/) - Bitcoin-specific documentation
+- [docs/chains/eth/](docs/chains/eth/) - Ethereum-specific documentation
 
 ### Project Guidelines and Standards
 

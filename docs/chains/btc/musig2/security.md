@@ -120,17 +120,20 @@ Partial signatures in Round 2 are tied to those commitments
 #### External Attackers
 
 **Capabilities**:
+
 - Observe blockchain transactions
 - Observe network traffic (if not encrypted)
 - Attempt to exploit software vulnerabilities
 - Social engineering attacks
 
 **Goals**:
+
 - Steal funds by exploiting vulnerabilities
 - Learn about transaction patterns (privacy attack)
 - Disrupt operations (DoS)
 
 **Mitigation**:
+
 - Offline wallets (air-gapped) for key operations
 - Encrypted file transport
 - Regular security updates
@@ -139,15 +142,18 @@ Partial signatures in Round 2 are tied to those commitments
 #### Insider Threats (Malicious)
 
 **Capabilities**:
+
 - Access to operational systems
 - Knowledge of procedures
 - Ability to manipulate files or processes
 
 **Goals**:
+
 - Steal funds
 - Sabotage operations
 
 **Mitigation**:
+
 - Multi-signature requirement (no single person can steal funds)
 - Audit logging
 - Access controls
@@ -156,13 +162,16 @@ Partial signatures in Round 2 are tied to those commitments
 #### Insider Threats (Accidental)
 
 **Capabilities**:
+
 - Authorized access to systems
 - Perform operations
 
 **Goals**:
+
 - None (accidental errors, not malicious)
 
 **Mitigation**:
+
 - Training and procedures
 - Monitoring and alerts
 - Error detection (multiple validation layers)
@@ -174,6 +183,7 @@ Partial signatures in Round 2 are tied to those commitments
 **Vulnerability**: Weak random number generation
 **Impact**: Predictable nonces → private key recovery
 **Mitigation**:
+
 - Use cryptographically secure RNG (`crypto/rand` in Go)
 - btcd library handles nonce generation securely
 - Never implement custom nonce generation
@@ -183,6 +193,7 @@ Partial signatures in Round 2 are tied to those commitments
 **Vulnerability**: Nonce reuse due to storage issues
 **Impact**: Private key leakage
 **Mitigation**:
+
 - Database unique constraints
 - Application-level validation
 - Monitoring for reuse attempts
@@ -192,6 +203,7 @@ Partial signatures in Round 2 are tied to those commitments
 **Vulnerability**: PSBT file interception/modification
 **Impact**: Transaction manipulation, DoS
 **Mitigation**:
+
 - Encrypted transport (if over network)
 - File integrity checks (checksums)
 - Physical security for USB transport
@@ -201,6 +213,7 @@ Partial signatures in Round 2 are tied to those commitments
 **Vulnerability**: Accepting invalid partial signatures
 **Impact**: Transaction broadcast failure, fund stuck
 **Mitigation**:
+
 - Verify each partial signature
 - Verify final aggregated signature
 - Test transaction validity before broadcast
@@ -210,6 +223,7 @@ Partial signatures in Round 2 are tied to those commitments
 **Vulnerability**: Implementation errors in MuSig2 code
 **Impact**: Various (depends on bug)
 **Mitigation**:
+
 - Use well-tested library (`btcd/btcec/v2/schnorr/musig2`)
 - Extensive testing
 - Code review
@@ -285,6 +299,7 @@ publicNonce := session.PublicNonce()  // [66]byte
 ```
 
 **Security Properties**:
+
 - Uses `crypto/rand` for randomness (cryptographically secure)
 - Nonce is unique with overwhelming probability (2^256 keyspace)
 - Secret nonce never leaves the session object
@@ -565,6 +580,7 @@ keygen create-key --account deposit
 ```
 
 **Security Requirements**:
+
 - Generate keys on air-gapped system (no network connection)
 - Use high-quality entropy source
 - Never generate keys on internet-connected systems
@@ -587,6 +603,7 @@ m / 86' / 0' / account' / 0 / index     (P2TR, Taproot/MuSig2)
 ```
 
 For MuSig2:
+
 - **Purpose**: `86'` (BIP86 - Taproot key derivation)
 - **Coin Type**: `0'` (Bitcoin)
 - **Account**: `0'`, `1'`, etc. (different accounts)
@@ -600,6 +617,7 @@ For MuSig2:
 **Rogue Key Attack**: A malicious signer crafts their public key to gain full control over the aggregated key.
 
 **Example**:
+
 ```
 Honest signers have public keys: P1, P2
 Attacker claims public key: P3' = P3 - P1 - P2
@@ -734,6 +752,7 @@ Backup Locations:
 ```
 
 **Recovery Testing**:
+
 - Test key recovery from backup quarterly
 - Document recovery procedure
 - Train multiple team members on recovery
@@ -779,12 +798,14 @@ Transaction requires: Any 2 out of 3 people
 **Description**: Using the same nonce to sign two different transactions.
 
 **Causes**:
+
 - Database failure (nonce not recorded properly)
 - Operator error (re-running Round 1 for same transaction)
 - Software bug (nonce not generated uniquely)
 - File management error (using old PSBT with same nonce)
 
 **Consequences**:
+
 ```
 CRITICAL: Private key leakage
 → Immediate fund loss risk
@@ -792,6 +813,7 @@ CRITICAL: Private key leakage
 ```
 
 **Prevention**:
+
 1. Database unique constraints (technical control)
 2. Application validation (technical control)
 3. Operator training (human control)
@@ -799,6 +821,7 @@ CRITICAL: Private key leakage
 5. Monitoring (detective control)
 
 **Detection**:
+
 ```bash
 # Check for nonce reuse
 mysql> SELECT nonce, COUNT(*) FROM musig2_nonces GROUP BY nonce HAVING COUNT(*) > 1;
@@ -811,11 +834,13 @@ mysql> SELECT nonce, COUNT(*) FROM musig2_nonces GROUP BY nonce HAVING COUNT(*) 
 **Description**: Signers use different ordering of public keys when aggregating.
 
 **Causes**:
+
 - Configuration mismatch between wallets
 - Manual key entry (typos, wrong order)
 - Software version mismatch
 
 **Consequences**:
+
 ```
 Result: Different aggregated public keys
 → Signature verification fails
@@ -824,11 +849,13 @@ Result: Different aggregated public keys
 ```
 
 **Prevention**:
+
 1. Use consistent key sorting (sort alphabetically by public key)
 2. Configuration management (all wallets use same config)
 3. Automated key import (no manual entry)
 
 **Detection**:
+
 ```go
 // Verify all signers compute same aggregated key
 
@@ -841,6 +868,7 @@ if !bytes.Equal(aggregatedKey1, aggregatedKey2) {
 ```
 
 **Response**:
+
 - Fix key ordering configuration
 - Restart signing process with correct order
 
@@ -849,11 +877,13 @@ if !bytes.Equal(aggregatedKey1, aggregatedKey2) {
 **Description**: Not all signers provide partial signatures.
 
 **Causes**:
+
 - Operator error (forgot to sign)
 - File transfer failure (partial signature lost)
 - Hardware failure (signing device offline)
 
 **Consequences**:
+
 ```
 Result: Incomplete signature set
 → Cannot aggregate final signature
@@ -862,11 +892,13 @@ Result: Incomplete signature set
 ```
 
 **Prevention**:
+
 1. Tracking system (checklist for each transaction)
 2. Automated validation (check signature count before aggregation)
 3. Redundant file backups
 
 **Detection**:
+
 ```go
 // Before aggregation, verify all signatures present
 
@@ -880,6 +912,7 @@ func validatePartialSignatures(sigs []PartialSignature, expectedCount int) error
 ```
 
 **Response**:
+
 - Identify which signer is missing
 - Have that signer complete their partial signature
 - Continue aggregation
@@ -889,11 +922,13 @@ func validatePartialSignatures(sigs []PartialSignature, expectedCount int) error
 **Description**: Using wrong PSBT file, overwriting files, losing files.
 
 **Causes**:
+
 - Confusing file names
 - Manual file management (human error)
 - Lack of version control for files
 
 **Consequences**:
+
 ```
 Result varies:
 - Using old PSBT → may include wrong transaction data
@@ -902,7 +937,9 @@ Result varies:
 ```
 
 **Prevention**:
+
 1. Strict file naming convention:
+
    ```
    payment_{request_id}_{stage}_{step}_{timestamp}.psbt
 
@@ -918,6 +955,7 @@ Result varies:
    ```
 
 2. File checksums (detect corruption)
+
    ```bash
    sha256sum payment_15_unsigned_0_1704067200.psbt > payment_15_unsigned_0_1704067200.psbt.sha256
    ```
@@ -927,10 +965,12 @@ Result varies:
 4. File backup (keep copies of all intermediate files)
 
 **Detection**:
+
 - Checksum verification before use
 - PSBT analysis (check expected contents)
 
 **Response**:
+
 - If wrong file used: Restart from last correct checkpoint
 - If file corrupted: Restore from backup or recreate
 
@@ -939,11 +979,13 @@ Result varies:
 **Description**: Offline wallets have stale data.
 
 **Causes**:
+
 - Offline wallets not updated with latest public keys
 - Configuration out of sync between wallets
 - Key rotation not communicated
 
 **Consequences**:
+
 ```
 Result: Signing failures
 → Different aggregated keys computed
@@ -952,12 +994,14 @@ Result: Signing failures
 ```
 
 **Prevention**:
+
 1. Regular sync schedule (weekly)
 2. Manifest files tracking current keys/config
 3. Version numbers in configuration files
 4. Checksum verification after sync
 
 **Sync Procedure**:
+
 ```bash
 # 1. Export current public keys from watch wallet
 watch export-keys --output keys_v5.json
@@ -976,10 +1020,12 @@ sign import-keys --input keys_v5.json --verify
 ```
 
 **Detection**:
+
 - Pre-flight checks before signing
 - Aggregated key verification
 
 **Response**:
+
 - Re-sync offline wallets
 - Verify sync with checksums
 - Restart signing with synced config
@@ -991,7 +1037,7 @@ sign import-keys --input keys_v5.json --verify
 **Minimum Training Requirements**:
 
 1. **MuSig2 Basics** (2 hours)
-   - Read: `docs/crypto/btc/musig2/user-guide.md`
+   - Read: `docs/chains/btc/musig2/user-guide.md`
    - Understand two-round protocol
    - Understand nonce security
 
@@ -1016,6 +1062,7 @@ sign import-keys --input keys_v5.json --verify
    - Must score 90%+ to qualify
 
 **Ongoing Training**:
+
 - Quarterly refresher (1 hour)
 - Review of any incidents
 - Updates for procedure changes
@@ -1096,6 +1143,7 @@ data/tx/btc/
 **Key Metrics to Monitor**:
 
 1. **Nonce Uniqueness**
+
    ```sql
    -- Run every 5 minutes
    SELECT COUNT(*) as duplicate_nonces
@@ -1110,6 +1158,7 @@ data/tx/btc/
    ```
 
 2. **Signing Success Rate**
+
    ```sql
    -- Run daily
    SELECT
@@ -1128,6 +1177,7 @@ data/tx/btc/
    ```
 
 3. **Pending Transaction Age**
+
    ```sql
    -- Run hourly
    SELECT
@@ -1142,6 +1192,7 @@ data/tx/btc/
    ```
 
 4. **File System Health**
+
    ```bash
    # Check for stale PSBT files
    find data/tx/btc/pending/ -name "*.psbt" -mtime +7
@@ -1150,6 +1201,7 @@ data/tx/btc/
    ```
 
 **Alerting Channels**:
+
 - **Email**: All alerts (operators + management)
 - **SMS**: Critical alerts only (nonce reuse, key compromise)
 - **Slack**: All alerts + daily summaries
@@ -1281,6 +1333,7 @@ Before each MuSig2 transaction signing:
 - **Escalation**: CEO, CTO, Security Officer
 
 **Actions**:
+
 1. STOP all operations
 2. Assess scope of compromise
 3. Assume key is compromised
@@ -1295,6 +1348,7 @@ Before each MuSig2 transaction signing:
 - **Escalation**: Technical Lead, Operations Manager
 
 **Actions**:
+
 1. Investigate root cause
 2. Activate backup procedures
 3. Communicate ETA to stakeholders
@@ -1308,6 +1362,7 @@ Before each MuSig2 transaction signing:
 - **Escalation**: On-duty operator
 
 **Actions**:
+
 1. Debug and resolve
 2. Document in incident log
 3. Monitor for recurrence
@@ -1460,16 +1515,19 @@ EMERGENCY FUND SWEEP
 #### Internal Communication
 
 **Severity 1 (Critical)**:
+
 - Immediately alert: CEO, CTO, Security Officer, All Operators
 - Method: SMS + Phone Call (ensure acknowledgment)
 - Updates: Every 15 minutes until resolved
 
 **Severity 2 (High)**:
+
 - Alert: Technical Lead, Operations Manager, On-call team
 - Method: Slack + Email
 - Updates: Hourly
 
 **Severity 3 (Medium)**:
+
 - Inform: Operations team
 - Method: Slack
 - Updates: As resolved
@@ -1477,12 +1535,14 @@ EMERGENCY FUND SWEEP
 #### External Communication (if applicable)
 
 **Customers/Partners**:
+
 - Inform IF funds are at risk or operations disrupted
 - Method: Email + status page update
 - Frequency: As situation develops
 - Transparency: Provide facts, no speculation
 
 **Regulators** (if applicable):
+
 - Report IF required by regulations
 - Consult legal team first
 - Follow compliance procedures
@@ -1496,6 +1556,7 @@ EMERGENCY FUND SWEEP
 **Attacker Goal**: Extract private key by observing two signatures with same nonce.
 
 **Attack Steps**:
+
 1. Attacker observes transaction 1 on blockchain:
    - Message: m1 (transaction hash)
    - Signature: s1
@@ -1507,6 +1568,7 @@ EMERGENCY FUND SWEEP
    - Public nonce: R (same as transaction 1!)
 
 3. Attacker computes private key:
+
    ```
    s1 = k + Hash(R || P || m1) * x
    s2 = k + Hash(R || P || m2) * x
@@ -1520,6 +1582,7 @@ EMERGENCY FUND SWEEP
 4. Attacker now has private key, can steal all funds
 
 **Defense**:
+
 - Nonce uniqueness enforced at multiple layers
 - Monitoring detects nonce reuse before broadcast
 - Emergency fund sweep if compromise detected
@@ -1529,12 +1592,14 @@ EMERGENCY FUND SWEEP
 **Attacker Goal**: Gain full control over multisig by manipulating their public key.
 
 **Attack Steps** (Attempted):
+
 1. Honest parties have keys: P1, P2
 2. Attacker claims key: P3' = P3 - P1 - P2
 3. Naive aggregation: P_agg = P1 + P2 + P3' = P3
 4. Attacker controls P_agg with only their private key
 
 **Why This Fails in MuSig2**:
+
 - MuSig2 uses deterministic coefficients
 - Coefficients depend on all public keys
 - Attacker cannot manipulate aggregated key
@@ -1545,6 +1610,7 @@ EMERGENCY FUND SWEEP
 **Attacker Goal**: Substitute malicious PSBT file to redirect funds.
 
 **Attack Steps**:
+
 1. Attacker gains access to file transport (USB drive)
 2. Attacker replaces PSBT file with malicious version
    - Changes output address to attacker's address
@@ -1552,12 +1618,14 @@ EMERGENCY FUND SWEEP
 4. Funds sent to attacker
 
 **Defense**:
+
 1. File integrity checks (checksums)
 2. Review transaction details before signing
 3. Physical security for file transport
 4. Encrypted file containers
 
 **Detection**:
+
 - Checksum verification fails
 - Manual review notices wrong address
 
@@ -1566,12 +1634,14 @@ EMERGENCY FUND SWEEP
 **Attacker Goal**: Predict nonces by observing timing.
 
 **Attack Steps**:
+
 1. Attacker measures time taken for nonce generation
 2. Attempts to correlate timing with random values
 3. Predicts nonce values
 4. Uses predicted nonces to forge signatures
 
 **Why This Fails**:
+
 - `crypto/rand` provides cryptographically secure randomness
 - Timing does not leak information about random values
 - 2^256 keyspace makes prediction infeasible
@@ -1581,12 +1651,14 @@ EMERGENCY FUND SWEEP
 **Attacker Goal**: Trick operator into signing malicious transaction.
 
 **Attack Steps**:
+
 1. Attacker impersonates manager
 2. Requests urgent transaction signing
 3. Operator skips verification steps
 4. Signs transaction sending funds to attacker
 
 **Defense**:
+
 1. Verification procedures mandatory (no exceptions)
 2. Multi-person approval for transactions
 3. Out-of-band confirmation for unusual requests
@@ -1609,6 +1681,7 @@ MuSig2 provides significant benefits (smaller transactions, lower fees, better p
 ### Defense in Depth
 
 MuSig2 security uses multiple protective layers:
+
 - Cryptographic protocol (MuSig2 itself)
 - Application validation
 - Database constraints
@@ -1637,6 +1710,7 @@ No single layer is perfect, but together they provide robust security.
 **Last Updated**: 2025-01-30
 **Author**: go-crypto-wallet Security Team
 **Related Documents**:
+
 - [MuSig2 User Guide](../crypto/btc/musig2_guide.md)
 - [Migration Guide](../migration/traditional_to_musig2.md)
 - [Architecture Documentation](../architecture/musig2_architecture.md)

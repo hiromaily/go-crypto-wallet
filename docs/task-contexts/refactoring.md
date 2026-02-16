@@ -37,7 +37,7 @@ version: 1.0.0
 | internalパッケージ移動 | Internal Guidelines | `internal/AGENTS.md` |
 | pkgパッケージ移動 | Pkg Guidelines | `pkg/AGENTS.md` |
 | モック関連の変更 | Code Generation | `docs/guidelines/code-generation.md` |
-| DB関連の変更 | Database | `docs/database/database.md` |
+| DB関連の変更 | Database | `docs/database/db-management.md` |
 
 ## Task-Specific Rules
 

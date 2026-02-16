@@ -108,6 +108,7 @@ nonce, err := client.PendingNonceAt(ctx, address)
 ```
 
 **注意点**:
+
 - Nonceは連続している必要がある
 - 同じNonceで新しいトランザクションを送ると上書き（置換）
 - ペンディングトランザクションがある場合は考慮が必要
@@ -221,8 +222,8 @@ go test ./internal/infrastructure/api/eth/erc20/...
 
 ## Related Documentation
 
-- [ETH README](../../../../docs/crypto/eth/README.md) - 詳細なETHドキュメント
-- [ERC-20 Guide](../../../../docs/crypto/eth/ERC20.md) - ERC-20トークン操作
+- [ETH README](../../../../docs/chains/eth/README.md) - 詳細なETHドキュメント
+- [ERC-20 Guide](../../../../docs/chains/eth/ERC20.md) - ERC-20トークン操作
 
 ## Common Operations
 
@@ -255,4 +256,3 @@ go test ./internal/infrastructure/api/eth/erc20/...
 3. **Wei変換**: 金額操作時はWei単位で計算、表示時にEther変換
 4. **EIP-1559**: 新しいガス方式（maxFeePerGas, maxPriorityFeePerGas）への対応を確認
 5. **チェーンID**: 署名時に正しいチェーンIDを使用（リプレイ攻撃防止）
-

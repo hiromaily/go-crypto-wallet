@@ -268,7 +268,7 @@ go test ./internal/infrastructure/api/xrp/xrp/...
 
 ## Related Documentation
 
-- [XRP README](../../../../docs/crypto/xrp/README.md) - 詳細なXRPドキュメント
+- [XRP README](../../../../docs/chains/xrp/README.md) - 詳細なXRPドキュメント
 - [XRP Transaction Flow Alignment Spec](.kiro/specs/xrp-transaction-flow-alignment/) - 現在の実装仕様
 - [Code Generation](../../guidelines/code-generation.md) - コード生成ガイド
 
