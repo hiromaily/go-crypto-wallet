@@ -566,8 +566,8 @@ See [musig2/security.md](musig2/security.md) for details.
 | Resource | Location |
 |----------|----------|
 | E2E Test Scripts | [scripts/operation/btc/e2e/](../../../scripts/operation/btc/e2e/) |
-| Project Testing Standards | [docs/standards/testing.md](../../standards/testing.md) |
-| Security Standards | [docs/standards/security.md](../../standards/security.md) |
+| Project Testing Standards | [docs/guidelines/testing.md](../../guidelines/testing.md) |
+| Security Standards | [docs/guidelines/security.md](../../guidelines/security.md) |
 
 ---
 

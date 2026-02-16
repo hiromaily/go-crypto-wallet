@@ -16,7 +16,7 @@ Read these documents in order:
 
 1. **[AGENTS.md](AGENTS.md)** - Agent behavior guidelines (how to act)
 2. **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture (how it's designed)
-3. **[docs/standards/](docs/standards/)** - Detailed coding standards (SSOT)
+3. **[docs/guidelines/](docs/guidelines/)** - Project guidelines and standards
 
 ## Quick Reference
 
@@ -71,13 +71,12 @@ docs/          → Documentation
 - [docs/crypto/btc/](docs/crypto/btc/) - Bitcoin-specific documentation
 - [docs/crypto/eth/](docs/crypto/eth/) - Ethereum-specific documentation
 
-### Project Standards (SSOT)
+### Project Guidelines and Standards
 
-- [docs/standards/](docs/standards/) - Single Source of Truth for all project standards
+- [docs/guidelines/](docs/guidelines/) - Project guidelines and standards (SSOT)
 
 ### AI Agent Context
 
-- [docs/guidelines/](docs/guidelines/) - Detailed guidelines (full context)
 - [docs/task-contexts/](docs/task-contexts/) - Task-type specific context
 
 ## Supported Cryptocurrencies

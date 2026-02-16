@@ -48,13 +48,13 @@ This consolidated approach provides:
 
 ```yaml
 services:
-  wallet-db:
+  wallet-mysql:
     image: mysql:8.4
-    container_name: wallet-db
+    container_name: wallet-mysql
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      - wallet-db:/var/lib/mysql
+      - wallet-mysql:/var/lib/mysql
       - "./docker/mysql/sqls:/sqls"
       - "./docker/mysql/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
@@ -169,12 +169,12 @@ When the container starts for the first time:
 
 1. **Start the database**:
    ```bash
-   docker compose up -d wallet-db
+   docker compose up -d wallet-mysql
    ```
 
 2. **Wait for database to be ready** (about 30 seconds):
    ```bash
-   docker compose exec wallet-db mysqladmin ping -uroot -proot --silent
+   docker compose exec wallet-mysql mysqladmin ping -uroot -proot --silent
    ```
 
 3. **Apply Atlas migrations**:
@@ -186,8 +186,8 @@ When the container starts for the first time:
 
 4. **Verify schemas and tables created**:
    ```bash
-   docker compose exec wallet-db mysql -uroot -proot -e "SHOW DATABASES;"
-   docker compose exec wallet-db mysql -uroot -proot watch -e "SHOW TABLES;"
+   docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
+   docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
    ```
 
    Expected output:
@@ -201,8 +201,8 @@ When the container starts for the first time:
 
 3. **Verify server configuration**:
    ```bash
-   docker compose exec wallet-db mysql -uroot -proot -e "SHOW VARIABLES LIKE 'character_set_server';"
-   docker compose exec wallet-db mysql -uroot -proot -e "SHOW VARIABLES LIKE 'collation_server';"
+   docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'character_set_server';"
+   docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'collation_server';"
    ```
 
    Expected: `utf8mb4` and `utf8mb4_unicode_ci`
@@ -245,13 +245,13 @@ pass = "hiromaily"
 **Using Docker Exec**:
 ```bash
 # Access watch schema
-docker compose exec wallet-db mysql -uroot -proot watch
+docker compose exec wallet-mysql mysql -uroot -proot watch
 
 # Access keygen schema
-docker compose exec wallet-db mysql -uroot -proot keygen
+docker compose exec wallet-mysql mysql -uroot -proot keygen
 
 # Access sign schema
-docker compose exec wallet-db mysql -uroot -proot sign
+docker compose exec wallet-mysql mysql -uroot -proot sign
 ```
 
 **From Host Machine**:
@@ -292,16 +292,16 @@ Export schema with data:
 
 ```bash
 # Backup watch schema
-docker compose exec wallet-db mysqldump -uroot -proot watch > backups/watch_$(date +%Y%m%d).sql
+docker compose exec wallet-mysql mysqldump -uroot -proot watch > backups/watch_$(date +%Y%m%d).sql
 
 # Backup keygen schema
-docker compose exec wallet-db mysqldump -uroot -proot keygen > backups/keygen_$(date +%Y%m%d).sql
+docker compose exec wallet-mysql mysqldump -uroot -proot keygen > backups/keygen_$(date +%Y%m%d).sql
 
 # Backup sign schema
-docker compose exec wallet-db mysqldump -uroot -proot sign > backups/sign_$(date +%Y%m%d).sql
+docker compose exec wallet-mysql mysqldump -uroot -proot sign > backups/sign_$(date +%Y%m%d).sql
 
 # Backup all schemas in one file
-docker compose exec wallet-db mysqldump -uroot -proot --databases watch keygen sign > backups/all_schemas_$(date +%Y%m%d).sql
+docker compose exec wallet-mysql mysqldump -uroot -proot --databases watch keygen sign > backups/all_schemas_$(date +%Y%m%d).sql
 ```
 
 ### Data Restore
@@ -310,16 +310,16 @@ Restore from backup:
 
 ```bash
 # Restore watch schema
-docker compose exec -T wallet-db mysql -uroot -proot watch < backups/watch_20241227.sql
+docker compose exec -T wallet-mysql mysql -uroot -proot watch < backups/watch_20241227.sql
 
 # Restore keygen schema
-docker compose exec -T wallet-db mysql -uroot -proot keygen < backups/keygen_20241227.sql
+docker compose exec -T wallet-mysql mysql -uroot -proot keygen < backups/keygen_20241227.sql
 
 # Restore sign schema
-docker compose exec -T wallet-db mysql -uroot -proot sign < backups/sign_20241227.sql
+docker compose exec -T wallet-mysql mysql -uroot -proot sign < backups/sign_20241227.sql
 
 # Restore all schemas
-docker compose exec -T wallet-db mysql -uroot -proot < backups/all_schemas_20241227.sql
+docker compose exec -T wallet-mysql mysql -uroot -proot < backups/all_schemas_20241227.sql
 ```
 
 ### Reset Database
@@ -331,7 +331,7 @@ Complete database reset (WARNING: deletes all data):
 docker compose down -v
 
 # Restart - will reinitialize schemas
-docker compose up -d wallet-db
+docker compose up -d wallet-mysql
 ```
 
 ### Reset Individual Schema
@@ -340,15 +340,15 @@ Reset specific schema while keeping others:
 
 ```bash
 # Reset watch schema
-docker compose exec wallet-db mysql -uroot -proot -e "DROP DATABASE watch; CREATE DATABASE watch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker compose exec wallet-mysql mysql -uroot -proot -e "DROP DATABASE watch; CREATE DATABASE watch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 make atlas-migrate-docker  # This will apply migrations for all schemas
 
 # Reset keygen schema
-docker compose exec wallet-db mysql -uroot -proot -e "DROP DATABASE keygen; CREATE DATABASE keygen CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker compose exec wallet-mysql mysql -uroot -proot -e "DROP DATABASE keygen; CREATE DATABASE keygen CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 make atlas-migrate-docker
 
 # Reset sign schema
-docker compose exec wallet-db mysql -uroot -proot -e "DROP DATABASE sign; CREATE DATABASE sign CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+docker compose exec wallet-mysql mysql -uroot -proot -e "DROP DATABASE sign; CREATE DATABASE sign CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 make atlas-migrate-docker
 ```
 
@@ -359,7 +359,7 @@ make atlas-migrate-docker
 ```bash
 # Drop and recreate the table using Atlas migration
 # Or manually:
-docker compose exec wallet-db mysql -uroot -proot watch -e "DROP TABLE IF EXISTS payment_request;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "DROP TABLE IF EXISTS payment_request;"
 make atlas-migrate-docker
 ```
 
@@ -371,23 +371,23 @@ make atlas-migrate-docker
 
 ```bash
 # List all tables in watch schema
-docker compose exec wallet-db mysql -uroot -proot watch -e "SHOW TABLES;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
 
 # List all tables in keygen schema
-docker compose exec wallet-db mysql -uroot -proot keygen -e "SHOW TABLES;"
+docker compose exec wallet-mysql mysql -uroot -proot keygen -e "SHOW TABLES;"
 
 # List all tables in sign schema
-docker compose exec wallet-db mysql -uroot -proot sign -e "SHOW TABLES;"
+docker compose exec wallet-mysql mysql -uroot -proot sign -e "SHOW TABLES;"
 
 # Describe a specific table
-docker compose exec wallet-db mysql -uroot -proot watch -e "DESCRIBE address;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "DESCRIBE address;"
 ```
 
 ### Check Database Size
 
 ```bash
 # Size of each schema
-docker compose exec wallet-db mysql -uroot -proot -e "
+docker compose exec wallet-mysql mysql -uroot -proot -e "
 SELECT
   table_schema AS 'Schema',
   ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Size (MB)'
@@ -400,10 +400,10 @@ GROUP BY table_schema;"
 
 ```bash
 # Show active connections
-docker compose exec wallet-db mysql -uroot -proot -e "SHOW PROCESSLIST;"
+docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW PROCESSLIST;"
 
 # Show connections per schema
-docker compose exec wallet-db mysql -uroot -proot -e "
+docker compose exec wallet-mysql mysql -uroot -proot -e "
 SELECT db, COUNT(*) as connections
 FROM information_schema.processlist
 WHERE db IN ('watch', 'keygen', 'sign')
@@ -414,13 +414,13 @@ GROUP BY db;"
 
 ```bash
 # View database container logs
-docker compose logs wallet-db
+docker compose logs wallet-mysql
 
 # Follow logs
-docker compose logs -f wallet-db
+docker compose logs -f wallet-mysql
 
 # View last 100 lines
-docker compose logs --tail=100 wallet-db
+docker compose logs --tail=100 wallet-mysql
 ```
 
 ## Schema Migrations with Atlas
@@ -503,15 +503,15 @@ Apply all pending migrations for all schemas:
 # Local environment (requires Atlas CLI installed)
 make atlas-migrate
 
-# Docker environment (uses wallet-db-migrate service)
+# Docker environment (uses wallet-mysql-migrate service)
 make atlas-migrate-docker
 ```
 
-The Docker environment uses a dedicated migration service (`wallet-db-migrate`) that runs Atlas in a container. This service:
+The Docker environment uses a dedicated migration service (`wallet-mysql-migrate`) that runs Atlas in a container. This service:
 - Automatically waits for the database to be ready (health check)
 - Runs in the same network as the database
 - Has access to the `tools/atlas` directory via volume mount
-- Can be run manually: `docker compose run --rm wallet-db-migrate migrate apply --dir file://migrations/watch --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"`
+- Can be run manually: `docker compose run --rm wallet-mysql-migrate migrate apply --dir file://migrations/watch --url "mysql://root:root@wallet-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"`
 
 #### Check Migration Status
 
@@ -621,7 +621,7 @@ For new schema changes:
 
 #### Connection Issues
 
-1. Verify MySQL is running: `docker compose ps wallet-db`
+1. Verify MySQL is running: `docker compose ps wallet-mysql`
 2. Check connection string in Makefile targets
 3. Verify credentials are correct
 
@@ -730,7 +730,7 @@ Generated files: `internal/infrastructure/database/sqlite/sqlcgen/`
 
 **Check logs**:
 ```bash
-docker compose logs wallet-db
+docker compose logs wallet-mysql
 ```
 
 **Common issues**:
@@ -740,31 +740,31 @@ docker compose logs wallet-db
    lsof -i :3306
 
    # Use different port
-   MYSQL_PORT=3307 docker compose up -d wallet-db
+   MYSQL_PORT=3307 docker compose up -d wallet-mysql
    ```
 
 2. Volume permission issues:
    ```bash
    # Remove and recreate volume
    docker compose down -v
-   docker compose up -d wallet-db
+   docker compose up -d wallet-mysql
    ```
 
 ### Cannot Connect to Database
 
 **Verify container is running**:
 ```bash
-docker compose ps wallet-db
+docker compose ps wallet-mysql
 ```
 
 **Check container health**:
 ```bash
-docker compose exec wallet-db mysqladmin ping -uroot -proot
+docker compose exec wallet-mysql mysqladmin ping -uroot -proot
 ```
 
 **Verify users exist**:
 ```bash
-docker compose exec wallet-db mysql -uroot -proot -e "SELECT User, Host FROM mysql.user WHERE User IN ('root', 'hiromaily');"
+docker compose exec wallet-mysql mysql -uroot -proot -e "SELECT User, Host FROM mysql.user WHERE User IN ('root', 'hiromaily');"
 ```
 
 **Test connection from host**:
@@ -776,19 +776,19 @@ mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 -e "SELECT 1;"
 
 **List existing schemas**:
 ```bash
-docker compose exec wallet-db mysql -uroot -proot -e "SHOW DATABASES;"
+docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
 ```
 
 **Reinitialize schemas**:
 ```bash
-docker compose exec wallet-db mysql -uroot -proot < docker/mysql/init.d/01_init_all_schemas.sql
+docker compose exec wallet-mysql mysql -uroot -proot < docker/mysql/init.d/01_init_all_schemas.sql
 ```
 
 ### Character Set Issues
 
 **Check current settings**:
 ```bash
-docker compose exec wallet-db mysql -uroot -proot -e "
+docker compose exec wallet-mysql mysql -uroot -proot -e "
 SHOW VARIABLES LIKE 'character_set%';
 SHOW VARIABLES LIKE 'collation%';"
 ```
@@ -803,7 +803,7 @@ SHOW VARIABLES LIKE 'collation%';"
 
 **Enable slow query log**:
 ```bash
-docker compose exec wallet-db mysql -uroot -proot -e "
+docker compose exec wallet-mysql mysql -uroot -proot -e "
 SET GLOBAL slow_query_log = 'ON';
 SET GLOBAL long_query_time = 2;
 SHOW VARIABLES LIKE 'slow_query%';"
@@ -811,7 +811,7 @@ SHOW VARIABLES LIKE 'slow_query%';"
 
 **View slow query log**:
 ```bash
-docker compose exec wallet-db cat /var/lib/mysql/slow-query.log
+docker compose exec wallet-mysql cat /var/lib/mysql/slow-query.log
 ```
 
 ## Migration Guide
@@ -854,7 +854,7 @@ docker compose rm -f watch-db keygen-db sign-db
 #### 4. Start New Container
 
 ```bash
-docker compose up -d wallet-db
+docker compose up -d wallet-mysql
 ```
 
 #### 5. Restore Data (Optional)
@@ -866,24 +866,24 @@ If you need to restore your backed-up data:
 sleep 30
 
 # Restore each schema
-docker compose exec -T wallet-db mysql -uroot -proot watch < migration/watch_backup.sql
-docker compose exec -T wallet-db mysql -uroot -proot keygen < migration/keygen_backup.sql
-docker compose exec -T wallet-db mysql -uroot -proot sign < migration/sign_backup.sql
+docker compose exec -T wallet-mysql mysql -uroot -proot watch < migration/watch_backup.sql
+docker compose exec -T wallet-mysql mysql -uroot -proot keygen < migration/keygen_backup.sql
+docker compose exec -T wallet-mysql mysql -uroot -proot sign < migration/sign_backup.sql
 ```
 
 #### 6. Verify Migration
 
 ```bash
 # Check schemas exist
-docker compose exec wallet-db mysql -uroot -proot -e "SHOW DATABASES;"
+docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
 
 # Check tables in each schema
-docker compose exec wallet-db mysql -uroot -proot watch -e "SHOW TABLES;"
-docker compose exec wallet-db mysql -uroot -proot keygen -e "SHOW TABLES;"
-docker compose exec wallet-db mysql -uroot -proot sign -e "SHOW TABLES;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
+docker compose exec wallet-mysql mysql -uroot -proot keygen -e "SHOW TABLES;"
+docker compose exec wallet-mysql mysql -uroot -proot sign -e "SHOW TABLES;"
 
 # Verify data (example)
-docker compose exec wallet-db mysql -uroot -proot watch -e "SELECT COUNT(*) FROM address;"
+docker compose exec wallet-mysql mysql -uroot -proot watch -e "SELECT COUNT(*) FROM address;"
 ```
 
 #### 7. Cleanup Old Volumes (Optional)
@@ -921,7 +921,7 @@ docker volume rm go-crypto-wallet_sign-db
    BACKUP_DIR="/path/to/backups"
    DATE=$(date +%Y%m%d_%H%M%S)
 
-   docker compose exec wallet-db mysqldump -uroot -proot \
+   docker compose exec wallet-mysql mysqldump -uroot -proot \
      --single-transaction \
      --databases watch keygen sign \
      > "$BACKUP_DIR/wallet_backup_$DATE.sql"

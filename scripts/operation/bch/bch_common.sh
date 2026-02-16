@@ -40,7 +40,7 @@ BCH_WALLET_PASSPHRASE="${BCH_WALLET_PASSPHRASE:-${WALLET_PASSPHRASE:-test}}"
 
 # Docker volume name (can be overridden via environment variable)
 # Note: Docker Compose prepends project name to volume names
-BCH_DOCKER_VOLUME_NAME="${BCH_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
+BCH_DOCKER_VOLUME_NAME="${BCH_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-mysql}"
 
 # Wallet-specific RPC hosts (for environment variable overrides)
 # Note: These are initialized with default values and updated by bch_init_rpc_hosts()
@@ -325,7 +325,7 @@ mysql_query() {
 	local db_name="$1"
 	local query="$2"
 
-	docker compose exec -e MYSQL_PWD="${BCH_MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root "$db_name" -N -e "$query"
+	docker compose exec -e MYSQL_PWD="${BCH_MYSQL_ROOT_PASSWORD}" -T wallet-mysql mysql -u root "$db_name" -N -e "$query"
 }
 
 # Execute database query (abstraction layer)
@@ -350,7 +350,7 @@ db_execute() {
 	if db_is_sqlite; then
 		sqlite_query "$db_name" "$query"
 	else
-		docker compose exec -e MYSQL_PWD="${BCH_MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root "$db_name" <<EOF
+		docker compose exec -e MYSQL_PWD="${BCH_MYSQL_ROOT_PASSWORD}" -T wallet-mysql mysql -u root "$db_name" <<EOF
 $query
 EOF
 	fi
@@ -425,7 +425,7 @@ bch_get_volume_name() {
 	local project_root="${PROJECT_ROOT:-$(pwd)}"
 	# Docker Compose prefixes volume names with the project name (defaults to base name of project directory)
 	# Dynamically determine volume name to handle different project directory names
-	echo "$(basename "$project_root" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]//g')_wallet-db"
+	echo "$(basename "$project_root" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]//g')_wallet-mysql"
 }
 
 # Remove Docker volume with retry
@@ -482,7 +482,7 @@ bch_verify_volume_deleted() {
 # Full reset: cleanup everything for fresh state
 # Usage: bch_full_reset [volume_name] [node_list]
 # Example: bch_full_reset
-#          bch_full_reset "go-crypto-wallet_wallet-db" "watch keygen sign1 sign2"
+#          bch_full_reset "go-crypto-wallet_wallet-mysql" "watch keygen sign1 sign2"
 # Note: When E2E_SHARED_INFRASTRUCTURE=true, skips Docker container management (for parallel E2E)
 bch_full_reset() {
 	local volume_name="${1:-${BCH_DOCKER_VOLUME_NAME}}"
@@ -730,7 +730,7 @@ bch_setup_infrastructure() {
 		log_info "MySQL database container started"
 
 		# Wait for database to be healthy
-		wait_for_healthy "wallet-db" 90
+		wait_for_healthy "wallet-mysql" 90
 
 		# Wait for database migrations to complete
 		wait_for_migrations 120

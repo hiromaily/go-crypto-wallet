@@ -60,25 +60,86 @@ This document describes development workflow, dependency management, and git ope
 
 **Commit Messages:**
 
-Follow conventional commit format when appropriate:
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) format, enforced by `lefthook` pre-commit hooks.
 
-- `fix:` for bug fixes
-- `feat:` for new features
-- `refactor:` for refactoring changes
-- `docs:` for documentation changes
-- `test:` for test additions/changes
-- `chore:` for maintenance tasks
+Format:
 
-Example:
+```
+<type>(<scope>): <description>
 
-```text
-fix: resolve logger initialization issue in domain layer
+[optional body]
 
-- Move logger initialization to dependency injection
-- Remove global logger usage from domain package
-- Add logger interface for testability
+[optional footer]
+```
 
-Closes #123
+**Types:**
+
+| Type | Description | Release |
+|------|-------------|---------|
+| `feat` | New feature | MINOR |
+| `fix` | Bug fix | PATCH |
+| `docs` | Documentation only | - |
+| `refactor` | Code refactoring (no feature/fix) | - |
+| `test` | Adding or updating tests | - |
+| `ci` | CI/CD changes | - |
+| `chore` | Maintenance tasks | - |
+| `build` | Build system changes | - |
+| `perf` | Performance improvements | PATCH |
+| `style` | Code style (formatting, etc.) | - |
+| `revert` | Revert a previous commit | - |
+
+**Scopes (Optional):**
+
+The following are suggested scopes, but other alphanumeric scopes are also permitted.
+
+| Scope | Description |
+|-------|-------------|
+| `btc` | Bitcoin-related |
+| `bch` | Bitcoin Cash-related |
+| `eth` | Ethereum-related |
+| `xrp` | XRP-related |
+| `db` | Database-related |
+| `api` | API-related |
+| `cli` | CLI-related |
+| `pr` | PR review fixes |
+
+**Examples:**
+
+```bash
+# Feature with scope
+feat(btc): add taproot address support
+
+# Bug fix without scope
+fix: resolve database connection timeout
+
+# Documentation
+docs: update architecture guide
+
+# Refactoring with scope
+refactor(api): reorganize endpoint handlers
+
+# Breaking change (add ! after type/scope)
+feat(btc)!: change address format to bech32m only
+```
+
+**Validation:**
+
+Commit messages are validated by `lefthook` on every commit. If validation fails:
+
+```
+ERROR: Commit message does not follow Conventional Commits format.
+
+Expected format: <type>(<scope>): <description>
+
+Types: feat, fix, docs, refactor, test, ci, chore, build, perf, style, revert
+
+Examples:
+  feat(btc): add taproot address support
+  fix: resolve database connection timeout
+  docs: update architecture guide
+  refactor(api): reorganize endpoint handlers
+
+Your commit message: <your-invalid-commit-message>
 ```
 
 ## Verification Commands
@@ -156,8 +217,6 @@ Format: `{type}/{brief-description}-{issue-number}`
 - `fix/{brief-description}-{issue-number}` - For bug fixes
 - `refactor/{brief-description}-{issue-number}` - For refactoring
 
-See [docs/standards/workflow.md](../standards/workflow.md) for the complete branch naming convention.
-
 **Branch Lifecycle:**
 
 1. Create branch from `main`
@@ -226,7 +285,7 @@ After implementing code changes and before running tests, perform a self-review 
 
 - **Code quality and correctness**: Ensure the code works as intended
 - **Adherence to Clean Architecture principles**: Verify layer separation and dependency direction
-- **Compliance with coding standards**: Follow guidelines from `AGENTS.md` and [Coding Standards](coding-standards.md)
+- **Compliance with coding standards**: Follow guidelines from `AGENTS.md` and [Coding Standards](coding-conventions.md)
 - **Proper error handling**: Use `fmt.Errorf` + `%w` for error wrapping, add `context.Context` to API calls
 - **Security considerations**: Especially important for wallet/key operations
   - Never log private keys or sensitive information
@@ -344,5 +403,5 @@ See [Code Generation Guidelines](code-generation.md) for details.
 - [Required Tools and Versions](requirements.md) - Tool requirements and version information
 - [Core Principles](core.md) - Security and important notes
 - [Code Generation Guidelines](code-generation.md) - Working with auto-generated files
-- [Coding Standards](coding-standards.md) - Linting and formatting commands
+- [Coding Standards](coding-conventions.md) - Linting and formatting commands
 - [Testing Guidelines](testing.md) - Testing requirements and strategies

@@ -88,7 +88,7 @@
 
 **主な読み込みドキュメント**:
 
-- `docs/guidelines/database.md` - Atlas/SQLC手順
+- `docs/database/database.md` - Atlas/SQLC手順
 - `docs/guidelines/code-generation.md` - コード生成
 - `tools/atlas/` - スキーマファイル
 

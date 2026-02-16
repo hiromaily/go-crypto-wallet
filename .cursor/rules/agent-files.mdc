@@ -47,7 +47,7 @@ AI Agent configuration files are managed with **Claude Code's `.claude/` directo
 
 ```markdown
 - Follow @AGENTS.md for guidelines
-- Refer to @docs/standards/coding-conventions.md
+- Refer to @docs/guidelines/coding-conventions.md
 ```
 
 ### Cursor

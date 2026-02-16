@@ -37,7 +37,7 @@ version: 1.0.0
 | internalパッケージ移動 | Internal Guidelines | `internal/AGENTS.md` |
 | pkgパッケージ移動 | Pkg Guidelines | `pkg/AGENTS.md` |
 | モック関連の変更 | Code Generation | `docs/guidelines/code-generation.md` |
-| DB関連の変更 | Database | `docs/guidelines/database.md` |
+| DB関連の変更 | Database | `docs/database/database.md` |
 
 ## Task-Specific Rules
 
@@ -308,4 +308,3 @@ Agent Actions:
 - [Refactoring Plan](../../issues/REFACTORING_PLAN.md) - プロジェクトのリファクタリング計画
 - [Code Generation](../guidelines/code-generation.md) - モック生成など
 - [Internal Guidelines](../../../internal/AGENTS.md) - internalパッケージ構造
-

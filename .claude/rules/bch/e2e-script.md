@@ -132,7 +132,7 @@ db_query "keygen" "SELECT * FROM account_key LIMIT 5"
 | DB_TYPE | Command |
 |---------|---------|
 | `sqlite` | `sqlite3 ./data/sqlite/bch/e2e.db "SELECT ..."` |
-| `mysql` | `docker compose exec -T wallet-db mysql -u root -proot watch -e "SELECT ..."` |
+| `mysql` | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."` |
 
 ## BCH-Specific Implementation Rules
 
@@ -240,7 +240,7 @@ make shfmt
 
 - ❌ Do NOT log private keys
 - ❌ Do NOT use test passphrases/RPC credentials in production
-- Reference: `docs/standards/security.md`
+- Reference: `docs/guidelines/security.md`
 
 ## Common BCH Errors
 

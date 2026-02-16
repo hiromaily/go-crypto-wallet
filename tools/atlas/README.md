@@ -74,27 +74,33 @@ Atlas supports two distinct workflows depending on your development phase:
 **When to use**: Active development phase with frequent schema changes.
 
 **Characteristics**:
+
 - Modify HCL schema files (`schemas/*.hcl`) directly
 - Regenerate migrations from scratch using `make atlas-dev-reset`
 - Single migration file represents the current complete schema state
 - Fast iteration on schema design
-- `docker compose up` automatically applies the latest migration
+- `docker compose --profile mysql up` automatically applies the latest migration
 
 **Workflow**:
 
 1. Modify HCL schema files in `schemas/` directory
 2. Format and lint schemas:
+
    ```bash
    make atlas-fmt
    make atlas-lint
    ```
+
 3. Regenerate migrations from scratch (WARNING: deletes existing migrations):
+
    ```bash
    make atlas-dev-reset
    ```
+
 4. Apply migrations:
+
    ```bash
-   docker compose up
+   docker compose --profile mysql up
    # or
    make atlas-migrate-apply
    ```
@@ -118,6 +124,7 @@ make atlas-schema-apply-one SCHEMA=watch
 **When to use**: Production or stable development phase where migration history matters.
 
 **Characteristics**:
+
 - Incremental migrations with version control
 - Each migration represents a specific change
 - Migration history is preserved
@@ -127,25 +134,34 @@ make atlas-schema-apply-one SCHEMA=watch
 **Workflow**:
 
 1. Initialize production migration history (one-time):
+
    ```bash
    make atlas-prod-init
    ```
+
 2. Modify HCL schema files in `schemas/` directory
 3. Format and lint schemas:
+
    ```bash
    make atlas-fmt
    make atlas-lint
    ```
+
 4. Generate incremental migration:
+
    ```bash
    make atlas-migrate-diff SCHEMA=watch NAME=add_new_column
    ```
+
 5. Review generated migration in `migrations/<schema>/`
 6. Apply migration:
+
    ```bash
    make atlas-migrate-apply
    ```
+
 7. Check migration status:
+
    ```bash
    make atlas-migrate-status
    ```
@@ -224,11 +240,11 @@ This creates a new migration file that will bring the database in line with the 
 
 **Docker environment (Automatic)**:
 
-Migrations are **automatically applied** when you run `docker compose up`. The `compose.yaml` file defines three migration services:
+Migrations are **automatically applied** when you run `docker compose --profile mysql up`. The `compose.yaml` file defines three migration services:
 
-- `wallet-db-migrate-watch`: Applies migrations for the watch schema
-- `wallet-db-migrate-keygen`: Applies migrations for the keygen schema
-- `wallet-db-migrate-sign`: Applies migrations for the sign schema
+- `wallet-mysql-migrate-watch`: Applies migrations for the watch schema
+- `wallet-mysql-migrate-keygen`: Applies migrations for the keygen schema
+- `wallet-mysql-migrate-sign`: Applies migrations for the sign schema
 
 These services:
 
@@ -367,7 +383,7 @@ atlas migrate apply \
 
 ### Docker Environment
 
-**Note**: Migrations are automatically applied when you run `docker compose up`. The following commands are for manual execution if needed.
+**Note**: Migrations are automatically applied when you run `docker compose --profile mysql up`. The following commands are for manual execution if needed.
 
 Using the migration services:
 
@@ -375,42 +391,42 @@ Using the migration services:
 
 ```bash
 # Apply migrations manually
-docker compose run --rm wallet-db-migrate-watch migrate apply \
+docker compose run --rm wallet-mysql-migrate-watch migrate apply \
   --dir file://migrations/watch \
-  --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
+  --url "mysql://root:root@wallet-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
 
 # Check status
-docker compose run --rm wallet-db-migrate-watch migrate status \
+docker compose run --rm wallet-mysql-migrate-watch migrate status \
   --dir file://migrations/watch \
-  --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
+  --url "mysql://root:root@wallet-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
 **Keygen Schema**:
 
 ```bash
 # Apply migrations manually
-docker compose run --rm wallet-db-migrate-keygen migrate apply \
+docker compose run --rm wallet-mysql-migrate-keygen migrate apply \
   --dir file://migrations/keygen \
-  --url "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
+  --url "mysql://root:root@wallet-mysql:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
 
 # Check status
-docker compose run --rm wallet-db-migrate-keygen migrate status \
+docker compose run --rm wallet-mysql-migrate-keygen migrate status \
   --dir file://migrations/keygen \
-  --url "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
+  --url "mysql://root:root@wallet-mysql:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
 **Sign Schema**:
 
 ```bash
 # Apply migrations manually
-docker compose run --rm wallet-db-migrate-sign migrate apply \
+docker compose run --rm wallet-mysql-migrate-sign migrate apply \
   --dir file://migrations/sign \
-  --url "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
+  --url "mysql://root:root@wallet-mysql:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
 
 # Check status
-docker compose run --rm wallet-db-migrate-sign migrate status \
+docker compose run --rm wallet-mysql-migrate-sign migrate status \
   --dir file://migrations/sign \
-  --url "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
+  --url "mysql://root:root@wallet-mysql:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
 **Note**: In Docker environment, the working directory is `/app/atlas` (mounted from `./tools/atlas`), so paths are relative to that directory (e.g., `file://migrations/watch` instead of `file://tools/atlas/migrations/watch`).
@@ -478,7 +494,7 @@ The project supports both approaches:
 
 3. **Review the generated migration** file
 4. **Apply the migration**:
-   - **Docker environment**: Run `docker compose up` (migrations are applied automatically)
+   - **Docker environment**: Run `docker compose --profile mysql up` (migrations are applied automatically)
    - **Local environment**: Run `make atlas-migrate`
 5. **Update sqlc schema files** if needed for code generation
 6. **Run sqlc generate** to update generated code
@@ -496,7 +512,7 @@ When creating new tables or modifying existing ones:
 1. Update the HCL schema file (`schemas/*.hcl`)
 2. Generate a migration from the diff (or apply directly)
 3. Apply the migration:
-   - **Docker environment**: Run `docker compose up` (migrations are applied automatically)
+   - **Docker environment**: Run `docker compose --profile mysql up` (migrations are applied automatically)
    - **Local environment**: Run `make atlas-migrate`
 4. Update sqlc schema files if needed for code generation
 5. Run `sqlc generate` to update generated code
@@ -524,12 +540,12 @@ If rollback fails:
 
 If you can't connect to the database:
 
-1. Verify MySQL is running: `docker compose ps wallet-db`
+1. Verify MySQL is running: `docker compose ps wallet-mysql`
 2. Check connection string in Makefile targets
 3. Verify credentials are correct
 
 ## Related Documentation
 
-- [Database Architecture Documentation](../../docs/development/database.md)
+- [Database Architecture Documentation](../../docs/database/architecture.md)
 - [Atlas Official Documentation](https://atlasgo.io/)
 - [Atlas MySQL Guide](https://atlasgo.io/guides/mysql)

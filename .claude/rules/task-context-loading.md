@@ -4,7 +4,7 @@ Rules for automatically loading appropriate context documents when receiving a t
 
 **Key Skill**: Use [label-context-mapping](../skills/label-context-mapping/SKILL.md) for all label → skill/context mappings.
 
-**SSOT Reference**: See [Task Classification](../../docs/standards/task-classification.md) for the authoritative definition of labels and task types.
+**SSOT Reference**: See [Task Classification](../../docs/guidelines/task-classification.md) for the authoritative definition of labels and task types.
 
 ## Target Files
 
@@ -206,7 +206,7 @@ Task Received
 ## Related Documents
 
 - [label-context-mapping](../skills/label-context-mapping/SKILL.md) - Label → Skill/Context mapping
-- [Task Classification SSOT](../../docs/standards/task-classification.md) - Label definitions
+- [Task Classification SSOT](../../docs/guidelines/task-classification.md) - Label definitions
 - [Task Contexts](../../docs/task-contexts/README.md) - Context file details
 - [Verification Matrix](../../docs/task-contexts/verification.md) - Verification commands
 - [AGENTS.md](../../AGENTS.md) - Project-wide guidelines

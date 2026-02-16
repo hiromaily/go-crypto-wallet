@@ -22,12 +22,12 @@ Workflow for documentation changes with SSOT awareness.
 |----------|---------------|-------------|
 | Agent behavior | `AGENTS.md` | Entry point for all agents |
 | Agent instruction design | `docs/design/ai-agents-instruction.md` | Command/Skill/Rule architecture |
-| Label definitions | `docs/standards/task-classification.md` | All label types and meanings |
+| Label definitions | `docs/guidelines/task-classification.md` | All label types and meanings |
 | Label → Skill mapping | `.claude/skills/label-context-mapping/` | Operational routing |
-| Coding conventions | `docs/standards/coding-conventions.md` | Code style rules |
-| Security rules | `docs/standards/security.md` | Security requirements |
-| Testing standards | `docs/standards/testing.md` | Test requirements |
-| Workflow | `docs/standards/workflow.md` | Development workflow |
+| Coding conventions | `docs/guidelines/coding-conventions.md` | Code style rules |
+| Security rules | `docs/guidelines/security.md` | Security requirements |
+| Testing standards | `docs/guidelines/testing.md` | Test requirements |
+| Workflow | `docs/guidelines/workflow.md` | Development workflow |
 
 ### SSOT Rules
 
@@ -41,9 +41,8 @@ Workflow for documentation changes with SSOT awareness.
 |------|------|-------------|
 | `AGENTS.md` | SSOT | Agent behavior entry point |
 | `ARCHITECTURE.md` | SSOT | System architecture |
-| `docs/standards/` | SSOT | Project standards |
+| `docs/guidelines/` | SSOT | Project guidelines and standards |
 | `docs/design/` | Reference | Design documents |
-| `docs/guidelines/` | Reference | Detailed guidelines |
 | `docs/crypto/` | Reference | Chain-specific documentation |
 | `docs/task-contexts/` | Context | Task-specific procedures |
 | `internal/AGENTS.md` | Scoped SSOT | Internal package guidelines |
@@ -56,16 +55,15 @@ AGENTS.md (entry point)
     │
     ├─ docs/design/ai-agents-instruction.md (instruction system design)
     │
-    ├─ docs/standards/ (SSOT for standards)
-    │   ├─ task-classification.md (label definitions)
+    ├─ docs/guidelines/ (guidelines and standards)
+    │   ├─ task-classification.md (label definitions, SSOT)
     │   ├─ coding-conventions.md
     │   ├─ security.md
     │   ├─ testing.md
-    │   └─ workflow.md
-    │
-    ├─ docs/guidelines/ (detailed how-to)
-    │   ├─ database.md
-    │   └─ code-generation.md
+    │   ├─ workflow.md
+    │   ├─ architecture.md
+    │   ├─ code-generation.md
+    │   └─ ...
     │
     └─ docs/task-contexts/ (task-specific context)
         ├─ bug-fix.md, feature-add.md, etc.
@@ -173,4 +171,4 @@ Example: `docs(standards): update coding conventions for error handling`
 - `git-workflow` - Branch, commit, PR workflow
 - [AGENTS.md](../../../AGENTS.md) - Agent entry point
 - [AI Agent Instruction Design](../../../docs/design/ai-agents-instruction.md) - System design
-- [Task Classification](../../../docs/standards/task-classification.md) - Label SSOT
+- [Task Classification](../../../docs/guidelines/task-classification.md) - Label SSOT

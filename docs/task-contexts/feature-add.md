@@ -33,7 +33,7 @@ version: 1.0.0
 
 | Condition | Document | Path |
 |-----------|----------|------|
-| DB変更が必要 | Database | `docs/guidelines/database.md` |
+| DB変更が必要 | Database | `docs/database/database.md` |
 | 複数チェーン対応 | Multi-Chain | `docs/guidelines/multi-chain.md` |
 | セキュリティ関連機能 | Core Principles | `docs/guidelines/core.md` |
 | コード生成が必要 | Code Generation | `docs/guidelines/code-generation.md` |
@@ -300,4 +300,3 @@ Agent Actions:
 - [Coding Standards](../guidelines/coding-standards.md) - コーディング規約詳細
 - [Internal Guidelines](../../../internal/AGENTS.md) - internalパッケージ詳細
 - [Multi-Chain Support](../guidelines/multi-chain.md) - マルチチェーン対応詳細
-

@@ -10,22 +10,22 @@ Rules for modifying SQL files (`*.sql`) in go-crypto-wallet.
 
 ## File Categories
 
-| Path | Description | Editable |
-|------|-------------|----------|
-| `tools/sqlc/queries/*.sql` | SQLC query definitions | ✅ Yes |
-| `tools/sqlc/schemas/*.sql` | SQLC schema files | ❌ Auto-generated |
-| `tools/atlas/migrations/**/*.sql` | Atlas migration files | ❌ Auto-generated |
-| `docker/*.sql` | Initial data/seed scripts | ✅ Yes |
+| Path                              | Description               | Editable          |
+| --------------------------------- | ------------------------- | ----------------- |
+| `tools/sqlc/queries/*.sql`        | SQLC query definitions    | ✅ Yes            |
+| `tools/sqlc/schemas/*.sql`        | SQLC schema files         | ❌ Auto-generated |
+| `tools/atlas/migrations/**/*.sql` | Atlas migration files     | ❌ Auto-generated |
+| `docker/*.sql`                    | Initial data/seed scripts | ✅ Yes            |
 
 ## Verification Commands
 
 ### SQLC (Query Files)
 
-| Command | Purpose | Required |
-|---------|---------|----------|
-| `make sqlc-compile` | Check syntax and type errors | ✅ Yes |
-| `make sqlc-vet` | Check for potential issues | ✅ Yes |
-| `make sqlc-validate` | Compile + vet combined | Recommended |
+| Command              | Purpose                      | Required    |
+| -------------------- | ---------------------------- | ----------- |
+| `make sqlc-compile`  | Check syntax and type errors | ✅ Yes      |
+| `make sqlc-vet`      | Check for potential issues   | ✅ Yes      |
+| `make sqlc-validate` | Compile + vet combined       | Recommended |
 
 ### After Changes
 
@@ -66,13 +66,13 @@ INSERT INTO account_key (
 
 ### Query Annotations
 
-| Annotation | Description |
-|------------|-------------|
-| `:one` | Returns single row |
-| `:many` | Returns multiple rows |
-| `:exec` | Executes without return |
+| Annotation    | Description                       |
+| ------------- | --------------------------------- |
+| `:one`        | Returns single row                |
+| `:many`       | Returns multiple rows             |
+| `:exec`       | Executes without return           |
 | `:execresult` | Returns result with affected rows |
-| `:execrows` | Returns number of affected rows |
+| `:execrows`   | Returns number of affected rows   |
 
 ## Auto-Generated Files
 
@@ -153,7 +153,7 @@ make gotest
 
 ## Related Documentation
 
-- @docs/guidelines/database.md - Database management guide
+- @docs/database/database.md - Database management guide
 - @tools/sqlc/ - SQLC configuration and files
 
 ## Related Skills

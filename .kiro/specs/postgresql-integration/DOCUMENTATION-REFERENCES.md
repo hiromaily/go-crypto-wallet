@@ -11,7 +11,7 @@ This document tracks all references to database management documentation within 
 
 ### Primary Guides
 
-1. **[Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md)**
+1. **[Database Schema Changes Guide](../../../docs/database/database-schema-changes.md)**
    - Complete step-by-step workflow for schema modifications
    - Multi-database considerations (MySQL, SQLite, PostgreSQL)
    - Three detailed scenarios with examples
@@ -19,7 +19,7 @@ This document tracks all references to database management documentation within 
    - Troubleshooting guide
    - Best practices
 
-2. **[Database Quick Reference](../../../docs/guidelines/database-quick-reference.md)**
+2. **[Database Quick Reference](../../../docs/database/database-quick-reference.md)**
    - Command cheat sheet
    - Data type mapping tables
    - Common workflows
@@ -27,12 +27,12 @@ This document tracks all references to database management documentation within 
    - Testing commands
    - Troubleshooting quick fixes
 
-3. **[Database Management](../../../docs/guidelines/database.md)**
+3. **[Database Management](../../../docs/database/database.md)**
    - Overview of database tools and architecture
    - Quick workflow summary
    - Multi-database workflow
 
-4. **[Database Architecture](../../../docs/development/database.md)**
+4. **[Database Architecture](../../../docs/database/architecture.md)**
    - Detailed database setup and operations
    - Container configuration
    - Common operations
@@ -42,6 +42,7 @@ This document tracks all references to database management documentation within 
 ### design.md
 
 **Line ~13**: Overview section
+
 ```markdown
 **📚 Implementation References**:
 - [Database Schema Changes Guide] - Complete workflow for multi-database schema modifications
@@ -50,12 +51,14 @@ This document tracks all references to database management documentation within 
 ```
 
 **Line ~481**: Data Type Mappings section
+
 ```markdown
 **📘 Complete reference**: See [Database Quick Reference - Data Type Mapping]
 for comprehensive mapping across MySQL, SQLite, and PostgreSQL.
 ```
 
 **Line ~1027**: Migration Strategy section
+
 ```markdown
 **📘 Complete workflow guide**: See [Database Schema Changes Guide]
 for detailed step-by-step schema modification workflow across all databases.
@@ -64,6 +67,7 @@ for detailed step-by-step schema modification workflow across all databases.
 ### research.md
 
 **Line ~289**: New "Project Documentation" section
+
 ```markdown
 ## Project Documentation
 
@@ -77,6 +81,7 @@ for detailed step-by-step schema modification workflow across all databases.
 ### tasks.md
 
 **Line ~11**: Overview section
+
 ```markdown
 **📘 Implementation References**:
 - [Database Schema Changes Guide] - Complete workflow for schema modifications
@@ -85,12 +90,14 @@ for detailed step-by-step schema modification workflow across all databases.
 ```
 
 **Line ~37**: Phase 2 header
+
 ```markdown
 **📘 Reference**: See [Database Quick Reference - Data Type Mapping]
 for MySQL→PostgreSQL conversion table.
 ```
 
 **Line ~103**: Phase 3 header
+
 ```markdown
 **📘 Reference**: Follow [Database Schema Changes Guide - Scenario 1]
 for complete schema extraction and sqlc workflow.
@@ -100,7 +107,7 @@ for complete schema extraction and sqlc workflow.
 
 ### Schema Change Workflow
 
-From [Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md):
+From [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md):
 
 1. **Step-by-Step Workflows**:
    - Adding a new column
@@ -121,7 +128,7 @@ From [Database Schema Changes Guide](../../../docs/guidelines/database-schema-ch
 
 ### Data Type Mappings
 
-From [Database Quick Reference](../../../docs/guidelines/database-quick-reference.md):
+From [Database Quick Reference](../../../docs/database/database-quick-reference.md):
 
 | Concept | MySQL | SQLite | PostgreSQL |
 |---------|-------|--------|------------|
@@ -135,13 +142,13 @@ From [Database Quick Reference](../../../docs/guidelines/database-quick-referenc
 
 ### Common Commands
 
-From [Database Quick Reference](../../../docs/guidelines/database-quick-reference.md):
+From [Database Quick Reference](../../../docs/database/database-quick-reference.md):
 
 ```bash
 # Schema change workflow
 make atlas-fmt && make atlas-lint
 make atlas-dev-reset
-docker compose down -v && docker compose up -d
+docker compose down -v && docker compose --profile mysql up -d
 make atlas-migrate-docker
 make sqlc && make sqlc-sqlite && make sqlc-postgresql
 
@@ -153,36 +160,40 @@ make go-lint && make check-build && make gotest
 
 ### For Task 2.x (Atlas Migration & Docker Compose)
 
-**Reference**: [Database Quick Reference - Data Type Mapping](../../../docs/guidelines/database-quick-reference.md#-data-type-mapping)
+**Reference**: [Database Quick Reference - Data Type Mapping](../../../docs/database/database-quick-reference.md#-data-type-mapping)
 
 **Use For**:
+
 - Converting MySQL types to PostgreSQL
 - Understanding ENUM → TEXT CHECK conversion
 - Verifying AUTO_INCREMENT → BIGSERIAL mapping
 
 ### For Task 4.x (Schema Extraction & Code Generation)
 
-**Reference**: [Database Schema Changes Guide - Scenario 1](../../../docs/guidelines/database-schema-changes.md#scenario-1-adding-a-new-column)
+**Reference**: [Database Schema Changes Guide - Scenario 1](../../../docs/database/database-schema-changes.md#scenario-1-adding-a-new-column)
 
 **Use For**:
+
 - Understanding the complete workflow: HCL → migrations → database → dump → extract → sqlc
 - Following the established pattern for schema extraction
 - Implementing pg_dump wrapper scripts
 
 ### For Task 5.x-7.x (Repository Implementations)
 
-**Reference**: [Database Schema Changes Guide - Repository Pattern](../../../docs/guidelines/database-schema-changes.md#repository-pattern)
+**Reference**: [Database Schema Changes Guide - Repository Pattern](../../../docs/database/database-schema-changes.md#repository-pattern)
 
 **Use For**:
+
 - Understanding the repository pattern structure
 - DI container integration examples
 - Type-safe sqlc-generated code usage
 
 ### For Task 11.x-14.x (Testing)
 
-**Reference**: [Database Schema Changes Guide - Testing Schema Changes](../../../docs/guidelines/database-schema-changes.md#testing-schema-changes)
+**Reference**: [Database Schema Changes Guide - Testing Schema Changes](../../../docs/database/database-schema-changes.md#testing-schema-changes)
 
 **Use For**:
+
 - Testing with all three databases
 - Cross-database compatibility testing
 - Integration test patterns
@@ -192,6 +203,7 @@ make go-lint && make check-build && make gotest
 **Reference**: All database management guides
 
 **Use For**:
+
 - Migration documentation structure
 - Configuration examples
 - Best practices and common pitfalls
@@ -244,12 +256,14 @@ make go-lint && make check-build && make gotest
 ## Maintenance
 
 **When to Update References**:
+
 - New documentation added to `docs/guidelines/`
 - Workflow changes or improvements
 - New database features added
 - Breaking changes in tools (Atlas, sqlc)
 
 **How to Update**:
+
 1. Update relevant documentation in `docs/guidelines/`
 2. Verify references in specs still point to correct sections
 3. Test workflows to ensure accuracy

@@ -23,7 +23,7 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Database Management | `docs/guidelines/database.md` | Atlas/SQLC手順、スキーマ管理 |
+| Database Management | `docs/database/database.md` | Atlas/SQLC手順、スキーマ管理 |
 | Code Generation | `docs/guidelines/code-generation.md` | 自動生成ファイルの扱い |
 | Workflow Guidelines | `docs/guidelines/workflow.md` | 検証ステップ |
 
@@ -52,6 +52,7 @@ version: 1.0.0
 ```
 
 **必須の手順:**
+
 1. `tools/atlas/schemas/*.hcl` を編集
 2. `make atlas-fmt` でフォーマット
 3. `make atlas-lint` でリント
@@ -67,6 +68,7 @@ version: 1.0.0
 ```
 
 **DO NOT EDIT** コメントがあるファイル:
+
 - `internal/infrastructure/database/sqlc/*.go`
 - `tools/atlas/migrations/*.sql` (生成後)
 
@@ -123,7 +125,7 @@ make atlas-dev-reset # マイグレーション生成
 
 # Docker環境での検証
 docker compose down -v
-docker compose up -d
+docker compose --profile mysql up -d
 # マイグレーションが正常に適用されることを確認
 
 # SQLCコード生成
@@ -189,6 +191,7 @@ make atlas-dev-reset
 ```
 
 生成されたマイグレーションファイルを確認:
+
 - `tools/atlas/migrations/` に新しいSQLファイルが作成される
 
 ### Step 5: Docker環境で検証
@@ -198,7 +201,7 @@ make atlas-dev-reset
 docker compose down -v
 
 # 新しいマイグレーションで起動
-docker compose up -d
+docker compose --profile mysql up -d
 
 # ログを確認
 docker compose logs mysql
@@ -223,6 +226,7 @@ make sqlc
 ```
 
 生成されるファイル:
+
 - `internal/infrastructure/database/sqlc/models.go`
 - `internal/infrastructure/database/sqlc/new_table.sql.go`
 
@@ -308,7 +312,7 @@ Phase 2: カラム削除
 User: "XRPトランザクション履歴を保存するテーブルを追加して"
 
 Agent Actions:
-1. docs/guidelines/database.md を読み込み
+1. docs/database/database.md を読み込み
 2. 既存のスキーマを確認（tools/atlas/schemas/）
 3. 新しいテーブル定義をHCLに追加
 4. make atlas-fmt && make atlas-lint
@@ -326,7 +330,7 @@ Agent Actions:
 User: "addressテーブルにlabelカラムを追加して"
 
 Agent Actions:
-1. docs/guidelines/database.md を読み込み
+1. docs/database/database.md を読み込み
 2. 既存のaddressテーブル定義を確認
 3. HCLにlabelカラムを追加
 4. make atlas-fmt && make atlas-lint
@@ -388,4 +392,3 @@ docker compose exec mysql mysql -u wallet -p wallet
 - [Database Management](../guidelines/database.md) - Atlas/SQLC詳細手順
 - [Code Generation](../guidelines/code-generation.md) - 自動生成ファイルの扱い
 - [Architecture Guidelines](../guidelines/architecture.md) - Repository層の設計
-

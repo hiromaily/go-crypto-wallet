@@ -63,8 +63,7 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 
 | Category | SSOT Location | Notes |
 |----------|---------------|-------|
-| Standards | `docs/standards/` | Coding, testing, security, workflow |
-| Guidelines | `docs/guidelines/` | Database, code-generation |
+| Guidelines | `docs/guidelines/` | Coding, testing, security, workflow, database, code-generation |
 | Architecture | `ARCHITECTURE.md` | System design |
 | Agent behavior | `AGENTS.md` (this file) | Entry point for all agents |
 
@@ -80,12 +79,12 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 | Project overview | [llms.txt](llms.txt) |
 | Architecture design | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | **AI Agent instruction design** | [docs/design/ai-agents-instruction.md](docs/design/ai-agents-instruction.md) |
-| **Standards (SSOT)** | [docs/standards/](docs/standards/) |
-| Coding conventions | [docs/standards/coding-conventions.md](docs/standards/coding-conventions.md) |
-| Security | [docs/standards/security.md](docs/standards/security.md) |
-| Testing | [docs/standards/testing.md](docs/standards/testing.md) |
-| Workflow | [docs/standards/workflow.md](docs/standards/workflow.md) |
-| Database changes | [docs/guidelines/database.md](docs/guidelines/database.md) |
+| **Guidelines** | [docs/guidelines/](docs/guidelines/) |
+| Coding conventions | [docs/guidelines/coding-conventions.md](docs/guidelines/coding-conventions.md) |
+| Security | [docs/guidelines/security.md](docs/guidelines/security.md) |
+| Testing | [docs/guidelines/testing.md](docs/guidelines/testing.md) |
+| Workflow | [docs/guidelines/workflow.md](docs/guidelines/workflow.md) |
+| Database changes | [docs/database/database.md](docs/database/database.md) |
 | Auto-generated files | [docs/guidelines/code-generation.md](docs/guidelines/code-generation.md) |
 | Internal packages | [internal/AGENTS.md](internal/AGENTS.md) |
 | Public packages | [pkg/AGENTS.md](pkg/AGENTS.md) |
@@ -114,5 +113,4 @@ git merge, gh pr merge, push to main
 
 - [llms.txt](llms.txt) - AI-friendly project sitemap
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
-- [docs/standards/](docs/standards/) - Project standards (SSOT)
-- [docs/guidelines/](docs/guidelines/) - Detailed guidelines
+- [docs/guidelines/](docs/guidelines/) - Project guidelines and standards

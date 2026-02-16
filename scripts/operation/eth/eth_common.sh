@@ -30,7 +30,7 @@ ETH_RPC_PORT="${ETH_RPC_PORT:-8546}"
 ETH_MYSQL_ROOT_PASSWORD="${ETH_MYSQL_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-root}}"
 
 # Docker volume name
-ETH_DOCKER_VOLUME_NAME="${ETH_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
+ETH_DOCKER_VOLUME_NAME="${ETH_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-mysql}"
 
 ###############################################################################
 # Database Configuration

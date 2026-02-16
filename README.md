@@ -363,8 +363,8 @@ code .
 
 **Documentation:**
 
-- 📖 [Complete DevContainer Guide](./docs/development/devcontainer.md) - Setup, usage, and troubleshooting
-- 🤖 [AI-Assisted Development with DevContainer](./docs/development/devcontainer.md#using-with-ai-tools) - Claude Code, Copilot integration
+- 📖 [Complete DevContainer Guide](./docs/devcontainer.md) - Setup, usage, and troubleshooting
+- 🤖 [AI-Assisted Development with DevContainer](./docs/devcontainer.md#using-with-ai-tools) - Claude Code, Copilot integration
 
 **Note:** DevContainer is completely optional. Continue with local development if you prefer.
 

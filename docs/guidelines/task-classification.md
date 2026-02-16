@@ -137,7 +137,7 @@ Priority Order:
 
 ## Related Documents
 
-- [GitHub Labels](.github/labels.yml) - Label definitions with colors
-- [Task Context Loading](../.claude/rules/task-context-loading.md) - Auto-loading rules
-- [GitHub Issue Creation](../.claude/skills/github-issue-creation/SKILL.md) - Issue creation workflow
-- [Task Contexts](./task-contexts/README.md) - Context file details
+- [GitHub Labels](../../.github/labels.yml) - Label definitions with colors
+- [Task Context Loading](../../.claude/rules/task-context-loading.md) - Auto-loading rules
+- [GitHub Issue Creation](../../.claude/skills/github-issue-creation/SKILL.md) - Issue creation workflow
+- [Task Contexts](../task-contexts/README.md) - Context file details

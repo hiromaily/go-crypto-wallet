@@ -53,25 +53,25 @@ sqlc-lint: sqlc-vet
 # Schema Export Targets
 ###############################################################################
 
-# Export watch schema from wallet-db container
+# Export watch schema from wallet-mysql container
 .PHONY: dump-schema-watch
 dump-schema-watch:
 	mkdir -p data/dump/sql
-	docker exec wallet-db mysqldump -u root -proot --no-data --skip-triggers watch > data/dump/sql/dump_watch.sql
+	docker exec wallet-mysql mysqldump -u root -proot --no-data --skip-triggers watch > data/dump/sql/dump_watch.sql
 
-# Export keygen schema from wallet-db container
+# Export keygen schema from wallet-mysql container
 .PHONY: dump-schema-keygen
 dump-schema-keygen:
 	mkdir -p data/dump/sql
-	docker exec wallet-db mysqldump -u root -proot --no-data --skip-triggers keygen > data/dump/sql/dump_keygen.sql
+	docker exec wallet-mysql mysqldump -u root -proot --no-data --skip-triggers keygen > data/dump/sql/dump_keygen.sql
 
-# Export sign schema from wallet-db container
+# Export sign schema from wallet-mysql container
 .PHONY: dump-schema-sign
 dump-schema-sign:
 	mkdir -p data/dump/sql
-	docker exec wallet-db mysqldump -u root -proot --no-data --skip-triggers sign > data/dump/sql/dump_sign.sql
+	docker exec wallet-mysql mysqldump -u root -proot --no-data --skip-triggers sign > data/dump/sql/dump_sign.sql
 
-# Export all schemas from wallet-db container
+# Export all schemas from wallet-mysql container
 .PHONY: dump-schema-all
 dump-schema-all: dump-schema-watch dump-schema-keygen dump-schema-sign
 

@@ -234,5 +234,5 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 - [Database Management Guidelines](database.md) - Detailed database schema workflow
 - [Testing Guidelines](testing.md) - Mock usage and unit testing patterns
-- [Coding Standards](coding-standards.md) - Verification commands
+- [Coding Standards](coding-conventions.md) - Verification commands
 - [Core Principles](core.md) - Rules about editing auto-generated files

@@ -14,7 +14,7 @@ This is a cryptocurrency wallet implementation supporting BTC, BCH, ETH, XRP, an
 ## General Guidelines
 
 - Follow Clean Architecture principles (see [ARCHITECTURE.md](../ARCHITECTURE.md))
-- Refer to [docs/standards/](../docs/standards/) for detailed coding conventions
+- Refer to [docs/guidelines/](../docs/guidelines/) for detailed coding conventions
 - Follow [AGENTS.md](../AGENTS.md) for behavior guidelines
 
 ## Code Suggestions
@@ -26,7 +26,7 @@ This is a cryptocurrency wallet implementation supporting BTC, BCH, ETH, XRP, an
 
 ## Security Requirements
 
-See [docs/standards/security.md](../docs/standards/security.md) for full details.
+See [docs/guidelines/security.md](../docs/guidelines/security.md) for full details.
 
 Key rules:
 - **NEVER** log private keys or sensitive information
@@ -36,15 +36,15 @@ Key rules:
 
 ## Testing
 
-See [docs/standards/testing.md](../docs/standards/testing.md) for testing strategy.
+See [docs/guidelines/testing.md](../docs/guidelines/testing.md) for testing strategy.
 
 ## Coding Conventions
 
-See [docs/standards/coding-conventions.md](../docs/standards/coding-conventions.md) for standards.
+See [docs/guidelines/coding-conventions.md](../docs/guidelines/coding-conventions.md) for standards.
 
 ## Workflow
 
-See [docs/standards/workflow.md](../docs/standards/workflow.md) for Git operations and PR guidelines.
+See [docs/guidelines/workflow.md](../docs/guidelines/workflow.md) for Git operations and PR guidelines.
 
 ## Auto-Generated Files
 

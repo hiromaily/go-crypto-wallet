@@ -79,5 +79,5 @@ Optional: [Test Scope] + [Chain]
 ## Related
 
 - [label-context-mapping](../label-context-mapping/SKILL.md) - Label → Skill/Context mapping
-- [Task Classification SSOT](../../../docs/standards/task-classification.md) - Label definitions
+- [Task Classification SSOT](../../../docs/guidelines/task-classification.md) - Label definitions
 - [fix-issue command](../../commands/fix-issue.md) - Working on issues

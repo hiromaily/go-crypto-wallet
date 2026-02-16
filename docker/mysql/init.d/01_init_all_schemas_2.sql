@@ -23,7 +23,7 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `sign2` /*!40100 DEFAULT CHARACTER SET 
 
 -- Grant permissions to application user (created by MYSQL_USER environment variable)
 -- Note: User must be created first by MySQL's built-in initialization
--- Make sure by `docker compose exec wallet-db mysql -uhiromaily -phiromaily watch -e "SELECT DATABASE(), USER();"`
+-- Make sure by `docker compose exec wallet-mysql mysql -uhiromaily -phiromaily watch -e "SELECT DATABASE(), USER();"`
 GRANT ALL PRIVILEGES ON `watch`.* TO 'hiromaily'@'%';
 GRANT ALL PRIVILEGES ON `keygen`.* TO 'hiromaily'@'%';
 GRANT ALL PRIVILEGES ON `sign`.* TO 'hiromaily'@'%';

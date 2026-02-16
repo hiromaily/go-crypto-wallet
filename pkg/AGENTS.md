@@ -73,11 +73,11 @@ make tidy         # go mod tidy
 
 - `.claude/rules/go/conventions.md` - Go conventions
 
-### Standards (SSOT)
+### Guidelines
 
-- [Coding Conventions](../docs/standards/coding-conventions.md)
-- [Security](../docs/standards/security.md)
-- [Testing](../docs/standards/testing.md)
+- [Coding Conventions](../docs/guidelines/coding-conventions.md)
+- [Security](../docs/guidelines/security.md)
+- [Testing](../docs/guidelines/testing.md)
 
 ### Other
 

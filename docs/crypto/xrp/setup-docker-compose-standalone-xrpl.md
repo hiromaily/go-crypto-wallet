@@ -1,6 +1,5 @@
 # Docker Compose setup to run a Standalone XRPL `rippled` node
 
-
 ## 1. `compose.yaml` (Standalone `rippled`)
 
 ```yaml
@@ -24,8 +23,8 @@ services:
 
 Why this works:
 
-* The image explicitly documents that passing `standalone` starts Standalone mode. 
-* In Standalone mode you typically need to manually advance the ledger (see `ledger_accept`) for tx to become validated. 
+* The image explicitly documents that passing `standalone` starts Standalone mode.
+* In Standalone mode you typically need to manually advance the ledger (see `ledger_accept`) for tx to become validated.
 
 ---
 
@@ -34,7 +33,7 @@ Why this works:
 ### Start
 
 ```bash
-docker compose up -d
+docker compose --profile mysql up -d
 ```
 
 ### Confirm it’s healthy
@@ -67,7 +66,7 @@ docker compose exec -T rippled rippled --silent server_info
 docker compose exec -T rippled rippled --silent ledger_accept
 ```
 
-`ledger_accept` is the standard way to manually advance the ledger in Standalone testing workflows. 
+`ledger_accept` is the standard way to manually advance the ledger in Standalone testing workflows.
 
 ### C) `wallet_propose` (quick test wallet generation)
 
@@ -104,4 +103,4 @@ So your E2E flow should always include:
 2. `ledger_accept`
 3. query tx by hash and confirm `validated == true` (and `tesSUCCESS`)
 
-XRPL docs explicitly describe Standalone as a fresh genesis known state, and remind you that you must advance the ledger manually. 
+XRPL docs explicitly describe Standalone as a fresh genesis known state, and remind you that you must advance the ledger manually.

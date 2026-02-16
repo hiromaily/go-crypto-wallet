@@ -127,5 +127,5 @@ Good documentation makes the codebase more maintainable.
 ## See Also
 
 - [Architecture Guidelines](architecture.md) - Clean Architecture principles and layer guidelines
-- [Coding Standards](coding-standards.md) - Linting, formatting, and naming conventions
+- [Coding Standards](coding-conventions.md) - Linting, formatting, and naming conventions
 - [Workflow Guidelines](workflow.md) - Git operations and dependency management

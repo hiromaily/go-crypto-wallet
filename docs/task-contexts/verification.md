@@ -57,4 +57,4 @@ version: 2.0.0
 ## Related Documents
 
 - [Task Contexts README](./README.md) - タスクコンテキスト一覧
-- [Coding Conventions](../standards/coding-conventions.md) - コーディング規約
+- [Coding Conventions](../guidelines/coding-conventions.md) - コーディング規約

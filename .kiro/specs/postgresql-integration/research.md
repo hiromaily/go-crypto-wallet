@@ -1,6 +1,7 @@
 # Research & Design Decisions
 
 ## Summary
+
 - **Feature**: `postgresql-integration`
 - **Discovery Scope**: Extension (adding PostgreSQL to existing MySQL/SQLite support)
 - **Key Findings**:
@@ -17,12 +18,14 @@
 **Context**: Go ecosystem offers two main PostgreSQL drivers - need to select the optimal one for performance and maintainability.
 
 **Sources Consulted**:
+
 - [pgx vs lib/pq performance comparison](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgresql-golang-driver/)
 - [Go database driver benchmarks](https://github.com/jackc/go_db_bench)
 - [GitLab's recommendation for pgx](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49135)
 - [sqlc + pgx article](https://brandur.org/sqlc)
 
 **Findings**:
+
 - **Performance**: pgx is 10-20% faster than lib/pq when using database/sql interface, and 50-100% faster with native pgx interface
 - **Binary protocol**: pgx uses PostgreSQL binary format, reducing parsing overhead compared to lib/pq's text-based communication
 - **Connection pooling**: pgx includes built-in pgxpool for connection management, lib/pq requires external solutions
@@ -31,6 +34,7 @@
 - **Statement preparation**: pgx automatically prepares and caches statements by default (3x performance improvement in some workloads)
 
 **Implications**:
+
 - **Decision**: Use `github.com/jackc/pgx/v5` as PostgreSQL driver
 - Connection factory in `pkg/db/postgresql/` will use pgx driver
 - Maintains compatibility with existing database/sql patterns used for MySQL/SQLite
@@ -40,12 +44,14 @@
 **Context**: MySQL schemas use ENUM types extensively; need strategy for PostgreSQL conversion.
 
 **Sources Consulted**:
+
 - [Native enums vs CHECK constraints](https://making.close.com/posts/native-enums-or-check-constraints-in-postgresql/)
 - [Enums vs Check Constraints (Crunchy Data)](https://www.crunchydata.com/blog/enums-vs-check-constraints-in-postgres)
 - [PostgreSQL ENUM documentation](https://www.postgresql.org/docs/current/datatype-enum.html)
 - [sqlc datatype mappings](https://docs.sqlc.dev/en/stable/reference/datatypes.html)
 
 **Findings**:
+
 - **PostgreSQL ENUM advantages**: Type safety, ordering, space efficiency (stored as catalog references)
 - **PostgreSQL ENUM drawbacks**:
   - ALTER TYPE requires ACCESS EXCLUSIVE lock (blocks all table access)
@@ -60,6 +66,7 @@
 - **sqlc support**: Both approaches work with sqlc; ENUMs map to Go type aliases, TEXT maps to string
 
 **Implications**:
+
 - **Decision**: Use TEXT columns with CHECK constraints for enum-like fields
 - Rationale: Schema evolution flexibility outweighs storage efficiency in this use case
 - Migration safety: SHARE UPDATE EXCLUSIVE lock allows concurrent operations during schema changes
@@ -70,11 +77,13 @@
 **Context**: Need to verify PostgreSQL 18.2 availability and compatibility for local development.
 
 **Sources Consulted**:
+
 - [PostgreSQL official Docker Hub](https://hub.docker.com/_/postgres/)
 - [PostgreSQL Docker tags](https://hub.docker.com/_/postgres/tags)
 - [PostgreSQL Docker documentation](https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/)
 
 **Findings**:
+
 - PostgreSQL 18.2 available as `postgres:18.2` tag on Docker Hub
 - Multi-architecture support: amd64, arm64v8, arm32v7, and others
 - PGDATA environment variable changed in PostgreSQL 18: now `/var/lib/postgresql/18/docker` (version-specific)
@@ -82,6 +91,7 @@
 - Image includes standard tools: psql, pg_dump, pg_restore, etc.
 
 **Implications**:
+
 - Use `postgres:18.2` for Docker Compose service
 - Update PGDATA path in initialization scripts if needed
 - Healthcheck command: `pg_isready -U postgres`
@@ -92,11 +102,13 @@
 **Context**: Current version is 1.0.0, upgrading to 1.1.0 for improved PostgreSQL support.
 
 **Sources Consulted**:
+
 - [Atlas GitHub releases](https://github.com/ariga/atlas/releases)
 - [Atlas PostgreSQL guide](https://atlasgo.io/guides/postgres/automatic-migrations)
 - [Atlas documentation](https://atlasgo.io/versioned/apply)
 
 **Findings**:
+
 - Atlas supports declarative schema management for PostgreSQL
 - PostgreSQL partitions, functions, procedures, and domains now supported
 - Docker image: `arigaio/atlas:1.1.0` available
@@ -105,6 +117,7 @@
 - HCL schemas are database-agnostic; migrations are engine-specific
 
 **Implications**:
+
 - Update Docker Compose to use `arigaio/atlas:1.1.0`
 - Existing MySQL/SQLite migrations remain unchanged
 - Create PostgreSQL-specific environments in atlas.hcl
@@ -115,6 +128,7 @@
 **Context**: Need precise mappings to ensure data integrity and compatibility.
 
 **Findings**:
+
 | MySQL Type | PostgreSQL Type | Notes |
 |------------|-----------------|-------|
 | AUTO_INCREMENT | SERIAL / BIGSERIAL | Use BIGSERIAL for BIGINT columns |
@@ -128,6 +142,7 @@
 | int | INTEGER | Direct mapping |
 
 **Implications**:
+
 - Schema conversion scripts need to handle AUTO_INCREMENT → SERIAL transformation
 - Enum values must be extracted and converted to CHECK constraints
 - All other types have straightforward mappings
@@ -137,12 +152,14 @@
 **Context**: The project uses sqlc for type-safe SQL query generation across multiple database engines (MySQL, SQLite, and now PostgreSQL). Need to verify sqlc's PostgreSQL 18.2 compatibility and its ability to handle shared query definitions across different database engines.
 
 **Sources Consulted**:
+
 - [sqlc PostgreSQL support documentation](https://docs.sqlc.dev/en/stable/reference/language-support.html#postgresql)
 - [sqlc multi-engine support](https://docs.sqlc.dev/en/stable/howto/named-parameters.html)
 - [sqlc PostgreSQL datatype mappings](https://docs.sqlc.dev/en/stable/reference/datatypes.html)
 - [sqlc version releases](https://github.com/sqlc-dev/sqlc/releases)
 
 **Findings**:
+
 - **PostgreSQL Version Support**: sqlc supports PostgreSQL 9.6 through PostgreSQL 17+ (PostgreSQL 18.2 is forward-compatible)
 - **Multi-Engine Architecture**: sqlc supports multiple engines in a single project through separate configuration files:
   - `sqlc.yml` for MySQL (existing)
@@ -170,6 +187,7 @@
   - New SQL/JSON functions are available if needed in future queries
 
 **Implications**:
+
 - **Decision**: Use separate sqlc configuration file (`sqlc_postgresql.yml`) for PostgreSQL code generation
 - **Query Reuse**: Current queries in `tools/sqlc/queries/*.sql` can be reused for PostgreSQL if they avoid MySQL-specific syntax
 - **Code Generation Strategy**:
@@ -188,6 +206,7 @@
 **Description**: Follow existing MySQL/SQLite pattern - one repository implementation per database engine.
 
 **Strengths**:
+
 - Proven pattern (working well for MySQL/SQLite)
 - Clear separation of concerns
 - Type-safe sqlc-generated code per database
@@ -195,11 +214,13 @@
 - No abstraction leakage
 
 **Risks / Limitations**:
+
 - Code duplication (~40 repository files)
 - Must maintain three parallel implementations
 - Schema drift risk if not carefully managed
 
 **Notes**:
+
 - Aligns with existing Clean Architecture in codebase
 - DI container already handles database selection via switch statements
 - Acceptable trade-off: code duplication for type safety and clarity
@@ -209,10 +230,12 @@
 **Description**: Create database-agnostic repository using reflection or code generation.
 
 **Strengths**:
+
 - Single implementation for all databases
 - Easier to add future databases
 
 **Risks / Limitations**:
+
 - Significant refactoring of existing codebase
 - Loss of type safety
 - Performance overhead (reflection)
@@ -227,12 +250,14 @@
 **Context**: Need to select PostgreSQL driver for Go that balances performance, maintainability, and compatibility.
 
 **Alternatives Considered**:
+
 1. **lib/pq** - Traditional driver, database/sql compatible, no longer maintained
 2. **pgx** - Modern driver, superior performance, actively maintained
 
 **Selected Approach**: pgx (github.com/jackc/pgx/v5)
 
 **Rationale**:
+
 - 50-100% better performance than lib/pq
 - Active maintenance and community support
 - Built-in connection pooling (pgxpool)
@@ -241,6 +266,7 @@
 - Better PostgreSQL-specific feature support
 
 **Trade-offs**:
+
 - ✅ Benefits: Performance, features, maintenance
 - ❌ Compromises: None significant - pgx is drop-in compatible
 
@@ -251,6 +277,7 @@
 **Context**: MySQL schemas use ENUM types extensively; PostgreSQL offers native ENUMs or TEXT+CHECK alternatives.
 
 **Alternatives Considered**:
+
 1. **PostgreSQL native ENUM** - Type-safe, space-efficient, difficult to modify
 2. **TEXT with CHECK constraints** - Flexible, easy migration, slightly larger storage
 3. **Lookup tables** - Referential integrity, normalized, adds join overhead
@@ -258,6 +285,7 @@
 **Selected Approach**: TEXT with CHECK constraints
 
 **Rationale**:
+
 - Schema evolution flexibility (SHARE UPDATE EXCLUSIVE vs ACCESS EXCLUSIVE lock)
 - Simpler migration from MySQL ENUMs
 - No blocking operations during constraint modifications
@@ -265,6 +293,7 @@
 - Maintains similar validation semantics to MySQL
 
 **Trade-offs**:
+
 - ✅ Benefits: Migration safety, flexibility, concurrent updates
 - ❌ Compromises: ~4 bytes per value vs catalog reference (negligible for wallet data)
 
@@ -275,18 +304,21 @@
 **Context**: Atlas supports database-agnostic HCL schemas; need to decide if separate PostgreSQL HCL files are needed.
 
 **Alternatives Considered**:
+
 1. **Reuse existing HCL** - Single source of truth, database-agnostic
 2. **Separate PostgreSQL HCL** - Database-specific optimizations, independent evolution
 
 **Selected Approach**: Reuse existing HCL schemas (watch.hcl, keygen.hcl, sign.hcl)
 
 **Rationale**:
+
 - HCL schemas are already database-agnostic
 - Single source of truth reduces maintenance burden
 - Atlas generates database-specific migrations from HCL
 - No PostgreSQL-specific schema features needed at this time
 
 **Trade-offs**:
+
 - ✅ Benefits: Single source of truth, reduced maintenance
 - ❌ Compromises: Cannot use PostgreSQL-specific features easily
 
@@ -297,6 +329,7 @@
 **Context**: Need to convert 3 MySQL schema files to PostgreSQL syntax.
 
 **Alternatives Considered**:
+
 1. **Automated conversion tool** - Fast, consistent, requires tooling development
 2. **Manual conversion** - Controlled, educational, time-consuming
 3. **Atlas-generated from HCL** - Automated, requires HCL as source
@@ -304,12 +337,14 @@
 **Selected Approach**: Manual conversion with validation
 
 **Rationale**:
+
 - Only 3 schema files (watch, keygen, sign)
 - Opportunity to review and validate each table
 - Ensures understanding of schema nuances
 - Atlas can generate from HCL for future changes
 
 **Trade-offs**:
+
 - ✅ Benefits: Quality control, learning opportunity
 - ❌ Compromises: Initial time investment (1-2 days)
 
@@ -338,33 +373,39 @@
 ## Project Documentation
 
 **Database Management Guides** (Created 2024-02-15):
-- [Database Schema Changes Guide](../../../docs/guidelines/database-schema-changes.md) - Complete workflow for multi-database schema modifications
-- [Database Quick Reference](../../../docs/guidelines/database-quick-reference.md) - Command cheat sheet and data type mapping tables
-- [Database Management](../../../docs/guidelines/database.md) - Overview of database tools and architecture
-- [Database Architecture](../../../docs/development/database.md) - Detailed database setup and operations
+
+- [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md) - Complete workflow for multi-database schema modifications
+- [Database Quick Reference](../../../docs/database/database-quick-reference.md) - Command cheat sheet and data type mapping tables
+- [Database Management](../../../docs/database/database.md) - Overview of database tools and architecture
+- [Database Architecture](../../../docs/database/architecture.md) - Detailed database setup and operations
 
 ## References
 
 **PostgreSQL Drivers**:
+
 - [pgx vs lib/pq comparison](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgresql-golang-driver/)
 - [pgx GitHub repository](https://github.com/jackc/pgx)
 - [sqlc + pgx integration](https://brandur.org/sqlc)
 
 **Enum Handling**:
+
 - [Native enums vs CHECK constraints](https://making.close.com/posts/native-enums-or-check-constraints-in-postgresql/)
 - [Enums vs Check Constraints - Crunchy Data](https://www.crunchydata.com/blog/enums-vs-check-constraints-in-postgres)
 - [PostgreSQL ENUM documentation](https://www.postgresql.org/docs/current/datatype-enum.html)
 
 **Docker & Infrastructure**:
+
 - [PostgreSQL official Docker image](https://hub.docker.com/_/postgres/)
 - [PostgreSQL Docker tags](https://hub.docker.com/_/postgres/tags)
 
 **Atlas Migration Tool**:
+
 - [Atlas GitHub releases](https://github.com/ariga/atlas/releases)
 - [Atlas PostgreSQL guide](https://atlasgo.io/guides/postgres/automatic-migrations)
 - [Atlas documentation](https://atlasgo.io/)
 
 **sqlc**:
+
 - [sqlc datatype documentation](https://docs.sqlc.dev/en/stable/reference/datatypes.html)
 - [sqlc PostgreSQL support](https://docs.sqlc.dev/en/stable/reference/language-support.html)
 - [sqlc multi-engine support](https://docs.sqlc.dev/en/stable/howto/named-parameters.html)

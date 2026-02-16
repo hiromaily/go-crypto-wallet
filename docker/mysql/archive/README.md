@@ -29,7 +29,7 @@ All these files have been replaced by Atlas migrations located in `tools/atlas/m
 
 **Current initialization process:**
 
-1. Database container starts (`docker compose up wallet-db`)
+1. MySQL container starts (`docker compose up wallet-mysql`)
 2. `init.d/01_init_all_schemas.sql` creates empty schemas (watch, keygen, sign)
 3. Atlas migration services automatically apply migrations when database is ready
 4. All tables are created via Atlas migrations
@@ -37,7 +37,7 @@ All these files have been replaced by Atlas migrations located in `tools/atlas/m
 **To manually apply migrations (if needed):**
 
 ```bash
-# Migrations are automatically applied on docker compose up
+# Migrations are automatically applied on docker compose --profile mysql up
 # For manual re-application:
 make atlas-migrate-docker
 ```

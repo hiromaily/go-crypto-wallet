@@ -3,9 +3,9 @@
 set -eu
 
 # reset DB
-#docker compose stop wallet-db
-docker compose rm -f -s wallet-db
-docker volume rm -f go-crypto-wallet_wallet-db
+#docker compose stop wallet-mysql
+docker compose rm -f -s wallet-mysql
+docker volume rm -f go-crypto-wallet_wallet-mysql
 
 # reset bitcoind dat
 docker compose -f compose.btc.yaml stop btc-watch btc-keygen btc-sign1 btc-sign2

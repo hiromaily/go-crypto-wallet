@@ -131,7 +131,7 @@ db_query "keygen" "SELECT * FROM account_key LIMIT 5"
 | DB_TYPE | Command |
 |---------|---------|
 | `sqlite` | `sqlite3 ./data/sqlite/btc/e2e.db "SELECT ..."` |
-| `mysql` | `docker compose exec -T wallet-db mysql -u root -proot watch -e "SELECT ..."` |
+| `mysql` | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."` |
 
 ## Configuration File Policy (Important)
 
@@ -270,7 +270,7 @@ make shfmt
 
 - ❌ Do NOT log private keys
 - ❌ Do NOT use test passphrases/RPC credentials in production
-- Reference: `docs/standards/security.md`
+- Reference: `docs/guidelines/security.md`
 
 ## Avoiding Impact on Other Patterns
 
