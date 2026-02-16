@@ -7,6 +7,12 @@ description: Address PR review comments by selecting appropriate skills based on
 
 Workflow for addressing review comments on pull requests.
 
+## Expected Command Format
+
+```
+Please revise the reviews at https://github.com/{owner}/{repo}/pull/{pr_number}#pullrequestreview-{review_id} and reply to each review with your results.
+```
+
 ## Input Formats
 
 User may provide either:
@@ -15,210 +21,97 @@ User may provide either:
 
 Extract `{pr_number}` (and optionally `{review_id}`) from the input.
 
-## Prerequisites
-
-- PR number or review URL is required
-- Use `git-workflow` Skill for commit conventions
-
 ## Process Overview
 
 ```
-1. Parse input (PR number or review URL)
-2. Fetch PR details and review comments
-3. Classify by file type
-4. Load appropriate development skill
-5. Fix each comment
-6. Run verification
-7. Display summary table
-8. Commit and push changes
+1. Fetch PR details and review comments
+2. Classify files and load development skill
+3. Fix each comment
+4. Run verification
+5. Commit and push changes
+6. Reply to each review comment on GitHub
 ```
 
 ## Step 1: Fetch PR Information
 
 ```bash
-# Get PR details
 gh pr view {pr_number}
-
-# Get PR diff to see modified files
 gh pr diff {pr_number} --name-only
-
-# Get all reviews for a PR (includes summary comments)
 gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews
-
-# Get review comments for a specific review (if review_id is provided)
 gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews/{review_id}/comments
-
-# Get all inline comments on the PR
 gh api repos/{owner}/{repo}/pulls/{pr_number}/comments
 ```
 
-## Step 2: Classify by Modified Files
+## Step 2: Classify and Load Skill
 
-| Files Modified                         | Development Skill        |
-| -------------------------------------- | ------------------------ |
-| `internal/`, `pkg/`, `cmd/`, `*.go`    | `go-development`         |
-| `apps/xrpl-grpc-server/`, `*.ts`       | `typescript-development` |
-| `apps/erc20-token/contracts/`, `*.sol` | `solidity-development`   |
-| `scripts/`, `*.sh`                     | `shell-scripts`          |
-| `Makefile`, `make/*.mk`                | `makefile-update`        |
-| `tools/atlas/`, `*.sql`, `*.hcl`       | `db-migration`           |
-| `docs/`, `*.md`                        | `docs-update`            |
+Classify modified files and load the appropriate development skill.
 
-## Step 3: Load Development Skill
+For file-type-to-skill mapping, see `.claude/rules/general.md` (Language-Specific Skills table).
 
-Based on classification, load the appropriate skill:
-
-| Skill      | Path                                             |
-| ---------- | ------------------------------------------------ |
-| Go         | `.claude/skills/go-development/SKILL.md`         |
-| TypeScript | `.claude/skills/typescript-development/SKILL.md` |
-| Solidity   | `.claude/skills/solidity-development/SKILL.md`   |
-| Shell      | `.claude/skills/shell-scripts/SKILL.md`          |
-| Makefile   | `.claude/skills/makefile-update/SKILL.md`        |
-| Database   | `.claude/skills/db-migration/SKILL.md`           |
-| Docs       | `.claude/skills/docs-update/SKILL.md`            |
-
-## Step 4: Address ALL Comments
+## Step 3: Address ALL Comments
 
 **IMPORTANT**: Every review comment must be addressed. Do not skip or miss any comment.
 
-### Procedure
+1. **List all comments** from the API response
+2. **Sort by priority**: Security > Functionality > Code Quality
+3. **Fix each one**, one by one
+4. **Track status**: FIXED, ALREADY APPLIED, or SKIPPED
 
-1. **List all comments** - Enumerate every review comment from the API response
-2. **Sort by priority** - Security > Functionality > Code Quality
-3. **Fix each one** - Address every comment, one by one
-4. **Track status** - Record the outcome for each comment (FIXED, ALREADY APPLIED, or SKIPPED)
+## Step 4: Run Verification
 
-### Priority Order
+Run verification commands from the loaded development skill.
 
-1. **Security** - Address security concerns first
-2. **Functionality** - Fix bugs or logic issues
-3. **Code Quality** - Style, naming, documentation
-
-### Comment Categories
-
-| Category               | Action                                |
-| ---------------------- | ------------------------------------- |
-| Bug fix requested      | Fix the issue, add test if applicable |
-| Refactoring suggestion | Apply if improves readability         |
-| Style/naming           | Follow project conventions            |
-| Documentation          | Add/update comments                   |
-| Question               | Respond in code comment or PR         |
-
-## Step 5: Run Verification
-
-Run verification commands from the loaded development skill:
-
-### Go Files
-
-```bash
-make go-lint && make tidy && make check-build && make gotest
-```
-
-### TypeScript Files
-
-```bash
-cd apps/xrpl-grpc-server && bun run lint && bun run build && bun test
-```
-
-### Shell Scripts
-
-```bash
-make shfmt
-```
-
-### Multiple Languages
+For verification commands by file type, see `.claude/rules/task-context-loading.md` (Verification Commands by File Type).
 
 If PR modifies multiple file types, run all applicable verification commands.
 
-## Step 6: Display Summary
+## Step 5: Commit and Push
 
-After fixing all comments, display a summary table:
-
-```
-Summary
-
-┌─────────────────────────┬────────────────────┬──────────────────────────────┐
-│     Review Comment      │       Status       │           Details            │
-├─────────────────────────┼────────────────────┼──────────────────────────────┤
-│ [comment description]   │ ✅ FIXED           │ [what was changed]           │
-├─────────────────────────┼────────────────────┼──────────────────────────────┤
-│ [comment description]   │ ✅ ALREADY APPLIED │ Applied in commit [hash]     │
-├─────────────────────────┼────────────────────┼──────────────────────────────┤
-│ [comment description]   │ ⏭️ SKIPPED         │ [reason for skipping]        │
-└─────────────────────────┴────────────────────┴──────────────────────────────┘
-```
-
-### Status Values
-
-| Status             | Meaning                                          |
-| ------------------ | ------------------------------------------------ |
-| ✅ FIXED           | Comment addressed with new code changes           |
-| ✅ ALREADY APPLIED | Already fixed in a previous commit                |
-| ⏭️ SKIPPED         | Not applicable or intentionally not addressed     |
-
-## Step 7: Commit and Push
+Follow `git-workflow` skill for commit conventions.
 
 ```bash
-# Stage changes
 git add .
-
-# Commit with descriptive message
 git commit -m "$(cat <<'EOF'
 fix(scope): address PR review comments
 
 - Fix: [specific fix 1]
 - Fix: [specific fix 2]
-- Update: [update description]
 EOF
 )"
-
-# Push to update PR
 git push
 ```
 
-## Common Review Patterns
+## Step 6: Reply to Each Review Comment on GitHub
 
-### Error Handling (Go)
+**IMPORTANT**: After pushing fixes, reply to each review comment on GitHub.
 
-**Review comment**: "Missing error context"
+### How to Reply
 
-```go
-// Before
-return err
+```bash
+# Reply to inline review comment
+gh api repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies \
+  -f body="Fixed: [description of what was changed]"
 
-// After
-return fmt.Errorf("failed to create wallet: %w", err)
+# Reply to PR conversation (for summary-level review comments)
+gh pr comment {pr_number} --body "Addressed all review comments. See commit [short_hash]."
 ```
 
-### Logging Security
+### Reply Templates
 
-**Review comment**: "Don't log sensitive data"
+| Status             | Reply Template                                                    |
+| ------------------ | ----------------------------------------------------------------- |
+| FIXED              | `Fixed: [description]. See commit [short_hash].`                  |
+| ALREADY APPLIED    | `Already addressed in commit [short_hash].`                       |
+| SKIPPED            | `Acknowledged. [reason for not changing, or alternative approach]` |
 
-```go
-// Before
-log.Info("Processing key", "key", privateKey)
+### Notes
 
-// After
-log.Info("Processing key", "keyID", keyID)
-```
+- Reply to **every** comment, not just the ones that resulted in code changes
+- Reference the commit hash so reviewers can verify the fix
+- Comment IDs are available from the API responses in Step 1 (`.[].id` field)
 
-### Code Duplication
+## Related
 
-**Review comment**: "Extract to helper function"
-
-```go
-// Before: Duplicated code in multiple places
-
-// After: Create helper function
-func helperFunction(params) result {
-    // extracted logic
-}
-```
-
-## Related Skills
-
-- `go-development` - Go code changes
-- `typescript-development` - TypeScript changes
-- `shell-scripts` - Shell script changes
-- `git-workflow` - Branch and commit workflow
+- `.claude/rules/general.md` - File-type-to-skill mapping, verification commands
+- `.claude/rules/task-context-loading.md` - Verification matrix
+- `.claude/skills/git-workflow/SKILL.md` - Commit conventions
