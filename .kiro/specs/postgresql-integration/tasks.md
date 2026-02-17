@@ -122,7 +122,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Exclude atlas_schema_revisions table (same as MySQL extraction)
   - For sign schema: exclude seed and musig2_nonces tables (same as MySQL)
   - Add DO NOT EDIT header comment
-  - Output to tools/sqlc/schemas_postgresql/*.sql
+  - Output to tools/sqlc/schemas/postgresql/*.sql
   - _Requirements: 2.1, 2.2, 2.3_
 
 - [ ] 4.3 Add PostgreSQL schema extraction targets to Makefile
@@ -136,7 +136,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 - [ ] 4.4 (P) Create sqlc PostgreSQL configuration
   - Create tools/sqlc/sqlc_postgresql.yml with version 2
   - Configure engine: postgresql, queries: ./queries/*.sql
-  - Set schema: ./schemas_postgresql/*.sql
+  - Set schema: ./schemas/postgresql/*.sql
   - Configure Go output to internal/infrastructure/database/postgresql/sqlcgen
   - _Requirements: 3.1, 3.2, 3.4_
 

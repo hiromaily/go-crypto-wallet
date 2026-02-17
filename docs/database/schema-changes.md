@@ -66,8 +66,8 @@ type = "mysql"  # or "sqlite" or "postgresql" (coming soon)
 | Apply migrations (Docker) | `make atlas-migrate-docker` |
 | Generate MySQL sqlc code | `make sqlc` |
 | Generate SQLite sqlc code | `make sqlc-sqlite` |
-| Generate PostgreSQL sqlc code | `make sqlc-postgresql` *(coming soon)* |
-| Generate all sqlc code | `make sqlc-all` *(coming soon)* |
+| Generate PostgreSQL sqlc code | `make sqlc-postgresql` |
+| Generate all sqlc code | `make sqlc-all` |
 | Verify build | `make check-build` |
 
 ### File Locations
@@ -85,25 +85,29 @@ tools/atlas/
 └── atlas.hcl                  # Atlas configuration
 
 tools/sqlc/
-├── schemas/                    # MySQL schema files (extracted from DB)
-│   ├── 01_watch.sql
-│   ├── 02_keygen.sql
-│   └── 03_sign.sql
-├── schemas_sqlite/             # SQLite schema files (converted)
-│   ├── 01_watch.sql
-│   ├── 02_keygen.sql
-│   └── 03_sign.sql
-├── schemas_postgresql/         # PostgreSQL schema files (coming soon)
-│   ├── 01_watch.sql
-│   ├── 02_keygen.sql
-│   └── 03_sign.sql
-├── queries/                    # SQL queries (MANUAL)
-│   ├── address.sql
-│   ├── btc_tx.sql
-│   └── ...
+├── queries/
+│   ├── mysql/                  # SQL queries - MySQL (? placeholders)
+│   │   ├── address.sql
+│   │   ├── btc_tx.sql
+│   │   └── ...
+│   └── postgresql/             # SQL queries - PostgreSQL ($1,$2 placeholders)
+│       └── ...
+├── schemas/
+│   ├── mysql/                  # MySQL schema files (extracted from DB)
+│   │   ├── 01_watch.sql
+│   │   ├── 02_keygen.sql
+│   │   └── 03_sign.sql
+│   ├── postgresql/             # PostgreSQL schema files (extracted from DB)
+│   │   ├── 01_watch.sql
+│   │   ├── 02_keygen.sql
+│   │   └── 03_sign.sql
+│   └── sqlite/                 # SQLite schema files (manually converted)
+│       ├── 01_watch.sql
+│       ├── 02_keygen.sql
+│       └── 03_sign.sql
 ├── sqlc.yml                   # MySQL sqlc config
 ├── sqlc_sqlite.yml            # SQLite sqlc config
-└── sqlc_postgresql.yml        # PostgreSQL sqlc config (coming soon)
+└── sqlc_postgresql.yml        # PostgreSQL sqlc config
 ```
 
 ## Step-by-Step Workflow
@@ -200,10 +204,10 @@ make dump-schema-all
 make extract-sqlc-schema-all
 
 # Convert to SQLite format
-# (This is manual - see tools/sqlc/schemas_sqlite/)
+# (This is manual - see tools/sqlc/schemas/sqlite/)
 # Copy and modify MySQL schema with SQLite-specific changes
 
-# PostgreSQL (coming soon)
+# PostgreSQL
 # Convert to PostgreSQL format following data type mappings
 ```
 
@@ -227,8 +231,8 @@ make sqlc
 # Generate for SQLite
 make sqlc-sqlite
 
-# Future: Generate for PostgreSQL
-# make sqlc-postgresql
+# Generate for PostgreSQL
+make sqlc-postgresql
 ```
 
 **Generated files**:
@@ -239,7 +243,7 @@ make sqlc-sqlite
 
 #### Step 7: Update Queries (if needed)
 
-If you need to query the new column, edit `tools/sqlc/queries/address.sql`:
+If you need to query the new column, edit `tools/sqlc/queries/mysql/address.sql`:
 
 ```sql
 -- name: GetAddressWithEmail :one
@@ -359,7 +363,7 @@ Follow Steps 2-10 from Scenario 1.
 
 **Additional Considerations**:
 
-- Create corresponding queries in `tools/sqlc/queries/audit_log.sql`
+- Create corresponding queries in `tools/sqlc/queries/mysql/audit_log.sql`
 - Implement repository interface and implementations for all databases
 - Add integration tests for the new table
 
@@ -722,7 +726,7 @@ Error: sqlc generate failed
 
    ```bash
    # Validate MySQL syntax
-   docker compose exec wallet-mysql mysql -uroot -proot watch < tools/sqlc/schemas/01_watch.sql
+   docker compose exec wallet-mysql mysql -uroot -proot watch < tools/sqlc/schemas/mysql/01_watch.sql
    ```
 
 2. **Check query file syntax**:
@@ -756,7 +760,7 @@ Error: sqlc generate failed
 
    ```bash
    # Compare table structures
-   diff -u tools/sqlc/schemas/01_watch.sql tools/sqlc/schemas_sqlite/01_watch.sql
+   diff -u tools/sqlc/schemas/mysql/01_watch.sql tools/sqlc/schemas/sqlite/01_watch.sql
    ```
 
 2. **Verify data type mappings**:

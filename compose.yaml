@@ -78,7 +78,7 @@ services:
     profiles: ["postgres"]
     container_name: wallet-postgres
     volumes:
-      - wallet-postgres:/var/lib/postgresql/data
+      - wallet-postgres:/var/lib/postgresql
       - "./docker/postgresql/init.d:/docker-entrypoint-initdb.d"
     environment:
       POSTGRES_USER: postgres
@@ -123,7 +123,7 @@ services:
       - migrate
       - apply
       - --dir
-      - file://migrations/watch
+      - file://migrations/mysql/watch
       - --url
       - "mysql://root:root@wallet-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
 
@@ -136,7 +136,7 @@ services:
       - migrate
       - apply
       - --dir
-      - file://migrations/keygen
+      - file://migrations/mysql/keygen
       - --url
       - "mysql://root:root@wallet-mysql:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
 
@@ -149,7 +149,7 @@ services:
       - migrate
       - apply
       - --dir
-      - file://migrations/sign
+      - file://migrations/mysql/sign
       - --url
       - "mysql://root:root@wallet-mysql:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
 
@@ -162,6 +162,104 @@ services:
       - migrate
       - apply
       - --dir
-      - file://migrations/sign
+      - file://migrations/mysql/sign
       - --url
       - "mysql://root:root@wallet-mysql:3306/sign2?charset=utf8mb4&parseTime=True&loc=Local"
+
+  #########################################################################
+  # PostgreSQL Migration (Atlas)
+  #########################################################################
+  # PostgreSQL migration services - same pattern as MySQL but for PostgreSQL
+  # Activated with `docker compose --profile postgres up`
+
+  wallet-postgres-migrate-watch:
+    image: arigaio/atlas:1.1.0
+    profiles: ["postgres"]
+    container_name: wallet-postgres-migrate-watch
+    volumes:
+      - "./tools/atlas:/app/atlas"
+    working_dir: /app/atlas
+    depends_on:
+      wallet-postgres:
+        condition: service_healthy
+    networks:
+      - db
+    environment:
+      - ATLAS_NO_UPDATE_NOTIFIER=true
+    restart: "no"
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgresql/watch"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/watch?sslmode=disable"
+
+  wallet-postgres-migrate-keygen:
+    image: arigaio/atlas:1.1.0
+    profiles: ["postgres"]
+    container_name: wallet-postgres-migrate-keygen
+    volumes:
+      - "./tools/atlas:/app/atlas"
+    working_dir: /app/atlas
+    depends_on:
+      wallet-postgres:
+        condition: service_healthy
+    networks:
+      - db
+    environment:
+      - ATLAS_NO_UPDATE_NOTIFIER=true
+    restart: "no"
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgresql/keygen"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/keygen?sslmode=disable"
+
+  wallet-postgres-migrate-sign:
+    image: arigaio/atlas:1.1.0
+    profiles: ["postgres"]
+    container_name: wallet-postgres-migrate-sign
+    volumes:
+      - "./tools/atlas:/app/atlas"
+    working_dir: /app/atlas
+    depends_on:
+      wallet-postgres:
+        condition: service_healthy
+    networks:
+      - db
+    environment:
+      - ATLAS_NO_UPDATE_NOTIFIER=true
+    restart: "no"
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgresql/sign"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/sign?sslmode=disable"
+
+  wallet-postgres-migrate-sign2:
+    image: arigaio/atlas:1.1.0
+    profiles: ["postgres"]
+    container_name: wallet-postgres-migrate-sign2
+    volumes:
+      - "./tools/atlas:/app/atlas"
+    working_dir: /app/atlas
+    depends_on:
+      wallet-postgres:
+        condition: service_healthy
+    networks:
+      - db
+    environment:
+      - ATLAS_NO_UPDATE_NOTIFIER=true
+    restart: "no"
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgresql/sign"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/sign2?sslmode=disable"

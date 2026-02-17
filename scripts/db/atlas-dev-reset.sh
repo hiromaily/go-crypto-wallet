@@ -3,13 +3,16 @@
 # Regenerates migrations from HCL schemas and restores originals if no content changes detected
 #
 # Usage: ./scripts/db/atlas-dev-reset.sh
+# Environment variables:
+#   DB_DIALECT  - Database dialect: mysql (default) or postgresql
 
 set -euo pipefail
 
 # Configuration
-ATLAS_ENV_WATCH="${ATLAS_ENV_WATCH:-local_mysql_watch}"
-ATLAS_ENV_KEYGEN="${ATLAS_ENV_KEYGEN:-local_mysql_keygen}"
-ATLAS_ENV_SIGN="${ATLAS_ENV_SIGN:-local_mysql_sign}"
+DB_DIALECT="${DB_DIALECT:-mysql}"
+ATLAS_ENV_WATCH="local_${DB_DIALECT}_watch"
+ATLAS_ENV_KEYGEN="local_${DB_DIALECT}_keygen"
+ATLAS_ENV_SIGN="local_${DB_DIALECT}_sign"
 SCHEMAS=("watch" "keygen" "sign")
 
 # Colors for output
@@ -23,7 +26,7 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ATLAS_DIR="${PROJECT_ROOT}/tools/atlas"
-MIGRATIONS_DIR="${ATLAS_DIR}/migrations"
+MIGRATIONS_DIR="${ATLAS_DIR}/migrations/${DB_DIALECT}"
 
 log_info() {
 	echo -e "${BLUE}ℹ️  $1${NC}"
@@ -50,7 +53,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-log_warning "Regenerating all migrations from HCL schemas..."
+log_warning "Regenerating all migrations from HCL schemas (${DB_DIALECT})..."
 log_info "If no content changes are detected, original files will be restored."
 echo ""
 
@@ -104,6 +107,12 @@ for schema in "${SCHEMAS[@]}"; do
 	fi
 done
 
+# Determine the appropriate docker reset command
+DOCKER_PROFILE="${DB_DIALECT}"
+if [[ "${DB_DIALECT}" == "postgresql" ]]; then
+	DOCKER_PROFILE="postgres"
+fi
+
 # Restore or keep based on changes
 if [[ "${HAS_CHANGES}" -eq 0 ]]; then
 	echo ""
@@ -124,5 +133,5 @@ if [[ "${HAS_CHANGES}" -eq 0 ]]; then
 else
 	echo ""
 	log_success "Migrations regenerated with content changes."
-	echo "  Run 'make reset-docker-mysql' to apply."
+	echo "  Run 'make reset-docker-${DOCKER_PROFILE}' to apply."
 fi

@@ -112,16 +112,16 @@ See [Database Schema Changes Guide](schema-changes.md) for complete mapping tabl
 
 **Generated Files**:
 
-- `tools/sqlc/schemas/01_watch.sql` - Watch schema for SQLC
-- `tools/sqlc/schemas/02_keygen.sql` - Keygen schema for SQLC
-- `tools/sqlc/schemas/03_sign.sql` - Sign schema for SQLC
+- `tools/sqlc/schemas/mysql/01_watch.sql` - Watch schema for SQLC
+- `tools/sqlc/schemas/mysql/02_keygen.sql` - Keygen schema for SQLC
+- `tools/sqlc/schemas/mysql/03_sign.sql` - Sign schema for SQLC
 
 **Note**: These schema files are extracted from MySQL database dumps. The source of truth is the Atlas HCL files (`tools/atlas/schemas/*.hcl`). To update schemas, modify the HCL files and run the database migration flow.
 
 ## Database Code (SQLC)
 
 **Tool**: [sqlc](https://sqlc.dev/)
-**Source**: `tools/sqlc/schemas/*.sql` (auto-generated) and `tools/sqlc/queries/*.sql` (manually edited)
+**Source**: `tools/sqlc/schemas/mysql/*.sql` (auto-generated) and `tools/sqlc/queries/mysql/*.sql` (manually edited)
 **Command**: `make sqlc` (or `cd tools/sqlc && sqlc generate`)
 
 ### MySQL SQLC
@@ -136,7 +136,7 @@ See [Database Schema Changes Guide](schema-changes.md) for complete mapping tabl
 ### SQLite SQLC
 
 **Config**: `tools/sqlc/sqlc_sqlite.yml`
-**Schema**: `tools/sqlc/schemas_sqlite/*.sql`
+**Schema**: `tools/sqlc/schemas/sqlite/*.sql`
 **Command**: `make sqlc-sqlite`
 
 **Generated Files**:
@@ -156,13 +156,13 @@ See [Database Schema Changes Guide](schema-changes.md) for complete mapping tabl
 
 ## SQLC Query Files
 
-**Manual Editing**: The SQL query files in `tools/sqlc/queries/*.sql` are **manually edited** and should be modified when adding new database queries.
+**Manual Editing**: The SQL query files in `tools/sqlc/queries/mysql/*.sql` are **manually edited** and should be modified when adding new database queries.
 
-**Location**: `tools/sqlc/queries/`
+**Location**: `tools/sqlc/queries/mysql/`
 
 **Workflow:**
 
-1. Write SQL queries in `tools/sqlc/queries/*.sql`
+1. Write SQL queries in `tools/sqlc/queries/mysql/*.sql`
 2. Run `make sqlc` to generate Go code
 3. Use the generated code in your repositories
 

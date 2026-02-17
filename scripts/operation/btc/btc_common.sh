@@ -107,9 +107,9 @@ E2E_TIMESTAMP="${E2E_TIMESTAMP:-$(date +%Y%m%d-%H%M%S)}"
 SQLITE_DB_DIR="${SQLITE_DB_DIR:-./data/sqlite/btc}"
 
 # SQLite schema file location
-SQLITE_WATCH_SCHEMA="${SQLITE_WATCH_SCHEMA:-tools/sqlc/schemas_sqlite/01_watch.sql}"
-SQLITE_KEYGEN_SCHEMA="${SQLITE_KEYGEN_SCHEMA:-tools/sqlc/schemas_sqlite/02_keygen.sql}"
-SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas_sqlite/03_sign.sql}"
+SQLITE_WATCH_SCHEMA="${SQLITE_WATCH_SCHEMA:-tools/sqlc/schemas/sqlite/01_watch.sql}"
+SQLITE_KEYGEN_SCHEMA="${SQLITE_KEYGEN_SCHEMA:-tools/sqlc/schemas/sqlite/02_keygen.sql}"
+SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas/sqlite/03_sign.sql}"
 
 # Generate SQLite database file path for a specific wallet type
 # Usage: db_path=$(sqlite_get_db_path "watch")

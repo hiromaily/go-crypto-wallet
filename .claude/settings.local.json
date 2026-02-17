@@ -49,7 +49,8 @@
       "Bash(mockery)",
       "Bash(chmod:*)",
       "Bash(atlas version:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git stash:*)"
     ]
   },
   "hooks": {

@@ -687,7 +687,7 @@ make btc-e2e-reset P=1 DB=mysql
 SQLite-compatible schemas are located in:
 
 ```
-tools/sqlc/schemas_sqlite/
+tools/sqlc/schemas/sqlite/
 ├── 01_watch.sql   # Watch wallet schema
 ├── 02_keygen.sql  # Keygen wallet schema
 └── 03_sign.sql    # Sign wallet schema

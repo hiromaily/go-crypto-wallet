@@ -5,7 +5,7 @@
 #   ./scripts/db/extract-sqlc-schema.sh <schema_name> <dump_file> <output_file>
 #
 # Example:
-#   ./scripts/db/extract-sqlc-schema.sh watch data/dump/sql/dump_watch.sql tools/sqlc/schemas/extracted_watch.sql
+#   ./scripts/db/extract-sqlc-schema.sh watch data/dump/sql/dump_watch.sql tools/sqlc/schemas/mysql/extracted_watch.sql
 
 set -euo pipefail
 

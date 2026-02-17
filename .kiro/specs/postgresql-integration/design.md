@@ -228,7 +228,7 @@ sequenceDiagram
 | Requirement | Summary | Components | Interfaces | Flows |
 |-------------|---------|------------|------------|-------|
 | 1.1-1.7 | PostgreSQL configuration support and validation | Database Config struct, validateDatabase() | config.Database.PostgreSQL | Config validation |
-| 2.1-2.5 | PostgreSQL schema generation and type conversion | Schema files in schemas_postgresql/ | N/A (file artifacts) | N/A |
+| 2.1-2.5 | PostgreSQL schema generation and type conversion | Schema files in schemas/postgresql/ | N/A (file artifacts) | N/A |
 | 3.1-3.5 | sqlc code generation for PostgreSQL | sqlc_postgresql.yml, PostgreSQL sqlcgen package | sqlcgen.Queries interface | N/A |
 | 4.1-4.5 | PostgreSQL connection management | PostgreSQL Connection Factory (pkg/db/postgresql/) | NewPostgreSQL() function | Database selection flow |
 | 5.1-5.5 | Build system integration | Makefile targets (db_sqlc.mk, db_atlas.mk) | make sqlc, make atlas-* | N/A |
@@ -531,7 +531,7 @@ coin TEXT NOT NULL CHECK (coin IN ('btc','bch','eth','xrp','hyt'))
 
 **Implementation Notes**:
 
-- Location: `tools/sqlc/schemas_postgresql/01_watch.sql`, `02_keygen.sql`, `03_sign.sql`
+- Location: `tools/sqlc/schemas/postgresql/01_watch.sql`, `02_keygen.sql`, `03_sign.sql`
 - Conversion method: Manual conversion with validation (see research.md for rationale)
 - Comments: Use PostgreSQL COMMENT syntax for column/table descriptions
 - Risks: Type precision differences require thorough testing (especially NUMERIC for crypto amounts)
@@ -550,7 +550,7 @@ version: "2"
 sql:
   - engine: "postgresql"
     queries: "./queries/*.sql"
-    schema: "./schemas_postgresql/*.sql"
+    schema: "./schemas/postgresql/*.sql"
     gen:
       go:
         package: "sqlcgen"
@@ -795,7 +795,7 @@ atlas-lint: atlas-lint-mysql atlas-lint-postgresql
 **Batch Contract**:
 
 - Trigger: Manual execution via `make sqlc` or `make atlas-lint`
-- Input: Schema files (`schemas_postgresql/*.sql`) and HCL files (`schemas/*.hcl`)
+- Input: Schema files (`schemas/postgresql/*.sql`) and HCL files (`schemas/*.hcl`)
 - Output: Generated Go code or validation results
 - Idempotency: Code generation is deterministic (same input → same output)
 - Recovery: Regenerate code on failure; validation errors prevent commits
