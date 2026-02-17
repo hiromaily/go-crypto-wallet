@@ -51,7 +51,7 @@ tools/atlas/
 
 The `atlas.hcl` file contains:
 
-- **Three environments**: `local_watch`, `local_keygen`, `local_sign`
+- **Three environments**: `local_mysql_watch`, `local_mysql_keygen`, `local_mysql_sign`
 - **Diff configuration**: Protects against destructive changes (drop schema/table/column)
 - **Lint configuration**: Validates schema for:
   - Destructive operations (errors on dangerous changes)

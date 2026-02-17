@@ -97,9 +97,9 @@ See [Database Schema Changes Guide](schema-changes.md) for complete mapping tabl
 
 **Generated Files**:
 
-- `tools/atlas/migrations/watch/*.sql` - Watch schema migrations
-- `tools/atlas/migrations/keygen/*.sql` - Keygen schema migrations
-- `tools/atlas/migrations/sign/*.sql` - Sign schema migrations
+- `tools/atlas/migrations/{database}/watch/*.sql` - Watch schema migrations
+- `tools/atlas/migrations/{database}/keygen/*.sql` - Keygen schema migrations
+- `tools/atlas/migrations/{database}/sign/*.sql` - Sign schema migrations
 - `tools/atlas/migrations/*/atlas.sum` - Migration checksums
 
 **Note**: These files are auto-generated and should **NEVER** be edited manually.

@@ -4,9 +4,9 @@
 ###############################################################################
 # Atlas configuration file and environments
 ATLAS_CONFIG := file://tools/atlas/atlas.hcl
-ATLAS_ENV_WATCH := local_watch
-ATLAS_ENV_KEYGEN := local_keygen
-ATLAS_ENV_SIGN := local_sign
+ATLAS_ENV_WATCH := local_mysql_watch
+ATLAS_ENV_KEYGEN := local_mysql_keygen
+ATLAS_ENV_SIGN := local_mysql_sign
 ATLAS_SCHEMAS := watch keygen sign
 
 ###############################################################################
@@ -185,7 +185,7 @@ atlas-migrate-apply-all:
 atlas-migrate-diff: _check-schema _check-name
 	@echo "=== Generating migration for $(SCHEMA) schema ==="
 	@cd tools/atlas && atlas migrate diff $(NAME) --config file://atlas.hcl --env local_$(SCHEMA)
-	@echo "✓ Migration generated: tools/atlas/migrations/$(SCHEMA)/"
+	@echo "✓ Migration generated: tools/atlas/migrations/db/$(SCHEMA)/"
 
 # Hash migration directory for production readiness
 .PHONY: atlas-migrate-hash-all

@@ -7,6 +7,7 @@ This analysis examines the implementation gap for adding PostgreSQL support to g
 **Scope**: Add PostgreSQL 18.2 as a third database option alongside MySQL and SQLite, and upgrade Atlas from 1.0 to 1.1.
 
 **Key Findings**:
+
 - **Existing Pattern**: Well-established dual-database support provides clear blueprint for PostgreSQL addition
 - **Implementation Approach**: Extend existing components following the MySQL/SQLite pattern (Option A + minimal new components)
 - **Effort Estimate**: M (Medium, 3-7 days) - Primarily mechanical replication of existing patterns
@@ -17,12 +18,14 @@ This analysis examines the implementation gap for adding PostgreSQL support to g
 ### 1. Configuration Layer (`pkg/config/`)
 
 **Existing Assets**:
+
 - `pkg/config/wallet.go`: Database configuration with type selection
   - `Database.Type` validates `oneof=mysql sqlite` (line 145)
   - Separate `MySQL` and `SQLite` structs with connection parameters
   - Validation logic in `validateDatabase()` (lines 264-291)
 
 **Pattern Identified**:
+
 ```go
 type Database struct {
     Type   string `validate:"required,oneof=mysql sqlite"`
@@ -38,6 +41,7 @@ type Database struct {
 ### 2. Database Connection Layer (`pkg/db/`)
 
 **Existing Assets**:
+
 - `pkg/db/mysql/connection.go`: MySQL connection factory
   - Uses `sql.Open("mysql", dsn)`
   - Connection pool configuration
@@ -47,6 +51,7 @@ type Database struct {
   - SQLite-specific pragmas (foreign keys, WAL mode, busy timeout)
 
 **Pattern Identified**:
+
 - Package per database type
 - Factory function `New{Database}(conf *config.{Database}) (*sql.DB, error)`
 - Database-specific optimizations
@@ -58,6 +63,7 @@ type Database struct {
 ### 3. SQLC Configuration (`tools/sqlc/`)
 
 **Existing Assets**:
+
 - `sqlc.yml`: MySQL configuration
   - Engine: `mysql`
   - Schema: `./schemas/*.sql`
@@ -69,6 +75,7 @@ type Database struct {
 - Shared queries: `./queries/*.sql` (used by both engines)
 
 **Pattern Identified**:
+
 - Separate config file per database
 - Separate schema directory per database
 - Same query files reused across all databases
@@ -81,6 +88,7 @@ type Database struct {
 ### 4. Schema Definitions
 
 **Existing Assets**:
+
 - MySQL schemas: `tools/sqlc/schemas/*.sql`
   - Auto-generated from Atlas migrations via `make extract-sqlc-schema-all`
   - Contains MySQL-specific syntax (AUTO_INCREMENT, ENGINE=InnoDB, enum types)
@@ -89,6 +97,7 @@ type Database struct {
   - Different data types (INTEGER PRIMARY KEY instead of AUTO_INCREMENT)
 
 **Pattern Identified**:
+
 - MySQL schemas are source of truth (generated from HCL via Atlas)
 - SQLite schemas are adapted versions
 - Three schema files: 01_watch.sql, 02_keygen.sql, 03_sign.sql
@@ -96,6 +105,7 @@ type Database struct {
 **Gap**: No PostgreSQL schema files with PostgreSQL-specific syntax
 
 **Data Type Mappings Needed**:
+
 | MySQL | PostgreSQL |
 |-------|------------|
 | AUTO_INCREMENT | SERIAL / BIGSERIAL |
@@ -112,15 +122,17 @@ type Database struct {
 ### 5. Atlas Configuration (`tools/atlas/`)
 
 **Existing Assets**:
+
 - `atlas.hcl`: Atlas 1.0.0 configuration
-  - MySQL-only environments (local_watch, local_keygen, local_sign)
+  - MySQL-only environments (local_mysql_watch, local_mysql_keygen, local_mysql_sign)
   - Dev database: `docker://mysql/8/`
   - HCL schemas: `schemas/watch.hcl`, `schemas/keygen.hcl`, `schemas/sign.hcl`
 - Migrations: `migrations/watch/`, `migrations/keygen/`, `migrations/sign/`
 
 **Pattern Identified**:
+
 ```hcl
-env "local_watch" {
+env "local_mysql_watch" {
   url = "mysql://root:root@127.0.0.1:3306/watch?..."
   src = "file://schemas/watch.hcl"
   schemas = ["watch"]
@@ -132,6 +144,7 @@ env "local_watch" {
 ```
 
 **Gap**:
+
 - No PostgreSQL environments
 - Atlas 1.0.0 (needs upgrade to 1.1.0)
 - No PostgreSQL dev database configuration
@@ -141,6 +154,7 @@ env "local_watch" {
 ### 6. Repository Layer (`internal/infrastructure/repository/`)
 
 **Existing Assets**:
+
 - Interface definitions: `internal/application/ports/repository/`
   - `watch/`: Address, BTC/ETH/XRP transactions, payments
   - `cold/`: Account keys, seed, auth, XRP signer lists
@@ -153,6 +167,7 @@ env "local_watch" {
   - Same interface, different sqlcgen package
 
 **Pattern Identified**:
+
 - One repository file per entity per database
 - Private converter functions (domain ↔ sqlcgen types)
 - Repository struct holds `queries *sqlcgen.Queries`
@@ -166,8 +181,10 @@ env "local_watch" {
 ### 7. Dependency Injection (`internal/di/container.go`)
 
 **Existing Assets**:
+
 - Database selection via `switch c.conf.Database.Type` (appears ~20 times)
 - Pattern:
+
 ```go
 func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
     switch c.conf.Database.Type {
@@ -194,6 +211,7 @@ func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
 ### 8. Build System (`make/`)
 
 **Existing Assets**:
+
 - `make/db_sqlc.mk`:
   - `sqlc-compile`, `sqlc-vet`: Validate both MySQL and SQLite
   - `extract-sqlc-schema-all`: Extract MySQL schemas from database
@@ -204,6 +222,7 @@ func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
   - Only MySQL environments configured
 
 **Gap**:
+
 - sqlc targets need PostgreSQL variant
 - Atlas targets need PostgreSQL environments
 - Schema extraction needs PostgreSQL support
@@ -213,9 +232,11 @@ func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
 ### 9. Docker Compose (`compose.yaml`)
 
 **Existing Assets**:
+
 - `wallet-mysql` service: MySQL 8.4 container
 - Migration services: `wallet-mysql-migrate-{watch,keygen,sign}` using Atlas 1.0.0
 - Pattern:
+
 ```yaml
 x-migration-base: &migration-base
   image: arigaio/atlas:1.0.0
@@ -225,6 +246,7 @@ x-migration-base: &migration-base
 ```
 
 **Gap**:
+
 - No PostgreSQL 18.2 container
 - No PostgreSQL migration services
 - Atlas image version 1.0.0 (needs upgrade to 1.1.0)
@@ -236,11 +258,13 @@ x-migration-base: &migration-base
 ### Technical Needs by Requirement
 
 #### R1: Configuration Support
+
 - **Needs**: PostgreSQL struct, validation logic, SSLMode parameter
 - **Complexity**: Simple - extend existing pattern
 - **Unknowns**: None
 
 #### R2: PostgreSQL Schema Generation
+
 - **Needs**: Data type conversion script/tool, PostgreSQL schemas in `schemas_postgresql/`
 - **Complexity**: Moderate - requires careful type mapping
 - **Unknowns**:
@@ -248,22 +272,26 @@ x-migration-base: &migration-base
   - Research Needed: Decimal precision compatibility
 
 #### R3: SQLC Code Generation
+
 - **Needs**: `sqlc_postgresql.yml`, PostgreSQL sqlcgen package
 - **Complexity**: Simple - mechanical replication
 - **Unknowns**: None (sqlc supports PostgreSQL engine)
 
 #### R4: Database Connection Management
+
 - **Needs**: PostgreSQL driver, connection factory, SSL configuration
 - **Complexity**: Simple - use `github.com/lib/pq` or `pgx`
 - **Unknowns**:
   - Research Needed: Driver selection (lib/pq vs pgx - recommend pgx for better performance and features)
 
 #### R5: Build Integration
+
 - **Needs**: Makefile targets for PostgreSQL sqlc/atlas operations
 - **Complexity**: Simple - extend existing targets
 - **Unknowns**: None
 
 #### R6: Migration Path
+
 - **Needs**: Data export/import scripts, type compatibility testing
 - **Complexity**: Moderate - requires data validation
 - **Unknowns**:
@@ -271,21 +299,25 @@ x-migration-base: &migration-base
   - Research Needed: Enum value migration strategy
 
 #### R7: Atlas Migration Support
+
 - **Needs**: PostgreSQL environments in atlas.hcl, HCL schemas (optional), migrations
 - **Complexity**: Simple - replicate MySQL pattern
 - **Unknowns**: None (Atlas supports PostgreSQL)
 
 #### R8: Docker Compose Integration
+
 - **Needs**: PostgreSQL 18.2 container, healthcheck, init scripts, migration services
 - **Complexity**: Simple - replicate MySQL pattern
 - **Unknowns**: None
 
 #### R9: Testing
+
 - **Needs**: Integration tests, test database setup
 - **Complexity**: Moderate - adapt existing tests
 - **Unknowns**: None (can reuse existing test patterns)
 
 #### R10: Atlas Upgrade
+
 - **Needs**: Update version references, verify compatibility
 - **Complexity**: Simple - version bump
 - **Unknowns**:
@@ -340,6 +372,7 @@ x-migration-base: &migration-base
    - Extend atlas targets for PostgreSQL environments
 
 **Trade-offs**:
+
 - ✅ Minimal risk - proven pattern
 - ✅ Consistent with existing architecture
 - ✅ Fast development - copy-paste with modifications
@@ -348,6 +381,7 @@ x-migration-base: &migration-base
 - ❌ ~40 new repository files (but well-isolated)
 
 **Compatibility Assessment**:
+
 - No breaking changes to existing MySQL/SQLite users
 - New database type is opt-in via configuration
 - Existing interfaces unchanged
@@ -360,11 +394,13 @@ x-migration-base: &migration-base
 **Strategy**: Create database-agnostic repository layer to reduce duplication
 
 **Components**:
+
 - Generic repository implementations using reflection or code generation
 - Database-specific adapters for sqlcgen types
 - Unified sqlcgen wrapper
 
 **Trade-offs**:
+
 - ✅ Reduces code duplication long-term
 - ✅ Easier to add future databases
 - ❌ Significant refactoring of existing code
@@ -382,11 +418,13 @@ x-migration-base: &migration-base
 **Strategy**: Extend existing components (Option A) + create shared utilities for common operations
 
 **Additional Components**:
+
 - Shared converter utilities for common patterns
 - Schema conversion tool (MySQL → PostgreSQL)
 - Test helpers for multi-database testing
 
 **Trade-offs**:
+
 - ✅ Reduces some duplication
 - ✅ Provides tooling for maintenance
 - ✅ Maintains consistency with existing pattern
@@ -402,6 +440,7 @@ x-migration-base: &migration-base
 ### Effort Estimate: M (Medium, 3-7 days)
 
 **Breakdown by Requirement**:
+
 | Requirement | Effort | Justification |
 |-------------|--------|---------------|
 | R1: Configuration | S (0.5 day) | Simple struct addition and validation |
@@ -436,6 +475,7 @@ x-migration-base: &migration-base
 | Repository implementation bugs | Low | Copy proven MySQL code, unit test each |
 
 **Overall**: Low risk due to:
+
 - Clear precedent with MySQL/SQLite
 - Familiar technologies (PostgreSQL, sqlc, Atlas)
 - No architectural changes required
@@ -480,6 +520,7 @@ x-migration-base: &migration-base
 ### Preferred Approach
 
 **Option A (Extend Existing Components)** is strongly recommended because:
+
 - Proven pattern exists (MySQL/SQLite)
 - Low risk, fast implementation
 - Maintains architectural consistency
@@ -496,6 +537,7 @@ x-migration-base: &migration-base
 ### Implementation Order
 
 **Phase 1: Foundation** (1-2 days)
+
 1. Atlas upgrade to 1.1.0
 2. PostgreSQL Docker container + healthcheck
 3. Configuration structs and validation
@@ -532,17 +574,20 @@ x-migration-base: &migration-base
 ## Constraint Summary
 
 **Architectural Constraints**:
+
 - Must follow Clean Architecture (domain ↔ application ↔ infrastructure)
 - Must use repository pattern (one impl per entity per database)
 - Must maintain interface compatibility (no breaking changes)
 
 **Technical Constraints**:
+
 - Must use sqlc for type-safe SQL generation
 - Must use Atlas for schema migrations
 - Must support offline wallets (keygen/sign) and online wallet (watch)
 - Must handle three separate database schemas (watch, keygen, sign)
 
 **Compatibility Constraints**:
+
 - Must not affect existing MySQL/SQLite users
 - Must maintain data consistency across databases
 - Must preserve decimal precision for cryptocurrency amounts

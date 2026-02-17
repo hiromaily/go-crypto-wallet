@@ -7,9 +7,9 @@
 set -euo pipefail
 
 # Configuration
-ATLAS_ENV_WATCH="${ATLAS_ENV_WATCH:-local_watch}"
-ATLAS_ENV_KEYGEN="${ATLAS_ENV_KEYGEN:-local_keygen}"
-ATLAS_ENV_SIGN="${ATLAS_ENV_SIGN:-local_sign}"
+ATLAS_ENV_WATCH="${ATLAS_ENV_WATCH:-local_mysql_watch}"
+ATLAS_ENV_KEYGEN="${ATLAS_ENV_KEYGEN:-local_mysql_keygen}"
+ATLAS_ENV_SIGN="${ATLAS_ENV_SIGN:-local_mysql_sign}"
 SCHEMAS=("watch" "keygen" "sign")
 
 # Colors for output
