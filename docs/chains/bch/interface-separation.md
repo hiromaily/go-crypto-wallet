@@ -182,4 +182,4 @@ func IsBTCGroup(val CoinTypeCode) bool {
 ## Related Documentation
 
 - `.claude/rules/bch/btc-only-files.md` - List of BTC-only files
-- `docs/task-contexts/chains/bch.md` - BCH technical context
+- `docs/chains/bch/README.md` - BCH technical context

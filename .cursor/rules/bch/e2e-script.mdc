@@ -13,7 +13,7 @@ Rules applied when creating or modifying Bitcoin Cash E2E scripts.
 
 **MANDATORY**: Before working on any BCH E2E task, read the BCH task context document:
 
-- `docs/task-contexts/chains/bch.md` - **BCH vs BTC feature differences, workflow comparison, prohibited features**
+- `docs/chains/bch/README.md` - **BCH vs BTC feature differences, workflow comparison, prohibited features**
 
 This document explains what BCH can and cannot do compared to BTC.
 
@@ -37,7 +37,7 @@ Read the following documents before creating or modifying scripts:
 
 | Document | Contents |
 |----------|----------|
-| `docs/task-contexts/chains/bch.md` | **CRITICAL**: BCH vs BTC differences, prohibited features |
+| `docs/chains/bch/README.md`       | **CRITICAL**: BCH vs BTC differences, prohibited features |
 | `docs/chains/bch/README.md` | Detailed BCH technical reference |
 | `scripts/operation/bch/bch_common.sh` | BCH common utility functions |
 | `scripts/operation/common.sh` | Shared utility functions |
@@ -315,6 +315,6 @@ internal/application/usecase/*/btc/*descriptor*.go
 
 ## Related Documentation
 
-- [BCH Task Context](../../../docs/task-contexts/chains/bch.md) - **CRITICAL**: Read first
+- [BCH Documentation](../../../docs/chains/bch/README.md) - **CRITICAL**: Read first
 - [BCH Technical Reference](../../../docs/chains/bch/README.md)
 - [BCH E2E README](../../../scripts/operation/bch/README.md)

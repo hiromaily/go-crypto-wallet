@@ -17,14 +17,14 @@
 
 ## Chain-Specific References
 
-暗号通貨固有のタスクを処理する場合は、チェーンを特定した後に該当するリファレンスを読み込んでください：
+暗号通貨固有のタスクを処理する場合は、[chain-specific.md](./chain-specific.md) を参照し、チェーンを特定した後に `docs/chains/` の該当ドキュメントを読み込んでください：
 
-| Chain | Reference | Key Features |
-|-------|-----------|--------------|
-| BTC | [chains/btc.md](./chains/btc.md) | UTXO, Descriptor, Taproot, MuSig2 |
-| BCH | [chains/bch.md](./chains/bch.md) | UTXO, CashAddr |
-| ETH | [chains/eth.md](./chains/eth.md) | Account, Gas, ERC-20 |
-| XRP | [chains/xrp.md](./chains/xrp.md) | Account, gRPC, Destination Tag |
+| Chain | Documentation | Key Features |
+|-------|---------------|--------------|
+| BTC | [docs/chains/btc/README.md](../chains/btc/README.md) | UTXO, Descriptor, Taproot, MuSig2 |
+| BCH | [docs/chains/bch/README.md](../chains/bch/README.md) | UTXO, CashAddr |
+| ETH | [docs/chains/eth/README.md](../chains/eth/README.md) | Account, Gas, ERC-20 |
+| XRP | [docs/chains/xrp/README.md](../chains/xrp/README.md) | Account, gRPC, Destination Tag |
 
 ## Usage
 
@@ -97,12 +97,13 @@
 新しいタスクタイプを追加する場合：
 
 1. このディレクトリに `{task-type}.md` ファイルを作成
-2. [Task Context File Format](../task-oriented-context.md#task-context-file-format) に従って記述
+2. [Task Context File Format](./task-oriented-context.md#task-context-file-format) に従って記述
 3. このREADMEのQuick Referenceテーブルを更新
 4. 必要に応じて `AGENTS.md` のナビゲーションを更新
 
 ## Related Documents
 
-- [Task-Oriented Context Management](../task-oriented-context.md) - 概念と戦略
-- [AGENTS.md](../../../AGENTS.md) - プロジェクトガイドライン
+- [Task-Oriented Context Management](./task-oriented-context.md) - 概念と戦略
+- [Task Analysis](./task-analysis.md) - Issue/Commit パターン分析
+- [AGENTS.md](../../AGENTS.md) - プロジェクトガイドライン
 - [Workflow Guidelines](../guidelines/workflow.md) - 共通ワークフロー

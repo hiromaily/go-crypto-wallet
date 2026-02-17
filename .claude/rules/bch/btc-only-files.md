@@ -303,7 +303,7 @@ const (
 
 ## Related Documentation
 
-- `docs/task-contexts/chains/bch.md` - Full BCH technical context
+- `docs/chains/bch/README.md` - Full BCH technical context
 - `internal/infrastructure/api/btc/bch/` - BCH-specific implementations
 - GitHub Issue #435 - Use case layer separation tracking
 

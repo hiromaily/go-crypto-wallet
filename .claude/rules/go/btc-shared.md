@@ -148,4 +148,4 @@ Override in `btc/bch/` when:
 
 - @.claude/skills/bch-development/SKILL.md - Full BCH development workflow
 - @.claude/rules/go/conventions.md - Go coding conventions
-- @docs/task-contexts/chains/bch.md - BCH task context
+- @docs/chains/bch/README.md - BCH chain documentation

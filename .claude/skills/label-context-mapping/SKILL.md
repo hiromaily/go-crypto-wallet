@@ -52,11 +52,11 @@ Central mapping from GitHub labels to Skills and Context documents.
 
 | Label | Context Documents |
 |-------|-------------------|
-| `chain:btc` | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/btc.md` |
-| `chain:bch` | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/bch.md` |
-| `chain:eth` | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/eth.md` |
-| `chain:erc20` | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/eth.md` |
-| `chain:xrp` | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/xrp.md` |
+| `chain:btc` | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
+| `chain:bch` | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
+| `chain:eth` | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| `chain:erc20` | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| `chain:xrp` | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
 | `chain:all` | `docs/task-contexts/chain-specific.md` |
 
 ### Test Scope Labels → Verification

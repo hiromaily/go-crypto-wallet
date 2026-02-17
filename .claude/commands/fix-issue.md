@@ -48,7 +48,7 @@ If issue #123 has labels `bug`, `lang:go`, `chain:btc`:
 2. Mapping determines:
    - Context: `docs/task-contexts/bug-fix.md` (from `bug`)
    - Skill: `go-development` (from `lang:go`)
-   - Chain context: `docs/task-contexts/chains/btc.md` (from `chain:btc`)
+   - Chain context: `docs/chains/btc/README.md` (from `chain:btc`)
 3. Load `git-workflow` skill (always)
 4. Load `go-development` skill
 5. Follow workflow: branch → implement → verify → commit → PR

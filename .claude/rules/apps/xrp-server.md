@@ -68,5 +68,5 @@ make proto-ts         # TypeScript protobuf no longer needed
 ## Related Documentation
 
 - @.kiro/specs/xrp-transaction-flow-alignment/ - Current XRP implementation specification
-- @docs/task-contexts/chains/xrp.md - XRP chain context
+- @docs/chains/xrp/README.md - XRP chain documentation
 - @docs/chains/xrp/architecture-xrpl-grpc-server-version.md - Historical gRPC architecture (OBSOLETE)
