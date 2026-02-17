@@ -6,7 +6,7 @@ Fix errors in BCH E2E test (Pattern 1: P2PKH Single-sig).
 
 **MUST read:**
 
-- @docs/task-contexts/chains/bch.md (**CRITICAL**: BCH vs BTC differences)
+- @docs/chains/bch/README.md (**CRITICAL**: BCH vs BTC differences)
 - @.claude/rules/bch/e2e-script.md (common rules, errors, debug commands)
 
 > **WARNING**: BCH does NOT support SegWit, Taproot, Descriptor, PSBT, MuSig2.

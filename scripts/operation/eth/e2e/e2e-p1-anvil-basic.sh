@@ -11,7 +11,7 @@
 #   -h, --help Display help message
 #
 # Reference Documentation:
-#   docs/crypto/eth/operations/e2e-transaction-patterns.md - E2E transaction patterns
+#   docs/chains/eth/operations/e2e-transaction-patterns.md - E2E transaction patterns
 #
 # Transaction Pattern:
 #   Pattern 1: ETH Basic Single-sig

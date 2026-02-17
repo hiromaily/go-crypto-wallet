@@ -24,11 +24,11 @@ This project follows SSOT principles. When editing documentation, always identif
 
 | Category         | SSOT Location                        | References                                     |
 | ---------------- | ------------------------------------ | ---------------------------------------------- |
-| Coding Standards | `.claude/rules/*.md` (per file type) | `docs/guidelines/coding-conventions.md`         |
-| Security         | `docs/guidelines/security.md`         | `.claude/rules/security.md`                    |
-| Testing          | `docs/guidelines/testing.md`          | -                                              |
-| Workflow         | `docs/guidelines/workflow.md`         | -                                              |
-| Database         | `docs/database/database.md`          | `.claude/rules/sql.md`, `.claude/rules/hcl.md` |
+| Coding Standards | `.claude/rules/*.md` (per file type) | `docs/guidelines/coding-conventions.md`        |
+| Security         | `docs/guidelines/security.md`        | `.claude/rules/security.md`                    |
+| Testing          | `docs/guidelines/testing.md`         | -                                              |
+| Workflow         | `docs/guidelines/workflow.md`        | -                                              |
+| Database         | `docs/database/db-management.md`     | `.claude/rules/sql.md`, `.claude/rules/hcl.md` |
 | Architecture     | `ARCHITECTURE.md`                    | -                                              |
 | Agent Behavior   | `AGENTS.md`                          | -                                              |
 

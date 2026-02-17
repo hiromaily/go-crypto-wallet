@@ -2,7 +2,7 @@
 
 This document provides a quick reference for database schema management and SQLC code generation in the go-crypto-wallet project.
 
-**📘 For detailed schema change workflows, see [Database Schema Changes Guide](database-schema-changes.md)**
+**📘 For detailed schema change workflows, see [Database Schema Changes Guide](schema-changes.md)**
 
 ## Supported Databases
 
@@ -50,7 +50,7 @@ export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
 6. Regenerate SQLC code (`make sqlc-all`)
 7. Verify build (`make check-build`)
 
-**📘 For complete step-by-step workflow with examples, see [Database Schema Changes Guide](database-schema-changes.md)**
+**📘 For complete step-by-step workflow with examples, see [Database Schema Changes Guide](schema-changes.md)**
 
 ### Schema Files (Source of Truth)
 
@@ -80,7 +80,7 @@ When making schema changes, you must update schemas for **all supported database
 | `DATETIME` | `TEXT` | `TIMESTAMP` |
 | `DECIMAL(26,10)` | `TEXT` | `NUMERIC(26,10)` |
 
-See [Database Schema Changes Guide](database-schema-changes.md) for complete mapping table.
+See [Database Schema Changes Guide](schema-changes.md) for complete mapping table.
 
 ### Important Principles
 
@@ -97,9 +97,9 @@ See [Database Schema Changes Guide](database-schema-changes.md) for complete map
 
 **Generated Files**:
 
-- `tools/atlas/migrations/watch/*.sql` - Watch schema migrations
-- `tools/atlas/migrations/keygen/*.sql` - Keygen schema migrations
-- `tools/atlas/migrations/sign/*.sql` - Sign schema migrations
+- `tools/atlas/migrations/{database}/watch/*.sql` - Watch schema migrations
+- `tools/atlas/migrations/{database}/keygen/*.sql` - Keygen schema migrations
+- `tools/atlas/migrations/{database}/sign/*.sql` - Sign schema migrations
 - `tools/atlas/migrations/*/atlas.sum` - Migration checksums
 
 **Note**: These files are auto-generated and should **NEVER** be edited manually.

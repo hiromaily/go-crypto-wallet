@@ -54,10 +54,10 @@ Identify the chain from the following keywords:
 
 | Keywords | Chain | Context Files |
 |----------|-------|---------------|
-| Bitcoin, BTC, Taproot, Descriptor, PSBT, MuSig2 | BTC | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/btc.md` |
-| Bitcoin Cash, BCH, CashAddr | BCH | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/bch.md` |
-| Ethereum, ETH, ERC-20, Gas, Nonce | ETH | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/eth.md` |
-| Ripple, XRP, Destination Tag | XRP | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/xrp.md` |
+| Bitcoin, BTC, Taproot, Descriptor, PSBT, MuSig2 | BTC | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
+| Bitcoin Cash, BCH, CashAddr | BCH | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
+| Ethereum, ETH, ERC-20, Gas, Nonce | ETH | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| Ripple, XRP, Destination Tag | XRP | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
 
 ## File Type Detection for Verification
 
@@ -88,7 +88,7 @@ See `docs/task-contexts/verification.md` for details.
 Order:
 1. docs/task-contexts/{task-type}.md (by task type)
 2. docs/task-contexts/chain-specific.md (if chain-related)
-3. docs/task-contexts/chains/{chain}.md (for specific chain)
+3. docs/chains/{chain}/README.md (for specific chain)
 4. docs/task-contexts/verification.md (verification commands)
 5. Additional related documents (specified in each context file)
 ```

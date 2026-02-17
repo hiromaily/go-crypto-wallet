@@ -225,8 +225,8 @@ Command Behavior:
 ## Related Documents
 
 - [AGENTS.md](../../AGENTS.md) - プロジェクトガイドライン
-- [Agent Skills](./agent-skills.md) - Agent Skills使用ガイド
-- [Task Contexts](./task-contexts/README.md) - タスクコンテキスト一覧
+- [Agent Skills](../agent-skills.md) - Agent Skills使用ガイド
+- [Task Contexts](./README.md) - タスクコンテキスト一覧
 - [Task Analysis](./task-analysis.md) - Issue/Commit パターン分析
-- [Verification Matrix](./task-contexts/verification.md) - ファイルタイプ別検証コマンド
-- [Workflow Guidelines](./guidelines/workflow.md) - 共通ワークフロー
+- [Verification Matrix](./verification.md) - ファイルタイプ別検証コマンド
+- [Workflow Guidelines](../guidelines/workflow.md) - 共通ワークフロー

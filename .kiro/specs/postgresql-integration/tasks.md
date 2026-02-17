@@ -8,8 +8,8 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 
 **📘 Implementation References**:
 
-- [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md) - Complete workflow for schema modifications
-- [Database Quick Reference](../../../docs/database/database-quick-reference.md) - Command cheat sheet and data type mappings
+- [Database Schema Changes Guide](../../../docs/database/schema-changes.md) - Complete workflow for schema modifications
+- [Database Quick Reference](../../../docs/database/quick-reference.md) - Command cheat sheet and data type mappings
 - See design.md and research.md for architectural decisions and technology research
 
 **Total Estimated Effort**: 5-7 days (based on gap analysis)
@@ -35,7 +35,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 
 ### Phase 2: Atlas Migration & Docker Compose Infrastructure
 
-**📘 Reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/database/database-quick-reference.md#-data-type-mapping) for MySQL→PostgreSQL conversion table.
+**📘 Reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/database/quick-reference.md#-data-type-mapping) for MySQL→PostgreSQL conversion table.
 
 - [ ] 2. Configure Atlas for PostgreSQL migrations
 - [x] 2.1 (P) Add PostgreSQL environments to Atlas configuration
@@ -106,7 +106,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 
 ### Phase 3: Schema Extraction & Code Generation
 
-**📘 Reference**: Follow [Database Schema Changes Guide - Scenario 1](../../../docs/database/database-schema-changes.md#scenario-1-adding-a-new-column) for complete schema extraction and sqlc workflow.
+**📘 Reference**: Follow [Database Schema Changes Guide - Scenario 1](../../../docs/database/schema-changes.md#scenario-1-adding-a-new-column) for complete schema extraction and sqlc workflow.
 
 - [ ] 4. Extract PostgreSQL schemas and generate sqlc code
 - [ ] 4.1 Add PostgreSQL schema dump targets to Makefile

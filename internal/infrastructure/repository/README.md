@@ -104,7 +104,7 @@ See [Repository Pattern Rules](../../../.claude/rules/go/repository.md) for impl
 
 ## Related Documentation
 
-- [Database Guidelines](../../../docs/database/database.md)
+- [Database Guidelines](../../../docs/database/db-management.md)
 - [Repository Pattern Rules](../../../.claude/rules/go/repository.md)
 - [sqlc Configuration](../../../tools/sqlc/)
 - [Issue #385](https://github.com/hiromaily/go-crypto-wallet/issues/385) - SQLite implementation tracking

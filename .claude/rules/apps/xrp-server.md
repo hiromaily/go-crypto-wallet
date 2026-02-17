@@ -18,9 +18,9 @@ Rules for working with XRP/Ripple-related server applications in the `apps/` dir
 
 ## Directory Status
 
-| Directory                | Status         | Description                              |
-| ------------------------ | -------------- | ---------------------------------------- |
-| `apps/xrpl-grpc-server/` | **DEPRECATED** | No longer used; replaced by native Go    |
+| Directory                | Status         | Description                           |
+| ------------------------ | -------------- | ------------------------------------- |
+| `apps/xrpl-grpc-server/` | **DEPRECATED** | No longer used; replaced by native Go |
 
 ## Critical Rules
 
@@ -60,13 +60,13 @@ make proto-ts         # TypeScript protobuf no longer needed
 
 ## Quick Reference
 
-| Action          | Correct Target                                    |
-| --------------- | ------------------------------------------------- |
-| Add XRP feature | `internal/infrastructure/api/xrp/` (Go codebase)  |
-| Fix XRP bug     | `internal/infrastructure/api/xrp/` (Go codebase)  |
+| Action          | Correct Target                                   |
+| --------------- | ------------------------------------------------ |
+| Add XRP feature | `internal/infrastructure/api/xrp/` (Go codebase) |
+| Fix XRP bug     | `internal/infrastructure/api/xrp/` (Go codebase) |
 
 ## Related Documentation
 
 - @.kiro/specs/xrp-transaction-flow-alignment/ - Current XRP implementation specification
-- @docs/task-contexts/chains/xrp.md - XRP chain context
-- @docs/crypto/xrp/architecture-xrpl-grpc-server-version.md - Historical gRPC architecture (OBSOLETE)
+- @docs/chains/xrp/README.md - XRP chain documentation
+- @docs/chains/xrp/architecture-xrpl-grpc-server-version.md - Historical gRPC architecture (OBSOLETE)

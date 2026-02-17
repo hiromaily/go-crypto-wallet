@@ -37,10 +37,10 @@ version: 1.0.0
 
 | Chain | Reference Document |
 |-------|-------------------|
-| BTC | [chains/btc.md](./chains/btc.md) |
-| BCH | [chains/bch.md](./chains/bch.md) |
-| ETH | [chains/eth.md](./chains/eth.md) |
-| XRP | [chains/xrp.md](./chains/xrp.md) |
+| BTC | [BTC Documentation](../chains/btc/README.md) |
+| BCH | [BCH Documentation](../chains/bch/README.md) |
+| ETH | [ETH Documentation](../chains/eth/README.md) |
+| XRP | [XRP Documentation](../chains/xrp/README.md) |
 
 ## Required Context Documents
 
@@ -55,14 +55,10 @@ version: 1.0.0
 
 | Chain | Document | Path |
 |-------|----------|------|
-| BTC | BTC Reference | `docs/task-contexts/chains/btc.md` |
-| BTC | BTC Documentation | `docs/crypto/btc/README.md` |
-| BCH | BCH Reference | `docs/task-contexts/chains/bch.md` |
-| BCH | BCH Documentation | `docs/crypto/bch/README.md` |
-| ETH | ETH Reference | `docs/task-contexts/chains/eth.md` |
-| ETH | ETH Documentation | `docs/crypto/eth/README.md` |
-| XRP | XRP Reference | `docs/task-contexts/chains/xrp.md` |
-| XRP | XRP Documentation | `docs/crypto/xrp/README.md` |
+| BTC | BTC Documentation | `docs/chains/btc/README.md` |
+| BCH | BCH Documentation | `docs/chains/bch/README.md` |
+| ETH | ETH Documentation | `docs/chains/eth/README.md` |
+| XRP | XRP Documentation | `docs/chains/xrp/README.md` |
 
 ## Wallet Types
 
@@ -333,4 +329,4 @@ Agent Actions:
 
 - [Multi-Chain Support](../guidelines/multi-chain.md) - マルチチェーンアーキテクチャ詳細
 - [Architecture Guidelines](../guidelines/architecture.md) - レイヤー構造
-- [Chain References](./chains/) - 各チェーンの詳細リファレンス
+- [Chain Documentation](../chains/) - 各チェーンの詳細ドキュメント

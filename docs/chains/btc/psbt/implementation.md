@@ -117,6 +117,7 @@ type PInput struct {
 #### Method Details
 
 **walletcreatefundedpsbt**
+
 ```json
 // Parameters
 {
@@ -143,6 +144,7 @@ type PInput struct {
 ```
 
 **walletprocesspsbt**
+
 ```json
 // Parameters
 {
@@ -159,6 +161,7 @@ type PInput struct {
 ```
 
 **finalizepsbt**
+
 ```json
 // Parameters
 {
@@ -453,16 +456,19 @@ internal/infrastructure/api/btc/btc/
 ### 3.3 Method Responsibilities
 
 **psbt.go** - Main PSBT interface
+
 - Interface definition
 - Common PSBT utilities
 - Validation functions
 
 **psbt_rpc.go** - RPC methods (Watch Wallet)
+
 - `CreatePSBTFromTx` using `walletcreatefundedpsbt`
 - `FinalizePSBT` using `finalizepsbt`
 - `CombinePSBT` using `combinepsbt`
 
 **psbt_offline.go** - Offline methods (Keygen/Sign Wallets)
+
 - `SignPSBTWithKey` using btcd package
 - Signature creation
 - Private key operations
@@ -559,6 +565,7 @@ internal/infrastructure/api/btc/btc/
 **Filename Convention**: `{actionType}_{txID}_{txType}_{signedCount}_{timestamp}.psbt`
 
 **Examples**:
+
 ```
 deposit_8_unsigned_0_1534744535097796209.psbt   # Created by Watch
 deposit_8_unsigned_1_1534744536000000000.psbt   # Signed by Keygen (1/2)
@@ -568,21 +575,26 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ### 4.3 PSBT Metadata Requirements
 
 **For all inputs**, PSBT must include:
+
 - Previous output amount (required for SegWit/Taproot)
 - Previous output scriptPubKey
 - Transaction ID and output index
 
 **For P2SH/P2SH-SegWit**:
+
 - Redeem script
 
 **For P2WSH**:
+
 - Witness script
 
 **For P2TR (Taproot)**:
+
 - Taproot internal key
 - Taproot merkle root (if script path)
 
 **Optional (for hardware wallets)**:
+
 - BIP32 derivation paths
 - Public keys
 
@@ -595,6 +607,7 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 **Decision**: Replace CSV with PSBT immediately (no backward compatibility)
 
 **Rationale**:
+
 1. **Simplicity**: Single code path, no format detection logic
 2. **Security**: PSBT is standardized and well-tested
 3. **Compatibility**: PSBT works with other Bitcoin tools
@@ -603,6 +616,7 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ### 5.2 Migration Steps
 
 #### Phase 1: Implementation (Issues #93-#98)
+
 1. Implement PSBT infrastructure (#93)
 2. Update file repository (#94)
 3. Update Watch wallet (#95)
@@ -611,11 +625,13 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 6. Update finalization (#98)
 
 #### Phase 2: Testing (#99)
+
 1. End-to-end integration tests
 2. Compatibility testing with Bitcoin Core
 3. Performance benchmarking
 
 #### Phase 3: Deployment
+
 1. Complete all pending CSV transactions
 2. Deploy PSBT-enabled binaries
 3. Archive old CSV files (keep for audit)
@@ -626,16 +642,19 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 **Options**:
 
 **Option A: Complete Before Migration** (Recommended)
+
 - Finish all pending CSV transactions
 - Deploy PSBT after queue is clear
 - Archive CSV files post-migration
 
 **Option B: Conversion Tool** (If needed)
+
 - Create CSV-to-PSBT conversion utility
 - Convert pending transactions
 - Validate converted PSBTs
 
 **Option C: Dual Support** (Not recommended)
+
 - Maintain both CSV and PSBT code paths
 - Adds complexity
 - Only if gradual migration required
@@ -649,6 +668,7 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ### 6.1 Keygen Wallet (Offline)
 
 **Requirements**:
+
 - ✅ Read PSBT files from filesystem
 - ✅ Parse PSBT without network access
 - ✅ Sign PSBT using local private keys
@@ -656,6 +676,7 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 - ✅ No Bitcoin Core RPC required
 
 **btcd Package Support**:
+
 - ✅ `psbt.NewFromRawBytes()` - Parse from base64
 - ✅ `updater.Sign()` - Sign with private keys
 - ✅ `packet.Serialize()` - Serialize to base64
@@ -666,6 +687,7 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ### 6.2 Sign Wallet (Offline)
 
 **Requirements**:
+
 - ✅ Read partially signed PSBT files
 - ✅ Parse PSBT with existing signatures
 - ✅ Add second signature offline
@@ -673,6 +695,7 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 - ✅ No Bitcoin Core RPC required
 
 **btcd Package Support**:
+
 - ✅ `psbt.NewFromRawBytes()` - Parse partially signed PSBT
 - ✅ `updater.Sign()` - Add additional signatures
 - ✅ `packet.IsComplete()` - Check completion
@@ -731,18 +754,21 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ### 7.4 Mitigation Strategies
 
 **Testing**:
+
 - Comprehensive unit tests (>80% coverage)
 - Integration tests (end-to-end)
 - Testnet deployment before production
 - Compatibility tests with Bitcoin Core
 
 **Security**:
+
 - Code review by senior engineers
 - Security audit (if budget allows)
 - Follow Clean Architecture principles
 - Never log sensitive data
 
 **Operations**:
+
 - Gradual rollout (testnet → small mainnet → full)
 - Monitor error rates and transaction success
 - Maintain rollback capability
@@ -753,26 +779,31 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ## 8. Implementation Roadmap
 
 ### Phase 2.1: Research ✅ (This Document)
+
 - Duration: 1 week
 - Status: **COMPLETE**
 - Deliverable: Technical design document
 
 ### Phase 2.2: Infrastructure (#93)
+
 - Duration: 2-3 weeks
 - Dependencies: #92
 - Deliverable: `internal/infrastructure/api/btc/btc/psbt.go`
 
 ### Phase 2.3: File Repository (#94)
+
 - Duration: 1 week
 - Dependencies: #93
 - Deliverable: `.psbt` file support
 
 ### Phase 2.4-2.7: Wallet Updates (#95-#98)
+
 - Duration: 4-5 weeks total
 - Dependencies: #93, #94
 - Deliverables: PSBT support in all wallets
 
 ### Phase 2.8: Testing & Documentation (#99)
+
 - Duration: 2 weeks
 - Dependencies: #92-#98
 - Deliverables: Tests, docs, migration guide
@@ -813,16 +844,19 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ## 10. References
 
 ### BIP Specifications
+
 - **[BIP 174: Partially Signed Bitcoin Transaction Format](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)**
 - [BIP 340: Schnorr Signatures for secp256k1](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki) (Taproot)
 - [BIP 341: Taproot: SegWit version 1 spending rules](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)
 
 ### Library Documentation
+
 - [btcd PSBT Package](https://pkg.go.dev/github.com/btcsuite/btcd/btcutil/psbt@v1.1.6)
 - [btcd Transaction Package](https://pkg.go.dev/github.com/btcsuite/btcd/wire)
 - [btcd Signing Package](https://pkg.go.dev/github.com/btcsuite/btcd/txscript)
 
 ### Bitcoin Core Documentation
+
 - [Bitcoin Core RPC Reference](https://developer.bitcoin.org/reference/rpc/)
 - [walletcreatefundedpsbt](https://developer.bitcoin.org/reference/rpc/walletcreatefundedpsbt.html)
 - [walletprocesspsbt](https://developer.bitcoin.org/reference/rpc/walletprocesspsbt.html)
@@ -830,9 +864,10 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 - [combinepsbt](https://developer.bitcoin.org/reference/rpc/combinepsbt.html)
 
 ### Project Documentation
+
 - Issue #91: PSBT Support (Parent)
 - Issue #92: This research document
-- `docs/crypto/btc/wallet_flow_improvements_2025.md`: Phase 2 overview
+- `docs/chains/btc/wallet_flow_improvements_2025.md`: Phase 2 overview
 - `AGENTS.md`: Architecture guidelines
 
 ---

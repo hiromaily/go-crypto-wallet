@@ -38,12 +38,12 @@ When BCH requires different logic from BTC:
 
 ## Why This Pattern?
 
-| Reason | Explanation |
-|--------|-------------|
-| **Separation of Concerns** | BTC code remains pure and focused |
-| **Maintainability** | BCH changes don't affect BTC |
-| **Clarity** | BCH differences are explicit in BCH directory |
-| **Safety** | BTC modifications can't accidentally break BCH |
+| Reason                     | Explanation                                    |
+| -------------------------- | ---------------------------------------------- |
+| **Separation of Concerns** | BTC code remains pure and focused              |
+| **Maintainability**        | BCH changes don't affect BTC                   |
+| **Clarity**                | BCH differences are explicit in BCH directory  |
+| **Safety**                 | BTC modifications can't accidentally break BCH |
 
 ## Implementation Examples
 
@@ -111,12 +111,12 @@ func (b *BitcoinCash) initChainParams() {
 
 ## BCH vs BTC: Feature Differences
 
-| Feature | BTC | BCH |
-|---------|-----|-----|
-| SegWit | ✅ Supported | ❌ Not supported |
-| Taproot | ✅ Supported | ❌ Not supported |
-| Address Format | Legacy, SegWit, Taproot | Legacy, CashAddr |
-| Network Magic | BTC values | BCH-specific values |
+| Feature        | BTC                     | BCH                 |
+| -------------- | ----------------------- | ------------------- |
+| SegWit         | ✅ Supported            | ❌ Not supported    |
+| Taproot        | ✅ Supported            | ❌ Not supported    |
+| Address Format | Legacy, SegWit, Taproot | Legacy, CashAddr    |
+| Network Magic  | BTC values              | BCH-specific values |
 
 ## Directory Structure
 
@@ -186,13 +186,13 @@ info, _ := bch.Bitcoin.GetAddressInfo(addr)
 
 ## Related Files
 
-| File | Purpose |
-|------|---------|
-| `internal/infrastructure/api/btc/bch/bitcoin_cash.go` | BitcoinCash struct definition |
-| `internal/infrastructure/api/btc/btc/bitcoin.go` | Bitcoin struct (embedded by BCH) |
-| `internal/application/ports/btc/interface.go` | Bitcoiner interface |
+| File                                                  | Purpose                          |
+| ----------------------------------------------------- | -------------------------------- |
+| `internal/infrastructure/api/btc/bch/bitcoin_cash.go` | BitcoinCash struct definition    |
+| `internal/infrastructure/api/btc/btc/bitcoin.go`      | Bitcoin struct (embedded by BCH) |
+| `internal/application/ports/btc/interface.go`         | Bitcoiner interface              |
 
 ## Related Documentation
 
-- [BCH Technical Docs](../../../docs/crypto/bch/)
-- [BTC Technical Docs](../../../docs/crypto/btc/)
+- [BCH Technical Docs](../../../docs/chains/bch/)
+- [BTC Technical Docs](../../../docs/chains/btc/)

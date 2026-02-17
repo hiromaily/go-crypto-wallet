@@ -77,7 +77,7 @@ config/wallet/btc/sign1.yaml
 ./sign1 --config config/wallet/btc/sign1.yaml --coin btc sign --file tx.psbt
 ```
 
-See `docs/crypto/btc/operation_example.md` for configuration details.
+See `docs/chains/btc/operation_example.md` for configuration details.
 
 ---
 
@@ -94,6 +94,7 @@ PSBT files follow this naming pattern:
 ```
 
 **Components:**
+
 - `actionType`: Transaction type (`deposit`, `payment`, `transfer`)
 - `txID`: Database transaction ID
 - `txType`: Status (`unsigned`, `signed`)
@@ -101,6 +102,7 @@ PSBT files follow this naming pattern:
 - `timestamp`: Unix timestamp in nanoseconds
 
 **Examples:**
+
 ```
 deposit_8_unsigned_0_1534744535097796209.psbt    # Unsigned deposit (0 signatures)
 deposit_8_unsigned_1_1534744535097796210.psbt    # Partially signed (1 signature)
@@ -148,6 +150,7 @@ cd /path/to/go-crypto-wallet
 ```
 
 **Output:**
+
 ```
 Created unsigned transaction: deposit_8_unsigned_0_1534744535097796209.psbt
 Transaction ID: 8
@@ -158,6 +161,7 @@ Fee: 0.0001 BTC
 ```
 
 **File Generated:**
+
 - `data/tx/btc/deposit_8_unsigned_0_1534744535097796209.psbt`
 
 #### Step 2: Transfer PSBT to Keygen Wallet
@@ -178,6 +182,7 @@ cd /path/to/go-crypto-wallet
 ```
 
 **Output:**
+
 ```
 Signed transaction successfully
 Input file: deposit_8_unsigned_0_1534744535097796209.psbt
@@ -187,6 +192,7 @@ Transaction ready for broadcasting
 ```
 
 **File Generated:**
+
 - `data/tx/btc/deposit_8_signed_1_1534744535097796210.psbt`
 
 #### Step 4: Transfer Signed PSBT Back to Watch Wallet
@@ -204,6 +210,7 @@ cp data/tx/btc/deposit_8_signed_1_*.psbt /media/usb/
 ```
 
 **Output:**
+
 ```
 Transaction broadcast successfully
 Transaction hash: a1b2c3d4e5f6...
@@ -223,6 +230,7 @@ Status: Sent
 ```
 
 **Output:**
+
 ```
 Created unsigned transaction: payment_12_unsigned_0_1534744600000000000.psbt
 Transaction ID: 12
@@ -241,6 +249,7 @@ Multisig: 2-of-2 (requires 2 signatures)
 ```
 
 **Output:**
+
 ```
 Signed transaction successfully
 Output file: payment_12_unsigned_1_1534744600000000001.psbt
@@ -259,6 +268,7 @@ Next: Transfer to Sign wallet for second signature
 ```
 
 **Output:**
+
 ```
 Signed transaction successfully
 Output file: payment_12_signed_2_1534744600000000002.psbt
@@ -274,6 +284,7 @@ Transaction ready for broadcasting
 ```
 
 **Output:**
+
 ```
 Transaction broadcast successfully
 Transaction hash: f6e5d4c3b2a1...
@@ -293,6 +304,7 @@ Status: Sent
 ```
 
 **Output:**
+
 ```
 Created unsigned transaction: transfer_15_unsigned_0_1534744700000000000.psbt
 Transaction ID: 15
@@ -350,6 +362,7 @@ data/tx/btc/
 #### For Air-Gapped Systems
 
 1. **Use USB Drives**
+
    ```bash
    # Mount USB
    mount /dev/sdb1 /media/usb
@@ -362,6 +375,7 @@ data/tx/btc/
    ```
 
 2. **Use QR Codes** (for smaller transactions)
+
    ```bash
    # Generate QR code
    qrencode -o psbt.png < payment_12_unsigned_0_*.psbt
@@ -491,6 +505,7 @@ PSBT automatically:
 #### Error: "PSBT is not fully signed"
 
 **Symptom:**
+
 ```
 Error: PSBT is not fully signed - cannot finalize incomplete PSBT
 ```
@@ -498,6 +513,7 @@ Error: PSBT is not fully signed - cannot finalize incomplete PSBT
 **Cause:** Trying to broadcast a PSBT that doesn't have all required signatures.
 
 **Solution:**
+
 ```bash
 # Check signature status
 ./keygen sign --file payment_12_unsigned_1_*.psbt --dry-run
@@ -510,6 +526,7 @@ Error: PSBT is not fully signed - cannot finalize incomplete PSBT
 #### Error: "Invalid PSBT format"
 
 **Symptom:**
+
 ```
 Error: failed to validate PSBT: invalid PSBT format
 ```
@@ -517,6 +534,7 @@ Error: failed to validate PSBT: invalid PSBT format
 **Cause:** PSBT file is corrupted or invalid base64.
 
 **Solution:**
+
 ```bash
 # Verify file integrity
 sha256sum payment_12_unsigned_0_*.psbt
@@ -530,6 +548,7 @@ sha256sum payment_12_unsigned_0_*.psbt
 #### Error: "Transaction already broadcast"
 
 **Symptom:**
+
 ```
 Error: transaction already sent
 Transaction ID: (empty)
@@ -538,6 +557,7 @@ Transaction ID: (empty)
 **Cause:** Transaction was already broadcast to the network.
 
 **Solution:**
+
 - This is **not an error** - the transaction was successfully sent previously
 - Check blockchain explorer to confirm transaction status
 - No action needed
@@ -545,6 +565,7 @@ Transaction ID: (empty)
 #### Error: "Failed to read PSBT file"
 
 **Symptom:**
+
 ```
 Error: failed to read PSBT file: invalid file extension (expected .psbt)
 ```
@@ -552,6 +573,7 @@ Error: failed to read PSBT file: invalid file extension (expected .psbt)
 **Cause:** File doesn't have `.psbt` extension.
 
 **Solution:**
+
 ```bash
 # Ensure file has correct extension
 mv payment_12_signed_2_1534744600000000002 payment_12_signed_2_1534744600000000002.psbt
@@ -560,6 +582,7 @@ mv payment_12_signed_2_1534744600000000002 payment_12_signed_2_15347446000000000
 #### Error: "Missing private key"
 
 **Symptom:**
+
 ```
 Error: failed to sign PSBT: private key not found for address
 ```
@@ -567,6 +590,7 @@ Error: failed to sign PSBT: private key not found for address
 **Cause:** Wallet doesn't have the required private key.
 
 **Solution:**
+
 ```bash
 # Verify key exists in database
 # Keygen wallet:
@@ -591,6 +615,7 @@ bitcoin-cli decodepsbt "$(cat payment_12_unsigned_0_*.psbt)"
 ```
 
 **Output shows:**
+
 - Inputs and their UTXOs
 - Outputs and amounts
 - Fee
@@ -605,6 +630,7 @@ bitcoin-cli analyzepsbt "$(cat payment_12_unsigned_0_*.psbt)"
 ```
 
 **Output shows:**
+
 - Number of inputs
 - Required signatures per input
 - Current signature count

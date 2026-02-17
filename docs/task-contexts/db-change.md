@@ -23,7 +23,7 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Database Management | `docs/database/database.md` | Atlas/SQLC手順、スキーマ管理 |
+| Database Management | `docs/database/db-management.md` | Atlas/SQLC手順、スキーマ管理 |
 | Code Generation | `docs/guidelines/code-generation.md` | 自動生成ファイルの扱い |
 | Workflow Guidelines | `docs/guidelines/workflow.md` | 検証ステップ |
 
@@ -312,7 +312,7 @@ Phase 2: カラム削除
 User: "XRPトランザクション履歴を保存するテーブルを追加して"
 
 Agent Actions:
-1. docs/database/database.md を読み込み
+1. docs/database/db-management.md を読み込み
 2. 既存のスキーマを確認（tools/atlas/schemas/）
 3. 新しいテーブル定義をHCLに追加
 4. make atlas-fmt && make atlas-lint
@@ -330,7 +330,7 @@ Agent Actions:
 User: "addressテーブルにlabelカラムを追加して"
 
 Agent Actions:
-1. docs/database/database.md を読み込み
+1. docs/database/db-management.md を読み込み
 2. 既存のaddressテーブル定義を確認
 3. HCLにlabelカラムを追加
 4. make atlas-fmt && make atlas-lint

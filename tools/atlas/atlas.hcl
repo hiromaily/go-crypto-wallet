@@ -35,12 +35,12 @@ lint {
 
 # Local development environment - Watch schema
 # Used for migrations and schema apply (schema-scoped operations)
-env "local_watch" {
+env "local_mysql_watch" {
   url     = "mysql://root:root@127.0.0.1:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
   src     = "file://schemas/watch.hcl"
   schemas = ["watch"]
   migration {
-    dir = "file://migrations/watch"
+    dir = "file://migrations/mysql/watch"
   }
   # Dev database with schema name - prevents CREATE DATABASE in migrations
   dev = "docker://mysql/8/watch"
@@ -48,12 +48,12 @@ env "local_watch" {
 
 # Local development environment - Keygen schema
 # Used for migrations and schema apply (schema-scoped operations)
-env "local_keygen" {
+env "local_mysql_keygen" {
   url     = "mysql://root:root@127.0.0.1:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
   src     = "file://schemas/keygen.hcl"
   schemas = ["keygen"]
   migration {
-    dir = "file://migrations/keygen"
+    dir = "file://migrations/mysql/keygen"
   }
   # Dev database with schema name - prevents CREATE DATABASE in migrations
   dev = "docker://mysql/8/keygen"
@@ -61,12 +61,12 @@ env "local_keygen" {
 
 # Local development environment - Sign schema
 # Used for migrations and schema apply (schema-scoped operations)
-env "local_sign" {
+env "local_mysql_sign" {
   url     = "mysql://root:root@127.0.0.1:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
   src     = "file://schemas/sign.hcl"
   schemas = ["sign"]
   migration {
-    dir = "file://migrations/sign"
+    dir = "file://migrations/mysql/sign"
   }
   # Dev database with schema name - prevents CREATE DATABASE in migrations
   dev = "docker://mysql/8/sign"
@@ -109,7 +109,7 @@ env "local_postgresql_watch" {
   src     = "file://schemas/watch.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql_watch"
+    dir = "file://migrations/postgresql/watch"
   }
   dev = "docker://postgres/18/watch"
 }
@@ -120,7 +120,7 @@ env "local_postgresql_keygen" {
   src     = "file://schemas/keygen.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql_keygen"
+    dir = "file://migrations/postgresql/keygen"
   }
   dev = "docker://postgres/18/keygen"
 }
@@ -131,7 +131,7 @@ env "local_postgresql_sign" {
   src     = "file://schemas/sign.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql_sign"
+    dir = "file://migrations/postgresql/sign"
   }
   dev = "docker://postgres/18/sign"
 }
@@ -165,30 +165,30 @@ env "admin_postgresql_sign" {
 # Usage examples:
 #
 # Apply HCL schema directly:
-#   atlas schema apply --env local_watch
-#   atlas schema apply --env local_keygen
-#   atlas schema apply --env local_sign
+#   atlas schema apply --env local_mysql_watch
+#   atlas schema apply --env local_mysql_keygen
+#   atlas schema apply --env local_mysql_sign
 #
 # Show diff between database and HCL schema:
-#   atlas schema diff --env local_watch
-#   atlas schema diff --env local_keygen
-#   atlas schema diff --env local_sign
+#   atlas schema diff --env local_mysql_watch
+#   atlas schema diff --env local_mysql_keygen
+#   atlas schema diff --env local_mysql_sign
 #
 # Generate migration from HCL schema diff:
-#   atlas migrate diff --env local_watch --name add_new_table
-#   atlas migrate diff --env local_keygen --name update_account_key
-#   atlas migrate diff --env local_sign --name add_index
+#   atlas migrate diff --env local_mysql_watch --name add_new_table
+#   atlas migrate diff --env local_mysql_keygen --name update_account_key
+#   atlas migrate diff --env local_mysql_sign --name add_index
 #
 # Apply migrations:
-#   atlas migrate apply --env local_watch
-#   atlas migrate apply --env local_keygen
-#   atlas migrate apply --env local_sign
+#   atlas migrate apply --env local_mysql_watch
+#   atlas migrate apply --env local_mysql_keygen
+#   atlas migrate apply --env local_mysql_sign
 #
 # Check migration status:
-#   atlas migrate status --env local_watch
-#   atlas migrate status --env local_keygen
-#   atlas migrate status --env local_sign
+#   atlas migrate status --env local_mysql_watch
+#   atlas migrate status --env local_mysql_keygen
+#   atlas migrate status --env local_mysql_sign
 #
 # With destructive changes enabled:
-#   atlas schema apply --env local_watch -var destructive=true
+#   atlas schema apply --env local_mysql_watch -var destructive=true
 

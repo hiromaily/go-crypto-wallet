@@ -13,7 +13,7 @@
 // │                                                                             │
 // │ For BCH implementations, see:                                               │
 // │   - internal/infrastructure/api/btc/bch/                                    │
-// │   - docs/task-contexts/chains/bch.md                                        │
+// │   - docs/chains/bch/README.md                                               │
 // └─────────────────────────────────────────────────────────────────────────────┘
 //
 // PSBT is defined in BIP174 and provides a standard format for unsigned/partially

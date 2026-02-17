@@ -10,7 +10,7 @@ package btc
 // │                                                                             │
 // │ For BCH implementations, see:                                               │
 // │   - internal/infrastructure/api/btc/bch/                                    │
-// │   - docs/task-contexts/chains/bch.md                                        │
+// │   - docs/chains/bch/README.md                                               │
 // └─────────────────────────────────────────────────────────────────────────────┘
 
 import (

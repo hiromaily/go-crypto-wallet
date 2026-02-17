@@ -153,7 +153,7 @@ make gotest
 
 ## Related Documentation
 
-- @docs/database/database.md - Database management guide
+- @docs/database/db-management.md - Database management guide
 - @tools/sqlc/ - SQLC configuration and files
 
 ## Related Skills

@@ -374,9 +374,9 @@
 
 **Database Management Guides** (Created 2024-02-15):
 
-- [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md) - Complete workflow for multi-database schema modifications
-- [Database Quick Reference](../../../docs/database/database-quick-reference.md) - Command cheat sheet and data type mapping tables
-- [Database Management](../../../docs/database/database.md) - Overview of database tools and architecture
+- [Database Schema Changes Guide](../../../docs/database/schema-changes.md) - Complete workflow for multi-database schema modifications
+- [Database Quick Reference](../../../docs/database/quick-reference.md) - Command cheat sheet and data type mapping tables
+- [Database Management](../../../docs/database/db-management.md) - Overview of database tools and architecture
 - [Database Architecture](../../../docs/database/architecture.md) - Detailed database setup and operations
 
 ## References

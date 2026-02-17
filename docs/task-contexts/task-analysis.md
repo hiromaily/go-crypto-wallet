@@ -146,6 +146,7 @@ git log --pretty=format: --name-only -100 | grep -E '\.(go|md|yaml|toml|sql|hcl)
 
 ## Related Documents
 
-- [Task Contexts README](./task-contexts/README.md)
+- [Task Contexts README](./README.md)
 - [Task-Oriented Context Management](./task-oriented-context.md)
 - [AGENTS.md](../../AGENTS.md)
+

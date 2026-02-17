@@ -33,7 +33,7 @@ version: 1.0.0
 
 | Condition | Document | Path |
 |-----------|----------|------|
-| DB変更が必要 | Database | `docs/database/database.md` |
+| DB変更が必要 | Database | `docs/database/db-management.md` |
 | 複数チェーン対応 | Multi-Chain | `docs/guidelines/multi-chain.md` |
 | セキュリティ関連機能 | Core Principles | `docs/guidelines/core.md` |
 | コード生成が必要 | Code Generation | `docs/guidelines/code-generation.md` |

@@ -7,7 +7,7 @@ Each script automates the complete workflow from infrastructure setup to transac
 
 For detailed transaction pattern explanations, technical references, and implementation status, see:
 
-- **[E2E Transaction Patterns Guide](../../../../docs/crypto/btc/operations/e2e-transaction-patterns.md)** - Key types, signature patterns, and workflow details
+- **[E2E Transaction Patterns Guide](../../../../docs/chains/btc/operations/e2e-transaction-patterns.md)** - Key types, signature patterns, and workflow details
 
 ## Script List
 
@@ -34,6 +34,7 @@ For detailed transaction pattern explanations, technical references, and impleme
 | 11 | ✅ Framework verified | 2026-01-16 | Infrastructure and workflow verified; Tapscript Script Path pending CLI implementation |
 
 **Pattern 10 Verified Components:**
+
 - Infrastructure setup (Docker, Bitcoin Core, MySQL)
 - Wallet creation and configuration
 - Taproot address generation (bech32m encoding)
@@ -41,10 +42,12 @@ For detailed transaction pattern explanations, technical references, and impleme
 - Payment workflow
 
 **Pattern 10 Pending:**
+
 - Full MuSig2 2-round protocol (nonce generation, partial signatures, aggregation)
 - Requires completion of MuSig2 CLI commands
 
 **Pattern 11 Verified Components:**
+
 - Infrastructure setup (Docker, Bitcoin Core, MySQL)
 - Wallet creation and configuration
 - Taproot address generation (bech32m encoding)
@@ -52,6 +55,7 @@ For detailed transaction pattern explanations, technical references, and impleme
 - Payment workflow
 
 **Pattern 11 Pending:**
+
 - Script tree construction (Merkle tree)
 - Internal key tweaking with Merkle root
 - Control block construction
@@ -154,6 +158,7 @@ make btc-e2e-parallel PATTERNS=1-11 VERBOSE=true
 | `VERBOSE` | `false` | Show real-time output from all processes |
 
 **Benefits:**
+
 - Uses SQLite backend for isolated database per pattern
 - Each pattern runs independently without database conflicts
 - Significantly reduces total CI execution time
@@ -278,6 +283,7 @@ export WALLET_ADDRESS_TYPE="taproot"
 ```
 
 Required:
+
 - Uses `config/wallet/account/account_3of3.yaml` for N-of-N configuration
 - Bitcoin Core v22.0+ with descriptor-based wallet support
 - Address encoding: bech32m (`bcrt1p...` for regtest)
@@ -292,6 +298,7 @@ export WALLET_ADDRESS_TYPE="taproot"
 ```
 
 Required:
+
 - Uses `config/wallet/account/account_2of3.yaml` for 2-of-3 configuration
 - Bitcoin Core v22.0+ with Taproot/Tapscript support
 - Address encoding: bech32m (`bcrt1p...` for regtest)
@@ -392,7 +399,7 @@ See `../README.md` for a complete list of available functions.
 
 ## Related Documentation
 
-- [E2E Transaction Patterns Guide](../../../../docs/crypto/btc/operations/e2e-transaction-patterns.md) - Pattern details
-- [BTC Technical Reference](../../../../docs/crypto/btc/README.md) - Bitcoin technical reference
-- [Descriptor Examples](../../../../docs/crypto/btc/descriptor/examples.md) - Descriptor examples
-- [PSBT Developer Guide](../../../../docs/crypto/btc/psbt/developer-guide.md) - PSBT developer guide
+- [E2E Transaction Patterns Guide](../../../../docs/chains/btc/operations/e2e-transaction-patterns.md) - Pattern details
+- [BTC Technical Reference](../../../../docs/chains/btc/README.md) - Bitcoin technical reference
+- [Descriptor Examples](../../../../docs/chains/btc/descriptor/examples.md) - Descriptor examples
+- [PSBT Developer Guide](../../../../docs/chains/btc/psbt/developer-guide.md) - PSBT developer guide

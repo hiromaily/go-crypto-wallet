@@ -31,8 +31,8 @@ version: 1.0.0
 | Condition | Document | Path |
 |-----------|----------|------|
 | AGENTS.md 系の更新 | Architecture | `docs/guidelines/architecture.md` |
-| タスクコンテキスト作成 | Task-Oriented Context | `docs/task-oriented-context.md` |
-| チェーン固有ドキュメント | Chain Specific | `docs/task-contexts/chains/` |
+| タスクコンテキスト作成 | Task-Oriented Context | `docs/task-contexts/task-oriented-context.md` |
+| チェーン固有ドキュメント | Chain Specific | `docs/chains/` |
 
 ## Task-Specific Rules
 
@@ -188,7 +188,7 @@ Agent Actions:
 User: "security-audit タスク用のコンテキストファイルを作成して"
 
 Agent Actions:
-1. docs/task-oriented-context.md を読み込み（フォーマット確認）
+1. docs/task-contexts/task-oriented-context.md を読み込み（フォーマット確認）
 2. 既存のタスクコンテキストを参照
 3. security-audit.md を作成
 4. README.md のテーブルを更新
@@ -210,6 +210,6 @@ Agent Actions:
 
 ## Related Documents
 
-- [Task-Oriented Context Management](../task-oriented-context.md) - タスクコンテキストの概念
+- [Task-Oriented Context Management](./task-oriented-context.md) - タスクコンテキストの概念
 - [Task Contexts README](./README.md) - タスクコンテキスト一覧
 - [Verification Matrix](./verification.md) - ファイルタイプ別検証コマンド

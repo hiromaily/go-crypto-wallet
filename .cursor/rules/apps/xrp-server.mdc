@@ -58,4 +58,4 @@ bun run dev           # Run server in dev mode
 
 - @apps/xrpl-grpc-server/README.md - Server documentation
 - @apps/xrpl-grpc-server/docs/MIGRATION-GUIDE.md - Migration guide
-- @docs/task-contexts/chains/xrp.md - XRP chain context
+- @docs/chains/xrp/README.md - XRP chain documentation

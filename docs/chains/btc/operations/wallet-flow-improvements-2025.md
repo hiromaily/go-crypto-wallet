@@ -64,12 +64,14 @@ This document outlines improvements for the Bitcoin wallet flow, including the r
 ### 2.1 Watch Wallet (Online)
 
 **Current Role:**
+
 - Monitor addresses and UTXOs
 - Create unsigned transactions
 - Broadcast signed transactions
 - Track transaction status
 
 **Responsibilities:**
+
 - ✅ Blockchain connectivity
 - ✅ UTXO management
 - ✅ Transaction construction
@@ -77,6 +79,7 @@ This document outlines improvements for the Bitcoin wallet flow, including the r
 - ✅ Balance monitoring
 
 **Improvements Needed:**
+
 - ⚠️ Taproot address support
 - ✅ Descriptor wallet integration
 - ⚠️ PSBT (Partially Signed Bitcoin Transaction) support
@@ -85,12 +88,14 @@ This document outlines improvements for the Bitcoin wallet flow, including the r
 ### 2.2 Keygen Wallet (Offline)
 
 **Current Role:**
+
 - Generate seeds and HD keys
 - Create multisig addresses
 - First signature for multisig transactions
 - Single signature for non-multisig transactions
 
 **Responsibilities:**
+
 - ✅ Seed generation
 - ✅ HD key derivation (BIP32/BIP44)
 - ✅ Multisig address creation
@@ -98,6 +103,7 @@ This document outlines improvements for the Bitcoin wallet flow, including the r
 - ✅ Private key management (offline)
 
 **Improvements Needed:**
+
 - ⚠️ Taproot key derivation (BIP86)
 - ⚠️ MuSig2 support
 - ⚠️ PSBT handling
@@ -107,17 +113,20 @@ This document outlines improvements for the Bitcoin wallet flow, including the r
 ### 2.3 Sign Wallet (Offline)
 
 **Current Role:**
+
 - Generate authorization account keys
 - Export full public keys
 - Second and subsequent signatures for multisig
 
 **Responsibilities:**
+
 - ✅ Authorization key generation
 - ✅ Public key export
 - ✅ Additional signatures for multisig
 - ✅ Private key management (offline)
 
 **Improvements Needed:**
+
 - ⚠️ MuSig2 participation
 - ⚠️ PSBT handling
 - ⚠️ Schnorr signature support
@@ -296,6 +305,7 @@ wsh(sortedmulti(2,xpub1...,xpub2...))
 ```
 
 **Benefits:**
+
 - Smaller transaction size
 - Lower fees
 - Better privacy
@@ -329,6 +339,7 @@ wsh(sortedmulti(2,xpub1...,xpub2...))
 ```
 
 **Benefits:**
+
 - Single signature on-chain (privacy)
 - Smaller transaction size
 - Lower fees
@@ -359,6 +370,7 @@ Parallel Nonce Generation:
 ```
 
 **Benefits:**
+
 - Faster signature collection
 - Better user experience
 - Reduced waiting time
@@ -420,27 +432,27 @@ watch --coin btc create payment --multisig-type musig2 --fee 0.0001
 
 ### Medium Priority (Near Future)
 
-4. **MuSig2 Implementation**
+1. **MuSig2 Implementation**
    - Two-round signature protocol
    - Signature aggregation
    - Parallel nonce generation
 
-5. **Descriptor Wallets**
+2. **Descriptor Wallets**
    - Descriptor generation
    - Bitcoin Core integration
 
-6. **Transaction Fee Optimization**
+3. **Transaction Fee Optimization**
    - Better fee estimation
    - RBF (Replace-By-Fee) support
    - CPFP (Child-Pays-For-Parent) support
 
 ### Low Priority (Long-term)
 
-7. **Hardware Wallet Integration**
+1. **Hardware Wallet Integration**
    - Ledger/Trezor support via PSBT
    - Better security for key management
 
-8. **Advanced Script Support**
+2. **Advanced Script Support**
    - Time-locked transactions
    - Conditional payments
    - Complex multisig scenarios
@@ -504,6 +516,7 @@ watch --coin btc create payment --multisig-type musig2 --fee 0.0001
    - Documented end-to-end workflows
 
 **Complete PSBT Flow:**
+
 ```
 1. Watch Wallet → Create unsigned PSBT (0 signatures)
 2. Keygen Wallet → Add first signature (1 signature)
@@ -512,13 +525,15 @@ watch --coin btc create payment --multisig-type musig2 --fee 0.0001
 ```
 
 **Deliverables:**
-- `docs/crypto/btc/psbt/user-guide.md` - User documentation
-- `docs/crypto/btc/psbt/migration.md` - Migration guide
-- `docs/crypto/btc/psbt/developer-guide.md` - Developer documentation
+
+- `docs/chains/btc/psbt/user-guide.md` - User documentation
+- `docs/chains/btc/psbt/migration.md` - Migration guide
+- `docs/chains/btc/psbt/developer-guide.md` - Developer documentation
 - Full PSBT implementation across all wallets
 - Comprehensive test coverage
 
 **Benefits Achieved:**
+
 - ✅ Industry-standard transaction format (BIP 174)
 - ✅ Compatible with Bitcoin Core, Electrum, hardware wallets
 - ✅ Better security with structured validation

@@ -31,7 +31,7 @@ version: 1.0.0
 | Integration tests | Architecture | `ARCHITECTURE.md` |
 | E2E tests | E2E Script Rules | `.claude/rules/btc/e2e-script.md` |
 | Mock creation | Internal Guidelines | `internal/AGENTS.md` |
-| DB-related tests | Database Guidelines | `docs/database/database.md` |
+| DB-related tests | Database Guidelines | `docs/database/db-management.md` |
 
 ## Test Types
 

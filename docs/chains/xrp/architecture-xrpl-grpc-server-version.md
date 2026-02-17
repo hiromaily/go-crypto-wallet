@@ -5,8 +5,9 @@
 > **Current Approach**: The project has adopted native Go signing using the `xrpl-go` library to eliminate gRPC dependencies and simplify the architecture. This document represents a previous architectural exploration that is no longer being pursued.
 >
 > **For current XRP implementation details, see**:
+>
 > - `.kiro/specs/xrp-transaction-flow-alignment/` - Current specification
-> - `docs/crypto/xrp/` - Current XRP documentation (excluding this file)
+> - `docs/chains/xrp/` - Current XRP documentation (excluding this file)
 >
 > **This file is retained for historical reference only.**
 
@@ -275,9 +276,9 @@ proto/
 
 ## 9. Docs to add
 
-1. `docs/crypto/xrp/architecture.md` (Done)
-2. `docs/crypto/xrp/grpc-api.md` (Not yet)
-3. `docs/crypto/xrp/operations/payment.md` (Not yet)
+1. `docs/chains/xrp/architecture.md` (Done)
+2. `docs/chains/xrp/grpc-api.md` (Not yet)
+3. `docs/chains/xrp/operations/payment.md` (Not yet)
 
 ---
 

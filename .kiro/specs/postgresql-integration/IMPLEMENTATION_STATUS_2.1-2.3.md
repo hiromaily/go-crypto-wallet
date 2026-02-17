@@ -59,9 +59,9 @@ Successfully configured Atlas for PostgreSQL migrations by adding six new enviro
 **Completed**:
 
 - ✅ Created migration directories:
-  - `tools/atlas/migrations/postgresql_watch/`
-  - `tools/atlas/migrations/postgresql_keygen/`
-  - `tools/atlas/migrations/postgresql_sign/`
+  - `tools/atlas/migrations/postgresql/watch/`
+  - `tools/atlas/migrations/postgresql/keygen/`
+  - `tools/atlas/migrations/postgresql/sign/`
 - ✅ Created README.md documentation in each directory with:
   - Migration generation commands
   - Expected output format
@@ -165,9 +165,9 @@ atlas schema diff --env local_postgresql_watch  # Should show "Schemas are synce
 
 ### Created Directories
 
-- `tools/atlas/migrations/postgresql_watch/` with README.md (1.4KB)
-- `tools/atlas/migrations/postgresql_keygen/` with README.md (1.1KB)
-- `tools/atlas/migrations/postgresql_sign/` with README.md (1.1KB)
+- `tools/atlas/migrations/postgresql/watch/` with README.md (1.4KB)
+- `tools/atlas/migrations/postgresql/keygen/` with README.md (1.1KB)
+- `tools/atlas/migrations/postgresql/sign/` with README.md (1.1KB)
 
 ---
 
@@ -208,6 +208,6 @@ atlas schema diff --env local_postgresql_watch  # Should show "Schemas are synce
 
 ## Related Documentation
 
-- [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md)
-- [Database Quick Reference](../../../docs/database/database-quick-reference.md)
-- [Atlas Migration README](../../../tools/atlas/migrations/postgresql_watch/README.md)
+- [Database Schema Changes Guide](../../../docs/database/schema-changes.md)
+- [Database Quick Reference](../../../docs/database/quick-reference.md)
+- [Atlas Migration README](../../../tools/atlas/migrations/postgresql/watch/README.md)

@@ -11,7 +11,7 @@ This document tracks all references to database management documentation within 
 
 ### Primary Guides
 
-1. **[Database Schema Changes Guide](../../../docs/database/database-schema-changes.md)**
+1. **[Database Schema Changes Guide](../../../docs/database/schema-changes.md)**
    - Complete step-by-step workflow for schema modifications
    - Multi-database considerations (MySQL, SQLite, PostgreSQL)
    - Three detailed scenarios with examples
@@ -19,7 +19,7 @@ This document tracks all references to database management documentation within 
    - Troubleshooting guide
    - Best practices
 
-2. **[Database Quick Reference](../../../docs/database/database-quick-reference.md)**
+2. **[Database Quick Reference](../../../docs/database/quick-reference.md)**
    - Command cheat sheet
    - Data type mapping tables
    - Common workflows
@@ -27,7 +27,7 @@ This document tracks all references to database management documentation within 
    - Testing commands
    - Troubleshooting quick fixes
 
-3. **[Database Management](../../../docs/database/database.md)**
+3. **[Database Management](../../../docs/database/db-management.md)**
    - Overview of database tools and architecture
    - Quick workflow summary
    - Multi-database workflow
@@ -107,7 +107,7 @@ for complete schema extraction and sqlc workflow.
 
 ### Schema Change Workflow
 
-From [Database Schema Changes Guide](../../../docs/database/database-schema-changes.md):
+From [Database Schema Changes Guide](../../../docs/database/schema-changes.md):
 
 1. **Step-by-Step Workflows**:
    - Adding a new column
@@ -128,7 +128,7 @@ From [Database Schema Changes Guide](../../../docs/database/database-schema-chan
 
 ### Data Type Mappings
 
-From [Database Quick Reference](../../../docs/database/database-quick-reference.md):
+From [Database Quick Reference](../../../docs/database/quick-reference.md):
 
 | Concept | MySQL | SQLite | PostgreSQL |
 |---------|-------|--------|------------|
@@ -142,7 +142,7 @@ From [Database Quick Reference](../../../docs/database/database-quick-reference.
 
 ### Common Commands
 
-From [Database Quick Reference](../../../docs/database/database-quick-reference.md):
+From [Database Quick Reference](../../../docs/database/quick-reference.md):
 
 ```bash
 # Schema change workflow
@@ -160,7 +160,7 @@ make go-lint && make check-build && make gotest
 
 ### For Task 2.x (Atlas Migration & Docker Compose)
 
-**Reference**: [Database Quick Reference - Data Type Mapping](../../../docs/database/database-quick-reference.md#-data-type-mapping)
+**Reference**: [Database Quick Reference - Data Type Mapping](../../../docs/database/quick-reference.md#-data-type-mapping)
 
 **Use For**:
 
@@ -170,7 +170,7 @@ make go-lint && make check-build && make gotest
 
 ### For Task 4.x (Schema Extraction & Code Generation)
 
-**Reference**: [Database Schema Changes Guide - Scenario 1](../../../docs/database/database-schema-changes.md#scenario-1-adding-a-new-column)
+**Reference**: [Database Schema Changes Guide - Scenario 1](../../../docs/database/schema-changes.md#scenario-1-adding-a-new-column)
 
 **Use For**:
 
@@ -180,7 +180,7 @@ make go-lint && make check-build && make gotest
 
 ### For Task 5.x-7.x (Repository Implementations)
 
-**Reference**: [Database Schema Changes Guide - Repository Pattern](../../../docs/database/database-schema-changes.md#repository-pattern)
+**Reference**: [Database Schema Changes Guide - Repository Pattern](../../../docs/database/schema-changes.md#repository-pattern)
 
 **Use For**:
 
@@ -190,7 +190,7 @@ make go-lint && make check-build && make gotest
 
 ### For Task 11.x-14.x (Testing)
 
-**Reference**: [Database Schema Changes Guide - Testing Schema Changes](../../../docs/database/database-schema-changes.md#testing-schema-changes)
+**Reference**: [Database Schema Changes Guide - Testing Schema Changes](../../../docs/database/schema-changes.md#testing-schema-changes)
 
 **Use For**:
 

@@ -118,7 +118,7 @@ make tidy         # go mod tidy
 - [Testing](../docs/guidelines/testing.md)
 - [Workflow](../docs/guidelines/workflow.md)
 - [Architecture](../docs/guidelines/architecture.md)
-- [Database](../docs/database/database.md)
+- [Database](../docs/database/db-management.md)
 - [Code Generation](../docs/guidelines/code-generation.md)
 
 ### Other
