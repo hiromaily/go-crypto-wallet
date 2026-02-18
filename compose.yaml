@@ -78,7 +78,7 @@ services:
     profiles: ["postgres"]
     container_name: wallet-postgres
     volumes:
-      - wallet-postgres:/var/lib/postgresql
+      - wallet-postgres:/var/lib/postgresql/data
       - "./docker/postgresql/init.d:/docker-entrypoint-initdb.d"
     environment:
       POSTGRES_USER: postgres
