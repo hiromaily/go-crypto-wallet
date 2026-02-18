@@ -12,8 +12,8 @@ Rules for modifying SQL files (`*.sql`) in go-crypto-wallet.
 
 | Path                              | Description               | Editable          |
 | --------------------------------- | ------------------------- | ----------------- |
-| `tools/sqlc/queries/*.sql`        | SQLC query definitions    | ✅ Yes            |
-| `tools/sqlc/schemas/*.sql`        | SQLC schema files         | ❌ Auto-generated |
+| `tools/sqlc/queries/mysql/*.sql`        | SQLC query definitions    | ✅ Yes            |
+| `tools/sqlc/schemas/mysql/*.sql`        | SQLC schema files         | ❌ Auto-generated |
 | `tools/atlas/migrations/**/*.sql` | Atlas migration files     | ❌ Auto-generated |
 | `docker/*.sql`                    | Initial data/seed scripts | ✅ Yes            |
 
@@ -44,7 +44,7 @@ make check-build
 
 ### Location
 
-`tools/sqlc/queries/*.sql`
+`tools/sqlc/queries/mysql/*.sql`
 
 ### Query Syntax
 
@@ -80,7 +80,7 @@ INSERT INTO account_key (
 
 ### SQLC Schema Files
 
-- `tools/sqlc/schemas/*.sql`
+- `tools/sqlc/schemas/mysql/*.sql`
 
 These are extracted from database dumps. Regenerate with:
 
@@ -109,7 +109,7 @@ These are generated from HCL schemas. Use HCL files as the source of truth.
 
 ```bash
 # 1. Edit query files
-# tools/sqlc/queries/*.sql
+# tools/sqlc/queries/mysql/*.sql
 
 # 2. Validate
 make sqlc-validate

@@ -19,6 +19,7 @@ install-mac-tools:
 		ariga/tap/atlas \
 		protobuf \
 		buf \
+		sqlc \
 		sqlfluff \
 		shellcheck \
 		clang-format

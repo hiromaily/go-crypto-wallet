@@ -18,7 +18,7 @@ Workflow for database schema and migration changes.
 | Path                        | Description                              |
 | --------------------------- | ---------------------------------------- |
 | `tools/atlas/schemas/*.hcl` | HCL schema definitions (source of truth) |
-| `tools/sqlc/queries/*.sql`  | SQLC query definitions                   |
+| `tools/sqlc/queries/mysql/*.sql`  | SQLC query definitions                   |
 
 ## Workflow
 

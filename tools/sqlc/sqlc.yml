@@ -1,8 +1,8 @@
 version: "2"
 sql:
   - engine: "mysql"
-    queries: "./queries/*.sql"
-    schema: "./schemas/*.sql"
+    queries: "./queries/mysql/*.sql"
+    schema: "./schemas/mysql/*.sql"
     gen:
       go:
         package: "sqlcgen"

@@ -1,0 +1,9 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "./queries/postgresql/*.sql"
+    schema: "./schemas/postgresql/*.sql"
+    gen:
+      go:
+        package: "sqlcgen"
+        out: "../../internal/infrastructure/database/postgresql/sqlcgen"

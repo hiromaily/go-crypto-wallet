@@ -70,7 +70,7 @@ type Database struct {
   - Output: `internal/infrastructure/database/mysql/sqlcgen`
 - `sqlc_sqlite.yml`: SQLite configuration
   - Engine: `sqlite`
-  - Schema: `./schemas_sqlite/*.sql`
+  - Schema: `./schemas/sqlite/*.sql`
   - Output: `internal/infrastructure/database/sqlite/sqlcgen`
 - Shared queries: `./queries/*.sql` (used by both engines)
 
@@ -81,7 +81,7 @@ type Database struct {
 - Same query files reused across all databases
 - Generated code in engine-specific directories
 
-**Gap**: No `sqlc_postgresql.yml` or `schemas_postgresql/` directory
+**Gap**: No `sqlc_postgresql.yml` or `schemas/postgresql/` directory
 
 ---
 
@@ -92,7 +92,7 @@ type Database struct {
 - MySQL schemas: `tools/sqlc/schemas/*.sql`
   - Auto-generated from Atlas migrations via `make extract-sqlc-schema-all`
   - Contains MySQL-specific syntax (AUTO_INCREMENT, ENGINE=InnoDB, enum types)
-- SQLite schemas: `tools/sqlc/schemas_sqlite/*.sql`
+- SQLite schemas: `tools/sqlc/schemas/sqlite/*.sql`
   - Manually created SQLite-compatible versions
   - Different data types (INTEGER PRIMARY KEY instead of AUTO_INCREMENT)
 
@@ -265,7 +265,7 @@ x-migration-base: &migration-base
 
 #### R2: PostgreSQL Schema Generation
 
-- **Needs**: Data type conversion script/tool, PostgreSQL schemas in `schemas_postgresql/`
+- **Needs**: Data type conversion script/tool, PostgreSQL schemas in `schemas/postgresql/`
 - **Complexity**: Moderate - requires careful type mapping
 - **Unknowns**:
   - Research Needed: Enum handling strategy (TEXT CHECK vs PostgreSQL ENUM)
@@ -345,7 +345,7 @@ x-migration-base: &migration-base
 
 3. **SQLC Configuration** (`tools/sqlc/`):
    - Create `sqlc_postgresql.yml` with engine: postgresql
-   - Create `schemas_postgresql/` directory with converted schemas
+   - Create `schemas/postgresql/` directory with converted schemas
    - Generate to `internal/infrastructure/database/postgresql/sqlcgen`
 
 4. **Repository Implementations** (new packages):

@@ -49,7 +49,12 @@
       "Bash(mockery)",
       "Bash(chmod:*)",
       "Bash(atlas version:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git stash:*)",
+      "Bash(gh api:*)",
+      "Bash(brew list:*)",
+      "Bash(brew:*)",
+      "Bash(gh auth:*)"
     ]
   },
   "hooks": {

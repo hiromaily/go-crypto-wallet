@@ -28,7 +28,7 @@ make extract-sqlc-schema-all
 # 6. Regenerate code
 make sqlc        # MySQL
 make sqlc-sqlite # SQLite
-# make sqlc-postgresql # PostgreSQL (coming soon)
+make sqlc-postgresql # PostgreSQL
 
 # 7. Verify
 make go-lint && make check-build && make gotest
@@ -38,7 +38,7 @@ make go-lint && make check-build && make gotest
 
 ```bash
 # 1. Add query to SQL file
-vim tools/sqlc/queries/address.sql
+vim tools/sqlc/queries/mysql/address.sql
 
 # 2. Regenerate code
 make sqlc && make sqlc-sqlite
@@ -75,18 +75,22 @@ tools/atlas/
     └── sign/*.sql
 
 tools/sqlc/
-├── schemas/              # 🔄 EXTRACTED - From MySQL dump
-│   ├── 01_watch.sql
-│   ├── 02_keygen.sql
-│   └── 03_sign.sql
-├── schemas_sqlite/       # ✏️  CONVERTED - Manual type mapping
-│   └── *.sql
-├── schemas_postgresql/   # ✏️  CONVERTED - Manual type mapping (coming soon)
-│   └── *.sql
-└── queries/              # ✏️  EDIT HERE - Your SQL queries
-    ├── address.sql
-    ├── btc_tx.sql
-    └── *.sql
+├── queries/
+│   ├── mysql/            # ✏️  EDIT HERE - MySQL queries (? placeholders)
+│   │   ├── address.sql
+│   │   ├── btc_tx.sql
+│   │   └── *.sql
+│   └── postgresql/       # ✏️  EDIT HERE - PostgreSQL queries ($1,$2 placeholders)
+│       └── *.sql
+├── schemas/
+│   ├── mysql/            # 🔄 EXTRACTED - From MySQL dump
+│   │   ├── 01_watch.sql
+│   │   ├── 02_keygen.sql
+│   │   └── 03_sign.sql
+│   ├── postgresql/       # 🔄 EXTRACTED - From PostgreSQL dump
+│   │   └── *.sql
+│   └── sqlite/           # ✏️  CONVERTED - Manual type mapping
+│       └── *.sql
 
 internal/infrastructure/database/
 ├── mysql/sqlcgen/        # 🔒 AUTO-GENERATED
@@ -121,8 +125,8 @@ internal/infrastructure/database/
 |---------|-------------|
 | `make sqlc` | Generate MySQL SQLC code |
 | `make sqlc-sqlite` | Generate SQLite SQLC code |
-| `make sqlc-postgresql` | Generate PostgreSQL SQLC code *(coming soon)* |
-| `make sqlc-all` | Generate code for all databases *(coming soon)* |
+| `make sqlc-postgresql` | Generate PostgreSQL SQLC code |
+| `make sqlc-all` | Generate code for all databases |
 
 ### Schema Extraction
 
@@ -295,7 +299,7 @@ make atlas-migrate-docker
 
 ```bash
 # Check schema syntax
-docker compose exec wallet-mysql mysql -uroot -proot watch < tools/sqlc/schemas/01_watch.sql
+docker compose exec wallet-mysql mysql -uroot -proot watch < tools/sqlc/schemas/mysql/01_watch.sql
 
 # Run sqlc with verbose output
 cd tools/sqlc && sqlc generate --experimental
@@ -317,7 +321,7 @@ make check-build
 
 ```bash
 # Compare schemas
-diff -u tools/sqlc/schemas/01_watch.sql tools/sqlc/schemas_sqlite/01_watch.sql
+diff -u tools/sqlc/schemas/mysql/01_watch.sql tools/sqlc/schemas/sqlite/01_watch.sql
 
 # Verify data type conversions match the mapping table above
 ```

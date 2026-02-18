@@ -66,6 +66,32 @@ regenerate-all-from-atlas:
 	@echo ""
 	@echo "✓ All done! Schema regeneration complete."
 
+# Regenerate everything for PostgreSQL after Atlas HCL schema changes
+# Same workflow as MySQL but for PostgreSQL
+#
+# Usage: After modifying tools/atlas/schemas/*.hcl, run:
+#   make regenerate-all-from-atlas-postgresql
+.PHONY: regenerate-all-from-atlas-postgresql
+regenerate-all-from-atlas-postgresql:
+	@echo "=== Step 1/5: Regenerating Atlas PostgreSQL migrations ==="
+	@$(MAKE) atlas-dev-reset DB_DIALECT=postgresql
+	@echo ""
+	@echo "=== Step 2/5: Restarting Docker PostgreSQL ==="
+	docker compose down -v
+	docker compose --profile postgres up -d
+	@echo ""
+	@echo "=== Step 3/5: Waiting for DB and migrations to be ready ==="
+	docker compose wait wallet-postgres-migrate-watch wallet-postgres-migrate-keygen wallet-postgres-migrate-sign
+	@echo "✓ Database is ready and all migrations completed"
+	@echo ""
+	@echo "=== Step 4/5: Extracting sqlc schemas from DB ==="
+	@$(MAKE) extract-sqlc-schema-postgresql-all
+	@echo ""
+	@echo "=== Step 5/5: Generating sqlc code ==="
+	@$(MAKE) sqlc-postgresql
+	@echo ""
+	@echo "✓ All done! PostgreSQL schema regeneration complete."
+
 
 ###############################################################################
 # sqlfluff Linting
@@ -83,7 +109,7 @@ regenerate-all-from-atlas:
 .PHONY: sqlfluff-format
 sqlfluff-format:
 	@echo "Formatting SQL files..."
-	@sqlfluff format tools/sqlc/queries/*.sql
+	@sqlfluff format tools/sqlc/queries/mysql/*.sql
 	@echo "✓ SQL files formatted"
 
 # Lint SQL files
@@ -91,7 +117,7 @@ sqlfluff-format:
 .PHONY: sqlfluff-lint
 sqlfluff-lint:
 	@echo "Linting SQL files..."
-	@sqlfluff lint tools/sqlc/queries/*.sql || true
+	@sqlfluff lint tools/sqlc/queries/mysql/*.sql || true
 	@echo "Note: PRS (parsing) errors for ? placeholders are acceptable for sqlc"
 
 # Fix SQL files (format and auto-fix issues)
@@ -99,5 +125,5 @@ sqlfluff-lint:
 .PHONY: sqlfluff-fix
 sqlfluff-fix:
 	@echo "Formatting and fixing SQL files..."
-	@sqlfluff fix tools/sqlc/queries/*.sql
+	@sqlfluff fix tools/sqlc/queries/mysql/*.sql
 	@echo "✓ SQL files formatted and fixed"

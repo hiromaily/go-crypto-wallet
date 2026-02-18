@@ -5,61 +5,93 @@
 -- 3. Implement application-level encryption before database persistence
 -- 4. Restrict database access with role-based permissions
 -- 5. Enable audit logging for sensitive table access
--- 
+--
 -- The offline wallet architecture (keygen/sign separated from watch) provides
 -- air-gapped security, but database-level protections remain critical.
 
 
 -- Create "auth_account_key" table
 CREATE TABLE "auth_account_key" (
-  "id" smallserial NOT NULL COMMENT "ID",
-  "coin" text NOT NULL CHECK ("coin" IN ('btc','bch')) COMMENT "coin type code",
-  "key_type" varchar(20) NOT NULL DEFAULT "bip44" COMMENT "key type (bip44, bip49, bip84, bip86, musig2)",
-  "auth_account" varchar(20) NOT NULL COMMENT "auth type",
-  "account" varchar(20) NOT NULL DEFAULT "deposit" COMMENT "multisig account type (deposit, payment, stored)",
-  "p2pkh_address" varchar(255) NOT NULL COMMENT "address as standard pubkey script that Pays To PubKey Hash (P2PKH)",
-  "p2sh_segwit_address" varchar(255) NULL COMMENT "p2sh-segwit address",
-  "bech32_address" varchar(255) NULL COMMENT "bech32 address",
-  "taproot_address" varchar(255) NULL COMMENT "taproot address (BIP86)",
-  "full_public_key" varchar(255) NOT NULL COMMENT "full public key",
-  "multisig_address" varchar(255) NOT NULL DEFAULT "" COMMENT "multisig address",
-  "redeem_script" varchar(255) NOT NULL DEFAULT "" COMMENT "redeedScript after multisig address generated",
-  "wallet_import_format" varchar(255) NOT NULL COMMENT "WIF",
-  "account_extended_privkey" varchar(255) NULL COMMENT "Account-level extended private key (xpriv) for BIP32 derivation",
-  "idx" bigint NOT NULL COMMENT "index for hd wallet",
-  "addr_status" smallint NOT NULL DEFAULT false COMMENT "progress status for address generating",
-  "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
-  PRIMARY KEY ("id"),
-  UNIQUE INDEX "idex_coin_auth_account_account" ("coin", "auth_account", "account"),
-  INDEX "idx_auth_account" ("auth_account"),
-  UNIQUE INDEX "idx_bech32_address" ("bech32_address"),
-  INDEX "idx_coin" ("coin"),
-  INDEX "idx_key_type" ("key_type"),
-  UNIQUE INDEX "idx_p2pkh_address" ("p2pkh_address"),
-  UNIQUE INDEX "idx_p2sh_segwit_address" ("p2sh_segwit_address"),
-  UNIQUE INDEX "idx_wallet_import_format" ("wallet_import_format")
-) COMMENT "table for keys for auth account";
+  "id" smallserial NOT NULL,
+  "coin" text NOT NULL CHECK ("coin" IN ('btc','bch')),
+  "key_type" varchar(20) NOT NULL DEFAULT 'bip44',
+  "auth_account" varchar(20) NOT NULL,
+  "account" varchar(20) NOT NULL DEFAULT 'deposit',
+  "p2pkh_address" varchar(255) NOT NULL,
+  "p2sh_segwit_address" varchar(255) NULL,
+  "bech32_address" varchar(255) NULL,
+  "taproot_address" varchar(255) NULL,
+  "full_public_key" varchar(255) NOT NULL,
+  "multisig_address" varchar(255) NOT NULL DEFAULT '',
+  "redeem_script" varchar(255) NOT NULL DEFAULT '',
+  "wallet_import_format" varchar(255) NOT NULL,
+  "account_extended_privkey" varchar(255) NULL,
+  "idx" bigint NOT NULL,
+  "addr_status" smallint NOT NULL DEFAULT 0,
+  "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX "idx_auth_account_key_coin_auth_account_account" ON "auth_account_key" ("coin", "auth_account", "account");
+CREATE INDEX "idx_auth_account_key_auth_account" ON "auth_account_key" ("auth_account");
+CREATE UNIQUE INDEX "idx_auth_account_key_bech32_address" ON "auth_account_key" ("bech32_address");
+CREATE INDEX "idx_auth_account_key_coin" ON "auth_account_key" ("coin");
+CREATE INDEX "idx_auth_account_key_key_type" ON "auth_account_key" ("key_type");
+CREATE UNIQUE INDEX "idx_auth_account_key_p2pkh_address" ON "auth_account_key" ("p2pkh_address");
+CREATE UNIQUE INDEX "idx_auth_account_key_p2sh_segwit_address" ON "auth_account_key" ("p2sh_segwit_address");
+CREATE UNIQUE INDEX "idx_auth_account_key_wallet_import_format" ON "auth_account_key" ("wallet_import_format");
 -- Create "musig2_nonces" table
 CREATE TABLE "musig2_nonces" (
-  "id" bigserial NOT NULL COMMENT "ID",
-  "signer_id" varchar(255) NOT NULL COMMENT "Signer identifier",
-  "transaction_id" varchar(255) NOT NULL COMMENT "Transaction identifier",
-  "public_nonce" binary(66) NOT NULL COMMENT "Public nonce (66 bytes: two 33-byte compressed EC points R1||R2)",
-  "is_used" boolean NOT NULL DEFAULT false COMMENT "true: nonce has been used in signing",
-  "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT "creation date",
-  "used_at" timestamp NULL COMMENT "date when nonce was marked as used",
-  PRIMARY KEY ("id"),
-  INDEX "idx_created_at" ("created_at"),
-  INDEX "idx_is_used" ("is_used"),
-  UNIQUE INDEX "idx_signer_transaction" ("signer_id", "transaction_id") COMMENT "Prevent duplicate nonces per signer-tx pair (CRITICAL for security)",
-  INDEX "idx_transaction_id" ("transaction_id")
-) COMMENT "MuSig2 nonce commitments for secure storage";
+  "id" bigserial NOT NULL,
+  "signer_id" varchar(255) NOT NULL,
+  "transaction_id" varchar(255) NOT NULL,
+  "public_nonce" bytea NOT NULL,
+  "is_used" boolean NOT NULL DEFAULT false,
+  "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  "used_at" timestamp NULL,
+  PRIMARY KEY ("id")
+);
+CREATE INDEX "idx_musig2_nonces_created_at" ON "musig2_nonces" ("created_at");
+CREATE INDEX "idx_musig2_nonces_is_used" ON "musig2_nonces" ("is_used");
+CREATE UNIQUE INDEX "idx_musig2_nonces_signer_transaction" ON "musig2_nonces" ("signer_id", "transaction_id");
+CREATE INDEX "idx_musig2_nonces_transaction_id" ON "musig2_nonces" ("transaction_id");
 -- Create "seed" table
 CREATE TABLE "seed" (
-  "id" smallserial NOT NULL COMMENT "ID",
-  "coin" text NOT NULL CHECK ("coin" IN ('btc','bch')) COMMENT "coin type code",
-  "seed" varchar(255) NOT NULL COMMENT "seed",
-  "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
-  PRIMARY KEY ("id"),
-  INDEX "idx_coin" ("coin")
-) COMMENT "table for seed";
+  "id" smallserial NOT NULL,
+  "coin" text NOT NULL CHECK ("coin" IN ('btc','bch')),
+  "seed" varchar(255) NOT NULL,
+  "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY ("id")
+);
+CREATE INDEX "idx_seed_coin" ON "seed" ("coin");
+-- Comments
+COMMENT ON TABLE "auth_account_key" IS 'table for keys for auth account';
+COMMENT ON COLUMN "auth_account_key"."id" IS 'ID';
+COMMENT ON COLUMN "auth_account_key"."coin" IS 'coin type code';
+COMMENT ON COLUMN "auth_account_key"."key_type" IS 'key type (bip44, bip49, bip84, bip86, musig2)';
+COMMENT ON COLUMN "auth_account_key"."auth_account" IS 'auth type';
+COMMENT ON COLUMN "auth_account_key"."account" IS 'multisig account type (deposit, payment, stored)';
+COMMENT ON COLUMN "auth_account_key"."p2pkh_address" IS 'address as standard pubkey script that Pays To PubKey Hash (P2PKH)';
+COMMENT ON COLUMN "auth_account_key"."p2sh_segwit_address" IS 'p2sh-segwit address';
+COMMENT ON COLUMN "auth_account_key"."bech32_address" IS 'bech32 address';
+COMMENT ON COLUMN "auth_account_key"."taproot_address" IS 'taproot address (BIP86)';
+COMMENT ON COLUMN "auth_account_key"."full_public_key" IS 'full public key';
+COMMENT ON COLUMN "auth_account_key"."multisig_address" IS 'multisig address';
+COMMENT ON COLUMN "auth_account_key"."redeem_script" IS 'redeedScript after multisig address generated';
+COMMENT ON COLUMN "auth_account_key"."wallet_import_format" IS 'WIF';
+COMMENT ON COLUMN "auth_account_key"."account_extended_privkey" IS 'Account-level extended private key (xpriv) for BIP32 derivation';
+COMMENT ON COLUMN "auth_account_key"."idx" IS 'index for hd wallet';
+COMMENT ON COLUMN "auth_account_key"."addr_status" IS 'progress status for address generating';
+COMMENT ON COLUMN "auth_account_key"."updated_at" IS 'updated date';
+COMMENT ON TABLE "musig2_nonces" IS 'MuSig2 nonce commitments for secure storage';
+COMMENT ON COLUMN "musig2_nonces"."id" IS 'ID';
+COMMENT ON COLUMN "musig2_nonces"."signer_id" IS 'Signer identifier';
+COMMENT ON COLUMN "musig2_nonces"."transaction_id" IS 'Transaction identifier';
+COMMENT ON COLUMN "musig2_nonces"."public_nonce" IS 'Public nonce (66 bytes: two 33-byte compressed EC points R1||R2)';
+COMMENT ON COLUMN "musig2_nonces"."is_used" IS 'true: nonce has been used in signing';
+COMMENT ON COLUMN "musig2_nonces"."created_at" IS 'creation date';
+COMMENT ON COLUMN "musig2_nonces"."used_at" IS 'date when nonce was marked as used';
+COMMENT ON TABLE "seed" IS 'table for seed';
+COMMENT ON COLUMN "seed"."id" IS 'ID';
+COMMENT ON COLUMN "seed"."coin" IS 'coin type code';
+COMMENT ON COLUMN "seed"."seed" IS 'seed';
+COMMENT ON COLUMN "seed"."updated_at" IS 'updated date';
