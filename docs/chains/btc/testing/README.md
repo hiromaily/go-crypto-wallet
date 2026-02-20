@@ -16,6 +16,7 @@ This directory contains test procedures and verification documentation.
 ## Test Scripts
 
 E2E test scripts are located in:
+
 - `scripts/operation/btc/e2e/` - Bitcoin E2E test scripts
 
 ## Running Tests

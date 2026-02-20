@@ -127,24 +127,24 @@ In `go-crypto-wallet`, `key_type` is **automatically derived** from `address_typ
 ```go
 // internal/domain/address/types.go
 func (a AddrType) ToKeyType() (key.KeyType, error) {
-	switch a {
-	case AddrTypeLegacy:
-		return key.KeyTypeBIP44, nil
-	case AddrTypeP2shSegwit:
-		return key.KeyTypeBIP49, nil
-	case AddrTypeBech32:
-		return key.KeyTypeBIP84, nil
-	case AddrTypeTaproot:
-		return key.KeyTypeBIP86, nil
-	case AddrTypeBCHCashAddr:
-		// BCH uses BIP44 derivation path (same as legacy BTC)
-		return key.KeyTypeBIP44, nil
-	case AddrTypeETH:
-		// Ethereum uses BIP44 derivation path
-		return key.KeyTypeBIP44, nil
-	default:
-		return "", fmt.Errorf("unsupported address type for key derivation: %s", a)
-	}
+ switch a {
+ case AddrTypeLegacy:
+  return key.KeyTypeBIP44, nil
+ case AddrTypeP2shSegwit:
+  return key.KeyTypeBIP49, nil
+ case AddrTypeBech32:
+  return key.KeyTypeBIP84, nil
+ case AddrTypeTaproot:
+  return key.KeyTypeBIP86, nil
+ case AddrTypeBCHCashAddr:
+  // BCH uses BIP44 derivation path (same as legacy BTC)
+  return key.KeyTypeBIP44, nil
+ case AddrTypeETH:
+  // Ethereum uses BIP44 derivation path
+  return key.KeyTypeBIP44, nil
+ default:
+  return "", fmt.Errorf("unsupported address type for key derivation: %s", a)
+ }
 }
 ```
 
@@ -163,16 +163,19 @@ address_type: "taproot"  # Automatically uses BIP86 (key_type)
 ### Mistake 1: Confusing "bech32m" with "taproot"
 
 **❌ WRONG:**
+
 ```yaml
 address_type: "bech32m"  # This will fail - bech32m is a format, not a type
 ```
 
 **✅ CORRECT:**
+
 ```yaml
 address_type: "taproot"  # Taproot uses bech32m format automatically
 ```
 
 **Explanation:**
+
 - `"bech32m"` is an **encoding format** (how addresses are displayed)
 - `"taproot"` is an **address type** (the script structure)
 - Taproot addresses automatically use bech32m encoding
@@ -181,16 +184,19 @@ address_type: "taproot"  # Taproot uses bech32m format automatically
 ### Mistake 2: Using "bech32" for Taproot
 
 **❌ WRONG:**
+
 ```yaml
 address_type: "bech32"  # This creates P2WPKH addresses (bc1q...), NOT Taproot!
 ```
 
 **✅ CORRECT:**
+
 ```yaml
 address_type: "taproot"  # This creates P2TR addresses (bc1p...)
 ```
 
 **Explanation:**
+
 - `"bech32"` refers to **Native SegWit** (P2WPKH/P2WSH) addresses
 - Native SegWit uses the original **bech32** encoding
 - Taproot uses the improved **bech32m** encoding

@@ -58,16 +58,19 @@ go tool cover -html=coverage.out
 **Purpose:** Validate Taproot address validation logic without external dependencies.
 
 **Key Tests:**
+
 - `TestValidateWalletKey_TaprootSupport` - Verifies Taproot addresses are properly validated
 - `TestValidateWalletKey_BackwardCompatibility` - Ensures legacy address types still work
 
 **Coverage:**
+
 - Taproot-only wallet keys
 - Mixed address format wallet keys (legacy + Taproot)
 - Mainnet and testnet Taproot addresses
 - Address format validation (bc1p/tb1p prefix, length, character set)
 
 **Run:**
+
 ```bash
 go test -v ./internal/domain/key/ -run "TestValidateWalletKey"
 ```
@@ -77,23 +80,27 @@ go test -v ./internal/domain/key/ -run "TestValidateWalletKey"
 **Location:** `internal/infrastructure/wallet/key/`
 
 **Test Files:**
+
 - `bip86_generator_test.go` - BIP86 key generator unit tests
 - `bip86_integration_test.go` - BIP86 integration tests
 
 **Key Tests:**
 
 #### BIP86 Generator Tests
+
 - `TestBIP86Generator` - Basic BIP86 key generation
 - `TestBIP86GeneratorConsistency` - Deterministic key generation
 - `TestBIP86vsHDKeyEquivalence` - Compatibility with existing HDKey implementation
 
 #### BIP86 Integration Tests
+
 - `TestBIP86IntegrationRealWalletScenario` - Real-world wallet operation scenarios
 - `TestBIP86IntegrationKeyConsistency` - Wallet recovery consistency
 - `TestBIP86IntegrationMultipleAccounts` - Multi-account wallet support
 - `TestBIP86IntegrationAddressValidation` - Network-specific address validation
 
 **Coverage:**
+
 - BIP86 derivation paths (`m/86'/0'/account'/0/index`)
 - Taproot address generation for all account types (Client, Deposit, Payment, Stored)
 - Mainnet, Testnet3, and Signet network support
@@ -102,6 +109,7 @@ go test -v ./internal/domain/key/ -run "TestValidateWalletKey"
 - Schnorr public key derivation
 
 **Run:**
+
 ```bash
 go test -v ./internal/infrastructure/wallet/key/ -run "BIP86"
 ```
@@ -111,20 +119,24 @@ go test -v ./internal/infrastructure/wallet/key/ -run "BIP86"
 **Location:** `internal/application/usecase/*/`
 
 **Test Files:**
+
 - `internal/application/usecase/watch/shared/import_address_test.go`
 - `internal/application/usecase/keygen/shared/generate_seed_test.go`
 - `internal/application/usecase/sign/shared/store_seed_test.go`
 
 **Key Tests:**
+
 - Constructor tests for use cases
 - Interface compliance verification
 
 **Note:** Full integration tests for use cases require:
+
 - Database setup (MySQL)
 - Test fixtures for address files
 - Bitcoin Core RPC connection
 
 **Run:**
+
 ```bash
 go test -v ./internal/application/usecase/...
 ```
@@ -132,23 +144,27 @@ go test -v ./internal/application/usecase/...
 ## Test Scenarios Covered
 
 ### Taproot Address Generation
+
 - ✅ Generate Taproot addresses from BIP86 derivation paths
 - ✅ Support all network types (Mainnet, Testnet, Signet)
 - ✅ Generate unique addresses across multiple accounts
 - ✅ Deterministic key generation for wallet recovery
 
 ### Taproot Address Validation
+
 - ✅ Validate Taproot address format (bc1p/tb1p prefix)
 - ✅ Validate address length (62 characters)
 - ✅ Validate bech32m character set
 - ✅ Support Taproot-only and mixed address format wallet keys
 
 ### Taproot Transaction Support
+
 - ✅ Transaction creation with Taproot outputs (via Bitcoin Core RPC)
 - ✅ Schnorr signature generation (via Bitcoin Core RPC)
 - ✅ Multisig Taproot transaction signing
 
 ### Backward Compatibility
+
 - ✅ Legacy address types (P2PKH, P2SH-SegWit, Bech32) continue to work
 - ✅ Mixed wallet keys with multiple address formats
 
@@ -157,6 +173,7 @@ go test -v ./internal/application/usecase/...
 ### Prerequisites
 
 Integration tests require:
+
 1. **Bitcoin Core v22.0+** (for Taproot/Schnorr support)
 2. **MySQL Database** (for address/transaction storage)
 3. **Configuration Files** with Taproot settings
@@ -266,11 +283,13 @@ SIGN_CONF=./config/wallet/btc/sign1.yaml
 ## Known Limitations
 
 ### Integration Tests
+
 - **Database Required:** Full use case tests require MySQL database setup
 - **Bitcoin Core Required:** Transaction signing tests require Bitcoin Core v22.0+
 - **Network Access:** Some tests require testnet/mainnet connectivity
 
 ### Manual Testing
+
 - Testnet/Mainnet transaction broadcast requires real network connectivity
 - Multisig scenarios require multiple wallet instances
 
@@ -290,6 +309,7 @@ SIGN_CONF=./config/wallet/btc/sign1.yaml
 ### Bitcoin Core Version
 
 Verify Bitcoin Core version supports Taproot:
+
 ```bash
 bitcoin-cli --version
 # Should be v22.0 or higher
@@ -298,6 +318,7 @@ bitcoin-cli --version
 ### Address Validation
 
 Verify Taproot address format:
+
 ```bash
 # Mainnet: bc1p... (62 characters)
 # Testnet/Signet: tb1p... (62 characters)
@@ -306,11 +327,13 @@ Verify Taproot address format:
 ## Future Test Enhancements
 
 ### Phase 1h (Documentation)
+
 - User guide for Taproot usage
 - API reference documentation
 - Migration guide from legacy addresses
 
 ### Potential Additions
+
 - **Performance Tests:** Benchmark Schnorr signature generation
 - **Stress Tests:** Large transaction batch signing
 - **Fuzz Tests:** Input validation edge cases
@@ -327,6 +350,7 @@ Verify Taproot address format:
 ## Contributing
 
 When adding new Taproot functionality:
+
 1. Add domain layer tests for business logic validation
 2. Add infrastructure tests for implementation details
 3. Update integration tests for end-to-end scenarios

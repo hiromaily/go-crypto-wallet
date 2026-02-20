@@ -792,6 +792,7 @@ Key Derivation: m/44'/1'/account'/change/index (testnet/regtest)
 ```
 
 **Implementation Status:**
+
 - ✅ Infrastructure and wallet setup
 - ✅ HD key generation and fullpubkey export/import
 - ✅ 3-of-3 multisig address creation

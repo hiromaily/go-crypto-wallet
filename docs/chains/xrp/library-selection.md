@@ -28,6 +28,7 @@ Sign Transaction
 ```
 
 **Problems:**
+
 1. ❌ **Network dependency for signing**: gRPC server must be running
 2. ❌ **Offline signing impossible**: Cannot sign on air-gapped keygen/sign wallets
 3. ❌ **JavaScript dependency**: ripple-lib requires Node.js runtime

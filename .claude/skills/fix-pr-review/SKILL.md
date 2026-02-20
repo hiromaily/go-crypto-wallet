@@ -16,6 +16,7 @@ Please revise the reviews at https://github.com/{owner}/{repo}/pull/{pr_number}#
 ## Input Formats
 
 User may provide either:
+
 - **PR number**: `563`, `#563`
 - **Full review URL**: `https://github.com/{owner}/{repo}/pull/{pr_number}#pullrequestreview-{review_id}`
 

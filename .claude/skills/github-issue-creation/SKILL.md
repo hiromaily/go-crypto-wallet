@@ -17,6 +17,7 @@ Create issues with proper classification. **Labels determine which Skills are us
 ### Required Labels
 
 Every issue must have:
+
 1. **One Type label** (`bug`, `enhancement`, `refactoring`, `documentation`, `security`, `technical-debt`, `test`)
 2. **One Language OR Scope label** (`lang:*` or `scope:*`)
 
@@ -30,6 +31,7 @@ Every issue must have:
 ### 1. Classify Task
 
 From user request, determine:
+
 - Type (bug, enhancement, refactoring, documentation, security, technical-debt, test)
 - Language OR Scope
 - Test scope (if applicable)

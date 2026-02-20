@@ -253,7 +253,7 @@ packages:
       YourInterface:
 ```
 
-3. Run `make mockery`
+1. Run `make mockery`
 
 ### Moving Mocks Directories
 

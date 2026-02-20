@@ -29,6 +29,7 @@ This is a cryptocurrency wallet implementation supporting BTC, BCH, ETH, XRP, an
 See [docs/guidelines/security.md](../docs/guidelines/security.md) for full details.
 
 Key rules:
+
 - **NEVER** log private keys or sensitive information
 - Always validate inputs at boundaries
 - Consider offline wallet implications (keygen, sign)
@@ -49,6 +50,7 @@ See [docs/guidelines/workflow.md](../docs/guidelines/workflow.md) for Git operat
 ## Auto-Generated Files
 
 **DO NOT EDIT** files containing `DO NOT EDIT` comments:
+
 - `internal/infrastructure/database/sqlc/*.go`
 - `internal/infrastructure/api/xrp/xrp/*.pb.go`
 - `internal/infrastructure/contract/token-abi.go`

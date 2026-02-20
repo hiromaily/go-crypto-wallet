@@ -36,6 +36,7 @@ Refer to @docs/guidelines/security.md for full security requirements.
 ## Verification
 
 Before committing security-related changes:
+
 ```bash
 make go-check-vuln
 make go-lint

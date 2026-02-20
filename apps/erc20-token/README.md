@@ -11,7 +11,7 @@ erc20 token `HYT`
 geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal --unlock 0xXXXXXXXXXXXXXXXX --password pw --allow-insecure-unlock
 ```
 
-3. deploy contract
+1. deploy contract
 
 - token manager address is required in `migrations/2_all_contracts.js` before running
 
@@ -19,7 +19,7 @@ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,p
 truffle migrate --network deploy-dev2 --reset
 ```
 
-4. mint token to address
+1. mint token to address
 
 - environment variable `NODE_URL`, `CONTRACT_ADDRESS`, `OWNER_ADDRESS` are required. see `.envrc`.
 

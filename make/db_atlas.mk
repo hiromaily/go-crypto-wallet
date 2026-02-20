@@ -225,3 +225,8 @@ atlas-migrate-hash-all:
 # 	done
 # 	@echo "✓ Production migration history initialized"
 # 	@echo "You can now create incremental migrations using: make atlas-migrate-diff SCHEMA=<schema> NAME=<name>"
+
+# Usage: make atlas-migration-flow [DB_DIALECT=mysql|postgresql]
+.PHONY: atlas-migration-flow
+atlas-migration-flow:
+

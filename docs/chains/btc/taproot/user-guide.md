@@ -59,12 +59,14 @@ Taproot is Bitcoin's latest major upgrade (activated November 2021) that introdu
 ### Required Software Versions
 
 1. **Bitcoin Core v22.0 or later** (for Taproot/Schnorr support)
+
    ```bash
    bitcoin-cli --version
    # Should output: Bitcoin Core version v22.0.0 or higher
    ```
 
 2. **go-crypto-wallet v5.0.0 or later**
+
    ```bash
    ./keygen --version
    ./watch --version
@@ -86,6 +88,7 @@ Taproot is Bitcoin's latest major upgrade (activated November 2021) that introdu
 Edit your wallet configuration file to enable Taproot:
 
 **Keygen Wallet** (`config/wallet/btc/keygen.yaml`):
+
 ```yaml
 # BIP86 is required for Taproot
 key_type: bip86  # bip44, bip49, bip84, bip86, musig2
@@ -101,6 +104,7 @@ bitcoin:
 ```
 
 **Watch Wallet** (`config/wallet/btc/watch.yaml`):
+
 ```yaml
 address_type: taproot
 
@@ -112,6 +116,7 @@ bitcoin:
 ```
 
 **Sign Wallet** (`config/wallet/btc/sign1.yaml`):
+
 ```yaml
 address_type: taproot
 
@@ -191,6 +196,7 @@ Testnet: tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c
 ```
 
 **Taproot Address Characteristics:**
+
 - Prefix: `bc1p` (mainnet) or `tb1p` (testnet/signet)
 - Length: 62 characters
 - Encoding: bech32m (lowercase only)
@@ -331,11 +337,13 @@ sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
 #### Step 3: Gradual Migration Strategy
 
 **Option A: Immediate Migration**
+
 - Stop using old addresses immediately
 - Transfer all funds from old addresses to new Taproot addresses
 - Update all systems to use new addresses
 
 **Option B: Gradual Migration**
+
 1. Start issuing new Taproot addresses to new users
 2. Keep accepting payments to old addresses
 3. Periodically consolidate old address balances to Taproot addresses
@@ -373,6 +381,7 @@ sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
    - Transfer files via USB or QR codes only
 
 2. **Secure File Transfers**
+
    ```bash
    # Encrypt transaction files
    gpg --encrypt --recipient your@email.com transaction.tx
@@ -389,12 +398,14 @@ sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
 ### Performance
 
 1. **Batch Operations**
+
    ```bash
    # Generate addresses in batches
    ./keygen --coin btc create hdkey --account client --count 1000
    ```
 
 2. **Monitor Transaction Pool**
+
    ```bash
    # Check mempool before sending
    bitcoin-cli getmempoolinfo
@@ -407,12 +418,14 @@ sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
 ### Operational
 
 1. **Test on Testnet First**
+
    ```bash
    # Always test new workflows on testnet
    ./keygen --config ./config/wallet/btc/keygen_testnet.yaml --coin btc ...
    ```
 
 2. **Keep Audit Logs**
+
    ```bash
    # Log all wallet operations
    ./keygen --coin btc create hdkey --account client --count 10 \
@@ -420,6 +433,7 @@ sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
    ```
 
 3. **Regular Backups**
+
    ```bash
    # Backup database
    mysqldump -u user -p wallet_db > backup_$(date +%Y%m%d).sql
@@ -454,6 +468,7 @@ A: Yes, but traditional multisig (multiple keys, threshold signing) works the sa
 
 **Q: How much smaller are Taproot transactions?**
 A: Typical savings:
+
 - Single-sig: 30-40% smaller
 - 2-of-3 multisig: 40-50% smaller
 - Larger multisig: Even greater savings
@@ -468,18 +483,21 @@ A: Yes, you can spend from multiple address types in a single transaction.
 
 **Q: Why do I get "fail to call NewAddressTaproot()" errors?**
 A: This usually means:
+
 1. Bitcoin Core version is older than v22.0
 2. Bitcoin Core is not properly configured
 3. RPC connection issue
 
 **Q: Why are my Taproot addresses not showing up?**
 A: Check:
+
 1. Configuration: `address_type = "taproot"` and `key_type = "bip86"`
 2. Database schema has `taproot_address` column
 3. Address import completed successfully
 
 **Q: Transaction signatures failing?**
 A: Ensure:
+
 1. Bitcoin Core v22.0+ is running
 2. Transaction file includes previous transaction data
 3. Correct wallet is unlocked in Bitcoin Core
@@ -489,18 +507,22 @@ A: Ensure:
 ### Issue: "Address type not supported"
 
 **Symptoms:**
+
 ```
 Error: address type 'taproot' not recognized
 ```
 
 **Solutions:**
+
 1. Verify configuration file:
+
    ```bash
    grep "address_type" config/wallet/btc/keygen.yaml
    # Should show: address_type = "taproot"
    ```
 
 2. Check wallet version:
+
    ```bash
    ./keygen --version
    # Should be v5.0.0 or later
@@ -509,17 +531,21 @@ Error: address type 'taproot' not recognized
 ### Issue: "Bitcoin Core RPC connection failed"
 
 **Symptoms:**
+
 ```
 Error: could not connect to Bitcoin Core RPC
 ```
 
 **Solutions:**
+
 1. Verify Bitcoin Core is running:
+
    ```bash
    bitcoin-cli getblockchaininfo
    ```
 
 2. Check RPC credentials in config:
+
    ```toml
    [bitcoin]
    host = "127.0.0.1:18332"
@@ -528,6 +554,7 @@ Error: could not connect to Bitcoin Core RPC
    ```
 
 3. Test RPC connection:
+
    ```bash
    curl --user your_rpc_user:your_rpc_password \
      --data-binary '{"jsonrpc": "1.0", "id": "test", "method": "getblockchaininfo", "params": []}' \
@@ -538,17 +565,21 @@ Error: could not connect to Bitcoin Core RPC
 ### Issue: "Taproot address not generated"
 
 **Symptoms:**
+
 - Keys generated but no Taproot addresses in output
 - Database shows NULL for `taproot_address` column
 
 **Solutions:**
+
 1. Verify `key_type` is set to `bip86`:
+
    ```bash
    grep "key_type" config/wallet/btc/keygen.yaml
    # Should show: key_type = "bip86"
    ```
 
 2. Check database schema:
+
    ```sql
    DESCRIBE account_key;
    -- Should include: taproot_address varchar(255) NULL
@@ -559,17 +590,21 @@ Error: could not connect to Bitcoin Core RPC
 ### Issue: "Transaction signature invalid"
 
 **Symptoms:**
+
 ```
 Error: non-mandatory-script-verify-flag (Signature must be zero for failed CHECK(MULTI)SIG operation)
 ```
 
 **Solutions:**
+
 1. Ensure Bitcoin Core v22.0+:
+
    ```bash
    bitcoin-cli --version
    ```
 
 2. Verify transaction file includes previous outputs:
+
    ```bash
    cat ./data/tx/btc/payment_5_unsigned_0_*.tx
    # Should contain: hex,encoded_prevs_addrs
@@ -580,12 +615,15 @@ Error: non-mandatory-script-verify-flag (Signature must be zero for failed CHECK
 ### Issue: "Database migration required"
 
 **Symptoms:**
+
 ```
 Error: column 'taproot_address' does not exist
 ```
 
 **Solutions:**
+
 1. Run database migration:
+
    ```sql
    ALTER TABLE account_key ADD COLUMN taproot_address VARCHAR(255) NULL
      AFTER bech32_address;
@@ -598,6 +636,7 @@ Error: column 'taproot_address' does not exist
 If you encounter issues not covered here:
 
 1. **Check Logs:**
+
    ```bash
    # Keygen wallet
    tail -f keygen.log
@@ -607,12 +646,14 @@ If you encounter issues not covered here:
    ```
 
 2. **Enable Debug Logging:**
+
    ```toml
    [logger]
    level = "debug"  # change from "info" to "debug"
    ```
 
 3. **Verify Configuration:**
+
    ```bash
    # Validate TOML syntax
    python3 -c "import toml; toml.load('config/wallet/btc/keygen.yaml')"
@@ -624,23 +665,26 @@ If you encounter issues not covered here:
    - Faster block times
 
 5. **Report Issues:**
-   - GitHub Issues: https://github.com/hiromaily/go-crypto-wallet/issues
+   - GitHub Issues: <https://github.com/hiromaily/go-crypto-wallet/issues>
    - Include: version, config (redact secrets), error messages, steps to reproduce
 
 ## Additional Resources
 
 ### Documentation
+
 - [Taproot Testing Guide](./testing.md) - For developers running tests
 - [BIP341 - Taproot](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki) - Technical specification
 - [BIP86 - Key Derivation](https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki) - Derivation path standard
 - [BIP340 - Schnorr Signatures](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki) - Signature scheme
 
 ### Tools
+
 - [Bitcoin Core](https://bitcoincore.org/) - Full node software
 - [Bitcoin Explorer](https://www.blockchain.com/explorer) - View transactions on-chain
 - [Mempool.space](https://mempool.space/) - Fee estimation and mempool monitoring
 
 ### Community
+
 - Bitcoin-dev mailing list
 - Bitcoin Stack Exchange
 - Bitcoin Core development

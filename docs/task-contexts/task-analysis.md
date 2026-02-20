@@ -43,20 +43,24 @@
 直近のコミットから見えるパターン：
 
 ### 1. Feature Development
+
 - YAML設定サポート追加 (#284, #285)
 - E2Eワークフロースクリプト追加 (#276, #277)
 - DevContainer導入 (#264, #265)
 
 ### 2. Refactoring
+
 - Clean Architecture への移行（Phase 1-3）
 - Persistence Port インターフェース導入 (#271-275)
 
 ### 3. Bug Fixes
+
 - Bitcoin Core バージョン対応 (#266-269)
 - BCH コンテナ起動問題 (#280, #281)
 - Multisig descriptor インポート (#259, #260)
 
 ### 4. Chain-Specific Work
+
 - **BTC**: Descriptor, E2E workflow, Bitcoin Core 対応
 - **BCH**: E2E workflow, コンテナ修正
 - **ETH**: Anvil ローカルノード追加
@@ -149,4 +153,3 @@ git log --pretty=format: --name-only -100 | grep -E '\.(go|md|yaml|toml|sql|hcl)
 - [Task Contexts README](./README.md)
 - [Task-Oriented Context Management](./task-oriented-context.md)
 - [AGENTS.md](../../AGENTS.md)
-

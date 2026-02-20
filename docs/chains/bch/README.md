@@ -686,6 +686,7 @@ The BCH Node's `signrawtransactionwithkey` RPC method incorrectly evaluates tran
 1. **Transaction File Type**: After 2nd signature in 3-of-3 multisig, transaction file is marked as `signed` instead of remaining `unsigned`
 2. **Missing prevTx Metadata**: When marked as `signed`, prevTx metadata (TXID, vout, scriptPubKey, redeemScript, amount) is omitted from the transaction file
 3. **Sign2 Wallet Failure**: Without prevTx metadata, Sign2 wallet cannot add the 3rd signature, resulting in error:
+
    ```
    Error: fail to sign transaction: fail to sign raw transaction with auth key:
    result of sign raw transaction includes error: Input not found or already spent
@@ -713,6 +714,7 @@ if fileType.TxType != domainTx.TxTypeUnsigned && fileType.TxType != domainTx.TxT
 Modified both keygen and sign wallets to always include prevTx metadata for multisig transactions, regardless of the `complete` flag:
 
 **Keygen Wallet** (`internal/application/usecase/keygen/bch/sign_transaction.go`):
+
 ```go
 var generatedFileName string
 // For multisig transactions, always include prevTx metadata for subsequent signers,
@@ -729,6 +731,7 @@ if isSigned && !isMultisig {
 ```
 
 **Sign Wallet** (`internal/application/usecase/sign/bch/sign_transaction.go`):
+
 ```go
 var generatedFileName string
 // For multisig transactions, always include prevTx metadata for subsequent signers,
@@ -747,6 +750,7 @@ if isSigned && !isMultisig {
 ##### 3. E2E Script Fixes
 
 Fixed duplicate `--wallet` flags in E2E scripts:
+
 - **Issue**: RPC host already included wallet name (e.g., `127.0.0.1:30332/wallet/sign1-p2`)
 - **Additional `--wallet` flag** created invalid path (e.g., `127.0.0.1:30332/wallet/sign1-p2/wallet/sign1`)
 - **Solution**: Removed all redundant `--wallet` flags from `e2e-p2-p2sh-2of3.sh` and `e2e-p3-p2sh-3of3.sh`
@@ -770,6 +774,7 @@ After implementing the workarounds:
 #### Future Considerations
 
 This workaround should be maintained until Bitcoin Cash Node fixes the `complete` flag behavior. Monitor BCH Node releases for:
+
 - Fixes to `signrawtransactionwithkey` multisig evaluation
 - Changes to transaction completeness logic
 - Updates to RPC response format

@@ -32,24 +32,28 @@ This feature aligns the XRP transaction flow with Bitcoin patterns by introducin
 ### Existing Architecture Analysis
 
 **Current XRP Transaction Flow**:
+
 - **Watch Wallet** (Online): Creates unsigned transactions in CSV text format, submits signed transactions
 - **Keygen/Sign Wallet** (Offline): Parses CSV files, signs via gRPC, outputs CSV format
 - **File Format**: Simple text with sender account type header + UUID,JSON transaction pairs
 - **Interfaces**: Monolithic `XRPer` interface with 30+ methods (admin, public, API operations)
 
 **Current Architecture Patterns**:
+
 - Clean Architecture with strict layer separation (Domain → Application → Infrastructure → Interface Adapters)
 - File repository pattern for transaction file I/O (`TransactionFileRepositorier`)
 - Use case orchestration pattern (create, sign, send use cases)
 - Port interface pattern (interfaces in application/ports, implementations in infrastructure)
 
 **Constraints to Maintain**:
+
 - Domain layer has ZERO infrastructure dependencies
 - Use cases depend only on port interfaces (never concrete implementations)
 - File path naming convention: `{actionType}_{txID}_{txType}_{signedCount}_{timestamp}.{ext}`
 - Multi-wallet architecture (watch online, keygen/sign offline)
 
 **Technical Debt Addressed**:
+
 - Monolithic XRPer interface → Segregated interfaces (AccountInfoProvider, TransactionSigner, TransactionSubmitter)
 - gRPC dependency for signing → Native Go signing (offline-capable)
 - Unstructured text format → Structured JSON with metadata
@@ -126,6 +130,7 @@ graph TB
 ```
 
 **Architecture Integration**:
+
 - **Selected pattern**: Clean Architecture (already established) + Interface Segregation Principle (ISP)
 - **Domain/feature boundaries**:
   - Transaction file operations isolated in `TransactionFileRepositorier` (reusable across BTC/BCH/ETH/XRP)
@@ -157,6 +162,7 @@ graph TB
 | **Infrastructure / Runtime** | File system | Transaction file I/O | Extends existing `TransactionFileRepository` with JSON methods |
 
 **Rationale Summary**:
+
 - **Peersyst/xrpl-go**: Selected for comprehensive wallet/signing API over XRPLF (serialization-focused) or xrpscan (websocket-focused). Provides offline signing with `wallet.Sign()` and multi-signature support with `wallet.Multisign()`. See research.md for detailed comparison.
 - **Dual xrpl-go libraries**: xrpscan/xrpl-go for submission (already working), Peersyst/xrpl-go for signing (new requirement). Acceptable specialization; alternative XRPLF investigation deferred to future optimization.
 - **JSON format**: Standard library support, human-readable for debugging, schema validation possible, versioning support (apiVersion field per Google JSON Style Guide).
@@ -214,6 +220,7 @@ sequenceDiagram
 ```
 
 **Key Decisions**:
+
 - JSON file format enables metadata preservation across offline transfers (version, network, signature count)
 - Sequential file naming tracks signing progression (`unsigned.json` → `signed-1.json` → `signed-N.json`)
 - Multi-signature detection: `isComplete = (signatureCount >= requiredSignatures)`
@@ -242,6 +249,7 @@ flowchart TD
 ```
 
 **Flow Decisions**:
+
 - Fail fast: JSON parsing errors block further processing
 - Signature count validation: Prevent premature submission of incomplete transactions
 - `isComplete` flag: Explicit completion marker prevents retry confusion
@@ -307,6 +315,7 @@ flowchart TD
 | Requirements | 1.1, 1.3, 2.1, 3.1, 4.1, 7.1 |
 
 **Responsibilities & Constraints**
+
 - Extend existing file repository with JSON read/write methods (`ReadJSONTransactionFile`, `WriteJSONTransactionFile`)
 - Reuse file path naming convention: `{actionType}_{txID}_{txType}_{signedCount}_{timestamp}.json`
 - Maintain backward compatibility: detect and parse text format with deprecation warnings
@@ -314,6 +323,7 @@ flowchart TD
 - File extension enforcement: `.json` for new files
 
 **Dependencies**
+
 - Outbound: File system I/O — read/write JSON files (P0)
 - Outbound: JSON serialization (Go stdlib encoding/json) — marshal/unmarshal (P0)
 - Outbound: Path validation logic (existing) — file naming, directory creation (P0)
@@ -354,19 +364,23 @@ type XRPTransactionEntry struct {
 ```
 
 **Preconditions**:
+
 - `WriteJSONTransactionFile`: `data` must have valid version, chain, and network fields
 - `ReadJSONTransactionFile`: File must exist and contain valid JSON
 
 **Postconditions**:
+
 - `WriteJSONTransactionFile`: Returns full file path with timestamp; file created on disk
 - `ReadJSONTransactionFile`: Returns deserialized `XRPTransactionFile` or error if invalid
 
 **Invariants**:
+
 - JSON files always have `.json` extension
 - Version field always present and follows semantic versioning (Major.Minor.Patch)
 - Transaction UUIDs unique within file
 
 **Implementation Notes**
+
 - **Integration**: Follows existing PSBT/Hex method pattern; reuses `CreateFilePath` and `createDir` helpers
 - **Validation**: JSON schema validation for version compatibility; verify `chain == "XRP"`; check transaction array non-empty
 - **Backward Compatibility**: `parseTransactionFile` helper in use cases detects format (JSON vs text) based on extension or content; logs deprecation warnings for text format
@@ -382,6 +396,7 @@ type XRPTransactionEntry struct {
 | Requirements | 3.2, 5.1, 5.2, 9.2 |
 
 **Responsibilities & Constraints**
+
 - Implement `TransactionSigner` interface using Peersyst/xrpl-go `wallet.Sign()` and `wallet.Multisign()` functions
 - Convert `dtoxrp.TxInput` to Peersyst transaction format for signing
 - Return signed transaction blob (hex-encoded) and transaction hash
@@ -389,6 +404,7 @@ type XRPTransactionEntry struct {
 - Handle multi-signature transactions (combine multiple signatures if needed)
 
 **Dependencies**
+
 - Inbound: SignTransactionUseCase — requests transaction signing (P0)
 - Outbound: Peersyst/xrpl-go wallet package — native Go signing (P0)
 - Outbound: XRPAccountKeyRepositorier — retrieve signing secrets (P0)
@@ -432,6 +448,7 @@ func (s *PeersystSigner) SignTransactionNative(
 ```
 
 **Preconditions**:
+
 - `txInput` must have all required fields populated (Account, Destination, Amount, Fee, Sequence, LastLedgerSequence)
 - `secret` must be valid XRP seed format (rXXX family seed or ed25519/secp256k1 hex seed)
 - `isMultiSig` must correctly indicate signature type (true for multi-sig, false for single-sig)
@@ -439,16 +456,19 @@ func (s *PeersystSigner) SignTransactionNative(
 - For multi-sig: `txInput.SigningPubKey` must be empty string
 
 **Postconditions**:
+
 - Returns 64-character hex transaction hash (unique identifier)
 - Returns hex-encoded signed transaction blob ready for submission
 - Signed blob includes signature in `TxnSignature` field (single-sig) or `Signers` array (multi-sig)
 - If existingSignedBlob provided, new signature is ADDED to existing signatures (accumulation)
 
 **Invariants**:
+
 - No network calls during signing (offline operation)
 - Signing deterministic (same input + secret = same signature)
 
 **Implementation Notes**
+
 - **Integration**: Add `github.com/Peersyst/xrpl-go` to go.mod; import wallet and binary-codec packages
 - **Conversion**: Map `dtoxrp.TxInput` fields to Peersyst transaction map format
 - **Multi-sig Signing**: Use `wallet.Multisign()` for multi-sig, `wallet.Sign()` for single-sig
@@ -472,11 +492,13 @@ func (s *PeersystSigner) SignTransactionNative(
 | Requirements | 2.2, 9.1, 9.3 |
 
 **Responsibilities & Constraints**
+
 - Extract account query methods from monolithic `XRPer` interface
 - Support only operations needed by CreateTransactionUseCase (account info, balance)
 - Implemented by xrpl-go client (xrpscan implementation reused)
 
 **Dependencies**
+
 - Inbound: CreateTransactionUseCase — queries account information (P0)
 - Outbound: XRP Ledger (via xrpl-go) — fetches account data (P0)
 
@@ -496,14 +518,17 @@ type AccountInfoProvider interface {
 ```
 
 **Preconditions**:
+
 - `address` must be valid XRP address format (rXXX classic address or XXXX X-address)
 - Network connectivity required (online operation)
 
 **Postconditions**:
+
 - Returns account information (sequence, balance, flags) or error if account not found
 - Balance returned as XRP (float64), not drops (integer)
 
 **Invariants**:
+
 - Read-only operations (no ledger state modifications)
 
 #### TransactionSigner (NEW Interface)
@@ -514,11 +539,13 @@ type AccountInfoProvider interface {
 | Requirements | 3.2, 9.2, 9.4 |
 
 **Responsibilities & Constraints**
+
 - Define signing contract for SignTransactionUseCase
 - NO network methods (offline-capable interface)
 - Implemented by PeersystSigner (native Go signing)
 
 **Dependencies**
+
 - Inbound: SignTransactionUseCase — requests transaction signing (P0)
 - Outbound: None (interface definition)
 
@@ -547,11 +574,13 @@ type TransactionSigner interface {
 | Requirements | 4.2, 9.2, 9.4 |
 
 **Responsibilities & Constraints**
+
 - Extract submission methods from monolithic `XRPer` interface
 - Support only operations needed by SendTransactionUseCase (submit, wait validation, get transaction)
 - Implemented by xrpl-go client (xrpscan implementation reused)
 
 **Dependencies**
+
 - Inbound: SendTransactionUseCase — submits signed transactions (P0)
 - Outbound: XRP Ledger (via xrpl-go) — broadcasts transactions (P0)
 
@@ -574,15 +603,18 @@ type TransactionSubmitter interface {
 ```
 
 **Preconditions**:
+
 - `signedTx` must be valid hex-encoded signed transaction blob
 - Network connectivity required (online operation)
 
 **Postconditions**:
+
 - `SubmitTransaction` returns transaction hash, ledger version, or error if submission fails
 - `WaitValidation` blocks until ledger reaches target version or timeout
 - `GetTransaction` returns transaction details (status, result, metadata) or error if not found
 
 **Invariants**:
+
 - Idempotent submission (submitting same transaction twice returns same result)
 
 ### Application / Use Cases
@@ -595,6 +627,7 @@ type TransactionSubmitter interface {
 | Requirements | 2.1, 2.2, 2.3, 2.4, 2.5 |
 
 **Responsibilities & Constraints**
+
 - Orchestrate transaction creation workflow (validate inputs, query account info, build transaction, write JSON file)
 - Depend on `AccountInfoProvider` interface (not full `XRPer`)
 - Generate JSON file with comprehensive metadata (version, chain, network, timestamp)
@@ -602,6 +635,7 @@ type TransactionSubmitter interface {
 - Return generated JSON file path
 
 **Dependencies**
+
 - Inbound: Watch CLI commands — requests transaction creation (P0)
 - Outbound: AccountInfoProvider — queries account info and balance (P0)
 - Outbound: TransactionFileRepositorier — writes JSON transaction files (P0)
@@ -631,20 +665,24 @@ type CreateTransactionOutput struct {
 ```
 
 **Preconditions**:
+
 - `ActionType` must be valid ("deposit", "payment", "transfer")
 - For transfer: `SenderAccount`, `ReceiverAccount`, `Amount` must be provided
 - Network connectivity required (online operation)
 
 **Postconditions**:
+
 - JSON transaction file created at `.kiro/tx/xrp/{actionType}_{txID}_unsigned_0_{timestamp}.json`
 - Database records created (xrp_tx, xrp_tx_detail)
 - Returns file path in `FileName` field
 
 **Invariants**:
+
 - Generated transactions always have `signatureCount = 0` and `signedBlob = null`
 - UUID generated using UUIDv7 for each transaction entry
 
 **Implementation Notes**
+
 - **Integration**: Replace `WriteFileSlice` with `WriteJSONTransactionFile`; change dependency from `xrpCreateTxClient` to `AccountInfoProvider`
 - **Validation**: Verify account has sufficient balance; validate destination address format
 - **Error Handling**: Wrap errors with context (e.g., "failed to query account info for %s: %w")
@@ -658,6 +696,7 @@ type CreateTransactionOutput struct {
 | Requirements | 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 5.1, 5.2, 6.1, 6.2, 6.3, 6.4 |
 
 **Responsibilities & Constraints**
+
 - Parse JSON transaction files (replace CSV parsing)
 - Use `TransactionSigner` interface for native Go signing (replace gRPC)
 - Track signature count and determine completion status
@@ -666,6 +705,7 @@ type CreateTransactionOutput struct {
 - Retrieve signing secrets from XRPAccountKeyRepositorier
 
 **Dependencies**
+
 - Inbound: Keygen/Sign CLI commands — requests transaction signing (P0)
 - Outbound: TransactionSigner — performs native Go signing (P0)
 - Outbound: TransactionFileRepositorier — reads/writes JSON transaction files (P0)
@@ -692,22 +732,26 @@ type SignTransactionOutput struct {
 ```
 
 **Preconditions**:
+
 - `FilePath` must exist and contain valid JSON transaction file
 - JSON file must have transactions with `signatureCount < requiredSignatures`
 - Signing secrets must be available in database for sender accounts
 - No network connectivity required (offline operation)
 
 **Postconditions**:
+
 - Signed JSON file created at `.kiro/tx/xrp/{actionType}_{txID}_signed_{signedCount+1}_{timestamp}.json`
 - Each transaction entry updated: `signatureCount` incremented, `signedBlob` populated, `isComplete` flag set if quorum met
 - Returns `IsComplete = true` when all transactions have sufficient signatures
 
 **Invariants**:
+
 - Signature count never decrements (monotonically increasing)
 - Signed blob format: hex-encoded XRP Ledger transaction
 - No re-signing: skip transactions where `isComplete == true`
 
 **Implementation Notes**
+
 - **Integration**: Replace `ReadFileSlice` with `ReadJSONTransactionFile`; replace gRPC signing call with `TransactionSigner.SignTransactionNative`
 - **Multi-sig Detection**: Check `requiredSignatures` field; if > 1, use multi-sig signing flow
 - **Completion Logic**: Set `isComplete = (signatureCount >= requiredSignatures)` after signing
@@ -723,6 +767,7 @@ type SignTransactionOutput struct {
 | Requirements | 4.1, 4.2, 4.3, 4.4, 4.5, 4.6 |
 
 **Responsibilities & Constraints**
+
 - Parse signed JSON transaction files (replace CSV parsing)
 - Validate signature completion status (`isComplete == true`)
 - Submit signed transaction blobs to XRP Ledger via `TransactionSubmitter` interface
@@ -730,6 +775,7 @@ type SignTransactionOutput struct {
 - Update database with transaction status
 
 **Dependencies**
+
 - Inbound: Watch CLI commands — requests transaction submission (P0)
 - Outbound: TransactionSubmitter — submits transactions to ledger (P0)
 - Outbound: TransactionFileRepositorier — reads signed JSON files (P0)
@@ -756,21 +802,25 @@ type SendTransactionOutput struct {
 ```
 
 **Preconditions**:
+
 - `FilePath` must exist and contain valid signed JSON transaction file
 - All transactions must have `isComplete == true`
 - All transactions must have valid `signedBlob` (non-null, hex-encoded)
 - Network connectivity required (online operation)
 
 **Postconditions**:
+
 - Transactions submitted to XRP Ledger
 - Database updated with transaction hash and status (sent → done)
 - Returns transaction hash for each submitted transaction
 
 **Invariants**:
+
 - Only complete transactions submitted (signatureCount >= requiredSignatures)
 - Idempotent: submitting same signed blob returns same transaction hash
 
 **Implementation Notes**
+
 - **Integration**: Replace `ReadFileSlice` with `ReadJSONTransactionFile`; submission logic already uses xrpl-go (xrpscan)
 - **Validation**: Check `isComplete` flag before submission; verify `signedBlob != null`
 - **Error Handling**: Return XRP Ledger error codes and messages (e.g., "tefPAST_SEQ", "tecUNFUNDED_PAYMENT")
@@ -787,12 +837,14 @@ type SendTransactionOutput struct {
 | Requirements | 1.2, 1.4, 1.5, 2.4 |
 
 **Responsibilities & Constraints**
+
 - Represent JSON transaction file schema as Go struct
 - Support JSON marshaling/unmarshaling via struct tags
 - Enforce version, chain, network, timestamp fields
 - Transaction array with comprehensive metadata (UUID, unsigned data, signature tracking)
 
 **Dependencies**
+
 - Inbound: TransactionFileRepository — serializes/deserializes files (P0)
 - Inbound: Use cases — build transaction file structures (P0)
 - Outbound: dtoxrp.TxInput — embedded unsigned transaction data (P0)
@@ -824,6 +876,7 @@ type XRPTransactionEntry struct {
 ```
 
 **State Validation**:
+
 - `Version` must match semantic versioning pattern (Major.Minor.Patch)
 - `Chain` must equal "XRP"
 - `Network` must be "mainnet" or "testnet"
@@ -836,6 +889,7 @@ type XRPTransactionEntry struct {
 **Concurrency Strategy**: Immutable (new file created for each signing phase)
 
 **Implementation Notes**
+
 - **JSON Tags**: Use lowercase JSON field names per Google JSON Style Guide
 - **Pointer Fields**: `SignedBlob` as pointer to distinguish null (unsigned) vs empty string
 - **Validation**: Create `Validate()` method for schema validation
@@ -846,15 +900,18 @@ type XRPTransactionEntry struct {
 ### Domain Model
 
 **Entities**:
+
 - **Transaction** (existing): Aggregate root for transaction lifecycle (unsigned → signed → sent → done)
 - **Account** (existing): XRP account entity with address, type, balance
 
 **Value Objects**:
+
 - **ActionType** (existing): Enumeration (deposit, payment, transfer)
 - **TxType** (existing): Enumeration (unsigned, signed, sent, done)
 - **AccountType** (existing): Enumeration (client, receipt, deposit, payment, etc.)
 
 **Business Rules**:
+
 - Multi-signature completion: `signatureCount >= requiredSignatures`
 - Transaction immutability: Once signed, transaction fields cannot be modified
 - Fee calculation: Multi-sig transactions require (N+1) × base fee
@@ -884,11 +941,13 @@ XRPTransactionFile (root)
 ```
 
 **Consistency Boundaries**:
+
 - Each JSON file is a consistency boundary (atomic file write)
 - Database transactions separate (xrp_tx, xrp_tx_detail updates)
 - No distributed transactions between file and database
 
 **Temporal Aspects**:
+
 - `createdAt` timestamp for audit trail
 - File path timestamp for version progression tracking
 - No in-file versioning history (each file is immutable)
@@ -896,12 +955,14 @@ XRPTransactionFile (root)
 ### Physical Data Model
 
 **File Storage**:
+
 - **Location**: `.kiro/tx/xrp/`
 - **Naming**: `{actionType}_{txID}_{txType}_{signedCount}_{timestamp}.json`
 - **Format**: UTF-8 encoded JSON
 - **Size Estimate**: ~1-5 KB per transaction entry (typical payment transaction)
 
 **File Progression Example**:
+
 ```
 .kiro/tx/xrp/
 ├── deposit_42_unsigned_0_1634744535097796209.json
@@ -911,6 +972,7 @@ XRPTransactionFile (root)
 ```
 
 **Database Schema** (Existing, No Changes):
+
 - **xrp_tx** table: txID, action_type, status, created_at, updated_at
 - **xrp_tx_detail** table: txID, uuid, sender_account, destination, amount, fee, sequence
 - **xrp_account_key** table: account_type, address, master_seed (encrypted)
@@ -920,6 +982,7 @@ XRPTransactionFile (root)
 ### Data Contracts & Integration
 
 **API Data Transfer** (Internal):
+
 - Use `dtoxrp.TxInput` for unsigned transaction data (consistent with existing DTOs)
 - Use `XRPTransactionFile` for file I/O operations (new DTO)
 
@@ -932,12 +995,14 @@ XRPTransactionFile (root)
 ### Error Strategy
 
 **Error Categories**:
+
 1. **Validation Errors** (4xx-equivalent): Invalid input, schema violations
 2. **Business Logic Errors** (422-equivalent): Insufficient signatures, incomplete transactions
 3. **Infrastructure Errors** (5xx-equivalent): File I/O failures, database errors, network timeouts
 4. **External Service Errors**: XRP Ledger submission failures (tefXXX, tecXXX codes)
 
 **Recovery Mechanisms**:
+
 - File I/O errors: Retry with exponential backoff
 - Signature errors: Return descriptive error; operator investigates
 - Ledger submission errors: Return XRP error code and message; operator investigates
@@ -946,21 +1011,25 @@ XRPTransactionFile (root)
 ### Error Categories and Responses
 
 **User Errors** (Validation):
+
 - Invalid JSON format → Return parse error with line/column number
 - Missing required fields → Return field-level validation error
 - Invalid XRP address format → Return address validation error with examples
 
 **System Errors** (Infrastructure):
+
 - File I/O failure → Log error with file path; return "failed to read/write transaction file"
 - Database connection failure → Return "database temporarily unavailable"
 - Network timeout → Return "XRP Ledger unavailable; retry later"
 
 **Business Logic Errors**:
+
 - Insufficient signatures → Return "transaction requires X signatures, has Y"
 - Transaction already complete → Return "transaction already signed and ready for submission"
 - Insufficient balance → Return "sender account has X XRP, transaction requires Y XRP + fees"
 
 **XRP Ledger Errors**:
+
 - `tefPAST_SEQ` → Return "transaction sequence number already used"
 - `tecUNFUNDED_PAYMENT` → Return "sender account has insufficient balance"
 - `tecNO_DST` → Return "destination account does not exist"
@@ -969,12 +1038,14 @@ XRPTransactionFile (root)
 ### Monitoring
 
 **Logging**:
+
 - DEBUG level: Transaction UUIDs, account addresses, signature counts
 - INFO level: Transaction creation, signing completion, submission success
 - WARN level: Backward compatibility fallback (text format parsing)
 - ERROR level: File parsing failures, signing errors, ledger submission failures
 
 **Metrics** (Future):
+
 - Transaction file size distribution
 - Signing operation latency
 - Ledger submission success/failure rates
@@ -985,18 +1056,21 @@ XRPTransactionFile (root)
 ### Unit Tests
 
 **TransactionFileRepository**:
+
 - JSON serialization/deserialization correctness
 - Schema validation (version, chain, network)
 - File path naming convention
 - Error handling (invalid JSON, missing files)
 
 **PeersystSigner**:
+
 - Wallet derivation from seed
 - Transaction signing output format (hex-encoded blob, transaction hash)
 - Multi-signature signing flow
 - Error handling (invalid seed, malformed transaction)
 
 **Use Cases**:
+
 - CreateTransactionUseCase: JSON file generation with correct metadata
 - SignTransactionUseCase: Signature count tracking, completion detection
 - SendTransactionUseCase: Completion validation, error propagation
@@ -1004,38 +1078,45 @@ XRPTransactionFile (root)
 ### Integration Tests
 
 **Full Transaction Flow** (create → sign → send):
+
 - Create unsigned transaction → verify JSON file structure
 - Sign transaction → verify signature count incremented, blob populated
 - Send transaction → verify ledger submission (testnet)
 
 **Multi-Signature Scenarios**:
+
 - 2-of-3 multisig: Create → Sign (Keygen) → Sign (Sign) → Send → verify completion
 - 3-of-5 multisig: Create → Sign × 3 → Send → verify completion
 
 **Backward Compatibility**:
+
 - Parse legacy text format transaction files
 - Verify deprecation warnings logged
 - Ensure text format parsing still functional
 
 **Peersyst + xrpscan Compatibility**:
+
 - Sign transaction with Peersyst → Submit with xrpscan → verify acceptance
 - Verify signed blob format matches XRP Ledger requirements
 
 ### E2E Tests
 
 **Deposit Flow** (mainnet simulation):
+
 1. Create deposit transaction (collect client funds)
 2. Sign with keygen wallet
 3. Submit to testnet
 4. Verify transaction confirmed on ledger
 
 **Payment Flow**:
+
 1. Create payment transaction (pay external recipient)
 2. Sign with keygen and sign wallets (2-of-2)
 3. Submit to testnet
 4. Verify transaction confirmed and payment delivered
 
 **Transfer Flow**:
+
 1. Create transfer transaction (move funds between internal accounts)
 2. Sign with single signer
 3. Submit to testnet
@@ -1044,24 +1125,29 @@ XRPTransactionFile (root)
 ### Performance / Load Tests
 
 **JSON File Size**:
+
 - Generate transaction files with 1, 10, 100 transaction entries
 - Measure file size and serialization/deserialization latency
 
 **Signing Latency**:
+
 - Measure native Go signing latency vs gRPC signing (baseline comparison)
 - Verify offline signing has zero network dependency (no network calls)
 
 **Batch Transaction Submission**:
+
 - Submit 100 transactions sequentially
 - Measure total submission time and success rate
 
 **Concurrent Signing**:
+
 - Simulate 5 concurrent signers signing different transactions
 - Verify no file conflicts or race conditions
 
 ## Security Considerations
 
 **Threat Modeling**:
+
 - **Threat**: Offline system compromise (private keys exposed)
   - **Mitigation**: Keygen/sign wallets on air-gapped systems; manual file transfer only
 - **Threat**: Signed transaction tampering during file transfer
@@ -1070,16 +1156,19 @@ XRPTransactionFile (root)
   - **Mitigation**: Multi-signature quorum enforcement; signature count validation
 
 **Security Controls**:
+
 - **Secret Management**: Signing secrets encrypted in database; never logged
 - **File Permissions**: Transaction files read/write by wallet process only (0600)
 - **Network Isolation**: Sign wallet has NO network methods (offline guarantee)
 
 **Compliance Requirements**:
+
 - **Audit Trail**: Transaction file progression (unsigned → signed-1 → signed-N → sent)
 - **Non-Repudiation**: Transaction hash uniquely identifies signed transaction
 - **Least Privilege**: Use cases depend on minimal interfaces (ISP)
 
 **Data Protection**:
+
 - **Sensitive Data**: Master seeds, signing secrets (never logged, encrypted at rest)
 - **PII**: XRP addresses considered public (no encryption required)
 - **File Encryption**: Not required (transaction data public on ledger)
@@ -1087,31 +1176,37 @@ XRPTransactionFile (root)
 ## Performance & Scalability
 
 **Target Metrics**:
+
 - JSON file serialization: < 10ms per file (100 transactions)
 - Native Go signing: < 50ms per transaction (single signature)
 - Transaction submission: < 500ms per transaction (network dependent)
 
 **Scaling Approaches**:
+
 - **Horizontal**: Multiple sign wallets can sign different transactions concurrently
 - **Vertical**: Single keygen wallet signs sequentially (acceptable for offline operations)
 
 **Caching Strategies**:
+
 - Account info caching (60s TTL) in create transaction use case
 - No caching for signing or submission (real-time operations)
 
 **Optimization Techniques**:
+
 - Batch transaction submission (sequential, not parallel, to avoid sequence conflicts)
 - JSON streaming for large transaction files (future optimization if needed)
 
 ## Migration Strategy
 
 **Phase 1: Infrastructure Preparation** (Week 1)
+
 1. Add Peersyst/xrpl-go dependency to go.mod
 2. Implement JSON transaction file methods in TransactionFileRepository
 3. Define segregated interfaces (AccountInfoProvider, TransactionSigner, TransactionSubmitter)
 4. Unit tests for file repository and signer
 
 **Phase 2: Implementation** (Week 2)
+
 1. Implement PeersystSigner with native Go signing
 2. Refactor CreateTransactionUseCase to use JSON format and AccountInfoProvider
 3. Refactor SignTransactionUseCase to use JSON parsing and native signing
@@ -1119,24 +1214,28 @@ XRPTransactionFile (root)
 5. Integration tests for full transaction flow
 
 **Phase 3: Testing** (Week 3)
+
 1. Multi-signature scenario tests (2-of-3, 3-of-5)
 2. Backward compatibility tests (text format parsing)
 3. Peersyst + xrpscan compatibility verification
 4. Performance testing (file size, signing latency)
 
 **Phase 4: Deployment** (Week 4)
+
 1. Deploy to testnet environment
 2. Validate end-to-end transaction flow (create → sign → send)
 3. Monitor for errors and performance issues
 4. Documentation and operator training
 
 **Rollback Triggers**:
+
 - Peersyst signed blobs rejected by XRP Ledger
 - JSON file size exceeds acceptable limits (>100KB per file)
 - Signing latency regression (>5x slower than gRPC)
 - Critical bugs in multi-signature logic
 
 **Validation Checkpoints**:
+
 - ✅ JSON schema validation passes for all generated files
 - ✅ Native Go signing produces valid XRP Ledger signatures
 - ✅ Multi-signature transactions submit successfully
@@ -1228,22 +1327,28 @@ graph LR
 ### XRP Transaction Fee Calculation
 
 #### Standard Single-Signature Transactions
+
 **Formula**: `Fee = BaseFee`
 
 Where:
+
 - BaseFee = Current XRP Ledger minimum fee (typically 0.00001 XRP = 10 drops)
 
 **Example**:
+
 - Single signature: Fee = 10 drops
 
 #### Multi-Signature Transactions
+
 **Formula**: `Fee = (N + 1) × BaseFee`
 
 Where:
+
 - N = Number of signatures provided in transaction
 - BaseFee = Current XRP Ledger minimum fee (typically 0.00001 XRP = 10 drops)
 
 **Example**:
+
 - 2-of-3 multisig (2 signatures): Fee = (2 + 1) × 10 drops = 30 drops
 - 3-of-5 multisig (3 signatures): Fee = (3 + 1) × 10 drops = 40 drops
 
@@ -1268,20 +1373,24 @@ Where:
 Research findings are based on the following sources:
 
 **xrpl-go Libraries**:
+
 - [XRPLF/xrpl-go](https://github.com/XRPLF/xrpl-go) - Official XRP Ledger Foundation implementation
 - [Peersyst/xrpl-go](https://pkg.go.dev/github.com/Peersyst/xrpl-go) - Comprehensive wallet and signing functionality
 - [xrpscan/xrpl-go](https://github.com/xrpscan/xrpl-go) - Currently integrated (v0.2.11)
 
 **XRP Ledger Documentation**:
+
 - [Multi-Signing Concepts](https://xrpl.org/docs/concepts/accounts/multi-signing)
 - [Set Up Multi-Signing Tutorial](https://xrpl.org/docs/tutorials/how-tos/manage-account-settings/set-up-multi-signing)
 - [Secure Signing](https://xrpl.org/docs/concepts/transactions/secure-signing)
 
 **JSON Standards**:
+
 - [Google JSON Style Guide](https://google.github.io/styleguide/jsoncstyleguide.xml)
 - [REST API Standards & Best Practices 2026](https://www.boltic.io/blog/rest-api-standards)
 
 **Internal References**:
+
 - [Gap Analysis](./gap-analysis.md) - Implementation gap evaluation
 - [Requirements](./requirements.md) - EARS-formatted acceptance criteria
 - [Research Log](./research.md) - Detailed discovery findings

@@ -22,6 +22,7 @@ Domain (descriptor types, validation)
 ## Data Flows
 
 ### Export Flow
+
 ```
 CLI keygen descriptor export
     → ExportDescriptorUseCase
@@ -31,6 +32,7 @@ CLI keygen descriptor export
 ```
 
 ### Import Flow
+
 ```
 Descriptor file (text or Bitcoin Core JSON)
     → ImportDescriptorUseCase

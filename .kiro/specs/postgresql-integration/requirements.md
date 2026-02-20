@@ -3,12 +3,14 @@
 ## Project Description (Input)
 
 The go-crypto-wallet project currently supports two database backends:
+
 - **MySQL** - Primary database for production deployments
 - **SQLite** - Lightweight option for testing and development
 
 The project uses [sqlc](https://github.com/sqlc-dev/sqlc) as a type-safe SQL code generator (ORM-alternative) and [Atlas](https://github.com/ariga/atlas) version 1.0 for schema migrations. Users select their preferred database engine through the `database.type` configuration field in TOML config files.
 
 **Goals**:
+
 1. **Add PostgreSQL Support**: Add PostgreSQL as a third database option, maintaining feature parity with MySQL and SQLite. Users should be able to select PostgreSQL by setting `database.type = "postgresql"` in the configuration file, with the application handling PostgreSQL-specific connection management, schema generation, and query execution transparently.
 
 2. **Upgrade Atlas**: Upgrade Atlas from version 1.0 to the current version 1.1, taking advantage of improved PostgreSQL support and new features while ensuring backward compatibility with existing migrations.

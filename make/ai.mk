@@ -2,7 +2,7 @@
 # AI Targets
 ###############################################################################
 # create symlink from AGENTS.md for CLAUDE.md
-PHONY: create-claudemd-symlink
+.PHONY: create-claudemd-symlink
 create-claudemd-symlink:
 	@find . -name "AGENTS.md" -type f | while read agents_file; do \
 		dir=$$(dirname "$$agents_file"); \

@@ -270,16 +270,16 @@ export BTC_NETWORK_MODE
 # Mode-specific targets
 .PHONY: btc-e2e-regtest
 btc-e2e-regtest:
-	BTC_NETWORK_MODE=regtest $(E2E_SCRIPT_PATH) --reset
+ BTC_NETWORK_MODE=regtest $(E2E_SCRIPT_PATH) --reset
 
 .PHONY: btc-e2e-signet
 btc-e2e-signet:
-	BTC_NETWORK_MODE=signet $(E2E_SCRIPT_PATH) --reset
+ BTC_NETWORK_MODE=signet $(E2E_SCRIPT_PATH) --reset
 
 # Run E2E in current mode
 .PHONY: btc-e2e-mode
 btc-e2e-mode: _btc-e2e-validate
-	$(E2E_SCRIPT_PATH)
+ $(E2E_SCRIPT_PATH)
 ```
 
 ## Implementation Plan

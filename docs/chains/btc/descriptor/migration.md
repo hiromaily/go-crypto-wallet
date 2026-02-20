@@ -9,16 +9,19 @@ Migrate if you need Bitcoin Core compatibility, explicit address derivation, or 
 ## Phased Migration Plan
 
 ### Phase 1: Parallel Operation
+
 - Generate descriptors alongside existing legacy addresses.
 - Import descriptors into the watch wallet with a limited range to validate balances.
 - Keep using legacy addresses for production transactions while monitoring descriptor-derived addresses.
 
 ### Phase 2: Gradual Cutover
+
 - Start issuing new receive/change addresses from descriptor exports.
 - Keep legacy addresses active for existing UTXOs.
 - Export descriptor files regularly and back them up offline.
 
 ### Phase 3: Full Migration
+
 - Move remaining funds to descriptor-derived addresses.
 - Update operational runbooks to reference descriptor exports and validation.
 - Decommission legacy address generation paths only after reconciliation.

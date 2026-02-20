@@ -3,6 +3,7 @@
 Guidance for contributors extending descriptor functionality.
 
 ## Prerequisites
+
 - Go toolchain (see `docs/guidelines/requirements.md`).
 - Bitcoin Core available for compatibility testing when running `integration`-tag tests or smoke scripts.
 - Avoid editing auto-generated files; descriptors live in application/infrastructure layers.
@@ -10,16 +11,19 @@ Guidance for contributors extending descriptor functionality.
 ## Local Verification
 
 1. **Unit tests**
+
    ```bash
    go test ./...
    ```
 
 2. **Integration workflow test (no external deps)**
+
    ```bash
    go test ./test/integration -run TestDescriptorWorkflow_EndToEnd -v
    ```
 
 3. **Bitcoin Core compatibility (requires node)**
+
    ```bash
    BTC_CORE_COMPAT_DESCRIPTOR_FILE=/path/to/descriptors.json \
    BITCOIN_CLI_ARGS="-regtest -rpcuser=test -rpcpassword=test" \
@@ -27,6 +31,7 @@ Guidance for contributors extending descriptor functionality.
    ```
 
 4. **Performance benchmarks**
+
    ```bash
    go test ./internal/infrastructure/api/btc/btc -bench=BenchmarkGenerateDescriptors -benchmem
    ```

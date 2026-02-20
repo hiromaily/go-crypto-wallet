@@ -67,9 +67,9 @@ make -n {target}
 ```makefile
 .PHONY: my-target
 my-target: ## Description of target
-	@echo "Running my-target..."
-	command1
-	command2
+ @echo "Running my-target..."
+ command1
+ command2
 ```
 
 ## Verification Checklist

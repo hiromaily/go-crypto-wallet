@@ -36,6 +36,7 @@ The project uses a **single MySQL 8.4 container** with **three separate schemas*
 - **`sign` schema**: Signing wallet data (auth account keys, seeds)
 
 This consolidated approach provides:
+
 - ✅ Reduced resource usage (single MySQL instance)
 - ✅ Simplified deployment and maintenance
 - ✅ Data isolation through schema separation
@@ -94,6 +95,7 @@ When the container starts for the first time:
    - `hiromaily@'%'` with password `hiromaily`
 
 2. **Schema Creation**: Executes `01_init_all_schemas.sql` to create empty schemas
+
    ```sql
    -- Create watch schema (empty)
    CREATE DATABASE `watch` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -106,6 +108,7 @@ When the container starts for the first time:
    ```
 
 3. **Configuration**: Applies server settings from `custom.cnf`
+
    ```ini
    [mysqld]
    character-set-server=utf8mb4
@@ -113,10 +116,11 @@ When the container starts for the first time:
    ```
 
 4. **Schema Migration**: After the container starts, apply Atlas migrations
+
    ```bash
    make atlas-migrate-docker
    ```
-   
+
    This will create all tables and apply schema definitions using Atlas migrations.
 
 ## Schema Design
@@ -126,6 +130,7 @@ When the container starts for the first time:
 **Purpose**: Manages online wallet operations including address tracking, transaction monitoring, and payment requests.
 
 **Tables**:
+
 - `address` - Wallet addresses for all account types
 - `btc_tx` - Bitcoin/BCH transaction records
 - `btc_tx_input` - Bitcoin transaction inputs
@@ -142,6 +147,7 @@ When the container starts for the first time:
 **Purpose**: Stores key generation data for offline key generation wallet.
 
 **Tables**:
+
 - `account_key` - Generated account keys (HD wallet)
 - `auth_fullpubkey` - Full public keys for multisig authentication
 - `xrp_account_key` - XRP-specific account keys
@@ -156,6 +162,7 @@ When the container starts for the first time:
 **Purpose**: Stores signing wallet data for offline transaction signing.
 
 **Tables**:
+
 - `auth_account_key` - Authentication account keys for signing
 - `seed` - Encrypted seed phrases for signing wallet
 
@@ -168,29 +175,34 @@ When the container starts for the first time:
 ### Initial Setup
 
 1. **Start the database**:
+
    ```bash
    docker compose up -d wallet-mysql
    ```
 
 2. **Wait for database to be ready** (about 30 seconds):
+
    ```bash
    docker compose exec wallet-mysql mysqladmin ping -uroot -proot --silent
    ```
 
 3. **Apply Atlas migrations**:
+
    ```bash
    make atlas-migrate-docker
    ```
-   
+
    This will create all tables and schema definitions.
 
 4. **Verify schemas and tables created**:
+
    ```bash
    docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
    docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
    ```
 
    Expected output:
+
    ```
    Database
    keygen
@@ -199,7 +211,8 @@ When the container starts for the first time:
    (plus system databases)
    ```
 
-3. **Verify server configuration**:
+5. **Verify server configuration**:
+
    ```bash
    docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'character_set_server';"
    docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'collation_server';"
@@ -212,6 +225,7 @@ When the container starts for the first time:
 Each wallet type (watch, keygen, sign) connects to the same database host but specifies different schema names:
 
 **Watch Wallet** (`config/wallet/*_watch.toml`):
+
 ```toml
 [mysql]
 host = "127.0.0.1:3306"
@@ -221,6 +235,7 @@ pass = "hiromaily"
 ```
 
 **Keygen Wallet** (`config/wallet/*_keygen.toml`):
+
 ```toml
 [mysql]
 host = "127.0.0.1:3306"
@@ -230,6 +245,7 @@ pass = "hiromaily"
 ```
 
 **Sign Wallet** (`config/wallet/*_sign.toml`):
+
 ```toml
 [mysql]
 host = "127.0.0.1:3306"
@@ -243,6 +259,7 @@ pass = "hiromaily"
 ### Database Access
 
 **Using Docker Exec**:
+
 ```bash
 # Access watch schema
 docker compose exec wallet-mysql mysql -uroot -proot watch
@@ -255,6 +272,7 @@ docker compose exec wallet-mysql mysql -uroot -proot sign
 ```
 
 **From Host Machine**:
+
 ```bash
 # Access watch schema
 mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 watch
@@ -508,6 +526,7 @@ make atlas-migrate-docker
 ```
 
 The Docker environment uses a dedicated migration service (`wallet-mysql-migrate`) that runs Atlas in a container. This service:
+
 - Automatically waits for the database to be ready (health check)
 - Runs in the same network as the database
 - Has access to the `tools/atlas` directory via volume mount
@@ -526,6 +545,7 @@ make atlas-status-docker
 ```
 
 This shows:
+
 - Applied migrations
 - Pending migrations
 - Migration history
@@ -586,6 +606,7 @@ Atlas migrations work alongside the existing SQL files:
 - **Atlas migrations** (`tools/atlas/migrations/`): Used for version-controlled schema changes
 
 For new schema changes:
+
 1. Create an Atlas migration instead of modifying SQL files directly
 2. Apply migrations using `make atlas-migrate`
 3. Update sqlc schema files if needed for code generation
@@ -593,11 +614,13 @@ For new schema changes:
 ### Best Practices
 
 1. **Always validate** migrations before applying:
+
    ```bash
    make atlas-validate
    ```
 
 2. **Check status** before applying:
+
    ```bash
    make atlas-status
    ```
@@ -729,12 +752,15 @@ Generated files: `internal/infrastructure/database/sqlite/sqlcgen/`
 ### Container Won't Start
 
 **Check logs**:
+
 ```bash
 docker compose logs wallet-mysql
 ```
 
 **Common issues**:
+
 1. Port already in use:
+
    ```bash
    # Check what's using port 3306
    lsof -i :3306
@@ -744,6 +770,7 @@ docker compose logs wallet-mysql
    ```
 
 2. Volume permission issues:
+
    ```bash
    # Remove and recreate volume
    docker compose down -v
@@ -753,21 +780,25 @@ docker compose logs wallet-mysql
 ### Cannot Connect to Database
 
 **Verify container is running**:
+
 ```bash
 docker compose ps wallet-mysql
 ```
 
 **Check container health**:
+
 ```bash
 docker compose exec wallet-mysql mysqladmin ping -uroot -proot
 ```
 
 **Verify users exist**:
+
 ```bash
 docker compose exec wallet-mysql mysql -uroot -proot -e "SELECT User, Host FROM mysql.user WHERE User IN ('root', 'hiromaily');"
 ```
 
 **Test connection from host**:
+
 ```bash
 mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 -e "SELECT 1;"
 ```
@@ -775,11 +806,13 @@ mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 -e "SELECT 1;"
 ### Schema Not Found
 
 **List existing schemas**:
+
 ```bash
 docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
 ```
 
 **Reinitialize schemas**:
+
 ```bash
 docker compose exec wallet-mysql mysql -uroot -proot < docker/mysql/init.d/01_init_all_schemas.sql
 ```
@@ -787,6 +820,7 @@ docker compose exec wallet-mysql mysql -uroot -proot < docker/mysql/init.d/01_in
 ### Character Set Issues
 
 **Check current settings**:
+
 ```bash
 docker compose exec wallet-mysql mysql -uroot -proot -e "
 SHOW VARIABLES LIKE 'character_set%';
@@ -794,6 +828,7 @@ SHOW VARIABLES LIKE 'collation%';"
 ```
 
 **Expected values**:
+
 - `character_set_server`: `utf8mb4`
 - `collation_server`: `utf8mb4_unicode_ci`
 
@@ -802,6 +837,7 @@ SHOW VARIABLES LIKE 'collation%';"
 ### Slow Queries
 
 **Enable slow query log**:
+
 ```bash
 docker compose exec wallet-mysql mysql -uroot -proot -e "
 SET GLOBAL slow_query_log = 'ON';
@@ -810,6 +846,7 @@ SHOW VARIABLES LIKE 'slow_query%';"
 ```
 
 **View slow query log**:
+
 ```bash
 docker compose exec wallet-mysql cat /var/lib/mysql/slow-query.log
 ```
@@ -915,6 +952,7 @@ docker volume rm go-crypto-wallet_sign-db
 ### Backup Strategy
 
 1. **Automated Backups**:
+
    ```bash
    # Daily backup script example
    #!/bin/bash
@@ -948,6 +986,7 @@ docker volume rm go-crypto-wallet_sign-db
 3. **Query Optimization**: Use `EXPLAIN` to analyze slow queries
 
 4. **Resource Limits**: Adjust MySQL configuration for your workload
+
    ```ini
    # Example additional settings in custom.cnf
    [mysqld]

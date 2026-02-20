@@ -5,6 +5,7 @@ This page collects runnable examples for descriptor workflows.
 ## Export and Import a Taproot Account
 
 1. **Export from keygen wallet (receive + change)**
+
    ```bash
    keygen --coin btc descriptor export \
      --account deposit \
@@ -14,6 +15,7 @@ This page collects runnable examples for descriptor workflows.
    ```
 
 2. **Inspect the Bitcoin Core JSON**
+
    ```json
    [
      {
@@ -32,6 +34,7 @@ This page collects runnable examples for descriptor workflows.
    ```
 
 3. **Import into the watch wallet**
+
    ```bash
    watch --coin btc descriptor import \
      --file /tmp/deposit_tr.json \
@@ -41,6 +44,7 @@ This page collects runnable examples for descriptor workflows.
    ```
 
 4. **Optional: Import into Bitcoin Core**
+
    ```bash
    bitcoin-cli importdescriptors "$(cat /tmp/deposit_tr.json)"
    bitcoin-cli deriveaddresses "tr([a1b2c3d4/86'/0'/0']xpub.../0/*)" "[0,2]"
@@ -75,6 +79,7 @@ scripts/test/test_descriptor_compatibility.sh ./payment_all.json
 ```
 
 Environment variables:
+
 - `BITCOIN_CLI` (default: `bitcoin-cli`)
 - `BITCOIN_CLI_ARGS` (e.g., `-regtest -rpcuser=test -rpcpassword=test`)
 

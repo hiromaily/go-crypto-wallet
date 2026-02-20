@@ -5,14 +5,17 @@ This guide explains how to generate, export, and import Bitcoin descriptor walle
 ## Quick Start
 
 1. **Generate a descriptor (keygen wallet)**
+
    ```bash
    keygen --coin btc descriptor generate \
      --account deposit \
      --address-type taproot
    ```
+
    Example output: `tr([a1b2c3d4/86'/0'/0']xpub.../0/*)`
 
 2. **Export descriptors for Bitcoin Core**
+
    ```bash
    keygen --coin btc descriptor export \
      --account deposit \
@@ -22,6 +25,7 @@ This guide explains how to generate, export, and import Bitcoin descriptor walle
    ```
 
 3. **Import descriptors into the watch wallet**
+
    ```bash
    watch --coin btc descriptor import \
      --file deposit_descriptors.json \
@@ -31,6 +35,7 @@ This guide explains how to generate, export, and import Bitcoin descriptor walle
    ```
 
 4. **Optional: Import into Bitcoin Core for monitoring**
+
    ```bash
    bitcoin-cli importdescriptors "$(cat deposit_descriptors.json)"
    ```
@@ -48,6 +53,7 @@ This guide explains how to generate, export, and import Bitcoin descriptor walle
 ## Common Operations
 
 - **Generate all descriptors for an account**
+
   ```bash
   keygen --coin btc descriptor export-all \
     --account deposit \
@@ -55,12 +61,14 @@ This guide explains how to generate, export, and import Bitcoin descriptor walle
   ```
 
 - **Validate before importing**
+
   ```bash
   watch --coin btc descriptor validate \
     --file deposit_all_descriptors.json
   ```
 
 - **Backup descriptors**
+
   ```bash
   keygen --coin btc descriptor export \
     --account deposit \

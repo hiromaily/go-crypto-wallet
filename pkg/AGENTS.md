@@ -31,6 +31,7 @@ pkg/
 **Packages in `pkg/` MUST NOT import from `internal/` directory.**
 
 This is non-negotiable:
+
 - `pkg/` = public APIs for external code
 - `internal/` = internal implementation details
 - Mixing breaks encapsulation and creates circular dependencies

@@ -98,6 +98,7 @@ Central mapping from GitHub labels to Skills and Context documents.
 ### Required Labels
 
 Every issue must have:
+
 1. **One Type label** (`bug`, `enhancement`, `refactoring`, `documentation`, `security`, `technical-debt`, `test`)
 2. **One Language OR Scope label** (`lang:*` or `scope:*`)
 

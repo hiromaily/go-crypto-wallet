@@ -7,6 +7,7 @@ argument-hint: <feature-name>
 # Technical Design Validation
 
 <background_information>
+
 - **Mission**: Conduct interactive quality review of technical design to ensure readiness for implementation
 - **Success Criteria**:
   - Critical issues identified (maximum 3 most important concerns)
@@ -44,6 +45,7 @@ Interactive design quality review for feature **$1** based on approved requireme
    - Guide user on proceeding based on decision
 
 ## Important Constraints
+
 - **Quality assurance, not perfection seeking**: Accept acceptable risk
 - **Critical focus only**: Maximum 3 issues, only those significantly impacting success
 - **Interactive approach**: Engage in dialogue, not one-way evaluation
@@ -52,11 +54,13 @@ Interactive design quality review for feature **$1** based on approved requireme
 </instructions>
 
 ## Tool Guidance
+
 - **Read first**: Load all context (spec, steering, rules) before review
 - **Grep if needed**: Search codebase for pattern validation or integration checks
 - **Interactive**: Engage with user throughout the review process
 
 ## Output Description
+
 Provide output in the language specified in spec.json with:
 
 1. **Review Summary**: Brief overview (2-3 sentences) of design quality and readiness
@@ -65,6 +69,7 @@ Provide output in the language specified in spec.json with:
 4. **Final Assessment**: GO/NO-GO decision with rationale and next steps
 
 **Format Requirements**:
+
 - Use Markdown headings for clarity
 - Follow design-review.md output format
 - Keep summary concise
@@ -72,6 +77,7 @@ Provide output in the language specified in spec.json with:
 ## Safety & Fallback
 
 ### Error Scenarios
+
 - **Missing Design**: If design.md doesn't exist, stop with message: "Run `/kiro:spec-design $1` first to generate design document"
 - **Design Not Generated**: If design phase not marked as generated in spec.json, warn but proceed with review
 - **Empty Steering Directory**: Warn user that project context is missing and may affect review quality
@@ -80,11 +86,13 @@ Provide output in the language specified in spec.json with:
 ### Next Phase: Task Generation
 
 **If Design Passes Validation (GO Decision)**:
+
 - Review feedback and apply changes if needed
 - Run `/kiro:spec-tasks $1` to generate implementation tasks
 - Or `/kiro:spec-tasks $1 -y` to auto-approve and proceed directly
 
 **If Design Needs Revision (NO-GO Decision)**:
+
 - Address critical issues identified
 - Re-run `/kiro:spec-design $1` with improvements
 - Re-validate with `/kiro:validate-design $1`

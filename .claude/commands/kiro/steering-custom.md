@@ -11,6 +11,7 @@ allowed-tools: Bash, Read, Write, Edit, MultiEdit, Glob, Grep, LS
 **Mission**: Help users create domain-specific project memory for specialized areas.
 
 **Success Criteria**:
+
 - Custom steering captures specialized patterns
 - Follows same granularity principles as core steering
 - Provides clear value for specific domain
@@ -102,11 +103,13 @@ Review and customize as needed.
 ## Examples
 
 ### Success: API Standards
+
 **Input**: "Create API standards steering"  
 **Action**: Load template, analyze src/api/, extract patterns  
 **Output**: api-standards.md with project-specific REST conventions
 
 ### Success: Testing Strategy
+
 **Input**: "Document our testing approach"  
 **Action**: Load template, analyze test files, extract patterns  
 **Output**: testing.md with test organization and mocking strategies

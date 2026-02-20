@@ -3,9 +3,11 @@
 ## Core Principles
 
 ### 1. Natural Language Descriptions
+
 Focus on capabilities and outcomes, not code structure.
 
 **Describe**:
+
 - What functionality to achieve
 - Business logic and behavior
 - Features and capabilities
@@ -13,6 +15,7 @@ Focus on capabilities and outcomes, not code structure.
 - Data relationships and workflows
 
 **Avoid**:
+
 - File paths and directory structure
 - Function/method names and signatures
 - Type definitions and interfaces
@@ -24,6 +27,7 @@ Focus on capabilities and outcomes, not code structure.
 ### 2. Task Integration & Progression
 
 **Every task must**:
+
 - Build on previous outputs (no orphaned code)
 - Connect to the overall system (no hanging features)
 - Progress incrementally (no big jumps in complexity)
@@ -37,6 +41,7 @@ Focus on capabilities and outcomes, not code structure.
 ### 3. Flexible Task Sizing
 
 **Guidelines**:
+
 - **Major tasks**: As many sub-tasks as logically needed (group by cohesion)
 - **Sub-tasks**: 1-3 hours each, 3-10 details per sub-task
 - Balance between too granular and too broad
@@ -46,6 +51,7 @@ Focus on capabilities and outcomes, not code structure.
 ### 4. Requirements Mapping
 
 **End each task detail section with**:
+
 - `_Requirements: X.X, Y.Y_` listing **only numeric requirement IDs** (comma-separated). Never append descriptive text, parentheses, translations, or free-form labels.
 - For cross-cutting requirements, list every relevant requirement ID. All requirements MUST have numeric IDs in requirements.md. If an ID is missing, stop and correct requirements.md before generating tasks.
 - Reference components/interfaces from design.md when helpful (e.g., `_Contracts: AuthService API`)
@@ -53,11 +59,13 @@ Focus on capabilities and outcomes, not code structure.
 ### 5. Code-Only Focus
 
 **Include ONLY**:
+
 - Coding tasks (implementation)
 - Testing tasks (unit, integration, E2E)
 - Technical setup tasks (infrastructure, configuration)
 
 **Exclude**:
+
 - Deployment tasks
 - Documentation tasks
 - User testing
@@ -72,6 +80,7 @@ Focus on capabilities and outcomes, not code structure.
 ## Task Hierarchy Rules
 
 ### Maximum 2 Levels
+
 - **Level 1**: Major tasks (1, 2, 3, 4...)
 - **Level 2**: Sub-tasks (1.1, 1.2, 2.1, 2.2...)
 - **No deeper nesting** (no 1.1.1)
@@ -79,11 +88,13 @@ Focus on capabilities and outcomes, not code structure.
 - When a major task exists purely as a container, keep the checkbox description concise and avoid duplicating detailed bullets—reserve specifics for its sub-tasks.
 
 ### Sequential Numbering
+
 - Major tasks MUST increment: 1, 2, 3, 4, 5...
 - Sub-tasks reset per major task: 1.1, 1.2, then 2.1, 2.2...
 - Never repeat major task numbers
 
 ### Parallel Analysis (default)
+
 - Assume parallel analysis is enabled unless explicitly disabled (e.g. `--sequential` flag).
 - Identify tasks that can run concurrently when **all** conditions hold:
   - No data dependency on other pending tasks
@@ -99,6 +110,7 @@ Focus on capabilities and outcomes, not code structure.
 - Explicitly call out dependencies that prevent `(P)` even when tasks look similar.
 
 ### Checkbox Format
+
 ```markdown
 - [ ] 1. Major task description
 - [ ] 1.1 Sub-task description
@@ -121,6 +133,7 @@ Focus on capabilities and outcomes, not code structure.
 ## Requirements Coverage
 
 **Mandatory Check**:
+
 - ALL requirements from requirements.md MUST be covered
 - Cross-reference every requirement ID with task mappings
 - If gaps found: Return to requirements or design phase

@@ -7,11 +7,13 @@
 ## Directory Patterns
 
 ### [Pattern Name]
+
 **Location**: `/path/`  
 **Purpose**: [What belongs here]  
 **Example**: [Brief example]
 
 ### [Pattern Name]
+
 **Location**: `/path/`  
 **Purpose**: [What belongs here]  
 **Example**: [Brief example]
@@ -31,6 +33,7 @@ import { Local } from './local'     // Relative
 ```
 
 **Path Aliases**:
+
 - `@/`: [Maps to]
 
 ## Code Organization Principles

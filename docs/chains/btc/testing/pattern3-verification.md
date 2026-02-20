@@ -71,6 +71,7 @@ This document verifies the successful implementation of Pattern 3: P2SH-P2WPKH (
 The implementation correctly follows BIP143 (Segregated Witness Transaction Signature Verification):
 
 1. **ScriptCode Construction**: P2PKH format for signature hash calculation
+
    ```
    OP_DUP OP_HASH160 <20-byte-pubkey-hash> OP_EQUALVERIFY OP_CHECKSIG
    ```
@@ -128,6 +129,7 @@ Address Type Breakdown:
 ### Original Problem
 
 Transaction validation was failing with:
+
 ```
 mandatory-script-verify-flag-failed (Script evaluated without error but
 finished with a false/empty top stack element)
@@ -136,6 +138,7 @@ finished with a false/empty top stack element)
 ### Root Cause
 
 The original implementation was missing proper PSBT finalization for P2SH-P2WPKH:
+
 1. ScriptSig construction was incorrect
 2. Witness serialization was not properly implemented
 3. Custom finalization function was needed to work around btcd limitations
@@ -143,6 +146,7 @@ The original implementation was missing proper PSBT finalization for P2SH-P2WPKH
 ### Solution (PR #363)
 
 Implemented `finalizeP2SHP2WPKHInput()` function that:
+
 1. ✅ Properly constructs scriptSig with redeemScript
 2. ✅ Correctly serializes witness as `[<signature>, <pubkey>]`
 3. ✅ Uses ScriptBuilder for proper length prefixing
@@ -164,5 +168,5 @@ Implemented `finalizeP2SHP2WPKHInput()` function that:
 - BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts
 - BIP141: Segregated Witness (Consensus layer)
 - BIP143: Transaction Signature Verification for Version 0 Witness Program
-- Issue #362: https://github.com/hiromaily/go-crypto-wallet/issues/362
-- PR #363: https://github.com/hiromaily/go-crypto-wallet/pull/363
+- Issue #362: <https://github.com/hiromaily/go-crypto-wallet/issues/362>
+- PR #363: <https://github.com/hiromaily/go-crypto-wallet/pull/363>

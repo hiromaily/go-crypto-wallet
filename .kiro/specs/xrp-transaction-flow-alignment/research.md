@@ -4,12 +4,15 @@
 **Purpose**: Capture discovery findings, architectural investigations, and rationale that inform the technical design for XRP transaction flow alignment.
 
 **Usage**:
+
 - Log research activities and outcomes during the discovery phase.
 - Document design decision trade-offs that are too detailed for `design.md`.
 - Provide references and evidence for future audits or reuse.
+
 ---
 
 ## Summary
+
 - **Feature**: `xrp-transaction-flow-alignment`
 - **Discovery Scope**: Complex Integration (extending existing system with new transaction file format and native signing)
 - **Key Findings**:
@@ -22,6 +25,7 @@
 ## Research Log
 
 ### xrpl-go Native Signing Capabilities
+
 - **Context**: Need to replace gRPC-based signing with native Go implementation for offline signing capability
 - **Sources Consulted**:
   - [XRPLF/xrpl-go](https://github.com/XRPLF/xrpl-go) - Official XRP Ledger Foundation implementation
@@ -46,6 +50,7 @@
   - May need to manage two xrpl-go implementations (xrpscan for submission, Peersyst for signing)
 
 ### XRP Multi-Signature Transaction Workflow
+
 - **Context**: Need to understand XRP multi-sig requirements for JSON transaction file metadata design
 - **Sources Consulted**:
   - [XRP Ledger Multi-Signing Concepts](https://xrpl.org/docs/concepts/accounts/multi-signing)
@@ -81,6 +86,7 @@
   - Transaction fields immutable after first signature (no modifications during signing rounds)
 
 ### JSON Transaction File Format Versioning
+
 - **Context**: Need to design JSON file format that supports future evolution and backward compatibility
 - **Sources Consulted**:
   - [safe-json: Automatic JSON format versioning](https://hackage.haskell.org/package/safe-json)
@@ -111,6 +117,7 @@
   - Consider optional fields for forward compatibility
 
 ### Existing File Repository Architecture Analysis
+
 - **Context**: Determine if transaction file repository can be extended or needs replacement
 - **Sources**: Internal codebase analysis (gap-analysis.md findings)
 - **Findings**:
@@ -320,21 +327,25 @@ type TransactionSubmitter interface {
 ## References
 
 ### Official Documentation
+
 - [XRP Ledger Multi-Signing](https://xrpl.org/docs/concepts/accounts/multi-signing) - Multi-signature transaction requirements
 - [Set Up Multi-Signing Tutorial](https://xrpl.org/docs/tutorials/how-tos/manage-account-settings/set-up-multi-signing) - SignerList configuration
 - [Secure Signing](https://xrpl.org/docs/concepts/transactions/secure-signing) - Best practices for transaction signing
 
 ### xrpl-go Libraries
+
 - [XRPLF/xrpl-go](https://github.com/XRPLF/xrpl-go) - Official XRP Ledger Foundation implementation
 - [Peersyst/xrpl-go](https://pkg.go.dev/github.com/Peersyst/xrpl-go) - Comprehensive wallet and signing functionality (selected for signing)
 - [xrpscan/xrpl-go](https://github.com/xrpscan/xrpl-go) - Currently integrated (v0.2.11, used for submission)
 - [Wallet Package Documentation](https://pkg.go.dev/github.com/Peersyst/xrpl-go/xrpl/wallet) - Sign and Multisign function reference
 
 ### JSON Standards
+
 - [Google JSON Style Guide](https://google.github.io/styleguide/jsoncstyleguide.xml) - API versioning and structure best practices
 - [REST API Standards & Best Practices 2026](https://www.boltic.io/blog/rest-api-standards) - Modern API design patterns
 - [JSON-API Versioning Strategy](https://github.com/json-api/json-api/issues/406) - Semantic versioning approaches
 
 ### Internal References
+
 - [Gap Analysis](./gap-analysis.md) - Implementation gap evaluation and option analysis
 - [Requirements](./requirements.md) - EARS-formatted acceptance criteria

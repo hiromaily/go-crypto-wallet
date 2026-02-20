@@ -89,6 +89,7 @@ func (b *Bitcoin) CreatePSBT(
 **Purpose:** Creates an unsigned PSBT from transaction inputs and outputs.
 
 **Implementation:**
+
 ```go
 // Create PSBT packet
 packet, err := psbt.NewFromUnsignedTx(msgTx)
@@ -120,6 +121,7 @@ func (b *Bitcoin) SignPSBTWithKey(
 **Purpose:** Signs PSBT inputs with provided WIF private keys (offline signing).
 
 **Implementation:**
+
 ```go
 // Decode base64 PSBT
 psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
@@ -170,6 +172,7 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error)
 **Purpose:** Combines signatures into final scriptSig/witness for broadcasting.
 
 **Implementation:**
+
 ```go
 // Decode base64 PSBT
 psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
@@ -204,6 +207,7 @@ func (b *Bitcoin) ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error)
 **Purpose:** Extracts the final, broadcastable transaction from PSBT.
 
 **Implementation:**
+
 ```go
 // Decode base64 PSBT
 psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
@@ -266,6 +270,7 @@ func (r *TransactionFileRepository) WritePSBTFile(
 ```
 
 **Implementation:**
+
 ```go
 // Validate PSBT format
 if !isValidBase64(psbtBase64) {
@@ -294,6 +299,7 @@ func (r *TransactionFileRepository) ReadPSBTFile(path string) (string, error)
 ```
 
 **Implementation:**
+
 ```go
 // Validate extension
 if !strings.HasSuffix(strings.ToLower(path), ".psbt") {
@@ -328,6 +334,7 @@ Location: `internal/application/usecase/watch/btc/create_transaction.go`
 **Responsibility:** Create unsigned PSBT for transactions.
 
 **Key Method:**
+
 ```go
 func (u *createTransactionUseCase) Execute(
     ctx context.Context,
@@ -336,6 +343,7 @@ func (u *createTransactionUseCase) Execute(
 ```
 
 **PSBT Flow:**
+
 1. Select UTXOs for inputs
 2. Calculate outputs (recipient + change)
 3. Create `wire.MsgTx`
@@ -345,6 +353,7 @@ func (u *createTransactionUseCase) Execute(
 7. Store transaction metadata in database
 
 **Code Example:**
+
 ```go
 // Create transaction
 msgTx, err := u.btcClient.CreateRawTransaction(inputs, outputs)
@@ -372,6 +381,7 @@ Location: `internal/application/usecase/watch/btc/send_transaction.go`
 **Responsibility:** Finalize and broadcast fully signed PSBT.
 
 **Key Method:**
+
 ```go
 func (u *sendTransactionUseCase) Execute(
     ctx context.Context,
@@ -380,6 +390,7 @@ func (u *sendTransactionUseCase) Execute(
 ```
 
 **PSBT Flow:**
+
 1. Detect file format (PSBT vs legacy)
 2. For PSBT: Read PSBT file
 3. Validate PSBT is fully signed
@@ -390,6 +401,7 @@ func (u *sendTransactionUseCase) Execute(
 8. Update database
 
 **Code Example:**
+
 ```go
 func (u *sendTransactionUseCase) processPSBTFile(filePath string) (string, error) {
     // Read PSBT
@@ -423,6 +435,7 @@ Location: `internal/application/usecase/keygen/btc/sign_transaction.go`
 **Responsibility:** Add first signature to PSBT (offline).
 
 **PSBT Flow:**
+
 1. Read unsigned PSBT
 2. Determine sender account
 3. Get account private keys
@@ -430,6 +443,7 @@ Location: `internal/application/usecase/keygen/btc/sign_transaction.go`
 5. Write partially/fully signed PSBT
 
 **Code Example:**
+
 ```go
 func (u *signTransactionUseCase) signMultisigPSBT(
     psbtBase64 string,
@@ -457,12 +471,14 @@ Location: `internal/application/usecase/sign/btc/sign_transaction.go`
 **Responsibility:** Add second+ signature to PSBT (offline).
 
 **PSBT Flow:**
+
 1. Read partially signed PSBT
 2. Get auth private key
 3. Sign PSBT with auth key (offline)
 4. Write fully signed PSBT
 
 **Code Example:**
+
 ```go
 func (u *signTransactionUseCase) signMultisigPSBT(
     psbtBase64 string,
@@ -489,10 +505,12 @@ func (u *signTransactionUseCase) signMultisigPSBT(
 Location: `internal/application/usecase/*/btc/*_test.go`
 
 **Current Approach:**
+
 - Constructor tests verify use case instantiation
 - Interface compliance tests verify correct interface implementation
 
 **Example:**
+
 ```go
 func TestNewSignTransactionUseCase(t *testing.T) {
     t.Run("creates use case successfully with nil dependencies", func(t *testing.T) {
@@ -537,6 +555,7 @@ func TestNewSignTransactionUseCase(t *testing.T) {
    - Sample transaction data
 
 **Example Integration Test:**
+
 ```go
 func TestSignTransactionUseCase_Integration(t *testing.T) {
     // Setup mocks
@@ -736,6 +755,7 @@ bitcoin-cli analyzepsbt "$(cat transaction.psbt)"
 ```
 
 **Output shows:**
+
 - Inputs and their metadata
 - Outputs
 - Current signatures
@@ -758,12 +778,14 @@ packet.Inputs[i].WitnessUtxo = &wire.TxOut{
 **Issue 2: "Invalid signature"**
 
 **Solution:** Verify correct signature algorithm:
+
 - Taproot → Schnorr (BIP340)
 - Legacy/SegWit → ECDSA
 
 **Issue 3: "PSBT not finalizing"**
 
 **Solution:** Check all required signatures present:
+
 ```go
 isComplete, err := btc.IsPSBTComplete(psbtBase64)
 if !isComplete {
@@ -811,6 +833,7 @@ bitcoin-cli decodepsbt "$(cat "$PSBT_FILE")"
 | **Total (2-of-2)** | ~165ms | ~245ms | +48% |
 
 **Analysis:**
+
 - PSBT has ~50% overhead due to richer metadata
 - Still well within acceptable performance (<1s for complete flow)
 - Benefits (standardization, compatibility) outweigh performance cost
@@ -818,6 +841,7 @@ bitcoin-cli decodepsbt "$(cat "$PSBT_FILE")"
 ### Optimization Opportunities
 
 1. **Caching**
+
    ```go
    // Cache parsed PSBTs to avoid re-parsing
    type PSBTCache struct {
@@ -827,6 +851,7 @@ bitcoin-cli decodepsbt "$(cat "$PSBT_FILE")"
    ```
 
 2. **Parallel Signing** (future)
+
    ```go
    // Sign multiple inputs in parallel
    var wg sync.WaitGroup
@@ -841,6 +866,7 @@ bitcoin-cli decodepsbt "$(cat "$PSBT_FILE")"
    ```
 
 3. **Streaming for Large PSBTs**
+
    ```go
    // Stream PSBT data instead of loading into memory
    reader := bufio.NewReader(file)

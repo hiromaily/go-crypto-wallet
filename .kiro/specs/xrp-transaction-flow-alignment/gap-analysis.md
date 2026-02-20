@@ -5,6 +5,7 @@
 This gap analysis evaluates the implementation challenges for aligning XRP transaction flow with Bitcoin patterns through JSON-based file format and native Go signing. The analysis reveals a **mature file handling infrastructure** that can be extended with minimal changes, **existing xrpl-go integration** that simplifies submission, but **significant refactoring needed** for interface segregation and native signing implementation.
 
 **Key Findings**:
+
 - **Infrastructure Reuse**: 85% of transaction file handling infrastructure is reusable
 - **xrpl-go Already Integrated**: Transaction submission library is present and functional
 - **Interface Segregation Gap**: Current use cases depend on monolithic XRPer interface
@@ -24,6 +25,7 @@ This gap analysis evaluates the implementation challenges for aligning XRP trans
 **Location**: `internal/infrastructure/storage/file/transaction/transaction.go`
 
 **Current Capabilities**:
+
 - ✅ File naming convention: `{actionType}_{txID}_{txType}_{signedCount}_{timestamp}.{ext}`
 - ✅ Directory creation and path validation
 - ✅ PSBT file support (`.psbt` extension, base64-encoded)
@@ -32,6 +34,7 @@ This gap analysis evaluates the implementation challenges for aligning XRP trans
 - ✅ Metadata extraction from file paths (`GetFileNameType`, `ValidateFilePath`)
 
 **Interface Definition** (`internal/application/ports/file/interface.go`):
+
 ```go
 type TransactionFileRepositorier interface {
     CreateFilePath(actionType, txType, txID, signedCount)
@@ -49,18 +52,21 @@ type TransactionFileRepositorier interface {
 #### XRP Use Cases
 
 **Create Transaction** (`internal/application/usecase/watch/xrp/create_transaction.go`):
+
 - Current format: CSV-like text with sender account type header
 - Uses `WriteFileSlice` for multi-line output
 - Depends on full `xrpCreateTxClient` interface (embedsBalanceChecker + TransactionPreparer)
 - Output format: `senderAccount\nUUID,txJSON\n...`
 
 **Sign Transaction** (`internal/application/usecase/sign/xrp/sign_transaction.go`):
+
 - Current format: Parses CSV text format
 - Uses gRPC-based signing via `xrpSignClient`  (TransactionSigner interface)
 - No signature count validation or multi-signature metadata
 - Output: CSV format with UUID, signed transaction ID, and blob
 
 **Send Transaction** (`internal/application/usecase/watch/xrp/send_transaction.go`):
+
 - Uses `ReadFileSlice` to parse signed transactions
 - Submission already uses **xrpl-go library** for network calls
 - No validation of signature completion status
@@ -70,12 +76,14 @@ type TransactionFileRepositorier interface {
 **Location**: `internal/application/ports/api/xrp/interface.go`
 
 **Current Structure**:
+
 - `XRPer` (monolithic): Embeds XRPAdminer, XRPPublicer, XRPAPIer + additional methods
 - `XRPAPIer` (comprehensive): 30+ methods including account, transaction, escrow, NFT operations
 - No segregated `AccountInfoProvider` interface
 - No segregated `TransactionSigner` interface for offline signing
 
 **Current Dependencies**:
+
 - Create use case: Depends on `xrpCreateTxClient` (custom interface embedding BalanceChecker + TransactionPreparer)
 - Sign use case: Depends on `xrpSignClient` (custom interface for TransactionSigner)
 - Send use case: Depends on full `XRPAPIer`
@@ -83,6 +91,7 @@ type TransactionFileRepositorier interface {
 #### XRP Implementation
 
 **xrpl-go Integration** (`internal/infrastructure/api/xrp/xrplgo/`):
+
 - ✅ Already integrated: `github.com/xrpscan/xrpl-go v0.2.11`
 - ✅ Transaction submission implemented (`SubmitTransaction`)
 - ✅ Account info retrieval (`GetAccountInfo`)
@@ -90,6 +99,7 @@ type TransactionFileRepositorier interface {
 - ✅ Transaction status checking (`GetTransaction`)
 
 **gRPC-based Signing** (`internal/infrastructure/api/xrp/xrp/`):
+
 - Currently uses gRPC service for signing operations
 - Protocol Buffers auto-generated: `*.pb.go` (DO NOT EDIT)
 - **Gap**: No native Go signing implementation using xrpl-go's signing capabilities
@@ -97,6 +107,7 @@ type TransactionFileRepositorier interface {
 ### 1.2 Architecture Patterns
 
 **File Naming Convention**:
+
 ```
 Pattern: {baseDir}{actionType}_{txID}_{txType}_{signedCount}_{timestamp}.{extension}
 
@@ -107,6 +118,7 @@ Examples:
 ```
 
 **Multi-Signature File Progression**:
+
 ```
 transfer_5_unsigned_0_*.json      # Created by watch wallet
 transfer_5_signed_1_*.json        # After keygen wallet signature
@@ -116,6 +128,7 @@ transfer_5_done_2_*.json          # Confirmed on ledger
 ```
 
 **Interface Segregation Pattern** (from Bitcoin):
+
 ```go
 // BTC Create Transaction Use Case
 type createTxBTCClient interface {
@@ -134,11 +147,13 @@ XRP needs similar segregation for `AccountInfoProvider` and `TransactionSigner`.
 ### 1.3 Integration Surfaces
 
 **Database Schema**:
+
 - `xrp_tx` table: Tracks transaction metadata (txID, status, etc.)
 - `xrp_tx_detail` table: Stores XRP-specific details
 - `xrp_account_key` table: Stores master seeds for signing
 
 **DTO Structures** (`internal/application/dto/xrp/transaction.go`):
+
 ```go
 type TxInput struct {
     TransactionType    string
@@ -173,6 +188,7 @@ type Instructions struct {
 #### Requirement 1: JSON Transaction File Format
 
 **Data Models**:
+
 - JSON structure matching `dtoxrp.TxInput` plus metadata:
   - Version (e.g., "1.0.0")
   - Chain ("XRP")
@@ -188,11 +204,13 @@ type Instructions struct {
     - SignedBlob (optional, when signed)
 
 **Services/Components**:
+
 - Extend `TransactionFileRepositorier` interface with JSON methods
 - JSON serialization/deserialization for transaction files
 - File extension handler (`.json` instead of `.psbt` or `.hex`)
 
 **Validation**:
+
 - JSON schema validation for version compatibility
 - UUID format validation
 - Transaction data completeness validation
@@ -200,15 +218,18 @@ type Instructions struct {
 #### Requirement 2: Create Transaction Use Case Refactoring
 
 **Data Models**:
+
 - New `AccountInfoProvider` interface extracting account-related methods from XRPer
 - Create transaction output DTO with JSON file path
 
 **Services/Components**:
+
 - Refactor `createTransactionUseCase` to use JSON file writer
 - Define segregated `AccountInfoProvider` interface
 - Update file generation logic to include comprehensive metadata
 
 **Business Rules**:
+
 - Preserve all transaction details for offline signing
 - Initialize signature count to 0
 - Set required signatures based on account configuration
@@ -216,16 +237,19 @@ type Instructions struct {
 #### Requirement 3: Sign Transaction Use Case Refactoring
 
 **Data Models**:
+
 - New `TransactionSigner` interface for offline signing methods
 - Native Go signing using xrpl-go library
 
 **Services/Components**:
+
 - Implement native Go signing (no gRPC dependency)
 - JSON transaction file parser
 - Signature count incrementer
 - Multi-signature completion detector
 
 **Business Rules**:
+
 - Skip re-signing if transaction already complete
 - Increment signature count after successful signing
 - Mark transaction as complete when `signatureCount >= requiredSignatures`
@@ -233,11 +257,13 @@ type Instructions struct {
 #### Requirement 4: Send Transaction Use Case Refactoring
 
 **Services/Components**:
+
 - JSON file parser for signed transactions
 - xrpl-go submission (already implemented in `xrplgo` package)
 - Signature completion validator
 
 **Validation**:
+
 - Verify `isComplete` flag before submission
 - Validate signed blob format
 - Check signature count meets threshold
@@ -245,11 +271,13 @@ type Instructions struct {
 #### Requirement 5-6: Offline Signing + Multi-Signature
 
 **Security**:
+
 - No network calls in sign wallet operations
 - All required data in JSON file (no database lookups except secrets)
 - Sequential file naming for audit trail
 
 **Workflow**:
+
 - File-based data transfer between online/offline systems
 - Signature count tracking in file metadata
 - Completion status flag
@@ -257,6 +285,7 @@ type Instructions struct {
 #### Requirement 7: Backward Compatibility
 
 **Migration Strategy**:
+
 - Detect file format: Try JSON parse, fallback to CSV
 - Deprecation warnings for text format
 - Dual-format support during migration period
@@ -264,6 +293,7 @@ type Instructions struct {
 #### Requirement 9: Interface Segregation
 
 **Interface Definitions**:
+
 ```go
 // New interfaces to define in application/ports/api/xrp/
 
@@ -326,12 +356,14 @@ type TransactionSubmitter interface {
 ### 2.3 Complexity Signals
 
 **Complexity Indicators**:
+
 - ✅ Simple CRUD: File read/write operations
 - 🟡 Algorithmic Logic: JSON serialization/deserialization, signature count tracking
 - 🟡 Workflows: Multi-phase transaction signing (unsigned → signed-1 → signed-N → sent)
 - 🔴 External Integrations: Native Go signing with xrpl-go (requires research)
 
 **Risk Areas**:
+
 - Native Go signing implementation (unfamiliar API)
 - Multi-signature transaction blob manipulation
 - Backward compatibility with in-flight text-format transactions
@@ -343,6 +375,7 @@ type TransactionSubmitter interface {
 ### Option A: Extend Existing Components
 
 **Which files/modules to extend**:
+
 1. **`internal/application/ports/file/interface.go`**:
    - Add `ReadJSONTransactionFile(path) (TransactionFile, error)`
    - Add `WriteJSONTransactionFile(path, data TransactionFile) (string, error)`
@@ -365,18 +398,21 @@ type TransactionSubmitter interface {
    - Add signature completion validation
 
 **Compatibility Assessment**:
+
 - ✅ No breaking changes to interface consumers outside XRP
 - ✅ Existing PSBT/Hex methods remain unchanged
 - ⚠️ XRP use cases require updates (expected as part of refactor)
 - ✅ File repository backward compatible (new methods added, existing preserved)
 
 **Complexity and Maintainability**:
+
 - 📊 TransactionFileRepository file size: ~280 lines → ~400 lines (manageable)
 - 📊 Create/Sign/Send use cases: Moderate changes to parsing logic
 - ✅ Single Responsibility Principle: File repository handles multiple formats (acceptable for infrastructure)
 - ✅ Cognitive load: Medium (JSON methods clearly separated from PSBT/Hex)
 
 **Trade-offs**:
+
 - ✅ **Pros**:
   - Minimal new files (faster implementation)
   - Leverages existing file path and naming infrastructure
@@ -391,6 +427,7 @@ type TransactionSubmitter interface {
 ### Option B: Create New Components
 
 **Rationale for new creation**:
+
 - Distinct JSON transaction file handling vs. existing text/PSBT/Hex
 - XRP-specific transaction lifecycle (metadata, multi-sig) differs from BTC/BCH
 - Clean separation for xrpl-go signing vs. gRPC-based signing
@@ -398,6 +435,7 @@ type TransactionSubmitter interface {
 **New Components**:
 
 1. **`internal/application/ports/file/xrp_transaction.go`**:
+
    ```go
    type XRPTransactionFileHandler interface {
        ReadJSONFile(path string) (*XRPTransactionFile, error)
@@ -412,6 +450,7 @@ type TransactionSubmitter interface {
    - Version compatibility checking
 
 3. **`internal/application/ports/api/xrp/segregated_interfaces.go`**:
+
    ```go
    type AccountInfoProvider interface { ... }
    type TransactionSigner interface { ... }
@@ -423,12 +462,14 @@ type TransactionSubmitter interface {
    - Implements `TransactionSigner` interface
 
 **Integration Points**:
+
 - XRP use cases depend on `XRPTransactionFileHandler` instead of `TransactionFileRepositorier`
 - Create use case uses `AccountInfoProvider` instead of full `XRPer`
 - Sign use case uses `TransactionSigner` (native Go implementation)
 - Send use case uses `TransactionSubmitter` (xrpl-go client)
 
 **Responsibility Boundaries**:
+
 - `XRPTransactionFileHandler`: JSON file I/O, schema validation, versioning
 - `TransactionFileRepositorier`: Generic file operations (text, PSBT, Hex)
 - `AccountInfoProvider`: Account queries only (balance, info)
@@ -436,6 +477,7 @@ type TransactionSubmitter interface {
 - `TransactionSubmitter`: Ledger submission only (no signing)
 
 **Trade-offs**:
+
 - ✅ **Pros**:
   - Clean separation of XRP-specific logic
   - Easier to test in isolation (no PSBT/Hex coupling)
@@ -454,16 +496,19 @@ type TransactionSubmitter interface {
 **Combination Strategy**:
 
 **Part 1: Extend File Repository** (minimal changes):
+
 - Add JSON file methods to `TransactionFileRepositorier` interface
 - Implement in `TransactionFileRepository` (reuse existing path logic)
 - **Rationale**: File path and naming convention is reusable infrastructure
 
 **Part 2: Create Segregated Interfaces** (new files):
+
 - Define `AccountInfoProvider`, `TransactionSigner`, `TransactionSubmitter` interfaces
 - Implement native Go signing in `xrplgo/native_signer.go`
 - **Rationale**: Interface segregation is architectural improvement
 
 **Part 3: Refactor Use Cases** (update existing):
+
 - Update create/sign/send use cases to use JSON methods and segregated interfaces
 - Add backward compatibility parser as private helper in use cases
 - **Rationale**: Use cases are the integration point; changes expected here
@@ -471,40 +516,47 @@ type TransactionSubmitter interface {
 **Phased Implementation**:
 
 **Phase 1**: Infrastructure (Low Risk)
+
 - [ ] Add `ReadJSONTransactionFile` / `WriteJSONTransactionFile` to port interface
 - [ ] Implement JSON methods in `TransactionFileRepository`
 - [ ] Define transaction file JSON schema structure
 - [ ] Write unit tests for JSON serialization/deserialization
 
 **Phase 2**: Interface Segregation (Medium Risk)
+
 - [ ] Define `AccountInfoProvider` interface in `application/ports/api/xrp/`
 - [ ] Define `TransactionSigner` interface
 - [ ] Implement `AccountInfoProvider` in `xrplgo` client (delegate existing methods)
 - [ ] Research xrpl-go native signing API
 
 **Phase 3**: Native Signing (High Risk - Research Heavy)
+
 - [ ] Implement `TransactionSigner` with native Go signing
 - [ ] Test signing output matches gRPC-based signing
 - [ ] Validate signed transaction blob format
 
 **Phase 4**: Use Case Refactoring (Medium Risk)
+
 - [ ] Refactor create transaction to use JSON format and `AccountInfoProvider`
 - [ ] Refactor sign transaction to use JSON parsing and native signing
 - [ ] Refactor send transaction to validate JSON and submit via xrpl-go
 - [ ] Add backward compatibility for text format
 
 **Phase 5**: Testing & Migration (Low Risk)
+
 - [ ] Integration tests for full transaction flow (create → sign → send)
 - [ ] Multi-signature scenario tests (2-of-3, 3-of-5)
 - [ ] Backward compatibility tests with legacy text files
 - [ ] Documentation and migration guide
 
 **Risk Mitigation**:
+
 - **Phase 3 Blocker**: If native signing research fails, implement signing wrapper around gRPC (defer full native implementation)
 - **Backward Compatibility**: Feature flag to enable/disable JSON format during migration
 - **Incremental Rollout**: Deploy to testnet first, validate multi-sig flows, then mainnet
 
 **Trade-offs**:
+
 - ✅ **Pros**:
   - Balanced approach (reuse + new components)
   - Phased implementation reduces risk
@@ -527,6 +579,7 @@ type TransactionSubmitter interface {
 **Overall Effort**: **M (Medium - 5-7 days)**
 
 **Breakdown by Phase**:
+
 - Phase 1 (Infrastructure): **S** (1-2 days) - Straightforward JSON I/O
 - Phase 2 (Interface Segregation): **S** (1 day) - Interface extraction
 - Phase 3 (Native Signing): **M** (2-3 days) - Research + implementation
@@ -534,6 +587,7 @@ type TransactionSubmitter interface {
 - Phase 5 (Testing): **S** (1 day) - Extend existing test patterns
 
 **Justification**:
+
 - Extends established patterns (file handling, interface segregation)
 - Manageable complexity (JSON serialization is standard library)
 - xrpl-go research mitigated by existing `xrplgo` integration knowledge
@@ -544,6 +598,7 @@ type TransactionSubmitter interface {
 **Overall Risk**: **Medium**
 
 **High-Risk Areas**:
+
 1. **Native Go Signing with xrpl-go**:
    - **Risk**: xrpl-go signing API unfamiliar; may not support all transaction types
    - **Mitigation**: Research xrpl-go documentation and examples first; fallback to gRPC wrapper if needed
@@ -555,6 +610,7 @@ type TransactionSubmitter interface {
    - **Impact**: High (security and correctness critical)
 
 **Medium-Risk Areas**:
+
 1. **Backward Compatibility Parsing**:
    - **Risk**: Edge cases in text format parsing cause migration failures
    - **Mitigation**: Thorough testing with existing text files; dual-format support with feature flag
@@ -566,6 +622,7 @@ type TransactionSubmitter interface {
    - **Impact**: Medium (maintenance burden)
 
 **Low-Risk Areas**:
+
 1. **File Repository Extension**:
    - **Risk**: Low (similar to existing PSBT/Hex methods)
    - **Mitigation**: Unit tests cover new methods
@@ -577,6 +634,7 @@ type TransactionSubmitter interface {
    - **Impact**: Low
 
 **Overall Justification**:
+
 - Known tech (Go stdlib JSON, xrpl-go library)
 - Moderate integrations (file I/O, interface refactoring)
 - Clear performance path (file-based, no heavy computation)
@@ -642,6 +700,7 @@ type TransactionSubmitter interface {
 ```
 
 **Versioning Strategy**:
+
 - Major version: Breaking schema changes (e.g., field removal)
 - Minor version: Backward-compatible additions (e.g., new optional fields)
 - Patch version: Documentation or validation fixes
@@ -671,6 +730,7 @@ type TransactionSubmitter interface {
 ```
 
 **Benefits**:
+
 - Clear dependency boundaries (create, sign, send)
 - Testability (mock minimal interfaces)
 - Offline capability (TransactionSigner has no network methods)
@@ -694,6 +754,7 @@ func (u *signTransactionUseCase) parseTransactionFile(filePath string) (*Transac
 ```
 
 **Migration Timeline**:
+
 - Week 1-2: Deploy JSON format (new transactions use JSON)
 - Week 3-4: Monitor for text format usage (log warnings)
 - Month 2+: Deprecate text format (documentation update)

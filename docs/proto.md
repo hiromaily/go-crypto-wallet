@@ -98,6 +98,7 @@ make proto-fmt-check   # Check formatting (used in CI)
 ```
 
 **Requirements:**
+
 - `clang-format` (install via `apt install clang-format` or `brew install clang-format`)
 
 ### buf Utilities (Limited with Edition 2024)

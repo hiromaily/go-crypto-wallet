@@ -46,6 +46,7 @@ All specification documents have been reviewed and validated. One metadata synch
 | Project description | ✅ PASS | Well-structured overview with goals |
 
 **Sample EARS Validation**:
+
 ```
 ✅ "When the configuration file specifies `database.type = "postgresql"`,
     the Wallet System shall accept this as a valid database type"
@@ -56,6 +57,7 @@ All specification documents have been reviewed and validated. One metadata synch
 ```
 
 **Requirements Summary**:
+
 1. Configuration Support for PostgreSQL (7 criteria)
 2. PostgreSQL Schema Generation (5 criteria)
 3. SQLC Code Generation for PostgreSQL (5 criteria)
@@ -86,6 +88,7 @@ All specification documents have been reviewed and validated. One metadata synch
 | Migration strategy | ✅ PASS | Section present with 5 migration phases |
 
 **Design Document Structure**:
+
 - ✅ Overview
 - ✅ Architecture (Existing + Pattern & Boundary Map)
 - ✅ System Flows
@@ -99,6 +102,7 @@ All specification documents have been reviewed and validated. One metadata synch
 - ✅ Performance & Scalability
 
 **Key Technical Decisions**:
+
 - ✅ pgx v5 driver (50-100% faster than lib/pq)
 - ✅ TEXT with CHECK constraints (not PostgreSQL ENUM)
 - ✅ Repository Pattern extension
@@ -122,6 +126,7 @@ All specification documents have been reviewed and validated. One metadata synch
 | Natural language | ✅ PASS | "What to do" descriptions (not code structure) |
 
 **Phase Breakdown**:
+
 1. ✅ Phase 1: Foundation & Configuration (Tasks 1-2, 6 sub-tasks)
 2. ✅ Phase 2: Code Generation & Connection (Tasks 3-4, 4 sub-tasks)
 3. ✅ Phase 3: Repository Implementations (Tasks 5-7, 9 sub-tasks)
@@ -131,6 +136,7 @@ All specification documents have been reviewed and validated. One metadata synch
 7. ✅ Phase 7: Documentation (Task 15, 4 sub-tasks)
 
 **Requirements Coverage Table Validated**:
+
 ```
 | Requirement | Tasks Covering |
 |-------------|----------------|
@@ -159,6 +165,7 @@ All specification documents have been reviewed and validated. One metadata synch
 | Risk assessment | ✅ PASS | 6 risks with mitigations |
 
 **Research Topics**:
+
 1. ✅ PostgreSQL Driver Selection (pgx vs lib/pq)
 2. ✅ Enum Handling Strategy (ENUM vs TEXT with CHECK)
 3. ✅ PostgreSQL Docker Image Version
@@ -166,6 +173,7 @@ All specification documents have been reviewed and validated. One metadata synch
 5. ✅ Data Type Mappings
 
 **Design Decisions Documented**:
+
 1. ✅ Use pgx Driver for PostgreSQL
 2. ✅ TEXT with CHECK Constraints for Enums
 3. ✅ Reuse Existing HCL Schemas for PostgreSQL
@@ -212,6 +220,7 @@ All specification documents have been reviewed and validated. One metadata synch
 
 **Description**:
 The `spec.json` metadata was out of sync with the actual specification state. The file showed:
+
 - `phase: "design-generated"` (should be `"tasks-generated"`)
 - `approvals.design.approved: false` (should be `true`)
 - `approvals.tasks.generated: false` (should be `true`)
@@ -221,6 +230,7 @@ The spec.json file was not updated when tasks.md was generated.
 
 **Fix Applied**:
 Updated spec.json with correct values:
+
 ```json
 {
   "phase": "tasks-generated",
@@ -329,23 +339,28 @@ All specification documents are complete, consistent, and ready for implementati
 ### Recommended Implementation Strategy
 
 **Option 1: Sequential Implementation (Recommended for Solo Developer)**
+
 ```bash
 # Clear context before starting
 /kiro:spec-impl postgresql-integration 1.1
 ```
+
 Start with Task 1.1 (Extend database configuration struct), then proceed sequentially through phases.
 
 **Option 2: Parallel Implementation (Recommended for Team)**
 Execute tasks marked with `(P)` in parallel:
+
 - Phase 1: Tasks 1.1, 1.2 in parallel
 - Phase 2: Tasks 2.1, 2.2, 2.3 in parallel
 - Phase 3: Tasks 5.1-5.4 in parallel
 - Etc.
 
 **Option 3: Multi-Task Batch**
+
 ```bash
 /kiro:spec-impl postgresql-integration 1.1,1.2
 ```
+
 Execute multiple related tasks together (use with caution - may consume context).
 
 ### Implementation Workflow

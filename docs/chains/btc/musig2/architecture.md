@@ -85,11 +85,13 @@ MuSig2 is a two-round Schnorr multisignature protocol (BIP327) that enables mult
 **Purpose**: Pure business logic with zero infrastructure dependencies
 
 **Components**:
+
 - **Types**: MuSig2-specific value objects (NonceCommitment, PartialSignature, AggregatedKey, SigningSession)
 - **Validators**: Business rule validation (nonce uniqueness, signer count, signature validation)
 - **Errors**: Domain-specific errors for MuSig2 operations
 
 **Key Characteristics**:
+
 - No external dependencies (no database, no API clients)
 - Immutable value objects
 - Validation logic for business rules
@@ -154,6 +156,7 @@ func ValidateSigningSessionComplete(session *SigningSession) error
 **Purpose**: Orchestrate business logic by coordinating domain objects and infrastructure services
 
 **Organization**:
+
 ```
 internal/application/usecase/
 ├── keygen/
@@ -190,6 +193,7 @@ type CreateMuSig2AddressInput struct {
 ```
 
 **Process**:
+
 1. Validate account is multisig account
 2. Retrieve public keys from all signers (auth_fullpubkey table)
 3. Add account's own public key
@@ -220,6 +224,7 @@ type GenerateMuSig2NonceOutput struct {
 ```
 
 **Process**:
+
 1. Validate PSBT and transaction
 2. Generate secure random nonce using MuSig2Service
 3. Store nonce in PSBT proprietary field
@@ -247,6 +252,7 @@ type MuSig2SignOutput struct {
 ```
 
 **Process**:
+
 1. Validate all nonces are present in PSBT
 2. Extract nonces from PSBT
 3. Retrieve private key for signing
@@ -285,6 +291,7 @@ type AggregateMuSig2SignaturesOutput struct {
 ```
 
 **Process**:
+
 1. Validate all partial signatures are present in PSBT
 2. Extract partial signatures
 3. Aggregate signatures using MuSig2Service
@@ -387,6 +394,7 @@ finalSig := session.FinalSig()
 **Purpose**: Manage account keys including MuSig2 Taproot addresses
 
 **Key Methods**:
+
 ```go
 type AccountKeyRepositorier interface {
     GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlc.AccountKey, error)
@@ -402,6 +410,7 @@ type AccountKeyRepositorier interface {
 **Purpose**: Manage full public keys from auth accounts (Sign wallets)
 
 **Key Methods**:
+
 ```go
 type AuthFullPubkeyRepositorier interface {
     GetOne(authType account.AuthType) (*sqlc.AuthFullpubkey, error)
@@ -416,6 +425,7 @@ type AuthFullPubkeyRepositorier interface {
 **Purpose**: Handle PSBT file operations
 
 MuSig2 data is stored in PSBT proprietary fields:
+
 - **Public Nonces**: 66 bytes per signer
 - **Partial Signatures**: 32 bytes per signer
 - **Aggregated Signature**: 64 bytes (final)
@@ -444,6 +454,7 @@ watch send --file payment_15_signed_3.psbt
 ```
 
 **Command Flow**:
+
 ```
 CLI Command → Parse Args → Create Use Case → Execute → Handle Result → Display Output
 ```
@@ -850,6 +861,7 @@ Example PSBT with MuSig2 data:
 #### Multi-Layer Protection
 
 **1. Application Layer**:
+
 ```go
 // Validate nonce uniqueness before use
 func ValidateNonceUniqueness(nonces []NonceCommitment) error {
@@ -866,6 +878,7 @@ func ValidateNonceUniqueness(nonces []NonceCommitment) error {
 ```
 
 **2. Database Layer** (Future Enhancement):
+
 ```sql
 CREATE TABLE musig2_nonces (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -880,6 +893,7 @@ CREATE TABLE musig2_nonces (
 ```
 
 **3. Cryptographic Layer**:
+
 - Nonces generated using secure random number generator
 - Each session creates fresh nonces
 - Nonces are automatically deleted after use in btcd library
@@ -897,6 +911,7 @@ CREATE TABLE musig2_nonces (
 ### Key Aggregation Security
 
 **Public Key Validation**:
+
 ```go
 // Validate all public keys before aggregation
 func ValidatePublicKeysForMuSig2(pubKeys [][]byte) error {
@@ -931,6 +946,7 @@ func ValidatePublicKeysForMuSig2(pubKeys [][]byte) error {
 ```
 
 **Taproot Tweak Application**:
+
 ```go
 // Apply BIP86 Taproot tweak for key-path spending
 aggregatedKey, err := musig2Service.AggregatePublicKeys(
@@ -942,6 +958,7 @@ aggregatedKey, err := musig2Service.AggregatePublicKeys(
 ### Signature Validation
 
 **Partial Signature Verification**:
+
 ```go
 // Each partial signature is validated before aggregation
 func ValidatePartialSignatures(sigs []PartialSignature, expected int) error {
@@ -963,6 +980,7 @@ func ValidatePartialSignatures(sigs []PartialSignature, expected int) error {
 ```
 
 **Final Signature Verification**:
+
 ```go
 // Verify aggregated signature before broadcasting
 isValid := musig2Service.VerifyAggregatedSignature(
@@ -982,6 +1000,7 @@ if !isValid {
 **Attack**: Reusing the same nonce for different messages allows an attacker to compute the private key.
 
 **Mitigation**:
+
 - Database unique constraint on nonces
 - Application-level validation
 - Automatic nonce deletion after use
@@ -992,6 +1011,7 @@ if !isValid {
 **Attack**: Attacker provides a crafted public key that allows them to control the aggregated key.
 
 **Mitigation**:
+
 - MuSig2 protocol includes built-in rogue key protection
 - Key sorting ensures deterministic aggregation
 - All signers must participate in signing
@@ -1001,6 +1021,7 @@ if !isValid {
 **Attack**: Attempt to create valid signature without all required partial signatures.
 
 **Mitigation**:
+
 - Cryptographic proof prevents forgery without all partial signatures
 - Verification step before broadcasting
 - PSBT validation at each stage
@@ -1010,6 +1031,7 @@ if !isValid {
 **Attack**: Modify PSBT fields to change transaction or signatures.
 
 **Mitigation**:
+
 - PSBT format includes checksums
 - Transaction hash validation at each step
 - Offline signing prevents network attacks
@@ -1046,6 +1068,7 @@ CREATE TABLE account_key (
 ```
 
 **MuSig2 Usage**:
+
 - `multisig_address`: Stores P2TR (Taproot) address (`bc1p...` or `tb1p...`)
 - `addr_status`: Tracks address creation status
 - `full_public_key`: Account's public key for aggregation
@@ -1068,6 +1091,7 @@ CREATE TABLE auth_fullpubkey (
 ```
 
 **MuSig2 Usage**:
+
 - `full_public_key`: Sign wallet's public key for key aggregation
 - `auth_account`: Identifies which Sign wallet (auth1, auth2, etc.)
 
@@ -1089,6 +1113,7 @@ CREATE TABLE auth_account_key (
 ```
 
 **MuSig2 Usage**:
+
 - `wallet_import_format`: Private key for creating partial signatures
 - Used by Sign wallets during Round 2 (signing)
 
@@ -1116,6 +1141,7 @@ CREATE TABLE musig2_nonces (
 ```
 
 **Purpose**:
+
 - Enforce nonce uniqueness at database level
 - Track which nonces have been used
 - Prevent nonce reuse attacks
@@ -1143,6 +1169,7 @@ CREATE TABLE musig2_sessions (
 ```
 
 **Purpose**:
+
 - Track signing session progress
 - Validate all nonces/signatures collected
 - Monitor signing workflow state
@@ -1169,6 +1196,7 @@ type CreateMuSig2AddressInput struct {
 ```
 
 **Example Usage**:
+
 ```go
 useCase := container.NewKeygenCreateMuSig2AddressUseCase()
 err := useCase.Create(ctx, keygenusecase.CreateMuSig2AddressInput{
@@ -1198,6 +1226,7 @@ type GenerateMuSig2NonceOutput struct {
 ```
 
 **Example Usage**:
+
 ```go
 useCase := container.NewKeygenGenerateMuSig2NonceUseCase()
 output, err := useCase.Generate(ctx, keygenusecase.GenerateMuSig2NonceInput{
@@ -1228,6 +1257,7 @@ type MuSig2SignOutput struct {
 ```
 
 **Example Usage**:
+
 ```go
 useCase := container.NewKeygenMuSig2SignUseCase()
 output, err := useCase.Sign(ctx, keygenusecase.MuSig2SignInput{
@@ -1256,6 +1286,7 @@ type AggregateMuSig2SignaturesOutput struct {
 ```
 
 **Example Usage**:
+
 ```go
 useCase := container.NewWatchAggregateMuSig2SignaturesUseCase()
 output, err := useCase.Aggregate(ctx, watchusecase.AggregateMuSig2SignaturesInput{
@@ -1319,12 +1350,13 @@ func (s *MuSig2Service) VerifyAggregatedSignature(
 ### Library Integration: btcd/btcec/v2/schnorr/musig2
 
 **Version**: v2.3.6
-**Documentation**: https://pkg.go.dev/github.com/btcsuite/btcd/btcec/v2/schnorr/musig2
+**Documentation**: <https://pkg.go.dev/github.com/btcsuite/btcd/btcec/v2/schnorr/musig2>
 **License**: ISC (permissive)
 
 #### Key Features Used
 
 **1. MuSig2 Context Creation**:
+
 ```go
 ctx, err := musig2.NewContext(
     privateKey,           // Signer's private key
@@ -1335,28 +1367,33 @@ ctx, err := musig2.NewContext(
 ```
 
 **2. Session Management**:
+
 ```go
 session, err := ctx.NewSession()
 pubNonce := session.PublicNonce()  // [66]byte public nonce
 ```
 
 **3. Nonce Registration**:
+
 ```go
 haveAllNonces, err := session.RegisterPubNonce(otherNonce)
 ```
 
 **4. Signing**:
+
 ```go
 partialSig, err := session.Sign(messageHash)
 ```
 
 **5. Aggregation**:
+
 ```go
 haveAllSigs, err := session.CombineSig(partialSig)
 finalSig := session.FinalSig()
 ```
 
 **6. Verification**:
+
 ```go
 isValid := finalSig.Verify(messageHash[:], aggregatedPubKey)
 ```
@@ -1408,6 +1445,7 @@ func ExtractMuSig2NoncesFromPSBT(p *psbt.Packet) ([][66]byte, error) {
 ### Error Handling
 
 **Error Wrapping**:
+
 ```go
 if err != nil {
     return fmt.Errorf("failed to create MuSig2 context: %w", err)
@@ -1415,6 +1453,7 @@ if err != nil {
 ```
 
 **Domain Errors**:
+
 ```go
 var (
     ErrDuplicateNonce       = errors.New("duplicate nonce detected")
@@ -1427,6 +1466,7 @@ var (
 ### Logging
 
 **Structured Logging**:
+
 ```go
 logger.Debug("create musig2 taproot address",
     "account_type", input.AccountType.String(),
@@ -1448,16 +1488,19 @@ logger.Error("failed to aggregate signatures",
 ### Testing Strategy
 
 **Unit Tests**:
+
 - Test each use case in isolation
 - Mock external dependencies
 - Test error conditions
 
 **Integration Tests**:
+
 - Test complete signing workflows
 - Test with real PSBT data
 - Test nonce uniqueness enforcement
 
 **Test Files**:
+
 ```
 internal/application/usecase/keygen/btc/
 ├── create_musig2_address_test.go
@@ -1487,17 +1530,20 @@ internal/infrastructure/api/btc/btc/
 | MuSig2 3-of-3 P2TR | ~215 bytes | 41.9% |
 
 **Cost Savings**:
+
 - At 10 sat/vB: 1,550 sats saved per transaction
 - At 50 sat/vB: 7,750 sats saved per transaction
 
 ### Parallel vs Sequential Operations
 
 **Parallel** (Round 1 - Nonce Generation):
+
 - All signers can generate nonces simultaneously
 - No dependencies between nonce generations
 - Reduces overall workflow time
 
 **Sequential** (Round 2 - Signing):
+
 - Must wait for all nonces before signing
 - Each signer creates partial signature independently
 - Can still be done in parallel after nonces collected
@@ -1505,6 +1551,7 @@ internal/infrastructure/api/btc/btc/
 ### Database Performance
 
 **Nonce Uniqueness Check**:
+
 - Index on nonce column for fast lookups
 - Unique constraint prevents duplicates
 - Consider cleanup of old nonces

@@ -35,7 +35,7 @@ Review your own changed or added code and fix issues if found.
 - [ ] Complex logic has explanatory comments
 - [ ] Interface definitions describe purpose
 
-4. **Fix issues**: If issues are found, fix them immediately
+1. **Fix issues**: If issues are found, fix them immediately
 
 ## Output
 

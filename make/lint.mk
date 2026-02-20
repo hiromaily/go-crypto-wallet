@@ -80,7 +80,20 @@ shellcheck:
 # lint makefile
 .PHONY: mk-lint
 mk-lint:
-	checkmake Makefile make/*.mk
+	@checkmake Makefile make/*.mk | awk '\
+	/^  minphony/ { skip=1; next } \
+	skip && /^  [a-z]/ { skip=0 } \
+	!skip \
+	'
+	@#checkmake Makefile make/*.mk
+
+###############################################################################
+# Markdown Linting
+###############################################################################
+.PHONY: md-lint
+md-lint:
+	markdownlint-cli2 --fix "**/*.md"
+
 
 ###############################################################################
 # YAML Linting

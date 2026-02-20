@@ -57,7 +57,7 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 ./scripts/operation/create-btc-tx-deposit.sh false
 ```
 
-4. txID must be displayed on console. Check it by [explorer](https://explorer.bc-2.jp/)
+1. txID must be displayed on console. Check it by [explorer](https://explorer.bc-2.jp/)
 
 ### 4. Try Transfer Action
 
@@ -75,7 +75,7 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 ./scripts/operation/create-btc-tx-transfer.sh false 0.0001
 ```
 
-2. txID must be displayed on console. Check it by [explorer](https://explorer.bc-2.jp/)
+1. txID must be displayed on console. Check it by [explorer](https://explorer.bc-2.jp/)
 
 ### 5. Try Payment Action
 
@@ -92,7 +92,7 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 docker compose exec wallet-mysql mysql -u root -proot watch -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
 ```
 
-2. Run script which includes
+1. Run script which includes
 
 - create unsigned tx
 - sing on unsigned tx first

@@ -49,6 +49,7 @@ git checkout -b ${NEW_BRANCH}
 ### Step 3: Apply Changes as Single Commit
 
 Option A: Cherry-pick and squash (if original has multiple commits)
+
 ```bash
 # Get commits from original PR
 gh pr view {pr_number} --json commits
@@ -62,6 +63,7 @@ git commit -m "squashed commit message"
 ```
 
 Option B: Apply diff directly
+
 ```bash
 # Apply the PR diff to the new branch
 gh pr diff {pr_number} | git apply
@@ -145,6 +147,7 @@ Review Comments Summarized:
 ```
 
 This will:
+
 1. Fetch PR #123 details and review comments
 2. Create new branch `{original-branch}-v2`
 3. Apply all changes as single commit

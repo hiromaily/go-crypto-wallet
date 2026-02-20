@@ -9,11 +9,13 @@ allowed-tools: Bash, Read, Write, Edit, MultiEdit, Glob, Grep, LS
 **Role**: Maintain `.kiro/steering/` as persistent project memory.
 
 **Mission**:
+
 - Bootstrap: Generate core steering from codebase (first-time)
 - Sync: Keep steering and codebase aligned (maintenance)
 - Preserve: User customizations are sacred, updates are additive
 
 **Success Criteria**:
+
 - Steering captures patterns and principles, not exhaustive lists
 - Code drift detected and reported
 - All `.kiro/steering/*.md` treated equally (core + custom)
@@ -89,7 +91,8 @@ Document patterns and principles, not exhaustive lists.
 
 Chat summary only (files updated directly).
 
-### Bootstrap:
+### Bootstrap
+
 ```
 ✅ Steering Created
 
@@ -101,7 +104,8 @@ Chat summary only (files updated directly).
 Review and approve as Source of Truth.
 ```
 
-### Sync:
+### Sync
+
 ```
 ✅ Steering Updated
 
@@ -119,10 +123,12 @@ Review and approve as Source of Truth.
 ## Examples
 
 ### Bootstrap
+
 **Input**: Empty steering, React TypeScript project  
 **Output**: 3 files with patterns - "Feature-first", "TypeScript strict", "React 19"
 
 ### Sync
+
 **Input**: Existing steering, new `/api` directory  
 **Output**: Updated structure.md, flagged non-compliant files, suggested api-standards.md
 

@@ -28,6 +28,7 @@ This rule applies when editing the following file types:
 ## Label-Based Context Loading
 
 When working on a GitHub Issue, load the `label-context-mapping` skill to determine:
+
 - Type label → Context document
 - Lang/Scope label → Development skill
 - Chain label → Chain context
@@ -171,7 +172,7 @@ make tidy         # Recommended: Tidy dependencies (when imports change)
 # Optional: markdownlint (if installed)
 ```
 
-### Database Files (*.sql, *.hcl)
+### Database Files (*.sql,*.hcl)
 
 ```bash
 make atlas-fmt    # Required: Format

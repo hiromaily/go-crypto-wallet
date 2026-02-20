@@ -11,6 +11,10 @@ Atlas is a modern database schema migration tool written in Go. It provides:
 - Rollback capabilities
 - Schema validation
 
+**Supported databases**: MySQL and PostgreSQL only.
+
+> **Note**: SQLite is NOT managed by Atlas. SQLite schemas are manually maintained in `tools/sqlc/schemas/sqlite/` and used only for SQLC code generation. See [Database Management](../../docs/database/db-management.md) for details.
+
 ## Installation
 
 Install Atlas CLI using Homebrew (macOS):

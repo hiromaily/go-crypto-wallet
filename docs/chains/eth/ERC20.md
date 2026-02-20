@@ -9,28 +9,28 @@
 UPDATE `watch`.`address` SET `coin` = 'hyt';
 ```
 
-3. deploy contract to your ethereum network from [erc20-token](https://github.com/hiromaily/erc20-token)
+1. deploy contract to your ethereum network from [erc20-token](https://github.com/hiromaily/erc20-token)
 
 ```
 yarn run deploy-dev2
 ```
 
-4. copy contract address and set into `contract_address` in eth_watch.toml
-5. set `master_address` as well
-6. setup [erc20-token](https://github.com/hiromaily/erc20-token)
+1. copy contract address and set into `contract_address` in eth_watch.toml
+2. set `master_address` as well
+3. setup [erc20-token](https://github.com/hiromaily/erc20-token)
     - `.envrc` includes `CONTRACT_ADDRESS` and `OWNER_ADDRESS` which need to be changed.
-7. transfer token from master address to specific address
+4. transfer token from master address to specific address
 
 ```
 yarn ts-node src/web3.ts --mode transfer --address 0x5c2415367A9558Cb95926619337859aD64beA345 --amount 100
 ```
 
-8. check balance
+1. check balance
 
 ```
 yarn ts-node src/web3.ts --mode balance --address 0x5c2415367A9558Cb95926619337859aD64beA345
 ```
 
-9. run command `watch -coin hyt create deposit`
-10. run command `keygen -coin hyt sign -file ${fileName}`
-11. run command `watch -coin hyt send -file ${fileName}`
+1. run command `watch -coin hyt create deposit`
+2. run command `keygen -coin hyt sign -file ${fileName}`
+3. run command `watch -coin hyt send -file ${fileName}`

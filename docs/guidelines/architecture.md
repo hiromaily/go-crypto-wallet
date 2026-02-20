@@ -62,6 +62,7 @@ internal/application/ports/
 Port interfaces must use **application-layer DTOs** (defined in `internal/application/dto/`) instead of infrastructure types. This ensures the application layer has zero dependencies on infrastructure.
 
 **DTO Location:**
+
 - DTOs are defined in `internal/application/dto/{coin}/` (e.g., `internal/application/dto/btc/dto.go`)
 - DTOs contain only domain types, standard library types, or external library types (e.g., `btcutil.Amount`)
 - DTOs MUST NOT import infrastructure packages

@@ -6,6 +6,7 @@ All labels, task types, and their mappings are defined here.
 ## Overview
 
 Task classification determines:
+
 1. Which **GitHub labels** to apply to issues
 2. Which **context files** to load when working on tasks
 3. Which **Skills** to use for implementation
@@ -47,7 +48,7 @@ Specify the scope when not primarily code changes.
 | `scope:scripts` | Shell scripts (scripts/, *.sh) | `shell-scripts` | `make shfmt` |
 | `scope:makefile` | Makefile and make/ directory | `makefile-update` | `make mk-lint` |
 | `scope:db` | Database schema and migrations | `db-migration` | `make atlas-lint && make sqlc` |
-| `scope:config` | Configuration files (config/, *.toml, *.yaml) | - | Syntax validation |
+| `scope:config` | Configuration files (config/, *.toml,*.yaml) | - | Syntax validation |
 | `scope:proto` | Protocol Buffer definitions (proto/) | - | `protoc` compilation |
 
 ### Chain Labels (For Cryptocurrency Tasks)
@@ -78,8 +79,9 @@ Specify the test granularity when Type is `test`.
 ### Required Labels
 
 Every issue must have:
+
 1. **One Type label** (bug, enhancement, refactoring, documentation, security, technical-debt, test)
-2. **One Language OR Scope label** (lang:* or scope:*)
+2. **One Language OR Scope label** (lang:*or scope:*)
 
 ### Optional Labels
 

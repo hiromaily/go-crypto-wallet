@@ -17,6 +17,21 @@ networks:
 #
 # Common migration service configuration template
 # Using YAML anchor (&mysql-migration-base) to define reusable configuration
+x-postgres-migration-base: &postgres-migration-base
+  image: arigaio/atlas:1.1.0
+  profiles: ["postgres"]
+  volumes:
+    - "./tools/atlas:/app/atlas"
+  working_dir: /app/atlas
+  depends_on:
+    wallet-postgres:
+      condition: service_healthy
+  networks:
+    - db
+  environment:
+    - ATLAS_NO_UPDATE_NOTIFIER=true
+  restart: "no"
+
 x-mysql-migration-base: &mysql-migration-base
   image: arigaio/atlas:1.1.0
   profiles: ["mysql"]
@@ -173,20 +188,8 @@ services:
   # Activated with `docker compose --profile postgres up`
 
   wallet-postgres-migrate-watch:
-    image: arigaio/atlas:1.1.0
-    profiles: ["postgres"]
+    !!merge <<: *postgres-migration-base
     container_name: wallet-postgres-migrate-watch
-    volumes:
-      - "./tools/atlas:/app/atlas"
-    working_dir: /app/atlas
-    depends_on:
-      wallet-postgres:
-        condition: service_healthy
-    networks:
-      - db
-    environment:
-      - ATLAS_NO_UPDATE_NOTIFIER=true
-    restart: "no"
     command:
       - migrate
       - apply
@@ -196,20 +199,8 @@ services:
       - "postgres://postgres:postgres@wallet-postgres:5432/watch?sslmode=disable"
 
   wallet-postgres-migrate-keygen:
-    image: arigaio/atlas:1.1.0
-    profiles: ["postgres"]
+    !!merge <<: *postgres-migration-base
     container_name: wallet-postgres-migrate-keygen
-    volumes:
-      - "./tools/atlas:/app/atlas"
-    working_dir: /app/atlas
-    depends_on:
-      wallet-postgres:
-        condition: service_healthy
-    networks:
-      - db
-    environment:
-      - ATLAS_NO_UPDATE_NOTIFIER=true
-    restart: "no"
     command:
       - migrate
       - apply
@@ -219,20 +210,8 @@ services:
       - "postgres://postgres:postgres@wallet-postgres:5432/keygen?sslmode=disable"
 
   wallet-postgres-migrate-sign:
-    image: arigaio/atlas:1.1.0
-    profiles: ["postgres"]
+    !!merge <<: *postgres-migration-base
     container_name: wallet-postgres-migrate-sign
-    volumes:
-      - "./tools/atlas:/app/atlas"
-    working_dir: /app/atlas
-    depends_on:
-      wallet-postgres:
-        condition: service_healthy
-    networks:
-      - db
-    environment:
-      - ATLAS_NO_UPDATE_NOTIFIER=true
-    restart: "no"
     command:
       - migrate
       - apply
@@ -242,20 +221,8 @@ services:
       - "postgres://postgres:postgres@wallet-postgres:5432/sign?sslmode=disable"
 
   wallet-postgres-migrate-sign2:
-    image: arigaio/atlas:1.1.0
-    profiles: ["postgres"]
+    !!merge <<: *postgres-migration-base
     container_name: wallet-postgres-migrate-sign2
-    volumes:
-      - "./tools/atlas:/app/atlas"
-    working_dir: /app/atlas
-    depends_on:
-      wallet-postgres:
-        condition: service_healthy
-    networks:
-      - db
-    environment:
-      - ATLAS_NO_UPDATE_NOTIFIER=true
-    restart: "no"
     command:
       - migrate
       - apply

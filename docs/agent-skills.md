@@ -32,10 +32,12 @@ Agent Skills are a structured format for defining AI agent capabilities:
 **Description**: Critical Bitcoin terminology rules to prevent confusion between bech32m (encoding) and taproot (address type). Use when working on BTC-related code, config files, or shell scripts.
 
 **Key Concept**:
+
 - **bech32m** = Encoding format (HOW address is serialized) → Use in Bitcoin Core RPC/CLI
 - **taproot** = Address type (WHAT the address represents) → Use in config files
 
 **When to use**:
+
 - Working on Taproot-related code (Pattern 9, 10, 11)
 - Modifying BTC config files or shell scripts
 - Understanding why `bech32m` vs `taproot` is used in different contexts
@@ -47,6 +49,7 @@ Agent Skills are a structured format for defining AI agent capabilities:
 **Description**: Create well-structured GitHub issues using the gh CLI tool. Use when you want to create a GitHub issue to track features, bugs, refactoring tasks, or technical debt.
 
 **Capabilities**:
+
 - Analyzes user requests and creates comprehensive issue proposals
 - Suggests appropriate labels from repository configuration
 - Follows project-specific guidelines (Clean Architecture, security requirements)
@@ -54,6 +57,7 @@ Agent Skills are a structured format for defining AI agent capabilities:
 - Includes detailed templates for different issue types (feature, bug, refactoring, security)
 
 **When to use**:
+
 - Creating feature requests
 - Reporting bugs
 - Proposing refactoring tasks
@@ -184,6 +188,7 @@ Claude: [Explicitly invokes the specified skill]
 ### Example 1: Creating a Feature Request
 
 **User Request**:
+
 ```
 I want to track a new feature for adding hardware wallet support using Ledger devices
 ```
@@ -253,6 +258,7 @@ Hardware wallets provide an additional layer of security by keeping private keys
 ### Example 2: Reporting a Bug
 
 **User Request**:
+
 ```
 I found a bug where the fee calculation is overpaying on Bitcoin testnet transactions
 ```
@@ -322,6 +328,7 @@ Transaction fees are 2-3x higher than expected calculation.
 ### Example 3: Refactoring Task
 
 **User Request**:
+
 ```
 We need to refactor the XRP wallet to use the new DTO pattern like we did for Bitcoin
 ```
@@ -396,6 +403,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 **Problem**: AI assistant doesn't seem to recognize skills
 
 **Solutions**:
+
 1. **Verify file location**: Skills must be in `.claude/skills/{skill-name}/SKILL.md`
 2. **Check YAML frontmatter**: Ensure proper format with `name` and `description` fields
 3. **Restart AI assistant**: Close and reopen Claude Desktop/Code
@@ -406,6 +414,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 **Problem**: Claude doesn't use the skill when expected
 
 **Solutions**:
+
 1. **Be explicit**: Mention the skill name or capability directly
 2. **Check description**: Skill description determines when it's triggered
 3. **Manual invocation**: Explicitly ask Claude to use a specific skill
@@ -415,6 +424,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 **Problem**: GitHub CLI commands in skills fail
 
 **Solutions**:
+
 1. **Install gh**: `brew install gh` (macOS) or see [GitHub CLI installation](https://cli.github.com/)
 2. **Authenticate**: Run `gh auth login`
 3. **Verify access**: Run `gh auth status`
@@ -425,6 +435,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 **Problem**: Label creation/sync commands fail
 
 **Solutions**:
+
 1. **Check permissions**: Ensure you have write access to the repository
 2. **Verify labels.yml**: Confirm `.github/labels.yml` exists and is valid YAML
 3. **Use correct method**:
@@ -437,6 +448,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 **Problem**: Cannot create issues or labels
 
 **Solutions**:
+
 1. **Check GitHub permissions**: Verify you have write access to the repository
 2. **Re-authenticate gh**: Run `gh auth logout` then `gh auth login`
 3. **Check repository**: Ensure you're in the correct repository: `git remote -v`
