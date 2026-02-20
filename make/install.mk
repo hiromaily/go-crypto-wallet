@@ -13,7 +13,8 @@ check-ver:
 .PHONY: install-mac-tools
 install-mac-tools:
 	brew tap hiromaily/tap \
-	brew install yaml-lint \
+	brew install hiromaily/tap/yaml-lint \
+		hiromaily/tap/pg2sqlite
 		jq \
 		mkcert \
 		ariga/tap/atlas \

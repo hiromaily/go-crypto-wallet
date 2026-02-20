@@ -5,6 +5,18 @@
 include make/codegen_proto.mk
 
 ###############################################################################
+# generate sqlite schema from postgresql scheme
+###############################################################################
+.PHONY: generate-sqlite-schema
+generate-sqlite-schema:
+	pg2sqlite -i tools/sqlc/schemas/postgresql/01_watch.sql \
+	-o tools/sqlc/schemas/sqlite/01_watch.sql
+	pg2sqlite -i tools/sqlc/schemas/postgresql/02_keygen.sql \
+	-o tools/sqlc/schemas/sqlite/02_keygen.sql
+	pg2sqlite -i tools/sqlc/schemas/postgresql/03_sign.sql \
+	-o tools/sqlc/schemas/sqlite/03_sign.sql
+
+########################################################################
 # sqlc
 #------------------------------------------------------------------------------
 # Generate Go code from SQL queries using sqlc
