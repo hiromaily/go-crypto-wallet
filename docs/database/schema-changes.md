@@ -739,7 +739,7 @@ Error: sqlc generate failed
 3. **Verify engine configuration**:
 
    ```yaml
-   # tools/sqlc/sqlc.yml
+   # tools/sqlc/sqlc_mysql.yml for MySQL
    version: "2"
    sql:
      - engine: "mysql"  # Ensure correct engine

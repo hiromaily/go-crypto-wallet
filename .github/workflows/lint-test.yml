@@ -44,7 +44,7 @@ jobs:
               - 'scripts/**/*.sh'
             sql:
               - 'tools/sqlc/**/*.sql'
-              - 'tools/sqlc/sqlc.yml'
+              - 'tools/sqlc/sqlc_*.yml'
             hcl:
               - 'tools/atlas/**/*.hcl'
               - 'tools/atlas/atlas.hcl'

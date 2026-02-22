@@ -353,7 +353,7 @@ mv tools/sqlc/schemas_postgresql tools/sqlc/schemas/postgresql
 
 #### 9b: Update sqlc config files
 
-**`tools/sqlc/sqlc.yml`** (MySQL):
+**`tools/sqlc/sqlc_mysql.yml`** (MySQL):
 
 ```yaml
 queries: "./queries/mysql/*.sql"

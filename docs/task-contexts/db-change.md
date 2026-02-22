@@ -33,7 +33,7 @@ version: 1.0.0
 |----------|------|---------|
 | Schema Files | `tools/atlas/schemas/*.hcl` | 現在のスキーマ定義 |
 | SQLC Queries | `tools/sqlc/*.sql` | 既存クエリ |
-| SQLC Config | `tools/sqlc/sqlc.yml` | SQLC設定 |
+| SQLC Config | `tools/sqlc/sqlc_*.yml` | SQLC設定 |
 
 ### Conditional Read (条件付き)
 
