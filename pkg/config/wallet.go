@@ -142,7 +142,7 @@ type TracerDetail struct {
 
 // Database config for database type selection
 type Database struct {
-	//nolint:lll,revive
+	//nolint:lll
 	Type       string     `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite postgres"`
 	MySQL      MySQL      `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
 	SQLite     SQLite     `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
