@@ -9,9 +9,10 @@
 # Note: This file sources common.sh automatically, so you don't need to source both.
 #
 # Database Support:
-#   This file supports both MySQL and SQLite databases for E2E testing.
+#   This file supports SQLite, PostgreSQL, and MySQL databases for E2E testing.
 #   Set DB_TYPE environment variable to choose:
 #     DB_TYPE=sqlite (default) - Uses local SQLite file (no Docker DB required)
+#     DB_TYPE=postgres         - Uses Docker PostgreSQL container
 #     DB_TYPE=mysql            - Uses Docker MySQL container
 
 # Script directory for relative paths
@@ -36,6 +37,11 @@ BTC_ENCRYPTED="${BTC_ENCRYPTED:-false}"
 BTC_RPC_USER="${BTC_RPC_USER:-${RPC_USER:-xyz}}"
 BTC_RPC_PASSWORD="${BTC_RPC_PASSWORD:-${RPC_PASSWORD:-xyz}}"
 
+# PostgreSQL credentials (can be overridden via environment variables)
+# Note: Default values are for regtest/development only
+BTC_POSTGRES_USER="${BTC_POSTGRES_USER:-${POSTGRES_USER:-postgres}}"
+BTC_POSTGRES_PASSWORD="${BTC_POSTGRES_PASSWORD:-${POSTGRES_PASSWORD:-postgres}}"
+
 # MySQL credentials (can be overridden via environment variables)
 # Note: Default value is for regtest/development only
 BTC_MYSQL_ROOT_PASSWORD="${BTC_MYSQL_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-root}}"
@@ -46,7 +52,11 @@ BTC_WALLET_PASSPHRASE="${BTC_WALLET_PASSPHRASE:-${WALLET_PASSPHRASE:-test}}"
 
 # Docker volume name (can be overridden via environment variable)
 # Note: Docker Compose prepends project name to volume names
-BTC_DOCKER_VOLUME_NAME="${BTC_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-mysql}"
+if [ "${DB_TYPE:-sqlite}" = "postgres" ]; then
+	BTC_DOCKER_VOLUME_NAME="${BTC_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-postgres}"
+else
+	BTC_DOCKER_VOLUME_NAME="${BTC_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-mysql}"
+fi
 
 # Wallet-specific RPC hosts (for environment variable overrides)
 # Note: These are initialized with default values and updated by btc_init_rpc_hosts()
@@ -147,6 +157,12 @@ if [ "${DB_TYPE}" = "sqlite" ]; then
 	# Default in config is 2, which is too low for parallel E2E execution
 	# Set to 20 to allow sufficient concurrent connections
 	export WALLET_DATABASE_SQLITE_MAX_OPEN_CONNS=20
+elif [ "${DB_TYPE}" = "postgres" ]; then
+	export WALLET_DATABASE_TYPE="postgres"
+	export WALLET_DATABASE_POSTGRES_HOST="${WALLET_DATABASE_POSTGRES_HOST:-127.0.0.1}"
+	export WALLET_DATABASE_POSTGRES_USER="${BTC_POSTGRES_USER}"
+	export WALLET_DATABASE_POSTGRES_PASS="${BTC_POSTGRES_PASSWORD}"
+	export WALLET_DATABASE_POSTGRES_SSLMODE="${WALLET_DATABASE_POSTGRES_SSLMODE:-disable}"
 elif [ "${DB_TYPE}" = "mysql" ]; then
 	export WALLET_DATABASE_TYPE="mysql"
 fi
@@ -159,6 +175,12 @@ fi
 # Usage: if db_is_sqlite; then ...; fi
 db_is_sqlite() {
 	[ "${DB_TYPE}" = "sqlite" ]
+}
+
+# Check if using PostgreSQL database
+# Usage: if db_is_postgres; then ...; fi
+db_is_postgres() {
+	[ "${DB_TYPE}" = "postgres" ]
 }
 
 # Check if using MySQL database
@@ -349,13 +371,22 @@ sqlite_query() {
 	sqlite3 -batch "$db_path" "$query"
 }
 
+# Execute PostgreSQL query via Docker
+# Usage: postgres_query "watch" "SELECT * FROM address"
+postgres_query() {
+	local db_name="$1"
+	local query="$2"
+
+	docker compose --profile postgres exec -e PGPASSWORD="${BTC_POSTGRES_PASSWORD}" -T wallet-postgres psql -U "${BTC_POSTGRES_USER}" -d "$db_name" -t -A -c "$query"
+}
+
 # Execute MySQL query via Docker
 # Usage: mysql_query "watch" "SELECT * FROM address"
 mysql_query() {
 	local db_name="$1"
 	local query="$2"
 
-	docker compose exec -e MYSQL_PWD="${BTC_MYSQL_ROOT_PASSWORD}" -T wallet-mysql mysql -u root "$db_name" -N -e "$query"
+	docker compose --profile mysql exec -e MYSQL_PWD="${BTC_MYSQL_ROOT_PASSWORD}" -T wallet-mysql mysql -u root "$db_name" -N -e "$query"
 }
 
 # Execute database query (abstraction layer)
@@ -366,6 +397,8 @@ db_query() {
 
 	if db_is_sqlite; then
 		sqlite_query "$db_name" "$query"
+	elif db_is_postgres; then
+		postgres_query "$db_name" "$query"
 	else
 		mysql_query "$db_name" "$query"
 	fi
@@ -379,8 +412,10 @@ db_execute() {
 
 	if db_is_sqlite; then
 		sqlite_query "$db_name" "$query"
+	elif db_is_postgres; then
+		docker compose --profile postgres exec -e PGPASSWORD="${BTC_POSTGRES_PASSWORD}" -T wallet-postgres psql -U "${BTC_POSTGRES_USER}" -d "$db_name" -c "$query"
 	else
-		docker compose exec -e MYSQL_PWD="${BTC_MYSQL_ROOT_PASSWORD}" -T wallet-mysql mysql -u root "$db_name" <<EOF
+		docker compose --profile mysql exec -e MYSQL_PWD="${BTC_MYSQL_ROOT_PASSWORD}" -T wallet-mysql mysql -u root "$db_name" <<EOF
 $query
 EOF
 	fi
@@ -540,23 +575,32 @@ btc_full_reset() {
 
 	if db_is_sqlite; then
 		# SQLite mode: Remove SQLite database files
-		log_info "Using SQLite mode (no MySQL container needed)"
+		log_info "Using SQLite mode (no Docker container needed)"
 		log_info "Removing all SQLite E2E database files..."
 		# Remove all E2E database files (pattern: *-e2e-*.db)
 		sqlite_clean_db "all" "*-e2e-*.db"
 		# Also remove any old-style single e2e.db file
 		sqlite_clean_db "all" "e2e.db"
 
-		# Also stop MySQL containers if running from previous runs (for clean state)
+		# Also stop DB containers if running from previous runs (for clean state)
 		if docker compose -f compose.yaml ps -q 2>/dev/null | grep -q .; then
-			log_info "Stopping leftover MySQL containers from previous runs..."
+			log_info "Stopping leftover DB containers from previous runs..."
 			docker compose -f compose.yaml down -v 2>/dev/null || true
 		fi
+	elif db_is_postgres; then
+		# PostgreSQL mode: Stop database container and remove volumes
+		log_info "Using PostgreSQL mode"
+		log_info "Stopping database container (with volume removal)..."
+		docker compose --profile postgres -f compose.yaml down -v 2>/dev/null || true
+
+		# Wait for containers to fully stop before attempting volume removal
+		log_info "Waiting for containers to stop completely..."
+		sleep 3
 	else
 		# MySQL mode: Stop database container and remove volumes
 		log_info "Using MySQL mode"
 		log_info "Stopping database container (with volume removal)..."
-		docker compose -f compose.yaml down -v 2>/dev/null || true
+		docker compose --profile mysql -f compose.yaml down -v 2>/dev/null || true
 
 		# Wait for containers to fully stop before attempting volume removal
 		log_info "Waiting for containers to stop completely..."
@@ -580,6 +624,8 @@ btc_full_reset() {
 	log_info "Full reset complete - system is in fresh state"
 	if db_is_sqlite; then
 		log_info "Note: SQLite database files were removed for complete cleanup"
+	elif db_is_postgres; then
+		log_info "Note: PostgreSQL database volumes were removed for complete cleanup"
 	else
 		log_info "Note: MySQL database volumes were removed for complete cleanup"
 	fi
@@ -602,14 +648,17 @@ btc_cleanup() {
 
 	if db_is_sqlite; then
 		log_info "SQLite mode: No database container needed"
-		# Also stop MySQL containers if running from previous runs (for clean state)
+		# Also stop DB containers if running from previous runs (for clean state)
 		if docker compose -f compose.yaml ps -q 2>/dev/null | grep -q .; then
-			log_info "Stopping leftover MySQL containers from previous runs..."
+			log_info "Stopping leftover DB containers from previous runs..."
 			docker compose -f compose.yaml down -v 2>/dev/null || true
 		fi
+	elif db_is_postgres; then
+		log_info "Stopping PostgreSQL database container..."
+		docker compose --profile postgres -f compose.yaml down -v 2>/dev/null || true
 	else
-		log_info "Stopping database container..."
-		docker compose -f compose.yaml down -v 2>/dev/null || true
+		log_info "Stopping MySQL database container..."
+		docker compose --profile mysql -f compose.yaml down -v 2>/dev/null || true
 	fi
 
 	log_info "Cleanup complete"
@@ -620,16 +669,28 @@ btc_cleanup() {
 ###############################################################################
 
 # Internal helper function for wallet command wrappers
-# Handles environment variable setup for both SQLite and MySQL modes
+# Handles environment variable setup for SQLite, PostgreSQL, and MySQL modes
 # Usage: _btc_wallet_cmd <wallet_name> <db_path> <rpc_host> [args...]
+#   wallet_name: CLI command name (watch, keygen, sign1, sign2) - also used as postgres dbname
+#   db_path: SQLite database file path (only used when DB_TYPE=sqlite)
+#   rpc_host: Bitcoin RPC host
 _btc_wallet_cmd() {
 	local wallet_name="$1"
 	local db_path="$2"
 	local rpc_host="$3"
 	shift 3
 
+	# Derive postgres dbname from wallet_name (sign1 -> sign, sign2 -> sign2)
+	local pg_dbname="${wallet_name}"
+	if [ "${pg_dbname}" = "sign1" ]; then
+		pg_dbname="sign"
+	fi
+
 	if db_is_sqlite; then
 		WALLET_DATABASE_SQLITE_PATH="${db_path}" \
+			WALLET_BITCOIN_HOST="${rpc_host}" "${wallet_name}" "$@"
+	elif db_is_postgres; then
+		WALLET_DATABASE_POSTGRES_DBNAME="${pg_dbname}" \
 			WALLET_BITCOIN_HOST="${rpc_host}" "${wallet_name}" "$@"
 	else
 		WALLET_BITCOIN_HOST="${rpc_host}" "${wallet_name}" "$@"
@@ -640,14 +701,14 @@ _btc_wallet_cmd() {
 # When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the watch-specific database
 # Usage: btc_watch_cmd [args...]
 btc_watch_cmd() {
-	_btc_wallet_cmd "watch" "${SQLITE_WATCH_DB_PATH}" "${BTC_WATCH_WALLET_RPC_HOST}" "$@"
+	_btc_wallet_cmd "watch" "${SQLITE_WATCH_DB_PATH:-}" "${BTC_WATCH_WALLET_RPC_HOST}" "$@"
 }
 
 # Wrapper for keygen wallet commands with host and database path override
 # When DB_TYPE=sqlite, sets WALLET_DATABASE_SQLITE_PATH to the keygen-specific database
 # Usage: btc_keygen_cmd [args...]
 btc_keygen_cmd() {
-	_btc_wallet_cmd "keygen" "${SQLITE_KEYGEN_DB_PATH}" "${BTC_KEYGEN_WALLET_RPC_HOST}" "$@"
+	_btc_wallet_cmd "keygen" "${SQLITE_KEYGEN_DB_PATH:-}" "${BTC_KEYGEN_WALLET_RPC_HOST}" "$@"
 }
 
 # Wrapper for sign1 wallet commands with host and database path override
@@ -676,10 +737,10 @@ btc_sign_cmd() {
 	local db_path
 	local rpc_host
 	if [ "${sign_num}" = "1" ]; then
-		db_path="${SQLITE_SIGN_DB_PATH}"
+		db_path="${SQLITE_SIGN_DB_PATH:-}"
 		rpc_host="${BTC_SIGN1_WALLET_RPC_HOST}"
 	elif [ "${sign_num}" = "2" ]; then
-		db_path="${SQLITE_SIGN2_DB_PATH}"
+		db_path="${SQLITE_SIGN2_DB_PATH:-}"
 		rpc_host="${BTC_SIGN2_WALLET_RPC_HOST}"
 	else
 		log_error "Invalid sign number provided to btc_sign_cmd: ${sign_num}"
@@ -736,14 +797,22 @@ btc_setup_infrastructure() {
 
 	if db_is_sqlite; then
 		# SQLite mode: Initialize separate SQLite databases for each wallet type
-		# No Docker MySQL container is started - this is faster and simpler
-		log_substep "Initializing SQLite databases (no MySQL container needed)"
+		# No Docker container is started - this is faster and simpler
+		log_substep "Initializing SQLite databases (no Docker container needed)"
 		sqlite_init_db "all"
 		# Database paths are logged by sqlite_init_db
+	elif db_is_postgres; then
+		# PostgreSQL mode: Start database container with profile
+		log_substep "Starting PostgreSQL database container"
+		docker compose --profile postgres -f compose.yaml up -d
+		log_info "PostgreSQL database container started"
+
+		# Wait for database to be healthy
+		wait_for_healthy "wallet-postgres" 90
 	else
 		# MySQL mode: Start database container
 		log_substep "Starting MySQL database container"
-		docker compose -f compose.yaml up -d
+		docker compose --profile mysql -f compose.yaml up -d
 		log_info "MySQL database container started"
 
 		# Wait for database to be healthy
@@ -997,7 +1066,7 @@ btc_insert_payment_requests() {
 		if [ -n "$values" ]; then
 			values="$values,"
 		fi
-		# SQLite uses 0/1 for boolean, MySQL uses false/true
+		# SQLite uses 0/1 for boolean, PostgreSQL/MySQL use false/true
 		if db_is_sqlite; then
 			values="$values
 	('btc', NULL, '${sender_address}', '${account}', '${receiver_array[$i]}', '${amount_array[$i]}', 0)"

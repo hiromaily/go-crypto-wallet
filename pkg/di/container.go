@@ -7,6 +7,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
+	"github.com/hiromaily/go-crypto-wallet/pkg/db/postgres"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/sqlite"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
@@ -18,6 +19,7 @@ type PkgContainer interface {
 	NewUUIDHandler() uuid.UUIDHandler
 	NewDatabaseClient() *sql.DB
 	NewMySQLClient() *sql.DB
+	NewPostgresClient() *sql.DB
 	NewSQLiteClient() *sql.DB
 	NewLogger() logger.Logger
 	NewGRPCClient() *grpc.ClientConn
@@ -36,8 +38,9 @@ type pkgContainer struct {
 	// uuid
 	uuidHandler uuid.UUIDHandler
 	// db
-	mysqlClient  *sql.DB
-	sqliteClient *sql.DB
+	mysqlClient    *sql.DB
+	postgresClient *sql.DB
+	sqliteClient   *sql.DB
 	// grpc
 	grpcConn *grpc.ClientConn
 	// serial
@@ -81,6 +84,8 @@ func (c *pkgContainer) NewDatabaseClient() *sql.DB {
 	switch c.config.Database.Type {
 	case "mysql":
 		return c.NewMySQLClient()
+	case "postgres":
+		return c.NewPostgresClient()
 	case "sqlite":
 		return c.NewSQLiteClient()
 	default:
@@ -98,6 +103,18 @@ func (c *pkgContainer) NewMySQLClient() *sql.DB {
 		c.mysqlClient = dbConn
 	}
 	return c.mysqlClient
+}
+
+// NewPostgresClient creates a new PostgreSQL client
+func (c *pkgContainer) NewPostgresClient() *sql.DB {
+	if c.postgresClient == nil {
+		dbConn, err := postgres.NewPostgres(&c.config.Database.PostgreSQL)
+		if err != nil {
+			panic(err)
+		}
+		c.postgresClient = dbConn
+	}
+	return c.postgresClient
 }
 
 // NewSQLiteClient creates a new SQLite client

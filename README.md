@@ -27,8 +27,6 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 | Tool | Version | Description |
 |------|---------|-------------|
 | Go | 1.25.6 | Programming language |
-| MySQL | 8.4+ | Database (via Docker) |
-| SQLite | 3.0+ | Database |
 | Atlas | 1.0.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
@@ -36,6 +34,16 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 | [golangci-lint](https://github.com/golangci/golangci-lint) | v2.8.0+ | Linter (for development) |
 | [protoc](https://grpc.io/docs/protoc-installation/) | 33.0+ | Protocol buffer compiler (**Edition 2024**) |
 | [buf](https://buf.build/) | latest | Protocol buffer management (lint, format) |
+
+### Database
+
+Supported databases (choose one)
+
+| Tool | Version | Description |
+|------|---------|-------------|
+| PostgreSQL | 18.2+ | Database (via Docker) |
+| MySQL | 8.4+ | Database (via Docker) |
+| SQLite | 3.0+ | Database |
 
 ### Blockchain Nodes
 
