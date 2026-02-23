@@ -56,7 +56,7 @@ type Database struct {
 - Factory function `New{Database}(conf *config.{Database}) (*sql.DB, error)`
 - Database-specific optimizations
 
-**Gap**: No `pkg/db/postgresql/` package
+**Gap**: No `pkg/db/postgres/` package
 
 ---
 
@@ -81,7 +81,7 @@ type Database struct {
 - Same query files reused across all databases
 - Generated code in engine-specific directories
 
-**Gap**: No `sqlc_postgresql.yml` or `schemas/postgresql/` directory
+**Gap**: No `sqlc_postgres.yml` or `schemas/postgres/` directory
 
 ---
 
@@ -265,7 +265,7 @@ x-migration-base: &migration-base
 
 #### R2: PostgreSQL Schema Generation
 
-- **Needs**: Data type conversion script/tool, PostgreSQL schemas in `schemas/postgresql/`
+- **Needs**: Data type conversion script/tool, PostgreSQL schemas in `schemas/postgres/`
 - **Complexity**: Moderate - requires careful type mapping
 - **Unknowns**:
   - Research Needed: Enum handling strategy (TEXT CHECK vs PostgreSQL ENUM)
@@ -273,7 +273,7 @@ x-migration-base: &migration-base
 
 #### R3: SQLC Code Generation
 
-- **Needs**: `sqlc_postgresql.yml`, PostgreSQL sqlcgen package
+- **Needs**: `sqlc_postgres.yml`, PostgreSQL sqlcgen package
 - **Complexity**: Simple - mechanical replication
 - **Unknowns**: None (sqlc supports PostgreSQL engine)
 
@@ -335,34 +335,34 @@ x-migration-base: &migration-base
 
 1. **Configuration** (`pkg/config/wallet.go`):
    - Add `PostgreSQL` struct (similar to MySQL)
-   - Update `Database.Type` validation to `oneof=mysql sqlite postgresql`
+   - Update `Database.Type` validation to `oneof=mysql sqlite postgres`
    - Add PostgreSQL validation in `validateDatabase()`
 
-2. **Connection Factory** (new package `pkg/db/postgresql/`):
+2. **Connection Factory** (new package `pkg/db/postgres/`):
    - Create `connection.go` with `NewPostgreSQL(conf *config.PostgreSQL) (*sql.DB, error)`
    - Use `pgx` driver for better PostgreSQL support
    - Configure SSL mode, connection pooling
 
 3. **SQLC Configuration** (`tools/sqlc/`):
-   - Create `sqlc_postgresql.yml` with engine: postgresql
-   - Create `schemas/postgresql/` directory with converted schemas
-   - Generate to `internal/infrastructure/database/postgresql/sqlcgen`
+   - Create `sqlc_postgres.yml` with engine: postgres
+   - Create `schemas/postgres/` directory with converted schemas
+   - Generate to `internal/infrastructure/database/postgres/sqlcgen`
 
 4. **Repository Implementations** (new packages):
-   - `internal/infrastructure/repository/cold/postgresql/*_sqlc.go` (~15 files)
-   - `internal/infrastructure/repository/watch/postgresql/*_sqlc.go` (~12 files)
+   - `internal/infrastructure/repository/cold/postgres/*_sqlc.go` (~15 files)
+   - `internal/infrastructure/repository/watch/postgres/*_sqlc.go` (~12 files)
    - Copy-paste from MySQL implementations, update import paths
 
 5. **DI Container** (`internal/di/container.go`):
-   - Add `case "postgresql":` to each database type switch (~20 locations)
+   - Add `case "postgres":` to each database type switch (~20 locations)
 
 6. **Atlas Configuration** (`tools/atlas/atlas.hcl`):
-   - Add PostgreSQL environments (local_postgresql_watch, etc.)
+   - Add PostgreSQL environments (local_postgres_watch, etc.)
    - Update dev database to `docker://postgres/18`
    - Optionally create PostgreSQL-specific HCL schemas or reuse existing
 
 7. **Docker Compose** (`compose.yaml`):
-   - Add `wallet-db-postgresql` service (PostgreSQL 18.2)
+   - Add `wallet-db-postgres` service (PostgreSQL 18.2)
    - Add migration services for PostgreSQL
    - Update Atlas image to 1.1.0
 
@@ -545,7 +545,7 @@ x-migration-base: &migration-base
 
 **Phase 2: Schema & Code Generation** (2-3 days)
 5. Convert schemas to PostgreSQL syntax
-6. Create sqlc_postgresql.yml
+6. Create sqlc_postgres.yml
 7. Generate PostgreSQL sqlcgen code
 8. Create Atlas PostgreSQL environments
 

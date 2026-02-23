@@ -31,7 +31,7 @@ version: 1.0.0
 
 | Resource | Path | Purpose |
 |----------|------|---------|
-| Schema Files | `tools/atlas/schemas/*.hcl` | 現在のスキーマ定義 |
+| Schema Files | `tools/atlas/schemas/{db_dialect}/*.hcl` | 現在のスキーマ定義 |
 | SQLC Queries | `tools/sqlc/*.sql` | 既存クエリ |
 | SQLC Config | `tools/sqlc/sqlc_*.yml` | SQLC設定 |
 
@@ -53,7 +53,7 @@ version: 1.0.0
 
 **必須の手順:**
 
-1. `tools/atlas/schemas/*.hcl` を編集
+1. `tools/atlas/schemas/{db_dialect}/*.hcl` を編集
 2. `make atlas-fmt` でフォーマット
 3. `make atlas-lint` でリント
 4. `make atlas-dev-reset` でマイグレーション生成
@@ -142,7 +142,7 @@ make gotest
 
 ```bash
 # 現在のスキーマを確認
-cat tools/atlas/schemas/*.hcl
+cat tools/atlas/schemas/{db_dialect}/*.hcl
 
 # 既存のマイグレーションを確認
 ls tools/atlas/migrations/
@@ -268,7 +268,7 @@ git commit -m "feat(db): add new_table schema and queries
 ### Scenario 1: 新しいテーブル追加
 
 ```
-1. tools/atlas/schemas/ にテーブル定義追加
+1. tools/atlas/schemas/{db_dialect}/ にテーブル定義追加
 2. make atlas-fmt && make atlas-lint
 3. make atlas-dev-reset
 4. docker compose で検証

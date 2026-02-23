@@ -2,7 +2,7 @@
 
 ## Overview
 
-This feature adds PostgreSQL 18.2 as a third database backend option to go-crypto-wallet, which currently supports MySQL and SQLite. Users will be able to select PostgreSQL by setting `database.type = "postgresql"` in the wallet configuration file, with the application transparently handling PostgreSQL-specific connection management, schema generation, and query execution.
+This feature adds PostgreSQL 18.2 as a third database backend option to go-crypto-wallet, which currently supports MySQL and SQLite. Users will be able to select PostgreSQL by setting `database.type = "postgres"` in the wallet configuration file, with the application transparently handling PostgreSQL-specific connection management, schema generation, and query execution.
 
 **Purpose**: Enable wallet operators to leverage PostgreSQL's advanced features, reliability, and performance characteristics for their wallet infrastructure, while maintaining complete feature parity with existing MySQL and SQLite implementations.
 
@@ -156,8 +156,8 @@ graph TB
 
 **Key Technology Decisions** (see `research.md` for detailed investigation):
 
-- **pgx over lib/pq**: 50-100% performance improvement, active maintenance, built-in connection pooling ([source](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgresql-golang-driver/))
-- **TEXT+CHECK over ENUM**: Schema evolution flexibility, SHARE UPDATE EXCLUSIVE lock (allows concurrent updates) ([source](https://making.close.com/posts/native-enums-or-check-constraints-in-postgresql/))
+- **pgx over lib/pq**: 50-100% performance improvement, active maintenance, built-in connection pooling ([source](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgres-golang-driver/))
+- **TEXT+CHECK over ENUM**: Schema evolution flexibility, SHARE UPDATE EXCLUSIVE lock (allows concurrent updates) ([source](https://making.close.com/posts/native-enums-or-check-constraints-in-postgres/))
 - **Atlas 1.1**: Enhanced PostgreSQL support for partitions, functions, procedures ([Atlas releases](https://github.com/ariga/atlas/releases))
 
 ## System Flows
@@ -174,7 +174,7 @@ sequenceDiagram
     participant PG as PostgreSQL Database
 
     App->>Config: Load wallet config
-    Config->>Config: Parse database.type = "postgresql"
+    Config->>Config: Parse database.type = "postgres"
     Config->>Config: Validate PostgreSQL config section
     App->>DI: Initialize container
     DI->>Config: Read database.type
@@ -204,13 +204,13 @@ sequenceDiagram
     participant PG as PostgreSQL Database
 
     Dev->>HCL: Modify schema (watch.hcl)
-    Dev->>Atlas: atlas migrate diff --env local_postgresql_watch
+    Dev->>Atlas: atlas migrate diff --env local_postgres_watch
     Atlas->>HCL: Read schema definition
     Atlas->>PG: Compare with current DB state
     PG-->>Atlas: Return current schema
     Atlas->>Atlas: Generate migration SQL
     Atlas-->>Dev: Create migration file
-    Dev->>Atlas: atlas migrate apply --env local_postgresql_watch
+    Dev->>Atlas: atlas migrate apply --env local_postgres_watch
     Atlas->>PG: Execute migration SQL
     PG-->>Atlas: Migration applied
     Atlas-->>Dev: Success confirmation
@@ -228,9 +228,9 @@ sequenceDiagram
 | Requirement | Summary | Components | Interfaces | Flows |
 |-------------|---------|------------|------------|-------|
 | 1.1-1.7 | PostgreSQL configuration support and validation | Database Config struct, validateDatabase() | config.Database.PostgreSQL | Config validation |
-| 2.1-2.5 | PostgreSQL schema generation and type conversion | Schema files in schemas/postgresql/ | N/A (file artifacts) | N/A |
-| 3.1-3.5 | sqlc code generation for PostgreSQL | sqlc_postgresql.yml, PostgreSQL sqlcgen package | sqlcgen.Queries interface | N/A |
-| 4.1-4.5 | PostgreSQL connection management | PostgreSQL Connection Factory (pkg/db/postgresql/) | NewPostgreSQL() function | Database selection flow |
+| 2.1-2.5 | PostgreSQL schema generation and type conversion | Schema files in schemas/postgres/ | N/A (file artifacts) | N/A |
+| 3.1-3.5 | sqlc code generation for PostgreSQL | sqlc_postgres.yml, PostgreSQL sqlcgen package | sqlcgen.Queries interface | N/A |
+| 4.1-4.5 | PostgreSQL connection management | PostgreSQL Connection Factory (pkg/db/postgres/) | NewPostgreSQL() function | Database selection flow |
 | 5.1-5.5 | Build system integration | Makefile targets (db_sqlc.mk, db_atlas.mk) | make sqlc, make atlas-* | N/A |
 | 6.1-6.5 | Migration path and data compatibility | Migration documentation, data type mappings | N/A (documentation) | Data migration process |
 | 7.1-7.7 | Atlas PostgreSQL migration support | Atlas configuration (atlas.hcl), PostgreSQL environments | atlas migrate diff/apply | Schema migration flow |
@@ -294,28 +294,28 @@ type PostgreSQL struct {
 
 // Database selection configuration (updated)
 type Database struct {
-    Type       string     `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite postgresql"`
+    Type       string     `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite postgres"`
     MySQL      MySQL      `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
     SQLite     SQLite     `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
-    PostgreSQL PostgreSQL `toml:"postgresql" yaml:"postgresql" mapstructure:"postgresql"`
+    PostgreSQL PostgreSQL `toml:"postgres" yaml:"postgres" mapstructure:"postgres"`
 }
 ```
 
 **Validation Rules** (in validateDatabase()):
 
 ```go
-case "postgresql":
+case "postgres":
     if c.Database.PostgreSQL.Host == "" {
-        return errors.New("database.postgresql.host is required when database.type is postgresql")
+        return errors.New("database.postgres.host is required when database.type is postgres")
     }
     if c.Database.PostgreSQL.DB == "" {
-        return errors.New("database.postgresql.dbname is required when database.type is postgresql")
+        return errors.New("database.postgres.dbname is required when database.type is postgres")
     }
     if c.Database.PostgreSQL.User == "" {
-        return errors.New("database.postgresql.user is required when database.type is postgresql")
+        return errors.New("database.postgres.user is required when database.type is postgres")
     }
     if c.Database.PostgreSQL.Pass == "" {
-        return errors.New("database.postgresql.pass is required when database.type is postgresql")
+        return errors.New("database.postgres.pass is required when database.type is postgres")
     }
 ```
 
@@ -355,7 +355,7 @@ case "postgresql":
 ##### Service Interface
 
 ```go
-package postgresql
+package postgres
 
 import (
     "database/sql"
@@ -391,7 +391,7 @@ func NewPostgreSQL(conf *config.PostgreSQL) (*sql.DB, error)
 
 **Implementation Notes**:
 
-- Integration: New package `pkg/db/postgresql/connection.go`
+- Integration: New package `pkg/db/postgres/connection.go`
 - Connection string format: `postgres://user:pass@host:port/dbname?sslmode=<mode>`
 - Connection pool configuration follows PostgreSQL best practices (see research.md)
 - Error handling: Wrap errors with descriptive context using fmt.Errorf
@@ -424,7 +424,7 @@ func NewPostgreSQL(conf *config.PostgreSQL) (*sql.DB, error)
 ##### Service Interface
 
 ```go
-package postgresql
+package postgres
 
 import (
     "context"
@@ -432,7 +432,7 @@ import (
 
     domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
     domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-    "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgresql/sqlcgen"
+    "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
 )
 
 // AddressRepositorySqlc implements AddressRepositorier using PostgreSQL sqlcgen
@@ -481,7 +481,7 @@ func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address
 
 **Implementation Notes**:
 
-- Integration: Create ~40 repository files in `internal/infrastructure/repository/{cold,watch}/postgresql/`
+- Integration: Create ~40 repository files in `internal/infrastructure/repository/{cold,watch}/postgres/`
 - Pattern: Copy-paste from MySQL implementations, update import paths to PostgreSQL sqlcgen
 - Validation: Repository validates domain entity invariants before database operations
 - Risks: Type conversion errors if sqlcgen schema differs from domain model
@@ -531,7 +531,7 @@ coin TEXT NOT NULL CHECK (coin IN ('btc','bch','eth','xrp','hyt'))
 
 **Implementation Notes**:
 
-- Location: `tools/sqlc/schemas/postgresql/01_watch.sql`, `02_keygen.sql`, `03_sign.sql`
+- Location: `tools/sqlc/schemas/postgres/01_watch.sql`, `02_keygen.sql`, `03_sign.sql`
 - Conversion method: Manual conversion with validation (see research.md for rationale)
 - Comments: Use PostgreSQL COMMENT syntax for column/table descriptions
 - Risks: Type precision differences require thorough testing (especially NUMERIC for crypto amounts)
@@ -543,23 +543,23 @@ coin TEXT NOT NULL CHECK (coin IN ('btc','bch','eth','xrp','hyt'))
 | Intent | Configure sqlc to generate PostgreSQL-specific Go code |
 | Requirements | 3.1, 3.2, 3.3, 3.4, 3.5 |
 
-**Configuration File** (`tools/sqlc/sqlc_postgresql.yml`):
+**Configuration File** (`tools/sqlc/sqlc_postgres.yml`):
 
 ```yaml
 version: "2"
 sql:
-  - engine: "postgresql"
+  - engine: "postgres"
     queries: "./queries/*.sql"
-    schema: "./schemas/postgresql/*.sql"
+    schema: "./schemas/postgres/*.sql"
     gen:
       go:
         package: "sqlcgen"
-        out: "../../internal/infrastructure/database/postgresql/sqlcgen"
+        out: "../../internal/infrastructure/database/postgres/sqlcgen"
 ```
 
 **Generated Code Structure**:
 
-- `internal/infrastructure/database/postgresql/sqlcgen/`
+- `internal/infrastructure/database/postgres/sqlcgen/`
   - `db.go` - Database interface wrapper
   - `models.go` - Go structs matching database schema
   - `*.sql.go` - Query implementations (one file per query file)
@@ -581,38 +581,38 @@ sql:
 
 ```hcl
 # PostgreSQL Local Environments
-env "local_postgresql_watch" {
+env "local_postgres_watch" {
   url     = "postgres://postgres:postgres@localhost:5432/watch?sslmode=disable"
   src     = "file://schemas/watch.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql_watch"
+    dir = "file://migrations/postgres_watch"
   }
   dev = "docker://postgres/18/watch"
 }
 
-env "local_postgresql_keygen" {
+env "local_postgres_keygen" {
   url     = "postgres://postgres:postgres@localhost:5432/keygen?sslmode=disable"
   src     = "file://schemas/keygen.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql_keygen"
+    dir = "file://migrations/postgres_keygen"
   }
   dev = "docker://postgres/18/keygen"
 }
 
-env "local_postgresql_sign" {
+env "local_postgres_sign" {
   url     = "postgres://postgres:postgres@localhost:5432/sign?sslmode=disable"
   src     = "file://schemas/sign.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql_sign"
+    dir = "file://migrations/postgres_sign"
   }
   dev = "docker://postgres/18/sign"
 }
 
 # PostgreSQL Admin Environments (for schema operations)
-env "admin_postgresql_watch" {
+env "admin_postgres_watch" {
   url     = "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
   src     = "file://schemas/watch.hcl"
   schemas = ["public"]
@@ -623,7 +623,7 @@ env "admin_postgresql_watch" {
 **Implementation Notes**:
 
 - HCL schemas: Reuse existing `schemas/watch.hcl`, `keygen.hcl`, `sign.hcl` (database-agnostic)
-- Migrations: Separate directories per database (`migrations/postgresql_watch/`, etc.)
+- Migrations: Separate directories per database (`migrations/postgres_watch/`, etc.)
 - Dev database: Uses PostgreSQL 18 Docker container for migration validation
 - Admin environments: Required for schema-level operations (clean, drop)
 - Risks: None - follows MySQL pattern exactly
@@ -642,12 +642,12 @@ env "admin_postgresql_watch" {
 ```yaml
 services:
   # PostgreSQL Database Service
-  wallet-db-postgresql:
+  wallet-db-postgres:
     image: postgres:18.2
-    container_name: wallet-db-postgresql
+    container_name: wallet-db-postgres
     volumes:
-      - wallet-db-postgresql:/var/lib/postgresql/data
-      - "./docker/postgresql/init.d:/docker-entrypoint-initdb.d"
+      - wallet-db-postgres:/var/lib/postgres/data
+      - "./docker/postgres/init.d:/docker-entrypoint-initdb.d"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -664,14 +664,14 @@ services:
       start_period: 30s
 
   # PostgreSQL Migration Services (Atlas 1.1.0)
-  wallet-db-migrate-postgresql-watch:
+  wallet-db-migrate-postgres-watch:
     image: arigaio/atlas:1.1.0
-    container_name: wallet-db-migrate-postgresql-watch
+    container_name: wallet-db-migrate-postgres-watch
     volumes:
       - "./tools/atlas:/app/atlas"
     working_dir: /app/atlas
     depends_on:
-      wallet-db-postgresql:
+      wallet-db-postgres:
         condition: service_healthy
     networks:
       - db
@@ -679,15 +679,15 @@ services:
       - migrate
       - apply
       - --dir
-      - file://migrations/postgresql_watch
+      - file://migrations/postgres_watch
       - --url
-      - "postgres://postgres:postgres@wallet-db-postgresql:5432/watch?sslmode=disable"
+      - "postgres://postgres:postgres@wallet-db-postgres:5432/watch?sslmode=disable"
     restart: "no"
 
   # Similar services for keygen and sign...
 ```
 
-**Database Initialization Script** (`docker/postgresql/init.d/01_create_databases.sh`):
+**Database Initialization Script** (`docker/postgres/init.d/01_create_databases.sh`):
 
 ```bash
 #!/bin/bash
@@ -707,7 +707,7 @@ EOSQL
 
 ```yaml
 volumes:
-  wallet-db-postgresql: {}
+  wallet-db-postgres: {}
 ```
 
 **Implementation Notes**:
@@ -738,7 +738,7 @@ sqlc-compile:
  @cd tools/sqlc && sqlc compile -f sqlc_sqlite.yml
  @echo "✓ SQLite SQL compilation successful"
  @echo "Compiling PostgreSQL SQL queries and schemas..."
- @cd tools/sqlc && sqlc compile -f sqlc_postgresql.yml
+ @cd tools/sqlc && sqlc compile -f sqlc_postgres.yml
  @echo "✓ PostgreSQL SQL compilation successful"
 
 # SQLC vet for PostgreSQL
@@ -751,7 +751,7 @@ sqlc-vet:
  @cd tools/sqlc && sqlc vet -f sqlc_sqlite.yml
  @echo "✓ SQLite SQL queries passed vetting"
  @echo "Vetting PostgreSQL SQL queries..."
- @cd tools/sqlc && sqlc vet -f sqlc_postgresql.yml
+ @cd tools/sqlc && sqlc vet -f sqlc_postgres.yml
  @echo "✓ PostgreSQL SQL queries passed vetting"
 
 # Generate SQLC code for all databases
@@ -764,7 +764,7 @@ sqlc:
  @cd tools/sqlc && sqlc generate -f sqlc_sqlite.yml
  @echo "✓ SQLite sqlc code generated"
  @echo "Generating PostgreSQL sqlc code..."
- @cd tools/sqlc && sqlc generate -f sqlc_postgresql.yml
+ @cd tools/sqlc && sqlc generate -f sqlc_postgres.yml
  @echo "✓ PostgreSQL sqlc code generated"
 ```
 
@@ -772,11 +772,11 @@ sqlc:
 
 ```makefile
 # Atlas PostgreSQL environments
-ATLAS_POSTGRESQL_SCHEMAS := postgresql_watch postgresql_keygen postgresql_sign
+ATLAS_POSTGRESQL_SCHEMAS := postgres_watch postgres_keygen postgres_sign
 
 # Lint PostgreSQL schemas
-.PHONY: atlas-lint-postgresql
-atlas-lint-postgresql:
+.PHONY: atlas-lint-postgres
+atlas-lint-postgres:
  @echo "Linting PostgreSQL Atlas HCL schema files..."
  @for schema in $(ATLAS_POSTGRESQL_SCHEMAS); do \
   echo "=== Linting $$schema schema ==="; \
@@ -786,7 +786,7 @@ atlas-lint-postgresql:
 
 # Combined lint (all databases)
 .PHONY: atlas-lint
-atlas-lint: atlas-lint-mysql atlas-lint-postgresql
+atlas-lint: atlas-lint-mysql atlas-lint-postgres
  @echo "✓ All database schemas passed linting"
 ```
 
@@ -795,7 +795,7 @@ atlas-lint: atlas-lint-mysql atlas-lint-postgresql
 **Batch Contract**:
 
 - Trigger: Manual execution via `make sqlc` or `make atlas-lint`
-- Input: Schema files (`schemas/postgresql/*.sql`) and HCL files (`schemas/*.hcl`)
+- Input: Schema files (`schemas/postgres/*.sql`) and HCL files (`schemas/*.hcl`)
 - Output: Generated Go code or validation results
 - Idempotency: Code generation is deterministic (same input → same output)
 - Recovery: Regenerate code on failure; validation errors prevent commits
@@ -832,8 +832,8 @@ func (c *container) newAddressRepo() repowatch.AddressRepositorier {
             c.pkgContainer.NewSQLiteClient(),
             c.conf.CoinTypeCode,
         )
-    case "postgresql":
-        return watchpostgresql.NewAddressRepositorySqlc(
+    case "postgres":
+        return watchpostgres.NewAddressRepositorySqlc(
             c.pkgContainer.NewPostgreSQLClient(),
             c.conf.CoinTypeCode,
         )
@@ -850,7 +850,7 @@ func (c *container) newAddressRepo() repowatch.AddressRepositorier {
 func (c *pkgContainer) NewPostgreSQLClient() *sql.DB {
     if c.postgreSQLClient == nil {
         var err error
-        c.postgreSQLClient, err = postgresql.NewPostgreSQL(&c.conf.Database.PostgreSQL)
+        c.postgreSQLClient, err = postgres.NewPostgreSQL(&c.conf.Database.PostgreSQL)
         if err != nil {
             panic(fmt.Sprintf("failed to connect to PostgreSQL: %v", err))
         }
@@ -1030,7 +1030,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 
 ### Unit Tests
 
-**Connection Factory Tests** (`pkg/db/postgresql/connection_test.go`):
+**Connection Factory Tests** (`pkg/db/postgres/connection_test.go`):
 
 - Test successful connection with valid configuration
 - Test connection failure with invalid host
@@ -1038,7 +1038,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 - Test connection pool configuration (max connections, idle connections)
 - Test SSL mode variations (disable, require, verify-ca, verify-full)
 
-**Repository Tests** (example: `internal/infrastructure/repository/watch/postgresql/address_sqlc_test.go`):
+**Repository Tests** (example: `internal/infrastructure/repository/watch/postgres/address_sqlc_test.go`):
 
 - Test type conversion (sqlcgen.Address ↔ domain.Address)
 - Test CRUD operations (Insert, GetByID, GetAll, Update)
@@ -1048,7 +1048,7 @@ if err := r.queries.InsertAddress(ctx, params); err != nil {
 
 ### Integration Tests
 
-**Database Operations** (`internal/integration_test/postgresql/`):
+**Database Operations** (`internal/integration_test/postgres/`):
 
 - Test end-to-end flow: config load → connection → repository → query execution
 - Test transaction handling (commit, rollback)
@@ -1115,7 +1115,7 @@ flowchart TB
 - [ ] Validate schema with sqlc compile
 - [ ] Test CREATE TABLE statements in PostgreSQL 18.2
 
-**Validation**: `cd tools/sqlc && sqlc compile -f sqlc_postgresql.yml`
+**Validation**: `cd tools/sqlc && sqlc compile -f sqlc_postgres.yml`
 
 ### Phase 2: Data Migration (MySQL → PostgreSQL)
 
@@ -1201,7 +1201,7 @@ CAST type decimal(26,10) to numeric(26,10)
 **Connection Pool Configuration**:
 
 ```go
-// PostgreSQL connection pool (pkg/db/postgresql/connection.go)
+// PostgreSQL connection pool (pkg/db/postgres/connection.go)
 db.SetMaxOpenConns(25)           // Maximum concurrent connections
 db.SetMaxIdleConns(5)            // Idle connections for quick reuse
 db.SetConnMaxLifetime(5 * time.Minute) // Prevent stale connections

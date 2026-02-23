@@ -22,9 +22,9 @@ Rules for modifying HCL (HashiCorp Configuration Language) files (`*.hcl`) in go
 
 | File | Description |
 |------|-------------|
-| `tools/atlas/schemas/watch.hcl` | Watch wallet schema (online) |
-| `tools/atlas/schemas/keygen.hcl` | Keygen wallet schema (offline) |
-| `tools/atlas/schemas/sign.hcl` | Sign wallet schema (offline) |
+| `tools/atlas/schemas/{db_dialect}/watch.hcl` | Watch wallet schema (online) |
+| `tools/atlas/schemas/{db_dialect}/keygen.hcl` | Keygen wallet schema (offline) |
+| `tools/atlas/schemas/{db_dialect}/sign.hcl` | Sign wallet schema (offline) |
 
 ## Verification Commands
 

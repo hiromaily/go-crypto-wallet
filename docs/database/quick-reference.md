@@ -8,7 +8,7 @@ Quick reference for common database operations in go-crypto-wallet project.
 
 ```bash
 # 1. Edit HCL schema
-vim tools/atlas/schemas/watch.hcl
+vim tools/atlas/schemas/{db_dialect}/watch.hcl
 
 # 2. Format and validate
 make atlas-fmt && make atlas-lint
@@ -28,7 +28,7 @@ make extract-sqlc-schema-all
 # 6. Regenerate code
 make sqlc        # MySQL
 make sqlc-sqlite # SQLite
-make sqlc-postgresql # PostgreSQL
+make sqlc-postgres # PostgreSQL
 
 # 7. Verify
 make go-lint && make check-build && make gotest
@@ -80,14 +80,14 @@ tools/sqlc/
 │   │   ├── address.sql
 │   │   ├── btc_tx.sql
 │   │   └── *.sql
-│   └── postgresql/       # ✏️  EDIT HERE - PostgreSQL queries ($1,$2 placeholders)
+│   └── postgres/       # ✏️  EDIT HERE - PostgreSQL queries ($1,$2 placeholders)
 │       └── *.sql
 ├── schemas/
 │   ├── mysql/            # 🔄 EXTRACTED - From MySQL dump
 │   │   ├── 01_watch.sql
 │   │   ├── 02_keygen.sql
 │   │   └── 03_sign.sql
-│   ├── postgresql/       # 🔄 EXTRACTED - From PostgreSQL dump
+│   ├── postgres/       # 🔄 EXTRACTED - From PostgreSQL dump
 │   │   └── *.sql
 │   └── sqlite/           # ✏️  CONVERTED - Manual type mapping
 │       └── *.sql
@@ -95,7 +95,7 @@ tools/sqlc/
 internal/infrastructure/database/
 ├── mysql/sqlcgen/        # 🔒 AUTO-GENERATED
 ├── sqlite/sqlcgen/       # 🔒 AUTO-GENERATED
-└── postgresql/sqlcgen/   # 🔒 AUTO-GENERATED (coming soon)
+└── postgres/sqlcgen/   # 🔒 AUTO-GENERATED (coming soon)
 ```
 
 **Legend**:
@@ -125,7 +125,7 @@ internal/infrastructure/database/
 |---------|-------------|
 | `make sqlc` | Generate MySQL SQLC code |
 | `make sqlc-sqlite` | Generate SQLite SQLC code |
-| `make sqlc-postgresql` | Generate PostgreSQL SQLC code |
+| `make sqlc-postgres` | Generate PostgreSQL SQLC code |
 | `make sqlc-all` | Generate code for all databases |
 
 ### Schema Extraction
@@ -177,9 +177,9 @@ debug = true
 
 ```toml
 [database]
-type = "postgresql"
+type = "postgres"
 
-[database.postgresql]
+[database.postgres]
 host = "127.0.0.1"
 port = 5432
 dbname = "watch"  # or "keygen", "sign"
@@ -278,7 +278,7 @@ sqlite3 ./data/sqlite/btc/e2e.db \
 - **Database Architecture**: [Development Database Docs](../development/database.md)
 - **Atlas Details**: `tools/atlas/README.md`
 - **Code Generation**: [Code Generation Guidelines](code-generation.md)
-- **PostgreSQL Integration**: `.kiro/specs/postgresql-integration/`
+- **PostgreSQL Integration**: `.kiro/specs/postgres-integration/`
 
 ## 🆘 Troubleshooting
 

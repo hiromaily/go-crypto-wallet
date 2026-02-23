@@ -4,12 +4,12 @@
 #
 # Usage: ./scripts/db/atlas-dev-reset.sh
 # Environment variables:
-#   DB_DIALECT  - Database dialect: mysql (default) or postgresql
+#   DB_DIALECT  - Database dialect: mysql (default) or postgres
 
 set -euo pipefail
 
 # Configuration
-DB_DIALECT="${DB_DIALECT:-mysql}"
+DB_DIALECT="${DB_DIALECT:-postgres}"
 ATLAS_ENV_WATCH="local_${DB_DIALECT}_watch"
 ATLAS_ENV_KEYGEN="local_${DB_DIALECT}_keygen"
 ATLAS_ENV_SIGN="local_${DB_DIALECT}_sign"
@@ -109,7 +109,7 @@ done
 
 # Determine the appropriate docker reset command
 DOCKER_PROFILE="${DB_DIALECT}"
-if [[ "${DB_DIALECT}" == "postgresql" ]]; then
+if [[ "${DB_DIALECT}" == "postgres" ]]; then
 	DOCKER_PROFILE="postgres"
 fi
 

@@ -143,10 +143,10 @@ type TracerDetail struct {
 // Database config for database type selection
 type Database struct {
 	//nolint:lll,revive
-	Type       string     `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite postgresql"`
+	Type       string     `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite postgres"`
 	MySQL      MySQL      `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
 	SQLite     SQLite     `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
-	PostgreSQL PostgreSQL `toml:"postgresql" yaml:"postgresql" mapstructure:"postgresql"`
+	PostgreSQL PostgreSQL `toml:"postgres" yaml:"postgres" mapstructure:"postgres"`
 }
 
 // MySQL info
@@ -305,22 +305,22 @@ func (c *WalletRoot) validateDatabase() error {
 		if c.Database.SQLite.Path == "" {
 			return errors.New("database.sqlite.path is required when database.type is sqlite")
 		}
-	case "postgresql":
+	case "postgres":
 		// Validate PostgreSQL configuration
 		if c.Database.PostgreSQL.Host == "" {
-			return errors.New("database.postgresql.host is required when database.type is postgresql")
+			return errors.New("database.postgres.host is required when database.type is postgres")
 		}
 		if c.Database.PostgreSQL.DB == "" {
-			return errors.New("database.postgresql.dbname is required when database.type is postgresql")
+			return errors.New("database.postgres.dbname is required when database.type is postgres")
 		}
 		if c.Database.PostgreSQL.User == "" {
-			return errors.New("database.postgresql.user is required when database.type is postgresql")
+			return errors.New("database.postgres.user is required when database.type is postgres")
 		}
 		if c.Database.PostgreSQL.Pass == "" {
-			return errors.New("database.postgresql.pass is required when database.type is postgresql")
+			return errors.New("database.postgres.pass is required when database.type is postgres")
 		}
 	default:
-		return fmt.Errorf("unsupported database type: %s (must be mysql, sqlite, or postgresql)", c.Database.Type)
+		return fmt.Errorf("unsupported database type: %s (must be mysql, sqlite, or postgres)", c.Database.Type)
 	}
 
 	return nil

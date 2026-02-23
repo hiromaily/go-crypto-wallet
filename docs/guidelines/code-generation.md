@@ -9,7 +9,7 @@ This project uses several code generation tools. **All auto-generated files cont
 ## Database Migrations (Atlas)
 
 **Tool**: [Atlas](https://atlasgo.io/)
-**Source**: `tools/atlas/schemas/*.hcl` (HCL schema files)
+**Source**: `tools/atlas/schemas/{db_dialect}/*.hcl` (HCL schema files)
 **Command**: `make atlas-dev-reset` (regenerate from scratch)
 
 **Generated Files**:
@@ -33,7 +33,7 @@ This project uses several code generation tools. **All auto-generated files cont
 - `tools/sqlc/schemas/mysql/02_keygen.sql` - Keygen schema for SQLC
 - `tools/sqlc/schemas/mysql/03_sign.sql` - Sign schema for SQLC
 
-**Note**: These schema files are extracted from MySQL database dumps. The source of truth is the Atlas HCL files (`tools/atlas/schemas/*.hcl`). To update schemas, modify the HCL files and run the database migration flow.
+**Note**: These schema files are extracted from MySQL database dumps. The source of truth is the Atlas HCL files (`tools/atlas/schemas/{db_dialect}/*.hcl`). To update schemas, modify the HCL files and run the database migration flow.
 
 ## Database Code (SQLC)
 
@@ -209,9 +209,9 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 1. **Never manually edit auto-generated files** - Changes will be overwritten on next generation
 2. **Edit source files instead**:
-   - Atlas: Edit `tools/atlas/schemas/*.hcl` (HCL schema files)
-   - SQLC Schemas: **DO NOT EDIT** `tools/sqlc/schemas/mysql/*.sql` - these are auto-generated from database dumps. Edit `tools/atlas/schemas/*.hcl` instead.
-   - SQLC Queries: Edit `tools/sqlc/queries/mysql/*.sql` (manually edited)
+   - Atlas: Edit `tools/atlas/schemas/{db_dialect}/*.hcl` (HCL schema files)
+   - SQLC Schemas: **DO NOT EDIT** `tools/sqlc/schemas/{db_dialect}/*.sql` - these are auto-generated from database dumps. Edit `tools/atlas/schemas/{db_dialect}/*.hcl` instead.
+   - SQLC Queries: Edit `tools/sqlc/queries/{db_dialect}/*.sql` (manually edited)
    - Mockery: Edit `.mockery.yaml` to add new interfaces, then run `make mockery`
    - Protocol Buffers: Edit `proto/rippleapi/*.proto`
    - ABI: Edit `contracts/token.abi` (or regenerate from Solidity source)
@@ -222,7 +222,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 | Tool | Source Files | Command | Generated Files |
 |------|--------------|---------|-----------------|
-| Atlas | `tools/atlas/schemas/*.hcl` | `make atlas-dev-reset` | `tools/atlas/migrations/*/*.sql` |
+| Atlas | `tools/atlas/schemas/{db_dialect}/*.hcl` | `make atlas-dev-reset` | `tools/atlas/migrations/*/*.sql` |
 | SQLC Schema Extract | `data/dump/sql/dump_*.sql` | `make extract-sqlc-schema-all` | `tools/sqlc/schemas/mysql/*.sql` |
 | SQLC | `tools/sqlc/schemas/mysql/*.sql` + `tools/sqlc/queries/mysql/*.sql` | `make sqlc` | `internal/infrastructure/database/mysql/sqlcgen/*.go` |
 | Mockery | `.mockery.yaml` + interface definitions | `make mockery` | `internal/infrastructure/*/mocks/*.go` |

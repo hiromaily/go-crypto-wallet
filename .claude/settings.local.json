@@ -54,7 +54,10 @@
       "Bash(gh api:*)",
       "Bash(brew list:*)",
       "Bash(brew:*)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "WebFetch(domain:atlasgo.io)",
+      "Bash(atlas schema lint:*)",
+      "Bash(atlas schema inspect:*)"
     ]
   },
   "hooks": {

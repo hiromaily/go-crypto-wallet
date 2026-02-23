@@ -11,7 +11,7 @@ flowchart TD
   C --> SQ[SQLite]
 
   %% PostgreSQL path
-  PG --> PG1[Schema dump\nコマンド例\nmake dump-schema-postgresql-all\npg_dump via docker exec wallet-postgres]
+  PG --> PG1[Schema dump\nコマンド例\nmake dump-schema-postgres-all\npg_dump via docker exec wallet-postgres]
 
   %% MySQL path
   MY --> MY1[Schema dump\nコマンド例\nmake dump-schema-all\nmysqldump via docker exec wallet-mysql]
@@ -20,12 +20,12 @@ flowchart TD
   SQ --> SQ1[Schema extract by Atlas\nコマンド例\natlas schema inspect -u sqlite://...\n--format {{ sql . }}]
 
   %% Normalize per dialect
-  PG1 --> NPG[スキーマ正規化\nscripts/db/extract-sqlc-schema-postgresql.sh\n出力: tools/sqlc/schemas/postgresql/*.sql]
+  PG1 --> NPG[スキーマ正規化\nscripts/db/extract-sqlc-schema-postgres.sh\n出力: tools/sqlc/schemas/postgres/*.sql]
   MY1 --> NMY[スキーマ正規化\nscripts/db/extract-sqlc-schema.sh\n出力: tools/sqlc/schemas/mysql/*.sql]
   SQ1 --> NSQ[スキーマは手動管理\ntools/sqlc/schemas/sqlite/*.sql]
 
   %% sqlc generation per dialect
-  NPG --> GPG[sqlc generate -f sqlc_postgresql.yml\nクエリ: queries/postgresql/*.sql\n出力: database/postgresql/sqlcgen/]
+  NPG --> GPG[sqlc generate -f sqlc_postgres.yml\nクエリ: queries/postgres/*.sql\n出力: database/postgres/sqlcgen/]
   NMY --> GMY[sqlc generate\nクエリ: queries/mysql/*.sql\n出力: database/mysql/sqlcgen/]
   NSQ --> GSQ[sqlc generate -f sqlc_sqlite.yml\nクエリ: queries/mysql/*.sql\n出力: database/sqlite/sqlcgen/]
 
@@ -51,11 +51,11 @@ make sqlc                       # generate Go code
 
 ```bash
 # Full regeneration after HCL schema change
-make regenerate-all-from-atlas-postgresql
+make regenerate-all-from-atlas-postgres
 
 # Or step by step:
-make extract-sqlc-schema-postgresql-all  # dump + normalize
-make sqlc-postgresql                     # generate Go code
+make extract-sqlc-schema-postgres-all  # dump + normalize
+make sqlc-postgres                     # generate Go code
 ```
 
 ### SQLite

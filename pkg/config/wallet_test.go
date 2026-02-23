@@ -295,8 +295,8 @@ tracer:
   type: none
 
 database:
-  type: postgresql
-  postgresql:
+  type: postgres
+  postgres:
     host: localhost
     port: 5432
     dbname: test_db
@@ -310,7 +310,7 @@ file_path:
   address: /tmp/address
   full_pubkey: /tmp/pubkey
 `
-	yamlPath := filepath.Join(tmpDir, "test_postgresql_wallet.yaml")
+	yamlPath := filepath.Join(tmpDir, "test_postgres_wallet.yaml")
 	err := os.WriteFile(yamlPath, []byte(yamlContent), 0o600)
 	require.NoError(t, err, "Failed to create test YAML file")
 
@@ -320,7 +320,7 @@ file_path:
 	require.NotNil(t, conf, "NewWallet() returned nil config")
 
 	// Verify PostgreSQL configuration
-	assert.Equal(t, "postgresql", conf.Database.Type)
+	assert.Equal(t, "postgres", conf.Database.Type)
 	assert.Equal(t, "localhost", conf.Database.PostgreSQL.Host)
 	assert.Equal(t, 5432, conf.Database.PostgreSQL.Port)
 	assert.Equal(t, "test_db", conf.Database.PostgreSQL.DB)
@@ -342,7 +342,7 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 			name: "Valid PostgreSQL configuration with all fields",
 			conf: WalletRoot{
 				Database: Database{
-					Type: "postgresql",
+					Type: "postgres",
 					PostgreSQL: PostgreSQL{
 						Host:    "localhost",
 						Port:    5432,
@@ -359,7 +359,7 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 			name: "Valid PostgreSQL configuration without optional fields",
 			conf: WalletRoot{
 				Database: Database{
-					Type: "postgresql",
+					Type: "postgres",
 					PostgreSQL: PostgreSQL{
 						Host: "localhost",
 						// Port defaults to 0 (will use 5432 in connection factory)
@@ -376,7 +376,7 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 			name: "Missing PostgreSQL host",
 			conf: WalletRoot{
 				Database: Database{
-					Type: "postgresql",
+					Type: "postgres",
 					PostgreSQL: PostgreSQL{
 						DB:   "test_db",
 						User: "postgres",
@@ -385,13 +385,13 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "database.postgresql.host is required when database.type is postgresql",
+			errMsg:  "database.postgres.host is required when database.type is postgres",
 		},
 		{
 			name: "Missing PostgreSQL dbname",
 			conf: WalletRoot{
 				Database: Database{
-					Type: "postgresql",
+					Type: "postgres",
 					PostgreSQL: PostgreSQL{
 						Host: "localhost",
 						User: "postgres",
@@ -400,13 +400,13 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "database.postgresql.dbname is required when database.type is postgresql",
+			errMsg:  "database.postgres.dbname is required when database.type is postgres",
 		},
 		{
 			name: "Missing PostgreSQL user",
 			conf: WalletRoot{
 				Database: Database{
-					Type: "postgresql",
+					Type: "postgres",
 					PostgreSQL: PostgreSQL{
 						Host: "localhost",
 						DB:   "test_db",
@@ -415,13 +415,13 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "database.postgresql.user is required when database.type is postgresql",
+			errMsg:  "database.postgres.user is required when database.type is postgres",
 		},
 		{
 			name: "Missing PostgreSQL password",
 			conf: WalletRoot{
 				Database: Database{
-					Type: "postgresql",
+					Type: "postgres",
 					PostgreSQL: PostgreSQL{
 						Host: "localhost",
 						DB:   "test_db",
@@ -430,7 +430,7 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "database.postgresql.pass is required when database.type is postgresql",
+			errMsg:  "database.postgres.pass is required when database.type is postgres",
 		},
 		{
 			name: "Unsupported database type",
@@ -440,7 +440,7 @@ func TestValidateDatabase_PostgreSQL(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "unsupported database type: oracle (must be mysql, sqlite, or postgresql)",
+			errMsg:  "unsupported database type: oracle (must be mysql, sqlite, or postgres)",
 		},
 	}
 

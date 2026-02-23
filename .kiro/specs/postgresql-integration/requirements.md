@@ -11,7 +11,7 @@ The project uses [sqlc](https://github.com/sqlc-dev/sqlc) as a type-safe SQL cod
 
 **Goals**:
 
-1. **Add PostgreSQL Support**: Add PostgreSQL as a third database option, maintaining feature parity with MySQL and SQLite. Users should be able to select PostgreSQL by setting `database.type = "postgresql"` in the configuration file, with the application handling PostgreSQL-specific connection management, schema generation, and query execution transparently.
+1. **Add PostgreSQL Support**: Add PostgreSQL as a third database option, maintaining feature parity with MySQL and SQLite. Users should be able to select PostgreSQL by setting `database.type = "postgres"` in the configuration file, with the application handling PostgreSQL-specific connection management, schema generation, and query execution transparently.
 
 2. **Upgrade Atlas**: Upgrade Atlas from version 1.0 to the current version 1.1, taking advantage of improved PostgreSQL support and new features while ensuring backward compatibility with existing migrations.
 
@@ -29,13 +29,13 @@ The implementation must maintain the existing architecture where database select
 
 #### Acceptance Criteria
 
-1. When the configuration file specifies `database.type = "postgresql"`, the Wallet System shall accept this as a valid database type
-2. If `database.type` is "postgresql" and `database.postgresql.host` is empty, then the Wallet System shall return a validation error
-3. If `database.type` is "postgresql" and `database.postgresql.dbname` is empty, then the Wallet System shall return a validation error
-4. If `database.type` is "postgresql" and `database.postgresql.user` is empty, then the Wallet System shall return a validation error
-5. If `database.type` is "postgresql" and `database.postgresql.pass` is empty, then the Wallet System shall return a validation error
+1. When the configuration file specifies `database.type = "postgres"`, the Wallet System shall accept this as a valid database type
+2. If `database.type` is "postgres" and `database.postgres.host` is empty, then the Wallet System shall return a validation error
+3. If `database.type` is "postgres" and `database.postgres.dbname` is empty, then the Wallet System shall return a validation error
+4. If `database.type` is "postgres" and `database.postgres.user` is empty, then the Wallet System shall return a validation error
+5. If `database.type` is "postgres" and `database.postgres.pass` is empty, then the Wallet System shall return a validation error
 6. The Wallet System shall support PostgreSQL connection parameters including host, port, database name, username, password, and SSL mode
-7. Where database.type is "postgresql", the Wallet System shall use the PostgreSQL configuration section and ignore MySQL and SQLite configurations
+7. Where database.type is "postgres", the Wallet System shall use the PostgreSQL configuration section and ignore MySQL and SQLite configurations
 
 ### Requirement 2: PostgreSQL Schema Generation
 
@@ -67,7 +67,7 @@ The implementation must maintain the existing architecture where database select
 
 #### Acceptance Criteria
 
-1. When the application starts with `database.type = "postgresql"`, the Database Connection Manager shall establish a connection to PostgreSQL using the provided credentials
+1. When the application starts with `database.type = "postgres"`, the Database Connection Manager shall establish a connection to PostgreSQL using the provided credentials
 2. If PostgreSQL connection fails, then the Database Connection Manager shall return a descriptive error including the connection failure reason
 3. While the application is running with PostgreSQL, the Database Connection Manager shall maintain connection pool settings appropriate for PostgreSQL
 4. The Database Connection Manager shall support PostgreSQL-specific connection options including SSL mode and connection timeout

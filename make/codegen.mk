@@ -5,51 +5,53 @@
 include make/codegen_proto.mk
 
 ###############################################################################
-# generate sqlite schema from postgresql scheme
+# generate sqlite schema from postgres scheme
 ###############################################################################
+# WIP
 .PHONY: generate-sqlite-schema
 generate-sqlite-schema:
-	pg2sqlite -i tools/sqlc/schemas/postgresql/01_watch.sql \
+	pg2sqlite -i tools/sqlc/schemas/postgres/01_watch.sql \
 	-o tools/sqlc/schemas/sqlite/01_watch.sql
-	pg2sqlite -i tools/sqlc/schemas/postgresql/02_keygen.sql \
+	pg2sqlite -i tools/sqlc/schemas/postgres/02_keygen.sql \
 	-o tools/sqlc/schemas/sqlite/02_keygen.sql
-	pg2sqlite -i tools/sqlc/schemas/postgresql/03_sign.sql \
+	pg2sqlite -i tools/sqlc/schemas/postgres/03_sign.sql \
 	-o tools/sqlc/schemas/sqlite/03_sign.sql
 
 ########################################################################
 # sqlc
 #------------------------------------------------------------------------------
-# Generate Go code from SQL queries using sqlc
-# Schemas: tools/sqlc/schemas/mysql/*.sql
-# Queries: tools/sqlc/queries/mysql/*.sql
-# Output: internal/infrastructure/database/mysql/sqlcgen/
+# Generate Go code from SQL queries for PostgreSQL using sqlc
+# Schemas: tools/sqlc/schemas/postgres/*.sql
+# Queries: tools/sqlc/queries/postgres/*.sql
+# Output: internal/infrastructure/database/postgres/sqlcgen/
 #------------------------------------------------------------------------------
 .PHONY: sqlc
 sqlc:
-	cd tools/sqlc && sqlc generate
+	cd tools/sqlc && sqlc generate -f sqlc_postgres.yml
+
+# Alias for postgres (default config)
+.PHONY: sqlc-postgres
+sqlc-postgres: sqlc
+
+# Generate Go code from SQL queries for MySQL using sqlc
+# Schemas: tools/sqlc/schemas/mysql/*.sql
+# Queries: tools/sqlc/queries/mysql/*.sql
+# Output: internal/infrastructure/database/mysql/sqlcgen/
+.PHONY: sqlc-mysql
+sqlc-mysql:
+	cd tools/sqlc && sqlc generate -f sqlc_mysql.yml
 
 # Generate Go code from SQL queries for SQLite using sqlc
 # Schemas: tools/sqlc/schemas/sqlite/*.sql
 # Queries: tools/sqlc/queries/mysql/*.sql
 # Output: internal/infrastructure/database/sqlite/sqlcgen/
-#------------------------------------------------------------------------------
 .PHONY: sqlc-sqlite
 sqlc-sqlite:
 	cd tools/sqlc && sqlc generate -f sqlc_sqlite.yml
 
-# Generate Go code from SQL queries for PostgreSQL using sqlc
-# Schemas: tools/sqlc/schemas/postgresql/*.sql
-# Queries: tools/sqlc/queries/postgresql/*.sql
-# Output: internal/infrastructure/database/postgresql/sqlcgen/
-#------------------------------------------------------------------------------
-.PHONY: sqlc-postgresql
-sqlc-postgresql:
-	cd tools/sqlc && sqlc generate -f sqlc_postgresql.yml
-
 # Generate sqlc code for all database backends (MySQL, SQLite, and PostgreSQL)
-#------------------------------------------------------------------------------
 .PHONY: sqlc-all
-sqlc-all: sqlc sqlc-sqlite sqlc-postgresql
+sqlc-all: sqlc sqlc-sqlite sqlc-postgres
 
 ###############################################################################
 # mockery

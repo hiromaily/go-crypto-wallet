@@ -2,6 +2,8 @@
 
 This document describes the database architecture and operations for the go-crypto-wallet project.
 
+---
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -16,20 +18,21 @@ This document describes the database architecture and operations for the go-cryp
 - [Troubleshooting](#troubleshooting)
 - [Migration Guide](#migration-guide)
 
+---
+
 ## Overview
 
 The project supports **two database backends**:
 
 | Database | Use Case | Features |
 |----------|----------|----------|
-| **MySQL** | Production, full testing | Docker container, schema separation |
+| **Postgres** | Production, full testing | Docker container, schema separation |
+| **MySQL** | Production as option, full testing | Docker container, schema separation |
 | **SQLite** | E2E testing, CI/CD | Local file, fast startup, no Docker DB required |
 
+---
+
 ## Supported Databases
-
-### MySQL (Production)
-
-The project uses a **single MySQL 8.4 container** with **three separate schemas** to manage wallet data:
 
 - **`watch` schema**: Online wallet data (addresses, transactions, payment requests)
 - **`keygen` schema**: Key generation data (seeds, account keys, full public keys)
@@ -37,13 +40,23 @@ The project uses a **single MySQL 8.4 container** with **three separate schemas*
 
 This consolidated approach provides:
 
-- ✅ Reduced resource usage (single MySQL instance)
+- ✅ Reduced resource usage (single db instance)
 - ✅ Simplified deployment and maintenance
 - ✅ Data isolation through schema separation
 - ✅ Easier backup and restore operations
 - ✅ Single point of configuration
 
-## Architecture
+### Postgresql (Production)
+
+TODO: explanation
+
+### MySQL (Production as option)
+
+The project uses a **single MySQL 8.4 container** with **three separate schemas** to manage wallet data:
+
+---
+
+## Architecture for MySQL
 
 ### Container Setup
 
@@ -51,6 +64,7 @@ This consolidated approach provides:
 services:
   wallet-mysql:
     image: mysql:8.4
+    profiles: ["mysql"]
     container_name: wallet-mysql
     ports:
       - "${MYSQL_PORT:-3306}:3306"
@@ -123,7 +137,11 @@ When the container starts for the first time:
 
    This will create all tables and apply schema definitions using Atlas migrations.
 
+---
+
 ## Schema Design
+
+TODO: update
 
 ### Watch Schema (`watch`)
 
@@ -170,7 +188,11 @@ When the container starts for the first time:
 
 **Security**: This schema contains sensitive signing keys - should be in offline/cold storage in production
 
+---
+
 ## Setup and Configuration
+
+TODO: update
 
 ### Initial Setup
 
@@ -254,7 +276,11 @@ user = "hiromaily"
 pass = "hiromaily"
 ```
 
+---
+
 ## Common Operations
+
+TODO: update
 
 ### Database Access
 
@@ -383,7 +409,11 @@ make atlas-migrate-docker
 
 **Note:** The payment request table is now managed by Atlas migrations. See `tools/atlas/migrations/watch/` for the current schema definition.
 
+---
+
 ## Database Management
+
+TODO: update
 
 ### View Schema Information
 
@@ -441,6 +471,8 @@ docker compose logs -f wallet-mysql
 docker compose logs --tail=100 wallet-mysql
 ```
 
+---
+
 ## Schema Migrations with Atlas
 
 The project uses [Atlas](https://atlasgo.io/) for managing database schema migrations. Atlas provides version-controlled migrations, migration history tracking, and rollback capabilities.
@@ -466,6 +498,8 @@ atlas version
 ```
 
 ### Migration Structure
+
+TODO: update
 
 Atlas supports both HCL schema definitions and SQL migrations:
 
@@ -656,6 +690,8 @@ For new schema changes:
 
 For more detailed information, see [Atlas README](../../tools/atlas/README.md).
 
+---
+
 ## SQLite for E2E Testing
 
 SQLite provides a lightweight alternative for E2E testing without requiring Docker MySQL.
@@ -746,6 +782,8 @@ make sqlc-sqlite
 ```
 
 Generated files: `internal/infrastructure/database/sqlite/sqlcgen/`
+
+---
 
 ## Troubleshooting
 
@@ -851,6 +889,8 @@ SHOW VARIABLES LIKE 'slow_query%';"
 docker compose exec wallet-mysql cat /var/lib/mysql/slow-query.log
 ```
 
+---
+
 ## Migration Guide
 
 ### From Old Three-Container Setup
@@ -933,6 +973,8 @@ docker volume rm go-crypto-wallet_keygen-db
 docker volume rm go-crypto-wallet_sign-db
 ```
 
+---
+
 ## Best Practices
 
 ### Security
@@ -1008,6 +1050,8 @@ docker volume rm go-crypto-wallet_sign-db
    - Disk space usage
    - Slow queries
    - Replication lag (if using replication)
+
+---
 
 ## References
 

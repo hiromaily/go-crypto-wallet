@@ -24,8 +24,8 @@ All these files have been replaced by Atlas migrations located in `tools/atlas/m
 **Current schema management:**
 
 - Schema initialization: `docker/mysql/init.d/01_init_all_schemas.sql` (creates schemas only)
-- Schema definitions: `tools/atlas/schemas/*.hcl` (HCL format, for reference)
-- Migrations: `tools/atlas/migrations/*/` (SQL migrations, version-controlled)
+- Schema definitions: `tools/atlas/schemas/{db_dialect}/*.hcl` (HCL format, for reference)
+- Migrations: `tools/atlas/migrations/{db_dialect}/*/` (SQL migrations, version-controlled)
 
 **Current initialization process:**
 

@@ -3,19 +3,12 @@
 ###############################################################################
 
 ###############################################################################
-# Docker Compose Targets
+# DB Dialect Configuration
 ###############################################################################
-
-# run consolidated database
-.PHONY: reset-docker-mysql
-reset-docker-mysql:
-	docker compose down -v
-	docker compose --profile mysql up
-
-.PHONY: reset-docker-postgres
-reset-docker-postgres:
-	docker compose down -v
-	docker compose --profile postgres up
+# DB_DIALECT selects the database dialect (mysql or postgres)
+# Usage: make <target> DB_DIALECT=postgres
+# Default: postgres
+DB_DIALECT ?= postgres
 
 ###############################################################################
 # DB Related Targets
@@ -26,77 +19,77 @@ include make/db_atlas.mk
 include make/db_sqlc.mk
 
 ###############################################################################
+# Docker Compose Targets
+# Usage: make reset-docker [DB_DIALECT=mysql|postgres]
+###############################################################################
+
+# Reset and restart database Docker containers
+# Usage: make reset-docker [DB_DIALECT=mysql|postgres]
+.PHONY: reset-docker
+reset-docker:
+	docker compose --profile $(DB_DIALECT) down -v
+	docker compose --profile $(DB_DIALECT) up
+
+# Convenience aliases for dialect-specific reset
+.PHONY: reset-docker-mysql
+reset-docker-mysql:
+	@$(MAKE) reset-docker DB_DIALECT=mysql
+
+# Remove all of database containers
+.PHONY: remove-all-dbs
+remove-all-dbs:
+	COMPOSE_PROFILES=mysql,postgres docker compose down -v
+
+
+###############################################################################
 # Full Schema Regeneration Workflow
 ###############################################################################
 
 # Regenerate everything after Atlas HCL schema changes
-# This runs all steps needed after modifying tools/atlas/schemas/*.hcl files:
+# This runs all steps needed after modifying tools/atlas/schemas/{db_dialect}/*.hcl files:
 # 1. atlas-dev-reset: Regenerate migration files from HCL schemas
-# 2. reset-docker-mysql: Restart DB container to apply migrations
+# 2. reset-docker: Restart DB container to apply migrations
 # 3. Wait for DB to be ready
 # 4. extract-sqlc-schema-all: Extract sqlc schemas from running DB
 # 5. sqlc: Generate Go code from schemas and queries
 #
-# Usage: After modifying tools/atlas/schemas/*.hcl, run:
-#   make regenerate-all-from-atlas
+# Usage: make regenerate-all-from-atlas [DB_DIALECT=mysql|postgres]
 .PHONY: regenerate-all-from-atlas
 regenerate-all-from-atlas:
-	@echo "=== Step 1/5: Regenerating Atlas migrations ==="
-	@$(MAKE) atlas-dev-reset
+	@echo "=== Step 1/5: Regenerating Atlas migrations ($(DB_DIALECT)) ==="
+	@$(MAKE) atlas-dev-reset DB_DIALECT=$(DB_DIALECT)
 	@echo ""
-	@echo "=== Step 2/5: Restarting Docker DB ==="
-	docker compose down -v
-	docker compose --profile mysql up -d
+	@echo "=== Step 2/5: Restarting Docker DB ($(DB_DIALECT)) ==="
+	docker compose --profile $(DB_DIALECT) down -v
+	docker compose --profile $(DB_DIALECT) up -d
 	@echo ""
 	@echo "=== Step 3/5: Waiting for DB and migrations to be ready ==="
 	@# Use 'docker compose wait' to wait for all migration services to complete.
-	@# Migration services depend on wallet-mysql with 'condition: service_healthy',
-	@# so MySQL is guaranteed to be ready when migrations complete.
+	@# Migration services depend on the DB with 'condition: service_healthy',
+	@# so the DB is guaranteed to be ready when migrations complete.
 	@# This command blocks until each specified service exits and returns their exit codes.
 	@# If any migration fails (non-zero exit), the command will fail and stop the workflow.
 	@# Requires Docker Compose v2.21 or later.
-	docker compose wait wallet-mysql-migrate-watch wallet-mysql-migrate-keygen wallet-mysql-migrate-sign
+	docker compose wait wallet-$(DB_DIALECT)-migrate-watch wallet-$(DB_DIALECT)-migrate-keygen wallet-$(DB_DIALECT)-migrate-sign
 	@echo "✓ Database is ready and all migrations completed"
 	@echo ""
 	@echo "=== Step 4/5: Extracting sqlc schemas from DB ==="
-	@$(MAKE) extract-sqlc-schema-all
+	@$(MAKE) extract-sqlc-schema-all DB_DIALECT=$(DB_DIALECT)
 	@echo ""
 	@echo "=== Step 5/5: Generating sqlc code ==="
-	@$(MAKE) sqlc
+	@$(MAKE) sqlc-$(DB_DIALECT)
 	@echo ""
-	@echo "✓ All done! Schema regeneration complete."
+	@echo "✓ All done! Schema regeneration complete ($(DB_DIALECT))."
 
-# Regenerate everything for PostgreSQL after Atlas HCL schema changes
-# Same workflow as MySQL but for PostgreSQL
-#
-# Usage: After modifying tools/atlas/schemas/*.hcl, run:
-#   make regenerate-all-from-atlas-postgresql
-.PHONY: regenerate-all-from-atlas-postgresql
-regenerate-all-from-atlas-postgresql:
-	@echo "=== Step 1/5: Regenerating Atlas PostgreSQL migrations ==="
-	@$(MAKE) atlas-dev-reset DB_DIALECT=postgresql
-	@echo ""
-	@echo "=== Step 2/5: Restarting Docker PostgreSQL ==="
-	docker compose down -v
-	docker compose --profile postgres up -d
-	@echo ""
-	@echo "=== Step 3/5: Waiting for DB and migrations to be ready ==="
-	docker compose wait wallet-postgres-migrate-watch wallet-postgres-migrate-keygen wallet-postgres-migrate-sign
-	@echo "✓ Database is ready and all migrations completed"
-	@echo ""
-	@echo "=== Step 4/5: Extracting sqlc schemas from DB ==="
-	@$(MAKE) extract-sqlc-schema-postgresql-all
-	@echo ""
-	@echo "=== Step 5/5: Generating sqlc code ==="
-	@$(MAKE) sqlc-postgresql
-	@echo ""
-	@echo "✓ All done! PostgreSQL schema regeneration complete."
+# Convenience aliases for dialect-specific regeneration
+.PHONY: regenerate-all-from-atlas-mysql
+regenerate-all-from-atlas-mysql:
+	@$(MAKE) regenerate-all-from-atlas DB_DIALECT=mysql
 
 
 ###############################################################################
 # sqlfluff Linting
 ###############################################################################
-
 ###############################################################################
 # SQLFluff Targets (SQL Formatting and Linting)
 ###############################################################################
@@ -104,26 +97,29 @@ regenerate-all-from-atlas-postgresql:
 # Note: SQLFluff may show PRS (parsing) errors for MySQL ? placeholders,
 # but these are acceptable as sqlc handles them correctly.
 
-# Format SQL files
-# Formats SQL files according to .sqlfluff configuration
+# Format SQL files for all dialects
 .PHONY: sqlfluff-format
 sqlfluff-format:
-	@echo "Formatting SQL files..."
-	@sqlfluff format tools/sqlc/queries/mysql/*.sql
+	@for dialect in mysql postgres; do \
+		echo "Formatting SQL files ($$dialect)..."; \
+		sqlfluff format tools/sqlc/queries/$$dialect/*.sql; \
+	done
 	@echo "✓ SQL files formatted"
 
-# Lint SQL files
-# Lints SQL files and reports issues (excluding parsing errors for ? placeholders)
+# Lint SQL files for all dialects
 .PHONY: sqlfluff-lint
 sqlfluff-lint:
-	@echo "Linting SQL files..."
-	@sqlfluff lint tools/sqlc/queries/mysql/*.sql || true
+	@for dialect in mysql postgres; do \
+		echo "Linting SQL files ($$dialect)..."; \
+		sqlfluff lint tools/sqlc/queries/$$dialect/*.sql || true; \
+	done
 	@echo "Note: PRS (parsing) errors for ? placeholders are acceptable for sqlc"
 
-# Fix SQL files (format and auto-fix issues)
-# Formats SQL files and automatically fixes linting issues where possible
+# Fix SQL files for all dialects (format and auto-fix issues)
 .PHONY: sqlfluff-fix
 sqlfluff-fix:
-	@echo "Formatting and fixing SQL files..."
-	@sqlfluff fix tools/sqlc/queries/mysql/*.sql
+	@for dialect in mysql postgres; do \
+		echo "Formatting and fixing SQL files ($$dialect)..."; \
+		sqlfluff fix tools/sqlc/queries/$$dialect/*.sql; \
+	done
 	@echo "✓ SQL files formatted and fixed"

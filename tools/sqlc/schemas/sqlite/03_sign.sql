@@ -1,15 +1,6 @@
 -- SQLite schema for sign wallet
 -- Converted from MySQL schema
 
-CREATE TABLE seed (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  coin TEXT NOT NULL CHECK(coin IN ('btc','bch','eth','xrp','hyt')),
-  seed TEXT NOT NULL,
-  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_seed_coin ON seed(coin);
-
 CREATE TABLE auth_account_key (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   coin TEXT NOT NULL CHECK(coin IN ('btc','bch')),
