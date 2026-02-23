@@ -37,7 +37,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 
 **📘 Reference**: See [Database Quick Reference - Data Type Mapping](../../../docs/database/quick-reference.md#-data-type-mapping) for MySQL→PostgreSQL conversion table.
 
-- [ ] 2. Configure Atlas for PostgreSQL migrations
+- [x] 2. Configure Atlas for PostgreSQL migrations
 - [x] 2.1 (P) Add PostgreSQL environments to Atlas configuration
   - Edit tools/atlas/atlas.hcl to add local_postgres_watch environment
   - Set URL: postgres://postgres:postgres@localhost:5432/watch?sslmode=disable
@@ -65,7 +65,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - **PostgreSQL Features**: BIGSERIAL, TEXT+CHECK constraints, BOOLEAN, TIMESTAMP, NUMERIC(26,10), INTEGER types
   - _Requirements: 7.3, 7.4, 7.6_
 
-- [ ] 3. Add PostgreSQL to Docker Compose environment
+- [x] 3. Add PostgreSQL to Docker Compose environment
 - [x] 3.1 Configure PostgreSQL database service
   - Add wallet-postgres service to compose.yaml (profile: "postgres")
   - Use image: postgres:18.2
@@ -97,7 +97,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - **Depends on**: Task 2.3 (migrations must exist before services reference them)
   - _Requirements: 8.7, 8.8, 10.2_
 
-- [ ] 3.4 (P) Update Atlas version to 1.1.0
+- [x] 3.4 (P) Update Atlas version to 1.1.0
   - Update Docker Compose image: arigaio/atlas:1.0.0 → arigaio/atlas:1.1.0
   - Update all migration services (watch, keygen, sign + new PostgreSQL ones) to use Atlas 1.1
   - Update make/db_atlas.mk comments referencing Atlas version
@@ -108,15 +108,15 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 
 **📘 Reference**: Follow [Database Schema Changes Guide - Scenario 1](../../../docs/database/schema-changes.md#scenario-1-adding-a-new-column) for complete schema extraction and sqlc workflow.
 
-- [ ] 4. Extract PostgreSQL schemas and generate sqlc code
-- [ ] 4.1 Add PostgreSQL schema dump targets to Makefile
+- [x] 4. Extract PostgreSQL schemas and generate sqlc code
+- [x] 4.1 Add PostgreSQL schema dump targets to Makefile
   - Add dump-schema-postgres-watch target to make/db_sqlc.mk
   - Use: docker exec wallet-db-postgres pg_dump -U postgres --schema-only --no-owner --no-privileges watch > data/dump/sql/dump_postgres_watch.sql
   - Add similar targets for keygen and sign
   - Add dump-schema-postgres-all target combining all three
   - _Requirements: 2.1, 5.1_
 
-- [ ] 4.2 Create PostgreSQL schema extraction script
+- [x] 4.2 Create PostgreSQL schema extraction script
   - Create scripts/db/extract-sqlc-schema-postgres.sh
   - Parse pg_dump output to extract CREATE TABLE statements for sqlc
   - Exclude atlas_schema_revisions table (same as MySQL extraction)
@@ -125,7 +125,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Output to tools/sqlc/schemas/postgres/*.sql
   - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 4.3 Add PostgreSQL schema extraction targets to Makefile
+- [x] 4.3 Add PostgreSQL schema extraction targets to Makefile
   - Add extract-sqlc-schema-postgres-watch target (depends on dump-schema-postgres-watch)
   - Calls: scripts/db/extract-sqlc-schema-postgres.sh watch <dump_file> <output_file>
   - Add similar targets for keygen and sign
@@ -133,14 +133,14 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Add clean-sqlc-schemas-postgres target
   - _Requirements: 2.1, 5.1, 5.2_
 
-- [ ] 4.4 (P) Create sqlc PostgreSQL configuration
+- [x] 4.4 (P) Create sqlc PostgreSQL configuration
   - Create tools/sqlc/sqlc_postgres.yml with version 2
   - Configure engine: postgres, queries: ./queries/*.sql
   - Set schema: ./schemas/postgres/*.sql
   - Configure Go output to internal/infrastructure/database/postgres/sqlcgen
   - _Requirements: 3.1, 3.2, 3.4_
 
-- [ ] 4.5 Run schema extraction and sqlc generation pipeline
+- [x] 4.5 Run schema extraction and sqlc generation pipeline
   - Start PostgreSQL Docker services: docker compose --profile postgres up -d
   - Wait for migrations to complete (wallet-postgres-migrate-* services)
   - Run: make extract-sqlc-schema-postgres-all
@@ -150,7 +150,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Validate query interfaces match MySQL/SQLite implementations
   - _Requirements: 2.4, 2.5, 3.1, 3.3, 3.5_
 
-- [ ] 4.6 (P) Add PostgreSQL to sqlc build targets
+- [x] 4.6 (P) Add PostgreSQL to sqlc build targets
   - Update make/db_sqlc.mk: sqlc-compile target to include PostgreSQL
   - Add sqlc compile -f sqlc_postgres.yml with success message
   - Update sqlc-vet target to validate PostgreSQL queries
@@ -158,7 +158,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Ensure all three databases processed: MySQL, SQLite, PostgreSQL
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 4.7 (P) Extend Atlas Makefile targets for PostgreSQL
+- [x] 4.7 (P) Extend Atlas Makefile targets for PostgreSQL
   - Update make/db_atlas.mk: Add ATLAS_POSTGRESQL_SCHEMAS variable
   - Create atlas-lint-postgres target for schema validation
   - Update combined atlas-lint to include PostgreSQL schemas
@@ -167,8 +167,8 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 
 ### Phase 4: Connection Management
 
-- [ ] 5. Implement PostgreSQL database connection
-- [ ] 5.1 (P) Create PostgreSQL connection factory
+- [x] 5. Implement PostgreSQL database connection
+- [x] 5.1 (P) Create PostgreSQL connection factory
   - Create pkg/db/postgres/connection.go package
   - Implement NewPostgreSQL(conf *config.PostgreSQL) (*sql.DB, error)
   - Use pgx driver: import _ "github.com/jackc/pgx/v5/stdlib"
@@ -179,7 +179,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Wrap errors with descriptive context (host, port, database)
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 5.2 (P) Add PostgreSQL client to DI container
+- [x] 5.2 (P) Add PostgreSQL client to DI container
   - Add NewPostgreSQLClient() method to pkg DI container
   - Initialize connection using postgres.NewPostgreSQL()
   - Cache connection in container (singleton pattern)
@@ -188,8 +188,8 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
 
 ### Phase 5: Repository Implementations
 
-- [ ] 6. Implement PostgreSQL repositories for watch wallet
-- [ ] 6.1 (P) Create address repository for PostgreSQL
+- [x] 6. Implement PostgreSQL repositories for watch wallet
+- [x] 6.1 (P) Create address repository for PostgreSQL
   - Create internal/infrastructure/repository/watch/postgres/address_sqlc.go
   - Implement AddressRepositorySqlc struct with queries field
   - Add NewAddressRepositorySqlc(dbConn, coinTypeCode) constructor
@@ -198,7 +198,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Handle NULL values in UpdatedAt field using sql.NullTime
   - _Requirements: 3.3, 4.1_
 
-- [ ] 6.2 (P) Create BTC transaction repositories for PostgreSQL
+- [x] 6.2 (P) Create BTC transaction repositories for PostgreSQL
   - Create btc_tx_sqlc.go, btc_tx_input_sqlc.go, btc_tx_output_sqlc.go
   - Implement BTCTxRepositorySqlc, TxInputRepositorySqlc, TxOutputRepositorySqlc
   - Add type conversion functions for BTC-specific entities
@@ -206,21 +206,21 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Handle decimal precision for cryptocurrency amounts (NUMERIC 26,10)
   - _Requirements: 3.3, 4.1_
 
-- [ ] 6.3 (P) Create ETH and XRP transaction repositories for PostgreSQL
+- [x] 6.3 (P) Create ETH and XRP transaction repositories for PostgreSQL
   - Create eth_detail_tx_sqlc.go, xrp_detail_tx_sqlc.go, xrp_pending_multisig_sqlc.go
   - Create xrp_multisig_signature_sqlc.go for XRP multisig support
   - Implement repository interfaces for ETH and XRP transactions
   - Add conversion functions for chain-specific entity types
   - _Requirements: 3.3, 4.1_
 
-- [ ] 6.4 (P) Create payment and transaction repositories for PostgreSQL
+- [x] 6.4 (P) Create payment and transaction repositories for PostgreSQL
   - Create payment_request_sqlc.go, tx_sqlc.go
   - Implement PaymentRequestRepositorySqlc and TxRepositorySqlc
   - Handle transaction status enums with CHECK constraints
   - _Requirements: 3.3, 4.1_
 
-- [ ] 7. Implement PostgreSQL repositories for keygen/sign wallets
-- [ ] 7.1 (P) Create account key repositories for PostgreSQL
+- [x] 7. Implement PostgreSQL repositories for keygen/sign wallets
+- [x] 7.1 (P) Create account key repositories for PostgreSQL
   - Create internal/infrastructure/repository/cold/postgres/ directory
   - Create btc_account_key_sqlc.go, eth_account_key_sqlc.go, xrp_account_key_sqlc.go
   - Create auth_account_key_sqlc.go, auth_fullpubkey_sqlc.go
@@ -228,27 +228,27 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Handle private key storage types (WIF for BTC, keystore for ETH)
   - _Requirements: 3.3, 4.1_
 
-- [ ] 7.2 (P) Create seed and nonce repositories for PostgreSQL
+- [x] 7.2 (P) Create seed and nonce repositories for PostgreSQL
   - Create seed_sqlc.go for mnemonic seed storage
   - Create nonce_repository_sqlc.go for MuSig2 nonce management
   - Implement repository interfaces for seed and nonce operations
   - _Requirements: 3.3, 4.1_
 
-- [ ] 7.3 (P) Create XRP signer list repositories for PostgreSQL
+- [x] 7.3 (P) Create XRP signer list repositories for PostgreSQL
   - Create xrp_signer_list_sqlc.go, xrp_signer_entry_sqlc.go
   - Create xrp_regular_key_sqlc.go for XRP key management
   - Implement XRP multisig signer management repositories
   - _Requirements: 3.3, 4.1_
 
-- [ ] 8. Integrate PostgreSQL repositories into DI container
-- [ ] 8.1 Add PostgreSQL cases to watch repository factories
+- [x] 8. Integrate PostgreSQL repositories into DI container
+- [x] 8.1 Add PostgreSQL cases to watch repository factories
   - Update internal/di/container.go repository factory methods
   - Add "postgres" case to each repository switch statement (~12 watch repos)
   - Return watchpostgres.NewXxxRepositorySqlc(pgClient, coinType)
   - Verify all switch statements handle "mysql", "sqlite", "postgres" consistently
   - _Requirements: 4.1, 4.2_
 
-- [ ] 8.2 Add PostgreSQL cases to cold repository factories
+- [x] 8.2 Add PostgreSQL cases to cold repository factories
   - Add "postgres" case to keygen/sign repository factories (~8 cold repos)
   - Return coldpostgres.NewXxxRepositorySqlc(pgClient, coinType)
   - Ensure default case panics with "unsupported database type" error
