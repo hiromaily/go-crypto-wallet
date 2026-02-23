@@ -144,10 +144,8 @@ jobs:
           cache: true
       - name: Install sqlc
         run: go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-      - name: sqlc compile
-        run: cd tools/sqlc && sqlc compile
-      - name: sqlc vet
-        run: cd tools/sqlc && sqlc vet
+      - name: sqlc validate (compile + vet)
+        run: make sqlc-validate
   # HCL linting with Atlas
   hcl-lint:
     needs: changes
