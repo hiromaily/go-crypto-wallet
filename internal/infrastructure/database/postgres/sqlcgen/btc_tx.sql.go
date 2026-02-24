@@ -49,8 +49,8 @@ WHERE coin = $1 AND action = $2 AND unsigned_hex_tx = $3
 `
 
 type GetBtcTxCountByUnsignedHexParams struct {
-	Coin          interface{}
-	Action        interface{}
+	Coin          string
+	Action        string
 	UnsignedHexTx string
 }
 
@@ -67,8 +67,8 @@ WHERE coin = $1 AND action = $2 AND sent_hash_tx = $3
 `
 
 type GetBtcTxIDBySentHashParams struct {
-	Coin       interface{}
-	Action     interface{}
+	Coin       string
+	Action     string
 	SentHashTx string
 }
 
@@ -85,8 +85,8 @@ WHERE coin = $1 AND action = $2 AND unsigned_hex_tx = $3
 `
 
 type GetBtcTxIDByUnsignedHexParams struct {
-	Coin          interface{}
-	Action        interface{}
+	Coin          string
+	Action        string
 	UnsignedHexTx string
 }
 
@@ -103,8 +103,8 @@ WHERE coin = $1 AND action = $2 AND current_tx_type = $3
 `
 
 type GetBtcTxSentHashListParams struct {
-	Coin          interface{}
-	Action        interface{}
+	Coin          string
+	Action        string
 	CurrentTxType int16
 }
 
@@ -141,8 +141,8 @@ RETURNING id
 `
 
 type InsertBtcTxParams struct {
-	Coin              interface{}
-	Action            interface{}
+	Coin              string
+	Action            string
 	UnsignedHexTx     string
 	SignedHexTx       string
 	SentHashTx        string
@@ -182,8 +182,8 @@ WHERE id = $12
 `
 
 type UpdateBtcTxParams struct {
-	Coin              interface{}
-	Action            interface{}
+	Coin              string
+	Action            string
 	UnsignedHexTx     string
 	SignedHexTx       string
 	SentHashTx        string
@@ -261,8 +261,8 @@ WHERE coin = $2 AND action = $3 AND sent_hash_tx = $4
 
 type UpdateBtcTxTypeBySentHashParams struct {
 	CurrentTxType int16
-	Coin          interface{}
-	Action        interface{}
+	Coin          string
+	Action        string
 	SentHashTx    string
 }
 

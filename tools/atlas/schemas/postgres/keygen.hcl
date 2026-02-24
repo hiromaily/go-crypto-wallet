@@ -4,27 +4,6 @@
 # Schema declaration (PostgreSQL uses "public" schema within each database)
 schema "public" {}
 
-# Enum types
-enum "coin_all" {
-  schema = schema.public
-  values = ["btc", "bch", "eth", "xrp", "hyt"]
-}
-
-enum "coin_btc_bch" {
-  schema = schema.public
-  values = ["btc", "bch"]
-}
-
-enum "coin_xrp" {
-  schema = schema.public
-  values = ["xrp"]
-}
-
-enum "account_type" {
-  schema = schema.public
-  values = ["client", "deposit", "payment", "stored"]
-}
-
 # Table: seed
 table "seed" {
   schema  = schema.public
@@ -40,7 +19,7 @@ table "seed" {
   }
 
   column "coin" {
-    type    = enum.coin_all
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
@@ -65,6 +44,10 @@ table "seed" {
   index "idx_seed_coin" {
     columns = [column.coin]
   }
+
+  check "chk_seed_coin" {
+    expr = "coin IN ('btc', 'bch', 'eth', 'xrp', 'hyt')"
+  }
 }
 
 # Table: btc_account_key
@@ -83,7 +66,7 @@ table "btc_account_key" {
   }
 
   column "coin" {
-    type    = enum.coin_btc_bch
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
@@ -96,7 +79,7 @@ table "btc_account_key" {
   }
 
   column "account" {
-    type    = enum.account_type
+    type    = varchar(20)
     null    = false
     comment = "account type"
   }
@@ -202,6 +185,14 @@ table "btc_account_key" {
   index "idx_btc_account_key_account" {
     columns = [column.account]
   }
+
+  check "chk_btc_account_key_coin" {
+    expr = "coin IN ('btc', 'bch')"
+  }
+
+  check "chk_btc_account_key_account" {
+    expr = "account IN ('client', 'deposit', 'payment', 'stored')"
+  }
 }
 
 # Table: eth_account_key
@@ -220,7 +211,7 @@ table "eth_account_key" {
   }
 
   column "account" {
-    type    = enum.account_type
+    type    = varchar(20)
     null    = false
     comment = "account type"
   }
@@ -280,6 +271,10 @@ table "eth_account_key" {
   index "idx_eth_account_key_account" {
     columns = [column.account]
   }
+
+  check "chk_eth_account_key_account" {
+    expr = "account IN ('client', 'deposit', 'payment', 'stored')"
+  }
 }
 
 # Table: xrp_account_key
@@ -297,13 +292,13 @@ table "xrp_account_key" {
   }
 
   column "coin" {
-    type    = enum.coin_xrp
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
 
   column "account" {
-    type    = enum.account_type
+    type    = varchar(20)
     null    = false
     comment = "account type"
   }
@@ -399,6 +394,14 @@ table "xrp_account_key" {
 
   index "idx_xrp_account_key_account" {
     columns = [column.account]
+  }
+
+  check "chk_xrp_account_key_coin" {
+    expr = "coin IN ('xrp')"
+  }
+
+  check "chk_xrp_account_key_account" {
+    expr = "account IN ('client', 'deposit', 'payment', 'stored')"
   }
 }
 
@@ -507,7 +510,7 @@ table "auth_fullpubkey" {
   }
 
   column "coin" {
-    type    = enum.coin_btc_bch
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
@@ -576,6 +579,10 @@ table "auth_fullpubkey" {
 
   index "idx_purpose" {
     columns = [column.purpose]
+  }
+
+  check "chk_auth_fullpubkey_coin" {
+    expr = "coin IN ('btc', 'bch')"
   }
 }
 

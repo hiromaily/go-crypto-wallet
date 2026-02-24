@@ -44,9 +44,9 @@ func convertBtcAccountKeyRow[T btcAccountKeyRow](row T) (*domainBitcoin.BTCAccou
 	// Extract fields using type switch to handle different row types
 	var (
 		id                     int64
-		coin                   any
+		coin                   string
 		keyType                string
-		account                any
+		account                string
 		p2pkhAddress           string
 		p2shSegwitAddress      string
 		bech32Address          string
@@ -122,9 +122,9 @@ func convertBtcAccountKeyRow[T btcAccountKeyRow](row T) (*domainBitcoin.BTCAccou
 
 	key := &domainBitcoin.BTCAccountKey{
 		ID:                 id,
-		CoinTypeCode:       domainCoin.CoinTypeCode(interfaceToString(coin)),
+		CoinTypeCode:       domainCoin.CoinTypeCode(coin),
 		KeyType:            keyType,
-		Account:            domainAccount.AccountType(interfaceToString(account)),
+		Account:            domainAccount.AccountType(account),
 		P2pkhAddress:       p2pkhAddress,
 		P2shSegwitAddress:  p2shSegwitAddress,
 		Bech32Address:      bech32Address,

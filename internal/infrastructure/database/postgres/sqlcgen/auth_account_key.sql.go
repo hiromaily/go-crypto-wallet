@@ -21,13 +21,13 @@ FROM auth_account_key WHERE coin = $1 AND auth_account = $2 LIMIT 1
 `
 
 type GetAuthAccountKeyParams struct {
-	Coin        interface{}
+	Coin        string
 	AuthAccount string
 }
 
 type GetAuthAccountKeyRow struct {
 	ID                     int16
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
 	AuthAccount            string
 	Account                string
@@ -81,14 +81,14 @@ FROM auth_account_key WHERE coin = $1 AND auth_account = $2 AND account = $3 LIM
 `
 
 type GetAuthAccountKeyByAccountParams struct {
-	Coin        interface{}
+	Coin        string
 	AuthAccount string
 	Account     string
 }
 
 type GetAuthAccountKeyByAccountRow struct {
 	ID                     int16
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
 	AuthAccount            string
 	Account                string
@@ -140,7 +140,7 @@ RETURNING id
 `
 
 type InsertAuthAccountKeyParams struct {
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
 	AuthAccount            string
 	Account                string
@@ -188,7 +188,7 @@ WHERE coin = $3 AND wallet_import_format = $4
 type UpdateAuthAccountKeyAddrStatusParams struct {
 	AddrStatus         int16
 	UpdatedAt          sql.NullTime
-	Coin               interface{}
+	Coin               string
 	WalletImportFormat string
 }
 

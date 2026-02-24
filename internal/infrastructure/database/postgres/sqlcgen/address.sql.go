@@ -16,8 +16,8 @@ WHERE coin = $1 AND account = $2
 `
 
 type GetAllAddressStringsParams struct {
-	Coin    interface{}
-	Account interface{}
+	Coin    string
+	Account string
 }
 
 func (q *Queries) GetAllAddressStrings(ctx context.Context, arg GetAllAddressStringsParams) ([]string, error) {
@@ -49,8 +49,8 @@ WHERE coin = $1 AND account = $2
 `
 
 type GetAllAddressesParams struct {
-	Coin    interface{}
-	Account interface{}
+	Coin    string
+	Account string
 }
 
 func (q *Queries) GetAllAddresses(ctx context.Context, arg GetAllAddressesParams) ([]Address, error) {
@@ -90,8 +90,8 @@ LIMIT 1
 `
 
 type GetOneUnallocatedAddressParams struct {
-	Coin    interface{}
-	Account interface{}
+	Coin    string
+	Account string
 }
 
 func (q *Queries) GetOneUnallocatedAddress(ctx context.Context, arg GetOneUnallocatedAddressParams) (Address, error) {
@@ -115,8 +115,8 @@ RETURNING id
 `
 
 type InsertAddressParams struct {
-	Coin          interface{}
-	Account       interface{}
+	Coin          string
+	Account       string
 	WalletAddress string
 	IsAllocated   bool
 	UpdatedAt     sql.NullTime
@@ -144,7 +144,7 @@ WHERE coin = $3 AND wallet_address = $4
 type UpdateAddressIsAllocatedParams struct {
 	IsAllocated   bool
 	UpdatedAt     sql.NullTime
-	Coin          interface{}
+	Coin          string
 	WalletAddress string
 }
 

@@ -29,7 +29,7 @@ func NewSeedRepositorySqlc(
 // convertToSeed converts sqlcgen.Seed to domain.Seed entity.
 // SECURITY: Handles encrypted seed data - never log the seed field.
 func convertToSeed(sqlcSeed *sqlcgen.Seed) (*domainKey.Seed, error) {
-	coinTypeCode := domainCoin.CoinTypeCode(interfaceToString(sqlcSeed.Coin))
+	coinTypeCode := domainCoin.CoinTypeCode(sqlcSeed.Coin)
 	if !domainCoin.IsCoinTypeCode(string(coinTypeCode)) {
 		return nil, fmt.Errorf("invalid coin type code from database: %v", sqlcSeed.Coin)
 	}

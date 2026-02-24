@@ -41,7 +41,7 @@ WHERE account = $1
 `
 
 type GetETHAccountKeysByAddrStatusParams struct {
-	Account    interface{}
+	Account    string
 	AddrStatus int16
 }
 
@@ -84,7 +84,7 @@ WHERE account = $1
 `
 
 // ETH Account Key Queries
-func (q *Queries) GetMaxETHAccountKeyIndex(ctx context.Context, account interface{}) (interface{}, error) {
+func (q *Queries) GetMaxETHAccountKeyIndex(ctx context.Context, account string) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, getMaxETHAccountKeyIndex, account)
 	var max_idx interface{}
 	err := row.Scan(&max_idx)
@@ -99,7 +99,7 @@ ORDER BY id DESC
 LIMIT 1
 `
 
-func (q *Queries) GetOneETHAccountKeyByMaxID(ctx context.Context, account interface{}) (EthAccountKey, error) {
+func (q *Queries) GetOneETHAccountKeyByMaxID(ctx context.Context, account string) (EthAccountKey, error) {
 	row := q.db.QueryRowContext(ctx, getOneETHAccountKeyByMaxID, account)
 	var i EthAccountKey
 	err := row.Scan(
@@ -129,7 +129,7 @@ RETURNING id
 `
 
 type InsertETHAccountKeyParams struct {
-	Account       interface{}
+	Account       string
 	Address       string
 	FullPublicKey string
 	PrivateKey    string
@@ -162,7 +162,7 @@ WHERE account = $3
 type UpdateETHAccountKeyAddrStatusParams struct {
 	AddrStatus int16
 	UpdatedAt  sql.NullTime
-	Account    interface{}
+	Account    string
 	PrivateKey string
 }
 

@@ -4,12 +4,6 @@
 # Schema declaration (PostgreSQL uses "public" schema within each database)
 schema "public" {}
 
-# Enum types
-enum "coin_btc_bch" {
-  schema = schema.public
-  values = ["btc", "bch"]
-}
-
 # Table: seed
 table "seed" {
   schema  = schema.public
@@ -25,7 +19,7 @@ table "seed" {
   }
 
   column "coin" {
-    type    = enum.coin_btc_bch
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
@@ -50,6 +44,10 @@ table "seed" {
   index "idx_seed_coin" {
     columns = [column.coin]
   }
+
+  check "chk_seed_coin" {
+    expr = "coin IN ('btc', 'bch')"
+  }
 }
 
 # Table: auth_account_key
@@ -67,7 +65,7 @@ table "auth_account_key" {
   }
 
   column "coin" {
-    type    = enum.coin_btc_bch
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
@@ -207,6 +205,10 @@ table "auth_account_key" {
 
   index "idx_auth_account" {
     columns = [column.auth_account]
+  }
+
+  check "chk_auth_account_key_coin" {
+    expr = "coin IN ('btc', 'bch')"
   }
 }
 

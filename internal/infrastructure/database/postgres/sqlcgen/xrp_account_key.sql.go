@@ -15,8 +15,8 @@ SELECT master_seed FROM xrp_account_key WHERE coin = $1 AND account = $2 AND acc
 `
 
 type GetXRPAccountKeySecretParams struct {
-	Coin      interface{}
-	Account   interface{}
+	Coin      string
+	Account   string
 	AccountID string
 }
 
@@ -32,8 +32,8 @@ SELECT id, coin, account, account_id, key_type, master_key, master_seed, master_
 `
 
 type GetXRPAccountKeysByAddrStatusParams struct {
-	Coin       interface{}
-	Account    interface{}
+	Coin       string
+	Account    string
 	AddrStatus int16
 }
 
@@ -84,8 +84,8 @@ RETURNING id
 `
 
 type InsertXRPAccountKeyParams struct {
-	Coin             interface{}
-	Account          interface{}
+	Coin             string
+	Account          string
 	AccountID        string
 	KeyType          int16
 	MasterKey        string
@@ -126,8 +126,8 @@ WHERE coin = $3 AND account = $4 AND account_id = $5
 type UpdateXRPAccountKeyAddrStatusParams struct {
 	AddrStatus int16
 	UpdatedAt  sql.NullTime
-	Coin       interface{}
-	Account    interface{}
+	Coin       string
+	Account    string
 	AccountID  string
 }
 

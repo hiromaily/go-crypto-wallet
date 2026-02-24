@@ -32,8 +32,8 @@ func NewAddressRepositorySqlc(
 func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error) {
 	addr := &domainAddress.Address{
 		ID:            sqlcAddr.ID,
-		CoinTypeCode:  domainCoin.CoinTypeCode(interfaceToString(sqlcAddr.Coin)),
-		AccountType:   domainAccount.AccountType(interfaceToString(sqlcAddr.Account)),
+		CoinTypeCode:  domainCoin.CoinTypeCode(sqlcAddr.Coin),
+		AccountType:   domainAccount.AccountType(sqlcAddr.Account),
 		WalletAddress: sqlcAddr.WalletAddress,
 		IsAllocated:   sqlcAddr.IsAllocated,
 	}

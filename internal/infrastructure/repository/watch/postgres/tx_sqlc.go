@@ -31,8 +31,8 @@ func NewTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode) *
 func convertToTransaction(sqlcTx *sqlcgen.Tx) (*domainTx.Transaction, error) {
 	tx := &domainTx.Transaction{
 		ID:           sqlcTx.ID,
-		CoinTypeCode: domainCoin.CoinTypeCode(interfaceToString(sqlcTx.Coin)),
-		ActionType:   domainTx.ActionType(interfaceToString(sqlcTx.Action)),
+		CoinTypeCode: domainCoin.CoinTypeCode(sqlcTx.Coin),
+		ActionType:   domainTx.ActionType(sqlcTx.Action),
 	}
 
 	if sqlcTx.UpdatedAt.Valid {

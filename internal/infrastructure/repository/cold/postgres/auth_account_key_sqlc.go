@@ -40,7 +40,7 @@ func convertAuthAccountKeyRow[T authAccountKeyRow](row T) (*domainAuth.AuthAccou
 	// Extract fields using type switch to handle different row types
 	var (
 		id                     int16
-		coin                   any
+		coin                   string
 		keyType                string
 		authAccount            string
 		account                string
@@ -104,7 +104,7 @@ func convertAuthAccountKeyRow[T authAccountKeyRow](row T) (*domainAuth.AuthAccou
 
 	key := &domainAuth.AuthAccountKey{
 		ID:                 id,
-		CoinTypeCode:       domainCoin.CoinTypeCode(interfaceToString(coin)),
+		CoinTypeCode:       domainCoin.CoinTypeCode(coin),
 		KeyType:            keyType,
 		AuthAccount:        domainAccount.AuthType(authAccount),
 		Account:            domainAccount.AccountType(account),

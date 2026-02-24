@@ -16,7 +16,7 @@ FROM auth_fullpubkey WHERE coin = $1 AND auth_account = $2 AND purpose = 49 LIMI
 `
 
 type GetAuthFullPubkeyParams struct {
-	Coin        interface{}
+	Coin        string
 	AuthAccount string
 }
 
@@ -65,7 +65,7 @@ FROM auth_fullpubkey WHERE coin = $1 AND auth_account = $2 AND purpose = $3 LIMI
 `
 
 type GetAuthFullPubkeyByPurposeParams struct {
-	Coin        interface{}
+	Coin        string
 	AuthAccount string
 	Purpose     int16
 }
@@ -94,7 +94,7 @@ RETURNING id
 `
 
 type InsertAuthFullPubkeyParams struct {
-	Coin           interface{}
+	Coin           string
 	AuthAccount    string
 	Purpose        int16
 	FullPublicKey  string
@@ -124,7 +124,7 @@ UPDATE auth_fullpubkey SET fingerprint = $1, updated_at = CURRENT_TIMESTAMP WHER
 
 type UpdateAuthFullPubkeyFingerprintParams struct {
 	Fingerprint sql.NullString
-	Coin        interface{}
+	Coin        string
 	AuthAccount string
 	Purpose     int16
 }

@@ -13,7 +13,7 @@ const getSeed = `-- name: GetSeed :one
 SELECT id, coin, seed, updated_at FROM seed WHERE coin = $1 LIMIT 1
 `
 
-func (q *Queries) GetSeed(ctx context.Context, coin interface{}) (Seed, error) {
+func (q *Queries) GetSeed(ctx context.Context, coin string) (Seed, error) {
 	row := q.db.QueryRowContext(ctx, getSeed, coin)
 	var i Seed
 	err := row.Scan(
@@ -31,7 +31,7 @@ RETURNING id
 `
 
 type InsertSeedParams struct {
-	Coin interface{}
+	Coin string
 	Seed string
 }
 

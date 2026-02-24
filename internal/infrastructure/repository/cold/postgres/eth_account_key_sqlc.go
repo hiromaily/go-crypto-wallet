@@ -36,7 +36,7 @@ func convertToETHAccountKey(sqlcKey *sqlcgen.EthAccountKey) (*domainEth.ETHAccou
 
 	key := &domainEth.ETHAccountKey{
 		ID:            sqlcKey.ID,
-		Account:       domainAccount.AccountType(interfaceToString(sqlcKey.Account)),
+		Account:       domainAccount.AccountType(sqlcKey.Account),
 		Address:       sqlcKey.Address,
 		FullPublicKey: sqlcKey.FullPublicKey,
 		PrivateKey:    sqlcKey.PrivateKey, // Private key - NEVER log

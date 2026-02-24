@@ -127,7 +127,7 @@ ORDER BY created_at DESC
 
 type GetXRPPendingMultisigsByAccountIDParams struct {
 	AccountID string
-	Status    interface{}
+	Status    string
 }
 
 func (q *Queries) GetXRPPendingMultisigsByAccountID(ctx context.Context, arg GetXRPPendingMultisigsByAccountIDParams) ([]XrpPendingMultisig, error) {
@@ -173,7 +173,7 @@ WHERE status = $1
 ORDER BY created_at ASC
 `
 
-func (q *Queries) GetXRPPendingMultisigsByStatus(ctx context.Context, status interface{}) ([]XrpPendingMultisig, error) {
+func (q *Queries) GetXRPPendingMultisigsByStatus(ctx context.Context, status string) ([]XrpPendingMultisig, error) {
 	rows, err := q.db.QueryContext(ctx, getXRPPendingMultisigsByStatus, status)
 	if err != nil {
 		return nil, err
@@ -225,7 +225,7 @@ type InsertXRPPendingMultisigParams struct {
 	XrpTxType      string
 	RequiredQuorum int32
 	CurrentWeight  int32
-	Status         interface{}
+	Status         string
 	ExpiresAt      sql.NullTime
 	CreatedAt      sql.NullTime
 }
@@ -300,7 +300,7 @@ WHERE id = $3
 `
 
 type UpdateXRPPendingMultisigStatusParams struct {
-	Status    interface{}
+	Status    string
 	UpdatedAt sql.NullTime
 	ID        int64
 }

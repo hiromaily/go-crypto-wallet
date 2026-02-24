@@ -56,8 +56,8 @@ WHERE coin = $1 AND action = $2
 `
 
 type GetMaxTxIDParams struct {
-	Coin   interface{}
-	Action interface{}
+	Coin   string
+	Action string
 }
 
 func (q *Queries) GetMaxTxID(ctx context.Context, arg GetMaxTxIDParams) (interface{}, error) {
@@ -91,8 +91,8 @@ RETURNING id
 `
 
 type InsertTxParams struct {
-	Coin   interface{}
-	Action interface{}
+	Coin   string
+	Action string
 }
 
 func (q *Queries) InsertTx(ctx context.Context, arg InsertTxParams) (int64, error) {
@@ -109,8 +109,8 @@ WHERE id = $4
 `
 
 type UpdateTxParams struct {
-	Coin      interface{}
-	Action    interface{}
+	Coin      string
+	Action    string
 	UpdatedAt sql.NullTime
 	ID        int64
 }

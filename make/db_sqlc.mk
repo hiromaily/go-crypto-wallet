@@ -12,7 +12,7 @@
 sqlc-compile:
 	@for dialect in postgres mysql; do \
 		echo "Compiling $$dialect SQL queries and schemas..."; \
-		cd tools/sqlc && sqlc compile -f sqlc_$${dialect}.yml && cd ../..; \
+		(cd tools/sqlc && sqlc compile -f sqlc_$${dialect}.yml) || exit 1; \
 		echo "✓ $$dialect SQL compilation successful"; \
 	done
 
@@ -24,7 +24,7 @@ sqlc-compile:
 sqlc-vet:
 	@for dialect in postgres mysql; do \
 		echo "Vetting $$dialect SQL queries..."; \
-		cd tools/sqlc && sqlc vet -f sqlc_$${dialect}.yml && cd ../..; \
+		(cd tools/sqlc && sqlc vet -f sqlc_$${dialect}.yml) || exit 1; \
 		echo "✓ $$dialect SQL queries passed vetting"; \
 	done
 
@@ -49,8 +49,8 @@ sqlc-verify:
 	@echo "Verifying sqlc configuration, schemas, and queries..."
 	@echo "Note: This command requires sqlc Cloud. Use sqlc-validate for local validation."
 	@for dialect in postgres mysql sqlite; do \
-		cd tools/sqlc && sqlc verify -f sqlc_$${dialect}.yml --no-remote && cd ../.. || \
-		(echo "⚠️  sqlc verify requires sqlc Cloud connection. Use sqlc-validate for local validation." && cd ../.. && exit 0); \
+		(cd tools/sqlc && sqlc verify -f sqlc_$${dialect}.yml --no-remote) || \
+		(echo "⚠️  sqlc verify requires sqlc Cloud connection. Use sqlc-validate for local validation." && exit 0); \
 	done
 
 ###############################################################################

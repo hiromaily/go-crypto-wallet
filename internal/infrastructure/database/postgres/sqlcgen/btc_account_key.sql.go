@@ -23,16 +23,16 @@ FROM btc_account_key WHERE coin = $1 AND account = $2 AND addr_status = $3
 `
 
 type GetBtcAccountKeysByAddrStatusParams struct {
-	Coin       interface{}
-	Account    interface{}
+	Coin       string
+	Account    string
 	AddrStatus int16
 }
 
 type GetBtcAccountKeysByAddrStatusRow struct {
 	ID                     int64
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
-	Account                interface{}
+	Account                string
 	P2pkhAddress           string
 	P2shSegwitAddress      string
 	Bech32Address          string
@@ -98,16 +98,16 @@ FROM btc_account_key WHERE coin = $1 AND account = $2 AND multisig_address = ANY
 `
 
 type GetBtcAccountKeysByMultisigAddressesParams struct {
-	Coin    interface{}
-	Account interface{}
+	Coin    string
+	Account string
 	Addrs   []string
 }
 
 type GetBtcAccountKeysByMultisigAddressesRow struct {
 	ID                     int64
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
-	Account                interface{}
+	Account                string
 	P2pkhAddress           string
 	P2shSegwitAddress      string
 	Bech32Address          string
@@ -168,8 +168,8 @@ SELECT COALESCE(MAX(idx), 0) as max_idx FROM btc_account_key WHERE coin = $1 AND
 `
 
 type GetMaxBtcAccountKeyIndexParams struct {
-	Coin    interface{}
-	Account interface{}
+	Coin    string
+	Account string
 }
 
 // BTC/BCH Account Key Queries
@@ -191,15 +191,15 @@ FROM btc_account_key WHERE coin = $1 AND account = $2 ORDER BY id DESC LIMIT 1
 `
 
 type GetOneBtcAccountKeyByMaxIDParams struct {
-	Coin    interface{}
-	Account interface{}
+	Coin    string
+	Account string
 }
 
 type GetOneBtcAccountKeyByMaxIDRow struct {
 	ID                     int64
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
-	Account                interface{}
+	Account                string
 	P2pkhAddress           string
 	P2shSegwitAddress      string
 	Bech32Address          string
@@ -247,9 +247,9 @@ RETURNING id
 `
 
 type InsertBtcAccountKeyParams struct {
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
-	Account                interface{}
+	Account                string
 	P2pkhAddress           string
 	P2shSegwitAddress      sql.NullString
 	Bech32Address          sql.NullString
@@ -293,8 +293,8 @@ WHERE coin = $3 AND account = $4 AND wallet_import_format = $5
 type UpdateBtcAccountKeyAddrStatusParams struct {
 	AddrStatus         int16
 	UpdatedAt          sql.NullTime
-	Coin               interface{}
-	Account            interface{}
+	Coin               string
+	Account            string
 	WalletImportFormat string
 }
 
@@ -316,8 +316,8 @@ WHERE coin = $3 AND account = $4 AND p2sh_segwit_address = $5
 type UpdateBtcAccountKeyAddressParams struct {
 	P2pkhAddress      string
 	UpdatedAt         sql.NullTime
-	Coin              interface{}
-	Account           interface{}
+	Coin              string
+	Account           string
 	P2shSegwitAddress sql.NullString
 }
 
@@ -342,8 +342,8 @@ type UpdateBtcAccountKeyMultisigAddrParams struct {
 	RedeemScript    string
 	AddrStatus      int16
 	UpdatedAt       sql.NullTime
-	Coin            interface{}
-	Account         interface{}
+	Coin            string
+	Account         string
 	FullPublicKey   string
 }
 

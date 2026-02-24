@@ -10,8 +10,8 @@ import (
 
 type Address struct {
 	ID            int64
-	Coin          interface{}
-	Account       interface{}
+	Coin          string
+	Account       string
 	WalletAddress string
 	IsAllocated   bool
 	UpdatedAt     sql.NullTime
@@ -19,7 +19,7 @@ type Address struct {
 
 type AuthAccountKey struct {
 	ID                     int16
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
 	AuthAccount            string
 	Account                string
@@ -39,7 +39,7 @@ type AuthAccountKey struct {
 
 type AuthFullpubkey struct {
 	ID             int16
-	Coin           interface{}
+	Coin           string
 	AuthAccount    string
 	Purpose        int16
 	FullPublicKey  string
@@ -51,9 +51,9 @@ type AuthFullpubkey struct {
 
 type BtcAccountKey struct {
 	ID                     int64
-	Coin                   interface{}
+	Coin                   string
 	KeyType                string
-	Account                interface{}
+	Account                string
 	P2pkhAddress           string
 	P2shSegwitAddress      sql.NullString
 	Bech32Address          sql.NullString
@@ -70,8 +70,8 @@ type BtcAccountKey struct {
 
 type BtcTx struct {
 	ID                int64
-	Coin              interface{}
-	Action            interface{}
+	Coin              string
+	Action            string
 	UnsignedHexTx     string
 	SignedHexTx       string
 	SentHashTx        string
@@ -107,7 +107,7 @@ type BtcTxOutput struct {
 
 type EthAccountKey struct {
 	ID            int64
-	Account       interface{}
+	Account       string
 	Address       string
 	FullPublicKey string
 	PrivateKey    string
@@ -148,7 +148,7 @@ type Musig2Nonce struct {
 
 type PaymentRequest struct {
 	ID              int64
-	Coin            interface{}
+	Coin            string
 	PaymentID       sql.NullInt64
 	SenderAddress   string
 	SenderAccount   string
@@ -160,22 +160,22 @@ type PaymentRequest struct {
 
 type Seed struct {
 	ID        int16
-	Coin      interface{}
+	Coin      string
 	Seed      string
 	UpdatedAt sql.NullTime
 }
 
 type Tx struct {
 	ID        int64
-	Coin      interface{}
-	Action    interface{}
+	Coin      string
+	Action    string
 	UpdatedAt sql.NullTime
 }
 
 type XrpAccountKey struct {
 	ID               int64
-	Coin             interface{}
-	Account          interface{}
+	Coin             string
+	Account          string
 	AccountID        string
 	KeyType          int16
 	MasterKey        string
@@ -230,7 +230,7 @@ type XrpPendingMultisig struct {
 	XrpTxType       string
 	RequiredQuorum  int32
 	CurrentWeight   int32
-	Status          interface{}
+	Status          string
 	CombinedTxBlob  sql.NullString
 	SubmittedTxHash sql.NullString
 	ExpiresAt       sql.NullTime

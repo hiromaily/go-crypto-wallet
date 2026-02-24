@@ -38,7 +38,7 @@ func convertToAuthFullPubkey(sqlcKey *sqlcgen.AuthFullpubkey) (*domainAuth.AuthF
 
 	key := &domainAuth.AuthFullPubkey{
 		ID:            sqlcKey.ID,
-		CoinTypeCode:  domainCoin.CoinTypeCode(interfaceToString(sqlcKey.Coin)),
+		CoinTypeCode:  domainCoin.CoinTypeCode(sqlcKey.Coin),
 		AuthAccount:   domainAccount.AuthType(sqlcKey.AuthAccount),
 		Purpose:       purpose,
 		FullPublicKey: sqlcKey.FullPublicKey,

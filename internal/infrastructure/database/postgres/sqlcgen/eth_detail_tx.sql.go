@@ -48,7 +48,7 @@ WHERE tx.coin = $1 AND eth_detail_tx.current_tx_type = $2
 `
 
 type GetETHDetailTXSentHashListParams struct {
-	Coin          interface{}
+	Coin          string
 	CurrentTxType int16
 }
 

@@ -33,7 +33,7 @@ func NewPaymentRequestRepositorySqlc(
 func convertToPaymentRequest(sqlcReq *sqlcgen.PaymentRequest) (*domainPayment.PaymentRequest, error) {
 	req := &domainPayment.PaymentRequest{
 		ID:              sqlcReq.ID,
-		CoinTypeCode:    domainCoin.CoinTypeCode(interfaceToString(sqlcReq.Coin)),
+		CoinTypeCode:    domainCoin.CoinTypeCode(sqlcReq.Coin),
 		SenderAddress:   sqlcReq.SenderAddress,
 		SenderAccount:   sqlcReq.SenderAccount,
 		ReceiverAddress: sqlcReq.ReceiverAddress,

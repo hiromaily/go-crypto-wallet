@@ -19,7 +19,7 @@ WHERE tx.coin = $1
 `
 
 type GetXRPDetailTxBlobListParams struct {
-	Coin          interface{}
+	Coin          string
 	CurrentTxType int16
 }
 

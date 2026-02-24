@@ -15,7 +15,7 @@ DELETE FROM payment_request
 WHERE coin = $1
 `
 
-func (q *Queries) DeleteAllPaymentRequests(ctx context.Context, coin interface{}) (sql.Result, error) {
+func (q *Queries) DeleteAllPaymentRequests(ctx context.Context, coin string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, deleteAllPaymentRequests, coin)
 }
 
@@ -24,7 +24,7 @@ SELECT id, coin, payment_id, sender_address, sender_account, receiver_address, a
 WHERE coin = $1 AND payment_id IS NULL
 `
 
-func (q *Queries) GetAllPaymentRequests(ctx context.Context, coin interface{}) ([]PaymentRequest, error) {
+func (q *Queries) GetAllPaymentRequests(ctx context.Context, coin string) ([]PaymentRequest, error) {
 	rows, err := q.db.QueryContext(ctx, getAllPaymentRequests, coin)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ WHERE coin = $1 AND payment_id = $2
 `
 
 type GetPaymentRequestsByPaymentIDParams struct {
-	Coin      interface{}
+	Coin      string
 	PaymentID sql.NullInt64
 }
 
@@ -107,7 +107,7 @@ RETURNING id
 `
 
 type InsertPaymentRequestParams struct {
-	Coin            interface{}
+	Coin            string
 	PaymentID       sql.NullInt64
 	SenderAddress   string
 	SenderAccount   string
@@ -141,7 +141,7 @@ WHERE coin = $2 AND payment_id = $3
 
 type UpdatePaymentRequestIsDoneParams struct {
 	IsDone    bool
-	Coin      interface{}
+	Coin      string
 	PaymentID sql.NullInt64
 }
 

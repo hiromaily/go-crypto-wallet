@@ -39,8 +39,8 @@ func convertToXRPAccountKey(sqlcKey *sqlcgen.XrpAccountKey) (*domainXrp.XRPAccou
 
 	key := &domainXrp.XRPAccountKey{
 		ID:               sqlcKey.ID,
-		CoinTypeCode:     domainCoin.CoinTypeCode(interfaceToString(sqlcKey.Coin)),
-		Account:          domainAccount.AccountType(interfaceToString(sqlcKey.Account)),
+		CoinTypeCode:     domainCoin.CoinTypeCode(sqlcKey.Coin),
+		Account:          domainAccount.AccountType(sqlcKey.Account),
 		AccountID:        sqlcKey.AccountID,
 		KeyType:          domainXrp.XRPKeyType(sqlcKey.KeyType),
 		MasterKey:        sqlcKey.MasterKey,

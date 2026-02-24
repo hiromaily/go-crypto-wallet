@@ -32,7 +32,7 @@ func convertToXRPPendingMultisig(sqlcPending *sqlcgen.XrpPendingMultisig) *domai
 		XRPTxType:      sqlcPending.XrpTxType,
 		RequiredQuorum: uint32(sqlcPending.RequiredQuorum),
 		CurrentWeight:  uint32(sqlcPending.CurrentWeight),
-		Status:         domainXrp.MultisigStatus(interfaceToString(sqlcPending.Status)),
+		Status:         domainXrp.MultisigStatus(sqlcPending.Status),
 	}
 
 	if sqlcPending.CombinedTxBlob.Valid {

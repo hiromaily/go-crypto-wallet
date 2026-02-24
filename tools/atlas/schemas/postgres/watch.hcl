@@ -4,42 +4,6 @@
 # Schema declaration (PostgreSQL uses "public" schema within each database)
 schema "public" {}
 
-# Enum types
-enum "coin_btc_bch" {
-  schema = schema.public
-  values = ["btc", "bch"]
-}
-
-enum "coin_eth_xrp_hyt" {
-  schema = schema.public
-  values = ["eth", "xrp", "hyt"]
-}
-
-enum "coin_all" {
-  schema = schema.public
-  values = ["btc", "bch", "eth", "xrp", "hyt"]
-}
-
-enum "coin_payment" {
-  schema = schema.public
-  values = ["btc", "bch", "eth", "xrp"]
-}
-
-enum "action_type" {
-  schema = schema.public
-  values = ["deposit", "payment", "transfer"]
-}
-
-enum "account_type" {
-  schema = schema.public
-  values = ["client", "deposit", "payment", "stored"]
-}
-
-enum "multisig_status" {
-  schema = schema.public
-  values = ["pending", "ready", "submitted", "confirmed", "failed", "expired"]
-}
-
 # Table: btc_tx
 table "btc_tx" {
   schema  = schema.public
@@ -55,13 +19,13 @@ table "btc_tx" {
   }
 
   column "coin" {
-    type    = enum.coin_btc_bch
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
 
   column "action" {
-    type    = enum.action_type
+    type    = varchar(20)
     null    = false
     comment = "action type"
   }
@@ -132,6 +96,14 @@ table "btc_tx" {
 
   index "idx_btc_tx_action" {
     columns = [column.action]
+  }
+
+  check "chk_btc_tx_coin" {
+    expr = "coin IN ('btc', 'bch')"
+  }
+
+  check "chk_btc_tx_action" {
+    expr = "action IN ('deposit', 'payment', 'transfer')"
   }
 }
 
@@ -283,13 +255,13 @@ table "tx" {
   }
 
   column "coin" {
-    type    = enum.coin_eth_xrp_hyt
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
 
   column "action" {
-    type    = enum.action_type
+    type    = varchar(20)
     null    = false
     comment = "action type"
   }
@@ -311,6 +283,14 @@ table "tx" {
 
   index "idx_tx_action" {
     columns = [column.action]
+  }
+
+  check "chk_tx_coin" {
+    expr = "coin IN ('eth', 'xrp', 'hyt')"
+  }
+
+  check "chk_tx_action" {
+    expr = "action IN ('deposit', 'payment', 'transfer')"
   }
 }
 
@@ -659,7 +639,7 @@ table "xrp_pending_multisig" {
   }
 
   column "status" {
-    type    = enum.multisig_status
+    type    = varchar(20)
     null    = false
     default = "pending"
     comment = "Current status of the multi-sig transaction"
@@ -717,6 +697,10 @@ table "xrp_pending_multisig" {
   index "idx_account_status" {
     columns = [column.account_id, column.status]
     comment = "Find pending transactions for an account"
+  }
+
+  check "chk_xrp_pending_multisig_status" {
+    expr = "status IN ('pending', 'ready', 'submitted', 'confirmed', 'failed', 'expired')"
   }
 }
 
@@ -800,13 +784,13 @@ table "address" {
   }
 
   column "coin" {
-    type    = enum.coin_all
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
 
   column "account" {
-    type    = enum.account_type
+    type    = varchar(20)
     null    = false
     comment = "account type"
   }
@@ -847,6 +831,14 @@ table "address" {
   index "idx_address_account" {
     columns = [column.account]
   }
+
+  check "chk_address_coin" {
+    expr = "coin IN ('btc', 'bch', 'eth', 'xrp', 'hyt')"
+  }
+
+  check "chk_address_account" {
+    expr = "account IN ('client', 'deposit', 'payment', 'stored')"
+  }
 }
 
 # Table: payment_request
@@ -864,7 +856,7 @@ table "payment_request" {
   }
 
   column "coin" {
-    type    = enum.coin_payment
+    type    = varchar(10)
     null    = false
     comment = "coin type code"
   }
@@ -919,5 +911,9 @@ table "payment_request" {
 
   index "idx_payment_request_coin" {
     columns = [column.coin]
+  }
+
+  check "chk_payment_request_coin" {
+    expr = "coin IN ('btc', 'bch', 'eth', 'xrp')"
   }
 }

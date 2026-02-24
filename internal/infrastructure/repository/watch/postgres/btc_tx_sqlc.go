@@ -35,8 +35,8 @@ func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BTCTransacti
 
 	tx := &domainBitcoin.BTCTransaction{
 		ID:                sqlcTx.ID,
-		CoinTypeCode:      domainCoin.CoinTypeCode(interfaceToString(sqlcTx.Coin)),
-		ActionType:        domainTx.ActionType(interfaceToString(sqlcTx.Action)),
+		CoinTypeCode:      domainCoin.CoinTypeCode(sqlcTx.Coin),
+		ActionType:        domainTx.ActionType(sqlcTx.Action),
 		UnsignedHexTx:     sqlcTx.UnsignedHexTx,
 		SignedHexTx:       sqlcTx.SignedHexTx,
 		SentHashTx:        sqlcTx.SentHashTx,
