@@ -1,0 +1,22 @@
+{
+  "feature_name": "eth-transaction-flow-alignment",
+  "created_at": "2026-02-24T19:48:00+09:00",
+  "updated_at": "2026-02-24T20:35:00+09:00",
+  "language": "en",
+  "phase": "design-generated",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": false
+    },
+    "tasks": {
+      "generated": false,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
