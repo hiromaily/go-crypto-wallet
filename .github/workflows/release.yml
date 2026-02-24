@@ -14,6 +14,9 @@ env:
 jobs:
   release:
     name: Release
+    # IMPORTANT: Do NOT use ubuntu-slim here. GoReleaser parallelism defaults to
+    # GOMAXPROCS (= CPU count). ubuntu-slim has 2 CPUs causing sequential builds (~12min),
+    # while ubuntu-latest has 4 CPUs enabling parallel builds (~3min).
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
