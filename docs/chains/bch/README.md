@@ -863,6 +863,10 @@ This workaround should be maintained until Bitcoin Cash Node fixes the `complete
 
 This section describes the E2E (End-to-End) transaction patterns available for Bitcoin Cash in the go-crypto-wallet system.
 
+> **Common flow reference**: The 3-wallet setup, signing, and monitoring flows are defined in
+> [docs/transaction-flow.md](../../transaction-flow.md). The patterns below describe
+> BCH-specific address formats, signing algorithms, and protocol constraints.
+
 ### BCH Pattern Limitations vs BTC
 
 Due to protocol differences, BCH supports **fewer patterns** than BTC:
@@ -893,19 +897,8 @@ Address Format: bitcoincash:q... (P2PKH), bchtest:q... (Testnet)
 
 **Workflow:**
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              BCH SINGLE-SIG FLOW                         │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  1. Watch Wallet: Create unsigned transaction           │
-│          ↓                                              │
-│  2. Keygen Wallet: Sign with single key (ECDSA)        │
-│          ↓                                              │
-│  3. Watch Wallet: Broadcast transaction                 │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+Follows the [common single-sig flow](../../transaction-flow.md#single-sig-flow).
+BCH-specific signing: **ECDSA** (no Schnorr).
 
 **Characteristics:**
 
@@ -934,23 +927,9 @@ Address Format: bitcoincash:p... (P2SH), bchtest:p... (Testnet)
 
 **Workflow:**
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              BCH 2-of-3 MULTISIG FLOW                   │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  1. Watch Wallet: Create unsigned transaction           │
-│          ↓                                              │
-│  2. Keygen Wallet: Sign (1st signature - ECDSA)        │
-│          ↓                                              │
-│  3. Sign1 Wallet: Sign (2nd signature - ECDSA)         │
-│          ↓                                              │
-│  4. Watch Wallet: Broadcast transaction                 │
-│                                                         │
-│  (Sign2 not required - completed with 2 sigs)          │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+Follows the [common multisig flow](../../transaction-flow.md#multisig-flow-m-of-n) with M=2, N=3.
+Signing stops after 2 signatures (`isCompleted: true`); Sign2 is not required.
+BCH-specific signing: **ECDSA** (no Schnorr).
 
 **Characteristics:**
 
@@ -979,23 +958,9 @@ E2E Script: scripts/operation/bch/e2e-workflow.sh
 
 **Workflow:**
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              BCH 3-of-3 MULTISIG FLOW                   │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  1. Watch Wallet: Create unsigned transaction           │
-│          ↓                                              │
-│  2. Keygen Wallet: Sign (1st signature - ECDSA)        │
-│          ↓                                              │
-│  3. Sign1 Wallet: Sign (2nd signature - ECDSA)         │
-│          ↓                                              │
-│  4. Sign2 Wallet: Sign (3rd signature - ECDSA)         │
-│          ↓                                              │
-│  5. Watch Wallet: Broadcast transaction                 │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+Follows the [common multisig flow](../../transaction-flow.md#multisig-flow-m-of-n) with M=3, N=3.
+All 3 signatures required (Keygen + Sign1 + Sign2).
+BCH-specific signing: **ECDSA** (no Schnorr).
 
 **Characteristics:**
 

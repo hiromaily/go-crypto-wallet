@@ -167,25 +167,27 @@ Keys must be generated only on trusted devices.
 
 # 5. Wallet-Level Flows
 
-## 5.1 Single-Sig Flow
+> The common 3-wallet setup, signing, and monitoring flows are defined in the chain-agnostic reference:
+> [docs/transaction-flow.md](../../transaction-flow.md).
+> This section describes XRPL-specific concerns on top of that common flow.
 
-```
-Watch (online)        Keygen (offline)        Watch (online)
-----------------------------------------------------------------
-build unsigned tx  →  sign tx blob        →   submit & confirm
-persist unsigned       persist signed          persist receipts
-```
+## 5.1 Single-Sig Flow (XRPL)
 
----
+Follows the [common single-sig flow](../../transaction-flow.md#single-sig-flow).
 
-## 5.2 Multisig Flow
+XRPL-specific steps:
+- Watch Wallet fetches `Sequence` and decides `Fee` / `LastLedgerSequence` before building the unsigned tx
+- Keygen Wallet signs the serialized transaction as a `tx_blob`
+- Watch Wallet submits `tx_blob` and polls for validated ledger inclusion
 
-```
-Watch (online) → Signer #1 (offline) → Signer #2..N → Watch (online)
------------------------------------------------------------------------
-build unsigned     add signer #1        add signer N    submit & confirm
-export file        export file          export file     record validated
-```
+## 5.2 Multisig Flow (XRPL)
+
+Follows the [common multisig flow](../../transaction-flow.md#multisig-flow-m-of-n).
+
+XRPL-specific steps:
+- Each signer produces a `Signer` entry appended to the transaction (rather than replacing it)
+- Signing is fully offline; signers do not need to coordinate in real time
+- Watch Wallet aggregates all `Signer` entries and submits the final `tx_blob`
 
 ---
 

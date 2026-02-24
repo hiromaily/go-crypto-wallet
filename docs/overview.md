@@ -81,6 +81,9 @@ With a security-focused design, it separates three different types of wallets (W
 
 ## Transaction Execution Flow
 
+> For a complete visual flow with Mermaid diagrams, see [Transaction Flow](transaction-flow.md).
+
+
 ### For Non-Multisig Addresses
 
 ```text

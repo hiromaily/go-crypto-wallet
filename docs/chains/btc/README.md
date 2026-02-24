@@ -6,8 +6,9 @@ This document provides a comprehensive technical reference for Bitcoin implement
 
 This directory is organized into the following categories:
 
-| Directory | Description | Audience |
-|-----------|-------------|----------|
+| File / Directory | Description | Audience |
+|------------------|-------------|----------|
+| [architecture.md](./architecture.md) | **Wallet architecture** — wallet roles, use case boundary map, Keygen vs Sign signing | Developers |
 | [overview/](overview/) | Fundamental technical references and Bitcoin basics | All |
 | [operations/](operations/) | Wallet operation guides and transaction flows | Operators |
 | [keygen/](keygen/) | Key generation design and improvements | Developers |
@@ -28,9 +29,10 @@ This directory is organized into the following categories:
 
 ### For Developers
 
-1. Read [overview/technical-reference.md](overview/technical-reference.md) for Bitcoin fundamentals
-2. Review architecture docs: [descriptor/architecture.md](descriptor/architecture.md), [musig2/architecture.md](musig2/architecture.md)
-3. Check [psbt/developer-guide.md](psbt/developer-guide.md) for implementation details
+1. Read [architecture.md](./architecture.md) for the wallet boundary map and use case assignments
+2. Read [overview/technical-reference.md](overview/technical-reference.md) for Bitcoin protocol fundamentals
+3. Review feature-specific architecture docs: [descriptor/architecture.md](descriptor/architecture.md), [musig2/architecture.md](musig2/architecture.md)
+4. Check [psbt/developer-guide.md](psbt/developer-guide.md) for PSBT implementation details
 
 ---
 
@@ -389,7 +391,8 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 | **payment** | Outgoing payments | Yes (2-of-3 or 3-of-3) |
 | **stored** | Cold storage | Yes |
 
-See [operations/wallet-flow.md](operations/wallet-flow.md) for detailed procedures.
+For the common 3-wallet transaction flow (chain-agnostic), see [docs/transaction-flow.md](../../transaction-flow.md).
+For BTC-specific procedures and Mermaid diagrams, see [operations/wallet-flow.md](operations/wallet-flow.md).
 
 ---
 
