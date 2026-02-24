@@ -47,14 +47,22 @@ tracer:
     service_name: "btc-wallet"
     collector_endpoint: "http://127.0.0.1:14268/api/traces"
     sampling_probability: 0.5 # 0.001 to 1.0
-# Database configuration - choose between mysql or sqlite
+# Database configuration - choose between mysql, sqlite, or postgres
 database:
-  type: "sqlite" # mysql, sqlite
+  type: "sqlite" # mysql, sqlite, postgres
   mysql:
     host: "127.0.0.1:3306"
     dbname: "watch"
     user: "hiromaily"
     pass: "hiromaily"
+    debug: true
+  postgres:
+    host: "127.0.0.1"
+    port: 5432
+    dbname: "watch"
+    user: "postgres"
+    pass: "postgres"
+    sslmode: "disable"
     debug: true
   sqlite:
     path: "./data/sqlite/btc/watch.db"

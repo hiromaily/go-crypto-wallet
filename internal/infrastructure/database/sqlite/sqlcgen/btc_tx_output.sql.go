@@ -76,7 +76,7 @@ type InsertBtcTxOutputParams struct {
 	TxID          int64
 	OutputAddress string
 	OutputAccount string
-	OutputAmount  string
+	OutputAmount  float64
 	IsChange      int64
 	UpdatedAt     sql.NullString
 }

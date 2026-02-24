@@ -49,24 +49,14 @@ func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCA
 		return nil, fmt.Errorf("invalid account type from database: %s", sqlcKey.Account)
 	}
 
-	// Handle interface{} types from SQLC (BCH compatibility)
-	p2shSegwitAddr := ""
-	if v, ok := sqlcKey.P2shSegwitAddress.(string); ok {
-		p2shSegwitAddr = v
-	}
-	bech32Addr := ""
-	if v, ok := sqlcKey.Bech32Address.(string); ok {
-		bech32Addr = v
-	}
-
 	key := &domainBitcoin.BTCAccountKey{
 		ID:                 sqlcKey.ID,
 		CoinTypeCode:       coinTypeCode,
 		KeyType:            sqlcKey.KeyType,
 		Account:            accountType,
 		P2pkhAddress:       sqlcKey.P2pkhAddress,
-		P2shSegwitAddress:  p2shSegwitAddr,
-		Bech32Address:      bech32Addr,
+		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress.String,
+		Bech32Address:      sqlcKey.Bech32Address.String,
 		FullPublicKey:      sqlcKey.FullPublicKey,
 		MultisigAddress:    sqlcKey.MultisigAddress,
 		RedeemScript:       sqlcKey.RedeemScript,
@@ -75,11 +65,11 @@ func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCA
 		AddrStatus:         addrStatus,
 	}
 
-	// Handle nullable TaprootAddress (interface{})
-	if v, ok := sqlcKey.TaprootAddress.(string); ok && v != "" {
-		key.TaprootAddress = &v
+	// Handle nullable TaprootAddress
+	if sqlcKey.TaprootAddress.Valid && sqlcKey.TaprootAddress.String != "" {
+		key.TaprootAddress = &sqlcKey.TaprootAddress.String
 	}
-	// Handle nullable AccountExtendedPrivkey (sql.NullString)
+	// Handle nullable AccountExtendedPrivkey
 	if sqlcKey.AccountExtendedPrivkey.Valid {
 		key.AccountExtendedPrivkey = &sqlcKey.AccountExtendedPrivkey.String // NEVER log
 	}
@@ -104,8 +94,8 @@ func convertFromBTCAccountKey(key *domainBitcoin.BTCAccountKey) *sqlcgen.BtcAcco
 		KeyType:            key.KeyType,
 		Account:            key.Account.String(),
 		P2pkhAddress:       key.P2pkhAddress,
-		P2shSegwitAddress:  key.P2shSegwitAddress,
-		Bech32Address:      key.Bech32Address,
+		P2shSegwitAddress:  sql.NullString{String: key.P2shSegwitAddress, Valid: key.P2shSegwitAddress != ""},
+		Bech32Address:      sql.NullString{String: key.Bech32Address, Valid: key.Bech32Address != ""},
 		FullPublicKey:      key.FullPublicKey,
 		MultisigAddress:    key.MultisigAddress,
 		RedeemScript:       key.RedeemScript,
@@ -130,6 +120,73 @@ func convertFromBTCAccountKey(key *domainBitcoin.BTCAccountKey) *sqlcgen.BtcAcco
 	}
 
 	return sqlcKey
+}
+
+// rowToBtcAccountKey converts a Row type (which has plain string for nullable address fields)
+// to a BtcAccountKey model (which uses sql.NullString).
+// All three query Row types share the same field layout.
+func rowToBtcAccountKey(
+	id int64, coin, keyType, account, p2pkhAddress, p2shSegwitAddress, bech32Address string,
+	taprootAddress sql.NullString, fullPublicKey, multisigAddress, redeemScript, walletImportFormat string,
+	accountExtendedPrivkey sql.NullString, idx, addrStatus int64, updatedAt sql.NullString,
+) *sqlcgen.BtcAccountKey {
+	return &sqlcgen.BtcAccountKey{
+		ID:                     id,
+		Coin:                   coin,
+		KeyType:                keyType,
+		Account:                account,
+		P2pkhAddress:           p2pkhAddress,
+		P2shSegwitAddress:      sql.NullString{String: p2shSegwitAddress, Valid: p2shSegwitAddress != ""},
+		Bech32Address:          sql.NullString{String: bech32Address, Valid: bech32Address != ""},
+		TaprootAddress:         taprootAddress,
+		FullPublicKey:          fullPublicKey,
+		MultisigAddress:        multisigAddress,
+		RedeemScript:           redeemScript,
+		WalletImportFormat:     walletImportFormat,
+		AccountExtendedPrivkey: accountExtendedPrivkey,
+		Idx:                    idx,
+		AddrStatus:             addrStatus,
+		UpdatedAt:              updatedAt,
+	}
+}
+
+// convertRowToBTCAccountKey converts GetOneBtcAccountKeyByMaxIDRow to domain entity.
+func convertRowToBTCAccountKeyFromMaxID(
+	row *sqlcgen.GetOneBtcAccountKeyByMaxIDRow,
+) (*domainBitcoin.BTCAccountKey, error) {
+	key := rowToBtcAccountKey(
+		row.ID, row.Coin, row.KeyType, row.Account, row.P2pkhAddress,
+		row.P2shSegwitAddress, row.Bech32Address, row.TaprootAddress,
+		row.FullPublicKey, row.MultisigAddress, row.RedeemScript, row.WalletImportFormat,
+		row.AccountExtendedPrivkey, row.Idx, row.AddrStatus, row.UpdatedAt,
+	)
+	return convertToBTCAccountKey(key)
+}
+
+// convertRowToBTCAccountKeyFromAddrStatus converts GetBtcAccountKeysByAddrStatusRow to domain entity.
+func convertRowToBTCAccountKeyFromAddrStatus(
+	row *sqlcgen.GetBtcAccountKeysByAddrStatusRow,
+) (*domainBitcoin.BTCAccountKey, error) {
+	key := rowToBtcAccountKey(
+		row.ID, row.Coin, row.KeyType, row.Account, row.P2pkhAddress,
+		row.P2shSegwitAddress, row.Bech32Address, row.TaprootAddress,
+		row.FullPublicKey, row.MultisigAddress, row.RedeemScript, row.WalletImportFormat,
+		row.AccountExtendedPrivkey, row.Idx, row.AddrStatus, row.UpdatedAt,
+	)
+	return convertToBTCAccountKey(key)
+}
+
+// convertRowToBTCAccountKeyFromMultisig converts GetBtcAccountKeysByMultisigAddressesRow to domain entity.
+func convertRowToBTCAccountKeyFromMultisig(
+	row *sqlcgen.GetBtcAccountKeysByMultisigAddressesRow,
+) (*domainBitcoin.BTCAccountKey, error) {
+	key := rowToBtcAccountKey(
+		row.ID, row.Coin, row.KeyType, row.Account, row.P2pkhAddress,
+		row.P2shSegwitAddress, row.Bech32Address, row.TaprootAddress,
+		row.FullPublicKey, row.MultisigAddress, row.RedeemScript, row.WalletImportFormat,
+		row.AccountExtendedPrivkey, row.Idx, row.AddrStatus, row.UpdatedAt,
+	)
+	return convertToBTCAccountKey(key)
 }
 
 // GetMaxIndex returns max idx
@@ -166,7 +223,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(
 		return nil, fmt.Errorf("failed to call GetOneBtcAccountKeyByMaxID(): %w", err)
 	}
 
-	return convertToBTCAccountKey(&accountKey)
+	return convertRowToBTCAccountKeyFromMaxID(&accountKey)
 }
 
 // GetAllAddrStatus returns all BtcAccountKey by addr_status
@@ -186,7 +243,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 
 	result := make([]*domainBitcoin.BTCAccountKey, 0, len(accountKeys))
 	for i := range accountKeys {
-		domainKey, err := convertToBTCAccountKey(&accountKeys[i])
+		domainKey, err := convertRowToBTCAccountKeyFromAddrStatus(&accountKeys[i])
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert account key at index %d: %w", i, err)
 		}
@@ -216,7 +273,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 
 	result := make([]*domainBitcoin.BTCAccountKey, 0, len(accountKeys))
 	for i := range accountKeys {
-		domainKey, err := convertToBTCAccountKey(&accountKeys[i])
+		domainKey, err := convertRowToBTCAccountKeyFromMultisig(&accountKeys[i])
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert account key at index %d: %w", i, err)
 		}
@@ -279,7 +336,7 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddr(
 		UpdatedAt:         sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true},
 		Coin:              r.coinTypeCode.String(),
 		Account:           accountType.String(),
-		P2shSegwitAddress: keyAddress,
+		P2shSegwitAddress: sql.NullString{String: keyAddress, Valid: keyAddress != ""},
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call UpdateBtcAccountKeyAddress(): %w", err)

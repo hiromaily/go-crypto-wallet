@@ -83,7 +83,7 @@ type InsertBtcTxInputParams struct {
 	InputVout          int64
 	InputAddress       string
 	InputAccount       string
-	InputAmount        string
+	InputAmount        float64
 	InputConfirmations int64
 	UpdatedAt          sql.NullString
 }

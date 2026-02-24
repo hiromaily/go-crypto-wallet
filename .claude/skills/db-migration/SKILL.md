@@ -15,16 +15,16 @@ Workflow for database schema and migration changes.
 
 ## Applicable Files
 
-| Path                        | Description                              |
-| --------------------------- | ---------------------------------------- |
-| `tools/atlas/schemas/*.hcl` | HCL schema definitions (source of truth) |
-| `tools/sqlc/queries/mysql/*.sql`  | SQLC query definitions                   |
+| Path                                     | Description                              |
+| ---------------------------------------- | ---------------------------------------- |
+| `tools/atlas/schemas/{db_dialect}/*.hcl` | HCL schema definitions (source of truth) |
+| `tools/sqlc/queries/{db_dialect}/*.sql`  | SQLC query definitions                   |
 
 ## Workflow
 
 ### 1. Modify Schema (HCL)
 
-Edit HCL files in `tools/atlas/schemas/`.
+Edit HCL files in `tools/atlas/schemas/{db_dialect}/`.
 
 ### 2. Verify HCL (from rules/hcl.md)
 

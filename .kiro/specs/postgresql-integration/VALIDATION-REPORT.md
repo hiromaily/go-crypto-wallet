@@ -1,7 +1,7 @@
 # PostgreSQL Integration - Specification Validation Report
 
 **Date**: 2026-02-15
-**Feature**: postgresql-integration
+**Feature**: postgres-integration
 **Validator**: Claude Sonnet 4.5
 **Status**: ✅ APPROVED - Ready for Implementation
 
@@ -28,7 +28,7 @@ All specification documents have been reviewed and validated. One metadata synch
 | Approvals tracking | ✅ PASS (FIXED) | Requirements and Design marked approved, Tasks generated |
 | Timestamps | ✅ PASS | Updated to 2026-02-15T14:30:00Z |
 | Language setting | ✅ PASS | English (en) |
-| Feature name | ✅ PASS | postgresql-integration |
+| Feature name | ✅ PASS | postgres-integration |
 
 **Fix Applied**: Updated spec.json to reflect correct phase and approval status.
 
@@ -48,7 +48,7 @@ All specification documents have been reviewed and validated. One metadata synch
 **Sample EARS Validation**:
 
 ```
-✅ "When the configuration file specifies `database.type = "postgresql"`,
+✅ "When the configuration file specifies `database.type = "postgres"`,
     the Wallet System shall accept this as a valid database type"
 ✅ "If PostgreSQL connection fails, then the Database Connection Manager
     shall return a descriptive error"
@@ -293,9 +293,9 @@ Updated spec.json with correct values:
 
 | Aspect | MySQL | SQLite | PostgreSQL | Status |
 |--------|-------|--------|------------|--------|
-| Connection factory | pkg/db/mysql/ | pkg/db/sqlite/ | pkg/db/postgresql/ | ✅ Consistent |
-| sqlcgen location | .../mysql/sqlcgen/ | .../sqlite/sqlcgen/ | .../postgresql/sqlcgen/ | ✅ Consistent |
-| Repository location | .../mysql/*.go | .../sqlite/*.go | .../postgresql/*.go | ✅ Consistent |
+| Connection factory | pkg/db/mysql/ | pkg/db/sqlite/ | pkg/db/postgres/ | ✅ Consistent |
+| sqlcgen location | .../mysql/sqlcgen/ | .../sqlite/sqlcgen/ | .../postgres/sqlcgen/ | ✅ Consistent |
+| Repository location | .../mysql/*.go | .../sqlite/*.go | .../postgres/*.go | ✅ Consistent |
 | Repository count | ~40 files | ~40 files | ~40 files (planned) | ✅ Consistent |
 
 ---
@@ -342,7 +342,7 @@ All specification documents are complete, consistent, and ready for implementati
 
 ```bash
 # Clear context before starting
-/kiro:spec-impl postgresql-integration 1.1
+/kiro:spec-impl postgres-integration 1.1
 ```
 
 Start with Task 1.1 (Extend database configuration struct), then proceed sequentially through phases.
@@ -358,7 +358,7 @@ Execute tasks marked with `(P)` in parallel:
 **Option 3: Multi-Task Batch**
 
 ```bash
-/kiro:spec-impl postgresql-integration 1.1,1.2
+/kiro:spec-impl postgres-integration 1.1,1.2
 ```
 
 Execute multiple related tasks together (use with caution - may consume context).
@@ -366,7 +366,7 @@ Execute multiple related tasks together (use with caution - may consume context)
 ### Implementation Workflow
 
 1. **Before Starting**: Clear conversation history to free up context
-2. **Execute Task**: Run `/kiro:spec-impl postgresql-integration <task-id>`
+2. **Execute Task**: Run `/kiro:spec-impl postgres-integration <task-id>`
 3. **TDD Cycle**: Write tests → Implement → Refactor → Verify
 4. **Mark Complete**: Task status updated in tasks.md
 5. **Next Task**: Repeat for next task in dependency order
@@ -385,7 +385,7 @@ Execute multiple related tasks together (use with caution - may consume context)
 
 ## Conclusion
 
-The postgresql-integration specification is **APPROVED** and **READY FOR IMPLEMENTATION**. All documents are complete, consistent, and align with project standards. One metadata synchronization issue was identified and resolved. No blocking issues remain.
+The postgres-integration specification is **APPROVED** and **READY FOR IMPLEMENTATION**. All documents are complete, consistent, and align with project standards. One metadata synchronization issue was identified and resolved. No blocking issues remain.
 
 **Estimated Implementation Time**: 5-7 days
 **Risk Level**: Low

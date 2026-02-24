@@ -10,7 +10,8 @@
 #
 # Database Backend:
 #   DB=sqlite (default) - Use local SQLite files with SQLC schemas
-#                         Faster, no Docker MySQL container needed
+#                         Faster, no Docker container needed
+#   DB=postgres         - Use Docker PostgreSQL container with Atlas migrations
 #   DB=mysql            - Use Docker MySQL container with Atlas migrations
 #
 # Patterns:
@@ -27,8 +28,9 @@
 #   11: P2TR Tapscript M-of-N
 #
 # Examples:
-#   make btc-e2e-reset P=1           # SQLite (default)
-#   make btc-e2e-reset P=1 DB=mysql  # MySQL
+#   make btc-e2e-reset P=1              # SQLite (default)
+#   make btc-e2e-reset P=1 DB=postgres  # PostgreSQL
+#   make btc-e2e-reset P=1 DB=mysql     # MySQL
 ###############################################################################
 
 # Default pattern
@@ -67,34 +69,40 @@ _btc-e2e-validate:
 
 # Run E2E test with --reset flag (recommended for fresh start)
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e-reset P=<1-11> [DB=sqlite|postgres|mysql]
 .PHONY: btc-e2e-reset
 btc-e2e-reset: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --reset
 
 # Run complete E2E test
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e P=<1-11> [DB=sqlite|postgres|mysql]
 .PHONY: btc-e2e
 btc-e2e: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH)
 
 # Run E2E test with verbose output
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e-verbose P=<1-11> [DB=sqlite|postgres|mysql]
 .PHONY: btc-e2e-verbose
 btc-e2e-verbose: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --verbose
 
 # Run E2E test in non-interactive mode (for CI/CD)
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e-ci P=<1-11> [DB=sqlite|postgres|mysql]
 .PHONY: btc-e2e-ci
 btc-e2e-ci: build-all _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --non-interactive
 
 # Cleanup E2E test environment (no build needed for cleanup)
+# Usage: make btc-e2e-cleanup P=<1-11> [DB=sqlite|postgres|mysql]
 .PHONY: btc-e2e-cleanup
 btc-e2e-cleanup: _btc-e2e-validate
 	$(E2E_DB_TYPE) $(E2E_SCRIPT_PATH) --cleanup
 
 # Show available patterns
+# Usage: make btc-e2e-help
 .PHONY: btc-e2e-help
 btc-e2e-help:
 	@echo "Bitcoin E2E Test Patterns:"
@@ -112,12 +120,14 @@ btc-e2e-help:
 	@echo ""
 	@echo "Database Backend:"
 	@echo "  DB=sqlite (default) - Local SQLite files with SQLC schemas"
-	@echo "                        No Docker MySQL container needed (faster)"
+	@echo "                        No Docker container needed (faster)"
+	@echo "  DB=postgres         - Docker PostgreSQL container with Atlas migrations"
 	@echo "  DB=mysql            - Docker MySQL container with Atlas migrations"
 	@echo ""
 	@echo "Usage:"
 	@echo "  make btc-e2e P=<pattern>              # Run E2E test (SQLite default)"
 	@echo "  make btc-e2e-reset P=<pattern>        # Run with --reset flag (recommended)"
+	@echo "  make btc-e2e-reset P=1 DB=postgres    # Run with PostgreSQL"
 	@echo "  make btc-e2e-reset P=1 DB=mysql       # Run with MySQL"
 	@echo "  make btc-e2e-verbose P=<pattern>      # Run with --verbose flag"
 	@echo "  make btc-e2e-ci P=<pattern>           # Run with --non-interactive flag"
@@ -169,12 +179,29 @@ endif
 
 # Run E2E tests in parallel
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e-parallel [PATTERNS=1-11] [MAX_PARALLEL=11] [VERBOSE=true]
+# e.g. make btc-e2e-parallel PATTERNS=1-9 MAX_PARALLEL=9
 .PHONY: btc-e2e-parallel
 btc-e2e-parallel: build-all
 	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG)
 
 # Run all E2E tests in parallel for CI (non-interactive mode)
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e-ci-all [PATTERNS=1-11] [MAX_PARALLEL=11] [VERBOSE=true]
 .PHONY: btc-e2e-ci-all
 btc-e2e-ci-all: build-all
 	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG) --ci
+
+# Check List
+# For PostgreSQL
+# make btc-e2e-reset P=1 DB=postgres
+# make btc-e2e-reset P=2 DB=postgres
+# make btc-e2e-reset P=3 DB=postgres
+# make btc-e2e-reset P=4 DB=postgres
+# make btc-e2e-reset P=5 DB=postgres
+# make btc-e2e-reset P=6 DB=postgres
+# make btc-e2e-reset P=7 DB=postgres
+# make btc-e2e-reset P=8 DB=postgres
+# make btc-e2e-reset P=9 DB=postgres
+# For SQLite
+# make btc-e2e-parallel PATTERNS=1-9 MAX_PARALLEL=9

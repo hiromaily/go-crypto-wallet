@@ -3,9 +3,7 @@
 # Atlas Configuration
 ###############################################################################
 # Atlas configuration file and environments
-# DB_DIALECT selects the database dialect (mysql or postgresql)
-# Usage: make <target> DB_DIALECT=postgresql
-DB_DIALECT ?= mysql
+# DB_DIALECT and derived variables are defined in db.mk (parent file)
 ATLAS_CONFIG := file://tools/atlas/atlas.hcl
 ATLAS_SCHEMAS := watch keygen sign
 
@@ -56,36 +54,30 @@ atlas-fmt-check:
 	fi
 	@echo "✓ All HCL files are properly formatted"
 
-# Lint all HCL schema files with validation
-# Usage: make atlas-lint [DB_DIALECT=mysql|postgresql]
+# Validate Atlas configuration for all dialects
+.PHONY: atlas-validate
+atlas-validate:
+	@for dialect in mysql postgres; do \
+		for schema in $(ATLAS_SCHEMAS); do \
+			echo "=== Validating $$schema ($$dialect) ==="; \
+			(cd tools/atlas && atlas migrate validate --config file://atlas.hcl --env local_$${dialect}_$$schema) || exit 1; \
+		done; \
+	done
+	@echo "✓ Atlas configuration is valid"
+
+# Lint all HCL schema files with validation for all dialects
+# Note **'atlas schema lint' is available only to Atlas Pro users.**
 # `atlas schema lint`
 .PHONY: atlas-lint
 atlas-lint:
-	@echo "Linting Atlas HCL schema files ($(DB_DIALECT))..."
-	@for schema in $(ATLAS_SCHEMAS); do \
-		echo "=== Linting $$schema schema ($(DB_DIALECT)) ==="; \
-		(cd tools/atlas && atlas schema lint --config file://atlas.hcl --env local_$(DB_DIALECT)_$$schema) || exit 1; \
+	@for dialect in mysql postgres; do \
+		for schema in $(ATLAS_SCHEMAS); do \
+			echo "=== Linting $$schema schema ($$dialect) ==="; \
+			(cd tools/atlas && atlas schema lint --config file://atlas.hcl --env local_$${dialect}_$$schema) || exit 1; \
+		done; \
 	done
 	@echo "✓ All schemas passed linting"
 
-# Convenience aliases for dialect-specific lint
-.PHONY: atlas-lint-mysql
-atlas-lint-mysql:
-	@$(MAKE) atlas-lint DB_DIALECT=mysql
-
-.PHONY: atlas-lint-postgresql
-atlas-lint-postgresql:
-	@$(MAKE) atlas-lint DB_DIALECT=postgresql
-
-# Validate Atlas configuration
-# Usage: make atlas-validate [DB_DIALECT=mysql|postgresql]
-.PHONY: atlas-validate
-atlas-validate:
-	@echo "Validating Atlas configuration ($(DB_DIALECT))..."
-	@for schema in $(ATLAS_SCHEMAS); do \
-		(cd tools/atlas && atlas migrate validate --config file://atlas.hcl --env local_$(DB_DIALECT)_$$schema) || exit 1; \
-	done
-	@echo "✓ Atlas configuration is valid"
 
 ###############################################################################
 # Development Workflow Targets
@@ -107,16 +99,21 @@ atlas-validate:
 # This target must run after atlas schema files `watch.hcl`, `keygen.hcl`, `sign.hcl` are changed
 # WARNING: This deletes all existing migrations and creates new ones
 # If no actual content changes are detected, original files are restored
-# Usage: make atlas-dev-reset [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-dev-reset [DB_DIALECT=postgres|mysql]
 # `atlas migrate diff initial_schema`
 .PHONY: atlas-dev-reset
 atlas-dev-reset:
 	@DB_DIALECT=$(DB_DIALECT) \
 	./scripts/db/atlas-dev-reset.sh
 
+# Regenerate migrations from HCL schemas (from scratch) for mysql
+.PHONY: atlas-dev-reset-mysql
+atlas-dev-reset-mysql:
+	@$(MAKE) atlas-dev-reset DB_DIALECT=mysql
+
 # Clean databases and reapply from HCL schemas
 # Uses admin_* environments which allow schema-level operations (drop/create schema)
-# Usage: make atlas-dev-clean [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-dev-clean [DB_DIALECT=mysql|postgres]
 # `atlas schema clean`
 .PHONY: atlas-dev-clean
 atlas-dev-clean:
@@ -137,12 +134,17 @@ atlas-dev-clean:
 		exit 1; \
 	fi
 
+# Clean databases and reapply from HCL schemas for mysql
+.PHONY: atlas-dev-clean-mysql
+atlas-dev-clean-mysql:
+	@$(MAKE) atlas-dev-clean DB_DIALECT=mysql
+
 ###############################################################################
 # Atlas utility targets
 ###############################################################################
 
 # Show migration status for all schemas
-# Usage: make atlas-migrate-status [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-migrate-status [DB_DIALECT=mysql|postgres]
 # `atlas migrate status`
 .PHONY: atlas-migrate-status
 atlas-migrate-status:
@@ -151,13 +153,17 @@ atlas-migrate-status:
 		(cd tools/atlas && atlas migrate status --config file://atlas.hcl --env local_$(DB_DIALECT)_$$schema) || true; \
 	done
 
+# Convenience aliases for dialect-specific migrate status
+.PHONY: atlas-migrate-status-mysql
+atlas-migrate-status-mysql:
+	@$(MAKE) atlas-migrate-status DB_DIALECT=mysql
 
 ###############################################################################
 # Atlas Schema Management Targets
 ###############################################################################
 
 # Apply HCL schema directly to database (all schemas)
-# Usage: make atlas-schema-apply-all [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-schema-apply-all [DB_DIALECT=mysql|postgres]
 # `atlas schema apply`
 .PHONY: atlas-schema-apply-all
 atlas-schema-apply-all:
@@ -168,12 +174,17 @@ atlas-schema-apply-all:
 	@echo "✓ All schemas applied successfully"
 
 # Apply HCL schema for a specific schema
-# Usage: make atlas-schema-apply SCHEMA=watch [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-schema-apply SCHEMA=watch [DB_DIALECT=mysql|postgres]
 # `atlas schema apply`
 .PHONY: atlas-schema-apply
 atlas-schema-apply: _check-schema
 	@echo "=== Applying $(SCHEMA) schema ($(DB_DIALECT)) ==="
 	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env local_$(DB_DIALECT)_$(SCHEMA) --auto-approve
+
+# Convenience aliases for dialect-specific schema apply
+.PHONY: atlas-schema-apply-all-mysql
+atlas-schema-apply-all-mysql:
+	@$(MAKE) atlas-schema-apply-all DB_DIALECT=mysql
 
 ###############################################################################
 # Atlas Migration Targets
@@ -181,7 +192,7 @@ atlas-schema-apply: _check-schema
 ###############################################################################
 
 # Apply all pending migrations for all schemas
-# Usage: make atlas-migrate-apply-all [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-migrate-apply-all [DB_DIALECT=mysql|postgres]
 # `atlas migrate apply`
 .PHONY: atlas-migrate-apply-all
 atlas-migrate-apply-all:
@@ -193,7 +204,7 @@ atlas-migrate-apply-all:
 	@echo "✓ All migrations applied successfully"
 
 # Generate new migration from HCL schema diff
-# Usage: make atlas-migrate-diff SCHEMA=watch NAME=add_new_column [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-migrate-diff SCHEMA=watch NAME=add_new_column [DB_DIALECT=mysql|postgres]
 # `atlas migrate diff`
 .PHONY: atlas-migrate-diff
 atlas-migrate-diff: _check-schema _check-name
@@ -202,7 +213,7 @@ atlas-migrate-diff: _check-schema _check-name
 	@echo "✓ Migration generated: tools/atlas/migrations/$(DB_DIALECT)/$(SCHEMA)/"
 
 # Hash migration directory for production readiness
-# Usage: make atlas-migrate-hash-all [DB_DIALECT=mysql|postgresql]
+# Usage: make atlas-migrate-hash-all [DB_DIALECT=mysql|postgres]
 .PHONY: atlas-migrate-hash-all
 atlas-migrate-hash-all:
 	@echo "Hashing migration directories ($(DB_DIALECT))..."
@@ -210,6 +221,15 @@ atlas-migrate-hash-all:
 		(cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env local_$(DB_DIALECT)_$$schema) || exit 1; \
 	done
 	@echo "✓ Migration directories hashed"
+
+# Convenience aliases for dialect-specific migration targets
+.PHONY: atlas-migrate-apply-all-mysql
+atlas-migrate-apply-all-mysql:
+	@$(MAKE) atlas-migrate-apply-all DB_DIALECT=mysql
+
+.PHONY: atlas-migrate-hash-all-mysql
+atlas-migrate-hash-all-mysql:
+	@$(MAKE) atlas-migrate-hash-all DB_DIALECT=mysql
 
 ###############################################################################
 # Production Workflow Targets
@@ -225,8 +245,3 @@ atlas-migrate-hash-all:
 # 	done
 # 	@echo "✓ Production migration history initialized"
 # 	@echo "You can now create incremental migrations using: make atlas-migrate-diff SCHEMA=<schema> NAME=<name>"
-
-# Usage: make atlas-migration-flow [DB_DIALECT=mysql|postgresql]
-.PHONY: atlas-migration-flow
-atlas-migration-flow:
-

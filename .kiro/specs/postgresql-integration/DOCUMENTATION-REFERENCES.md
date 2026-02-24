@@ -150,7 +150,7 @@ make atlas-fmt && make atlas-lint
 make atlas-dev-reset
 docker compose down -v && docker compose --profile mysql up -d
 make atlas-migrate-docker
-make sqlc && make sqlc-sqlite && make sqlc-postgresql
+make sqlc && make sqlc-sqlite && make sqlc-postgres
 
 # Testing
 make go-lint && make check-build && make gotest

@@ -38,14 +38,22 @@ logger:
 # only available for watch only wallet, but definition is required as none
 tracer:
   type: "none" # none, jaeger, datadog
-# Database configuration - choose between mysql or sqlite
+# Database configuration - choose between mysql, sqlite, or postgres
 database:
-  type: "sqlite" # mysql, sqlite
+  type: "sqlite" # mysql, sqlite, postgres
   mysql:
     host: "127.0.0.1:3306"
     dbname: "sign2"
     user: "hiromaily"
     pass: "hiromaily"
+    debug: true
+  postgres:
+    host: "127.0.0.1"
+    port: 5432
+    dbname: "sign2"
+    user: "postgres"
+    pass: "postgres"
+    sslmode: "disable"
     debug: true
   sqlite:
     path: "./data/sqlite/btc/sign2.db"

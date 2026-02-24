@@ -1,0 +1,358 @@
+---
+paths: ["**/*.hcl"]
+---
+
+# Atlas HCL File Rules
+
+## Overview
+
+Rules for modifying HCL (HashiCorp Configuration Language) files (`*.hcl`) in go-crypto-wallet.
+
+## Supported DB Dialects
+
+This project supports **two database dialects**: PostgreSQL and MySQL.
+The `DB_DIALECT` variable (default: `postgres`) controls which dialect is targeted.
+
+## Applicable Directories
+
+| Path                            | Description                                                 |
+| ------------------------------- | ----------------------------------------------------------- |
+| `tools/atlas/schemas/postgres/` | PostgreSQL schema definitions definitions (source of truth) |
+| `tools/atlas/schemas/mysql/`    | MySQL schema definitions (source of truth)                  |
+| `tools/atlas/atlas.hcl`         | Atlas configuration (all environments)                      |
+
+## Schema Files
+
+Each dialect has its own set of schema files:
+
+| File                                       | Description                    |
+| ------------------------------------------ | ------------------------------ |
+| `tools/atlas/schemas/{dialect}/watch.hcl`  | Watch wallet schema (online)   |
+| `tools/atlas/schemas/{dialect}/keygen.hcl` | Keygen wallet schema (offline) |
+| `tools/atlas/schemas/{dialect}/sign.hcl`   | Sign wallet schema (offline)   |
+
+Where `{dialect}` is `mysql` or `postgres`.
+
+## Atlas Environments
+
+Defined in `tools/atlas/atlas.hcl`:
+
+| Environment             | Dialect    | Purpose              |
+| ----------------------- | ---------- | -------------------- |
+| `local_postgres_watch`  | PostgreSQL | Local watch DB       |
+| `local_postgres_keygen` | PostgreSQL | Local keygen DB      |
+| `local_postgres_sign`   | PostgreSQL | Local sign DB        |
+| `admin_postgres_watch`  | PostgreSQL | Admin (schema clean) |
+| `admin_postgres_keygen` | PostgreSQL | Admin (schema clean) |
+| `admin_postgres_sign`   | PostgreSQL | Admin (schema clean) |
+| `local_mysql_watch`     | MySQL      | Local watch DB       |
+| `local_mysql_keygen`    | MySQL      | Local keygen DB      |
+| `local_mysql_sign`      | MySQL      | Local sign DB        |
+| `admin_mysql_watch`     | MySQL      | Admin (schema clean) |
+| `admin_mysql_keygen`    | MySQL      | Admin (schema clean) |
+| `admin_mysql_sign`      | MySQL      | Admin (schema clean) |
+
+## Verification Commands
+
+| Command                | Purpose                      | Required    |
+| ---------------------- | ---------------------------- | ----------- |
+| `make atlas-fmt`       | Format HCL files             | Yes         |
+| `make atlas-fmt-check` | Check formatting (CI mode)   | CI only     |
+| `make atlas-lint`      | Lint and validate schemas    | Yes         |
+| `make atlas-validate`  | Validate Atlas configuration | Recommended |
+
+## Complete Workflow
+
+After modifying HCL schema files, use the all-in-one regeneration commands:
+
+```bash
+# For PostgreSQL schemas (also requires SQLite regeneration):
+make regenerate-all-from-atlas
+make regenerate-all-from-atlas-sqlite
+
+# For MySQL schemas:
+make regenerate-all-from-atlas-mysql
+```
+
+These commands handle the full pipeline: format, lint, migration regeneration, SQLC schema extraction, SQLC codegen, and build verification.
+
+**Important**: When PostgreSQL HCL schemas are changed, you must also run `make regenerate-all-from-atlas-sqlite` because SQLite schemas depend on the PostgreSQL schema definitions.
+
+### Manual Step-by-Step (if needed)
+
+```bash
+# 1. Format
+make atlas-fmt
+
+# 2. Lint
+make atlas-lint
+
+# 3. Regenerate migrations (defaults to DB_DIALECT=mysql, or specify)
+make atlas-dev-reset
+# or: make atlas-dev-reset DB_DIALECT=postgres
+
+# 4. Reset database and apply
+# For PostgreSQL:
+docker compose down -v
+docker compose --profile postgres up -d
+# For MySQL:
+docker compose down -v
+docker compose --profile mysql up -d
+
+# 5. Regenerate SQLC (if schema affects queries)
+make extract-sqlc-schema-all
+make sqlc
+
+# 6. Verify
+make check-build
+make gotest
+```
+
+## Available Make Targets
+
+| Target                          | Purpose                                 | `DB_DIALECT` |
+| ------------------------------- | --------------------------------------- | ------------ |
+| `atlas-fmt`                     | Format all HCL schema files             | Both         |
+| `atlas-fmt-check`               | Check formatting (CI)                   | Both         |
+| `atlas-validate`                | Validate Atlas configuration            | Configurable |
+| `atlas-lint`                    | Lint HCL schemas                        | Configurable |
+| `atlas-dev-reset`               | Regenerate migration SQL from HCL       | Configurable |
+| `atlas-dev-reset-mysql`         | Regenerate MySQL migrations only        | MySQL        |
+| `atlas-dev-clean`               | Clean databases and reapply schemas     | Configurable |
+| `atlas-dev-clean-mysql`         | Clean MySQL databases only              | MySQL        |
+| `atlas-migrate-status`          | Show migration status                   | Configurable |
+| `atlas-migrate-status-mysql`    | Show MySQL migration status             | MySQL        |
+| `atlas-schema-apply-all`        | Apply HCL schema directly to databases  | Configurable |
+| `atlas-schema-apply`            | Apply HCL schema for specific schema    | Configurable |
+| `atlas-schema-apply-all-mysql`  | Apply all schemas for MySQL             | MySQL        |
+| `atlas-migrate-apply-all`       | Apply all pending migrations            | Configurable |
+| `atlas-migrate-apply-all-mysql` | Apply all MySQL migrations              | MySQL        |
+| `atlas-migrate-diff`            | Generate new migration from HCL diff    | Configurable |
+| `atlas-migrate-hash-all`        | Hash migration directory for production | Configurable |
+| `atlas-migrate-hash-all-mysql`  | Hash MySQL migration directories        | MySQL        |
+
+## Official HCL Reference Documentation
+
+When modifying schema HCL files, **always consult** the official Atlas HCL documentation for the target dialect:
+
+| Dialect    | Documentation URL                    |
+| ---------- | ------------------------------------ |
+| PostgreSQL | https://atlasgo.io/hcl/postgres      |
+| MySQL      | https://atlasgo.io/hcl/mysql         |
+| SQLite     | https://atlasgo.io/hcl/sqlite        |
+
+### When to Consult the Documentation
+
+You **MUST** refer to the official documentation when:
+
+- Adding or modifying column types (to ensure correct dialect-specific type names)
+- Adding constraints (primary key, foreign key, unique, check)
+- Using advanced features (partitioning, custom types, triggers, functions)
+- Unsure about attribute names or syntax (e.g., `auto_increment` vs `identity`, `datetime` vs `timestamptz`)
+- Adding indexes with dialect-specific options (e.g., PostgreSQL index types: BTREE, BRIN, HASH, GIN, GIST)
+- Working with enum-like columns (inline `enum()` for MySQL, `varchar` + `check` for PostgreSQL)
+
+### Key Dialect-Specific Syntax Reference
+
+#### Column Attributes (All Dialects)
+
+| Attribute        | Description                        | Dialects          |
+| ---------------- | ---------------------------------- | ----------------- |
+| `type`           | Column data type (required)        | All               |
+| `null`           | Allow NULL values                  | All               |
+| `default`        | Default value (bool/string/number/`sql()`) | All        |
+| `auto_increment` | Auto-increment column              | MySQL, SQLite     |
+| `identity`       | Identity column                    | PostgreSQL        |
+| `unsigned`       | Unsigned integer                   | MySQL, SQLite     |
+| `comment`        | Column documentation               | MySQL, PostgreSQL |
+| `charset`        | Character set                      | MySQL             |
+| `collate`        | Collation                          | MySQL, PostgreSQL |
+
+#### Foreign Key Actions
+
+All dialects support the same `on_delete` / `on_update` actions:
+`NO_ACTION`, `RESTRICT`, `CASCADE`, `SET_NULL`, `SET_DEFAULT`
+
+#### Index Types (PostgreSQL Only)
+
+PostgreSQL indexes support a `type` attribute: `BTREE` (default), `BRIN`, `HASH`, `GIN`, `GIST`, `SPGIST`
+
+#### Table Options (MySQL Only)
+
+MySQL tables support `engine` (`InnoDB`, `MyISAM`, etc.), `charset`, `collate`, and `auto_increment` table-level attributes.
+
+#### Table Options (SQLite Only)
+
+SQLite tables support `strict` and `without_rowid` attributes.
+
+## HCL Schema Syntax
+
+### MySQL Table Definition
+
+```hcl
+schema "watch" {}
+
+table "address" {
+  schema = schema.watch
+
+  column "id" {
+    type           = bigint
+    auto_increment = true
+  }
+
+  column "coin_type" {
+    type = enum("btc", "bch", "eth", "xrp", "hyt")
+  }
+
+  column "created_at" {
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+}
+```
+
+### PostgreSQL Table Definition
+
+**IMPORTANT**: Do NOT use native PostgreSQL `enum` types. Use `varchar` + `check` constraints instead.
+Native enums cause sqlc to generate `interface{}` types and require restrictive `ALTER TYPE` locks for schema evolution.
+
+```hcl
+schema "public" {}
+
+table "address" {
+  schema = schema.public
+
+  column "id" {
+    type = bigint
+    identity {
+      generated = BY_DEFAULT
+    }
+  }
+
+  column "coin_type" {
+    type = varchar(10)
+  }
+
+  column "created_at" {
+    type    = timestamptz
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  check "chk_address_coin_type" {
+    expr = "coin_type IN ('btc', 'bch', 'eth', 'xrp', 'hyt')"
+  }
+}
+```
+
+### Foreign Key
+
+```hcl
+foreign_key "fk_address_account" {
+  columns     = [column.account_key_id]
+  ref_columns = [table.account_key.column.id]
+  on_delete   = CASCADE
+  on_update   = CASCADE
+}
+```
+
+### Unique Constraint
+
+```hcl
+index "idx_unique_account" {
+  columns = [column.coin_type, column.account]
+  unique  = true
+}
+```
+
+## Dialect Differences
+
+### Schema Declaration
+
+| Feature     | MySQL                   | PostgreSQL               |
+| ----------- | ----------------------- | ------------------------ |
+| Schema name | `schema "watch" {}`     | `schema "public" {}`     |
+| Schema ref  | `schema = schema.watch` | `schema = schema.public` |
+
+### Auto-Increment / Identity
+
+| MySQL                   | PostgreSQL                            |
+| ----------------------- | ------------------------------------- |
+| `auto_increment = true` | `identity { generated = BY_DEFAULT }` |
+
+### Enum-like Columns
+
+| MySQL                        | PostgreSQL                                              |
+| ---------------------------- | ------------------------------------------------------- |
+| Inline: `enum("btc", "bch")` | `varchar(N)` + `check` constraint (NOT native `enum`)   |
+|                              | e.g., `check "chk_coin" { expr = "coin IN ('btc')" }`  |
+
+### Column Types
+
+| MySQL Type      | PostgreSQL Type | Notes                             |
+| --------------- | --------------- | --------------------------------- |
+| `bigint`        | `bigint`        | Same                              |
+| `int`           | `integer`       | Different keyword                 |
+| `tinyint`       | `smallint`      | Different keyword                 |
+| `varchar(n)`    | `varchar(n)`    | Same                              |
+| `text`          | `text`          | Same                              |
+| `datetime`      | `timestamptz`   | PostgreSQL uses timezone-aware    |
+| `bool`          | `boolean`       | Same behavior                     |
+| `decimal(p,s)`  | `numeric(p,s)`  | Different keyword                 |
+| `blob`          | `bytea`         | Binary data (e.g., MuSig2 nonces) |
+| Inline `enum()` | `varchar` + `check` | PostgreSQL uses CHECK constraints (not native enums) |
+
+## Auto-Generated Files
+
+**DO NOT EDIT** files generated from HCL:
+
+| Path                                          | Description           |
+| --------------------------------------------- | --------------------- |
+| `tools/atlas/migrations/mysql/**/*.sql`       | MySQL migrations      |
+| `tools/atlas/migrations/mysql/*/atlas.sum`    | MySQL checksums       |
+| `tools/atlas/migrations/postgres/**/*.sql`    | PostgreSQL migrations |
+| `tools/atlas/migrations/postgres/*/atlas.sum` | PostgreSQL checksums  |
+
+Regenerate with `make atlas-dev-reset` (or `make atlas-dev-reset DB_DIALECT=postgres`).
+
+## Best Practices
+
+### Schema Changes
+
+- Make backward compatible changes when possible
+- Add indexes for frequently queried columns
+- Use appropriate column types for each dialect
+- Define foreign keys with proper cascades
+- Keep MySQL and PostgreSQL schemas in sync (same tables/columns, dialect-appropriate types)
+
+### Naming Conventions
+
+- Table names: lowercase, snake_case
+- Column names: lowercase, snake_case
+- Index names: `idx_{table}_{column(s)}`
+- Foreign key names: `fk_{table}_{reference}`
+- Check constraint names: `chk_{table}_{column}` (e.g., `chk_btc_tx_coin`, `chk_address_account`)
+
+## Quick Checklist
+
+- [ ] Run `make regenerate-all-from-atlas` + `make regenerate-all-from-atlas-sqlite` (PostgreSQL) or `make regenerate-all-from-atlas-mysql` (MySQL)
+- [ ] `make check-build` passes
+- [ ] `make gotest` passes
+- [ ] Both MySQL and PostgreSQL schemas are consistent
+
+## Related Documentation
+
+- @docs/database/db-management.md - Database management guide
+- @tools/atlas/atlas.hcl - Atlas configuration
+
+## Related Skills
+
+- `db-migration` - Full database migration workflow
+- `go-development` - Go verification after SQLC generation

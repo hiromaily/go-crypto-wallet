@@ -37,7 +37,7 @@ lint {
 # Used for migrations and schema apply (schema-scoped operations)
 env "local_mysql_watch" {
   url     = "mysql://root:root@127.0.0.1:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
-  src     = "file://schemas/watch.hcl"
+  src     = "file://schemas/mysql/watch.hcl"
   schemas = ["watch"]
   migration {
     dir = "file://migrations/mysql/watch"
@@ -50,7 +50,7 @@ env "local_mysql_watch" {
 # Used for migrations and schema apply (schema-scoped operations)
 env "local_mysql_keygen" {
   url     = "mysql://root:root@127.0.0.1:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
-  src     = "file://schemas/keygen.hcl"
+  src     = "file://schemas/mysql/keygen.hcl"
   schemas = ["keygen"]
   migration {
     dir = "file://migrations/mysql/keygen"
@@ -63,7 +63,7 @@ env "local_mysql_keygen" {
 # Used for migrations and schema apply (schema-scoped operations)
 env "local_mysql_sign" {
   url     = "mysql://root:root@127.0.0.1:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
-  src     = "file://schemas/sign.hcl"
+  src     = "file://schemas/mysql/sign.hcl"
   schemas = ["sign"]
   migration {
     dir = "file://migrations/mysql/sign"
@@ -78,23 +78,23 @@ env "local_mysql_sign" {
 ###############################################################################
 
 # Admin environment - Watch schema (for atlas schema clean)
-env "admin_watch" {
+env "admin_mysql_watch" {
   url     = "mysql://root:root@127.0.0.1:3306/?charset=utf8mb4&parseTime=True&loc=Local"
-  src     = "file://schemas/watch.hcl"
+  src     = "file://schemas/mysql/watch.hcl"
   schemas = ["watch"]
 }
 
 # Admin environment - Keygen schema (for atlas schema clean)
-env "admin_keygen" {
+env "admin_mysql_keygen" {
   url     = "mysql://root:root@127.0.0.1:3306/?charset=utf8mb4&parseTime=True&loc=Local"
-  src     = "file://schemas/keygen.hcl"
+  src     = "file://schemas/mysql/keygen.hcl"
   schemas = ["keygen"]
 }
 
 # Admin environment - Sign schema (for atlas schema clean)
-env "admin_sign" {
+env "admin_mysql_sign" {
   url     = "mysql://root:root@127.0.0.1:3306/?charset=utf8mb4&parseTime=True&loc=Local"
-  src     = "file://schemas/sign.hcl"
+  src     = "file://schemas/mysql/sign.hcl"
   schemas = ["sign"]
 }
 
@@ -104,34 +104,34 @@ env "admin_sign" {
 ###############################################################################
 
 # Local development environment - PostgreSQL Watch schema
-env "local_postgresql_watch" {
+env "local_postgres_watch" {
   url     = "postgres://postgres:postgres@localhost:5432/watch?sslmode=disable"
-  src     = "file://schemas/watch.hcl"
+  src     = "file://schemas/postgres/watch.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql/watch"
+    dir = "file://migrations/postgres/watch"
   }
   dev = "docker://postgres/18/watch"
 }
 
 # Local development environment - PostgreSQL Keygen schema
-env "local_postgresql_keygen" {
+env "local_postgres_keygen" {
   url     = "postgres://postgres:postgres@localhost:5432/keygen?sslmode=disable"
-  src     = "file://schemas/keygen.hcl"
+  src     = "file://schemas/postgres/keygen.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql/keygen"
+    dir = "file://migrations/postgres/keygen"
   }
   dev = "docker://postgres/18/keygen"
 }
 
 # Local development environment - PostgreSQL Sign schema
-env "local_postgresql_sign" {
+env "local_postgres_sign" {
   url     = "postgres://postgres:postgres@localhost:5432/sign?sslmode=disable"
-  src     = "file://schemas/sign.hcl"
+  src     = "file://schemas/postgres/sign.hcl"
   schemas = ["public"]
   migration {
-    dir = "file://migrations/postgresql/sign"
+    dir = "file://migrations/postgres/sign"
   }
   dev = "docker://postgres/18/sign"
 }
@@ -142,23 +142,23 @@ env "local_postgresql_sign" {
 ###############################################################################
 
 # Admin environment - PostgreSQL Watch schema
-env "admin_postgresql_watch" {
+env "admin_postgres_watch" {
   url     = "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
-  src     = "file://schemas/watch.hcl"
+  src     = "file://schemas/postgres/watch.hcl"
   schemas = ["public"]
 }
 
 # Admin environment - PostgreSQL Keygen schema
-env "admin_postgresql_keygen" {
+env "admin_postgres_keygen" {
   url     = "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
-  src     = "file://schemas/keygen.hcl"
+  src     = "file://schemas/postgres/keygen.hcl"
   schemas = ["public"]
 }
 
 # Admin environment - PostgreSQL Sign schema
-env "admin_postgresql_sign" {
+env "admin_postgres_sign" {
   url     = "postgres://postgres:postgres@localhost:5432/?sslmode=disable"
-  src     = "file://schemas/sign.hcl"
+  src     = "file://schemas/postgres/sign.hcl"
   schemas = ["public"]
 }
 

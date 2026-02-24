@@ -145,9 +145,9 @@ type InsertBtcTxParams struct {
 	UnsignedHexTx     string
 	SignedHexTx       string
 	SentHashTx        string
-	TotalInputAmount  string
-	TotalOutputAmount string
-	Fee               string
+	TotalInputAmount  float64
+	TotalOutputAmount float64
+	Fee               float64
 	CurrentTxType     int64
 	UnsignedUpdatedAt sql.NullString
 	SentUpdatedAt     sql.NullString
@@ -183,9 +183,9 @@ type UpdateBtcTxParams struct {
 	UnsignedHexTx     string
 	SignedHexTx       string
 	SentHashTx        string
-	TotalInputAmount  string
-	TotalOutputAmount string
-	Fee               string
+	TotalInputAmount  float64
+	TotalOutputAmount float64
+	Fee               float64
 	CurrentTxType     int64
 	UnsignedUpdatedAt sql.NullString
 	SentUpdatedAt     sql.NullString

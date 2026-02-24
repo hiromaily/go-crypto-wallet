@@ -2,6 +2,8 @@
 
 This document describes the database architecture and operations for the go-crypto-wallet project.
 
+---
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -12,36 +14,57 @@ This document describes the database architecture and operations for the go-cryp
 - [Common Operations](#common-operations)
 - [Database Management](#database-management)
 - [Schema Migrations with Atlas](#schema-migrations-with-atlas)
+- [SQLC Code Generation](#sqlc-code-generation)
 - [SQLite for E2E Testing](#sqlite-for-e2e-testing)
 - [Troubleshooting](#troubleshooting)
 - [Migration Guide](#migration-guide)
 
+---
+
 ## Overview
 
-The project supports **two database backends**:
+The project supports **three database backends**:
 
-| Database | Use Case | Features |
-|----------|----------|----------|
-| **MySQL** | Production, full testing | Docker container, schema separation |
-| **SQLite** | E2E testing, CI/CD | Local file, fast startup, no Docker DB required |
+| Database | Version | Use Case | Features |
+|----------|---------|----------|----------|
+| **PostgreSQL** | 18.2 | Production (default) | Docker container, schema separation, `identity` columns |
+| **MySQL** | 8.4 | Production (alternative) | Docker container, schema separation, `auto_increment` |
+| **SQLite** | - | E2E testing, CI/CD | Local file, fast startup, no Docker required |
+
+All backends use **four separate databases/schemas** to manage wallet data:
+
+- **`watch`**: Online wallet data (addresses, transactions, payment requests)
+- **`keygen`**: Key generation data (seeds, account keys, full public keys)
+- **`sign`**: Signing wallet data (auth account keys, seeds)
+- **`sign2`**: Second signing wallet (same schema as `sign`, separate database)
+
+This approach provides:
+
+- Reduced resource usage (single DB instance per dialect)
+- Simplified deployment and maintenance
+- Data isolation through database/schema separation
+- Easier backup and restore operations
+- Single point of configuration
+
+---
 
 ## Supported Databases
 
-### MySQL (Production)
+### PostgreSQL (Production Default)
 
-The project uses a **single MySQL 8.4 container** with **three separate schemas** to manage wallet data:
+The project uses a **single PostgreSQL 18.2 container** with **four separate databases** (watch, keygen, sign, sign2). PostgreSQL uses named `enum` types, `identity` columns, `timestamptz`, and `bytea` for binary data.
 
-- **`watch` schema**: Online wallet data (addresses, transactions, payment requests)
-- **`keygen` schema**: Key generation data (seeds, account keys, full public keys)
-- **`sign` schema**: Signing wallet data (auth account keys, seeds)
+### MySQL (Production Alternative)
 
-This consolidated approach provides:
+The project uses a **single MySQL 8.4 container** with **four separate schemas** (watch, keygen, sign, sign2). MySQL uses inline `enum()`, `auto_increment`, `datetime`, and `blob` for binary data.
 
-- ✅ Reduced resource usage (single MySQL instance)
-- ✅ Simplified deployment and maintenance
-- ✅ Data isolation through schema separation
-- ✅ Easier backup and restore operations
-- ✅ Single point of configuration
+**Note**: MySQL 8.4 uses `caching_sha2_password` authentication by default, which requires SSL for local connections. Use `?tls=true` in connection strings.
+
+### SQLite (E2E Testing)
+
+SQLite provides a lightweight alternative for E2E testing without Docker. Uses `CHECK` constraints for enums, `INTEGER PRIMARY KEY` for auto-increment, and `TEXT` for timestamps.
+
+---
 
 ## Architecture
 
@@ -49,14 +72,27 @@ This consolidated approach provides:
 
 ```yaml
 services:
+  # PostgreSQL (default)
+  wallet-postgres:
+    image: postgres:18.2
+    profiles: ["postgres"]
+    ports:
+      - "${POSTGRESQL_PORT:-5432}:5432"
+    volumes:
+      - wallet-postgres:/var/lib/postgres
+      - "./docker/postgres/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  # MySQL (alternative)
   wallet-mysql:
     image: mysql:8.4
-    container_name: wallet-mysql
+    profiles: ["mysql"]
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - wallet-mysql:/var/lib/mysql
-      - "./docker/mysql/sqls:/sqls"
       - "./docker/mysql/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -65,63 +101,80 @@ services:
       MYSQL_PASSWORD: hiromaily
 ```
 
+Both services include health checks and are activated via Docker Compose profiles (`--profile postgres` or `--profile mysql`).
+
+### Migration Services
+
+Atlas migration services run automatically when databases start. Each schema has a dedicated migration service:
+
+```yaml
+# Example: PostgreSQL watch migration
+wallet-postgres-migrate-watch:
+  image: arigaio/atlas:1.1.0
+  profiles: ["postgres"]
+  command:
+    - migrate
+    - apply
+    - --dir
+    - "file://migrations/postgres/watch"
+    - --url
+    - "postgres://postgres:postgres@wallet-postgres:5432/watch?sslmode=disable"
+  depends_on:
+    wallet-postgres:
+      condition: service_healthy
+  restart: "no"
+```
+
+Migration services exist for: `watch`, `keygen`, `sign`, `sign2` (both MySQL and PostgreSQL).
+
 ### Directory Structure
 
 ```
-docker/mysql/
-├── archive/                     # Archived SQL schema files (reference only)
-│   ├── definition_watch.sql     # Original watch schema (archived)
-│   ├── definition_keygen.sql    # Original keygen schema (archived)
-│   ├── definition_sign.sql     # Original sign schema (archived)
-│   └── payment_request.sql     # Original payment request table (archived)
-├── conf.d/
-│   └── custom.cnf              # Server-level configuration
-├── init.d/
-│   └── 01_init_all_schemas.sql # Schema initialization (creates empty schemas)
-├── insert/
-│   └── ganache.example.sql     # Test data for Ganache
-└── scripts/
-    └── (utility scripts)
+docker/
+├── mysql/
+│   ├── archive/                       # Archived SQL schema files (reference only)
+│   ├── conf.d/
+│   │   └── custom.cnf                 # Server-level configuration (utf8mb4)
+│   ├── init.d/
+│   │   └── 01_init_all_schemas_2.sql  # Creates watch, keygen, sign, sign2 databases
+│   └── insert/
+│       └── ganache.example.sql        # Test data for Ganache
+├── postgres/
+│   └── init.d/
+│       └── 01_create_databases.sh     # Creates watch, keygen, sign, sign2 databases
 ```
 
-**Note:** Schema definitions are now managed by Atlas migrations in `tools/atlas/migrations/`. The archived SQL files are kept for reference only.
+**Note:** Schema definitions are managed by Atlas (HCL files in `tools/atlas/schemas/`). The init scripts only create empty databases.
 
 ### Initialization Process
 
 When the container starts for the first time:
 
-1. **User Creation**: MySQL creates users via environment variables
-   - `root@'%'` with password `root`
-   - `hiromaily@'%'` with password `hiromaily`
+1. **Database Creation**: Init scripts create four empty databases
 
-2. **Schema Creation**: Executes `01_init_all_schemas.sql` to create empty schemas
+   **PostgreSQL** (`01_create_databases.sh`):
 
    ```sql
-   -- Create watch schema (empty)
+   CREATE DATABASE watch;
+   CREATE DATABASE keygen;
+   CREATE DATABASE sign;
+   CREATE DATABASE sign2;
+   ```
+
+   **MySQL** (`01_init_all_schemas_2.sql`):
+
+   ```sql
    CREATE DATABASE `watch` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-   -- Create keygen schema (empty)
    CREATE DATABASE `keygen` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-   -- Create sign schema (empty)
    CREATE DATABASE `sign` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE DATABASE `sign2` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 
-3. **Configuration**: Applies server settings from `custom.cnf`
+2. **User/Permission Setup**: Grants privileges to application users
 
-   ```ini
-   [mysqld]
-   character-set-server=utf8mb4
-   collation-server=utf8mb4_unicode_ci
-   ```
+3. **Schema Migration**: Atlas migration services automatically apply migrations after the database is healthy
 
-4. **Schema Migration**: After the container starts, apply Atlas migrations
-
-   ```bash
-   make atlas-migrate-docker
-   ```
-
-   This will create all tables and apply schema definitions using Atlas migrations.
+---
 
 ## Schema Design
 
@@ -131,14 +184,18 @@ When the container starts for the first time:
 
 **Tables**:
 
-- `address` - Wallet addresses for all account types
-- `btc_tx` - Bitcoin/BCH transaction records
-- `btc_tx_input` - Bitcoin transaction inputs
-- `btc_tx_output` - Bitcoin transaction outputs
-- `eth_detail_tx` - Ethereum transaction details
-- `xrp_detail_tx` - XRP transaction details
-- `tx` - Generic transaction records
-- `payment_request` - Payment request queue
+| Table | Description |
+|-------|-------------|
+| `address` | Wallet addresses for all coin/account types (btc, bch, eth, xrp, hyt) |
+| `btc_tx` | Bitcoin/BCH transaction records |
+| `btc_tx_input` | Bitcoin transaction inputs (UTXOs) |
+| `btc_tx_output` | Bitcoin transaction outputs |
+| `tx` | Generic transaction records (ETH, XRP, HYT) |
+| `eth_detail_tx` | Ethereum transaction details |
+| `xrp_detail_tx` | XRP transaction details |
+| `xrp_pending_multisig` | Pending XRP multi-signature transactions awaiting signatures |
+| `xrp_multisig_signature` | Collected signatures for XRP multi-signature transactions |
+| `payment_request` | Payment request queue |
 
 **Access Pattern**: High read/write - monitors blockchain, creates transactions
 
@@ -148,140 +205,166 @@ When the container starts for the first time:
 
 **Tables**:
 
-- `account_key` - Generated account keys (HD wallet)
-- `auth_fullpubkey` - Full public keys for multisig authentication
-- `xrp_account_key` - XRP-specific account keys
-- `seed` - Encrypted seed phrases
+| Table | Description |
+|-------|-------------|
+| `seed` | Encrypted seed phrases (all coins) |
+| `btc_account_key` | BTC/BCH keys with multiple address formats (P2PKH, P2SH-SegWit, Bech32, Taproot) |
+| `eth_account_key` | Ethereum keys (address, public key, private key) |
+| `xrp_account_key` | XRP-specific account keys |
+| `auth_fullpubkey` | Full public keys for multisig authentication (with BIP32 extended key support) |
+| `xrp_signer_list` | XRP SignerList configuration for multi-signature accounts |
+| `xrp_signer_entry` | Individual signer entries within an XRP signer list |
+| `xrp_regular_key` | XRP regular key assignments for enhanced security |
+| `musig2_nonces` | MuSig2 nonce commitments (shared with sign schema) |
 
 **Access Pattern**: Write-heavy during key generation, read-only during export
 
 **Security**: This schema contains sensitive key material - should be in offline/cold storage in production
 
-### Sign Schema (`sign`)
+### Sign Schema (`sign` / `sign2`)
 
-**Purpose**: Stores signing wallet data for offline transaction signing.
+**Purpose**: Stores signing wallet data for offline transaction signing. `sign2` uses the same schema for a second signing wallet instance.
 
 **Tables**:
 
-- `auth_account_key` - Authentication account keys for signing
-- `seed` - Encrypted seed phrases for signing wallet
+| Table | Description |
+|-------|-------------|
+| `seed` | Encrypted seed phrases for signing wallet (BTC/BCH only) |
+| `auth_account_key` | Authentication account keys for signing (with multiple address formats) |
+| `musig2_nonces` | MuSig2 nonce commitments (shared with keygen schema) |
 
 **Access Pattern**: Read-only during signing operations
 
 **Security**: This schema contains sensitive signing keys - should be in offline/cold storage in production
 
+### Key Type Support
+
+The `btc_account_key` and `auth_account_key` tables support multiple key types:
+
+| Key Type | BIP Standard | Address Format |
+|----------|-------------|----------------|
+| `bip44` | BIP-44 | P2PKH (legacy) |
+| `bip49` | BIP-49 | P2SH-SegWit |
+| `bip84` | BIP-84 | Bech32 (native SegWit) |
+| `bip86` | BIP-86 | Taproot |
+| `musig2` | MuSig2 | Multi-signature |
+
+### Type Differences Across Dialects
+
+| Feature | PostgreSQL | MySQL | SQLite |
+|---------|-----------|-------|--------|
+| Auto-increment | `identity` | `auto_increment` | `INTEGER PRIMARY KEY` |
+| Numeric | `numeric(26,10)` | `decimal(26,10)` | `TEXT` |
+| Enums | Named types | Inline `enum()` | `CHECK` constraints |
+| Timestamps | `timestamptz` | `datetime` | `TEXT` |
+| Boolean | `boolean` | `bool` (tinyint) | `INTEGER` |
+| Binary | `bytea` | `blob` | `BLOB` |
+
+---
+
 ## Setup and Configuration
 
 ### Initial Setup
 
-1. **Start the database**:
+1. **Start the database** (choose one dialect):
 
    ```bash
-   docker compose up -d wallet-mysql
+   # PostgreSQL (default)
+   docker compose --profile postgres up -d
+
+   # MySQL
+   docker compose --profile mysql up -d
    ```
 
-2. **Wait for database to be ready** (about 30 seconds):
+2. **Migrations run automatically** via Atlas migration services. Wait for completion:
 
    ```bash
-   docker compose exec wallet-mysql mysqladmin ping -uroot -proot --silent
+   # PostgreSQL
+   docker compose wait wallet-postgres-migrate-watch wallet-postgres-migrate-keygen wallet-postgres-migrate-sign
+
+   # MySQL
+   docker compose wait wallet-mysql-migrate-watch wallet-mysql-migrate-keygen wallet-mysql-migrate-sign
    ```
 
-3. **Apply Atlas migrations**:
+3. **Verify databases and tables**:
 
    ```bash
-   make atlas-migrate-docker
+   # PostgreSQL
+   docker exec wallet-postgres psql -U postgres -c "\l"
+   docker exec wallet-postgres psql -U postgres -d watch -c "\dt"
+
+   # MySQL
+   docker exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
+   docker exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
    ```
-
-   This will create all tables and schema definitions.
-
-4. **Verify schemas and tables created**:
-
-   ```bash
-   docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
-   docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
-   ```
-
-   Expected output:
-
-   ```
-   Database
-   keygen
-   sign
-   watch
-   (plus system databases)
-   ```
-
-5. **Verify server configuration**:
-
-   ```bash
-   docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'character_set_server';"
-   docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'collation_server';"
-   ```
-
-   Expected: `utf8mb4` and `utf8mb4_unicode_ci`
 
 ### Application Configuration
 
-Each wallet type (watch, keygen, sign) connects to the same database host but specifies different schema names:
+Each wallet type connects to the same database host but specifies different database names. Configuration files support all three backends:
 
-**Watch Wallet** (`config/wallet/*_watch.toml`):
+**Example** (`config/wallet/btc/watch.yaml`):
 
-```toml
-[mysql]
-host = "127.0.0.1:3306"
-dbname = "watch"
-user = "hiromaily"
-pass = "hiromaily"
+```yaml
+database:
+  type: "sqlite"  # mysql, sqlite, postgres
+  mysql:
+    host: "127.0.0.1:3306"
+    dbname: "watch"
+    user: "hiromaily"
+    pass: "hiromaily"
+    debug: true
+  postgres:
+    host: "127.0.0.1"
+    port: 5432
+    dbname: "watch"
+    user: "postgres"
+    pass: "postgres"
+    sslmode: "disable"
+    debug: true
+  sqlite:
+    path: "./data/sqlite/btc/watch.db"
+    max_open_conns: 2  # Minimum 2 to prevent deadlock
+    debug: true
 ```
 
-**Keygen Wallet** (`config/wallet/*_keygen.toml`):
+**Connection details**:
 
-```toml
-[mysql]
-host = "127.0.0.1:3306"
-dbname = "keygen"
-user = "hiromaily"
-pass = "hiromaily"
-```
+| Dialect | Host | Port | User | Password |
+|---------|------|------|------|----------|
+| PostgreSQL | `127.0.0.1` | `5432` | `postgres` | `postgres` |
+| MySQL | `127.0.0.1` | `3306` | `hiromaily` | `hiromaily` |
+| SQLite | N/A | N/A | N/A | N/A |
 
-**Sign Wallet** (`config/wallet/*_sign.toml`):
-
-```toml
-[mysql]
-host = "127.0.0.1:3306"
-dbname = "sign"
-user = "hiromaily"
-pass = "hiromaily"
-```
+---
 
 ## Common Operations
 
 ### Database Access
 
-**Using Docker Exec**:
+**PostgreSQL**:
 
 ```bash
-# Access watch schema
-docker compose exec wallet-mysql mysql -uroot -proot watch
+# Access watch database
+docker exec -it wallet-postgres psql -U postgres -d watch
 
-# Access keygen schema
-docker compose exec wallet-mysql mysql -uroot -proot keygen
+# Access keygen database
+docker exec -it wallet-postgres psql -U postgres -d keygen
 
-# Access sign schema
-docker compose exec wallet-mysql mysql -uroot -proot sign
+# Access sign database
+docker exec -it wallet-postgres psql -U postgres -d sign
 ```
 
-**From Host Machine**:
+**MySQL**:
 
 ```bash
 # Access watch schema
-mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 watch
+docker exec -it wallet-mysql mysql -uroot -proot watch
 
 # Access keygen schema
-mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 keygen
+docker exec -it wallet-mysql mysql -uroot -proot keygen
 
 # Access sign schema
-mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 sign
+docker exec -it wallet-mysql mysql -uroot -proot sign
 ```
 
 ### Schema Export (Backup)
@@ -289,55 +372,37 @@ mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 sign
 Export schema structure without data:
 
 ```bash
-# Export watch schema
-make dump-schema-watch
-
-# Export keygen schema
-make dump-schema-keygen
-
-# Export sign schema
-make dump-schema-sign
-
-# Export all schemas
+# Export all schemas (uses DB_DIALECT, default: postgres)
 make dump-schema-all
+
+# Export for specific dialect
+make dump-schema-all DB_DIALECT=mysql
+make dump-schema-all DB_DIALECT=postgres
+
+# Export individual schemas
+make dump-schema-watch
+make dump-schema-keygen
+make dump-schema-sign
 ```
 
-Output location: `data/dump/sql/dump_*.sql`
+Output location: `data/dump/sql/dump_*.{dialect}.sql`
 
 ### Data Export (Full Backup)
 
-Export schema with data:
+**PostgreSQL**:
 
 ```bash
-# Backup watch schema
-docker compose exec wallet-mysql mysqldump -uroot -proot watch > backups/watch_$(date +%Y%m%d).sql
-
-# Backup keygen schema
-docker compose exec wallet-mysql mysqldump -uroot -proot keygen > backups/keygen_$(date +%Y%m%d).sql
-
-# Backup sign schema
-docker compose exec wallet-mysql mysqldump -uroot -proot sign > backups/sign_$(date +%Y%m%d).sql
-
-# Backup all schemas in one file
-docker compose exec wallet-mysql mysqldump -uroot -proot --databases watch keygen sign > backups/all_schemas_$(date +%Y%m%d).sql
+docker exec wallet-postgres pg_dump -U postgres watch > backups/watch_$(date +%Y%m%d).sql
+docker exec wallet-postgres pg_dump -U postgres keygen > backups/keygen_$(date +%Y%m%d).sql
+docker exec wallet-postgres pg_dump -U postgres sign > backups/sign_$(date +%Y%m%d).sql
 ```
 
-### Data Restore
-
-Restore from backup:
+**MySQL**:
 
 ```bash
-# Restore watch schema
-docker compose exec -T wallet-mysql mysql -uroot -proot watch < backups/watch_20241227.sql
-
-# Restore keygen schema
-docker compose exec -T wallet-mysql mysql -uroot -proot keygen < backups/keygen_20241227.sql
-
-# Restore sign schema
-docker compose exec -T wallet-mysql mysql -uroot -proot sign < backups/sign_20241227.sql
-
-# Restore all schemas
-docker compose exec -T wallet-mysql mysql -uroot -proot < backups/all_schemas_20241227.sql
+docker exec wallet-mysql mysqldump -uroot -proot watch > backups/watch_$(date +%Y%m%d).sql
+docker exec wallet-mysql mysqldump -uroot -proot keygen > backups/keygen_$(date +%Y%m%d).sql
+docker exec wallet-mysql mysqldump -uroot -proot sign > backups/sign_$(date +%Y%m%d).sql
 ```
 
 ### Reset Database
@@ -345,101 +410,53 @@ docker compose exec -T wallet-mysql mysql -uroot -proot < backups/all_schemas_20
 Complete database reset (WARNING: deletes all data):
 
 ```bash
-# Stop and remove container with volumes
-docker compose down -v
+# Reset specific dialect
+make reset-docker                    # PostgreSQL (default)
+make reset-docker DB_DIALECT=mysql   # MySQL
 
-# Restart - will reinitialize schemas
-docker compose up -d wallet-mysql
+# Remove all database containers
+make remove-all-dbs
 ```
 
-### Reset Individual Schema
-
-Reset specific schema while keeping others:
-
-```bash
-# Reset watch schema
-docker compose exec wallet-mysql mysql -uroot -proot -e "DROP DATABASE watch; CREATE DATABASE watch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-make atlas-migrate-docker  # This will apply migrations for all schemas
-
-# Reset keygen schema
-docker compose exec wallet-mysql mysql -uroot -proot -e "DROP DATABASE keygen; CREATE DATABASE keygen CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-make atlas-migrate-docker
-
-# Reset sign schema
-docker compose exec wallet-mysql mysql -uroot -proot -e "DROP DATABASE sign; CREATE DATABASE sign CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-make atlas-migrate-docker
-```
-
-**Note:** After dropping and recreating a schema, run `make atlas-migrate-docker` to apply migrations. This will only apply migrations to schemas that need them.
-
-### Reset Payment Request Table
-
-```bash
-# Drop and recreate the table using Atlas migration
-# Or manually:
-docker compose exec wallet-mysql mysql -uroot -proot watch -e "DROP TABLE IF EXISTS payment_request;"
-make atlas-migrate-docker
-```
-
-**Note:** The payment request table is now managed by Atlas migrations. See `tools/atlas/migrations/watch/` for the current schema definition.
+---
 
 ## Database Management
 
 ### View Schema Information
 
+**PostgreSQL**:
+
 ```bash
-# List all tables in watch schema
-docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
-
-# List all tables in keygen schema
-docker compose exec wallet-mysql mysql -uroot -proot keygen -e "SHOW TABLES;"
-
-# List all tables in sign schema
-docker compose exec wallet-mysql mysql -uroot -proot sign -e "SHOW TABLES;"
+# List all tables in watch database
+docker exec wallet-postgres psql -U postgres -d watch -c "\dt"
 
 # Describe a specific table
-docker compose exec wallet-mysql mysql -uroot -proot watch -e "DESCRIBE address;"
+docker exec wallet-postgres psql -U postgres -d watch -c "\d address"
 ```
 
-### Check Database Size
+**MySQL**:
 
 ```bash
-# Size of each schema
-docker compose exec wallet-mysql mysql -uroot -proot -e "
-SELECT
-  table_schema AS 'Schema',
-  ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Size (MB)'
-FROM information_schema.tables
-WHERE table_schema IN ('watch', 'keygen', 'sign')
-GROUP BY table_schema;"
-```
+# List all tables in watch schema
+docker exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
 
-### Monitor Active Connections
-
-```bash
-# Show active connections
-docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW PROCESSLIST;"
-
-# Show connections per schema
-docker compose exec wallet-mysql mysql -uroot -proot -e "
-SELECT db, COUNT(*) as connections
-FROM information_schema.processlist
-WHERE db IN ('watch', 'keygen', 'sign')
-GROUP BY db;"
+# Describe a specific table
+docker exec wallet-mysql mysql -uroot -proot watch -e "DESCRIBE address;"
 ```
 
 ### View Logs
 
 ```bash
-# View database container logs
+# PostgreSQL logs
+docker compose logs wallet-postgres
+docker compose logs -f wallet-postgres
+
+# MySQL logs
 docker compose logs wallet-mysql
-
-# Follow logs
 docker compose logs -f wallet-mysql
-
-# View last 100 lines
-docker compose logs --tail=100 wallet-mysql
 ```
+
+---
 
 ## Schema Migrations with Atlas
 
@@ -447,258 +464,247 @@ The project uses [Atlas](https://atlasgo.io/) for managing database schema migra
 
 ### Installation
 
-Install Atlas CLI using Homebrew (macOS):
-
 ```bash
+# Homebrew (macOS)
 brew install arigaio/tap/atlas
-```
 
-Alternatively, you can install using Go:
-
-```bash
+# Or via Go
 go install ariga.io/atlas/cmd/atlas@latest
-```
 
-Verify installation:
-
-```bash
+# Verify
 atlas version
 ```
 
 ### Migration Structure
 
-Atlas supports both HCL schema definitions and SQL migrations:
+Atlas uses HCL schema definitions as source of truth and generates SQL migration files:
 
 ```
 tools/atlas/
-├── atlas.hcl              # Atlas configuration
-├── schemas/               # HCL schema definitions (declarative)
-│   ├── watch.hcl          # Watch schema definition
-│   ├── keygen.hcl         # Keygen schema definition
-│   └── sign.hcl           # Sign schema definition
-├── migrations/            # SQL migration files (versioned)
-│   ├── watch/             # Watch schema migrations
-│   ├── keygen/            # Keygen schema migrations
-│   └── sign/              # Sign schema migrations
-└── README.md              # Detailed Atlas documentation
+├── atlas.hcl                          # Atlas configuration (environments for each dialect/schema)
+├── schemas/                           # HCL schema definitions (source of truth)
+│   ├── mysql/
+│   │   ├── watch.hcl
+│   │   ├── keygen.hcl
+│   │   └── sign.hcl
+│   └── postgres/
+│       ├── watch.hcl
+│       ├── keygen.hcl
+│       └── sign.hcl
+└── migrations/                        # Generated SQL migration files
+    ├── mysql/
+    │   ├── watch/                     # Watch schema migrations + atlas.sum
+    │   ├── keygen/                    # Keygen schema migrations + atlas.sum
+    │   └── sign/                      # Sign schema migrations + atlas.sum
+    └── postgres/
+        ├── watch/                     # Watch schema migrations + atlas.sum
+        ├── keygen/                    # Keygen schema migrations + atlas.sum
+        └── sign/                      # Sign schema migrations + atlas.sum
 ```
 
-### HCL Schema Management
+### Atlas Configuration
 
-The project uses HCL (HashiCorp Configuration Language) files for declarative schema management. HCL files define the desired state of the database schema.
+The `atlas.hcl` defines environments for each dialect/schema combination:
 
-#### Apply HCL Schema
-
-Apply HCL schema definitions directly to the database:
-
-```bash
-make atlas-schema-apply
+```hcl
+# Example: PostgreSQL watch environment
+env "local_postgres_watch" {
+  url     = "postgres://postgres:postgres@127.0.0.1:5432/watch?sslmode=disable"
+  src     = "file://schemas/postgres/watch.hcl"
+  schemas = ["public"]
+  migration {
+    dir = "file://migrations/postgres/watch"
+  }
+  dev = "docker://postgres/18/watch"
+}
 ```
 
-#### Show Schema Diff
+**Available environments**: `local_{mysql|postgres}_{watch|keygen|sign}`, `admin_{mysql|postgres}_{watch|keygen|sign}`
 
-Compare the current database state with HCL schema definition:
+**Features**:
 
-```bash
-make atlas-schema-diff SCHEMA=watch
-```
-
-#### Generate Migration from HCL Diff
-
-Generate a migration file based on the difference between database and HCL schema:
-
-```bash
-make atlas-schema-diff-migration SCHEMA=watch
-```
+- Destructive change protection (drop_schema, drop_table, drop_column)
+- Lint rules for naming conventions: `^[a-z][a-z0-9_]*$`
+- Dev databases for migration generation
 
 ### Common Operations
 
-#### Apply Migrations
-
-Apply all pending migrations for all schemas:
+#### Format and Lint
 
 ```bash
-# Local environment (requires Atlas CLI installed)
-make atlas-migrate
-
-# Docker environment (uses wallet-mysql-migrate service)
-make atlas-migrate-docker
+make atlas-fmt          # Format all HCL schema files
+make atlas-fmt-check    # Check formatting (CI mode)
+make atlas-lint         # Lint all schemas (both dialects)
+make atlas-validate     # Validate Atlas configuration
 ```
 
-The Docker environment uses a dedicated migration service (`wallet-mysql-migrate`) that runs Atlas in a container. This service:
-
-- Automatically waits for the database to be ready (health check)
-- Runs in the same network as the database
-- Has access to the `tools/atlas` directory via volume mount
-- Can be run manually: `docker compose run --rm wallet-mysql-migrate migrate apply --dir file://migrations/watch --url "mysql://root:root@wallet-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"`
-
-#### Check Migration Status
-
-View migration status for all schemas:
+#### Apply Schema Changes
 
 ```bash
-# Local environment
-make atlas-status
+# Apply HCL schema directly to database (all schemas)
+make atlas-schema-apply-all                     # PostgreSQL (default)
+make atlas-schema-apply-all DB_DIALECT=mysql     # MySQL
 
-# Docker environment
-make atlas-status-docker
+# Apply specific schema
+make atlas-schema-apply SCHEMA=watch
 ```
 
-This shows:
-
-- Applied migrations
-- Pending migrations
-- Migration history
-
-#### Rollback Migrations
-
-Rollback the last migration for a specific schema:
+#### Migration Management
 
 ```bash
-# Local environment
-make atlas-rollback SCHEMA=watch
-make atlas-rollback SCHEMA=keygen
-make atlas-rollback SCHEMA=sign
+# Check migration status
+make atlas-migrate-status                        # PostgreSQL (default)
+make atlas-migrate-status DB_DIALECT=mysql        # MySQL
 
-# Docker environment
-make atlas-rollback-docker SCHEMA=watch
-make atlas-rollback-docker SCHEMA=keygen
-make atlas-rollback-docker SCHEMA=sign
+# Apply all pending migrations
+make atlas-migrate-apply-all
+
+# Generate new migration from HCL diff
+make atlas-migrate-diff SCHEMA=watch NAME=add_new_table
+
+# Hash migration directory
+make atlas-migrate-hash-all
 ```
 
-#### Validate Migrations
-
-Validate all migration files before applying:
+#### Regenerate Migrations from Scratch
 
 ```bash
-# Local environment
-make atlas-validate
-
-# Docker environment
-make atlas-validate-docker
+# Regenerate migrations from HCL schemas
+make atlas-dev-reset                             # PostgreSQL (default)
+make atlas-dev-reset DB_DIALECT=mysql             # MySQL
 ```
 
-#### Create New Migration
-
-Create a new migration file:
+#### Clean and Recreate Databases
 
 ```bash
-# Local environment
-make atlas-new SCHEMA=watch NAME=add_new_table
-make atlas-new SCHEMA=keygen NAME=update_account_key
-make atlas-new SCHEMA=sign NAME=add_index
-
-# Docker environment
-make atlas-new-docker SCHEMA=watch NAME=add_new_table
-make atlas-new-docker SCHEMA=keygen NAME=update_account_key
-make atlas-new-docker SCHEMA=sign NAME=add_index
+# Drop all databases and recreate from HCL (WARNING: destructive)
+make atlas-dev-clean                             # PostgreSQL (default)
+make atlas-dev-clean DB_DIALECT=mysql             # MySQL
 ```
 
-### Migration History
+### Full Regeneration Workflow
 
-Atlas automatically creates a migration history table (`atlas_schema_migrations`) in each schema to track applied migrations. This table should not be modified manually.
+When HCL schemas change, regenerate everything:
 
-### Integration with Existing Setup
+```bash
+make regenerate-all-from-atlas                   # PostgreSQL (default)
+make regenerate-all-from-atlas DB_DIALECT=mysql   # MySQL
+```
 
-Atlas migrations work alongside the existing SQL files:
+This runs 5 steps:
 
-- **Legacy SQL files** (`docker/mysql/sqls/`): Preserved for reference and backward compatibility
-- **Atlas migrations** (`tools/atlas/migrations/`): Used for version-controlled schema changes
-
-For new schema changes:
-
-1. Create an Atlas migration instead of modifying SQL files directly
-2. Apply migrations using `make atlas-migrate`
-3. Update sqlc schema files if needed for code generation
+1. Regenerate Atlas migrations from HCL
+2. Restart Docker DB
+3. Wait for DB and migrations to complete
+4. Extract SQLC schemas from DB
+5. Generate SQLC Go code
 
 ### Best Practices
 
-1. **Always validate** migrations before applying:
-
-   ```bash
-   make atlas-validate
-   ```
-
-2. **Check status** before applying:
-
-   ```bash
-   make atlas-status
-   ```
-
-3. **Test migrations** on development database first
-
-4. **Never modify existing migration files** - create new migrations instead
-
-5. **Keep migrations small and focused** - one logical change per migration
-
-6. **Document complex migrations** with comments in SQL files
-
-### Troubleshooting Atlas
-
-#### Migration Fails
-
-1. Check error message for details
-2. Verify database connection
-3. Ensure schema exists
-4. Review migration file syntax
-
-#### Connection Issues
-
-1. Verify MySQL is running: `docker compose ps wallet-mysql`
-2. Check connection string in Makefile targets
-3. Verify credentials are correct
-
-#### Rollback Issues
-
-1. Check migration history: `make atlas-status`
-2. Verify migration file exists
-3. Check database connection
+1. **Always format and lint** before committing: `make atlas-fmt && make atlas-lint`
+2. **Check status** before applying: `make atlas-migrate-status`
+3. **Never modify existing migration files** - create new migrations instead
+4. **Keep migrations small and focused** - one logical change per migration
+5. **Test on development database first**
+6. **Update both MySQL and PostgreSQL HCL schemas** when making changes
 
 For more detailed information, see [Atlas README](../../tools/atlas/README.md).
 
+---
+
+## SQLC Code Generation
+
+The project uses [SQLC](https://sqlc.dev/) to generate type-safe Go code from SQL queries.
+
+### Configuration
+
+SQLC has separate configuration files per dialect:
+
+| Config File | Engine | Output |
+|-------------|--------|--------|
+| `tools/sqlc/sqlc_postgres.yml` | PostgreSQL | `internal/infrastructure/database/postgres/sqlcgen/` |
+| `tools/sqlc/sqlc_mysql.yml` | MySQL | `internal/infrastructure/database/mysql/sqlcgen/` |
+| `tools/sqlc/sqlc_sqlite.yml` | SQLite | `internal/infrastructure/database/sqlite/sqlcgen/` |
+
+### Structure
+
+```
+tools/sqlc/
+├── sqlc_postgres.yml             # PostgreSQL SQLC config
+├── sqlc_mysql.yml                # MySQL SQLC config
+├── sqlc_sqlite.yml               # SQLite SQLC config
+├── schemas/                      # Schema files (extracted from running DB)
+│   ├── postgres/*.sql
+│   ├── mysql/*.sql
+│   └── sqlite/*.sql
+└── queries/                      # SQL query files (20 per dialect)
+    ├── postgres/*.sql
+    └── mysql/*.sql
+```
+
+**Query files** (20 per dialect): `address`, `auth_account_key`, `auth_fullpubkey`, `btc_account_key`, `btc_tx`, `btc_tx_input`, `btc_tx_output`, `eth_account_key`, `eth_detail_tx`, `musig2_nonces`, `payment_request`, `seed`, `tx`, `xrp_account_key`, `xrp_detail_tx`, `xrp_multisig_signature`, `xrp_pending_multisig`, `xrp_regular_key`, `xrp_signer_entry`, `xrp_signer_list`
+
+### Common Operations
+
+```bash
+# Generate Go code
+make sqlc                          # PostgreSQL (default)
+make sqlc-mysql                    # MySQL
+make sqlc-sqlite                   # SQLite
+make sqlc-all                      # All dialects
+
+# Validate SQL queries
+make sqlc-compile                  # Check syntax (all dialects)
+make sqlc-vet                      # Vet for potential issues
+make sqlc-validate                 # Both compile and vet
+
+# Extract schema from running database
+make extract-sqlc-schema-all                     # PostgreSQL (default)
+make extract-sqlc-schema-all DB_DIALECT=mysql     # MySQL
+
+# Full regeneration (extract + generate)
+make regenerate-sqlc-from-current-db              # PostgreSQL (default)
+make regenerate-sqlc-from-current-db DB_DIALECT=mysql  # MySQL
+```
+
+### SQL Formatting
+
+```bash
+make sqlfluff-format    # Format all SQL query files
+make sqlfluff-lint      # Lint SQL query files
+make sqlfluff-fix       # Format and auto-fix SQL
+```
+
+---
+
 ## SQLite for E2E Testing
 
-SQLite provides a lightweight alternative for E2E testing without requiring Docker MySQL.
+SQLite provides a lightweight alternative for E2E testing without requiring Docker.
 
 ### Benefits
 
-- **Faster startup**: No Docker MySQL container needed
+- **Faster startup**: No Docker container needed
 - **Parallel testing**: Each test can use separate database files
 - **Lighter CI/CD**: Reduced infrastructure requirements
 - **Simpler debugging**: Direct file access
 
 ### Configuration
 
-#### Config Files
-
-All wallet config files support SQLite:
+All wallet config files support SQLite via the `database.type` field:
 
 ```yaml
 database:
-  type: "sqlite"  # mysql or sqlite
-  mysql:
-    host: "127.0.0.1:3306"
-    dbname: "watch"
+  type: "sqlite"
   sqlite:
-    path: "./data/sqlite/btc/e2e.db"
+    path: "./data/sqlite/btc/watch.db"
+    max_open_conns: 2  # Minimum 2 to prevent deadlock
     debug: true
-```
-
-#### Environment Variables
-
-Override database type via environment variables:
-
-```bash
-export WALLET_DATABASE_TYPE=sqlite
-export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
 ```
 
 ### E2E Script Usage
 
-E2E scripts support the `DB_TYPE` environment variable:
-
 ```bash
-# SQLite (default) - faster, no Docker MySQL
+# SQLite (default) - faster, no Docker
 make btc-e2e-reset P=1
 
 # MySQL - traditional Docker-based testing
@@ -716,36 +722,27 @@ tools/sqlc/schemas/sqlite/
 └── 03_sign.sql    # Sign wallet schema
 ```
 
-These schemas are converted from MySQL with the following changes:
+These schemas are converted from MySQL/PostgreSQL with the following changes:
 
-| MySQL | SQLite |
-|-------|--------|
-| `ENUM('a','b')` | `TEXT CHECK(col IN ('a','b'))` |
-| `AUTO_INCREMENT` | `AUTOINCREMENT` |
-| `TINYINT(1)` | `INTEGER` |
-| `DATETIME DEFAULT CURRENT_TIMESTAMP` | `TEXT DEFAULT CURRENT_TIMESTAMP` |
+| MySQL/PostgreSQL | SQLite |
+|-----------------|--------|
+| `ENUM('a','b')` / named enum | `TEXT CHECK(col IN ('a','b'))` |
+| `AUTO_INCREMENT` / `identity` | `AUTOINCREMENT` |
+| `TINYINT(1)` / `boolean` | `INTEGER` |
+| `DATETIME` / `timestamptz` | `TEXT DEFAULT CURRENT_TIMESTAMP` |
+| `BLOB` / `bytea` | `BLOB` |
 
 ### SQLite Data Location
-
-SQLite database files are stored in:
 
 ```
 data/sqlite/
 └── btc/
-    └── e2e.db  # Combined E2E test database
+    └── watch.db  # E2E test database
 ```
 
-**Note**: Database files are gitignored (see `.gitignore`: `data/sqlite/**/*.db`)
+**Note**: Database files are gitignored (`data/sqlite/**/*.db`)
 
-### SQLC Code Generation
-
-Generate SQLite-specific SQLC code:
-
-```bash
-make sqlc-sqlite
-```
-
-Generated files: `internal/infrastructure/database/sqlite/sqlcgen/`
+---
 
 ## Troubleshooting
 
@@ -754,7 +751,7 @@ Generated files: `internal/infrastructure/database/sqlite/sqlcgen/`
 **Check logs**:
 
 ```bash
-docker compose logs wallet-mysql
+docker compose logs wallet-postgres  # or wallet-mysql
 ```
 
 **Common issues**:
@@ -762,19 +759,18 @@ docker compose logs wallet-mysql
 1. Port already in use:
 
    ```bash
-   # Check what's using port 3306
-   lsof -i :3306
+   lsof -i :5432  # or :3306
 
    # Use different port
-   MYSQL_PORT=3307 docker compose up -d wallet-mysql
+   POSTGRESQL_PORT=5433 docker compose --profile postgres up -d
+   MYSQL_PORT=3307 docker compose --profile mysql up -d
    ```
 
 2. Volume permission issues:
 
    ```bash
-   # Remove and recreate volume
-   docker compose down -v
-   docker compose up -d wallet-mysql
+   docker compose --profile postgres down -v
+   docker compose --profile postgres up -d
    ```
 
 ### Cannot Connect to Database
@@ -782,74 +778,51 @@ docker compose logs wallet-mysql
 **Verify container is running**:
 
 ```bash
-docker compose ps wallet-mysql
+docker compose ps
 ```
 
-**Check container health**:
+**PostgreSQL**:
 
 ```bash
-docker compose exec wallet-mysql mysqladmin ping -uroot -proot
+docker exec wallet-postgres pg_isready -U postgres
+psql -h 127.0.0.1 -U postgres -d watch -c "SELECT 1;"
 ```
 
-**Verify users exist**:
+**MySQL**:
 
 ```bash
-docker compose exec wallet-mysql mysql -uroot -proot -e "SELECT User, Host FROM mysql.user WHERE User IN ('root', 'hiromaily');"
-```
-
-**Test connection from host**:
-
-```bash
-mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 -e "SELECT 1;"
+docker exec wallet-mysql mysqladmin ping -uroot -proot
+mysql -h 127.0.0.1 -u hiromaily -phiromaily -P 3306 watch -e "SELECT 1;"
 ```
 
 ### Schema Not Found
 
-**List existing schemas**:
-
 ```bash
-docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
+# PostgreSQL
+docker exec wallet-postgres psql -U postgres -c "\l"
+
+# MySQL
+docker exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
 ```
 
-**Reinitialize schemas**:
+### Migration Fails
+
+1. Check error message in migration service logs
+2. Verify database connection
+3. Ensure database exists
+4. Review migration file syntax
+5. Check migration status: `make atlas-migrate-status`
+
+### Character Set Issues (MySQL)
 
 ```bash
-docker compose exec wallet-mysql mysql -uroot -proot < docker/mysql/init.d/01_init_all_schemas.sql
+docker exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'character_set_server';"
+docker exec wallet-mysql mysql -uroot -proot -e "SHOW VARIABLES LIKE 'collation_server';"
 ```
 
-### Character Set Issues
+Expected: `utf8mb4` and `utf8mb4_unicode_ci`
 
-**Check current settings**:
-
-```bash
-docker compose exec wallet-mysql mysql -uroot -proot -e "
-SHOW VARIABLES LIKE 'character_set%';
-SHOW VARIABLES LIKE 'collation%';"
-```
-
-**Expected values**:
-
-- `character_set_server`: `utf8mb4`
-- `collation_server`: `utf8mb4_unicode_ci`
-
-**Fix**: Ensure `docker/mysql/conf.d/custom.cnf` is properly mounted and restart container.
-
-### Slow Queries
-
-**Enable slow query log**:
-
-```bash
-docker compose exec wallet-mysql mysql -uroot -proot -e "
-SET GLOBAL slow_query_log = 'ON';
-SET GLOBAL long_query_time = 2;
-SHOW VARIABLES LIKE 'slow_query%';"
-```
-
-**View slow query log**:
-
-```bash
-docker compose exec wallet-mysql cat /var/lib/mysql/slow-query.log
-```
+---
 
 ## Migration Guide
 
@@ -860,7 +833,6 @@ If migrating from the previous three-container setup (`watch-db`, `keygen-db`, `
 #### 1. Backup Existing Data
 
 ```bash
-# Backup from old containers
 docker compose exec watch-db mysqldump -uroot -proot watch > migration/watch_backup.sql
 docker compose exec keygen-db mysqldump -uroot -proot keygen > migration/keygen_backup.sql
 docker compose exec sign-db mysqldump -uroot -proot sign > migration/sign_backup.sql
@@ -868,17 +840,26 @@ docker compose exec sign-db mysqldump -uroot -proot sign > migration/sign_backup
 
 #### 2. Update Configuration
 
-All configuration files have been updated in the repository. If you have custom configs, update them:
-
 ```toml
 # Change from:
 host = "127.0.0.1:3307"  # or 3308, 3309
 
-# To:
+# To (MySQL):
 host = "127.0.0.1:3306"
+```
 
-# Keep dbname unchanged:
-dbname = "watch"  # or "keygen", "sign"
+Or switch to PostgreSQL:
+
+```yaml
+database:
+  type: "postgres"
+  postgres:
+    host: "127.0.0.1"
+    port: 5432
+    dbname: "watch"
+    user: "postgres"
+    pass: "postgres"
+    sslmode: "disable"
 ```
 
 #### 3. Stop Old Containers
@@ -891,41 +872,21 @@ docker compose rm -f watch-db keygen-db sign-db
 #### 4. Start New Container
 
 ```bash
-docker compose up -d wallet-mysql
+# PostgreSQL (recommended)
+docker compose --profile postgres up -d
+
+# Or MySQL
+docker compose --profile mysql up -d
 ```
 
 #### 5. Restore Data (Optional)
 
-If you need to restore your backed-up data:
-
 ```bash
-# Wait for container to initialize
-sleep 30
-
-# Restore each schema
-docker compose exec -T wallet-mysql mysql -uroot -proot watch < migration/watch_backup.sql
-docker compose exec -T wallet-mysql mysql -uroot -proot keygen < migration/keygen_backup.sql
-docker compose exec -T wallet-mysql mysql -uroot -proot sign < migration/sign_backup.sql
+# Wait for container and migrations
+docker compose wait wallet-postgres-migrate-watch wallet-postgres-migrate-keygen wallet-postgres-migrate-sign
 ```
 
-#### 6. Verify Migration
-
-```bash
-# Check schemas exist
-docker compose exec wallet-mysql mysql -uroot -proot -e "SHOW DATABASES;"
-
-# Check tables in each schema
-docker compose exec wallet-mysql mysql -uroot -proot watch -e "SHOW TABLES;"
-docker compose exec wallet-mysql mysql -uroot -proot keygen -e "SHOW TABLES;"
-docker compose exec wallet-mysql mysql -uroot -proot sign -e "SHOW TABLES;"
-
-# Verify data (example)
-docker compose exec wallet-mysql mysql -uroot -proot watch -e "SELECT COUNT(*) FROM address;"
-```
-
-#### 7. Cleanup Old Volumes (Optional)
-
-After verifying everything works:
+#### 6. Cleanup Old Volumes (Optional)
 
 ```bash
 docker volume rm go-crypto-wallet_watch-db
@@ -933,85 +894,13 @@ docker volume rm go-crypto-wallet_keygen-db
 docker volume rm go-crypto-wallet_sign-db
 ```
 
-## Best Practices
-
-### Security
-
-1. **Production Deployment**:
-   - Change default passwords immediately
-   - Use strong passwords for `root` and `hiromaily` users
-   - Limit remote access (use `localhost` instead of `%` for Host)
-   - Enable SSL/TLS for connections
-   - Store `keygen` and `sign` schemas in offline/cold storage
-
-2. **Secrets Management**:
-   - Never commit passwords to version control
-   - Use environment variables or secrets management tools
-   - Rotate passwords regularly
-
-### Backup Strategy
-
-1. **Automated Backups**:
-
-   ```bash
-   # Daily backup script example
-   #!/bin/bash
-   BACKUP_DIR="/path/to/backups"
-   DATE=$(date +%Y%m%d_%H%M%S)
-
-   docker compose exec wallet-mysql mysqldump -uroot -proot \
-     --single-transaction \
-     --databases watch keygen sign \
-     > "$BACKUP_DIR/wallet_backup_$DATE.sql"
-
-   # Keep only last 30 days
-   find "$BACKUP_DIR" -name "wallet_backup_*.sql" -mtime +30 -delete
-   ```
-
-2. **Backup Frequency**:
-   - **watch schema**: Daily or more frequent (active transaction data)
-   - **keygen schema**: After key generation operations
-   - **sign schema**: After key import operations
-
-3. **Off-site Backups**:
-   - Store backups in multiple locations
-   - Encrypt backups containing sensitive data (keygen, sign)
-
-### Performance Optimization
-
-1. **Connection Pooling**: Applications should use connection pooling
-
-2. **Indexes**: Verify indexes exist for frequently queried columns
-
-3. **Query Optimization**: Use `EXPLAIN` to analyze slow queries
-
-4. **Resource Limits**: Adjust MySQL configuration for your workload
-
-   ```ini
-   # Example additional settings in custom.cnf
-   [mysqld]
-   max_connections = 100
-   innodb_buffer_pool_size = 256M
-   ```
-
-### Monitoring
-
-1. **Health Checks**: Container includes health check via `mysqladmin ping`
-
-2. **Metrics**: Consider integrating with monitoring tools:
-   - Prometheus + MySQL Exporter
-   - Grafana dashboards
-   - CloudWatch (AWS)
-
-3. **Alerts**: Set up alerts for:
-   - Database connection failures
-   - Disk space usage
-   - Slow queries
-   - Replication lag (if using replication)
+---
 
 ## References
 
+- [PostgreSQL 18 Documentation](https://www.postgresql.org/docs/18/)
 - [MySQL 8.4 Documentation](https://dev.mysql.com/doc/refman/8.4/en/)
+- [Atlas Documentation](https://atlasgo.io/docs)
+- [SQLC Documentation](https://docs.sqlc.dev/)
+- [Atlas README](../../tools/atlas/README.md)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [Project Installation Guide](../Installation.md)
-- [Issue #87: Database Consolidation](../issues/database_consolidation.md)

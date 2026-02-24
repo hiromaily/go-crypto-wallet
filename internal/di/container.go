@@ -36,8 +36,10 @@ import (
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
+	coldpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/postgres"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
 	watchmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mysql"
+	watchpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/postgres"
 	watchsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/sqlite"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/descriptor"
@@ -558,6 +560,11 @@ func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
 			c.pkgContainer.NewDatabaseClient(),
 			c.conf.CoinTypeCode,
 		)
+	case "postgres":
+		return watchpostgres.NewBTCTxRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+			c.conf.CoinTypeCode,
+		)
 	case "sqlite":
 		return watchsqlite.NewBTCTxRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -573,6 +580,11 @@ func (c *container) newBTCTxInputRepo() repowatch.TxInputRepositorier {
 	case "mysql":
 		return watchmysql.NewBTCTxInputRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "postgres":
+		return watchpostgres.NewBTCTxInputRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
 			c.conf.CoinTypeCode,
 		)
 	case "sqlite":
@@ -592,6 +604,11 @@ func (c *container) newBTCTxOutputRepo() repowatch.TxOutputRepositorier {
 			c.pkgContainer.NewDatabaseClient(),
 			c.conf.CoinTypeCode,
 		)
+	case "postgres":
+		return watchpostgres.NewBTCTxOutputRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+			c.conf.CoinTypeCode,
+		)
 	case "sqlite":
 		return watchsqlite.NewBTCTxOutputRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -607,6 +624,11 @@ func (c *container) newTxRepo() repowatch.TxRepositorier {
 	case "mysql":
 		return watchmysql.NewTxRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "postgres":
+		return watchpostgres.NewTxRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
 			c.conf.CoinTypeCode,
 		)
 	case "sqlite":
@@ -626,6 +648,11 @@ func (c *container) newETHTxDetailRepo() repowatch.ETHDetailTXRepositorier {
 			c.pkgContainer.NewDatabaseClient(),
 			c.conf.CoinTypeCode,
 		)
+	case "postgres":
+		return watchpostgres.NewETHDetailTXInputRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+			c.conf.CoinTypeCode,
+		)
 	case "sqlite":
 		return watchsqlite.NewETHDetailTXInputRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -643,6 +670,11 @@ func (c *container) newXRPTxDetailRepo() repowatch.XRPDetailTXRepositorier {
 			c.pkgContainer.NewDatabaseClient(),
 			c.conf.CoinTypeCode,
 		)
+	case "postgres":
+		return watchpostgres.NewXRPDetailTxInputRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+			c.conf.CoinTypeCode,
+		)
 	case "sqlite":
 		return watchsqlite.NewXRPDetailTxInputRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -657,6 +689,8 @@ func (c *container) newXRPSignerListRepo() repocold.XRPSignerListRepositorier {
 	switch c.conf.Database.Type {
 	case "mysql":
 		return coldmysql.NewXRPSignerListRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "postgres":
+		return coldpostgres.NewXRPSignerListRepositorySqlc(c.pkgContainer.NewPostgresClient())
 	case "sqlite":
 		panic("XRP signer list repository not implemented for sqlite")
 	default:
@@ -668,6 +702,8 @@ func (c *container) newXRPSignerEntryRepo() repocold.XRPSignerEntryRepositorier 
 	switch c.conf.Database.Type {
 	case "mysql":
 		return coldmysql.NewXRPSignerEntryRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "postgres":
+		return coldpostgres.NewXRPSignerEntryRepositorySqlc(c.pkgContainer.NewPostgresClient())
 	case "sqlite":
 		panic("XRP signer entry repository not implemented for sqlite")
 	default:
@@ -679,6 +715,8 @@ func (c *container) newXRPRegularKeyRepo() repocold.XRPRegularKeyRepositorier {
 	switch c.conf.Database.Type {
 	case "mysql":
 		return coldmysql.NewXRPRegularKeyRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "postgres":
+		return coldpostgres.NewXRPRegularKeyRepositorySqlc(c.pkgContainer.NewPostgresClient())
 	case "sqlite":
 		panic("XRP regular key repository not implemented for sqlite")
 	default:
@@ -690,6 +728,8 @@ func (c *container) newXRPPendingMultisigRepo() repowatch.XRPPendingMultisigRepo
 	switch c.conf.Database.Type {
 	case "mysql":
 		return watchmysql.NewXRPPendingMultisigRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "postgres":
+		return watchpostgres.NewXRPPendingMultisigRepositorySqlc(c.pkgContainer.NewPostgresClient())
 	case "sqlite":
 		panic("XRP pending multisig repository not implemented for sqlite")
 	default:
@@ -701,6 +741,8 @@ func (c *container) newXRPMultisigSignatureRepo() repowatch.XRPMultisigSignature
 	switch c.conf.Database.Type {
 	case "mysql":
 		return watchmysql.NewXRPMultisigSignatureRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "postgres":
+		return watchpostgres.NewXRPMultisigSignatureRepositorySqlc(c.pkgContainer.NewPostgresClient())
 	case "sqlite":
 		panic("XRP multisig signature repository not implemented for sqlite")
 	default:
@@ -713,6 +755,11 @@ func (c *container) newPaymentRequestRepo() repowatch.PaymentRequestRepositorier
 	case "mysql":
 		return watchmysql.NewPaymentRequestRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "postgres":
+		return watchpostgres.NewPaymentRequestRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
 			c.conf.CoinTypeCode,
 		)
 	case "sqlite":
@@ -730,6 +777,11 @@ func (c *container) newAddressRepo() repowatch.AddressRepositorier {
 	case "mysql":
 		return watchmysql.NewAddressRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "postgres":
+		return watchpostgres.NewAddressRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
 			c.conf.CoinTypeCode,
 		)
 	case "sqlite":
@@ -773,9 +825,16 @@ func (c *container) newPaymentAccount() domainAccount.AccountType {
 }
 
 func (c *container) newHdWalletRepo() repocold.HDWalletRepo {
-	return coldmysql.NewAccountHDWalletRepo(
-		c.newAccountKeyRepo(),
-	)
+	switch c.conf.Database.Type {
+	case "postgres":
+		return coldpostgres.NewAccountHDWalletRepo(
+			c.newAccountKeyRepo(),
+		)
+	default:
+		return coldmysql.NewAccountHDWalletRepo(
+			c.newAccountKeyRepo(),
+		)
+	}
 }
 
 func (c *container) newKeyGenerator() portsWallet.Generator {
@@ -841,6 +900,11 @@ func (c *container) newSeedRepo() repocold.SeedRepositorier {
 			c.pkgContainer.NewDatabaseClient(),
 			c.conf.CoinTypeCode,
 		)
+	case "postgres":
+		return coldpostgres.NewSeedRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+			c.conf.CoinTypeCode,
+		)
 	case "sqlite":
 		return coldsqlite.NewSeedRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -856,6 +920,11 @@ func (c *container) newAccountKeyRepo() repocold.BTCAccountKeyRepositorier {
 	case "mysql":
 		return coldmysql.NewBTCAccountKeyRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "postgres":
+		return coldpostgres.NewBTCAccountKeyRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
 			c.conf.CoinTypeCode,
 		)
 	case "sqlite":
@@ -875,6 +944,11 @@ func (c *container) newXRPAccountKeyRepo() repocold.XRPAccountKeyRepositorier {
 			c.pkgContainer.NewDatabaseClient(),
 			c.conf.CoinTypeCode,
 		)
+	case "postgres":
+		return coldpostgres.NewXRPAccountKeyRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+			c.conf.CoinTypeCode,
+		)
 	case "sqlite":
 		return coldsqlite.NewXRPAccountKeyRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -891,6 +965,10 @@ func (c *container) newEthAccountKeyRepo() repocold.ETHAccountKeyRepositorier {
 		return coldmysql.NewETHAccountKeyRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
 		)
+	case "postgres":
+		return coldpostgres.NewETHAccountKeyRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+		)
 	case "sqlite":
 		return coldsqlite.NewETHAccountKeyRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -905,6 +983,11 @@ func (c *container) newAuthFullPubKeyRepo() repocold.AuthFullPubkeyRepositorier 
 	case "mysql":
 		return coldmysql.NewAuthFullPubkeyRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "postgres":
+		return coldpostgres.NewAuthFullPubkeyRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
 			c.conf.CoinTypeCode,
 		)
 	case "sqlite":
@@ -924,6 +1007,11 @@ func (c *container) newAuthKeyRepo() repocold.AuthAccountKeyRepositorier {
 			c.pkgContainer.NewDatabaseClient(),
 			c.conf.CoinTypeCode,
 		)
+	case "postgres":
+		return coldpostgres.NewAuthAccountKeyRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
+			c.conf.CoinTypeCode,
+		)
 	case "sqlite":
 		return coldsqlite.NewAuthAccountKeyRepositorySqlc(
 			c.pkgContainer.NewSQLiteClient(),
@@ -939,6 +1027,10 @@ func (c *container) newNonceRepo() multisig.NonceRepository {
 	case "mysql":
 		return coldmysql.NewNonceRepositorySqlc(
 			c.pkgContainer.NewDatabaseClient(),
+		)
+	case "postgres":
+		return coldpostgres.NewNonceRepositorySqlc(
+			c.pkgContainer.NewPostgresClient(),
 		)
 	case "sqlite":
 		return coldsqlite.NewNonceRepositorySqlc(
@@ -968,10 +1060,18 @@ func (*container) newDescriptorFileWriter() file.DescriptorFileWriter {
 //
 
 func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) repocold.HDWalletRepo {
-	return coldmysql.NewAuthHDWalletRepo(
-		c.newAuthKeyRepo(),
-		authType,
-	)
+	switch c.conf.Database.Type {
+	case "postgres":
+		return coldpostgres.NewAuthHDWalletRepo(
+			c.newAuthKeyRepo(),
+			authType,
+		)
+	default:
+		return coldmysql.NewAuthHDWalletRepo(
+			c.newAuthKeyRepo(),
+			authType,
+		)
+	}
 }
 
 //

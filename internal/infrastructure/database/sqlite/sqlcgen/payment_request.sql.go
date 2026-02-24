@@ -111,7 +111,7 @@ type InsertPaymentRequestParams struct {
 	SenderAddress   string
 	SenderAccount   string
 	ReceiverAddress string
-	Amount          string
+	Amount          float64
 	IsDone          int64
 	UpdatedAt       sql.NullString
 }

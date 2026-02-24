@@ -25,9 +25,29 @@ type GetAuthAccountKeyParams struct {
 	AuthAccount string
 }
 
-func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyParams) (AuthAccountKey, error) {
+type GetAuthAccountKeyRow struct {
+	ID                     int64
+	Coin                   string
+	KeyType                string
+	AuthAccount            string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int64
+	UpdatedAt              sql.NullString
+}
+
+func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyParams) (GetAuthAccountKeyRow, error) {
 	row := q.db.QueryRowContext(ctx, getAuthAccountKey, arg.Coin, arg.AuthAccount)
-	var i AuthAccountKey
+	var i GetAuthAccountKeyRow
 	err := row.Scan(
 		&i.ID,
 		&i.Coin,
@@ -66,9 +86,29 @@ type GetAuthAccountKeyByAccountParams struct {
 	Account     string
 }
 
-func (q *Queries) GetAuthAccountKeyByAccount(ctx context.Context, arg GetAuthAccountKeyByAccountParams) (AuthAccountKey, error) {
+type GetAuthAccountKeyByAccountRow struct {
+	ID                     int64
+	Coin                   string
+	KeyType                string
+	AuthAccount            string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int64
+	UpdatedAt              sql.NullString
+}
+
+func (q *Queries) GetAuthAccountKeyByAccount(ctx context.Context, arg GetAuthAccountKeyByAccountParams) (GetAuthAccountKeyByAccountRow, error) {
 	row := q.db.QueryRowContext(ctx, getAuthAccountKeyByAccount, arg.Coin, arg.AuthAccount, arg.Account)
-	var i AuthAccountKey
+	var i GetAuthAccountKeyByAccountRow
 	err := row.Scan(
 		&i.ID,
 		&i.Coin,
@@ -104,9 +144,9 @@ type InsertAuthAccountKeyParams struct {
 	AuthAccount            string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      interface{}
-	Bech32Address          interface{}
-	TaprootAddress         interface{}
+	P2shSegwitAddress      sql.NullString
+	Bech32Address          sql.NullString
+	TaprootAddress         sql.NullString
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string

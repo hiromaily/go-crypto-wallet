@@ -1,3 +1,10 @@
+# [reset]
+# docker compose down -v
+# [mysql]
+#	docker compose --profile mysql up
+# [postgres]
+#	docker compose --profile postgres up
+
 volumes:
   wallet-mysql: {}
   wallet-postgres: {}
@@ -49,7 +56,34 @@ x-mysql-migration-base: &mysql-migration-base
 
 services:
   #########################################################################
-  # Database
+  # PostgreSQL Database
+  #########################################################################
+  wallet-postgres:
+    image: postgres:18.2
+    profiles: ["postgres"]
+    container_name: wallet-postgres
+    volumes:
+      # IMPORTANT: PostgreSQL 18+ uses version-specific subdirectories under /var/lib/postgresql
+      # (e.g., /var/lib/postgresql/18/main). Do NOT use /var/lib/postgresql/data here.
+      # See: https://github.com/docker-library/postgres/pull/1259
+      - wallet-postgres:/var/lib/postgresql
+      - "./docker/postgres/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${POSTGRESQL_PORT:-5432}:5432"
+    networks:
+      - db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  #########################################################################
+  # MySQL Database
   #########################################################################
   # Consolidated wallet database with schema separation
   #
@@ -86,28 +120,54 @@ services:
       start_period: 30s
 
   #########################################################################
-  # PostgreSQL Database
+  # PostgreSQL Migration (Atlas)
   #########################################################################
-  wallet-postgres:
-    image: postgres:18.2
-    profiles: ["postgres"]
-    container_name: wallet-postgres
-    volumes:
-      - wallet-postgres:/var/lib/postgresql/data
-      - "./docker/postgresql/init.d:/docker-entrypoint-initdb.d"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "${POSTGRESQL_PORT:-5432}:5432"
-    networks:
-      - db
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+  # PostgreSQL migration services - same pattern as MySQL but for PostgreSQL
+  # Activated with `docker compose --profile postgres up`
+
+  wallet-postgres-migrate-watch:
+    !!merge <<: *postgres-migration-base
+    container_name: wallet-postgres-migrate-watch
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgres/watch"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/watch?sslmode=disable"
+
+  wallet-postgres-migrate-keygen:
+    !!merge <<: *postgres-migration-base
+    container_name: wallet-postgres-migrate-keygen
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgres/keygen"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/keygen?sslmode=disable"
+
+  wallet-postgres-migrate-sign:
+    !!merge <<: *postgres-migration-base
+    container_name: wallet-postgres-migrate-sign
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgres/sign"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/sign?sslmode=disable"
+
+  wallet-postgres-migrate-sign2:
+    !!merge <<: *postgres-migration-base
+    container_name: wallet-postgres-migrate-sign2
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgres/sign"
+      - --url
+      - "postgres://postgres:postgres@wallet-postgres:5432/sign2?sslmode=disable"
 
   #########################################################################
   # Database Migration (Atlas)
@@ -180,53 +240,3 @@ services:
       - file://migrations/mysql/sign
       - --url
       - "mysql://root:root@wallet-mysql:3306/sign2?charset=utf8mb4&parseTime=True&loc=Local"
-
-  #########################################################################
-  # PostgreSQL Migration (Atlas)
-  #########################################################################
-  # PostgreSQL migration services - same pattern as MySQL but for PostgreSQL
-  # Activated with `docker compose --profile postgres up`
-
-  wallet-postgres-migrate-watch:
-    !!merge <<: *postgres-migration-base
-    container_name: wallet-postgres-migrate-watch
-    command:
-      - migrate
-      - apply
-      - --dir
-      - "file://migrations/postgresql/watch"
-      - --url
-      - "postgres://postgres:postgres@wallet-postgres:5432/watch?sslmode=disable"
-
-  wallet-postgres-migrate-keygen:
-    !!merge <<: *postgres-migration-base
-    container_name: wallet-postgres-migrate-keygen
-    command:
-      - migrate
-      - apply
-      - --dir
-      - "file://migrations/postgresql/keygen"
-      - --url
-      - "postgres://postgres:postgres@wallet-postgres:5432/keygen?sslmode=disable"
-
-  wallet-postgres-migrate-sign:
-    !!merge <<: *postgres-migration-base
-    container_name: wallet-postgres-migrate-sign
-    command:
-      - migrate
-      - apply
-      - --dir
-      - "file://migrations/postgresql/sign"
-      - --url
-      - "postgres://postgres:postgres@wallet-postgres:5432/sign?sslmode=disable"
-
-  wallet-postgres-migrate-sign2:
-    !!merge <<: *postgres-migration-base
-    container_name: wallet-postgres-migrate-sign2
-    command:
-      - migrate
-      - apply
-      - --dir
-      - "file://migrations/postgresql/sign"
-      - --url
-      - "postgres://postgres:postgres@wallet-postgres:5432/sign2?sslmode=disable"

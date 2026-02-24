@@ -50,7 +50,7 @@ The project supports three database backends:
 
 ```toml
 [database]
-type = "mysql"  # or "sqlite" or "postgresql" (coming soon)
+type = "mysql"  # or "sqlite" or "postgres" (coming soon)
 ```
 
 ## Quick Reference
@@ -66,7 +66,7 @@ type = "mysql"  # or "sqlite" or "postgresql" (coming soon)
 | Apply migrations (Docker) | `make atlas-migrate-docker` |
 | Generate MySQL sqlc code | `make sqlc` |
 | Generate SQLite sqlc code | `make sqlc-sqlite` |
-| Generate PostgreSQL sqlc code | `make sqlc-postgresql` |
+| Generate PostgreSQL sqlc code | `make sqlc-postgres` |
 | Generate all sqlc code | `make sqlc-all` |
 | Verify build | `make check-build` |
 
@@ -90,14 +90,14 @@ tools/sqlc/
 │   │   ├── address.sql
 │   │   ├── btc_tx.sql
 │   │   └── ...
-│   └── postgresql/             # SQL queries - PostgreSQL ($1,$2 placeholders)
+│   └── postgres/             # SQL queries - PostgreSQL ($1,$2 placeholders)
 │       └── ...
 ├── schemas/
 │   ├── mysql/                  # MySQL schema files (extracted from DB)
 │   │   ├── 01_watch.sql
 │   │   ├── 02_keygen.sql
 │   │   └── 03_sign.sql
-│   ├── postgresql/             # PostgreSQL schema files (extracted from DB)
+│   ├── postgres/             # PostgreSQL schema files (extracted from DB)
 │   │   ├── 01_watch.sql
 │   │   ├── 02_keygen.sql
 │   │   └── 03_sign.sql
@@ -107,7 +107,7 @@ tools/sqlc/
 │       └── 03_sign.sql
 ├── sqlc.yml                   # MySQL sqlc config
 ├── sqlc_sqlite.yml            # SQLite sqlc config
-└── sqlc_postgresql.yml        # PostgreSQL sqlc config
+└── sqlc_postgres.yml        # PostgreSQL sqlc config
 ```
 
 ## Step-by-Step Workflow
@@ -118,7 +118,7 @@ tools/sqlc/
 
 #### Step 1: Modify HCL Schema
 
-Edit `tools/atlas/schemas/watch.hcl`:
+Edit `tools/atlas/schemas/{db_dialect}/watch.hcl`:
 
 ```hcl
 table "address" {
@@ -232,14 +232,14 @@ make sqlc
 make sqlc-sqlite
 
 # Generate for PostgreSQL
-make sqlc-postgresql
+make sqlc-postgres
 ```
 
 **Generated files**:
 
 - `internal/infrastructure/database/mysql/sqlcgen/*.go`
 - `internal/infrastructure/database/sqlite/sqlcgen/*.go`
-- (Future) `internal/infrastructure/database/postgresql/sqlcgen/*.go`
+- (Future) `internal/infrastructure/database/postgres/sqlcgen/*.go`
 
 #### Step 7: Update Queries (if needed)
 
@@ -302,7 +302,7 @@ make btc-e2e-reset P=1
 
 #### Step 1: Add Table Definition to HCL
 
-Edit `tools/atlas/schemas/watch.hcl`:
+Edit `tools/atlas/schemas/{db_dialect}/watch.hcl`:
 
 ```hcl
 table "audit_log" {
@@ -375,7 +375,7 @@ Follow Steps 2-10 from Scenario 1.
 
 #### Step 1: Modify HCL Schema
 
-Edit `tools/atlas/schemas/watch.hcl`:
+Edit `tools/atlas/schemas/{db_dialect}/watch.hcl`:
 
 ```hcl
 table "address" {
@@ -470,14 +470,14 @@ internal/infrastructure/repository/
 │   │   ├── address_sqlc.go
 │   │   ├── btc_tx_sqlc.go
 │   │   └── ...
-│   └── postgresql/           # Coming soon
+│   └── postgres/           # Coming soon
 │       ├── address_sqlc.go
 │       ├── btc_tx_sqlc.go
 │       └── ...
 └── cold/
     ├── mysql/
     ├── sqlite/
-    └── postgresql/           # Coming soon
+    └── postgres/           # Coming soon
 ```
 
 **DI Container** switches implementation based on `database.type`:
@@ -490,8 +490,8 @@ func (c *Container) CreateAddressRepository() repository.AddressRepository {
         return mysql.NewAddressRepositorySqlc(c.mysqlDB, c.coinTypeCode)
     case "sqlite":
         return sqlite.NewAddressRepositorySqlc(c.sqliteDB, c.coinTypeCode)
-    case "postgresql":
-        return postgresql.NewAddressRepositorySqlc(c.postgresDB, c.coinTypeCode)
+    case "postgres":
+        return postgres.NewAddressRepositorySqlc(c.postgresDB, c.coinTypeCode)
     default:
         panic("unsupported database type")
     }
@@ -943,7 +943,7 @@ Update these files when schema changes:
 - [SQLC Documentation](https://sqlc.dev/)
 - [Database Architecture](../development/database.md)
 - [Code Generation Guidelines](code-generation.md)
-- [PostgreSQL Integration Spec](.kiro/specs/postgresql-integration/)
+- [PostgreSQL Integration Spec](.kiro/specs/postgres-integration/)
 
 ---
 

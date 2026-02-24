@@ -42,7 +42,7 @@ export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
 
 **🚀 Quick Workflow**:
 
-1. Edit HCL schema (`tools/atlas/schemas/*.hcl`)
+1. Edit HCL schema (`tools/atlas/schemas/{db_dialect}/*.hcl`)
 2. Format and lint (`make atlas-fmt && make atlas-lint`)
 3. Regenerate migrations (`make atlas-dev-reset`)
 4. Apply to database (`docker compose down -v && docker compose --profile mysql up`)
@@ -56,9 +56,9 @@ export WALLET_DATABASE_SQLITE_PATH=./data/sqlite/btc/e2e.db
 
 There are 3 HCL schema files corresponding to each wallet type:
 
-- `tools/atlas/schemas/watch.hcl` - Watch wallet schema (online wallet)
-- `tools/atlas/schemas/keygen.hcl` - Keygen wallet schema (offline, key generation)
-- `tools/atlas/schemas/sign.hcl` - Sign wallet schema (offline, signing)
+- `tools/atlas/schemas/{db_dialect}/watch.hcl` - Watch wallet schema (online wallet)
+- `tools/atlas/schemas/{db_dialect}/keygen.hcl` - Keygen wallet schema (offline, key generation)
+- `tools/atlas/schemas/{db_dialect}/sign.hcl` - Sign wallet schema (offline, signing)
 
 **CRITICAL**: These HCL files are the **single source of truth**. Never edit migration SQL files or generated code directly.
 
@@ -92,7 +92,7 @@ See [Database Schema Changes Guide](schema-changes.md) for complete mapping tabl
 ## Database Migrations (Atlas)
 
 **Tool**: [Atlas](https://atlasgo.io/)
-**Source**: `tools/atlas/schemas/*.hcl` (HCL schema files)
+**Source**: `tools/atlas/schemas/{db_dialect}/*.hcl` (HCL schema files)
 **Command**: `make atlas-dev-reset` (regenerate from scratch)
 
 **Generated Files**:
@@ -112,16 +112,16 @@ See [Database Schema Changes Guide](schema-changes.md) for complete mapping tabl
 
 **Generated Files**:
 
-- `tools/sqlc/schemas/mysql/01_watch.sql` - Watch schema for SQLC
-- `tools/sqlc/schemas/mysql/02_keygen.sql` - Keygen schema for SQLC
-- `tools/sqlc/schemas/mysql/03_sign.sql` - Sign schema for SQLC
+- `tools/sqlc/schemas/{db_dialect}/01_watch.sql` - Watch schema for SQLC
+- `tools/sqlc/schemas/{db_dialect}/02_keygen.sql` - Keygen schema for SQLC
+- `tools/sqlc/schemas/{db_dialect}/03_sign.sql` - Sign schema for SQLC
 
-**Note**: These schema files are extracted from MySQL database dumps. The source of truth is the Atlas HCL files (`tools/atlas/schemas/*.hcl`). To update schemas, modify the HCL files and run the database migration flow.
+**Note**: These schema files are extracted from MySQL database dumps. The source of truth is the Atlas HCL files (`tools/atlas/schemas/{db_dialect}/*.hcl`). To update schemas, modify the HCL files and run the database migration flow.
 
 ## Database Code (SQLC)
 
 **Tool**: [sqlc](https://sqlc.dev/)
-**Source**: `tools/sqlc/schemas/mysql/*.sql` (auto-generated) and `tools/sqlc/queries/mysql/*.sql` (manually edited)
+**Source**: `tools/sqlc/schemas/{db_dialect}/*.sql` (auto-generated) and `tools/sqlc/queries/{db_dialect}/*.sql` (manually edited)
 **Command**: `make sqlc` (or `cd tools/sqlc && sqlc generate`)
 
 ### MySQL SQLC

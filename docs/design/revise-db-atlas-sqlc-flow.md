@@ -32,13 +32,13 @@ However, the surrounding tooling was not updated:
 **Missing PostgreSQL tooling:**
 
 1. No PostgreSQL Docker migration services in `compose.yaml`
-2. No `sqlc_postgresql.yml` configuration
+2. No `sqlc_postgres.yml` configuration
 3. No PostgreSQL schema extraction script or Make targets
 4. No PostgreSQL query files
    (PostgreSQL uses `$1, $2` placeholders, not `?`)
 5. `atlas-dev-reset.sh` is hardcoded to MySQL
 6. PostgreSQL migrations lack `atlas.sum` files
-7. No `regenerate-all-from-atlas-postgresql` orchestration
+7. No `regenerate-all-from-atlas-postgres` orchestration
    target
 
 ### Goals
@@ -80,7 +80,7 @@ Affected targets:
   `atlas-dev-clean`
 
 Add convenience aliases:
-`atlas-lint-mysql`, `atlas-lint-postgresql`
+`atlas-lint-mysql`, `atlas-lint-postgres`
 
 ### Task 2: Fix Docker Compose MySQL migration paths
 
@@ -104,7 +104,7 @@ Fix all 4 MySQL migration services
 Add YAML anchor and 4 services:
 
 ```yaml
-x-postgresql-migration-base: &postgresql-migration-base
+x-postgres-migration-base: &postgres-migration-base
   image: arigaio/atlas:1.1.0
   profiles: ["postgres"]
   volumes:
@@ -120,12 +120,12 @@ x-postgresql-migration-base: &postgresql-migration-base
   restart: "no"
 
 wallet-postgres-migrate-watch:
-  <<: *postgresql-migration-base
+  <<: *postgres-migration-base
   command:
     - migrate
     - apply
     - --dir
-    - "file://migrations/postgresql/watch"
+    - "file://migrations/postgres/watch"
     - --url
     - "postgres://postgres:postgres@wallet-postgres:5432/watch?sslmode=disable"
 # ... keygen, sign, sign2
@@ -139,11 +139,11 @@ directory:
 ```bash
 cd tools/atlas
 atlas migrate hash \
-  --config file://atlas.hcl --env local_postgresql_watch
+  --config file://atlas.hcl --env local_postgres_watch
 atlas migrate hash \
-  --config file://atlas.hcl --env local_postgresql_keygen
+  --config file://atlas.hcl --env local_postgres_keygen
 atlas migrate hash \
-  --config file://atlas.hcl --env local_postgresql_sign
+  --config file://atlas.hcl --env local_postgres_sign
 ```
 
 ### Task 5: Make `atlas-dev-reset.sh` dialect-aware
@@ -161,36 +161,36 @@ atlas migrate hash \
 
 **File**: `make/db.mk`
 
-Add `regenerate-all-from-atlas-postgresql`:
+Add `regenerate-all-from-atlas-postgres`:
 
-1. `atlas-dev-reset` with `DB_DIALECT=postgresql`
+1. `atlas-dev-reset` with `DB_DIALECT=postgres`
 2. `docker compose down -v`
    `&& docker compose --profile postgres up -d`
 3. `docker compose wait wallet-postgres-migrate-watch ...`
-4. `extract-sqlc-schema-postgresql-all`
-5. `sqlc-postgresql`
+4. `extract-sqlc-schema-postgres-all`
+5. `sqlc-postgres`
 
 ### Task 7: Add PostgreSQL SQLC pipeline
 
-#### 7a: Create `sqlc_postgresql.yml`
+#### 7a: Create `sqlc_postgres.yml`
 
-**File**: `tools/sqlc/sqlc_postgresql.yml` (new)
+**File**: `tools/sqlc/sqlc_postgres.yml` (new)
 
 ```yaml
 version: "2"
 sql:
-  - engine: "postgresql"
-    queries: "./queries_postgresql/*.sql"
-    schema: "./schemas_postgresql/*.sql"
+  - engine: "postgres"
+    queries: "./queries_postgres/*.sql"
+    schema: "./schemas_postgres/*.sql"
     gen:
       go:
         package: "sqlcgen"
-        out: "../../internal/infrastructure/database/postgresql/sqlcgen"
+        out: "../../internal/infrastructure/database/postgres/sqlcgen"
 ```
 
 #### 7b: Create PostgreSQL schema extraction script
 
-**File**: `scripts/db/extract-sqlc-schema-postgresql.sh`
+**File**: `scripts/db/extract-sqlc-schema-postgres.sh`
 (new)
 
 - Use `pg_dump --schema-only --no-owner --no-privileges`
@@ -200,7 +200,7 @@ sql:
   `seed` and `musig2_nonces` (sign only)
 - Remove PostgreSQL noise
   (SET statements, comments, extensions)
-- Output to `tools/sqlc/schemas_postgresql/`
+- Output to `tools/sqlc/schemas_postgres/`
 
 #### 7c: Add PostgreSQL targets to `db_sqlc.mk`
 
@@ -210,24 +210,24 @@ New targets:
 
 | Target | Description |
 | ------ | ----------- |
-| `dump-schema-postgresql-{watch,keygen,sign}` | `pg_dump` via Docker |
-| `dump-schema-postgresql-all` | All three dumps |
-| `clean-sqlc-schemas-postgresql` | Clean `schemas_postgresql/` |
-| `extract-sqlc-schema-postgresql-{watch,keygen,sign}` | Extract + format |
-| `extract-sqlc-schema-postgresql-all` | All three extractions |
-| `regenerate-sqlc-postgresql-from-current-db` | Extract + generate |
+| `dump-schema-postgres-{watch,keygen,sign}` | `pg_dump` via Docker |
+| `dump-schema-postgres-all` | All three dumps |
+| `clean-sqlc-schemas-postgres` | Clean `schemas_postgres/` |
+| `extract-sqlc-schema-postgres-{watch,keygen,sign}` | Extract + format |
+| `extract-sqlc-schema-postgres-all` | All three extractions |
+| `regenerate-sqlc-postgres-from-current-db` | Extract + generate |
 
 #### 7d: Add PostgreSQL to `codegen.mk`
 
 **File**: `make/codegen.mk`
 
 ```makefile
-.PHONY: sqlc-postgresql
-sqlc-postgresql:
-    cd tools/sqlc && sqlc generate -f sqlc_postgresql.yml
+.PHONY: sqlc-postgres
+sqlc-postgres:
+    cd tools/sqlc && sqlc generate -f sqlc_postgres.yml
 
 .PHONY: sqlc-all
-sqlc-all: sqlc sqlc-sqlite sqlc-postgresql
+sqlc-all: sqlc sqlc-sqlite sqlc-postgres
 ```
 
 #### 7e: Add PostgreSQL to sqlc validation targets
@@ -239,14 +239,14 @@ and SQLite.
 
 #### 7f: Create PostgreSQL query files
 
-**Directory**: `tools/sqlc/queries_postgresql/`
+**Directory**: `tools/sqlc/queries_postgres/`
 (new, 20 files)
 
 MySQL queries use `?` placeholders;
 PostgreSQL requires `$1, $2, ...`.
 Queries cannot be shared.
 This matches the existing pattern
-(`schemas/` vs `schemas_sqlite/` vs `schemas_postgresql/`).
+(`schemas/` vs `schemas_sqlite/` vs `schemas_postgres/`).
 
 Conversion rules:
 
@@ -278,7 +278,7 @@ Conversion rules:
 
 The doc references `strip_schema.sh` which doesn't exist.
 Update to reference `extract-sqlc-schema.sh` and
-`extract-sqlc-schema-postgresql.sh`.
+`extract-sqlc-schema-postgres.sh`.
 
 ## Task 9: Refactor `tools/sqlc/` directory structure
 
@@ -286,8 +286,8 @@ Update to reference `extract-sqlc-schema.sh` and
 
 The current `tools/sqlc/` directory uses inconsistent
 flat naming with `_dialect` suffixes
-(`queries_postgresql/`, `schemas_sqlite/`,
-`schemas_postgresql/`). This doesn't match the
+(`queries_postgres/`, `schemas_sqlite/`,
+`schemas_postgres/`). This doesn't match the
 `tools/atlas/migrations/{dialect}/{db}/` pattern used
 elsewhere in the project.
 
@@ -296,13 +296,13 @@ elsewhere in the project.
 ```
 tools/sqlc/
 ├── queries/                    # MySQL queries (shared with SQLite via ?)
-├── queries_postgresql/         # PostgreSQL queries ($1, $2, ...)
+├── queries_postgres/         # PostgreSQL queries ($1, $2, ...)
 ├── schemas/                    # MySQL schemas (auto-generated)
 ├── schemas_sqlite/             # SQLite schemas (manually maintained)
-├── schemas_postgresql/         # PostgreSQL schemas (auto-generated)
+├── schemas_postgres/         # PostgreSQL schemas (auto-generated)
 ├── sqlc.yml                    # MySQL config
 ├── sqlc_sqlite.yml             # SQLite config
-└── sqlc_postgresql.yml         # PostgreSQL config
+└── sqlc_postgres.yml         # PostgreSQL config
 ```
 
 ### Target Structure
@@ -311,14 +311,14 @@ tools/sqlc/
 tools/sqlc/
 ├── queries/
 │   ├── mysql/                  # ← from queries/ (MySQL ? placeholders)
-│   └── postgresql/             # ← from queries_postgresql/ ($1,$2 placeholders)
+│   └── postgres/             # ← from queries_postgres/ ($1,$2 placeholders)
 ├── schemas/
 │   ├── mysql/                  # ← from schemas/ (auto-generated from mysqldump)
-│   ├── postgresql/             # ← from schemas_postgresql/ (auto-generated from pg_dump)
+│   ├── postgres/             # ← from schemas_postgres/ (auto-generated from pg_dump)
 │   └── sqlite/                 # ← from schemas_sqlite/ (manually maintained)
 ├── sqlc.yml                    # Update paths
 ├── sqlc_sqlite.yml             # Update paths
-└── sqlc_postgresql.yml         # Update paths
+└── sqlc_postgres.yml         # Update paths
 ```
 
 **Note on `queries/sqlite/`**: Not needed.
@@ -340,7 +340,7 @@ mv tools/sqlc/queries tools/sqlc/queries_tmp
 mkdir -p tools/sqlc/queries/mysql
 mv tools/sqlc/queries_tmp/* tools/sqlc/queries/mysql/
 rmdir tools/sqlc/queries_tmp
-mv tools/sqlc/queries_postgresql tools/sqlc/queries/postgresql
+mv tools/sqlc/queries_postgres tools/sqlc/queries/postgres
 
 # Schemas
 mv tools/sqlc/schemas tools/sqlc/schemas_tmp
@@ -348,7 +348,7 @@ mkdir -p tools/sqlc/schemas/mysql
 mv tools/sqlc/schemas_tmp/* tools/sqlc/schemas/mysql/
 rmdir tools/sqlc/schemas_tmp
 mv tools/sqlc/schemas_sqlite tools/sqlc/schemas/sqlite
-mv tools/sqlc/schemas_postgresql tools/sqlc/schemas/postgresql
+mv tools/sqlc/schemas_postgres tools/sqlc/schemas/postgres
 ```
 
 #### 9b: Update sqlc config files
@@ -367,11 +367,11 @@ queries: "./queries/mysql/*.sql"    # shared with MySQL
 schema: "./schemas/sqlite/*.sql"
 ```
 
-**`tools/sqlc/sqlc_postgresql.yml`**:
+**`tools/sqlc/sqlc_postgres.yml`**:
 
 ```yaml
-queries: "./queries/postgresql/*.sql"
-schema: "./schemas/postgresql/*.sql"
+queries: "./queries/postgres/*.sql"
+schema: "./schemas/postgres/*.sql"
 ```
 
 #### 9c: Update Makefile targets
@@ -381,9 +381,9 @@ schema: "./schemas/postgresql/*.sql"
 | Before | After |
 | ------ | ----- |
 | `tools/sqlc/schemas/*.sql` | `tools/sqlc/schemas/mysql/*.sql` |
-| `tools/sqlc/schemas_postgresql/*.sql` | `tools/sqlc/schemas/postgresql/*.sql` |
+| `tools/sqlc/schemas_postgres/*.sql` | `tools/sqlc/schemas/postgres/*.sql` |
 | `clean-sqlc-schemas`: `rm -f tools/sqlc/schemas/*.sql` | `rm -f tools/sqlc/schemas/mysql/*.sql` |
-| `clean-sqlc-schemas-postgresql`: `rm -f tools/sqlc/schemas_postgresql/*.sql` | `rm -f tools/sqlc/schemas/postgresql/*.sql` |
+| `clean-sqlc-schemas-postgres`: `rm -f tools/sqlc/schemas_postgres/*.sql` | `rm -f tools/sqlc/schemas/postgres/*.sql` |
 
 **`make/codegen.mk`** - Update comments referencing paths
 
@@ -401,7 +401,7 @@ schema: "./schemas/postgresql/*.sql"
 **`scripts/db/extract-sqlc-schema.sh`** -
 Update example path in usage comment
 
-**`scripts/db/extract-sqlc-schema-postgresql.sh`** -
+**`scripts/db/extract-sqlc-schema-postgres.sh`** -
 Update example path in usage comment
 
 #### 9e: Update E2E operation scripts
@@ -428,7 +428,7 @@ Files referencing old paths (docs only, no code impact):
 - `docs/guidelines/code-generation.md`
 - `.claude/rules/sql.md`
 - `.claude/skills/db-migration/SKILL.md`
-- `.kiro/specs/postgresql-integration/` (multiple files)
+- `.kiro/specs/postgres-integration/` (multiple files)
 
 ### Verification
 
@@ -437,8 +437,8 @@ Files referencing old paths (docs only, no code impact):
 2. `make sqlc-validate` - validates all configs
 3. `make extract-sqlc-schema-all` - MySQL extraction
    outputs to `schemas/mysql/`
-4. `make extract-sqlc-schema-postgresql-all` - PostgreSQL
-   extraction outputs to `schemas/postgresql/`
+4. `make extract-sqlc-schema-postgres-all` - PostgreSQL
+   extraction outputs to `schemas/postgres/`
 5. E2E scripts reference correct SQLite schema paths
 
 ## Scope Exclusions
@@ -454,21 +454,21 @@ Files referencing old paths (docs only, no code impact):
 | ---- | ------ |
 | `make/db_atlas.mk` | Fix env naming, add DB_DIALECT |
 | `make/db_sqlc.mk` | Add PostgreSQL dump/extract/validate targets |
-| `make/db.mk` | Add `regenerate-all-from-atlas-postgresql` |
-| `make/codegen.mk` | Add `sqlc-postgresql`, update `sqlc-all` |
+| `make/db.mk` | Add `regenerate-all-from-atlas-postgres` |
+| `make/codegen.mk` | Add `sqlc-postgres`, update `sqlc-all` |
 | `compose.yaml` | Fix MySQL paths, add PostgreSQL migration services |
 | `scripts/db/atlas-dev-reset.sh` | Make dialect-aware |
-| `scripts/db/extract-sqlc-schema-postgresql.sh` | New: PostgreSQL schema extraction |
-| `tools/sqlc/sqlc_postgresql.yml` | New: PostgreSQL SQLC config |
-| `tools/sqlc/queries_postgresql/*.sql` | New: 20 PostgreSQL query files |
-| `tools/atlas/migrations/postgresql/*/atlas.sum` | New: generated hash files |
+| `scripts/db/extract-sqlc-schema-postgres.sh` | New: PostgreSQL schema extraction |
+| `tools/sqlc/sqlc_postgres.yml` | New: PostgreSQL SQLC config |
+| `tools/sqlc/queries_postgres/*.sql` | New: 20 PostgreSQL query files |
+| `tools/atlas/migrations/postgres/*/atlas.sum` | New: generated hash files |
 | `docs/database/sqlc-code-generation-flow.md` | Fix script reference |
 
 ## Verification
 
 1. `make atlas-lint` - passes without env name errors
    (MySQL default)
-2. `make atlas-lint DB_DIALECT=postgresql` - passes for
+2. `make atlas-lint DB_DIALECT=postgres` - passes for
    PostgreSQL
 3. `make reset-docker-mysql` - migration services find
    correct paths
@@ -476,7 +476,7 @@ Files referencing old paths (docs only, no code impact):
    apply successfully
 5. `make regenerate-all-from-atlas` - full MySQL pipeline
    end-to-end
-6. `make regenerate-all-from-atlas-postgresql` - full
+6. `make regenerate-all-from-atlas-postgres` - full
    PostgreSQL pipeline end-to-end
 7. `make sqlc-validate` - validates MySQL, SQLite,
    and PostgreSQL configs

@@ -467,7 +467,7 @@ The project supports both approaches:
 
 ### HCL Schema (Declarative)
 
-- **Location**: `tools/atlas/schemas/*.hcl`
+- **Location**: `tools/atlas/schemas/{db_dialect}/*.hcl`
 - **Purpose**: Define the desired state of the database schema
 - **Usage**: Use `atlas schema apply` to apply directly, or generate migrations from diffs
 - **Benefits**:

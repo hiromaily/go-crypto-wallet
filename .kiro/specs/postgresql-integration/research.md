@@ -2,7 +2,7 @@
 
 ## Summary
 
-- **Feature**: `postgresql-integration`
+- **Feature**: `postgres-integration`
 - **Discovery Scope**: Extension (adding PostgreSQL to existing MySQL/SQLite support)
 - **Key Findings**:
   - pgx driver provides 50-100% better performance than lib/pq and is actively maintained
@@ -19,7 +19,7 @@
 
 **Sources Consulted**:
 
-- [pgx vs lib/pq performance comparison](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgresql-golang-driver/)
+- [pgx vs lib/pq performance comparison](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgres-golang-driver/)
 - [Go database driver benchmarks](https://github.com/jackc/go_db_bench)
 - [GitLab's recommendation for pgx](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49135)
 - [sqlc + pgx article](https://brandur.org/sqlc)
@@ -36,7 +36,7 @@
 **Implications**:
 
 - **Decision**: Use `github.com/jackc/pgx/v5` as PostgreSQL driver
-- Connection factory in `pkg/db/postgresql/` will use pgx driver
+- Connection factory in `pkg/db/postgres/` will use pgx driver
 - Maintains compatibility with existing database/sql patterns used for MySQL/SQLite
 
 ### Enum Handling Strategy (PostgreSQL ENUM vs TEXT with CHECK)
@@ -45,9 +45,9 @@
 
 **Sources Consulted**:
 
-- [Native enums vs CHECK constraints](https://making.close.com/posts/native-enums-or-check-constraints-in-postgresql/)
+- [Native enums vs CHECK constraints](https://making.close.com/posts/native-enums-or-check-constraints-in-postgres/)
 - [Enums vs Check Constraints (Crunchy Data)](https://www.crunchydata.com/blog/enums-vs-check-constraints-in-postgres)
-- [PostgreSQL ENUM documentation](https://www.postgresql.org/docs/current/datatype-enum.html)
+- [PostgreSQL ENUM documentation](https://www.postgres.org/docs/current/datatype-enum.html)
 - [sqlc datatype mappings](https://docs.sqlc.dev/en/stable/reference/datatypes.html)
 
 **Findings**:
@@ -86,7 +86,7 @@
 
 - PostgreSQL 18.2 available as `postgres:18.2` tag on Docker Hub
 - Multi-architecture support: amd64, arm64v8, arm32v7, and others
-- PGDATA environment variable changed in PostgreSQL 18: now `/var/lib/postgresql/18/docker` (version-specific)
+- PGDATA environment variable changed in PostgreSQL 18: now `/var/lib/postgres/18/docker` (version-specific)
 - Official postgres image actively maintained by Docker Library
 - Image includes standard tools: psql, pg_dump, pg_restore, etc.
 
@@ -153,7 +153,7 @@
 
 **Sources Consulted**:
 
-- [sqlc PostgreSQL support documentation](https://docs.sqlc.dev/en/stable/reference/language-support.html#postgresql)
+- [sqlc PostgreSQL support documentation](https://docs.sqlc.dev/en/stable/reference/language-support.html#postgres)
 - [sqlc multi-engine support](https://docs.sqlc.dev/en/stable/howto/named-parameters.html)
 - [sqlc PostgreSQL datatype mappings](https://docs.sqlc.dev/en/stable/reference/datatypes.html)
 - [sqlc version releases](https://github.com/sqlc-dev/sqlc/releases)
@@ -164,7 +164,7 @@
 - **Multi-Engine Architecture**: sqlc supports multiple engines in a single project through separate configuration files:
   - `sqlc.yml` for MySQL (existing)
   - `sqlc_sqlite.yml` for SQLite (existing)
-  - `sqlc_postgresql.yml` for PostgreSQL (new)
+  - `sqlc_postgres.yml` for PostgreSQL (new)
 - **Shared Query Files**: sqlc allows reusing query definitions (`tools/sqlc/queries/*.sql`) across database engines when queries are database-agnostic
 - **Engine-Specific Features**:
   - PostgreSQL-specific syntax (e.g., `RETURNING *`, `ARRAY` types, `jsonb`) can be used in engine-specific query files
@@ -188,10 +188,10 @@
 
 **Implications**:
 
-- **Decision**: Use separate sqlc configuration file (`sqlc_postgresql.yml`) for PostgreSQL code generation
+- **Decision**: Use separate sqlc configuration file (`sqlc_postgres.yml`) for PostgreSQL code generation
 - **Query Reuse**: Current queries in `tools/sqlc/queries/*.sql` can be reused for PostgreSQL if they avoid MySQL-specific syntax
 - **Code Generation Strategy**:
-  - Generate PostgreSQL-specific code in `internal/infrastructure/database/postgresql/sqlcgen/`
+  - Generate PostgreSQL-specific code in `internal/infrastructure/database/postgres/sqlcgen/`
   - Follow same package structure as MySQL/SQLite for consistency
   - Use same `Queries` interface pattern across all three databases
 - **Type Safety**: sqlc guarantees type safety at compile time for PostgreSQL queries
@@ -383,15 +383,15 @@
 
 **PostgreSQL Drivers**:
 
-- [pgx vs lib/pq comparison](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgresql-golang-driver/)
+- [pgx vs lib/pq comparison](https://preslav.me/2022/05/13/pq-or-pgx-choosing-the-right-postgres-golang-driver/)
 - [pgx GitHub repository](https://github.com/jackc/pgx)
 - [sqlc + pgx integration](https://brandur.org/sqlc)
 
 **Enum Handling**:
 
-- [Native enums vs CHECK constraints](https://making.close.com/posts/native-enums-or-check-constraints-in-postgresql/)
+- [Native enums vs CHECK constraints](https://making.close.com/posts/native-enums-or-check-constraints-in-postgres/)
 - [Enums vs Check Constraints - Crunchy Data](https://www.crunchydata.com/blog/enums-vs-check-constraints-in-postgres)
-- [PostgreSQL ENUM documentation](https://www.postgresql.org/docs/current/datatype-enum.html)
+- [PostgreSQL ENUM documentation](https://www.postgres.org/docs/current/datatype-enum.html)
 
 **Docker & Infrastructure**:
 

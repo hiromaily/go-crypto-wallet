@@ -27,15 +27,34 @@ type GetBtcAccountKeysByAddrStatusParams struct {
 	AddrStatus int64
 }
 
-func (q *Queries) GetBtcAccountKeysByAddrStatus(ctx context.Context, arg GetBtcAccountKeysByAddrStatusParams) ([]BtcAccountKey, error) {
+type GetBtcAccountKeysByAddrStatusRow struct {
+	ID                     int64
+	Coin                   string
+	KeyType                string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int64
+	UpdatedAt              sql.NullString
+}
+
+func (q *Queries) GetBtcAccountKeysByAddrStatus(ctx context.Context, arg GetBtcAccountKeysByAddrStatusParams) ([]GetBtcAccountKeysByAddrStatusRow, error) {
 	rows, err := q.db.QueryContext(ctx, getBtcAccountKeysByAddrStatus, arg.Coin, arg.Account, arg.AddrStatus)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []BtcAccountKey
+	var items []GetBtcAccountKeysByAddrStatusRow
 	for rows.Next() {
-		var i BtcAccountKey
+		var i GetBtcAccountKeysByAddrStatusRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Coin,
@@ -83,7 +102,26 @@ type GetBtcAccountKeysByMultisigAddressesParams struct {
 	Addrs   []string
 }
 
-func (q *Queries) GetBtcAccountKeysByMultisigAddresses(ctx context.Context, arg GetBtcAccountKeysByMultisigAddressesParams) ([]BtcAccountKey, error) {
+type GetBtcAccountKeysByMultisigAddressesRow struct {
+	ID                     int64
+	Coin                   string
+	KeyType                string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int64
+	UpdatedAt              sql.NullString
+}
+
+func (q *Queries) GetBtcAccountKeysByMultisigAddresses(ctx context.Context, arg GetBtcAccountKeysByMultisigAddressesParams) ([]GetBtcAccountKeysByMultisigAddressesRow, error) {
 	query := getBtcAccountKeysByMultisigAddresses
 	var queryParams []interface{}
 	queryParams = append(queryParams, arg.Coin)
@@ -101,9 +139,9 @@ func (q *Queries) GetBtcAccountKeysByMultisigAddresses(ctx context.Context, arg 
 		return nil, err
 	}
 	defer rows.Close()
-	var items []BtcAccountKey
+	var items []GetBtcAccountKeysByMultisigAddressesRow
 	for rows.Next() {
-		var i BtcAccountKey
+		var i GetBtcAccountKeysByMultisigAddressesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Coin,
@@ -169,9 +207,28 @@ type GetOneBtcAccountKeyByMaxIDParams struct {
 	Account string
 }
 
-func (q *Queries) GetOneBtcAccountKeyByMaxID(ctx context.Context, arg GetOneBtcAccountKeyByMaxIDParams) (BtcAccountKey, error) {
+type GetOneBtcAccountKeyByMaxIDRow struct {
+	ID                     int64
+	Coin                   string
+	KeyType                string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int64
+	UpdatedAt              sql.NullString
+}
+
+func (q *Queries) GetOneBtcAccountKeyByMaxID(ctx context.Context, arg GetOneBtcAccountKeyByMaxIDParams) (GetOneBtcAccountKeyByMaxIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getOneBtcAccountKeyByMaxID, arg.Coin, arg.Account)
-	var i BtcAccountKey
+	var i GetOneBtcAccountKeyByMaxIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Coin,
@@ -205,9 +262,9 @@ type InsertBtcAccountKeyParams struct {
 	KeyType                string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      interface{}
-	Bech32Address          interface{}
-	TaprootAddress         interface{}
+	P2shSegwitAddress      sql.NullString
+	Bech32Address          sql.NullString
+	TaprootAddress         sql.NullString
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string
@@ -269,7 +326,7 @@ type UpdateBtcAccountKeyAddressParams struct {
 	UpdatedAt         sql.NullString
 	Coin              string
 	Account           string
-	P2shSegwitAddress interface{}
+	P2shSegwitAddress sql.NullString
 }
 
 func (q *Queries) UpdateBtcAccountKeyAddress(ctx context.Context, arg UpdateBtcAccountKeyAddressParams) (sql.Result, error) {
