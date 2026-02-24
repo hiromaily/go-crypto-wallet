@@ -158,6 +158,12 @@ extract-sqlc-schema-all: clean-sqlc-schemas
 extract-sqlc-schema-all-mysql:
 	@$(MAKE) extract-sqlc-schema-all DB_DIALECT=mysql
 
+# Convenience aliases for generating sqlite schema for sqlc
+# **`make extract-sqlc-schema-all` Must be run before this target**
+.PHONY: extract-sqlc-schema-all-sqlite
+extract-sqlc-schema-all-sqlite:
+	@$(MAKE) generate-sqlite-schema
+
 ###############################################################################
 # Generate sqlc code from current DB
 # Usage: make regenerate-sqlc-from-current-db [DB_DIALECT=mysql|postgres]

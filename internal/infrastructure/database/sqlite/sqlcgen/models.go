@@ -24,9 +24,9 @@ type AuthAccountKey struct {
 	AuthAccount            string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      interface{}
-	Bech32Address          interface{}
-	TaprootAddress         interface{}
+	P2shSegwitAddress      sql.NullString
+	Bech32Address          sql.NullString
+	TaprootAddress         sql.NullString
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string
@@ -55,9 +55,9 @@ type BtcAccountKey struct {
 	KeyType                string
 	Account                string
 	P2pkhAddress           string
-	P2shSegwitAddress      interface{}
-	Bech32Address          interface{}
-	TaprootAddress         interface{}
+	P2shSegwitAddress      sql.NullString
+	Bech32Address          sql.NullString
+	TaprootAddress         sql.NullString
 	FullPublicKey          string
 	MultisigAddress        string
 	RedeemScript           string
@@ -75,9 +75,9 @@ type BtcTx struct {
 	UnsignedHexTx     string
 	SignedHexTx       string
 	SentHashTx        string
-	TotalInputAmount  string
-	TotalOutputAmount string
-	Fee               string
+	TotalInputAmount  float64
+	TotalOutputAmount float64
+	Fee               float64
 	CurrentTxType     int64
 	UnsignedUpdatedAt sql.NullString
 	SentUpdatedAt     sql.NullString
@@ -90,7 +90,7 @@ type BtcTxInput struct {
 	InputVout          int64
 	InputAddress       string
 	InputAccount       string
-	InputAmount        string
+	InputAmount        float64
 	InputConfirmations int64
 	UpdatedAt          sql.NullString
 }
@@ -100,7 +100,7 @@ type BtcTxOutput struct {
 	TxID          int64
 	OutputAddress string
 	OutputAccount string
-	OutputAmount  string
+	OutputAmount  float64
 	IsChange      int64
 	UpdatedAt     sql.NullString
 }
@@ -153,7 +153,7 @@ type PaymentRequest struct {
 	SenderAddress   string
 	SenderAccount   string
 	ReceiverAddress string
-	Amount          string
+	Amount          float64
 	IsDone          int64
 	UpdatedAt       sql.NullString
 }
@@ -211,4 +211,59 @@ type XrpDetailTx struct {
 	SignedTxID            string
 	TxBlob                string
 	SentUpdatedAt         sql.NullString
+}
+
+type XrpMultisigSignature struct {
+	ID                int64
+	PendingMultisigID int64
+	SignerAccount     string
+	SignedTxBlob      string
+	SignerWeight      int64
+	SignedAt          sql.NullString
+}
+
+type XrpPendingMultisig struct {
+	ID              int64
+	TxUuid          string
+	AccountID       string
+	UnsignedTxJson  string
+	XrpTxType       string
+	RequiredQuorum  int64
+	CurrentWeight   int64
+	Status          string
+	CombinedTxBlob  sql.NullString
+	SubmittedTxHash sql.NullString
+	ExpiresAt       sql.NullString
+	CreatedAt       sql.NullString
+	UpdatedAt       sql.NullString
+}
+
+type XrpRegularKey struct {
+	ID                int64
+	AccountID         string
+	RegularKeyAddress string
+	PublicKey         string
+	PublicKeyHex      string
+	IsActive          int64
+	SetTxHash         sql.NullString
+	CreatedAt         sql.NullString
+	RotatedAt         sql.NullString
+}
+
+type XrpSignerEntry struct {
+	ID            int64
+	SignerListID  int64
+	SignerAccount string
+	SignerWeight  int64
+	CreatedAt     sql.NullString
+}
+
+type XrpSignerList struct {
+	ID           int64
+	AccountID    string
+	SignerQuorum int64
+	IsActive     int64
+	SetTxHash    sql.NullString
+	CreatedAt    sql.NullString
+	UpdatedAt    sql.NullString
 }

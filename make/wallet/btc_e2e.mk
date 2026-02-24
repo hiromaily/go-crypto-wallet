@@ -179,12 +179,15 @@ endif
 
 # Run E2E tests in parallel
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e-parallel [PATTERNS=1-11] [MAX_PARALLEL=11] [VERBOSE=true]
+# e.g. make btc-e2e-parallel PATTERNS=1-9 MAX_PARALLEL=9
 .PHONY: btc-e2e-parallel
 btc-e2e-parallel: build-all
 	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG)
 
 # Run all E2E tests in parallel for CI (non-interactive mode)
 # Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make btc-e2e-ci-all [PATTERNS=1-11] [MAX_PARALLEL=11] [VERBOSE=true]
 .PHONY: btc-e2e-ci-all
 btc-e2e-ci-all: build-all
 	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG) --ci

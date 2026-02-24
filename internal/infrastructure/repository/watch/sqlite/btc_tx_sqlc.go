@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
@@ -42,9 +43,9 @@ func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BTCTransacti
 		UnsignedHexTx:     sqlcTx.UnsignedHexTx,
 		SignedHexTx:       sqlcTx.SignedHexTx,
 		SentHashTx:        sqlcTx.SentHashTx,
-		TotalInputAmount:  sqlcTx.TotalInputAmount,
-		TotalOutputAmount: sqlcTx.TotalOutputAmount,
-		Fee:               sqlcTx.Fee,
+		TotalInputAmount:  strconv.FormatFloat(sqlcTx.TotalInputAmount, 'f', -1, 64),
+		TotalOutputAmount: strconv.FormatFloat(sqlcTx.TotalOutputAmount, 'f', -1, 64),
+		Fee:               strconv.FormatFloat(sqlcTx.Fee, 'f', -1, 64),
 		CurrentTxType:     currentTxType,
 	}
 
@@ -67,6 +68,9 @@ func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BTCTransacti
 
 // convertFromBtcTransaction converts domain.BtcTransaction entity to sqlcgen.BtcTx
 func convertFromBtcTransaction(tx *domainBitcoin.BTCTransaction) *sqlcgen.BtcTx {
+	totalInputAmount, _ := strconv.ParseFloat(tx.TotalInputAmount, 64)
+	totalOutputAmount, _ := strconv.ParseFloat(tx.TotalOutputAmount, 64)
+	fee, _ := strconv.ParseFloat(tx.Fee, 64)
 	sqlcTx := &sqlcgen.BtcTx{
 		ID:                tx.ID,
 		Coin:              tx.CoinTypeCode.String(),
@@ -74,9 +78,9 @@ func convertFromBtcTransaction(tx *domainBitcoin.BTCTransaction) *sqlcgen.BtcTx 
 		UnsignedHexTx:     tx.UnsignedHexTx,
 		SignedHexTx:       tx.SignedHexTx,
 		SentHashTx:        tx.SentHashTx,
-		TotalInputAmount:  tx.TotalInputAmount,
-		TotalOutputAmount: tx.TotalOutputAmount,
-		Fee:               tx.Fee,
+		TotalInputAmount:  totalInputAmount,
+		TotalOutputAmount: totalOutputAmount,
+		Fee:               fee,
 		CurrentTxType:     int64(tx.CurrentTxType.Int8()),
 	}
 
@@ -163,15 +167,18 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(
 ) (int64, error) {
 	ctx := context.Background()
 
+	totalInputAmount, _ := strconv.ParseFloat(txItem.TotalInputAmount, 64)
+	totalOutputAmount, _ := strconv.ParseFloat(txItem.TotalOutputAmount, 64)
+	fee, _ := strconv.ParseFloat(txItem.Fee, 64)
 	result, err := r.queries.InsertBtcTx(ctx, sqlcgen.InsertBtcTxParams{
 		Coin:              r.coinTypeCode.String(),
 		Action:            actionType.String(),
 		UnsignedHexTx:     txItem.UnsignedHexTx,
 		SignedHexTx:       txItem.SignedHexTx,
 		SentHashTx:        txItem.SentHashTx,
-		TotalInputAmount:  txItem.TotalInputAmount,
-		TotalOutputAmount: txItem.TotalOutputAmount,
-		Fee:               txItem.Fee,
+		TotalInputAmount:  totalInputAmount,
+		TotalOutputAmount: totalOutputAmount,
+		Fee:               fee,
 		CurrentTxType:     int64(txItem.CurrentTxType.Int8()),
 		UnsignedUpdatedAt: sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true},
 	})

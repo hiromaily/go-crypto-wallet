@@ -86,6 +86,24 @@ regenerate-all-from-atlas:
 regenerate-all-from-atlas-mysql:
 	@$(MAKE) regenerate-all-from-atlas DB_DIALECT=mysql
 
+# SQLite schema regeneration workflow
+# SQLite does not use Docker or Atlas directly. Instead, schemas are derived
+# from PostgreSQL schemas using the pg2sqlite tool.
+# Prerequisites: PostgreSQL sqlc schemas must exist in tools/sqlc/schemas/postgres/
+# Steps:
+# 1. generate-sqlite-schema: Convert PostgreSQL schemas to SQLite via pg2sqlite
+# 2. sqlc-sqlite: Generate Go code from SQLite schemas and queries
+.PHONY: regenerate-all-from-atlas-sqlite
+regenerate-all-from-atlas-sqlite:
+	@echo "=== Step 1/2: Converting PostgreSQL schemas to SQLite (pg2sqlite) ==="
+	@$(MAKE) generate-sqlite-schema
+	@echo ""
+	@echo "=== Step 2/2: Generating sqlc code for SQLite ==="
+	@$(MAKE) sqlc-sqlite
+	@echo ""
+	@echo "✓ All done! SQLite schema regeneration complete."
+
+
 
 ###############################################################################
 # sqlfluff Linting

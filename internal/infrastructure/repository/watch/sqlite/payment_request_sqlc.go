@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
@@ -40,7 +41,7 @@ func convertToPaymentRequest(sqlcReq *sqlcgen.PaymentRequest) (*domainPayment.Pa
 		SenderAddress:   sqlcReq.SenderAddress,
 		SenderAccount:   sqlcReq.SenderAccount,
 		ReceiverAddress: sqlcReq.ReceiverAddress,
-		Amount:          sqlcReq.Amount,
+		Amount:          strconv.FormatFloat(sqlcReq.Amount, 'f', -1, 64),
 		IsDone:          sqlcReq.IsDone != 0, // INTEGER → bool
 	}
 
@@ -61,13 +62,14 @@ func convertToPaymentRequest(sqlcReq *sqlcgen.PaymentRequest) (*domainPayment.Pa
 
 // convertFromPaymentRequest converts domain.PaymentRequest entity to sqlcgen.PaymentRequest
 func convertFromPaymentRequest(req *domainPayment.PaymentRequest) *sqlcgen.PaymentRequest {
+	amount, _ := strconv.ParseFloat(req.Amount, 64)
 	sqlcReq := &sqlcgen.PaymentRequest{
 		ID:              req.ID,
 		Coin:            req.CoinTypeCode.String(),
 		SenderAddress:   req.SenderAddress,
 		SenderAccount:   req.SenderAccount,
 		ReceiverAddress: req.ReceiverAddress,
-		Amount:          req.Amount,
+		Amount:          amount,
 		IsDone:          boolToInt64(req.IsDone), // bool → INTEGER
 	}
 

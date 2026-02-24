@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
@@ -36,7 +37,7 @@ func convertToBtcTxOutput(sqlcOutput *sqlcgen.BtcTxOutput) (*domainBitcoin.BTCTx
 		TxID:          sqlcOutput.TxID,
 		OutputAddress: sqlcOutput.OutputAddress,
 		OutputAccount: sqlcOutput.OutputAccount,
-		OutputAmount:  sqlcOutput.OutputAmount,
+		OutputAmount:  strconv.FormatFloat(sqlcOutput.OutputAmount, 'f', -1, 64),
 		IsChange:      sqlcOutput.IsChange != 0,
 	}
 
@@ -53,12 +54,13 @@ func convertToBtcTxOutput(sqlcOutput *sqlcgen.BtcTxOutput) (*domainBitcoin.BTCTx
 
 // convertFromBTCTxOutput converts domain.BTCTxOutput entity to sqlcgen.BtcTxOutput
 func convertFromBTCTxOutput(output *domainBitcoin.BTCTxOutput) *sqlcgen.BtcTxOutput {
+	outputAmount, _ := strconv.ParseFloat(output.OutputAmount, 64)
 	sqlcOutput := &sqlcgen.BtcTxOutput{
 		ID:            output.ID,
 		TxID:          output.TxID,
 		OutputAddress: output.OutputAddress,
 		OutputAccount: output.OutputAccount,
-		OutputAmount:  output.OutputAmount,
+		OutputAmount:  outputAmount,
 		IsChange:      boolToInt64(output.IsChange),
 	}
 
