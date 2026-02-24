@@ -84,3 +84,17 @@ bch-e2e-help:
 	@echo "  make bch-e2e-verbose P=<pattern> # Run with --verbose flag"
 	@echo "  make bch-e2e-ci P=<pattern>      # Run with --non-interactive flag"
 	@echo "  make bch-e2e-cleanup P=<pattern> # Run with --cleanup flag"
+
+# Check List
+# For PostgreSQL
+# make bch-e2e-reset P=1 DB=postgres
+# make bch-e2e-reset P=2 DB=postgres
+# make bch-e2e-reset P=3 DB=postgres
+# make bch-e2e-reset P=4 DB=postgres
+# make bch-e2e-reset P=5 DB=postgres
+# make bch-e2e-reset P=6 DB=postgres
+# make bch-e2e-reset P=7 DB=postgres
+# make bch-e2e-reset P=8 DB=postgres
+# make bch-e2e-reset P=9 DB=postgres
+# For SQLite
+# make bch-e2e-parallel PATTERNS=1-3 MAX_PARALLEL=3

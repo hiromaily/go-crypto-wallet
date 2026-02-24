@@ -63,7 +63,10 @@ services:
     profiles: ["postgres"]
     container_name: wallet-postgres
     volumes:
-      - wallet-postgres:/var/lib/postgres
+      # IMPORTANT: PostgreSQL 18+ uses version-specific subdirectories under /var/lib/postgresql
+      # (e.g., /var/lib/postgresql/18/main). Do NOT use /var/lib/postgresql/data here.
+      # See: https://github.com/docker-library/postgres/pull/1259
+      - wallet-postgres:/var/lib/postgresql
       - "./docker/postgres/init.d:/docker-entrypoint-initdb.d"
     environment:
       POSTGRES_USER: postgres
