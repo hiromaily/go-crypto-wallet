@@ -65,7 +65,9 @@
       "Bash(brew:*)",
       "Bash(atlas version:*)",
       "Bash(atlas schema lint:*)",
-      "Bash(atlas schema inspect:*)"
+      "Bash(atlas schema inspect:*)",
+      "Skill(kiro:spec-requirements)",
+      "Skill(kiro:spec-requirements:*)"
     ]
   },
   "hooks": {
