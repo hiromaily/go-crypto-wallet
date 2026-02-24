@@ -6,7 +6,9 @@ CREATE TABLE address (
   account TEXT NOT NULL,
   wallet_address TEXT NOT NULL,
   is_allocated INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((account) IN (('client'), ('deposit'), ('payment'), ('stored')))),
+  CHECK (((coin) IN (('btc'), ('bch'), ('eth'), ('xrp'), ('hyt'))))
 );
 
 CREATE TABLE btc_tx (
@@ -21,7 +23,9 @@ CREATE TABLE btc_tx (
   fee NUMERIC NOT NULL,
   current_tx_type INTEGER NOT NULL DEFAULT 1,
   unsigned_updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
-  sent_updated_at TEXT
+  sent_updated_at TEXT,
+  CHECK ((("action") IN (('deposit'), ('payment'), ('transfer')))),
+  CHECK (((coin) IN (('btc'), ('bch'))))
 );
 
 CREATE TABLE btc_tx_input (
@@ -75,14 +79,17 @@ CREATE TABLE payment_request (
   receiver_address TEXT NOT NULL,
   amount NUMERIC NOT NULL,
   is_done INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((coin) IN (('btc'), ('bch'), ('eth'), ('xrp'))))
 );
 
 CREATE TABLE tx (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   coin TEXT NOT NULL,
   "action" TEXT NOT NULL,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK ((("action") IN (('deposit'), ('payment'), ('transfer')))),
+  CHECK (((coin) IN (('eth'), ('xrp'), ('hyt'))))
 );
 
 CREATE TABLE xrp_detail_tx (
@@ -131,5 +138,6 @@ CREATE TABLE xrp_pending_multisig (
   submitted_tx_hash TEXT,
   expires_at TEXT,
   created_at TEXT DEFAULT (CURRENT_TIMESTAMP),
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((status) IN (('pending'), ('ready'), ('submitted'), ('confirmed'), ('failed'), ('expired'))))
 );

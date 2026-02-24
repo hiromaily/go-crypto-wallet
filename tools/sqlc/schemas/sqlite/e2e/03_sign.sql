@@ -19,7 +19,8 @@ CREATE TABLE auth_account_key (
   account_extended_privkey TEXT,
   idx INTEGER NOT NULL,
   addr_status INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((coin) IN (('btc'), ('bch'))))
 );
 
 -- Shared tables (from 02_keygen.sql, needed by sign wallet at runtime)
@@ -28,7 +29,8 @@ CREATE TABLE seed (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   coin TEXT NOT NULL,
   seed TEXT NOT NULL,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((coin) IN (('btc'), ('bch'), ('eth'), ('xrp'), ('hyt'))))
 );
 
 CREATE TABLE musig2_nonces (

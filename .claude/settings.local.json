@@ -60,7 +60,8 @@
       "Bash(atlas schema inspect:*)",
       "Bash(git status:*)",
       "Bash(gh pr diff:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(git -C /Users/hiroki.yasui/go/src/github.com/hiromaily/go-crypto-wallet status)"
     ]
   },
   "hooks": {

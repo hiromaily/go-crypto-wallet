@@ -63,7 +63,22 @@ Defined in `tools/atlas/atlas.hcl`:
 
 ## Complete Workflow
 
-After modifying HCL schema files:
+After modifying HCL schema files, use the all-in-one regeneration commands:
+
+```bash
+# For PostgreSQL schemas (also requires SQLite regeneration):
+make regenerate-all-from-atlas
+make regenerate-all-from-atlas-sqlite
+
+# For MySQL schemas:
+make regenerate-all-from-atlas-mysql
+```
+
+These commands handle the full pipeline: format, lint, migration regeneration, SQLC schema extraction, SQLC codegen, and build verification.
+
+**Important**: When PostgreSQL HCL schemas are changed, you must also run `make regenerate-all-from-atlas-sqlite` because SQLite schemas depend on the PostgreSQL schema definitions.
+
+### Manual Step-by-Step (if needed)
 
 ```bash
 # 1. Format
@@ -327,11 +342,7 @@ Regenerate with `make atlas-dev-reset` (or `make atlas-dev-reset DB_DIALECT=post
 
 ## Quick Checklist
 
-- [ ] `make atlas-fmt` passes
-- [ ] `make atlas-lint` passes
-- [ ] Migrations regenerated (`make atlas-dev-reset`)
-- [ ] Migration applies cleanly (reset Docker and apply)
-- [ ] `make sqlc` generates correctly (if schema changed)
+- [ ] Run `make regenerate-all-from-atlas` + `make regenerate-all-from-atlas-sqlite` (PostgreSQL) or `make regenerate-all-from-atlas-mysql` (MySQL)
 - [ ] `make check-build` passes
 - [ ] `make gotest` passes
 - [ ] Both MySQL and PostgreSQL schemas are consistent

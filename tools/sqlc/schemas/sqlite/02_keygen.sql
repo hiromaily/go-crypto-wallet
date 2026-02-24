@@ -9,7 +9,8 @@ CREATE TABLE auth_fullpubkey (
   extended_pubkey TEXT,
   fingerprint TEXT,
   derivation_path TEXT,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((coin) IN (('btc'), ('bch'))))
 );
 
 CREATE TABLE btc_account_key (
@@ -28,7 +29,9 @@ CREATE TABLE btc_account_key (
   account_extended_privkey TEXT,
   idx INTEGER NOT NULL,
   addr_status INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((account) IN (('client'), ('deposit'), ('payment'), ('stored')))),
+  CHECK (((coin) IN (('btc'), ('bch'))))
 );
 
 CREATE TABLE eth_account_key (
@@ -39,7 +42,8 @@ CREATE TABLE eth_account_key (
   private_key TEXT NOT NULL,
   idx INTEGER NOT NULL,
   addr_status INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((account) IN (('client'), ('deposit'), ('payment'), ('stored'))))
 );
 
 CREATE TABLE musig2_nonces (
@@ -56,7 +60,8 @@ CREATE TABLE seed (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   coin TEXT NOT NULL,
   seed TEXT NOT NULL,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((coin) IN (('btc'), ('bch'), ('eth'), ('xrp'), ('hyt'))))
 );
 
 CREATE TABLE xrp_account_key (
@@ -73,7 +78,9 @@ CREATE TABLE xrp_account_key (
   is_regular_key_pair INTEGER NOT NULL DEFAULT 0,
   allocated_id INTEGER NOT NULL DEFAULT 0,
   addr_status INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  CHECK (((account) IN (('client'), ('deposit'), ('payment'), ('stored')))),
+  CHECK (((coin) = 'xrp'))
 );
 
 CREATE TABLE xrp_regular_key (

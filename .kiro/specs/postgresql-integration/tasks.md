@@ -85,7 +85,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Grant all privileges to postgres user for each database
   - _Requirements: 8.4, 8.5_
 
-- [ ] 3.3 Add PostgreSQL migration services to Docker Compose
+- [x] 3.3 Add PostgreSQL migration services to Docker Compose
   - Add x-postgres-migration-base YAML anchor (like x-mysql-migration-base)
   - Add wallet-postgres-migrate-watch service (profile: "postgres")
   - Use image: arigaio/atlas:1.1.0 (matching Atlas upgrade)
