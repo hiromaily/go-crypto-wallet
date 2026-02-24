@@ -85,16 +85,69 @@ bch-e2e-help:
 	@echo "  make bch-e2e-ci P=<pattern>      # Run with --non-interactive flag"
 	@echo "  make bch-e2e-cleanup P=<pattern> # Run with --cleanup flag"
 
+###############################################################################
+# Parallel E2E Testing - Run Multiple Patterns Concurrently
+###############################################################################
+# Usage:
+#   make bch-e2e-parallel                          # Run all patterns (P1-P3) in parallel
+#   make bch-e2e-parallel PATTERNS=1,2             # Run specific patterns
+#   make bch-e2e-parallel PATTERNS=1-3             # Run pattern range
+#   make bch-e2e-parallel MAX_PARALLEL=2           # Limit concurrent processes
+#   make bch-e2e-ci-all                            # Run all patterns in CI mode
+#
+# Parameters:
+#   PATTERNS      - Comma-separated list or range (e.g., "1,2,3" or "1-3")
+#                   Default: "1-3" (all patterns)
+#   MAX_PARALLEL  - Maximum number of concurrent processes
+#                   Default: 3 (all patterns run in parallel)
+#   VERBOSE       - Show real-time output (true/false)
+#                   Default: false
+#
+# Notes:
+#   - Uses SQLite backend for isolated database per pattern
+#   - Each pattern runs with --reset --non-interactive flags
+#   - Logs are saved to data/logs/e2e-parallel/
+#   - Ideal for CI/CD environments to reduce execution time
+#
+# Examples:
+#   make bch-e2e-parallel                          # All patterns, full parallelism
+#   make bch-e2e-parallel PATTERNS=1,2 MAX_PARALLEL=2
+#   make bch-e2e-ci-all                            # CI mode (all patterns)
+###############################################################################
+
+# Default parameters
+PATTERNS ?= 1-3
+MAX_PARALLEL ?= 3
+VERBOSE ?= false
+
+# Parallel runner script path
+BCH_E2E_PARALLEL_SCRIPT := ./scripts/operation/bch/e2e/e2e-parallel-runner.sh
+
+# Build verbose flag
+BCH_VERBOSE_FLAG :=
+ifeq ($(VERBOSE),true)
+	BCH_VERBOSE_FLAG := --verbose
+endif
+
+# Run E2E tests in parallel
+# Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make bch-e2e-parallel [PATTERNS=1-3] [MAX_PARALLEL=3] [VERBOSE=true]
+# e.g. make bch-e2e-parallel PATTERNS=1-3 MAX_PARALLEL=3
+.PHONY: bch-e2e-parallel
+bch-e2e-parallel: build-all
+	$(BCH_E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(BCH_VERBOSE_FLAG)
+
+# Run all E2E tests in parallel for CI (non-interactive mode)
+# Note: build-all uses incremental build - only rebuilds when Go sources change
+# Usage: make bch-e2e-ci-all [PATTERNS=1-3] [MAX_PARALLEL=3] [VERBOSE=true]
+.PHONY: bch-e2e-ci-all
+bch-e2e-ci-all: build-all
+	$(BCH_E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(BCH_VERBOSE_FLAG) --ci
+
 # Check List
 # For PostgreSQL
 # make bch-e2e-reset P=1 DB=postgres
 # make bch-e2e-reset P=2 DB=postgres
 # make bch-e2e-reset P=3 DB=postgres
-# make bch-e2e-reset P=4 DB=postgres
-# make bch-e2e-reset P=5 DB=postgres
-# make bch-e2e-reset P=6 DB=postgres
-# make bch-e2e-reset P=7 DB=postgres
-# make bch-e2e-reset P=8 DB=postgres
-# make bch-e2e-reset P=9 DB=postgres
 # For SQLite
 # make bch-e2e-parallel PATTERNS=1-3 MAX_PARALLEL=3

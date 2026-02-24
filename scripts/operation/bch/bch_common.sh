@@ -105,9 +105,9 @@ _BCH_PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../" && pwd)"
 SQLITE_DB_DIR="${SQLITE_DB_DIR:-${_BCH_PROJECT_ROOT}/data/sqlite/bch}"
 
 # SQLite schema file location (relative paths - will be prefixed with PROJECT_ROOT)
-SQLITE_WATCH_SCHEMA="${SQLITE_WATCH_SCHEMA:-tools/sqlc/schemas/sqlite/01_watch.sql}"
-SQLITE_KEYGEN_SCHEMA="${SQLITE_KEYGEN_SCHEMA:-tools/sqlc/schemas/sqlite/02_keygen.sql}"
-SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas/sqlite/03_sign.sql}"
+SQLITE_WATCH_SCHEMA="${SQLITE_WATCH_SCHEMA:-tools/sqlc/schemas/sqlite/e2e/01_watch.sql}"
+SQLITE_KEYGEN_SCHEMA="${SQLITE_KEYGEN_SCHEMA:-tools/sqlc/schemas/sqlite/e2e/02_keygen.sql}"
+SQLITE_SIGN_SCHEMA="${SQLITE_SIGN_SCHEMA:-tools/sqlc/schemas/sqlite/e2e/03_sign.sql}"
 
 # Generate SQLite database file path for a specific wallet type
 # Usage: db_path=$(sqlite_get_db_path "watch")
