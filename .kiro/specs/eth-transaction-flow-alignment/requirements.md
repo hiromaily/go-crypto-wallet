@@ -28,17 +28,19 @@ Foundry/Anvil as the development node, robust HD key generation, and EIP-1559 tr
 
 ## Requirements
 
-### Requirement 1: Offline Transaction Signing (Sign Wallet)
+### Requirement 1: Offline Transaction Signing (Keygen Wallet)
 
-**Objective:** As a wallet operator, I want the ETH Sign wallet to function as a fully operational offline signing component, so that private keys never need to be exposed on an online machine.
+**Objective:** As a wallet operator, I want the ETH Keygen wallet to function as a fully operational offline signing component, so that private keys never need to be exposed on an online machine.
+
+> **Note:** ETH uses single-sig EOA only. The Sign Wallet is not required. The Keygen Wallet performs all transaction signing, consistent with the BTC keygen signing pattern. See [docs/chains/eth/architecture.md](../../../../docs/chains/eth/architecture.md).
 
 #### Acceptance Criteria
 
-1. When the Sign wallet receives an unsigned ETH transaction file, the ETH Sign Wallet shall deserialize the transaction, sign it with the appropriate private key, and produce a signed transaction file.
-2. The ETH Sign Wallet shall derive child private keys from the stored `accountXpriv` using BIP-44 derivation path (`m/44'/60'/0'/0/x`) matching the transaction's target account index.
-3. If a private key for the requested account index is not available, the ETH Sign Wallet shall return an error identifying the missing key index.
-4. The ETH Sign Wallet shall operate without any network connectivity or RPC connection to an Ethereum node.
-5. When the DI container constructs a Sign wallet for ETH coin type, the DI Container shall instantiate a fully functional ETH signer instead of returning "not implemented yet".
+1. When the Keygen wallet receives an unsigned ETH transaction file, the ETH Keygen Wallet shall deserialize the transaction, sign it with the appropriate private key, and produce a signed transaction file.
+2. The ETH Keygen Wallet shall derive child private keys from the stored `accountXpriv` using BIP-44 derivation path (`m/44'/60'/0'/0/x`) matching the transaction's target account index.
+3. If a private key for the requested account index is not available, the ETH Keygen Wallet shall return an error identifying the missing key index.
+4. The ETH Keygen Wallet shall operate without any network connectivity or RPC connection to an Ethereum node.
+5. When the DI container constructs a Keygen wallet for ETH coin type, the DI Container shall instantiate a fully functional ETH keygen signer instead of returning "not implemented yet".
 
 ### Requirement 2: EIP-1559 Transaction Support
 
@@ -49,7 +51,7 @@ Foundry/Anvil as the development node, robust HD key generation, and EIP-1559 tr
 1. When creating a new ETH transaction, the Watch Wallet shall construct an EIP-1559 `DynamicFeeTx` with `maxFeePerGas` and `maxPriorityFeePerGas` fields.
 2. When the connected Ethereum node does not support EIP-1559, the Watch Wallet shall fall back to creating a legacy `LegacyTx` with `gasPrice`.
 3. The ETH Transaction Creator shall estimate `maxPriorityFeePerGas` via `eth_maxPriorityFeePerGas` RPC and compute `maxFeePerGas` from the latest base fee.
-4. When signing an EIP-1559 transaction, the ETH Signer shall use `types.NewLondonSigner(chainID)` to produce the correct signature.
+4. When signing an ETH transaction, the ETH Keygen Signer shall use `types.LatestSignerForChainID(chainID)` to produce the correct signature, supporting both legacy and EIP-1559 transaction types.
 5. The ETH Transaction File Format shall include the transaction type indicator so the Sign wallet can distinguish between legacy and EIP-1559 transactions during offline signing.
 
 ### Requirement 3: Foundry/Anvil Development Environment
@@ -72,7 +74,7 @@ Foundry/Anvil as the development node, robust HD key generation, and EIP-1559 tr
 
 1. The ETH Keygen Wallet shall generate HD wallet keys using BIP-39 mnemonic and BIP-44 derivation path (`m/44'/60'/0'/0/x`).
 2. The ETH Keygen Wallet shall store the account-level extended private key (`accountXpriv`) in the database for later child key derivation by the Sign wallet.
-3. The ETH Keygen Wallet shall export full public keys to a file for import by the Sign wallet (matching BTC's `ExportFullPubkey` / `ImportFullPubKey` flow).
+3. The ETH Keygen Wallet shall export the account-level extended public key (`accountXpub`) to a file so the Watch Wallet can derive and verify child addresses independently without holding private keys.
 4. The ETH Key Strategy shall derive Ethereum addresses from secp256k1 public keys via Keccak-256 hashing (last 20 bytes).
 5. The ETH Keygen Wallet shall never store or transmit raw private keys in plaintext outside of the offline keygen environment.
 6. If the HD seed or mnemonic generation fails due to insufficient entropy, the ETH Keygen Wallet shall return an error without creating partial key material.
@@ -91,7 +93,7 @@ Foundry/Anvil as the development node, robust HD key generation, and EIP-1559 tr
 
 ### Requirement 6: Transaction File Format and Flow Alignment
 
-**Objective:** As a wallet operator, I want the ETH transaction flow (Watch → Keygen → Sign → Watch) to follow the same file-based exchange pattern as BTC, so that the air-gapped signing workflow is consistent across chains.
+**Objective:** As a wallet operator, I want the ETH transaction flow (Watch → Keygen → Watch) to follow the same file-based exchange pattern as BTC single-sig, so that the air-gapped signing workflow is consistent across chains.
 
 #### Acceptance Criteria
 
@@ -124,3 +126,16 @@ Foundry/Anvil as the development node, robust HD key generation, and EIP-1559 tr
 3. When a transaction is detected as failed or reverted on-chain, the ETH Monitor shall update the status to a failure state with the revert reason if available.
 4. The ETH Monitor shall update `is_allocated` in `account_pubkey_table` after a successful send to prevent double-spending from the same account.
 5. If the Ethereum node becomes unreachable during monitoring, the ETH Monitor shall retry with exponential backoff and log the connectivity issue.
+
+### Requirement 9: Ethereum Node Flexibility, Docker Compose, and E2E Verification
+
+**Objective:** As a developer, I want to be able to switch between Foundry Anvil and go-ethereum (Geth) via a single configuration value, and to verify the full ETH transaction flow using an E2E script, so that the implementation is validated against both node implementations.
+
+#### Acceptance Criteria
+
+1. The ETH Configuration shall support both Foundry Anvil (`https://www.getfoundry.sh/anvil`) and go-ethereum Geth (`https://github.com/ethereum/go-ethereum`) as Ethereum node backends, selectable via a `node_type` config field (e.g., `anvil` or `geth`).
+2. Any node-specific behavior differences (e.g., key import method, supported RPC methods) shall be handled internally so that use cases remain node-agnostic.
+3. The Docker Compose configuration shall define separate service profiles for Anvil and Geth so that either can be launched independently (e.g., `docker compose --profile anvil up` / `docker compose --profile geth up`).
+4. The Docker Compose configuration shall support multiple database backends (PostgreSQL, MySQL, SQLite) consistent with the BTC/BCH compose structure.
+5. An E2E shell script shall be provided at `scripts/operation/eth/e2e/` covering the full transaction flow: key generation → address export/import → transaction creation → offline signing → broadcast → confirmation monitoring.
+6. The E2E script shall be runnable against both Anvil and Geth by passing the node type as a parameter or reading from the environment.

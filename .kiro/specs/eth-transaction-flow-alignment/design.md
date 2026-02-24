@@ -46,57 +46,74 @@ CLI Layer (interface-adapters/wallet/eth/)
 
 ### Architecture Pattern & Boundary Map
 
+> Full first-class documentation: [docs/chains/eth/architecture.md](../../../docs/chains/eth/architecture.md)
+>
+> **ETH is single-sig EOA only. The Sign Wallet is not required.**
+> Keygen Wallet owns both key generation and transaction signing.
+> This mirrors the BTC Keygen wallet pattern (see `internal/application/usecase/keygen/btc/sign_transaction.go`).
+
 ```mermaid
 graph TB
-    subgraph CLI
+    subgraph "CLI Layer"
         WatchCLI[Watch CLI]
         KeygenCLI[Keygen CLI]
-        SignCLI[Sign CLI]
     end
 
-    subgraph UseCases
-        CreateTxUC[CreateTransaction]
-        SendTxUC[SendTransaction]
-        MonitorTxUC[MonitorTransaction]
-        KeygenUC[GenerateKey]
-        ExportPubUC[ExportFullPubkey]
-        SignTxUC[SignTransaction]
-        ImportKeyUC[ImportPrivKey]
+    subgraph "Use Case Layer"
+        subgraph "Watch Use Cases"
+            CreateTxUC[CreateTransaction]
+            SendTxUC[SendTransaction]
+            MonitorTxUC[MonitorTransaction]
+        end
+        subgraph "Keygen Use Cases"
+            GenerateSeedUC[GenerateSeed]
+            GenerateKeyUC[GenerateHDWallet]
+            ImportKeyUC[ImportPrivateKey]
+            ExportAddrUC[ExportAddress]
+            KeygenSignTxUC[SignTransaction]
+        end
     end
 
-    subgraph Ports
+    subgraph "Ports Layer"
         TxCreator[TxCreator]
         TxSender[TxSender]
         TxMonitor[TxMonitor]
         BalanceChecker[BalanceChecker]
         GasEstimator[GasEstimator]
         ChainConfig[ChainConfigProvider]
-        KeyDeriver[KeyDeriver]
+        TxSigner[TxSigner]
+        AddrValidator[AddressValidator]
     end
 
-    subgraph Infrastructure
+    subgraph "Infrastructure Layer"
         EthClient[Ethereum Client]
-        EthRPC[ethclient RPC]
+        EthRPC[go-ethereum ethclient]
         HDWallet[HD Wallet Key]
+        Keystore[go-ethereum keystore]
         FileRepo[Transaction File Repo]
-        DB[(PostgreSQL)]
+        DB[(PostgreSQL / SQLite)]
     end
 
     WatchCLI --> CreateTxUC
     WatchCLI --> SendTxUC
     WatchCLI --> MonitorTxUC
-    KeygenCLI --> KeygenUC
-    KeygenCLI --> ExportPubUC
-    SignCLI --> SignTxUC
-    SignCLI --> ImportKeyUC
+
+    KeygenCLI --> GenerateSeedUC
+    KeygenCLI --> GenerateKeyUC
+    KeygenCLI --> ImportKeyUC
+    KeygenCLI --> ExportAddrUC
+    KeygenCLI --> KeygenSignTxUC
 
     CreateTxUC --> TxCreator
     CreateTxUC --> GasEstimator
+    CreateTxUC --> AddrValidator
+    CreateTxUC --> ChainConfig
     SendTxUC --> TxSender
     MonitorTxUC --> TxMonitor
     MonitorTxUC --> BalanceChecker
-    SignTxUC --> ChainConfig
-    SignTxUC --> KeyDeriver
+
+    KeygenSignTxUC --> ChainConfig
+    KeygenSignTxUC --> TxSigner
 
     TxCreator --> EthClient
     TxSender --> EthClient
@@ -104,18 +121,29 @@ graph TB
     BalanceChecker --> EthClient
     GasEstimator --> EthClient
     ChainConfig --> EthClient
+    TxSigner --> EthClient
     EthClient --> EthRPC
-    KeyDeriver --> HDWallet
+
+    KeygenSignTxUC --> HDWallet
+    HDWallet --> Keystore
+    GenerateKeyUC --> HDWallet
+    ImportKeyUC --> Keystore
+
     CreateTxUC --> FileRepo
-    SignTxUC --> FileRepo
+    KeygenSignTxUC --> FileRepo
     SendTxUC --> FileRepo
+
     CreateTxUC --> DB
     MonitorTxUC --> DB
+    GenerateKeyUC --> DB
+    ImportKeyUC --> DB
 ```
 
 **Architecture Integration**:
 - Selected pattern: Clean Architecture with ISP-compliant port interfaces (mirrors BTC)
-- Domain boundaries: Watch (online, creates/broadcasts), Keygen (offline, key generation), Sign (offline, transaction signing)
+- Domain boundaries: Watch (online, creates/broadcasts), Keygen (offline, key generation **and signing**)
+- Sign Wallet: not required for ETH single-sig — omitted from this diagram
+- Keygen `SignTransaction` mirrors `internal/application/usecase/keygen/btc/sign_transaction.go` — same offline pattern, different transaction format (JSON/EIP-2718 vs PSBT)
 - Existing patterns preserved: Three-wallet separation, file-based exchange, domain/infrastructure type conversion via DTOs
 - New components: ETH-specific small port interfaces, JSON transaction file format, offline signer
 - Steering compliance: Dependency rule (use cases depend only on ports), ISP, DIP
@@ -133,13 +161,16 @@ graph TB
 
 ## System Flows
 
-### ETH Transaction Lifecycle (Watch → Sign → Watch)
+### ETH Transaction Lifecycle (Watch → Keygen → Watch)
+
+> ETH uses single-sig EOA only. The Sign Wallet is **not required**.
+> Only Watch Wallet (online) and Keygen Wallet (offline) participate.
 
 ```mermaid
 sequenceDiagram
     participant W as Watch Wallet
     participant FS as File System
-    participant S as Sign Wallet
+    participant K as Keygen Wallet
     participant BC as Blockchain
 
     Note over W: Online environment
@@ -149,13 +180,13 @@ sequenceDiagram
     W->>FS: Write unsigned tx file
     W->>W: Save tx record to DB as TxTypeUnsigned
 
-    Note over S: Offline environment
-    S->>FS: Read unsigned tx file
-    S->>S: Deserialize JSON to types.Transaction
-    S->>S: Derive child key from accountXpriv at BIP-44 index
-    S->>S: Sign with types.SignTx using LatestSignerForChainID
-    S->>S: Serialize signed tx to JSON
-    S->>FS: Write signed tx file
+    Note over K: Offline environment (Keygen Wallet)
+    K->>FS: Read unsigned tx file
+    K->>K: Deserialize JSON to types.Transaction
+    K->>K: Derive child key from accountXpriv at BIP-44 index
+    K->>K: Sign with types.SignTx using LatestSignerForChainID
+    K->>K: Serialize signed tx to JSON
+    K->>FS: Write signed tx file
 
     Note over W: Online environment
     W->>FS: Read signed tx file
@@ -199,15 +230,15 @@ flowchart TD
 
 | Requirement | Summary | Components | Interfaces | Flows |
 |-------------|---------|------------|------------|-------|
-| 1.1 | Sign wallet deserializes and signs | ETHSignTxUseCase, TxFileRepo | TxFileSigner | Tx Lifecycle |
-| 1.2 | BIP-44 child key derivation | ETHSignTxUseCase, HDWallet | KeyDeriver | Tx Lifecycle |
-| 1.3 | Missing key error | ETHSignTxUseCase | KeyDeriver | - |
-| 1.4 | Offline operation | ETHSignTxUseCase | - | Tx Lifecycle |
-| 1.5 | DI wiring | DI Container | - | - |
+| 1.1 | Keygen wallet deserializes and signs | ETHKeygenSignTxUseCase, TxFileRepo | TxFileSigner | Tx Lifecycle |
+| 1.2 | BIP-44 child key derivation | ETHKeygenSignTxUseCase, HDWallet | KeyDeriver | Tx Lifecycle |
+| 1.3 | Missing key error | ETHKeygenSignTxUseCase | KeyDeriver | - |
+| 1.4 | Offline operation | ETHKeygenSignTxUseCase | - | Tx Lifecycle |
+| 1.5 | DI wiring (Keygen) | DI Container | - | - |
 | 2.1 | DynamicFeeTx construction | EthereumClient | TxCreator, GasEstimator | Fee Estimation |
 | 2.2 | Legacy fallback | EthereumClient | TxCreator | Fee Estimation |
 | 2.3 | Dynamic fee estimation | EthereumClient | GasEstimator | Fee Estimation |
-| 2.4 | LatestSignerForChainID | ETHSignTxUseCase, EthereumClient | TxSigner | Tx Lifecycle |
+| 2.4 | LatestSignerForChainID | ETHKeygenSignTxUseCase, EthereumClient | TxSigner | Tx Lifecycle |
 | 2.5 | Tx type in file format | TxFileRepo | TxFileFormat | Tx Lifecycle |
 | 3.1 | Anvil endpoint config | Config | ChainConfigProvider | - |
 | 3.2 | Anvil key import | KeygenUseCase | - | - |
@@ -240,20 +271,27 @@ flowchart TD
 | 8.3 | Failed tx detection | MonitorTxUseCase | TxMonitor | - |
 | 8.4 | is_allocated update | MonitorTxUseCase | - | - |
 | 8.5 | Retry with backoff | MonitorTxUseCase | TxMonitor | - |
+| 9.1 | Anvil + Geth node_type config | Config, EthereumClient | ChainConfigProvider | - |
+| 9.2 | Node-agnostic use cases | All ETH use cases | All ETH ports | - |
+| 9.3 | Docker Compose node profiles | docker-compose.yml | - | - |
+| 9.4 | Docker Compose multi-DB | docker-compose.yml | - | - |
+| 9.5 | E2E script | scripts/operation/eth/e2e/ | - | - |
+| 9.6 | E2E node-switchable | scripts/operation/eth/e2e/ | - | - |
 
 ## Components and Interfaces
 
 | Component | Domain/Layer | Intent | Req Coverage | Key Dependencies | Contracts |
 |-----------|--------------|--------|--------------|-----------------|-----------|
 | ETH Small Port Interfaces | Ports | ISP-compliant blockchain API ports | 5.1, 5.2 | - | Service |
-| ETHSignTransactionUseCase | Use Case / Sign | Offline transaction signing | 1.1-1.5, 2.4 | KeyDeriver (P0), TxFileRepo (P0) | Service |
+| ETHKeygenSignTransactionUseCase | Use Case / Keygen | Offline transaction signing | 1.1-1.5, 2.4 | KeyDeriver (P0), TxFileRepo (P0) | Service |
 | ETHCreateTransactionUseCase | Use Case / Watch | Create unsigned EIP-1559 transactions | 2.1-2.3, 6.1 | TxCreator (P0), GasEstimator (P0) | Service |
 | ETHSendTransactionUseCase | Use Case / Watch | Broadcast signed transactions | 6.3 | TxSender (P0), TxFileRepo (P0) | Service |
 | ETHMonitorTransactionUseCase | Use Case / Watch | Track confirmations and status | 8.1-8.5 | TxMonitor (P0) | Service |
-| ETHExportFullPubkeyUseCase | Use Case / Sign | Export account public keys | 4.3 | HDWallet (P0), PubkeyFileRepo (P1) | Service |
+| ETHExportFullPubkeyUseCase | Use Case / Keygen | Export account-level xpub for Watch | 4.3 | HDWallet (P0), PubkeyFileRepo (P1) | Service |
 | ETHTransactionFileRepo | Infrastructure / File | JSON transaction file I/O | 6.1-6.5, 2.5 | FileSystem (P0) | Service |
-| EthereumClient | Infrastructure / API | Blockchain RPC operations | 2.1-2.3, 3.1, 3.5 | ethclient (P0) | Service |
-| Config / NetworkType | Config | ETH network and fee configuration | 3.1-3.3, 7.1-7.5 | - | State |
+| EthereumClient | Infrastructure / API | Blockchain RPC operations (Anvil or Geth) | 2.1-2.3, 3.1, 3.5, 9.1, 9.2 | ethclient (P0) | Service |
+| Config / NetworkType | Config | ETH network, fee, and node-type configuration | 3.1-3.3, 7.1-7.5, 9.1 | - | State |
+| E2E Scripts | Scripts / Verification | Full flow operational verification | 9.5, 9.6 | - | - |
 
 ### Ports Layer
 
@@ -333,7 +371,9 @@ type WatchTxCreationDeps interface {
     AddressValidator
 }
 
-type SignTxDeps interface {
+// KeygenSignTxDeps is used by the Keygen wallet's SignTransaction use case
+// (ETH is single-sig; there is no Sign wallet)
+type KeygenSignTxDeps interface {
     ChainConfigProvider
     TxSigner
 }
@@ -349,13 +389,13 @@ type SignTxDeps interface {
 - The `TxSigner` interface changes signature to accept `*ecdsa.PrivateKey` instead of using keystore password; this enables true offline signing without node dependency
 - Deprecation markers on old interfaces guide migration
 
-### Use Case Layer / Sign
+### Use Case Layer / Keygen
 
-#### ETHSignTransactionUseCase
+#### ETHKeygenSignTransactionUseCase
 
 | Field | Detail |
 |-------|--------|
-| Intent | Sign unsigned ETH transactions offline using HD-derived private keys |
+| Intent | Sign unsigned ETH transactions offline using HD-derived private keys (Keygen Wallet only — ETH is single-sig) |
 | Requirements | 1.1, 1.2, 1.3, 1.4, 1.5, 2.4 |
 
 **Responsibilities & Constraints**
@@ -368,7 +408,7 @@ type SignTxDeps interface {
 
 **Dependencies**
 
-- Inbound: SignCLI — invokes signing (P0)
+- Inbound: KeygenCLI — invokes signing (P0)
 - Outbound: TxFileRepo — read/write transaction files (P0)
 - Outbound: AccountKeyRepo — retrieve `accountXpriv` (P0)
 - External: hdkeychain — BIP-32 key derivation (P0)
@@ -572,8 +612,8 @@ func ReadETHTxFile(path string) (*ETHTransactionFile, error)
 
 | Field | Detail |
 |-------|--------|
-| Intent | Modernize ETH configuration with current networks and PostgreSQL support |
-| Requirements | 3.1, 3.2, 3.3, 7.1, 7.2, 7.3, 7.4, 7.5 |
+| Intent | Modernize ETH configuration with current networks, node-type selection, and PostgreSQL support |
+| Requirements | 3.1, 3.2, 3.3, 7.1, 7.2, 7.3, 7.4, 7.5, 9.1, 9.2 |
 
 **Key Changes**:
 
@@ -583,7 +623,8 @@ type Ethereum struct {
     Host                 string
     Port                 int
     DisableTLS           bool
-    NetworkType          EthNetworkType   // New enum type
+    NetworkType          EthNetworkType   // mainnet, sepolia, holesky, local
+    NodeType             EthNodeType      // New: "anvil" or "geth"
     KeyDirName           string
     ConfirmationNum      uint64
     ChainID              uint64           // New: explicit chain ID
@@ -600,7 +641,14 @@ const (
     EthNetworkMainnet EthNetworkType = "mainnet"   // Chain ID 1
     EthNetworkSepolia EthNetworkType = "sepolia"   // Chain ID 11155111
     EthNetworkHolesky EthNetworkType = "holesky"   // Chain ID 17000
-    EthNetworkLocal   EthNetworkType = "local"     // Chain ID 31337 (Anvil)
+    EthNetworkLocal   EthNetworkType = "local"     // Chain ID 31337 (Anvil default) / 1337 (Geth devnet)
+)
+
+// EthNodeType selects the Ethereum node implementation
+type EthNodeType string
+const (
+    EthNodeAnvil EthNodeType = "anvil"  // Foundry Anvil (https://getfoundry.sh/anvil)
+    EthNodeGeth  EthNodeType = "geth"   // go-ethereum Geth (https://github.com/ethereum/go-ethereum)
 )
 ```
 
@@ -609,6 +657,46 @@ const (
 - Remove deprecated network references (Goerli, Rinkeby, Ropsten)
 - Validate network type on load; return error listing supported networks for unknown values
 - `ChainID` auto-populated from `NetworkType` if not explicitly set
+- `NodeType` controls node-specific behavior (key import method, RPC quirks); defaults to `anvil`
+- Both node types use standard `eth_*` JSON-RPC — no node-specific logic in use cases
+
+### Deployment Layer
+
+#### Docker Compose and E2E Scripts
+
+| Field | Detail |
+|-------|--------|
+| Intent | Support both Anvil and Geth via Docker Compose profiles; provide E2E verification scripts |
+| Requirements | 9.3, 9.4, 9.5, 9.6 |
+
+**Docker Compose Design**:
+
+- Separate service profiles: `--profile anvil` and `--profile geth`
+- Both profiles share the same Watch/Keygen wallet service definitions
+- Multiple database backends (PostgreSQL, MySQL, SQLite) consistent with BTC/BCH compose structure
+- Example profile structure:
+
+```yaml
+services:
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    profiles: [anvil]
+    ...
+  geth:
+    image: ethereum/client-go:stable
+    profiles: [geth]
+    ...
+  postgres:
+    profiles: [anvil, geth]
+    ...
+```
+
+**E2E Script Design** (`scripts/operation/eth/e2e/`):
+
+- Mirrors BTC/BCH E2E script structure at `scripts/operation/btc/e2e/`
+- Covers the full single-sig flow: keygen → export address → watch import → create tx → keygen sign → watch send → monitor
+- Accepts `NODE_TYPE=anvil|geth` as environment variable for node selection
+- Individual scripts per operation pattern (consistent with BTC e2e patterns 1–11)
 
 ## Data Models
 

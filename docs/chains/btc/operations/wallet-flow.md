@@ -1,35 +1,24 @@
 # Flow for BTC
 
-This document describes the setup procedures and transaction flow for the three wallet types: Watch Wallet,
-Keygen Wallet, and Sign Wallet.
+This document describes the BTC-specific setup procedures and transaction flow.
 
-## Architecture Overview
+> **Common flow**: The 3-wallet architecture, setup flow, signing flow, and monitoring flow are
+> defined in the chain-agnostic reference: [docs/transaction-flow.md](../../../transaction-flow.md).
+> This document covers BTC-specific details only.
 
-**Important**: Each wallet type runs on a **separate machine** with its **own independent database**:
+## BTC-Specific Notes
 
-- **Keygen Wallet (Machine 1)**: Offline machine with Keygen DB
-- **Sign Wallet 1 (Machine 2)**: Offline machine with Sign DB 1
-- **Sign Wallet 2 (Machine 3)**: Offline machine with Sign DB 2 (if required)
-- **Watch Wallet (Machine 4)**: Online machine with Watch DB
-
-**Key Points**:
-
-- Each wallet maintains its own database independently
-- Keygen and Sign Wallets operate **offline** (air-gapped) for security
-- Only Watch Wallet is connected to the network
-- Data transfer between machines uses **secure offline methods** (USB drives, etc.)
-- Transaction files (PSBT) are transferred via USB between machines
+- Transaction files use **PSBT (Partially Signed Bitcoin Transaction)** format — see [psbt/](../psbt/)
+- Bitcoin Core descriptor wallets are used for address management — see [descriptor/](../descriptor/)
+- Multiple address types are supported (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR) — see [E2E patterns](e2e-transaction-patterns.md)
 
 ## Overview
 
 This document is organized into three main categories:
 
-1. **Setup Flow**: Initial wallet setup procedures
-2. **Transaction Operation Flow**: Creating, signing, and sending transactions
-3. **Monitoring Flow**: Monitoring transaction confirmations and updating database
-
-Each flow is described with detailed procedures and Mermaid sequence diagrams showing the interaction between
-Watch Wallet, Keygen Wallet, and Sign Wallet across separate machines.
+1. **Setup Flow**: BTC wallet setup procedures
+2. **Transaction Operation Flow**: Creating, signing, and sending BTC transactions
+3. **Monitoring Flow**: Monitoring BTC transaction confirmations and updating database
 
 ## 1. Setup Flow
 
