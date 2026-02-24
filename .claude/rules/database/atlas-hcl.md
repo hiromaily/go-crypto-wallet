@@ -135,7 +135,7 @@ You **MUST** refer to the official documentation when:
 - Using advanced features (partitioning, custom types, triggers, functions)
 - Unsure about attribute names or syntax (e.g., `auto_increment` vs `identity`, `datetime` vs `timestamptz`)
 - Adding indexes with dialect-specific options (e.g., PostgreSQL index types: BTREE, BRIN, HASH, GIN, GIST)
-- Working with enum types (inline for MySQL, named type for PostgreSQL)
+- Working with enum-like columns (inline `enum()` for MySQL, `varchar` + `check` for PostgreSQL)
 
 ### Key Dialect-Specific Syntax Reference
 
@@ -202,13 +202,11 @@ table "address" {
 
 ### PostgreSQL Table Definition
 
+**IMPORTANT**: Do NOT use native PostgreSQL `enum` types. Use `varchar` + `check` constraints instead.
+Native enums cause sqlc to generate `interface{}` types and require restrictive `ALTER TYPE` locks for schema evolution.
+
 ```hcl
 schema "public" {}
-
-enum "coin_all" {
-  schema = schema.public
-  values = ["btc", "bch", "eth", "xrp", "hyt"]
-}
 
 table "address" {
   schema = schema.public
@@ -221,7 +219,7 @@ table "address" {
   }
 
   column "coin_type" {
-    type = enum.coin_all
+    type = varchar(10)
   }
 
   column "created_at" {
@@ -231,6 +229,10 @@ table "address" {
 
   primary_key {
     columns = [column.id]
+  }
+
+  check "chk_address_coin_type" {
+    expr = "coin_type IN ('btc', 'bch', 'eth', 'xrp', 'hyt')"
   }
 }
 ```
@@ -270,12 +272,12 @@ index "idx_unique_account" {
 | ----------------------- | ------------------------------------- |
 | `auto_increment = true` | `identity { generated = BY_DEFAULT }` |
 
-### Enum Types
+### Enum-like Columns
 
-| MySQL                        | PostgreSQL                                       |
-| ---------------------------- | ------------------------------------------------ |
-| Inline: `enum("btc", "bch")` | Named type: `enum "coin_all" { values = [...] }` |
-|                              | Reference: `type = enum.coin_all`                |
+| MySQL                        | PostgreSQL                                              |
+| ---------------------------- | ------------------------------------------------------- |
+| Inline: `enum("btc", "bch")` | `varchar(N)` + `check` constraint (NOT native `enum`)   |
+|                              | e.g., `check "chk_coin" { expr = "coin IN ('btc')" }`  |
 
 ### Column Types
 
@@ -290,7 +292,7 @@ index "idx_unique_account" {
 | `bool`          | `boolean`       | Same behavior                     |
 | `decimal(p,s)`  | `numeric(p,s)`  | Different keyword                 |
 | `blob`          | `bytea`         | Binary data (e.g., MuSig2 nonces) |
-| Inline `enum()` | Named `enum`    | PostgreSQL requires separate type |
+| Inline `enum()` | `varchar` + `check` | PostgreSQL uses CHECK constraints (not native enums) |
 
 ## Auto-Generated Files
 
@@ -321,7 +323,7 @@ Regenerate with `make atlas-dev-reset` (or `make atlas-dev-reset DB_DIALECT=post
 - Column names: lowercase, snake_case
 - Index names: `idx_{table}_{column(s)}`
 - Foreign key names: `fk_{table}_{reference}`
-- PostgreSQL enum names: descriptive, snake_case (e.g., `coin_all`, `action_type`)
+- Check constraint names: `chk_{table}_{column}` (e.g., `chk_btc_tx_coin`, `chk_address_account`)
 
 ## Quick Checklist
 

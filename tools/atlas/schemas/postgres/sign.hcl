@@ -1,5 +1,10 @@
 # Sign Schema Definition
 # Signing wallet data (auth account keys, seeds)
+#
+# Design Decision: varchar + CHECK constraints instead of native PostgreSQL enums
+# - Better schema evolution flexibility (adding/removing values without ALTER TYPE locks)
+# - sqlc generates proper `string` types in Go models (native enums produce `interface{}`)
+# - Consistent with project design docs (docs/database/research.md)
 
 # Schema declaration (PostgreSQL uses "public" schema within each database)
 schema "public" {}
