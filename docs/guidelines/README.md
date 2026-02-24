@@ -18,6 +18,7 @@ All AI agent configurations and developer documentation should reference these g
 | [Multi-Chain](multi-chain.md) | Multi-chain cryptocurrency support and architecture |
 | [Release](release.md) | Release process (GoReleaser, versioning, workflow) |
 | [Requirements](requirements.md) | Tool versions and installation instructions |
+| [Claude-Mem](claude-mem.md) | Persistent memory plugin for Claude Code sessions |
 
 ## How to Use
 
