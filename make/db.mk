@@ -92,13 +92,17 @@ regenerate-all-from-atlas-mysql:
 # Prerequisites: PostgreSQL sqlc schemas must exist in tools/sqlc/schemas/postgres/
 # Steps:
 # 1. generate-sqlite-schema: Convert PostgreSQL schemas to SQLite via pg2sqlite
-# 2. sqlc-sqlite: Generate Go code from SQLite schemas and queries
+# 2. generate-e2e-sqlite-schemas: Generate composite E2E schemas (sign gets shared tables)
+# 3. sqlc-sqlite: Generate Go code from SQLite schemas and queries
 .PHONY: regenerate-all-from-atlas-sqlite
 regenerate-all-from-atlas-sqlite:
-	@echo "=== Step 1/2: Converting PostgreSQL schemas to SQLite (pg2sqlite) ==="
+	@echo "=== Step 1/3: Converting PostgreSQL schemas to SQLite (pg2sqlite) ==="
 	@$(MAKE) generate-sqlite-schema
 	@echo ""
-	@echo "=== Step 2/2: Generating sqlc code for SQLite ==="
+	@echo "=== Step 2/3: Generating E2E composite SQLite schemas ==="
+	@$(MAKE) generate-e2e-sqlite-schemas
+	@echo ""
+	@echo "=== Step 3/3: Generating sqlc code for SQLite ==="
 	@$(MAKE) sqlc-sqlite
 	@echo ""
 	@echo "✓ All done! SQLite schema regeneration complete."

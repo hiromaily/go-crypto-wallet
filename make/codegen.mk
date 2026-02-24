@@ -17,6 +17,18 @@ generate-sqlite-schema:
 	pg2sqlite -i tools/sqlc/schemas/postgres/03_sign.sql \
 	-o tools/sqlc/schemas/sqlite/03_sign.sql
 
+###############################################################################
+# Generate composite SQLite schemas for E2E testing
+###############################################################################
+# Creates per-wallet schemas in tools/sqlc/schemas/sqlite/e2e/ that include
+# all tables each wallet needs at runtime. The sign wallet gets seed and
+# musig2_nonces tables from the keygen schema (shared tables that can't be
+# duplicated in SQLC schemas due to glob-based merging).
+#------------------------------------------------------------------------------
+.PHONY: generate-e2e-sqlite-schemas
+generate-e2e-sqlite-schemas:
+	./scripts/db/generate-e2e-sqlite-schemas.sh
+
 ########################################################################
 # sqlc
 #------------------------------------------------------------------------------

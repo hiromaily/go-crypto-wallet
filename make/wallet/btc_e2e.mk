@@ -191,3 +191,17 @@ btc-e2e-parallel: build-all
 .PHONY: btc-e2e-ci-all
 btc-e2e-ci-all: build-all
 	$(E2E_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(VERBOSE_FLAG) --ci
+
+# Check List
+# For PostgreSQL
+# make btc-e2e-reset P=1 DB=postgres
+# make btc-e2e-reset P=2 DB=postgres
+# make btc-e2e-reset P=3 DB=postgres
+# make btc-e2e-reset P=4 DB=postgres
+# make btc-e2e-reset P=5 DB=postgres
+# make btc-e2e-reset P=6 DB=postgres
+# make btc-e2e-reset P=7 DB=postgres
+# make btc-e2e-reset P=8 DB=postgres
+# make btc-e2e-reset P=9 DB=postgres
+# For SQLite
+# make btc-e2e-parallel PATTERNS=1-9 MAX_PARALLEL=9

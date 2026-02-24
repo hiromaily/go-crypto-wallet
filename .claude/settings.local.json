@@ -58,7 +58,9 @@
       "WebFetch(domain:atlasgo.io)",
       "Bash(atlas schema lint:*)",
       "Bash(atlas schema inspect:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr:*)"
     ]
   },
   "hooks": {
