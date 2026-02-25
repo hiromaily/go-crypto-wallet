@@ -188,9 +188,11 @@ type ETHTransactionSigner interface {
 
 // ETHTransactionSender broadcasts signed Ethereum transactions to the network.
 // Used by watch wallet send-transaction use case.
-type ETHTransactionSender interface {
-	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
-}
+//
+// Deprecated: Use TxSender instead (defined in the EIP-1559 Transaction Flow
+// Interfaces section below). ETHTransactionSender is retained only for backward
+// compatibility; new code should depend on TxSender.
+type ETHTransactionSender = TxSender
 
 // ETHRawKeyImporter imports raw private keys via the Ethereum RPC.
 // Used by keygen API CLI commands.
@@ -223,4 +225,106 @@ type ETHKeygenSignClient interface {
 type ETHWatchClient interface {
 	ETHLifecycle
 	ETHNodeAPIClient
+}
+
+// =============================================================================
+// EIP-1559 Transaction Flow Interfaces (Task 2.1b)
+// =============================================================================
+//
+// These interfaces define the port boundary for the EIP-1559 transaction flow.
+// They use clean domain types to prevent infrastructure type leakage into the
+// use case layer.
+//
+// Note: Some method signatures differ from the monolithic Ethereumer to use
+// domain-friendly types (e.g., EstimateGas uses plain parameters instead of
+// ethereum.CallMsg). The infrastructure implementations will be updated in
+// Tasks 4.x to satisfy these interfaces.
+// =============================================================================
+
+// ChainConfigProvider provides chain-level configuration.
+// Used by keygen signing and watch transaction creation use cases.
+type ChainConfigProvider interface {
+	CoinTypeCode() domainCoin.CoinTypeCode
+	GetChainConf() *chaincfg.Params
+}
+
+// BalanceChecker retrieves account balances.
+// Used by watch wallet monitor-transaction use case.
+type BalanceChecker interface {
+	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, error)
+	BalanceAt(ctx context.Context, addr string) (*big.Int, error)
+}
+
+// TxCreator creates unsigned transactions for both legacy and EIP-1559 formats.
+// Used by watch wallet create-transaction use case.
+type TxCreator interface {
+	CreateRawTransaction(
+		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	CreateRawTransactionEIP1559(
+		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	SupportsEIP1559(ctx context.Context) bool
+}
+
+// GasEstimator estimates gas and fees for transaction creation.
+// Used by watch wallet create-transaction use case.
+// Note: EstimateGas uses domain-friendly parameters instead of ethereum.CallMsg.
+type GasEstimator interface {
+	GasPrice(ctx context.Context) (*big.Int, error)
+	EstimateGas(ctx context.Context, from, to string, value *big.Int) (uint64, error)
+	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
+}
+
+// TxSigner signs raw transactions offline using a private key directly.
+// Used by keygen wallet sign-transaction use case for air-gapped offline signing.
+// This differs from ETHTransactionSigner: it accepts *ecdsa.PrivateKey directly
+// rather than a keystore passphrase, enabling true offline operation without
+// requiring an Ethereum node or keystore.
+type TxSigner interface {
+	SignOnRawTransaction(
+		rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+	) (*domainEthereum.RawTx, error)
+}
+
+// TxSender broadcasts signed transactions to the network.
+// Used by watch wallet send-transaction use case.
+// Note: ETHTransactionSender is an equivalent interface retained for backward compatibility.
+type TxSender interface {
+	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
+}
+
+// TxMonitor retrieves transaction status and confirmation count.
+// Used by watch wallet monitor-transaction use case.
+type TxMonitor interface {
+	GetTransactionReceipt(ctx context.Context, txHash string) (*domainEthereum.TransactionReceipt, error)
+	GetConfirmation(ctx context.Context, txHash string) (uint64, error)
+}
+
+// AddressValidator validates Ethereum addresses.
+// Used by watch wallet create-transaction use case.
+type AddressValidator interface {
+	ValidateAddr(addr string) error
+}
+
+// =============================================================================
+// Composed Interfaces for EIP-1559 Transaction Flow Use Cases
+// =============================================================================
+
+// WatchTxCreationDeps is the composed interface for the Watch wallet's
+// create-transaction use case. It combines all dependencies needed to
+// create both legacy and EIP-1559 transactions.
+type WatchTxCreationDeps interface {
+	ChainConfigProvider
+	TxCreator
+	GasEstimator
+	AddressValidator
+}
+
+// KeygenSignTxDeps is the composed interface for the Keygen wallet's
+// sign-transaction use case. ETH is single-sig EOA; there is no Sign wallet.
+// This combines chain configuration with offline private-key signing capability.
+type KeygenSignTxDeps interface {
+	ChainConfigProvider
+	TxSigner
 }
