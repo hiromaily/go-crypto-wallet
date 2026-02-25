@@ -1459,7 +1459,7 @@ func (c *container) newBCHWatchImportAddressUseCase() watchusecase.ImportAddress
 
 func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	// Determine which Ethereum API to use based on coin type
-	var targetEthAPI apieth.EtherTxCreator
+	var targetEthAPI apieth.ERC20er
 	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
 		targetEthAPI = c.newERC20()
 	} else {

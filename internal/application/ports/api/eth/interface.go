@@ -128,9 +128,6 @@ type ERC20er interface {
 	) (*domainEthereum.RawTx, *TxCreateParams, error)
 }
 
-// EtherTxCreator is a type alias for ERC20er used in transaction creation contexts.
-type EtherTxCreator = ERC20er
-
 // EtherTxMonitor defines the interface for monitoring Ethereum transactions.
 // Implementations track transaction confirmations and balance updates.
 type EtherTxMonitor interface {

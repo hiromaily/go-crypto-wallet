@@ -22,7 +22,7 @@ import (
 )
 
 type createTransactionUseCase struct {
-	ethClient       apieth.EtherTxCreator
+	ethClient       apieth.ERC20er
 	dbConn          *sql.DB
 	addrRepo        repowatch.AddressRepositorier
 	txRepo          repowatch.TxRepositorier
@@ -35,7 +35,7 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	ethClient apieth.EtherTxCreator,
+	ethClient apieth.ERC20er,
 	dbConn *sql.DB,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.TxRepositorier,

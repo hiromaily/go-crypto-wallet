@@ -5,23 +5,23 @@ import (
 	"errors"
 	"fmt"
 
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	ethereum "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
 type signTransactionUseCase struct {
-	eth        ethereum.Ethereumer
+	eth        apieth.Ethereumer
 	txFileRepo file.TransactionFileRepositorier
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for ETH keygen
 func NewSignTransactionUseCase(
-	eth ethereum.Ethereumer,
+	eth apieth.Ethereumer,
 	txFileRepo file.TransactionFileRepositorier,
 ) keygenusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{
