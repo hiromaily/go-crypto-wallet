@@ -90,7 +90,7 @@ singlesig_setup_phase() {
 	log_substep "Importing descriptors into watch wallet"
 	for account in "${accounts[@]}"; do
 		log_info "Importing ${account} descriptors"
-		btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor import \
+		btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor \
 			--file "${descriptor_files[$account]}" \
 			--account "${account}"
 	done

@@ -129,7 +129,7 @@ multisig_setup_phase() {
 
 	log_substep "Importing descriptors into watch wallet"
 	for account in deposit payment stored; do
-		btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor import --file "${descriptor_paths[$account]}" --account "$account"
+		btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" import descriptor --file "${descriptor_paths[$account]}" --account "$account"
 	done
 
 	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_paths[payment]}" 2>/dev/null)

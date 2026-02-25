@@ -28,9 +28,8 @@ Online wallet. Manages public keys, creates unsigned transactions, sends signed 
 watch
 ├── import
 │   ├── address                    Import addresses exported by keygen wallet
-│   └── descriptor                 (BTC only) Descriptor operations
-│       ├── import                 Import descriptors from file into Bitcoin Core
-│       └── validate               Validate descriptors without importing
+│   └── descriptor                 (BTC only) Import descriptors into Bitcoin Core
+│                                  Use --validate flag for dry-run validation
 ├── create
 │   ├── deposit                    Create unsigned deposit transaction
 │   ├── payment                    Create unsigned payment transaction
