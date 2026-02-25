@@ -1,5 +1,7 @@
 # Commands
 
+> **Command tree overview**: [`internal/interface-adapters/cli/README.md`](../internal/interface-adapters/cli/README.md)
+
 This document describes all available CLI commands for the three wallet types: Watch Wallet, Keygen Wallet, and Sign Wallet.
 
 ---

@@ -5,6 +5,8 @@ description: How to run watch, keygen, and sign wallet CLI commands. Use when ex
 
 # Wallet CLI Usage
 
+> **Full command tree**: [`internal/interface-adapters/cli/README.md`](../../internal/interface-adapters/cli/README.md)
+
 Guide for running the three wallet types: watch, keygen, and sign.
 
 ## Prerequisites

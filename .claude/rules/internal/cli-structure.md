@@ -9,6 +9,8 @@ paths:
 
 # CLI Subcommand Structure Rules
 
+> **Current command tree**: [`internal/interface-adapters/cli/README.md`](../../../internal/interface-adapters/cli/README.md)
+
 ## Rule 1: Command Hierarchy Order
 
 CLI subcommands follow the order: **[wallet type] → [verb] → [target]**
