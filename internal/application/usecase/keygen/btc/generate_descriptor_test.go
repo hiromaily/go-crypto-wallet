@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
@@ -22,6 +22,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
+	coldmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mocks"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
@@ -67,20 +68,21 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	xpriv := testDescriptorMainnetXpriv
-	accountRepo := &stubAccountRepo{
-		key: &domainBitcoin.BTCAccountKey{
-			FullPublicKey:          testDescriptorMainnetXpub,
-			KeyType:                string(domainKey.KeyTypeBIP84),
-			Account:                domainAccount.AccountTypeDeposit,
-			AccountExtendedPrivkey: &xpriv,
-		},
+	accountKey := &domainBitcoin.BTCAccountKey{
+		FullPublicKey:          testDescriptorMainnetXpub,
+		KeyType:                string(domainKey.KeyTypeBIP84),
+		Account:                domainAccount.AccountTypeDeposit,
+		AccountExtendedPrivkey: &xpriv,
 	}
+	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	accountRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return(accountKey, nil)
+	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
 
 	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
-		&stubAuthRepo{},
+		authRepo,
 		accountRepo,
 		nil,
 		domainCoin.BTC,
@@ -105,10 +107,7 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 	t.Parallel()
 
 	testSeed := bytes.Repeat([]byte{0x01}, hdkeychain.RecommendedSeedLen)
-	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
-		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
-		domainAccount.AuthType2: {ExtendedPubKey: newTestXpubFromSeed(t, 0x02)},
-	}
+	xpub2 := newTestXpubFromSeed(t, 0x02)
 
 	multiConfig := domainAccount.NewMultisigConfig(map[domainAccount.AccountType]map[int][]domainAccount.AuthType{
 		domainAccount.AccountTypeDeposit: {
@@ -116,14 +115,24 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 		},
 	})
 
+	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, mock.Anything).Return(
+		&domainAuth.AuthFullPubkey{ExtendedPubKey: testDescriptorMainnetXpub}, nil)
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, mock.Anything).Return(
+		&domainAuth.AuthFullPubkey{ExtendedPubKey: xpub2}, nil)
+	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	seedRepo := coldmocks.NewMockSeedRepositorier(t)
+	seedRepo.EXPECT().GetOne(mock.Anything).Return(
+		&domainKey.Seed{Seed: hex.EncodeToString(testSeed)}, nil)
+
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
-		&stubAuthRepo{items: signers},
-		&stubAccountRepo{},
-		&stubSeedRepo{seed: testSeed},
+		authRepo,
+		accountRepo,
+		seedRepo,
 		domainCoin.BTC,
 		multiConfig,
 		coinStrategy,
@@ -147,10 +156,7 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 	t.Parallel()
 
 	testSeed := bytes.Repeat([]byte{0x01}, hdkeychain.RecommendedSeedLen)
-	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
-		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
-		domainAccount.AuthType2: {ExtendedPubKey: newTestXpubFromSeed(t, 0x03)},
-	}
+	xpub3 := newTestXpubFromSeed(t, 0x03)
 
 	multiConfig := domainAccount.NewMultisigConfig(map[domainAccount.AccountType]map[int][]domainAccount.AuthType{
 		domainAccount.AccountTypeDeposit: {
@@ -158,13 +164,23 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 		},
 	})
 
+	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, mock.Anything).Return(
+		&domainAuth.AuthFullPubkey{ExtendedPubKey: testDescriptorMainnetXpub}, nil)
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, mock.Anything).Return(
+		&domainAuth.AuthFullPubkey{ExtendedPubKey: xpub3}, nil)
+	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	seedRepo := coldmocks.NewMockSeedRepositorier(t)
+	seedRepo.EXPECT().GetOne(mock.Anything).Return(
+		&domainKey.Seed{Seed: hex.EncodeToString(testSeed)}, nil)
+
 	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
-		&stubAuthRepo{items: signers},
-		&stubAccountRepo{},
-		&stubSeedRepo{seed: testSeed},
+		authRepo,
+		accountRepo,
+		seedRepo,
 		domainCoin.BTC,
 		multiConfig,
 		coinStrategy,
@@ -187,12 +203,16 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
 	t.Parallel()
 
+	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	accountRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return((*domainBitcoin.BTCAccountKey)(nil), nil)
+	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
+
 	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
-		&stubAuthRepo{},
-		&stubAccountRepo{key: nil},
+		authRepo,
+		accountRepo,
 		nil,
 		domainCoin.BTC,
 		nil,
@@ -214,10 +234,7 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 	t.Parallel()
 
 	testSeed := bytes.Repeat([]byte{0x01}, hdkeychain.RecommendedSeedLen)
-	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
-		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
-		domainAccount.AuthType2: {ExtendedPubKey: newTestXpubFromSeed(t, 0x02)},
-	}
+	xpub2 := newTestXpubFromSeed(t, 0x02)
 
 	multiConfig := domainAccount.NewMultisigConfig(map[domainAccount.AccountType]map[int][]domainAccount.AuthType{
 		domainAccount.AccountTypePayment: {
@@ -225,14 +242,24 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 		},
 	})
 
+	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, mock.Anything).Return(
+		&domainAuth.AuthFullPubkey{ExtendedPubKey: testDescriptorMainnetXpub}, nil)
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, mock.Anything).Return(
+		&domainAuth.AuthFullPubkey{ExtendedPubKey: xpub2}, nil)
+	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	seedRepo := coldmocks.NewMockSeedRepositorier(t)
+	seedRepo.EXPECT().GetOne(mock.Anything).Return(
+		&domainKey.Seed{Seed: hex.EncodeToString(testSeed)}, nil)
+
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
-		&stubAuthRepo{items: signers},
-		&stubAccountRepo{},
-		&stubSeedRepo{seed: testSeed},
+		authRepo,
+		accountRepo,
+		seedRepo,
 		domainCoin.BTC,
 		multiConfig,
 		coinStrategy,
@@ -264,23 +291,24 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 func TestGenerateDescriptorUseCase_MultisigMissingSeed(t *testing.T) {
 	t.Parallel()
 
-	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
-		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
-	}
-
 	multiConfig := domainAccount.NewMultisigConfig(map[domainAccount.AccountType]map[int][]domainAccount.AuthType{
 		domainAccount.AccountTypeDeposit: {
 			2: {domainAccount.AuthType1},
 		},
 	})
 
+	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
+	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	seedRepo := coldmocks.NewMockSeedRepositorier(t)
+	seedRepo.EXPECT().GetOne(mock.Anything).Return((*domainKey.Seed)(nil), nil)
+
 	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
-		&stubAuthRepo{items: signers},
-		&stubAccountRepo{},
-		&stubSeedRepo{seed: nil}, // No seed available
+		authRepo,
+		accountRepo,
+		seedRepo,
 		domainCoin.BTC,
 		multiConfig,
 		coinStrategy,
@@ -296,79 +324,6 @@ func TestGenerateDescriptorUseCase_MultisigMissingSeed(t *testing.T) {
 	require.Contains(t, err.Error(), "seed not found")
 }
 
-type stubAccountRepo struct {
-	key *domainBitcoin.BTCAccountKey
-	err error
-}
-
-func (*stubAccountRepo) GetMaxIndex(_ context.Context, _ domainAccount.AccountType) (int64, error) {
-	return 0, nil
-}
-
-func (s *stubAccountRepo) GetOneMaxID(domainAccount.AccountType) (*domainBitcoin.BTCAccountKey, error) {
-	return s.key, s.err
-}
-
-func (*stubAccountRepo) GetAllAddrStatus(
-	domainAccount.AccountType,
-	domainAddress.AddrStatus,
-) ([]*domainBitcoin.BTCAccountKey, error) {
-	return nil, nil
-}
-
-func (*stubAccountRepo) GetAllMultiAddr(domainAccount.AccountType, []string) ([]*domainBitcoin.BTCAccountKey, error) {
-	return nil, nil
-}
-func (*stubAccountRepo) InsertBulk([]*domainBitcoin.BTCAccountKey) error { return nil }
-func (*stubAccountRepo) UpdateAddr(domainAccount.AccountType, string, string) (int64, error) {
-	return 0, nil
-}
-
-func (*stubAccountRepo) UpdateAddrStatus(
-	domainAccount.AccountType,
-	domainAddress.AddrStatus,
-	[]string,
-) (int64, error) {
-	return 0, nil
-}
-
-func (*stubAccountRepo) UpdateMultisigAddr(domainAccount.AccountType, *domainBitcoin.BTCAccountKey) (int64, error) {
-	return 0, nil
-}
-
-func (*stubAccountRepo) UpdateMultisigAddrs(
-	domainAccount.AccountType,
-	[]*domainBitcoin.BTCAccountKey,
-) (int64, error) {
-	return 0, nil
-}
-
-type stubAuthRepo struct {
-	items map[domainAccount.AuthType]*domainAuth.AuthFullPubkey
-}
-
-func (s *stubAuthRepo) GetOne(_ context.Context, authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error) {
-	if s.items == nil {
-		return nil, fmt.Errorf("auth not found: %s", authType.String())
-	}
-	val, ok := s.items[authType]
-	if !ok {
-		return nil, fmt.Errorf("auth not found: %s", authType.String())
-	}
-	return val, nil
-}
-
-func (s *stubAuthRepo) GetOneByPurpose(
-	authType domainAccount.AuthType,
-	_ domainAuth.Purpose,
-) (*domainAuth.AuthFullPubkey, error) {
-	// For tests, ignore purpose and return the same result as GetOne
-	return s.GetOne(context.Background(), authType)
-}
-
-func (*stubAuthRepo) Insert(domainAccount.AuthType, string) error   { return nil }
-func (*stubAuthRepo) InsertBulk([]*domainAuth.AuthFullPubkey) error { return nil }
-
 func newTestXpubFromSeed(t *testing.T, seedByte byte) string {
 	t.Helper()
 
@@ -381,22 +336,3 @@ func newTestXpubFromSeed(t *testing.T, seedByte byte) string {
 
 	return xpub.String()
 }
-
-type stubSeedRepo struct {
-	seed []byte
-	err  error
-}
-
-func (s *stubSeedRepo) GetOne(context.Context) (*domainKey.Seed, error) {
-	if s.err != nil {
-		return nil, s.err
-	}
-	if s.seed == nil {
-		return nil, nil
-	}
-	return &domainKey.Seed{
-		Seed: hex.EncodeToString(s.seed),
-	}, nil
-}
-
-func (*stubSeedRepo) Insert(context.Context, string) error { return nil }

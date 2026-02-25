@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
@@ -14,6 +15,8 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	coldmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mocks"
+	filemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )
 
 func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
@@ -27,8 +30,18 @@ func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
 			domainAddress.AddrTypeLegacy:     "pkh-desc",
 		},
 	}
-	writer := &stubDescriptorFileWriter{}
-	accountKeyRepo := &stubAccountKeyRepo{}
+	accountKeyRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	accountKeyRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return(
+		&domainBitcoin.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
+
+	var writtenPath string
+	var writtenData []byte
+	writer := filemocks.NewMockDescriptorFileWriter(t)
+	writer.EXPECT().WriteFile(mock.Anything, mock.Anything).
+		Run(func(path string, data []byte) {
+			writtenPath = path
+			writtenData = data
+		}).Return(nil)
 
 	useCase := keygenusecasebtc.NewExportDescriptorUseCase(generator, writer, accountKeyRepo)
 
@@ -40,14 +53,14 @@ func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, "/tmp/descriptors.txt", output.FilePath)
-	require.Equal(t, output.FilePath, writer.path)
+	require.Equal(t, "/tmp/descriptors.txt", writtenPath)
 
-	// stubAccountKeyRepo returns bip44 type, so only legacy (pkh) descriptors should be exported
+	// accountKeyRepo returns bip44 type, so only legacy (pkh) descriptors should be exported
 	expectedDescriptors := []string{
 		"pkh-desc",
 		"pkh-desc-change",
 	}
-	require.Equal(t, strings.Join(expectedDescriptors, "\n"), string(writer.data))
+	require.Equal(t, strings.Join(expectedDescriptors, "\n"), string(writtenData))
 }
 
 func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
@@ -61,8 +74,16 @@ func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
 			domainAddress.AddrTypeLegacy:     "pkh-desc",
 		},
 	}
-	writer := &stubDescriptorFileWriter{}
-	accountKeyRepo := &stubAccountKeyRepo{}
+	accountKeyRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	accountKeyRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypePayment).Return(
+		&domainBitcoin.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
+
+	var writtenData []byte
+	writer := filemocks.NewMockDescriptorFileWriter(t)
+	writer.EXPECT().WriteFile(mock.Anything, mock.Anything).
+		Run(func(_ string, data []byte) {
+			writtenData = data
+		}).Return(nil)
 
 	useCase := keygenusecasebtc.NewExportDescriptorUseCase(generator, writer, accountKeyRepo)
 
@@ -80,8 +101,8 @@ func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
 		Range      []int  `json:"range"`
 		WatchOnly  bool   `json:"watchonly"`
 	}
-	require.NoError(t, json.Unmarshal(writer.data, &items))
-	// stubAccountKeyRepo returns bip44 type, so only 1 legacy descriptor is exported (no change)
+	require.NoError(t, json.Unmarshal(writtenData, &items))
+	// accountKeyRepo returns bip44 type, so only 1 legacy descriptor is exported (no change)
 	require.Len(t, items, 1)
 
 	require.Equal(t, "pkh-desc", items[0].Descriptor)
@@ -93,10 +114,15 @@ func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
 func TestExportDescriptorUseCase_InvalidFormat(t *testing.T) {
 	t.Parallel()
 
+	accountKeyRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
+	accountKeyRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return(
+		&domainBitcoin.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
+	writer := filemocks.NewMockDescriptorFileWriter(t)
+
 	useCase := keygenusecasebtc.NewExportDescriptorUseCase(
 		&stubDescriptorGenerator{},
-		&stubDescriptorFileWriter{},
-		&stubAccountKeyRepo{},
+		writer,
+		accountKeyRepo,
 	)
 
 	_, err := useCase.Export(context.Background(), keygenusecase.ExportDescriptorInput{
@@ -129,70 +155,4 @@ func (s *stubDescriptorGenerator) Generate(
 		AccountType: input.AccountType,
 		AddressType: input.AddressType,
 	}, nil
-}
-
-type stubDescriptorFileWriter struct {
-	path string
-	data []byte
-}
-
-func (s *stubDescriptorFileWriter) WriteFile(path string, data []byte) error {
-	s.path = path
-	s.data = data
-	return nil
-}
-
-type stubAccountKeyRepo struct{}
-
-func (*stubAccountKeyRepo) GetMaxIndex(_ context.Context, _ domainAccount.AccountType) (int64, error) {
-	return 0, nil
-}
-
-func (*stubAccountKeyRepo) GetOneMaxID(_ domainAccount.AccountType) (*domainBitcoin.BTCAccountKey, error) {
-	// Return a mock account key with bip44 type for testing
-	// The export logic will use this key type to determine which descriptor to generate
-	return &domainBitcoin.BTCAccountKey{
-		ID:      1,
-		KeyType: "bip44",
-	}, nil
-}
-
-func (*stubAccountKeyRepo) GetAllAddrStatus(
-	_ domainAccount.AccountType, _ domainAddress.AddrStatus,
-) ([]*domainBitcoin.BTCAccountKey, error) {
-	return nil, nil
-}
-
-func (*stubAccountKeyRepo) GetAllMultiAddr(
-	_ domainAccount.AccountType, _ []string,
-) ([]*domainBitcoin.BTCAccountKey, error) {
-	return nil, nil
-}
-
-func (*stubAccountKeyRepo) InsertBulk(_ []*domainBitcoin.BTCAccountKey) error {
-	return nil
-}
-
-func (*stubAccountKeyRepo) UpdateAddr(
-	_ domainAccount.AccountType, _, _ string,
-) (int64, error) {
-	return 0, nil
-}
-
-func (*stubAccountKeyRepo) UpdateAddrStatus(
-	_ domainAccount.AccountType, _ domainAddress.AddrStatus, _ []string,
-) (int64, error) {
-	return 0, nil
-}
-
-func (*stubAccountKeyRepo) UpdateMultisigAddr(
-	_ domainAccount.AccountType, _ *domainBitcoin.BTCAccountKey,
-) (int64, error) {
-	return 0, nil
-}
-
-func (*stubAccountKeyRepo) UpdateMultisigAddrs(
-	_ domainAccount.AccountType, _ []*domainBitcoin.BTCAccountKey,
-) (int64, error) {
-	return 0, nil
 }
