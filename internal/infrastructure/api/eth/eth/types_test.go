@@ -19,6 +19,30 @@ func TestETHNodeTypeConstants(t *testing.T) {
 	assert.Equal(t, ETHNodeType("geth"), ETHNodeTypeGeth)
 }
 
+func TestDetectClientType(t *testing.T) {
+	tests := []struct {
+		version string
+		want    ClientVersion
+	}{
+		{"Anvil v0.2.0", ClientVersionAnvil},
+		{"anvil/v0.1.0", ClientVersionAnvil},
+		{"ANVIL", ClientVersionAnvil},
+		{"Parity-Ethereum//v2.7.2", ClientVersionParity},
+		{"parity/v1.0.0", ClientVersionParity},
+		{"Geth/v1.13.0", ClientVersionGeth},
+		{"go-ethereum/v1.12.0", ClientVersionGeth},
+		{"", ClientVersionGeth}, // empty defaults to Geth
+		{"unknown-client", ClientVersionGeth},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.version, func(t *testing.T) {
+			got := DetectClientType(tt.version)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestChainIDForNetwork(t *testing.T) {
 	tests := []struct {
 		network  NetworkTypeETH
