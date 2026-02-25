@@ -57,10 +57,8 @@ Each target handles: Atlas migrations → Docker DB reset → SQLC schema extrac
 
 After running the regenerate targets, confirm each DB dialect has exactly one migration SQL file:
 
-```
-tools/atlas/migrations/postgres/{db-name}/*.sql   ← one file, updated
-tools/atlas/migrations/mysql/{db-name}/*.sql      ← one file, updated
-```
+- `tools/atlas/migrations/postgres/{db-name}/*.sql`   ← one file, updated
+- `tools/atlas/migrations/mysql/{db-name}/*.sql`      ← one file, updated
 
 DB names: `keygen`, `sign`, `watch`
 
@@ -76,7 +74,7 @@ make check-build && make gotest
 - [ ] `make regenerate-all-from-atlas` succeeds (postgres)
 - [ ] `make regenerate-all-from-atlas-mysql` succeeds (mysql)
 - [ ] `make regenerate-all-from-atlas-sqlite` succeeds (sqlite)
-- [ ] Each `tools/atlas/migrations/{dialect}/{db-name}/` has exactly one `.sql` file and it is updated
+- [ ] Each `tools/atlas/migrations/{postgres,mysql}/{db-name}/` has exactly one `.sql` file and it is updated
 - [ ] SQLC generates correctly
 - [ ] Go build passes
 
