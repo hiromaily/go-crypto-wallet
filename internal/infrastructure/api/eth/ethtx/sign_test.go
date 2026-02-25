@@ -18,10 +18,14 @@ func newTestRawTx(t *testing.T, tx *types.Transaction, fromHex string) *domainEt
 	t.Helper()
 	txHex, err := ethtx.EncodeTx(tx)
 	require.NoError(t, err)
+	toHex := ""
+	if tx.To() != nil {
+		toHex = tx.To().Hex()
+	}
 	return &domainEthereum.RawTx{
 		UUID:  "test-uuid",
 		From:  fromHex,
-		To:    tx.To().Hex(),
+		To:    toHex,
 		Value: *tx.Value(),
 		Nonce: tx.Nonce(),
 		TxHex: *txHex,
@@ -104,6 +108,41 @@ func TestSignTxOffline_NilPrivKey(t *testing.T) {
 
 	_, err := ethtx.SignTxOffline(rawTx, nil, big.NewInt(1337))
 	assert.Error(t, err)
+}
+
+// TestSignTxOffline_ContractCreation verifies that signing a contract creation
+// transaction (To == nil) does not panic and produces a valid signed transaction.
+func TestSignTxOffline_ContractCreation(t *testing.T) {
+	privKey, err := crypto.GenerateKey()
+	require.NoError(t, err)
+	fromAddr := crypto.PubkeyToAddress(privKey.PublicKey)
+
+	// Contract creation: To is nil
+	chainID := big.NewInt(1337)
+	tx := types.NewTx(&types.DynamicFeeTx{
+		ChainID:   chainID,
+		Nonce:     0,
+		To:        nil, // contract creation
+		Value:     big.NewInt(0),
+		Gas:       100000,
+		GasTipCap: big.NewInt(2_000_000_000),
+		GasFeeCap: big.NewInt(30_000_000_000),
+		Data:      []byte{0x60, 0x60}, // minimal bytecode stub
+	})
+	rawTx := newTestRawTx(t, tx, fromAddr.Hex())
+
+	signed, err := ethtx.SignTxOffline(rawTx, privKey, chainID)
+	require.NoError(t, err)
+	require.NotNil(t, signed)
+	assert.Empty(t, signed.To, "To must be empty string for contract creation")
+
+	// Verify signature recovers the correct sender
+	decoded, err := ethtx.DecodeTx(signed.TxHex)
+	require.NoError(t, err)
+	signer := types.LatestSignerForChainID(chainID)
+	sender, err := types.Sender(signer, decoded)
+	require.NoError(t, err)
+	assert.Equal(t, fromAddr, sender)
 }
 
 // TestSignTxOffline_NilRawTx verifies that a nil rawTx returns an error.

@@ -33,12 +33,16 @@ func (e *Ethereum) GasPrice(ctx context.Context) (*big.Int, error) {
 func (e *Ethereum) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
 	tip, err := e.ethClient.SuggestGasTipCap(ctx)
 	if err != nil {
+		const (
+			defaultPriorityFeeGwei = 2
+			gweiInWei              = 1_000_000_000
+		)
 		logger.Warn("SuggestGasTipCap RPC failed, using config fallback", "error", err)
 		priorityFeeGwei := e.conf.MaxPriorityFeePerGas
 		if priorityFeeGwei == 0 {
-			priorityFeeGwei = 2 // Default 2 Gwei
+			priorityFeeGwei = defaultPriorityFeeGwei
 		}
-		return new(big.Int).SetUint64(priorityFeeGwei * 1_000_000_000), nil
+		return new(big.Int).SetUint64(priorityFeeGwei * gweiInWei), nil
 	}
 	return tip, nil
 }

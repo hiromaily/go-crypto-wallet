@@ -52,10 +52,16 @@ func SignTxOffline(
 		return nil, fmt.Errorf("fail to encode signed transaction: %w", err)
 	}
 
+	// To() is nil for contract creation transactions; preserve empty string in that case.
+	toAddr := ""
+	if signedTx.To() != nil {
+		toAddr = signedTx.To().Hex()
+	}
+
 	return &domainEthereum.RawTx{
 		UUID:  rawTx.UUID,
 		From:  fromAddr.Hex(),
-		To:    signedTx.To().Hex(),
+		To:    toAddr,
 		Value: *signedTx.Value(),
 		Nonce: signedTx.Nonce(),
 		TxHex: *encodedTx,
