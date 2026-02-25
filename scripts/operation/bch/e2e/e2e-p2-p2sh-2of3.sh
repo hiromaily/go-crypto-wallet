@@ -282,7 +282,7 @@ transaction_flow_phase() {
 
 	# Send transaction
 	log_substep "Sending fully signed transaction"
-	tx_result=$(bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send --file "${tx_signed2}")
+	tx_result=$(bch_watch_cmd -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send tx --file "${tx_signed2}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
