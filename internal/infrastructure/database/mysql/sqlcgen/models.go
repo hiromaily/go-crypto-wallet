@@ -896,6 +896,8 @@ type EthAccountKey struct {
 	FullPublicKey string
 	// private key (hex encoded)
 	PrivateKey string
+	// BIP32 account-level extended private key for offline signing derivation
+	AccountExtendedPrivkey sql.NullString
 	// index for hd wallet
 	Idx int64
 	// progress status for address generating

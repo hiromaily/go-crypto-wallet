@@ -82,6 +82,7 @@ type AddressInfo struct {
 - Depend on port interfaces, not concrete implementations
 - Delegate business logic to domain layer
 - Wrap errors with context
+- Should be kept as simple as possible, and specific functionality should be delegated to shared package layers such as the domain layer or /pkg.
 
 ### Pattern
 
@@ -104,15 +105,15 @@ func (u *xxxUseCase) Execute(ctx context.Context, input XxxInput) (*XxxOutput, e
 
 ## Allowed/Forbidden
 
-| Action | Allowed |
-|--------|---------|
-| Import from `domain/` | Yes |
-| Import from `application/ports/` | Yes |
-| Import from `application/dto/` | Yes |
-| Import from `infrastructure/` | No |
-| Import from `interface-adapters/` | No |
-| Define interfaces | Yes (in `ports/`) |
-| Contain business logic | No (delegate to domain) |
+| Action                            | Allowed                 |
+| --------------------------------- | ----------------------- |
+| Import from `domain/`             | Yes                     |
+| Import from `application/ports/`  | Yes                     |
+| Import from `application/dto/`    | Yes                     |
+| Import from `infrastructure/`     | No                      |
+| Import from `interface-adapters/` | No                      |
+| Define interfaces                 | Yes (in `ports/`)       |
+| Contain business logic            | No (delegate to domain) |
 
 ## Related Rules
 

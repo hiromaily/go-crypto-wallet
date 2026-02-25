@@ -21,6 +21,7 @@ type ETHKeygen struct {
 	generateHDWalletUseCase keygenusecase.GenerateHDWalletUseCase
 	importPrivKeyUseCase    keygenusecase.ImportPrivateKeyUseCase
 	exportAddressUseCase    keygenusecase.ExportAddressUseCase
+	exportFullPubkeyUseCase keygenusecase.ExportFullPubkeyUseCase
 	signTxUseCase           keygenusecase.SignTransactionUseCase
 }
 
@@ -33,6 +34,7 @@ func NewETHKeygen(
 	generateHDWalletUseCase keygenusecase.GenerateHDWalletUseCase,
 	importPrivKeyUseCase keygenusecase.ImportPrivateKeyUseCase,
 	exportAddressUseCase keygenusecase.ExportAddressUseCase,
+	exportFullPubkeyUseCase keygenusecase.ExportFullPubkeyUseCase,
 	signTxUseCase keygenusecase.SignTransactionUseCase,
 ) *ETHKeygen {
 	return &ETHKeygen{
@@ -43,6 +45,7 @@ func NewETHKeygen(
 		generateHDWalletUseCase: generateHDWalletUseCase,
 		importPrivKeyUseCase:    importPrivKeyUseCase,
 		exportAddressUseCase:    exportAddressUseCase,
+		exportFullPubkeyUseCase: exportFullPubkeyUseCase,
 		signTxUseCase:           signTxUseCase,
 	}
 }
@@ -102,6 +105,17 @@ func (*ETHKeygen) ImportFullPubKey(_ string) error {
 func (*ETHKeygen) CreateMultisigAddress(_ domainAccount.AccountType) error {
 	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil
+}
+
+// ExportFullPubkey exports the account-level extended public key (accountXpub) to a file
+func (k *ETHKeygen) ExportFullPubkey(accountType domainAccount.AccountType) (string, error) {
+	output, err := k.exportFullPubkeyUseCase.Export(context.Background(), keygenusecase.ExportFullPubkeyInput{
+		AccountType: accountType,
+	})
+	if err != nil {
+		return "", err
+	}
+	return output.FileName, nil
 }
 
 // ExportAddress exports address

@@ -63,7 +63,7 @@
   - _Requirements: 2.4_
 
 - [ ] 5. Verify and strengthen HD key generation in the Keygen wallet
-- [ ] 5.1 (P) Ensure BIP-39/BIP-44 key generation is robust and persists accountXpriv
+- [x] 5.1 (P) Ensure BIP-39/BIP-44 key generation is robust and persists accountXpriv
   - Verify BIP-44 derivation path `m/44'/60'/0'/0/x` is used consistently for all ETH key generation
   - Verify Ethereum addresses are derived from secp256k1 public keys via Keccak-256 (last 20 bytes)
   - Store the account-level extended private key (`accountXpriv`) in the database for later offline signing
@@ -71,7 +71,7 @@
   - Ensure no raw private key material is stored or logged outside the offline keygen environment
   - _Requirements: 3.2, 4.1, 4.2, 4.4, 4.5, 4.6_
 
-- [ ] 5.2 (P) Implement accountXpub export for the Watch wallet
+- [x] 5.2 (P) Implement accountXpub export for the Watch wallet
   - Export the account-level extended public key (`accountXpub`) to a file so the Watch wallet can derive and verify child addresses without ever holding private keys
   - Follow the BTC `ExportFullPubkey` use case pattern
   - _Requirements: 4.3_

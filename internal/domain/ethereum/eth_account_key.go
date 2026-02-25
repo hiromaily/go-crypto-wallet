@@ -2,7 +2,10 @@ package ethereum
 
 import (
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -10,17 +13,18 @@ import (
 
 // ETHAccountKey represents an Ethereum account key with associated address in the domain layer.
 //
-// SECURITY NOTE: The PrivateKey field contains the private key in hexadecimal format.
-// This must NEVER be logged or exposed in error messages. Handle with extreme care.
+// SECURITY NOTE: The PrivateKey and AccountExtendedPrivkey fields contain sensitive key material.
+// These must NEVER be logged or exposed in error messages. Handle with extreme care.
 type ETHAccountKey struct {
-	ID            int64
-	Account       domainAccount.AccountType
-	Address       string // Ethereum address (0x...)
-	FullPublicKey string // Full public key (uncompressed, 65 bytes hex)
-	PrivateKey    string // Private key (hex encoded) - NEVER log this field
-	Idx           int64  // Index for HD wallet
-	AddrStatus    domainAddress.AddrStatus
-	UpdatedAt     *time.Time
+	ID                     int64
+	Account                domainAccount.AccountType
+	Address                string // Ethereum address (0x...)
+	FullPublicKey          string // Full public key (uncompressed, 65 bytes hex)
+	PrivateKey             string // Private key (hex encoded) - NEVER log this field
+	AccountExtendedPrivkey string // BIP32 account-level extended private key - NEVER log this field
+	Idx                    int64  // Index for HD wallet
+	AddrStatus             domainAddress.AddrStatus
+	UpdatedAt              *time.Time
 }
 
 // NewETHAccountKey creates a new ETHAccountKey entity for key generation.
@@ -66,6 +70,30 @@ func (k *ETHAccountKey) UpdateAddrStatus(status domainAddress.AddrStatus) {
 // SECURITY: This returns sensitive private key data. Never log the return value.
 func (k *ETHAccountKey) GetPrivateKey() string {
 	return k.PrivateKey
+}
+
+// SetAccountExtendedPrivkey sets the BIP32 account-level extended private key.
+// SECURITY: This stores sensitive private key material. Never log the value parameter.
+func (k *ETHAccountKey) SetAccountExtendedPrivkey(xpriv string) {
+	k.AccountExtendedPrivkey = xpriv
+}
+
+// DeriveAccountXpub derives the account-level extended public key (xpub) from the stored xpriv.
+// The returned xpub can be shared with the Watch wallet for child address derivation
+// without exposing any private key material.
+func (k *ETHAccountKey) DeriveAccountXpub() (string, error) {
+	if k.AccountExtendedPrivkey == "" {
+		return "", errors.New("accountXpriv not found for this account; run key generation first")
+	}
+	extKey, err := hdkeychain.NewKeyFromString(k.AccountExtendedPrivkey)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse accountXpriv: %w", err)
+	}
+	pubKey, err := extKey.Neuter()
+	if err != nil {
+		return "", fmt.Errorf("failed to derive accountXpub from accountXpriv: %w", err)
+	}
+	return pubKey.String(), nil
 }
 
 func (k *ETHAccountKey) updateTimestamp() {
