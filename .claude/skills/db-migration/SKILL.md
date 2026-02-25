@@ -26,31 +26,43 @@ Workflow for database schema and migration changes.
 
 Edit HCL files in `tools/atlas/schemas/{db_dialect}/`.
 
+Dialect directories:
+- `tools/atlas/schemas/postgres/*.hcl`
+- `tools/atlas/schemas/mysql/*.hcl`
+
 ### 2. Verify HCL (from rules/hcl.md)
 
 ```bash
 make atlas-fmt && make atlas-lint
 ```
 
-### 3. Generate Migrations
+### 3. Regenerate All Artifacts
+
+Run **all three** targets after modifying HCL schemas:
 
 ```bash
-make atlas-dev-reset
+# Regenerate migrations, extract SQLC schemas, and generate Go code for PostgreSQL
+make regenerate-all-from-atlas
+
+# Regenerate for MySQL
+make regenerate-all-from-atlas-mysql
+
+# Convert PostgreSQL schemas to SQLite and generate Go code for SQLite
+make regenerate-all-from-atlas-sqlite
 ```
 
-### 4. Test Migration
+Each target handles: Atlas migrations → Docker DB reset → SQLC schema extraction → SQLC code generation.
 
-```bash
-docker compose down -v && docker compose --profile mysql up -d
-```
+### 4. Verify Migration Files
 
-### 5. Regenerate SQLC (from rules/sql.md)
+After running the regenerate targets, confirm each DB dialect has exactly one migration SQL file:
 
-```bash
-make extract-sqlc-schema-all && make sqlc
-```
+- `tools/atlas/migrations/postgres/{db-name}/*.sql`   ← one file, updated
+- `tools/atlas/migrations/mysql/{db-name}/*.sql`      ← one file, updated
 
-### 6. Verify Go Code
+DB names: `keygen`, `sign`, `watch`
+
+### 5. Verify Go Code
 
 ```bash
 make check-build && make gotest
@@ -59,7 +71,10 @@ make check-build && make gotest
 ## Self-Review Checklist
 
 - [ ] HCL format/lint passes
-- [ ] Migration applies cleanly
+- [ ] `make regenerate-all-from-atlas` succeeds (postgres)
+- [ ] `make regenerate-all-from-atlas-mysql` succeeds (mysql)
+- [ ] `make regenerate-all-from-atlas-sqlite` succeeds (sqlite)
+- [ ] Each `tools/atlas/migrations/{postgres,mysql}/{db-name}/` has exactly one `.sql` file and it is updated
 - [ ] SQLC generates correctly
 - [ ] Go build passes
 
