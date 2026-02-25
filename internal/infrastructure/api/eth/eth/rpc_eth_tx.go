@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
 
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -90,11 +89,13 @@ func (e *Ethereum) SendRawTransaction(ctx context.Context, signedTx string) (str
 	return txHash, nil
 }
 
-// SendRawTransactionWithTypesTx call SendRawTransaction() by types.Transaction
+// SendRawTransactionWithTypesTx call SendRawTransaction() by types.Transaction.
+// Uses EIP-2718 binary format (MarshalBinary) to correctly encode both legacy
+// and typed (EIP-1559) transactions for eth_sendRawTransaction.
 func (e *Ethereum) SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error) {
-	encodedTx, err := rlp.EncodeToBytes(tx)
+	encodedTx, err := tx.MarshalBinary()
 	if err != nil {
-		return "", fmt.Errorf("fail to call rlp.EncodeToBytes(tx): %w", err)
+		return "", fmt.Errorf("fail to call tx.MarshalBinary(): %w", err)
 	}
 	return e.SendRawTransaction(ctx, hexutil.Encode(encodedTx))
 }

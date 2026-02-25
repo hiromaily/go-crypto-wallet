@@ -22,6 +22,9 @@ var _ apieth.Ethereumer = (*Ethereum)(nil)
 // Compile-time check that Ethereum implements EtherTxMonitor interface
 var _ apieth.EtherTxMonitor = (*Ethereum)(nil)
 
+// Compile-time check that Ethereum implements TxSigner interface
+var _ apieth.TxSigner = (*Ethereum)(nil)
+
 // Ethereum includes client to call JSON-RPC
 type Ethereum struct {
 	ethClient    *ethclient.Client

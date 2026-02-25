@@ -88,6 +88,7 @@ type Ethereumer interface {
 	// rpc_eth_gas
 	GasPrice(ctx context.Context) (*big.Int, error)
 	EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error)
+	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
 	// rpc_eth_tx
 	Sign(ctx context.Context, hexAddr, message string) (string, error)
 	SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error)
@@ -122,6 +123,9 @@ type Ethereumer interface {
 	) (*domainEthereum.RawTx, *TxCreateParams, error)
 	SupportsEIP1559(ctx context.Context) bool
 	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
+	SignTxWithPrivateKey(
+		rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+	) (*domainEthereum.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
 	// util
@@ -278,11 +282,11 @@ type GasEstimator interface {
 
 // TxSigner signs raw transactions offline using a private key directly.
 // Used by keygen wallet sign-transaction use case for air-gapped offline signing.
-// This differs from ETHTransactionSigner: it accepts *ecdsa.PrivateKey directly
-// rather than a keystore passphrase, enabling true offline operation without
-// requiring an Ethereum node or keystore.
+// This differs from ETHTransactionSigner which uses a keystore passphrase:
+// SignTxWithPrivateKey accepts *ecdsa.PrivateKey directly, enabling true offline
+// operation without requiring an Ethereum node or keystore.
 type TxSigner interface {
-	SignOnRawTransaction(
+	SignTxWithPrivateKey(
 		rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
 	) (*domainEthereum.RawTx, error)
 }

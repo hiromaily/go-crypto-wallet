@@ -2,6 +2,7 @@ package eth
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"math/big"
@@ -215,10 +216,8 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase 
 	logger.Debug("call types.SignTx",
 		"tx", tx,
 		"chainID", chainID.Uint64(),
-		"key.PrivateKey", key.PrivateKey,
 	)
-	// var signer types.Signer = types.NewEIP155Signer(chainID)
-	signer := types.NewLondonSigner(chainID)
+	signer := types.LatestSignerForChainID(chainID)
 
 	// sign
 	signedTX, err := types.SignTx(tx, signer, key.PrivateKey)
@@ -381,13 +380,11 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	}
 
 	// Calculate EIP-1559 fees
-	// maxPriorityFeePerGas: Configurable priority fee (tip for miners/validators)
-	// Default: 2 Gwei if not configured
-	priorityFeeGwei := e.conf.MaxPriorityFeePerGas
-	if priorityFeeGwei == 0 {
-		priorityFeeGwei = 2 // Default to 2 Gwei
+	// maxPriorityFeePerGas: suggested by the node with config fallback
+	maxPriorityFeePerGas, err := e.SuggestGasTipCap(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call eth.SuggestGasTipCap(): %w", err)
 	}
-	maxPriorityFeePerGas := new(big.Int).SetUint64(priorityFeeGwei * 1000000000) // Convert Gwei to Wei
 
 	// maxFeePerGas: (baseFee * 2) + maxPriorityFee
 	// The doubling provides buffer for baseFee increases between tx creation and inclusion
@@ -490,4 +487,13 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	}
 
 	return domainRawTx, txParams, nil
+}
+
+// SignTxWithPrivateKey signs a raw transaction using a private key directly,
+// without requiring a keystore or node connection (fully offline operation).
+// Uses LatestSignerForChainID for forward compatibility with future transaction types.
+func (*Ethereum) SignTxWithPrivateKey(
+	rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+) (*domainEthereum.RawTx, error) {
+	return ethtx.SignTxOffline(rawTx, privKey, chainID)
 }

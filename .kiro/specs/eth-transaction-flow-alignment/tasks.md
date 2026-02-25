@@ -45,18 +45,18 @@
   - _Requirements: 2.5, 6.1, 6.2, 6.4, 6.5_
 
 - [ ] 4. Update the Ethereum client for EIP-1559 fee estimation and modern transaction encoding
-- [ ] 4.1 Add dynamic fee estimation methods to the Ethereum client
+- [x] 4.1 Add dynamic fee estimation methods to the Ethereum client
   - Add `SuggestGasTipCap` wrapper method calling `ethClient.SuggestGasTipCap(ctx)` with fallback to the config default when the RPC call fails
   - Add `SupportsEIP1559` detection method that inspects the connected node's block header for base fee support
   - Compute `maxFeePerGas` from the latest block base fee using `baseFee × 2 + tip`
   - _Requirements: 2.3, 3.5_
 
-- [ ] 4.2 Fix transaction encoding to use EIP-2718 binary format
+- [x] 4.2 Fix transaction encoding to use EIP-2718 binary format
   - Replace `rlp.EncodeToBytes`/`rlp.Decode` with `tx.MarshalBinary()`/`tx.UnmarshalBinary()` in the ETH transaction encoding layer
   - Verify encoding handles both Type 0 (legacy) and Type 2 (EIP-1559) transactions correctly
   - _Requirements: 2.1, 2.2_
 
-- [ ] 4.3 Add offline-capable signing and update signer selection
+- [x] 4.3 Add offline-capable signing and update signer selection
   - Add `SignOnRawTransaction` variant that accepts `*ecdsa.PrivateKey` directly (no keystore password required)
   - Replace `types.NewLondonSigner(chainID)` with `types.LatestSignerForChainID(chainID)` for forward compatibility with future transaction types
   - Depends on 4.2 (encoding fix must be in place)
