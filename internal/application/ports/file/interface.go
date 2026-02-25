@@ -1,6 +1,7 @@
 package file
 
 import (
+	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -29,6 +30,10 @@ type TransactionFileRepositorier interface {
 	// XRP JSON transaction file methods
 	ReadXRPJSONFile(path string) (*dtoxrp.XRPTransactionFile, error)
 	WriteXRPJSONFile(path string, data *dtoxrp.XRPTransactionFile) (string, error)
+
+	// ETH JSON transaction file methods
+	ReadETHJSONFile(path string) (*dtoeth.ETHTransactionFile, error)
+	WriteETHJSONFile(path string, data *dtoeth.ETHTransactionFile) (string, error)
 }
 
 // FileName is object for items in fine name

@@ -36,7 +36,7 @@
   - All new interfaces in 2.1b use only domain types — no infrastructure types in port signatures
   - _Requirements: 5.5_
 
-- [ ] 3. (P) Implement JSON transaction file format for air-gapped exchange
+- [x] 3. (P) Implement JSON transaction file format for air-gapped exchange
   - Define `ETHTransactionFile` struct with fields: version, tx_type, eth_tx_type, chain_id, nonce, from, to, value, gas, gas_price (legacy), max_fee_per_gas, max_priority_fee_per_gas, data, raw_tx_hex, signed_tx_hex
   - Use `tx.MarshalBinary()` (EIP-2718 envelope, not RLP) to correctly encode both legacy and EIP-1559 transactions
   - Implement write and read functions with field validation; return descriptive errors identifying missing or invalid fields

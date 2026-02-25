@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
@@ -167,6 +168,14 @@ func (m *MockTransactionFileRepo) ReadXRPJSONFile(path string) (*dtoxrp.XRPTrans
 func (m *MockTransactionFileRepo) WriteXRPJSONFile(path string, data *dtoxrp.XRPTransactionFile) (string, error) {
 	args := m.Called(path, data)
 	return args.String(0), args.Error(1)
+}
+
+func (*MockTransactionFileRepo) ReadETHJSONFile(_ string) (*dtoeth.ETHTransactionFile, error) {
+	return nil, nil
+}
+
+func (*MockTransactionFileRepo) WriteETHJSONFile(_ string, _ *dtoeth.ETHTransactionFile) (string, error) {
+	return "", nil
 }
 
 func TestSignTransactionUseCase_Sign_SingleSignature(t *testing.T) {

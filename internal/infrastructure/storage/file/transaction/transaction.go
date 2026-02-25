@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -273,6 +274,92 @@ func (*TransactionFileRepository) WriteHexFile(path, hexTx string) (string, erro
 	}
 
 	return fileName, nil
+}
+
+// ReadETHJSONFile reads a JSON transaction file for ETH transactions.
+// It validates the .json extension, prevents path traversal, parses the JSON,
+// and validates the ETHTransactionFile contents.
+func (r *TransactionFileRepository) ReadETHJSONFile(path string) (*dtoeth.ETHTransactionFile, error) {
+	// Validate extension (case-insensitive)
+	if !strings.HasSuffix(strings.ToLower(path), ".json") {
+		return nil, fmt.Errorf("invalid JSON file extension: %s (expected .json)", path)
+	}
+
+	// Security: Clean path and prevent path traversal
+	cleanPath := filepath.Clean(path)
+	// Note: r.filePath can be empty in tests
+	if r.filePath != "" {
+		baseDir := filepath.Clean(r.filePath)
+		rel, err := filepath.Rel(baseDir, cleanPath)
+		if err != nil || strings.HasPrefix(rel, "..") {
+			return nil, fmt.Errorf("path traversal attempt detected: %s", path)
+		}
+	}
+
+	// Read file
+	data, err := os.ReadFile(cleanPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read ETH JSON transaction file %s: %w", cleanPath, err)
+	}
+
+	// Parse JSON
+	var txFile dtoeth.ETHTransactionFile
+	if err := json.Unmarshal(data, &txFile); err != nil {
+		return nil, fmt.Errorf("failed to parse ETH JSON transaction file %s: %w", cleanPath, err)
+	}
+
+	// Validate transaction file data
+	if err := txFile.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid ETH transaction file data in %s: %w", cleanPath, err)
+	}
+
+	return &txFile, nil
+}
+
+// WriteETHJSONFile writes an ETH transaction file in JSON format with .json extension.
+// It validates the data, prevents path traversal, and writes indented JSON for readability.
+func (r *TransactionFileRepository) WriteETHJSONFile(
+	path string,
+	data *dtoeth.ETHTransactionFile,
+) (string, error) {
+	// Validate transaction file data before writing
+	if err := data.Validate(); err != nil {
+		return "", fmt.Errorf("invalid ETH transaction file data: %w", err)
+	}
+
+	// Add timestamp and .json extension
+	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := path + ts + ".json"
+
+	// Security: Prevent path traversal
+	cleanPath := filepath.Clean(fileName)
+	if r.filePath != "" {
+		baseDir := filepath.Clean(r.filePath)
+		rel, err := filepath.Rel(baseDir, cleanPath)
+		if err != nil || strings.HasPrefix(rel, "..") {
+			return "", fmt.Errorf("path traversal attempt detected: %s", fileName)
+		}
+	}
+
+	// Create directory if not existing
+	dir := filepath.Dir(cleanPath)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	// Marshal to JSON with indentation for readability
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal ETH transaction data: %w", err)
+	}
+
+	// Write JSON file
+	err = os.WriteFile(cleanPath, jsonData, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write ETH JSON transaction file %s: %w", cleanPath, err)
+	}
+
+	return cleanPath, nil
 }
 
 func (*TransactionFileRepository) createDir(path string) {
