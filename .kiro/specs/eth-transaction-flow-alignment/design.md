@@ -6,7 +6,7 @@
 
 **Users**: Wallet operators use the three-wallet system (Watch/Keygen/Sign) to create, sign, and broadcast ETH transactions with air-gapped key security.
 
-**Impact**: Transforms the ETH Sign wallet from non-functional stubs to a fully operational offline signing component, replaces legacy transaction format with EIP-1559 as default, decomposes the monolithic `Ethereumer` interface into ISP-compliant ports, and migrates to Anvil as the development node.
+**Impact**: Transforms the ETH Sign wallet from non-functional stubs to a fully operational offline signing component, replaces legacy transaction format with EIP-1559 as default, ~~decomposes the monolithic `Ethereumer` interface into ISP-compliant ports~~ **[Done PR #575: ISP-compliant port interfaces added to `interface.go`; `Ethereumer` retained for DI layer only]**, and migrates to Anvil as the development node.
 
 ### Goals
 
@@ -38,9 +38,9 @@ CLI Layer (interface-adapters/wallet/eth/)
       → Infrastructure (infrastructure/api/eth/eth/)
 ```
 
-**Current constraints**:
-- Port interfaces exist but the monolithic `Ethereumer` (80+ methods) violates ISP
-- Sign and keygen use cases import directly from infrastructure layer
+**Current constraints** (as of PR #575):
+- ~~Port interfaces exist but the monolithic `Ethereumer` (80+ methods) violates ISP~~ — **Resolved (PR #575)**: ISP-compliant focused interfaces added; `Ethereumer` restricted to DI layer only
+- Keygen/sign use cases still import `apiethimpl` (infrastructure) for the hardcoded `Password` constant — resolved by Task 10.3
 - Sign wallet adapter has all methods as stubs
 - Transaction encoding uses RLP which breaks with EIP-2718 typed transactions
 
@@ -304,17 +304,23 @@ flowchart TD
 
 **Responsibilities & Constraints**
 
-- Define minimal interfaces at `internal/application/ports/api/eth/interfaces_small.go`
-- Mirror BTC's pattern from `internal/application/ports/api/btc/interfaces_small.go`
-- Preserve the existing `Ethereumer` interface for backward compatibility during migration
+- ~~Define minimal interfaces at `internal/application/ports/api/eth/interfaces_small.go`~~ — **Done (PR #575)**: interfaces added directly to `internal/application/ports/api/eth/interface.go`
+- ETH uses a single `interface.go` file (not a separate `interfaces_small.go` like BTC)
+- `Ethereumer` preserved with DI-layer-only usage restriction comment
 - Each interface covers a single capability area
 
 **Contracts**: Service [x]
 
 ##### Service Interface
 
+> **Status (PR #575)**: Partial implementation complete. The following ISP interfaces have been added to `internal/application/ports/api/eth/interface.go`:
+> - `ETHLifecycle` (`Close`, `CoinTypeCode`), `ETHKeyAccessor` (`GetKeyDir`, `ToECDSA`), `ETHTransactionSigner` (`SignOnRawTransaction`), `ETHTransactionSender` (`SendSignedRawTransaction`), `ETHRawKeyImporter` (`ImportRawKey`), `ETHNodeAPIClient` (`ClientVersion`, `NetVersion`, `NodeInfo`, `Syncing`)
+> - Composed: `ETHKeygenSignClient` (`ETHLifecycle` + `ETHRawKeyImporter`), `ETHWatchClient` (`ETHLifecycle` + `ETHNodeAPIClient`)
+>
+> The interfaces below (`ChainConfigProvider`, `TxCreator`, `GasEstimator`, `TxSigner`, `TxMonitor`, `AddressValidator`, etc.) are still required for the EIP-1559 transaction flow (Tasks 7, 9) and have not yet been implemented. File path will be `interface.go`, not `interfaces_small.go`.
+
 ```go
-// internal/application/ports/api/eth/interfaces_small.go
+// internal/application/ports/api/eth/interface.go
 
 // ChainConfigProvider provides chain configuration
 type ChainConfigProvider interface {
@@ -419,17 +425,21 @@ type KeygenSignTxDeps interface {
 ##### Service Interface
 
 ```go
-// Local interface in use case file (mirrors BTC pattern)
-type signTxETHClient interface {
-    apieth.ChainConfigProvider
-}
+// Current implementation (PR #575) — uses ETHTransactionSigner directly
+// apieth.ChainConfigProvider does not exist yet; added when Task 2.1b is done
 
 type signTransactionUseCase struct {
-    chainConfig    signTxETHClient
+    eth        apieth.ETHTransactionSigner  // signs raw transactions; not ChainConfigProvider yet
     accountKeyRepo repocold.ETHAccountKeyRepositorier
     txFileRepo     file.TransactionFileRepositorier
     wtype          domainWallet.WalletType
 }
+
+// Target implementation (after Task 2.1b):
+// type signTxETHClient interface {
+//     apieth.ChainConfigProvider
+//     apieth.TxSigner
+// }
 
 // SignTransactionInput contains the path to the unsigned transaction file
 type SignTransactionInput struct {

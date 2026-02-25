@@ -22,8 +22,8 @@ Foundry/Anvil as the development node, robust HD key generation, and EIP-1559 tr
 | DI Sign wiring | Fully wired | Returns "not implemented yet" |
 | Offline signing | PSBT file-based | None (relies on online Geth keystore) |
 | Transaction type | N/A | Legacy only (EIP-1559 code exists but unused) |
-| Port compliance | ISP-compliant small interfaces | Monolithic `Ethereumer` interface |
-| Architecture | Clean (ports used correctly) | 4+ use cases import infrastructure directly |
+| Port compliance | ISP-compliant small interfaces | ISP interfaces added (PR #575) — `Ethereumer` retained for DI layer only |
+| Architecture | Clean (ports used correctly) | Partial: `ethereum` infra import removed; `apiethimpl.Password` import remains in 3 use cases |
 | Dev node | Bitcoin Core (regtest) | Geth (config references deprecated Goerli) |
 
 ## Requirements
@@ -85,9 +85,9 @@ Foundry/Anvil as the development node, robust HD key generation, and EIP-1559 tr
 
 #### Acceptance Criteria
 
-1. The ETH Use Cases shall import only from `internal/application/ports/api/eth` and never directly from `internal/infrastructure/api/eth` or `internal/infrastructure/api/eth/eth`.
-2. The ETH Port Interface shall be decomposed into small, ISP-compliant interfaces (e.g., `BalanceChecker`, `TxCreator`, `TxSigner`, `TxSender`, `GasEstimator`) matching the BTC port pattern.
-3. The deprecated interface definitions in `internal/infrastructure/api/eth/api-interface.go` shall be removed after all use cases are migrated to port interfaces.
+1. The ETH Use Cases shall import only from `internal/application/ports/api/eth` and never directly from `internal/infrastructure/api/eth` or `internal/infrastructure/api/eth/eth`. (Partial — PR #575 removed `ethereum` infrastructure imports; `apiethimpl.Password` constant import remains in 3 use cases, tracked by criterion 5.4.)
+2. The ETH Port Interface shall be decomposed into small, ISP-compliant interfaces (e.g., `BalanceChecker`, `TxCreator`, `TxSigner`, `TxSender`, `GasEstimator`) matching the BTC port pattern. (Partial — PR #575 added `ETHLifecycle`, `ETHKeyAccessor`, `ETHTransactionSigner`, `ETHTransactionSender`, `ETHRawKeyImporter`, `ETHNodeAPIClient`, `ETHKeygenSignClient`, `ETHWatchClient`; EIP-1559 and monitoring interfaces still needed for Tasks 7, 9.)
+3. ~~The deprecated interface definitions in `internal/infrastructure/api/eth/api-interface.go` shall be removed after all use cases are migrated to port interfaces.~~ **Done (PR #575)**: `internal/infrastructure/api/eth/api-interface.go` has been deleted.
 4. The hardcoded password constant (`Password = "password"`) shall be replaced with a configurable secret injected via the configuration system.
 5. When a use case requires an infrastructure-specific type, the ETH Ports Layer shall define a corresponding DTO or port-level type to avoid infrastructure leakage.
 
