@@ -276,6 +276,29 @@ func (*TransactionFileRepository) WriteHexFile(path, hexTx string) (string, erro
 	return fileName, nil
 }
 
+// checkPathTraversal validates that cleanPath stays within r.filePath.
+// When r.filePath is empty (e.g. in tests), the check is skipped.
+func (r *TransactionFileRepository) checkPathTraversal(cleanPath string) error {
+	if r.filePath == "" {
+		return nil
+	}
+	baseDir := filepath.Clean(r.filePath)
+	rel, err := filepath.Rel(baseDir, cleanPath)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		return fmt.Errorf("path traversal attempt detected: %s", cleanPath)
+	}
+	return nil
+}
+
+// createDirForFile creates all parent directories for the given file path.
+func createDirForFile(cleanPath string) error {
+	dir := filepath.Dir(cleanPath)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+	return nil
+}
+
 // ReadETHJSONFile reads a JSON transaction file for ETH transactions.
 // It validates the .json extension, prevents path traversal, parses the JSON,
 // and validates the ETHTransactionFile contents.
@@ -285,15 +308,9 @@ func (r *TransactionFileRepository) ReadETHJSONFile(path string) (*dtoeth.ETHTra
 		return nil, fmt.Errorf("invalid JSON file extension: %s (expected .json)", path)
 	}
 
-	// Security: Clean path and prevent path traversal
 	cleanPath := filepath.Clean(path)
-	// Note: r.filePath can be empty in tests
-	if r.filePath != "" {
-		baseDir := filepath.Clean(r.filePath)
-		rel, err := filepath.Rel(baseDir, cleanPath)
-		if err != nil || strings.HasPrefix(rel, "..") {
-			return nil, fmt.Errorf("path traversal attempt detected: %s", path)
-		}
+	if err := r.checkPathTraversal(cleanPath); err != nil {
+		return nil, err
 	}
 
 	// Read file
@@ -331,20 +348,13 @@ func (r *TransactionFileRepository) WriteETHJSONFile(
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 	fileName := path + ts + ".json"
 
-	// Security: Prevent path traversal
 	cleanPath := filepath.Clean(fileName)
-	if r.filePath != "" {
-		baseDir := filepath.Clean(r.filePath)
-		rel, err := filepath.Rel(baseDir, cleanPath)
-		if err != nil || strings.HasPrefix(rel, "..") {
-			return "", fmt.Errorf("path traversal attempt detected: %s", fileName)
-		}
+	if err := r.checkPathTraversal(cleanPath); err != nil {
+		return "", err
 	}
 
-	// Create directory if not existing
-	dir := filepath.Dir(cleanPath)
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	if err := createDirForFile(cleanPath); err != nil {
+		return "", err
 	}
 
 	// Marshal to JSON with indentation for readability
@@ -353,9 +363,8 @@ func (r *TransactionFileRepository) WriteETHJSONFile(
 		return "", fmt.Errorf("failed to marshal ETH transaction data: %w", err)
 	}
 
-	// Write JSON file
-	err = os.WriteFile(cleanPath, jsonData, 0o644)
-	if err != nil {
+	// Write JSON file — 0o600: transaction files contain sensitive data (keys, addresses, amounts)
+	if err = os.WriteFile(cleanPath, jsonData, 0o600); err != nil {
 		return "", fmt.Errorf("failed to write ETH JSON transaction file %s: %w", cleanPath, err)
 	}
 
@@ -378,15 +387,9 @@ func (r *TransactionFileRepository) ReadXRPJSONFile(path string) (*dtoxrp.XRPTra
 		return nil, fmt.Errorf("invalid JSON file extension: %s (expected .json)", path)
 	}
 
-	// Security: Clean path and prevent path traversal
 	cleanPath := filepath.Clean(path)
-	// Note: r.filePath can be empty in tests
-	if r.filePath != "" {
-		baseDir := filepath.Clean(r.filePath)
-		rel, err := filepath.Rel(baseDir, cleanPath)
-		if err != nil || strings.HasPrefix(rel, "..") {
-			return nil, fmt.Errorf("path traversal attempt detected: %s", path)
-		}
+	if err := r.checkPathTraversal(cleanPath); err != nil {
+		return nil, err
 	}
 
 	// Read file
@@ -423,20 +426,13 @@ func (r *TransactionFileRepository) WriteXRPJSONFile(
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 	fileName := path + ts + ".json"
 
-	// Security: Prevent path traversal
 	cleanPath := filepath.Clean(fileName)
-	if r.filePath != "" {
-		baseDir := filepath.Clean(r.filePath)
-		rel, err := filepath.Rel(baseDir, cleanPath)
-		if err != nil || strings.HasPrefix(rel, "..") {
-			return "", fmt.Errorf("path traversal attempt detected: %s", fileName)
-		}
+	if err := r.checkPathTraversal(cleanPath); err != nil {
+		return "", err
 	}
 
-	// Create directory if not existing
-	dir := filepath.Dir(cleanPath)
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	if err := createDirForFile(cleanPath); err != nil {
+		return "", err
 	}
 
 	// Marshal to JSON with indentation for readability
@@ -446,8 +442,7 @@ func (r *TransactionFileRepository) WriteXRPJSONFile(
 	}
 
 	// Write JSON file
-	err = os.WriteFile(cleanPath, jsonData, 0o644)
-	if err != nil {
+	if err = os.WriteFile(cleanPath, jsonData, 0o644); err != nil {
 		return "", fmt.Errorf("failed to write JSON transaction file %s: %w", cleanPath, err)
 	}
 

@@ -3,6 +3,8 @@ package eth
 
 import (
 	"errors"
+
+	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
 // ETHTransactionFile represents a JSON file structure for ETH transaction exchange
@@ -85,7 +87,7 @@ func (f *ETHTransactionFile) Validate() error {
 	if err := f.validateFeeFields(); err != nil {
 		return err
 	}
-	if f.TxType == "signed" && f.SignedTxHex == "" {
+	if f.TxType == string(domainTx.TxTypeSigned) && f.SignedTxHex == "" {
 		return ErrMissingETHSignedTxHex
 	}
 	return nil
@@ -96,7 +98,7 @@ func (f *ETHTransactionFile) validateHeader() error {
 	if f.Version < 1 {
 		return ErrInvalidETHVersion
 	}
-	if f.TxType != "unsigned" && f.TxType != "signed" {
+	if f.TxType != string(domainTx.TxTypeUnsigned) && f.TxType != string(domainTx.TxTypeSigned) {
 		return ErrInvalidETHTxType
 	}
 	if f.EthTxType != 0 && f.EthTxType != 2 {
