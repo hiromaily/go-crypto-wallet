@@ -25,6 +25,9 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer, containerGett
 	}
 	signatureCmd.Flags().StringVar(&signatureFile, "file", "", "import file path for signed transactions")
 	parentCmd.AddCommand(signatureCmd)
+
+	// musig2 commands (BTC only)
+	addMuSig2Commands(parentCmd, wallet, containerGetter)
 }
 
 func runSignature(container di.Container, filePath string) error {

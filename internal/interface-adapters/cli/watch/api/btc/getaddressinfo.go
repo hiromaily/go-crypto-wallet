@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/bookerzzz/grok"
+
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runGetAddressInfo(btc btcWatchAPICmds, addr string) error {
+func runGetAddressInfo(btc apibtc.WatchAPIClient, addr string) error {
 	// validator
 	if addr == "" {
 		return errors.New("address option [-address] is required")

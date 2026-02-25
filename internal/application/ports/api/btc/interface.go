@@ -467,15 +467,21 @@ type UTXOLocker interface {
 	UnlockUnspent() error
 }
 
-// WalletManager manages wallet-level operations (encryption, backup, etc.).
-type WalletManager interface {
-	BackupWallet(fileName string) error
-	DumpWallet(fileName string) error
-	ImportWallet(fileName string) error
+// WalletSecurityManager manages wallet encryption, passphrase, and key backup/restore.
+// Used by keygen and sign wallet adapters, and by the keygen API CLI commands.
+type WalletSecurityManager interface {
 	EncryptWallet(passphrase string) error
-	WalletLock() error
 	WalletPassphrase(passphrase string, timeoutSecs int64) error
 	WalletPassphraseChange(old, newPass string) error
+	WalletLock() error
+	DumpWallet(fileName string) error
+	ImportWallet(fileName string) error
+}
+
+// WalletManager manages wallet-level operations (encryption, backup, etc.).
+type WalletManager interface {
+	WalletSecurityManager
+	BackupWallet(fileName string) error
 	LoadWallet(fileName string) error
 	UnLoadWallet(fileName string) error
 	CreateWallet(fileName string, disablePrivKey bool) error
@@ -484,4 +490,25 @@ type WalletManager interface {
 // BTCLifecycle manages the Bitcoin client lifecycle.
 type BTCLifecycle interface {
 	Close()
+}
+
+// -----------------------------------------------------------------------------
+// Composed Interfaces for Watch Wallet API CLI
+// -----------------------------------------------------------------------------
+
+// WatchAPIClient combines interfaces needed for the watch wallet API CLI commands.
+// Used by the btcWatchAPICmds adapter and btcWatchClient wallet interface.
+type WatchAPIClient interface {
+	NodeBalanceChecker // GetBalance
+	BalanceChecker     // GetBalanceByAccount
+	FeeEstimator       // EstimateSmartFee
+	FullUTXOLister     // ListUnspent
+	UTXOProvider       // ListUnspentByAccount, GetUnspentListAddrs
+	NodeLogger         // Logging
+	AddressValidator   // ValidateAddress
+	// Inline: partial overlaps with larger interfaces to avoid importing extra methods
+	ConfirmationBlock() uint64
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
+	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
+	UnlockUnspent() error
 }

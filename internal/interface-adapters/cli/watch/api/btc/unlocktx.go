@@ -2,9 +2,11 @@ package btc
 
 import (
 	"fmt"
+
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runUnlockTx(btc btcWatchAPICmds) error {
+func runUnlockTx(btc apibtc.WatchAPIClient) error {
 	// unlock locked transaction for unspent transaction
 	err := btc.UnlockUnspent()
 	if err != nil {

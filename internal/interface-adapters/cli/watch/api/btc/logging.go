@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/bookerzzz/grok"
+
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runLogging(btc btcWatchAPICmds) error {
+func runLogging(btc apibtc.WatchAPIClient) error {
 	// logging
 	logData, err := btc.Logging()
 	if err != nil {

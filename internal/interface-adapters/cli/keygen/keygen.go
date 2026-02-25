@@ -2,13 +2,13 @@ package keygen
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	btcapi "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/eth"
-	btckeygen "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/create"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/export"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/imports"
@@ -54,12 +54,6 @@ func AddCommands(
 	rootCmd.AddCommand(signCmd)
 	sign.AddCommands(signCmd, wallet, containerGetter)
 
-	// Descriptor commands (BTC only)
-	btckeygen.AddDescriptorCommands(rootCmd, containerGetter)
-
-	// MuSig2 command (BTC only)
-	AddMuSig2Commands(rootCmd, containerGetter)
-
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{
 		Use:   "api",
@@ -75,6 +69,8 @@ func AddCommands(
 				btcapi.AddCommands(cmd, v.BTC)
 			case *ethwallet.ETHKeygen:
 				eth.AddCommands(cmd, v.ETH)
+			default:
+				fmt.Printf("[WARN] api command is not supported for this coin type\n")
 			}
 			return nil
 		},

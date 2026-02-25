@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -14,15 +15,8 @@ import (
 // btcSignClient is the interface for sign wallet BTC operations.
 // It covers the wallet adapter's own needs plus methods passed through to CLI commands.
 type btcSignClient interface {
-	// Lifecycle
-	Close()
-	// Wallet management (used by sign API CLI - shares keygen API commands)
-	EncryptWallet(passphrase string) error
-	WalletPassphrase(passphrase string, timeoutSecs int64) error
-	WalletPassphraseChange(old, newPass string) error
-	WalletLock() error
-	DumpWallet(fileName string) error
-	ImportWallet(fileName string) error
+	apibtc.BTCLifecycle          // Close()
+	apibtc.WalletSecurityManager // EncryptWallet, WalletPassphrase, WalletPassphraseChange, etc.
 }
 
 // BTCSign is sign wallet object

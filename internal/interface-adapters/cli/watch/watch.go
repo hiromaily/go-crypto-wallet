@@ -9,7 +9,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/api/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/api/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/api/xrp"
-	watchbtccmd "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/create"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/monitor"
@@ -56,15 +55,6 @@ func AddCommands(
 	}
 	rootCmd.AddCommand(monitorCmd)
 	monitor.AddCommands(monitorCmd, wallet, containerGetter)
-
-	// Descriptor command (BTC only)
-	watchbtccmd.AddDescriptorCommands(rootCmd, containerGetter)
-
-	// MuSig2 command (BTC only)
-	AddMuSig2Commands(rootCmd, containerGetter)
-
-	// XRP multisig and regular key commands (XRP only)
-	AddXRPMultisigCommands(rootCmd, containerGetter)
 
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{

@@ -12,12 +12,27 @@ import (
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 )
 
-// AddCommand creates and returns the send command
+// AddCommand creates and returns the send command with tx and multisig subcommands
 func AddCommand(wallet *wallets.Watcher, containerGetter func() di.Container) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "send",
+		Short: "send transactions to the blockchain network",
+	}
+
+	// tx target
+	cmd.AddCommand(newTxCommand(containerGetter))
+
+	// multisig target (BTC: MuSig2, XRP: multisig)
+	addMultisigCommands(cmd, wallet, containerGetter)
+
+	return cmd
+}
+
+func newTxCommand(containerGetter func() di.Container) *cobra.Command {
 	var filePath string
 
 	cmd := &cobra.Command{
-		Use:   "send",
+		Use:   "tx",
 		Short: "send signed transaction to blockchain network",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSend(containerGetter(), filePath)
@@ -29,15 +44,12 @@ func AddCommand(wallet *wallets.Watcher, containerGetter func() di.Container) *c
 }
 
 func runSend(container di.Container, filePath string) error {
-	// validator
 	if filePath == "" {
 		return errors.New("file path option [-file] is required")
 	}
 
-	// Get use case from container
 	useCase := container.NewWatchSendTransactionUseCase().(watchusecase.SendTransactionUseCase)
 
-	// send signed transactions
 	output, err := useCase.Execute(context.Background(), watchusecase.SendTransactionInput{
 		FilePath: filePath,
 	})
@@ -45,7 +57,6 @@ func runSend(container di.Container, filePath string) error {
 		return fmt.Errorf("fail to send transaction: %w", err)
 	}
 
-	// TODO: output should be json if json option is true
 	fmt.Println("tx is sent!! txID: " + output.TxID)
 
 	return nil
