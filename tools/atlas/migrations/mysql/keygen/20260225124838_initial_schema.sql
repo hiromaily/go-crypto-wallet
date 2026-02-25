@@ -47,6 +47,7 @@ CREATE TABLE `eth_account_key` (
   `address` varchar(42) NOT NULL COMMENT "Ethereum address (0x...)",
   `full_public_key` varchar(130) NOT NULL COMMENT "full public key (uncompressed, 65 bytes hex)",
   `private_key` varchar(64) NOT NULL COMMENT "private key (hex encoded)",
+  `account_extended_privkey` varchar(255) NULL COMMENT "BIP32 account-level extended private key for offline signing derivation",
   `idx` bigint NOT NULL COMMENT "index for hd wallet",
   `addr_status` tinyint NOT NULL DEFAULT 0 COMMENT "progress status for address generating",
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
