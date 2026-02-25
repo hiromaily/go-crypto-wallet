@@ -9,6 +9,7 @@ import (
 	"time"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 )
 
 // AddressFileRepository is repository to store pubkey as csv file.
@@ -52,7 +53,7 @@ func (r *AddressFileRepository) WriteXpubLine(
 ) (string, error) {
 	fileName := r.CreateFilePath(accountType)
 
-	f, err := os.Create(fileName) //nolint:gosec
+	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600) //nolint:gosec
 	if err != nil {
 		return "", fmt.Errorf("failed to create xpub file %s: %w", fileName, err)
 	}
@@ -62,7 +63,8 @@ func (r *AddressFileRepository) WriteXpubLine(
 		}
 	}()
 
-	line := fmt.Sprintf("%s,%s,44,%s,%s\n", coinTypeCode, accountType.String(), xpub, derivationPath)
+	line := fmt.Sprintf("%s,%s,%d,%s,%s\n",
+		coinTypeCode, accountType.String(), domainCoin.BIP44Purpose, xpub, derivationPath)
 	if _, err = fmt.Fprint(f, line); err != nil {
 		return "", fmt.Errorf("failed to write xpub file: %w", err)
 	}

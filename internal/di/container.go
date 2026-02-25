@@ -841,12 +841,12 @@ func (c *container) newHdWalletRepo() repocold.HDWalletRepo {
 
 func (c *container) newETHHdWalletRepo() repocold.HDWalletRepo {
 	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
 	case "postgres":
 		return coldpostgres.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
-	case "sqlite":
-		return coldsqlite.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
 	default:
-		return coldmysql.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
+		return coldsqlite.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
 	}
 }
 

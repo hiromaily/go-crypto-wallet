@@ -17,7 +17,7 @@ func runFullPubkey(container di.Container, acnt string) error {
 	if !domainAccount.ValidateAccountType(acnt) {
 		return errors.New("account option [-account] is invalid")
 	}
-	if !domainAccount.NotAllow(acnt, []domainAccount.AccountType{domainAccount.AccountTypeAuthorization}) {
+	if domainAccount.Allow(acnt, []domainAccount.AccountType{domainAccount.AccountTypeAuthorization}) {
 		return fmt.Errorf("account: %s is not allowed", domainAccount.AccountTypeAuthorization)
 	}
 

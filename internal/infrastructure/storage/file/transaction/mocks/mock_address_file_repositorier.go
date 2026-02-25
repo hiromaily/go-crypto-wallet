@@ -205,3 +205,81 @@ func (_c *MockAddressFileRepositorier_ValidateFilePath_Call) RunAndReturn(run fu
 	_c.Call.Return(run)
 	return _c
 }
+
+// WriteXpubLine provides a mock function for the type MockAddressFileRepositorier
+func (_mock *MockAddressFileRepositorier) WriteXpubLine(accountType account.AccountType, coinTypeCode string, xpub string, derivationPath string) (string, error) {
+	ret := _mock.Called(accountType, coinTypeCode, xpub, derivationPath)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WriteXpubLine")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, string, string, string) (string, error)); ok {
+		return returnFunc(accountType, coinTypeCode, xpub, derivationPath)
+	}
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, string, string, string) string); ok {
+		r0 = returnFunc(accountType, coinTypeCode, xpub, derivationPath)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(account.AccountType, string, string, string) error); ok {
+		r1 = returnFunc(accountType, coinTypeCode, xpub, derivationPath)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAddressFileRepositorier_WriteXpubLine_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WriteXpubLine'
+type MockAddressFileRepositorier_WriteXpubLine_Call struct {
+	*mock.Call
+}
+
+// WriteXpubLine is a helper method to define mock.On call
+//   - accountType account.AccountType
+//   - coinTypeCode string
+//   - xpub string
+//   - derivationPath string
+func (_e *MockAddressFileRepositorier_Expecter) WriteXpubLine(accountType interface{}, coinTypeCode interface{}, xpub interface{}, derivationPath interface{}) *MockAddressFileRepositorier_WriteXpubLine_Call {
+	return &MockAddressFileRepositorier_WriteXpubLine_Call{Call: _e.mock.On("WriteXpubLine", accountType, coinTypeCode, xpub, derivationPath)}
+}
+
+func (_c *MockAddressFileRepositorier_WriteXpubLine_Call) Run(run func(accountType account.AccountType, coinTypeCode string, xpub string, derivationPath string)) *MockAddressFileRepositorier_WriteXpubLine_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 account.AccountType
+		if args[0] != nil {
+			arg0 = args[0].(account.AccountType)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAddressFileRepositorier_WriteXpubLine_Call) Return(s string, err error) *MockAddressFileRepositorier_WriteXpubLine_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockAddressFileRepositorier_WriteXpubLine_Call) RunAndReturn(run func(accountType account.AccountType, coinTypeCode string, xpub string, derivationPath string) (string, error)) *MockAddressFileRepositorier_WriteXpubLine_Call {
+	_c.Call.Return(run)
+	return _c
+}

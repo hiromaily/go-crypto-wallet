@@ -2,84 +2,23 @@ package eth_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	keygenusecaseeth "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/eth"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	coldmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mocks"
+	filemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )
-
-// stubETHAccountKeyRepo is a test stub for ETHAccountKeyRepositorier.
-type stubETHAccountKeyRepo struct {
-	key *domainEth.ETHAccountKey
-	err error
-}
-
-func (*stubETHAccountKeyRepo) GetMaxIndex(_ context.Context, _ domainAccount.AccountType) (int64, error) {
-	return 0, nil
-}
-
-func (s *stubETHAccountKeyRepo) GetOneMaxID(_ domainAccount.AccountType) (*domainEth.ETHAccountKey, error) {
-	return s.key, s.err
-}
-
-func (*stubETHAccountKeyRepo) GetAllAddrStatus(
-	_ domainAccount.AccountType, _ domainAddress.AddrStatus,
-) ([]*domainEth.ETHAccountKey, error) {
-	return nil, nil
-}
-
-func (*stubETHAccountKeyRepo) GetByAddress(_ string) (*domainEth.ETHAccountKey, error) {
-	return nil, nil
-}
-
-func (*stubETHAccountKeyRepo) InsertBulk(_ []*domainEth.ETHAccountKey) error {
-	return nil
-}
-
-func (*stubETHAccountKeyRepo) UpdateAddrStatus(
-	_ domainAccount.AccountType, _ domainAddress.AddrStatus, _ []string,
-) (int64, error) {
-	return 0, nil
-}
-
-// stubAddressFileRepo is a test stub for AddressFileRepositorier.
-type stubAddressFileRepo struct {
-	path string
-}
-
-func (s *stubAddressFileRepo) CreateFilePath(_ domainAccount.AccountType) string {
-	return s.path
-}
-
-func (*stubAddressFileRepo) ValidateFilePath(_ string, _ domainAccount.AccountType) error {
-	return nil
-}
-
-func (*stubAddressFileRepo) ImportAddress(_ string) ([]string, error) {
-	return nil, nil
-}
-
-func (s *stubAddressFileRepo) WriteXpubLine(
-	accountType domainAccount.AccountType,
-	coinTypeCode, xpub, derivationPath string,
-) (string, error) {
-	line := fmt.Sprintf("%s,%s,44,%s,%s\n", coinTypeCode, accountType.String(), xpub, derivationPath)
-	if err := os.WriteFile(s.path, []byte(line), 0o600); err != nil {
-		return "", err
-	}
-	return s.path, nil
-}
 
 // newTestAccountXpriv generates a valid BIP-32 extended private key for testing.
 func newTestAccountXpriv(t *testing.T) string {
@@ -122,8 +61,27 @@ func TestExportFullPubkeyUseCase_Export_Success(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, tmpFile.Close())
 
-	accountKeyRepo := &stubETHAccountKeyRepo{key: ethKey}
-	fileRepo := &stubAddressFileRepo{path: tmpFile.Name()}
+	accountKeyRepo := coldmocks.NewMockETHAccountKeyRepositorier(t)
+	accountKeyRepo.EXPECT().
+		GetOneMaxID(domainAccount.AccountTypeDeposit).
+		Return(ethKey, nil)
+
+	fileRepo := filemocks.NewMockAddressFileRepositorier(t)
+	fileRepo.EXPECT().
+		WriteXpubLine(
+			domainAccount.AccountTypeDeposit,
+			domainCoin.ETH.String(),
+			mock.AnythingOfType("string"), // xpub value derived at runtime
+			"m/44'/60'/0'",
+		).
+		RunAndReturn(func(
+			accountType domainAccount.AccountType,
+			coinTypeCode, xpub, derivationPath string,
+		) (string, error) {
+			line := strings.Join([]string{coinTypeCode, accountType.String(), "44", xpub, derivationPath}, ",") + "\n"
+			require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(line), 0o600))
+			return tmpFile.Name(), nil
+		})
 
 	useCase := keygenusecaseeth.NewExportFullPubkeyUseCase(
 		accountKeyRepo,
@@ -165,8 +123,12 @@ func TestExportFullPubkeyUseCase_Export_MissingXpriv(t *testing.T) {
 	require.NoError(t, err)
 	// Do NOT set accountXpriv
 
-	accountKeyRepo := &stubETHAccountKeyRepo{key: ethKey}
-	fileRepo := &stubAddressFileRepo{path: "/tmp/unused.csv"}
+	accountKeyRepo := coldmocks.NewMockETHAccountKeyRepositorier(t)
+	accountKeyRepo.EXPECT().
+		GetOneMaxID(domainAccount.AccountTypeDeposit).
+		Return(ethKey, nil)
+
+	fileRepo := filemocks.NewMockAddressFileRepositorier(t)
 
 	useCase := keygenusecaseeth.NewExportFullPubkeyUseCase(
 		accountKeyRepo,
@@ -184,8 +146,12 @@ func TestExportFullPubkeyUseCase_Export_MissingXpriv(t *testing.T) {
 func TestExportFullPubkeyUseCase_Export_RepoError(t *testing.T) {
 	t.Parallel()
 
-	accountKeyRepo := &stubETHAccountKeyRepo{err: os.ErrNotExist}
-	fileRepo := &stubAddressFileRepo{path: "/tmp/unused.csv"}
+	accountKeyRepo := coldmocks.NewMockETHAccountKeyRepositorier(t)
+	accountKeyRepo.EXPECT().
+		GetOneMaxID(domainAccount.AccountTypeDeposit).
+		Return(nil, os.ErrNotExist)
+
+	fileRepo := filemocks.NewMockAddressFileRepositorier(t)
 
 	useCase := keygenusecaseeth.NewExportFullPubkeyUseCase(
 		accountKeyRepo,

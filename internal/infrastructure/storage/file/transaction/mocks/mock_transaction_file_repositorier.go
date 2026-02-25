@@ -5,8 +5,8 @@
 package mocks
 
 import (
-	eth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
-	xrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	mock "github.com/stretchr/testify/mock"
@@ -166,6 +166,68 @@ func (_c *MockTransactionFileRepositorier_GetFileNameType_Call) Return(fileName 
 }
 
 func (_c *MockTransactionFileRepositorier_GetFileNameType_Call) RunAndReturn(run func(filePath string) (*file.FileName, error)) *MockTransactionFileRepositorier_GetFileNameType_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ReadETHJSONFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) ReadETHJSONFile(path string) (*eth.ETHTransactionFile, error) {
+	ret := _mock.Called(path)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReadETHJSONFile")
+	}
+
+	var r0 *eth.ETHTransactionFile
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (*eth.ETHTransactionFile, error)); ok {
+		return returnFunc(path)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) *eth.ETHTransactionFile); ok {
+		r0 = returnFunc(path)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*eth.ETHTransactionFile)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(path)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_ReadETHJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReadETHJSONFile'
+type MockTransactionFileRepositorier_ReadETHJSONFile_Call struct {
+	*mock.Call
+}
+
+// ReadETHJSONFile is a helper method to define mock.On call
+//   - path string
+func (_e *MockTransactionFileRepositorier_Expecter) ReadETHJSONFile(path interface{}) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
+	return &MockTransactionFileRepositorier_ReadETHJSONFile_Call{Call: _e.mock.On("ReadETHJSONFile", path)}
+}
+
+func (_c *MockTransactionFileRepositorier_ReadETHJSONFile_Call) Run(run func(path string)) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadETHJSONFile_Call) Return(eTHTransactionFile *eth.ETHTransactionFile, err error) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
+	_c.Call.Return(eTHTransactionFile, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadETHJSONFile_Call) RunAndReturn(run func(path string) (*eth.ETHTransactionFile, error)) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -352,6 +414,68 @@ func (_c *MockTransactionFileRepositorier_ReadPSBTFile_Call) RunAndReturn(run fu
 	return _c
 }
 
+// ReadXRPJSONFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) ReadXRPJSONFile(path string) (*xrp.XRPTransactionFile, error) {
+	ret := _mock.Called(path)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReadXRPJSONFile")
+	}
+
+	var r0 *xrp.XRPTransactionFile
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (*xrp.XRPTransactionFile, error)); ok {
+		return returnFunc(path)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) *xrp.XRPTransactionFile); ok {
+		r0 = returnFunc(path)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*xrp.XRPTransactionFile)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(path)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_ReadXRPJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReadXRPJSONFile'
+type MockTransactionFileRepositorier_ReadXRPJSONFile_Call struct {
+	*mock.Call
+}
+
+// ReadXRPJSONFile is a helper method to define mock.On call
+//   - path string
+func (_e *MockTransactionFileRepositorier_Expecter) ReadXRPJSONFile(path interface{}) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	return &MockTransactionFileRepositorier_ReadXRPJSONFile_Call{Call: _e.mock.On("ReadXRPJSONFile", path)}
+}
+
+func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) Run(run func(path string)) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) Return(xRPTransactionFile *xrp.XRPTransactionFile, err error) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	_c.Call.Return(xRPTransactionFile, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) RunAndReturn(run func(path string) (*xrp.XRPTransactionFile, error)) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ValidateFilePath provides a mock function for the type MockTransactionFileRepositorier
 func (_mock *MockTransactionFileRepositorier) ValidateFilePath(filePath string, expectedTxType transaction.TxType) (transaction.ActionType, transaction.TxType, int64, int, error) {
 	ret := _mock.Called(filePath, expectedTxType)
@@ -432,6 +556,72 @@ func (_c *MockTransactionFileRepositorier_ValidateFilePath_Call) Return(actionTy
 }
 
 func (_c *MockTransactionFileRepositorier_ValidateFilePath_Call) RunAndReturn(run func(filePath string, expectedTxType transaction.TxType) (transaction.ActionType, transaction.TxType, int64, int, error)) *MockTransactionFileRepositorier_ValidateFilePath_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WriteETHJSONFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) WriteETHJSONFile(path string, data *eth.ETHTransactionFile) (string, error) {
+	ret := _mock.Called(path, data)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WriteETHJSONFile")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string, *eth.ETHTransactionFile) (string, error)); ok {
+		return returnFunc(path, data)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string, *eth.ETHTransactionFile) string); ok {
+		r0 = returnFunc(path, data)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(string, *eth.ETHTransactionFile) error); ok {
+		r1 = returnFunc(path, data)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionFileRepositorier_WriteETHJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WriteETHJSONFile'
+type MockTransactionFileRepositorier_WriteETHJSONFile_Call struct {
+	*mock.Call
+}
+
+// WriteETHJSONFile is a helper method to define mock.On call
+//   - path string
+//   - data *eth.ETHTransactionFile
+func (_e *MockTransactionFileRepositorier_Expecter) WriteETHJSONFile(path interface{}, data interface{}) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
+	return &MockTransactionFileRepositorier_WriteETHJSONFile_Call{Call: _e.mock.On("WriteETHJSONFile", path, data)}
+}
+
+func (_c *MockTransactionFileRepositorier_WriteETHJSONFile_Call) Run(run func(path string, data *eth.ETHTransactionFile)) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 *eth.ETHTransactionFile
+		if args[1] != nil {
+			arg1 = args[1].(*eth.ETHTransactionFile)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteETHJSONFile_Call) Return(s string, err error) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockTransactionFileRepositorier_WriteETHJSONFile_Call) RunAndReturn(run func(path string, data *eth.ETHTransactionFile) (string, error)) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -568,72 +758,6 @@ func (_c *MockTransactionFileRepositorier_WriteFileSlice_Call) RunAndReturn(run 
 	return _c
 }
 
-// WritePSBTFile provides a mock function for the type MockTransactionFileRepositorier
-func (_mock *MockTransactionFileRepositorier) WritePSBTFile(path string, psbtBase64 string) (string, error) {
-	ret := _mock.Called(path, psbtBase64)
-
-	if len(ret) == 0 {
-		panic("no return value specified for WritePSBTFile")
-	}
-
-	var r0 string
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string, string) (string, error)); ok {
-		return returnFunc(path, psbtBase64)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = returnFunc(path, psbtBase64)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	if returnFunc, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = returnFunc(path, psbtBase64)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockTransactionFileRepositorier_WritePSBTFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WritePSBTFile'
-type MockTransactionFileRepositorier_WritePSBTFile_Call struct {
-	*mock.Call
-}
-
-// WritePSBTFile is a helper method to define mock.On call
-//   - path string
-//   - psbtBase64 string
-func (_e *MockTransactionFileRepositorier_Expecter) WritePSBTFile(path interface{}, psbtBase64 interface{}) *MockTransactionFileRepositorier_WritePSBTFile_Call {
-	return &MockTransactionFileRepositorier_WritePSBTFile_Call{Call: _e.mock.On("WritePSBTFile", path, psbtBase64)}
-}
-
-func (_c *MockTransactionFileRepositorier_WritePSBTFile_Call) Run(run func(path string, psbtBase64 string)) *MockTransactionFileRepositorier_WritePSBTFile_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockTransactionFileRepositorier_WritePSBTFile_Call) Return(s string, err error) *MockTransactionFileRepositorier_WritePSBTFile_Call {
-	_c.Call.Return(s, err)
-	return _c
-}
-
-func (_c *MockTransactionFileRepositorier_WritePSBTFile_Call) RunAndReturn(run func(path string, psbtBase64 string) (string, error)) *MockTransactionFileRepositorier_WritePSBTFile_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // WriteHexFile provides a mock function for the type MockTransactionFileRepositorier
 func (_mock *MockTransactionFileRepositorier) WriteHexFile(path string, hexTx string) (string, error) {
 	ret := _mock.Called(path, hexTx)
@@ -700,62 +824,68 @@ func (_c *MockTransactionFileRepositorier_WriteHexFile_Call) RunAndReturn(run fu
 	return _c
 }
 
-// ReadXRPJSONFile provides a mock function for the type MockTransactionFileRepositorier
-func (_mock *MockTransactionFileRepositorier) ReadXRPJSONFile(path string) (*xrp.XRPTransactionFile, error) {
-	ret := _mock.Called(path)
+// WritePSBTFile provides a mock function for the type MockTransactionFileRepositorier
+func (_mock *MockTransactionFileRepositorier) WritePSBTFile(path string, psbtBase64 string) (string, error) {
+	ret := _mock.Called(path, psbtBase64)
 
 	if len(ret) == 0 {
-		panic("no return value specified for ReadXRPJSONFile")
+		panic("no return value specified for WritePSBTFile")
 	}
 
-	var r0 *xrp.XRPTransactionFile
+	var r0 string
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*xrp.XRPTransactionFile, error)); ok {
-		return returnFunc(path)
+	if returnFunc, ok := ret.Get(0).(func(string, string) (string, error)); ok {
+		return returnFunc(path, psbtBase64)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *xrp.XRPTransactionFile); ok {
-		r0 = returnFunc(path)
+	if returnFunc, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = returnFunc(path, psbtBase64)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.XRPTransactionFile)
-		}
+		r0 = ret.Get(0).(string)
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(path)
+	if returnFunc, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = returnFunc(path, psbtBase64)
 	} else {
 		r1 = ret.Error(1)
 	}
 	return r0, r1
 }
 
-// MockTransactionFileRepositorier_ReadXRPJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReadXRPJSONFile'
-type MockTransactionFileRepositorier_ReadXRPJSONFile_Call struct {
+// MockTransactionFileRepositorier_WritePSBTFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WritePSBTFile'
+type MockTransactionFileRepositorier_WritePSBTFile_Call struct {
 	*mock.Call
 }
 
-// ReadXRPJSONFile is a helper method to define mock.On call
+// WritePSBTFile is a helper method to define mock.On call
 //   - path string
-func (_e *MockTransactionFileRepositorier_Expecter) ReadXRPJSONFile(path interface{}) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
-	return &MockTransactionFileRepositorier_ReadXRPJSONFile_Call{Call: _e.mock.On("ReadXRPJSONFile", path)}
+//   - psbtBase64 string
+func (_e *MockTransactionFileRepositorier_Expecter) WritePSBTFile(path interface{}, psbtBase64 interface{}) *MockTransactionFileRepositorier_WritePSBTFile_Call {
+	return &MockTransactionFileRepositorier_WritePSBTFile_Call{Call: _e.mock.On("WritePSBTFile", path, psbtBase64)}
 }
 
-func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) Run(run func(path string)) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+func (_c *MockTransactionFileRepositorier_WritePSBTFile_Call) Run(run func(path string, psbtBase64 string)) *MockTransactionFileRepositorier_WritePSBTFile_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 string
 		if args[0] != nil {
 			arg0 = args[0].(string)
 		}
-		run(arg0)
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
 
-func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) Return(txFile *xrp.XRPTransactionFile, err error) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
-	_c.Call.Return(txFile, err)
+func (_c *MockTransactionFileRepositorier_WritePSBTFile_Call) Return(s string, err error) *MockTransactionFileRepositorier_WritePSBTFile_Call {
+	_c.Call.Return(s, err)
 	return _c
 }
 
-func (_c *MockTransactionFileRepositorier_ReadXRPJSONFile_Call) RunAndReturn(run func(path string) (*xrp.XRPTransactionFile, error)) *MockTransactionFileRepositorier_ReadXRPJSONFile_Call {
+func (_c *MockTransactionFileRepositorier_WritePSBTFile_Call) RunAndReturn(run func(path string, psbtBase64 string) (string, error)) *MockTransactionFileRepositorier_WritePSBTFile_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -808,7 +938,10 @@ func (_c *MockTransactionFileRepositorier_WriteXRPJSONFile_Call) Run(run func(pa
 		if args[1] != nil {
 			arg1 = args[1].(*xrp.XRPTransactionFile)
 		}
-		run(arg0, arg1)
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -819,129 +952,6 @@ func (_c *MockTransactionFileRepositorier_WriteXRPJSONFile_Call) Return(s string
 }
 
 func (_c *MockTransactionFileRepositorier_WriteXRPJSONFile_Call) RunAndReturn(run func(path string, data *xrp.XRPTransactionFile) (string, error)) *MockTransactionFileRepositorier_WriteXRPJSONFile_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// ReadETHJSONFile provides a mock function for the type MockTransactionFileRepositorier
-func (_mock *MockTransactionFileRepositorier) ReadETHJSONFile(path string) (*eth.ETHTransactionFile, error) {
-	ret := _mock.Called(path)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ReadETHJSONFile")
-	}
-
-	var r0 *eth.ETHTransactionFile
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*eth.ETHTransactionFile, error)); ok {
-		return returnFunc(path)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *eth.ETHTransactionFile); ok {
-		r0 = returnFunc(path)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*eth.ETHTransactionFile)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(path)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockTransactionFileRepositorier_ReadETHJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReadETHJSONFile'
-type MockTransactionFileRepositorier_ReadETHJSONFile_Call struct {
-	*mock.Call
-}
-
-// ReadETHJSONFile is a helper method to define mock.On call
-//   - path string
-func (_e *MockTransactionFileRepositorier_Expecter) ReadETHJSONFile(path interface{}) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
-	return &MockTransactionFileRepositorier_ReadETHJSONFile_Call{Call: _e.mock.On("ReadETHJSONFile", path)}
-}
-
-func (_c *MockTransactionFileRepositorier_ReadETHJSONFile_Call) Run(run func(path string)) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(arg0)
-	})
-	return _c
-}
-
-func (_c *MockTransactionFileRepositorier_ReadETHJSONFile_Call) Return(txFile *eth.ETHTransactionFile, err error) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
-	_c.Call.Return(txFile, err)
-	return _c
-}
-
-func (_c *MockTransactionFileRepositorier_ReadETHJSONFile_Call) RunAndReturn(run func(path string) (*eth.ETHTransactionFile, error)) *MockTransactionFileRepositorier_ReadETHJSONFile_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// WriteETHJSONFile provides a mock function for the type MockTransactionFileRepositorier
-func (_mock *MockTransactionFileRepositorier) WriteETHJSONFile(path string, data *eth.ETHTransactionFile) (string, error) {
-	ret := _mock.Called(path, data)
-
-	if len(ret) == 0 {
-		panic("no return value specified for WriteETHJSONFile")
-	}
-
-	var r0 string
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string, *eth.ETHTransactionFile) (string, error)); ok {
-		return returnFunc(path, data)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string, *eth.ETHTransactionFile) string); ok {
-		r0 = returnFunc(path, data)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	if returnFunc, ok := ret.Get(1).(func(string, *eth.ETHTransactionFile) error); ok {
-		r1 = returnFunc(path, data)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockTransactionFileRepositorier_WriteETHJSONFile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WriteETHJSONFile'
-type MockTransactionFileRepositorier_WriteETHJSONFile_Call struct {
-	*mock.Call
-}
-
-// WriteETHJSONFile is a helper method to define mock.On call
-//   - path string
-//   - data *eth.ETHTransactionFile
-func (_e *MockTransactionFileRepositorier_Expecter) WriteETHJSONFile(path interface{}, data interface{}) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
-	return &MockTransactionFileRepositorier_WriteETHJSONFile_Call{Call: _e.mock.On("WriteETHJSONFile", path, data)}
-}
-
-func (_c *MockTransactionFileRepositorier_WriteETHJSONFile_Call) Run(run func(path string, data *eth.ETHTransactionFile)) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		var arg1 *eth.ETHTransactionFile
-		if args[1] != nil {
-			arg1 = args[1].(*eth.ETHTransactionFile)
-		}
-		run(arg0, arg1)
-	})
-	return _c
-}
-
-func (_c *MockTransactionFileRepositorier_WriteETHJSONFile_Call) Return(s string, err error) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
-	_c.Call.Return(s, err)
-	return _c
-}
-
-func (_c *MockTransactionFileRepositorier_WriteETHJSONFile_Call) RunAndReturn(run func(path string, data *eth.ETHTransactionFile) (string, error)) *MockTransactionFileRepositorier_WriteETHJSONFile_Call {
 	_c.Call.Return(run)
 	return _c
 }

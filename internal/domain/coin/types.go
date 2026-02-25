@@ -157,6 +157,10 @@ func IsERC20Token(val string) bool {
 	return ok
 }
 
+// BIP44Purpose is the purpose index for BIP-44 HD wallet derivation paths.
+// All BIP-44 derivation paths use purpose = 44 (hardened).
+const BIP44Purpose = 44
+
 // BIP44AccountPath returns the BIP44 account-level derivation path string.
 // Format: m/44'/coinType'/accountIndex'
 //
