@@ -21,36 +21,36 @@ This document explains what BCH can and cannot do compared to BTC.
 
 BCH does NOT support the following BTC features:
 
-| Feature | BTC | BCH | Impact |
-|---------|-----|-----|--------|
-| SegWit | Yes | **NO** | No P2WPKH, P2WSH addresses |
-| Taproot | Yes | **NO** | No P2TR addresses |
-| Descriptor | Yes | **NO** | Cannot use descriptor APIs |
-| PSBT | Yes | **NO** | Use raw transaction hex |
-| Schnorr | Yes | **NO** | ECDSA only |
-| MuSig2 | Yes | **NO** | Traditional multisig only |
-| BIP49/84/86 | Yes | **NO** | BIP44 only |
+| Feature     | BTC | BCH    | Impact                     |
+| ----------- | --- | ------ | -------------------------- |
+| SegWit      | Yes | **NO** | No P2WPKH, P2WSH addresses |
+| Taproot     | Yes | **NO** | No P2TR addresses          |
+| Descriptor  | Yes | **NO** | Cannot use descriptor APIs |
+| PSBT        | Yes | **NO** | Use raw transaction hex    |
+| Schnorr     | Yes | **NO** | ECDSA only                 |
+| MuSig2      | Yes | **NO** | Traditional multisig only  |
+| BIP49/84/86 | Yes | **NO** | BIP44 only                 |
 
 ## Required Documentation
 
 Read the following documents before creating or modifying scripts:
 
-| Document | Contents |
-|----------|----------|
-| `docs/chains/bch/README.md`       | **CRITICAL**: BCH vs BTC differences, prohibited features |
-| `docs/chains/bch/README.md` | Detailed BCH technical reference |
-| `scripts/operation/bch/bch_common.sh` | BCH common utility functions |
-| `scripts/operation/common.sh` | Shared utility functions |
+| Document                              | Contents                                                  |
+| ------------------------------------- | --------------------------------------------------------- |
+| `docs/chains/bch/README.md`           | **CRITICAL**: BCH vs BTC differences, prohibited features |
+| `docs/chains/bch/README.md`           | Detailed BCH technical reference                          |
+| `scripts/operation/bch/bch_common.sh` | BCH common utility functions                              |
+| `scripts/operation/common.sh`         | Shared utility functions                                  |
 
 ## BCH Available Patterns
 
 BCH supports **only 3 patterns** (compared to BTC's 11):
 
-| Pattern | Description | Address Type | Address Format | Signature |
-|---------|-------------|--------------|----------------|-----------|
-| 1 | P2PKH Single-sig | P2PKH (BIP44) | `m.../n...` (regtest) | Single |
-| 2 | P2SH 2-of-3 | P2SH | `2...` (regtest) | 2-of-3 |
-| 3 | P2SH 3-of-3 | P2SH | `2...` (regtest) | 3-of-3 |
+| Pattern | Description      | Address Type  | Address Format        | Signature |
+| ------- | ---------------- | ------------- | --------------------- | --------- |
+| 1       | P2PKH Single-sig | P2PKH (BIP44) | `m.../n...` (regtest) | Single    |
+| 2       | P2SH 2-of-3      | P2SH          | `2...` (regtest)      | 2-of-3    |
+| 3       | P2SH 3-of-3      | P2SH          | `2...` (regtest)      | 3-of-3    |
 
 ## Script Structure Conventions
 
@@ -81,18 +81,18 @@ Each script must include header comments in the following format:
 
 BCH uses separate configuration files from BTC:
 
-| File | Purpose |
-|------|---------|
-| `config/wallet/bch/watch.yaml` | Watch wallet configuration |
+| File                            | Purpose                     |
+| ------------------------------- | --------------------------- |
+| `config/wallet/bch/watch.yaml`  | Watch wallet configuration  |
 | `config/wallet/bch/keygen.yaml` | Keygen wallet configuration |
-| `config/wallet/bch/sign1.yaml` | Sign1 wallet configuration |
-| `config/wallet/bch/sign2.yaml` | Sign2 wallet configuration |
+| `config/wallet/bch/sign1.yaml`  | Sign1 wallet configuration  |
+| `config/wallet/bch/sign2.yaml`  | Sign2 wallet configuration  |
 
 ### Account Configuration Files
 
-| Pattern | Account Config |
-|---------|----------------|
-| Single-sig | `config/wallet/account/account.yaml` |
+| Pattern         | Account Config                            |
+| --------------- | ----------------------------------------- |
+| Single-sig      | `config/wallet/account/account.yaml`      |
 | 2-of-3 Multisig | `config/wallet/account/account_2of3.yaml` |
 | 3-of-3 Multisig | `config/wallet/account/account_3of3.yaml` |
 
@@ -100,10 +100,10 @@ BCH uses separate configuration files from BTC:
 
 E2E scripts support two database backends via the `DB_TYPE` environment variable:
 
-| DB_TYPE | Description | Docker MySQL | Use Case |
-|---------|-------------|--------------|----------|
-| `sqlite` (**default**) | Local SQLite file | Not required | Fast testing, CI/CD |
-| `mysql` | Docker MySQL container | Required | Full integration test |
+| DB_TYPE                | Description            | Docker MySQL | Use Case              |
+| ---------------------- | ---------------------- | ------------ | --------------------- |
+| `sqlite` (**default**) | Local SQLite file      | Not required | Fast testing, CI/CD   |
+| `mysql`                | Docker MySQL container | Required     | Full integration test |
 
 ### Usage
 
@@ -132,10 +132,10 @@ db_query "keygen" "SELECT * FROM account_key LIMIT 5"
 
 **Manual queries** (when abstraction functions are not available):
 
-| DB_TYPE | Command |
-|---------|---------|
-| `sqlite` | `sqlite3 ./data/sqlite/bch/e2e.db "SELECT ..."` |
-| `mysql` | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."` |
+| DB_TYPE  | Command                                                                          |
+| -------- | -------------------------------------------------------------------------------- |
+| `sqlite` | `sqlite3 ./data/sqlite/bch/e2e.db "SELECT ..."`                                  |
+| `mysql`  | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."` |
 
 ## BCH-Specific Implementation Rules
 
@@ -182,13 +182,13 @@ make bch-e2e-reset P=1
 
 ### Available Makefile Targets
 
-| Target | Description |
-|--------|-------------|
-| `make bch-e2e-reset P=N` | Fresh start with reset (recommended) |
-| `make bch-e2e P=N` | Run E2E test |
-| `make bch-e2e-verbose P=N` | Run with verbose output |
-| `make bch-e2e-ci P=N` | Run in non-interactive mode |
-| `make bch-e2e-cleanup P=N` | Cleanup only |
+| Target                     | Description                          |
+| -------------------------- | ------------------------------------ |
+| `make bch-e2e-reset P=N`   | Fresh start with reset (recommended) |
+| `make bch-e2e P=N`         | Run E2E test                         |
+| `make bch-e2e-verbose P=N` | Run with verbose output              |
+| `make bch-e2e-ci P=N`      | Run in non-interactive mode          |
+| `make bch-e2e-cleanup P=N` | Cleanup only                         |
 
 ### Verification After Go Code Changes
 
@@ -222,20 +222,25 @@ make shfmt
 ## Progress Report
 
 ### Error Details
+
 [Error message that occurred]
 
 ### Attempted Fixes
+
 1. [Fix attempt 1]
 2. [Fix attempt 2]
 
 ### Current State
+
 [Description of current state]
 
 ### BCH-Specific Notes
+
 - Address format used: [CashAddr/Legacy]
 - Transaction format: Raw TX Hex
 
 ### Next Steps
+
 [Required next actions]
 ```
 
@@ -265,11 +270,11 @@ docker exec bch-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
 
 BCH uses different address formats:
 
-| Network | P2PKH Format | P2SH Format |
-|---------|--------------|-------------|
+| Network | P2PKH Format       | P2SH Format        |
+| ------- | ------------------ | ------------------ |
 | Mainnet | `bitcoincash:q...` | `bitcoincash:p...` |
-| Testnet | `bchtest:q...` | `bchtest:p...` |
-| Regtest | `m.../n...` | `2...` |
+| Testnet | `bchtest:q...`     | `bchtest:p...`     |
+| Regtest | `m.../n...`        | `2...`             |
 
 ### Balance Detection Issues
 
@@ -284,22 +289,22 @@ bitcoin-cli -regtest -rpcwallet=watch getbalance "*" 1 true
 
 BCH uses separate containers from BTC:
 
-| Container | Port | Purpose |
-|-----------|------|---------|
-| `bch-watch` | 28332 | Watch wallet node |
+| Container    | Port  | Purpose            |
+| ------------ | ----- | ------------------ |
+| `bch-watch`  | 28332 | Watch wallet node  |
 | `bch-keygen` | 29332 | Keygen wallet node |
-| `bch-sign1` | 30332 | Sign1 wallet node |
-| `bch-sign2` | 31332 | Sign2 wallet node |
+| `bch-sign1`  | 30332 | Sign1 wallet node  |
+| `bch-sign2`  | 31332 | Sign2 wallet node  |
 
 ## Makefile Targets
 
 BCH E2E targets follow the pattern `bch-e2e-pN`:
 
-| Pattern | Make Target | Script |
-|---------|-------------|--------|
-| 1 | `bch-e2e-p1` | `e2e-p1-p2pkh-singlesig.sh` |
-| 2 | `bch-e2e-p2` | `e2e-p2-p2sh-2of3.sh` |
-| 3 | `bch-e2e-p3` | `e2e-p3-p2sh-3of3.sh` |
+| Pattern | Make Target  | Script                      |
+| ------- | ------------ | --------------------------- |
+| 1       | `bch-e2e-p1` | `e2e-p1-p2pkh-singlesig.sh` |
+| 2       | `bch-e2e-p2` | `e2e-p2-p2sh-2of3.sh`       |
+| 3       | `bch-e2e-p3` | `e2e-p3-p2sh-3of3.sh`       |
 
 ## Files NOT to Reference for BCH
 

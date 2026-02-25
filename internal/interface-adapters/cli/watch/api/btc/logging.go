@@ -8,7 +8,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runLogging(btc apibtc.Bitcoiner) error {
+func runLogging(btc apibtc.WatchAPIClient) error {
 	// logging
 	logData, err := btc.Logging()
 	if err != nil {

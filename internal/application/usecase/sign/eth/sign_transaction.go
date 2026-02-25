@@ -5,25 +5,25 @@ import (
 	"errors"
 	"fmt"
 
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	ethereum "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
 type signTransactionUseCase struct {
-	eth        ethereum.Ethereumer
+	eth        apieth.ETHTransactionSigner
 	txFileRepo file.TransactionFileRepositorier
 	wtype      domainWallet.WalletType
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
-	ethAPI ethereum.Ethereumer,
+	ethAPI apieth.ETHTransactionSigner,
 	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) signusecase.SignTransactionUseCase {

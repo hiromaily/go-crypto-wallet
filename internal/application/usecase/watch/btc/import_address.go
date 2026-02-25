@@ -20,21 +20,13 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// importAddrBTCClient defines the minimal interface needed for BTC address import.
-// This follows the Interface Segregation Principle - depend only on methods actually used.
-type importAddrBTCClient interface {
-	apibtc.ChainConfigProvider   // CoinTypeCode
-	apibtc.LegacyAddressImporter // ImportAddressWithLabel, ImportMulti
-	apibtc.AddressOperator       // GetAddressInfo
-}
-
 // ImportAddressUseCase handles BTC address imports with rescan support
 type ImportAddressUseCase interface {
 	Execute(ctx context.Context, input watchusecase.ImportAddressInput) error
 }
 
 type importAddressUseCase struct {
-	btcClient    importAddrBTCClient
+	btcClient    apibtc.AddressImportClient
 	addrRepo     repowatch.AddressRepositorier
 	addrFileRepo file.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
@@ -43,7 +35,7 @@ type importAddressUseCase struct {
 
 // NewImportAddressUseCase creates a new BTC-specific ImportAddressUseCase
 func NewImportAddressUseCase(
-	btcClient apibtc.Bitcoiner,
+	btcClient apibtc.AddressImportClient,
 	addrRepo repowatch.AddressRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,

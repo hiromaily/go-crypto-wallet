@@ -8,7 +8,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runGetNetworkInfo(btc apibtc.Bitcoiner) error {
+func runGetNetworkInfo(btc apibtc.WatchAPIClient) error {
 	// call getnetworkinfo
 	infoData, err := btc.GetNetworkInfo()
 	if err != nil {

@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	ethereum "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type monitorTransactionUseCase struct {
-	ethClient    ethereum.Ethereumer
+	ethClient    apieth.EtherTxMonitor
 	addrRepo     repowatch.AddressRepositorier
 	txDetailRepo repowatch.ETHDetailTXRepositorier
 	confirmNum   uint64
@@ -21,7 +21,7 @@ type monitorTransactionUseCase struct {
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
-	ethClient ethereum.Ethereumer,
+	ethClient apieth.EtherTxMonitor,
 	addrRepo repowatch.AddressRepositorier,
 	txDetailRepo repowatch.ETHDetailTXRepositorier,
 	confirmNum uint64,

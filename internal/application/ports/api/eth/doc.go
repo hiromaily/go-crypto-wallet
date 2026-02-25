@@ -10,7 +10,6 @@
 //
 //   - Ethereumer: Main interface for Ethereum RPC operations
 //   - ERC20er: Interface for ERC-20 token operations
-//   - EtherTxCreator: Type alias for ERC20er in transaction creation contexts
 //   - EtherTxMonitor: Interface for monitoring transaction confirmations
 //
 // # Types

@@ -51,7 +51,7 @@ type importDescriptorUseCase struct {
 
 // NewImportDescriptorUseCase creates a descriptor import use case.
 func NewImportDescriptorUseCase(
-	btcClient apibtc.Bitcoiner,
+	btcClient importDescBTCClient,
 	parser *apibtcimpl.DescriptorParser,
 	chainConf *chaincfg.Params,
 	addrRepo repowatch.AddressRepositorier,

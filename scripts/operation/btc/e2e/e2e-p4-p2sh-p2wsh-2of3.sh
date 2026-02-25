@@ -128,7 +128,7 @@ multisig_setup_phase() {
 	fi
 	for account in deposit payment stored; do
 		output_file="data/descriptor/btc/${account}_descriptors${descriptor_suffix}.json"
-		cmd_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --account-config "${BTC_ACCOUNT_CONF}" --coin "${BTC_COIN}" descriptor export --account "$account" --output "$output_file" --format bitcoin-core --include-change)
+		cmd_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --account-config "${BTC_ACCOUNT_CONF}" --coin "${BTC_COIN}" create descriptor export --account "$account" --output "$output_file" --format bitcoin-core --include-change)
 		descriptor_paths[$account]="${cmd_output##*exported to }"
 	done
 
@@ -216,7 +216,7 @@ transaction_flow_phase() {
 	log_info "Signed transaction (2nd): $tx_signed2"
 
 	log_substep "Sending fully signed transaction"
-	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" send --file "${tx_signed2}")
+	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" send tx --file "${tx_signed2}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"

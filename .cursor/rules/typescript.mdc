@@ -13,16 +13,16 @@ Rules for modifying TypeScript (`*.ts`, `*.tsx`) and JavaScript (`*.js`, `*.jsx`
 
 ## Applicable Directories
 
-| App | Language | Runtime | Path | Status |
-|-----|----------|---------|------|--------|
-| xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **READ-ONLY** (deprecated) |
-| erc20-token | JavaScript/TypeScript | Node.js | `apps/erc20-token/` | Active |
+| App              | Language              | Runtime | Path                     | Status                     |
+| ---------------- | --------------------- | ------- | ------------------------ | -------------------------- |
+| xrpl-grpc-server | TypeScript            | **Bun** | `apps/xrpl-grpc-server/` | **READ-ONLY** (deprecated) |
+| erc20-token      | JavaScript/TypeScript | Node.js | `apps/erc20-token/`      | Active                     |
 
 ## Verification Commands
 
 **Navigate to app directory first:**
 
-### xrpl-grpc-server (TypeScript + Bun) -  (Deprecated - READ ONLY)
+### xrpl-grpc-server (TypeScript + Bun) - Active Development
 
 ```bash
 cd apps/xrpl-grpc-server
@@ -52,10 +52,10 @@ npm run test-all      # Run all tests
 
 ## Command Summary
 
-| App | Lint | Format | Build | Test |
-|-----|------|--------|-------|------|
-| xrpl-grpc-server | `bun run lint` | `bun run format` | `bun run build` | `bun run typecheck` |
-| erc20-token | `npm run lint-js` | `npm run fmt` | `npm run build` | `npm run test-all` |
+| App              | Lint              | Format           | Build           | Test                |
+| ---------------- | ----------------- | ---------------- | --------------- | ------------------- |
+| xrpl-grpc-server | `bun run lint`    | `bun run format` | `bun run build` | `bun run typecheck` |
+| erc20-token      | `npm run lint-js` | `npm run fmt`    | `npm run build` | `npm run test-all`  |
 
 ## Code Style
 
@@ -89,11 +89,11 @@ Instead, throw an error to fail fast and prevent silent failures.
 
 ```typescript
 // Bad: Silently returns empty string if seed is undefined
-const secret = wallet.seed ?? '';
+const secret = wallet.seed ?? "";
 
 // Good: Fail fast with explicit error
 if (!wallet.seed) {
-  throw new Error('Failed to generate a wallet seed.');
+  throw new Error("Failed to generate a wallet seed.");
 }
 const secret = wallet.seed;
 ```
@@ -131,21 +131,21 @@ import { AccountService } from "./services/account";
 #### erc20-token
 
 ```typescript
-import * as path from 'path';
+import * as path from "path";
 
-import { ethers } from 'ethers';
+import { ethers } from "ethers";
 
-import { TokenService } from './services/token';
+import { TokenService } from "./services/token";
 ```
 
 ## Auto-Generated Files
 
 **DO NOT EDIT:**
 
-| App | Generated Files |
-|-----|-----------------|
-| xrpl-grpc-server | `apps/xrpl-grpc-server/src/protogen/` (Buf/ConnectRPC generated) (deprecated - entire directory is read-only) |
-| erc20-token | `apps/erc20-token/build/` (Truffle build artifacts) |
+| App              | Generated Files                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| xrpl-grpc-server | `apps/xrpl-grpc-server/src/protogen/` (Buf/ConnectRPC generated) |
+| erc20-token      | `apps/erc20-token/build/` (Truffle build artifacts)              |
 
 ## Security
 

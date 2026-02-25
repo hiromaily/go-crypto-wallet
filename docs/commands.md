@@ -1,5 +1,7 @@
 # Commands
 
+> **Command tree overview**: [`internal/interface-adapters/cli/README.md`](../internal/interface-adapters/cli/README.md)
+
 This document describes all available CLI commands for the three wallet types: Watch Wallet, Keygen Wallet, and Sign Wallet.
 
 ---
@@ -409,22 +411,4 @@ API commands are coin-specific and dynamically configured based on the `--coin` 
 
 ## Global Flags
 
-All wallet commands support the following global flags:
-
-- `--config <path>` or `-c <path>` - Path to the configuration file (required)
-- `--account-config <path>` - Path to the account configuration file for multisig settings (optional)
-- `--coin <string>` - Coin type code: `btc`, `bch`, `eth`, `xrp`, `hyt` (default: `btc`)
-- `--wallet <string>` or `-w <string>` - Specify wallet.dat in Bitcoin Core (BTC/BCH only)
-
-**Example:**
-
-```bash
-# Watch wallet
-watch --config config/wallet/eth/watch.yaml --coin eth create deposit
-
-# Keygen wallet with account config for multisig
-keygen --config config/wallet/btc/keygen.yaml --account-config config/wallet/account/account.yaml --coin btc create multisig --account payment
-
-# Sign wallet
-sign1 --config config/wallet/btc/sign1.yaml --coin btc sign signature --file tx.json
-```
+> See [Global Flags](../internal/interface-adapters/cli/README.md#global-flags) in the CLI README.

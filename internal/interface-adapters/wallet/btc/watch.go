@@ -13,9 +13,17 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
+// btcWatchClient is the interface for watch wallet BTC operations.
+// It covers the wallet adapter's own needs plus methods passed through to CLI API commands.
+type btcWatchClient interface {
+	apibtc.BTCLifecycle   // Close()
+	apibtc.WatchAPIClient // all watch API commands
+	CoinTypeCode() domainCoin.CoinTypeCode
+}
+
 // BTCWatch watch only wallet object
 type BTCWatch struct {
-	BTC                     apibtc.Bitcoiner
+	BTC                     btcWatchClient
 	dbConn                  *sql.DB
 	addrType                domainAddress.AddrType
 	wtype                   domainWallet.WalletType
@@ -28,7 +36,7 @@ type BTCWatch struct {
 
 // NewBTCWatch returns Watch object
 func NewBTCWatch(
-	btc apibtc.Bitcoiner,
+	btc btcWatchClient,
 	dbConn *sql.DB,
 	addrType domainAddress.AddrType,
 	createTxUseCase watchusecase.CreateTransactionUseCase,

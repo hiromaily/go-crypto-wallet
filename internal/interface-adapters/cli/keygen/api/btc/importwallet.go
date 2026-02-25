@@ -7,7 +7,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runImportWallet(btc apibtc.Bitcoiner, fileName string) error {
+func runImportWallet(btc apibtc.WalletSecurityManager, fileName string) error {
 	fmt.Println("Imports keys from a wallet dump file")
 
 	// validator

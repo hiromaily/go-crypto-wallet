@@ -1,4 +1,4 @@
-package btc
+package create
 
 import (
 	"context"
@@ -12,25 +12,26 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
+	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
 )
 
-// AddDescriptorCommands adds descriptor-related subcommands for BTC.
-func AddDescriptorCommands(parentCmd *cobra.Command, containerGetter func() di.Container) {
+func addDescriptorCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, containerGetter func() di.Container) {
 	descriptorCmd := &cobra.Command{
 		Use:   "descriptor",
 		Short: "Descriptor operations for BTC keygen wallet",
 	}
 
 	descriptorCmd.AddCommand(
-		newDescriptorGenerateCommand(containerGetter),
-		newDescriptorExportCommand(containerGetter),
-		newDescriptorExportAllCommand(containerGetter),
+		newDescriptorGenerateCommand(wallet, containerGetter),
+		newDescriptorExportCommand(wallet, containerGetter),
+		newDescriptorExportAllCommand(wallet, containerGetter),
 	)
 
 	parentCmd.AddCommand(descriptorCmd)
 }
 
-func newDescriptorGenerateCommand(containerGetter func() di.Container) *cobra.Command {
+func newDescriptorGenerateCommand(wallet *wallets.Keygener, containerGetter func() di.Container) *cobra.Command {
 	var (
 		account       string
 		addressType   string
@@ -41,9 +42,16 @@ func newDescriptorGenerateCommand(containerGetter func() di.Container) *cobra.Co
 	cmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate a descriptor for the specified account and address type",
-		Example: "  keygen --coin btc descriptor generate --account deposit --address-type taproot\n" +
-			"  keygen --coin btc descriptor generate --account deposit --address-type bech32 --change",
+		Example: "  keygen --coin btc create descriptor generate --account deposit --address-type taproot\n" +
+			"  keygen --coin btc create descriptor generate --account deposit --address-type bech32 --change",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if wallet == nil || *wallet == nil {
+				return errors.New("wallet not initialized, check --coin flag")
+			}
+			if _, ok := (*wallet).(*btcwallet.BTCKeygen); !ok {
+				fmt.Println("this command is only supported for BTC")
+				return nil
+			}
 			return runDescriptorGenerate(
 				cmd.Context(), containerGetter(), account, addressType, includeChange, requiredSigs,
 			)
@@ -60,7 +68,7 @@ func newDescriptorGenerateCommand(containerGetter func() di.Container) *cobra.Co
 	return cmd
 }
 
-func newDescriptorExportCommand(containerGetter func() di.Container) *cobra.Command {
+func newDescriptorExportCommand(wallet *wallets.Keygener, containerGetter func() di.Container) *cobra.Command {
 	var (
 		account       string
 		outputPath    string
@@ -71,9 +79,16 @@ func newDescriptorExportCommand(containerGetter func() di.Container) *cobra.Comm
 	cmd := &cobra.Command{
 		Use:   "export",
 		Short: "Export descriptors for the account to a file",
-		Example: "  keygen --coin btc descriptor export --account deposit --output /tmp/descriptors.txt " +
+		Example: "  keygen --coin btc create descriptor export --account deposit --output /tmp/descriptors.txt " +
 			"--format bitcoin-core --include-change",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if wallet == nil || *wallet == nil {
+				return errors.New("wallet not initialized, check --coin flag")
+			}
+			if _, ok := (*wallet).(*btcwallet.BTCKeygen); !ok {
+				fmt.Println("this command is only supported for BTC")
+				return nil
+			}
 			return runDescriptorExport(cmd.Context(), containerGetter(), account, outputPath, format, includeChange)
 		},
 	}
@@ -93,7 +108,7 @@ func newDescriptorExportCommand(containerGetter func() di.Container) *cobra.Comm
 	return cmd
 }
 
-func newDescriptorExportAllCommand(containerGetter func() di.Container) *cobra.Command {
+func newDescriptorExportAllCommand(wallet *wallets.Keygener, containerGetter func() di.Container) *cobra.Command {
 	var (
 		account    string
 		outputPath string
@@ -101,10 +116,18 @@ func newDescriptorExportAllCommand(containerGetter func() di.Container) *cobra.C
 	)
 
 	cmd := &cobra.Command{
-		Use:     "export-all",
-		Short:   "Export all descriptors (receive and change) for the account",
-		Example: "  keygen --coin btc descriptor export-all --account deposit --output /tmp/deposit_descriptors.json",
+		Use:   "export-all",
+		Short: "Export all descriptors (receive and change) for the account",
+		Example: "  keygen --coin btc create descriptor export-all --account deposit " +
+			"--output /tmp/deposit_descriptors.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if wallet == nil || *wallet == nil {
+				return errors.New("wallet not initialized, check --coin flag")
+			}
+			if _, ok := (*wallet).(*btcwallet.BTCKeygen); !ok {
+				fmt.Println("this command is only supported for BTC")
+				return nil
+			}
 			return runDescriptorExport(cmd.Context(), containerGetter(), account, outputPath, format, true)
 		},
 	}

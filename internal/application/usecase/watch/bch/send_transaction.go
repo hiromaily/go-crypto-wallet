@@ -14,17 +14,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// sendTxBCHClient defines the minimal interface needed for BCH transaction sending.
-// This follows the Interface Segregation Principle - depend only on methods actually used.
-// BCH does not use PSBT, so this interface only needs TransactionSender.
-type sendTxBCHClient interface {
-	apibtc.TransactionSender
-}
-
 // sendTransactionUseCase implements BCH-specific transaction broadcasting.
 // BCH uses Raw Transaction Hex format instead of PSBT.
 type sendTransactionUseCase struct {
-	bchClient    sendTxBCHClient
+	bchClient    apibtc.TransactionSender
 	addrRepo     repowatch.AddressRepositorier
 	txRepo       repowatch.BTCTxRepositorier
 	txOutputRepo repowatch.TxOutputRepositorier
@@ -33,7 +26,7 @@ type sendTransactionUseCase struct {
 
 // NewBCHSendTransactionUseCase creates a new BCH SendTransactionUseCase.
 func NewBCHSendTransactionUseCase(
-	bchClient apibtc.BCHer,
+	bchClient apibtc.TransactionSender,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.BTCTxRepositorier,
 	txOutputRepo repowatch.TxOutputRepositorier,

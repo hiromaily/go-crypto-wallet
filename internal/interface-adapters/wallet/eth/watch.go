@@ -14,7 +14,7 @@ import (
 
 // ETHWatch watch only wallet object
 type ETHWatch struct {
-	ETH                     apieth.Ethereumer
+	ETH                     apieth.ETHWatchClient
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	createTxUseCase         watchusecase.CreateTransactionUseCase
@@ -26,7 +26,7 @@ type ETHWatch struct {
 
 // NewETHWatch returns ETHWatch object
 func NewETHWatch(
-	eth apieth.Ethereumer,
+	eth apieth.ETHWatchClient,
 	dbConn *sql.DB,
 	createTxUseCase watchusecase.CreateTransactionUseCase,
 	monitorTxUseCase watchusecase.MonitorTransactionUseCase,

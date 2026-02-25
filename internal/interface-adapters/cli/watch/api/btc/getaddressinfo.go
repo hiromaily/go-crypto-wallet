@@ -9,7 +9,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runGetAddressInfo(btc apibtc.Bitcoiner, addr string) error {
+func runGetAddressInfo(btc apibtc.WatchAPIClient, addr string) error {
 	// validator
 	if addr == "" {
 		return errors.New("address option [-address] is required")

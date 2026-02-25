@@ -7,7 +7,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runEncryptWallet(btc apibtc.Bitcoiner, passphrase string) error {
+func runEncryptWallet(btc apibtc.WalletSecurityManager, passphrase string) error {
 	fmt.Println("encrypts the wallet with 'passphrase'")
 
 	// validator

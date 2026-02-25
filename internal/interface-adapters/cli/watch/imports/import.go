@@ -25,19 +25,6 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGet
 	addressCmd.Flags().BoolVar(&addressIsRescan, "rescan", false, "run rescan when importing addresses or not")
 	parentCmd.AddCommand(addressCmd)
 
-	// descriptor command
-	var (
-		descriptorFilePath string
-		descriptorAccount  string
-	)
-	descriptorCmd := &cobra.Command{
-		Use:   "descriptor",
-		Short: "import output descriptors from file",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptor(containerGetter(), descriptorFilePath, descriptorAccount)
-		},
-	}
-	descriptorCmd.Flags().StringVar(&descriptorFilePath, "file", "", "import file path for descriptors (required)")
-	descriptorCmd.Flags().StringVar(&descriptorAccount, "account", "", "target account (required)")
-	parentCmd.AddCommand(descriptorCmd)
+	// descriptor subcommands (BTC only)
+	addDescriptorCommands(parentCmd, wallet, containerGetter)
 }

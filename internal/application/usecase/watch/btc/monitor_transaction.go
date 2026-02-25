@@ -32,7 +32,7 @@ type monitorTransactionUseCase struct {
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
-	btcClient apibtc.Bitcoiner,
+	btcClient monitorTxBTCClient,
 	dbConn *sql.DB,
 	txRepo repowatch.BTCTxRepositorier,
 	txInputRepo repowatch.TxInputRepositorier,

@@ -7,10 +7,11 @@ import (
 	"github.com/bookerzzz/grok"
 
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
 
-func runListUnspent(btc apibtc.Bitcoiner, acnt string, argsNum int64) error {
+func runListUnspent(btc apibtc.WatchAPIClient, acnt string, argsNum int64) error {
 	// validator
 	if acnt != "" && !domainAccount.ValidateAccountType(acnt) {
 		return errors.New("account option [-account] is invalid")

@@ -1,26 +1,22 @@
-package keygen_test
+package sign_test
 
 import (
 	"testing"
 
 	"github.com/spf13/cobra"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen"
+	signcli "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/sign"
 )
 
 func TestAddMuSig2Commands(t *testing.T) {
 	t.Parallel()
 
-	// Create a root command
-	rootCmd := &cobra.Command{
-		Use: "test",
-	}
+	rootCmd := &cobra.Command{Use: "test"}
+	signCmd := &cobra.Command{Use: "sign"}
+	rootCmd.AddCommand(signCmd)
+	signcli.AddCommands(signCmd, nil, nil)
 
-	// Add MuSig2 commands with nil container (testing command registration only)
-	keygen.AddMuSig2Commands(rootCmd, nil)
-
-	// Verify musig2 command was added
-	musig2Cmd, _, err := rootCmd.Find([]string{"musig2"})
+	musig2Cmd, _, err := signCmd.Find([]string{"musig2"})
 	if err != nil {
 		t.Fatalf("musig2 command not found: %v", err)
 	}
@@ -34,12 +30,10 @@ func TestAddMuSig2Commands(t *testing.T) {
 		t.Errorf("expected Use='musig2', got '%s'", musig2Cmd.Use)
 	}
 
-	// Verify subcommands exist
 	if !musig2Cmd.HasSubCommands() {
 		t.Error("musig2 command should have subcommands")
 	}
 
-	// Verify nonce subcommand
 	nonceCmd, _, err := musig2Cmd.Find([]string{"nonce"})
 	if err != nil {
 		t.Errorf("nonce subcommand not found: %v", err)
@@ -48,12 +42,11 @@ func TestAddMuSig2Commands(t *testing.T) {
 		t.Error("nonce subcommand is nil")
 	}
 
-	// Verify sign subcommand
-	signCmd, _, err := musig2Cmd.Find([]string{"sign"})
+	signSubCmd, _, err := musig2Cmd.Find([]string{"sign"})
 	if err != nil {
 		t.Errorf("sign subcommand not found: %v", err)
 	}
-	if signCmd == nil {
+	if signSubCmd == nil {
 		t.Error("sign subcommand is nil")
 	}
 }
@@ -61,10 +54,10 @@ func TestAddMuSig2Commands(t *testing.T) {
 func TestMuSig2NonceCommandFlags(t *testing.T) {
 	t.Parallel()
 
-	rootCmd := &cobra.Command{Use: "test"}
-	keygen.AddMuSig2Commands(rootCmd, nil)
+	signCmd := &cobra.Command{Use: "sign"}
+	signcli.AddCommands(signCmd, nil, nil)
 
-	musig2Cmd, _, err := rootCmd.Find([]string{"musig2"})
+	musig2Cmd, _, err := signCmd.Find([]string{"musig2"})
 	if err != nil {
 		t.Fatalf("musig2 command not found: %v", err)
 	}
@@ -74,14 +67,10 @@ func TestMuSig2NonceCommandFlags(t *testing.T) {
 		t.Fatalf("nonce subcommand not found: %v", err)
 	}
 
-	// Verify required flags exist
-	fileFlag := nonceCmd.Flags().Lookup("file")
-	if fileFlag == nil {
+	if nonceCmd.Flags().Lookup("file") == nil {
 		t.Error("--file flag not found")
 	}
-
-	outputFlag := nonceCmd.Flags().Lookup("output")
-	if outputFlag == nil {
+	if nonceCmd.Flags().Lookup("output") == nil {
 		t.Error("--output flag not found")
 	}
 }
@@ -89,27 +78,23 @@ func TestMuSig2NonceCommandFlags(t *testing.T) {
 func TestMuSig2SignCommandFlags(t *testing.T) {
 	t.Parallel()
 
-	rootCmd := &cobra.Command{Use: "test"}
-	keygen.AddMuSig2Commands(rootCmd, nil)
+	signCmd := &cobra.Command{Use: "sign"}
+	signcli.AddCommands(signCmd, nil, nil)
 
-	musig2Cmd, _, err := rootCmd.Find([]string{"musig2"})
+	musig2Cmd, _, err := signCmd.Find([]string{"musig2"})
 	if err != nil {
 		t.Fatalf("musig2 command not found: %v", err)
 	}
 
-	signCmd, _, err := musig2Cmd.Find([]string{"sign"})
+	signSubCmd, _, err := musig2Cmd.Find([]string{"sign"})
 	if err != nil {
 		t.Fatalf("sign subcommand not found: %v", err)
 	}
 
-	// Verify required flags exist
-	fileFlag := signCmd.Flags().Lookup("file")
-	if fileFlag == nil {
+	if signSubCmd.Flags().Lookup("file") == nil {
 		t.Error("--file flag not found")
 	}
-
-	outputFlag := signCmd.Flags().Lookup("output")
-	if outputFlag == nil {
+	if signSubCmd.Flags().Lookup("output") == nil {
 		t.Error("--output flag not found")
 	}
 }

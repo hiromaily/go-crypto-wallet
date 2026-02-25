@@ -20,6 +20,7 @@ General rules for Claude Code when working on go-crypto-wallet.
 Refer to @docs/guidelines/coding-conventions.md
 
 Key rules:
+
 - Follow Clean Architecture layer separation
 - Domain layer has ZERO infrastructure dependencies
 - Follow language-specific conventions (see Skills below)
@@ -34,6 +35,7 @@ Refer to @docs/guidelines/testing.md
 Refer to @docs/guidelines/workflow.md
 
 Key rules:
+
 - **Check current branch FIRST** before starting any task (never work on `main`)
 - Create feature branches for changes
 - Follow conventional commit messages

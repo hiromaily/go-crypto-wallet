@@ -6,7 +6,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runEstimateFee(btc apibtc.Bitcoiner) error {
+func runEstimateFee(btc apibtc.WatchAPIClient) error {
 	// estimate fee
 	feePerKb, err := btc.EstimateSmartFee()
 	if err != nil {

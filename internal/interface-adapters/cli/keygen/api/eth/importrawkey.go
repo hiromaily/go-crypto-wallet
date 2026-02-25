@@ -16,7 +16,7 @@ import (
 //	keygen -coin eth import key --account <account>
 //
 // The modern command uses local keystore.ImportECDSA() and works with both Geth and Anvil.
-func runImportRawKey(eth apieth.Ethereumer, privKey, passPhrase string) error {
+func runImportRawKey(eth apieth.ETHRawKeyImporter, privKey, passPhrase string) error {
 	fmt.Println("import raw key")
 
 	// validation

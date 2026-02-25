@@ -7,7 +7,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runWalletPassphrase(btc apibtc.Bitcoiner, passphrase string) error {
+func runWalletPassphrase(btc apibtc.WalletSecurityManager, passphrase string) error {
 	fmt.Println("stores the wallet decryption key in memory for 'timeout' seconds")
 
 	// validator

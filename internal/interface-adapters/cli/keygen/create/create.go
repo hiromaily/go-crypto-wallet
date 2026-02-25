@@ -51,6 +51,9 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, containerGe
 		"given seed is used to store in database instead of generating new seed (development use)")
 	parentCmd.AddCommand(seedCmd)
 
+	// descriptor command (BTC only)
+	addDescriptorCommands(parentCmd, wallet, containerGetter)
+
 	// multisig command
 	var (
 		multisigAccount string

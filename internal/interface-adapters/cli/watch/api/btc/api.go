@@ -7,7 +7,7 @@ import (
 )
 
 // AddCommands adds all Bitcoin API subcommands
-func AddCommands(parentCmd *cobra.Command, btc apibtc.Bitcoiner) {
+func AddCommands(parentCmd *cobra.Command, btc apibtc.WatchAPIClient) {
 	// balance command
 	var balanceAccount string
 	balanceCmd := &cobra.Command{

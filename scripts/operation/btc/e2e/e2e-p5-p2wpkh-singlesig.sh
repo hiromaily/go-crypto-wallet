@@ -76,7 +76,7 @@ singlesig_setup_phase() {
 		if [ -n "${E2E_PATTERN}" ]; then
 			descriptor_suffix="-${E2E_PATTERN}"
 		fi
-		file_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" descriptor export \
+		file_output=$(btc_keygen_cmd -c "${BTC_CONFIG_KEYGEN}" --coin "${BTC_COIN}" create descriptor export \
 			--account "${account}" \
 			--output "data/descriptor/btc/${account}_descriptors${descriptor_suffix}.json" \
 			--format bitcoin-core \
@@ -174,7 +174,7 @@ transaction_flow_phase() {
 	log_info "Signed transaction: $tx_signed"
 
 	log_substep "Sending fully signed transaction"
-	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" send --file "${tx_signed}")
+	tx_result=$(btc_watch_cmd -c "${BTC_CONFIG_WATCH}" --coin "${BTC_COIN}" send tx --file "${tx_signed}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"

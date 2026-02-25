@@ -5,6 +5,8 @@ description: How to run watch, keygen, and sign wallet CLI commands. Use when ex
 
 # Wallet CLI Usage
 
+> **Full command tree**: [`internal/interface-adapters/cli/README.md`](../../internal/interface-adapters/cli/README.md)
+
 Guide for running the three wallet types: watch, keygen, and sign.
 
 ## Prerequisites
@@ -16,14 +18,7 @@ Guide for running the three wallet types: watch, keygen, and sign.
 
 ## Required Flags
 
-All wallet commands require the `--config` flag:
-
-| Flag               | Short | Required | Description                                                   |
-| ------------------ | ----- | -------- | ------------------------------------------------------------- |
-| `--config`         | `-c`  | **Yes**  | Path to configuration file                                    |
-| `--coin`           |       | No       | Coin type: `btc`, `bch`, `eth`, `xrp`, `hyt` (default: `btc`) |
-| `--account-config` |       | No       | Path to account config for multisig                           |
-| `--wallet`         | `-w`  | No       | Bitcoin Core wallet name (BTC/BCH only)                       |
+See [Global Flags](../../internal/interface-adapters/cli/README.md#global-flags) in the CLI README.
 
 ## Configuration Files
 
@@ -60,13 +55,13 @@ watch --config config/wallet/btc/watch.yaml --coin btc create deposit
 watch --config config/wallet/btc/watch.yaml --coin btc create payment
 
 # Send signed transaction
-watch --config config/wallet/btc/watch.yaml --coin btc send --file data/tx/btc/payment_signed.psbt
+watch --config config/wallet/btc/watch.yaml --coin btc send tx --file data/tx/btc/payment_signed.psbt
 
 # Import addresses
 watch --config config/wallet/btc/watch.yaml --coin btc import address --file data/address/btc/addresses.csv
 
 # Import descriptors (BTC only)
-watch --config config/wallet/btc/watch.yaml --coin btc import descriptor --file data/descriptor/btc/descriptors.json
+watch --config config/wallet/btc/watch.yaml --coin btc import descriptor --file data/descriptor/btc/descriptors.json --account payment
 
 # Monitor transactions
 watch --config config/wallet/btc/watch.yaml --coin btc monitor senttx --account deposit
@@ -93,7 +88,7 @@ keygen --config config/wallet/btc/keygen.yaml --coin btc create hdkey --account 
 keygen --config config/wallet/btc/keygen.yaml --coin btc export address --account client
 
 # Export descriptors (BTC only)
-keygen --config config/wallet/btc/keygen.yaml --coin btc descriptor export --account payment --output data/descriptor/btc/payment.json
+keygen --config config/wallet/btc/keygen.yaml --coin btc create descriptor export --account payment --output data/descriptor/btc/payment.json
 
 # Import private keys to Bitcoin Core
 keygen --config config/wallet/btc/keygen.yaml --coin btc import privkey --account client

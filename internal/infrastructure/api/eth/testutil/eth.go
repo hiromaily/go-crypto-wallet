@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	ethereum "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
@@ -14,11 +15,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
-var et ethereum.Ethereumer
+var et apieth.Ethereumer
 
 // GetETH returns eth instance
 // FIXME: hard coded
-func GetETH() (ethereum.Ethereumer, error) {
+func GetETH() (apieth.Ethereumer, error) {
 	if et != nil {
 		return et, nil
 	}
@@ -49,7 +50,7 @@ func GetETH() (ethereum.Ethereumer, error) {
 // ETHTestSuite is a test suite for ETH
 type ETHTestSuite struct {
 	suite.Suite
-	ETH ethereum.Ethereumer
+	ETH apieth.Ethereumer
 }
 
 func (ets *ETHTestSuite) SetupTest() {
