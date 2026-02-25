@@ -289,7 +289,7 @@ type TxSigner interface {
 
 // TxSender broadcasts signed transactions to the network.
 // Used by watch wallet send-transaction use case.
-// Note: ETHTransactionSender is an equivalent interface retained for backward compatibility.
+// ETHTransactionSender is a type alias for this interface for backward compatibility.
 type TxSender interface {
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 }
