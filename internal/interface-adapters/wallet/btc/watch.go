@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	"github.com/btcsuite/btcd/btcutil"
+
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -13,9 +15,36 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
+// btcWatchClient is the interface for watch wallet BTC operations.
+// It covers the wallet adapter's own needs plus methods passed through to CLI API commands.
+type btcWatchClient interface {
+	// Lifecycle
+	Close()
+	// Chain config
+	CoinTypeCode() domainCoin.CoinTypeCode
+	ConfirmationBlock() uint64
+	// Balance
+	GetBalance() (btcutil.Amount, error)
+	GetBalanceByAccount(accountType domainAccount.AccountType, confirmationNum uint64) (btcutil.Amount, error)
+	// Fee
+	EstimateSmartFee() (float64, error)
+	// Address
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
+	ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error)
+	// Network
+	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
+	// UTXO
+	ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error)
+	ListUnspentByAccount(accountType domainAccount.AccountType, confirmationNum uint64) ([]dtobtc.UnspentOutput, error)
+	GetUnspentListAddrs(unspentList []dtobtc.UnspentOutput, accountType domainAccount.AccountType) []string
+	UnlockUnspent() error
+	// Logging
+	Logging() (*dtobtc.LoggingResult, error)
+}
+
 // BTCWatch watch only wallet object
 type BTCWatch struct {
-	BTC                     apibtc.Bitcoiner
+	BTC                     btcWatchClient
 	dbConn                  *sql.DB
 	addrType                domainAddress.AddrType
 	wtype                   domainWallet.WalletType
@@ -28,7 +57,7 @@ type BTCWatch struct {
 
 // NewBTCWatch returns Watch object
 func NewBTCWatch(
-	btc apibtc.Bitcoiner,
+	btc btcWatchClient,
 	dbConn *sql.DB,
 	addrType domainAddress.AddrType,
 	createTxUseCase watchusecase.CreateTransactionUseCase,

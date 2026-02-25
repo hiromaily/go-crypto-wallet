@@ -15,21 +15,15 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// importFullPubkeyBTCClient defines the minimal interface needed for full pubkey import.
-// This follows the Interface Segregation Principle - depend only on methods actually used.
-type importFullPubkeyBTCClient interface {
-	apibtc.ChainConfigProvider // CoinTypeCode
-}
-
 type importFullPubkeyUseCase struct {
-	btc                importFullPubkeyBTCClient
+	btc                apibtc.ChainConfigProvider
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier
 	pubkeyFileRepo     file.AddressFileRepositorier
 }
 
 // NewImportFullPubkeyUseCase creates a new ImportFullPubkeyUseCase
 func NewImportFullPubkeyUseCase(
-	btc apibtc.Bitcoiner,
+	btc apibtc.ChainConfigProvider,
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier,
 	pubkeyFileRepo file.AddressFileRepositorier,
 ) keygenusecase.ImportFullPubkeyUseCase {

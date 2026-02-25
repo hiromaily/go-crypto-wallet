@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	"github.com/btcsuite/btcd/chaincfg"
+
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -13,9 +14,25 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 )
 
+// btcKeygenClient is the interface for keygen wallet BTC operations.
+// It covers the wallet adapter's own needs plus methods passed through to CLI commands.
+type btcKeygenClient interface {
+	// Lifecycle
+	Close()
+	// Chain config (used by create/key.go)
+	GetChainConf() *chaincfg.Params
+	// Wallet management (used by keygen API CLI)
+	EncryptWallet(passphrase string) error
+	WalletPassphrase(passphrase string, timeoutSecs int64) error
+	WalletPassphraseChange(old, newPass string) error
+	WalletLock() error
+	DumpWallet(fileName string) error
+	ImportWallet(fileName string) error
+}
+
 // BTCKeygen is keygen wallet object
 type BTCKeygen struct {
-	BTC                       apibtc.Bitcoiner
+	BTC                       btcKeygenClient
 	dbConn                    *sql.DB
 	addrType                  domainAddress.AddrType
 	wtype                     domainWallet.WalletType
@@ -30,7 +47,7 @@ type BTCKeygen struct {
 
 // NewBTCKeygen returns Keygen object
 func NewBTCKeygen(
-	btc apibtc.Bitcoiner,
+	btc btcKeygenClient,
 	dbConn *sql.DB,
 	addrType domainAddress.AddrType,
 	generateSeedUseCase keygenusecase.GenerateSeedUseCase,

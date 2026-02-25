@@ -16,16 +16,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// importPrivKeyBTCClient defines the minimal interface needed for private key import.
-// This follows the Interface Segregation Principle - depend only on methods actually used.
-type importPrivKeyBTCClient interface {
-	apibtc.ChainConfigProvider // CoinTypeCode
-	apibtc.PrivateKeyImporter  // ImportPrivKeyWithoutReScan
-	apibtc.AddressOperator     // GetAccount, GetAddressInfo
-}
-
 type importPrivateKeyUseCase struct {
-	btc         importPrivKeyBTCClient
+	btc         apibtc.PrivateKeyImportClient
 	authKeyRepo repocold.AuthAccountKeyRepositorier
 	authType    domainAccount.AuthType
 	wtype       domainWallet.WalletType
@@ -33,7 +25,7 @@ type importPrivateKeyUseCase struct {
 
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase for sign wallet
 func NewImportPrivateKeyUseCase(
-	btc apibtc.Bitcoiner,
+	btc apibtc.PrivateKeyImportClient,
 	authKeyRepo repocold.AuthAccountKeyRepositorier,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,

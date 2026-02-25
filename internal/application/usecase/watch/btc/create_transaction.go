@@ -62,7 +62,7 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	btcClient apibtc.Bitcoiner,
+	btcClient createTxBTCClient,
 	dbConn *sql.DB,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.BTCTxRepositorier,

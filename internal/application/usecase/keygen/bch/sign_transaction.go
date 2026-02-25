@@ -16,18 +16,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// signTxBCHClient defines the minimal interface needed for BCH keygen transaction signing.
-// This follows the Interface Segregation Principle - depend only on methods actually used.
-// BCH uses Raw TX Hex with SIGHASH_FORKID instead of PSBT.
-type signTxBCHClient interface {
-	apibtc.RawTransactionCreator // ToMsgTx, ToHex
-	apibtc.RawTransactionSigner  // SignRawTransactionWithKey
-}
-
 // signTransactionUseCase implements BCH-specific transaction signing.
 // Unlike BTC, BCH uses Raw Transaction Hex format with SIGHASH_FORKID (0x41).
 type signTransactionUseCase struct {
-	bch             signTxBCHClient
+	bch             apibtc.BCHTransactionSigner
 	accountKeyRepo  repocold.BTCAccountKeyRepositorier
 	txFileRepo      file.TransactionFileRepositorier
 	multisigAccount *domainAccount.MultisigConfig
@@ -36,7 +28,7 @@ type signTransactionUseCase struct {
 // NewBCHSignTransactionUseCase creates a new BCH SignTransactionUseCase.
 // BCH uses Raw TX Hex with SIGHASH_FORKID instead of PSBT.
 func NewBCHSignTransactionUseCase(
-	bch apibtc.BCHer,
+	bch apibtc.BCHTransactionSigner,
 	accountKeyRepo repocold.BTCAccountKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,

@@ -56,7 +56,7 @@ type createTransactionUseCase struct {
 // NewCreateBCHTransactionUseCase creates a new BCH CreateTransactionUseCase.
 // BCH uses Raw Transaction Hex format instead of PSBT.
 func NewCreateBCHTransactionUseCase(
-	bchClient apibtc.BCHer,
+	bchClient createTxBCHClient,
 	dbConn *sql.DB,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.BTCTxRepositorier,

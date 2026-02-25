@@ -1,13 +1,39 @@
 package btc
 
 import (
+	"github.com/btcsuite/btcd/btcutil"
 	"github.com/spf13/cobra"
 
-	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
 
+// btcWatchAPICmds defines the minimal interface for Watch wallet API commands.
+type btcWatchAPICmds interface {
+	// balance
+	GetBalance() (btcutil.Amount, error)
+	GetBalanceByAccount(accountType domainAccount.AccountType, confirmationNum uint64) (btcutil.Amount, error)
+	ConfirmationBlock() uint64
+	// estimatefee
+	EstimateSmartFee() (float64, error)
+	// getaddressinfo
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
+	// getnetworkinfo
+	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
+	// listunspent
+	ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error)
+	ListUnspentByAccount(accountType domainAccount.AccountType, confirmationNum uint64) ([]dtobtc.UnspentOutput, error)
+	GetUnspentListAddrs(unspentList []dtobtc.UnspentOutput, accountType domainAccount.AccountType) []string
+	// logging
+	Logging() (*dtobtc.LoggingResult, error)
+	// validateaddress
+	ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error)
+	// unlocktx
+	UnlockUnspent() error
+}
+
 // AddCommands adds all Bitcoin API subcommands
-func AddCommands(parentCmd *cobra.Command, btc apibtc.Bitcoiner) {
+func AddCommands(parentCmd *cobra.Command, btc btcWatchAPICmds) {
 	// balance command
 	var balanceAccount string
 	balanceCmd := &cobra.Command{

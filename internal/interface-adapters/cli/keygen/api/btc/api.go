@@ -2,12 +2,20 @@ package btc
 
 import (
 	"github.com/spf13/cobra"
-
-	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
+// btcKeygenAPICmds defines the minimal interface for Keygen wallet API commands.
+type btcKeygenAPICmds interface {
+	EncryptWallet(passphrase string) error
+	WalletPassphrase(passphrase string, timeoutSecs int64) error
+	WalletPassphraseChange(old, newPass string) error
+	WalletLock() error
+	DumpWallet(fileName string) error
+	ImportWallet(fileName string) error
+}
+
 // AddCommands adds all Bitcoin API subcommands
-func AddCommands(parentCmd *cobra.Command, btc apibtc.Bitcoiner) {
+func AddCommands(parentCmd *cobra.Command, btc btcKeygenAPICmds) {
 	// encryptwallet command
 	var encryptwalletPassphrase string
 	encryptwalletCmd := &cobra.Command{

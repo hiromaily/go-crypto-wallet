@@ -38,10 +38,11 @@ func GetBTC() (apibtc.Bitcoiner, error) {
 		return nil, fmt.Errorf("fail to create bitcoin core client: %w", err)
 	}
 	// Bitcoin instance
-	bc, err = bitcoin.NewBitcoin(client, &conf.Bitcoin, conf.CoinTypeCode)
+	btcFull, err := bitcoin.NewBitcoin(client, &conf.Bitcoin, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create btc instance: %w", err)
 	}
+	bc = btcFull
 	return bc, nil
 }
 

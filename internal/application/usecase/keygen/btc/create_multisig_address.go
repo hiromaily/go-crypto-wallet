@@ -15,14 +15,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// createMultisigBTCClient defines the minimal interface needed for multisig address creation.
-// This follows the Interface Segregation Principle - depend only on methods actually used.
-type createMultisigBTCClient interface {
-	apibtc.MultisigManager // AddMultisigAddress
-}
-
 type createMultisigAddressUseCase struct {
-	btc                createMultisigBTCClient
+	btc                apibtc.MultisigManager
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier
 	accountKeyRepo     repocold.BTCAccountKeyRepositorier
 	multisigAccount    *domainAccount.MultisigConfig
@@ -30,7 +24,7 @@ type createMultisigAddressUseCase struct {
 
 // NewCreateMultisigAddressUseCase creates a new CreateMultisigAddressUseCase
 func NewCreateMultisigAddressUseCase(
-	btc apibtc.Bitcoiner,
+	btc apibtc.MultisigManager,
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier,
 	accountKeyRepo repocold.BTCAccountKeyRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,

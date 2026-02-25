@@ -478,8 +478,3 @@ func NewAccountKeyRepositorySqlc(
 ) *BTCAccountKeyRepositorySqlc {
 	return NewBTCAccountKeyRepositorySqlc(dbConn, coinTypeCode)
 }
-
-// AccountKeyRepositorySqlc is kept for backward compatibility.
-//
-// Deprecated: Use BTCAccountKeyRepositorySqlc instead.
-type AccountKeyRepositorySqlc = BTCAccountKeyRepositorySqlc

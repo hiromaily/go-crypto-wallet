@@ -1421,7 +1421,7 @@ func (c *container) newBTCWatchAggregateMuSig2SignaturesUseCase() watchusecase.A
 
 func (c *container) newBCHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasebch.NewCreateBCHTransactionUseCase(
-		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
+		c.newBTC(),
 		c.pkgContainer.NewDatabaseClient(),
 		c.newAddressRepo(),
 		c.newBTCTxRepo(),
@@ -1437,7 +1437,7 @@ func (c *container) newBCHWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 func (c *container) newBCHWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
 	return watchusecasebch.NewBCHSendTransactionUseCase(
-		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
+		c.newBTC(),
 		c.newAddressRepo(),
 		c.newBTCTxRepo(),
 		c.newBTCTxOutputRepo(),
@@ -1745,7 +1745,7 @@ func (c *container) newBTCKeygenSignTransactionUseCase() keygenusecase.SignTrans
 
 func (c *container) newBCHKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecasebch.NewBCHSignTransactionUseCase(
-		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
+		c.newBTC(),
 		c.newAccountKeyRepo(),
 		c.newTxFileRepo(),
 		c.newMultiAccount(),
@@ -1801,7 +1801,7 @@ func (c *container) newBTCSignTransactionUseCase() signusecase.SignTransactionUs
 
 func (c *container) newBCHSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecasebch.NewBCHSignTransactionUseCase(
-		c.newBTC(), // BCHer interface is satisfied by Bitcoiner
+		c.newBTC(),
 		c.newAccountKeyRepo(),
 		c.newAuthKeyRepo(),
 		c.newTxFileRepo(),

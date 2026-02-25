@@ -3,11 +3,9 @@ package btc
 import (
 	"errors"
 	"fmt"
-
-	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runValidateAddress(btc apibtc.Bitcoiner, address string) error {
+func runValidateAddress(btc btcWatchAPICmds, address string) error {
 	// validate args
 	if address == "" {
 		return errors.New("address option [-address] is required")

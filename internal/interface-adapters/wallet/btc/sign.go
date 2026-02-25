@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -12,9 +11,23 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
+// btcSignClient is the interface for sign wallet BTC operations.
+// It covers the wallet adapter's own needs plus methods passed through to CLI commands.
+type btcSignClient interface {
+	// Lifecycle
+	Close()
+	// Wallet management (used by sign API CLI - shares keygen API commands)
+	EncryptWallet(passphrase string) error
+	WalletPassphrase(passphrase string, timeoutSecs int64) error
+	WalletPassphraseChange(old, newPass string) error
+	WalletLock() error
+	DumpWallet(fileName string) error
+	ImportWallet(fileName string) error
+}
+
 // BTCSign is sign wallet object
 type BTCSign struct {
-	BTC                     apibtc.Bitcoiner
+	BTC                     btcSignClient
 	dbConn                  *sql.DB
 	authAccount             domainAccount.AuthType
 	addrType                domainAddress.AddrType
@@ -29,7 +42,7 @@ type BTCSign struct {
 
 // NewBTCSign returns Sign object
 func NewBTCSign(
-	btc apibtc.Bitcoiner,
+	btc btcSignClient,
 	dbConn *sql.DB,
 	authAccount domainAccount.AuthType,
 	addrType domainAddress.AddrType,

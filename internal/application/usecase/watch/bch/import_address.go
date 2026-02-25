@@ -20,16 +20,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// importAddrBCHClient defines the minimal interface needed for BCH address import.
-// This follows the Interface Segregation Principle - depend only on methods actually used.
-type importAddrBCHClient interface {
-	apibtc.ChainConfigProvider   // CoinTypeCode
-	apibtc.LegacyAddressImporter // ImportAddressWithLabel, ImportMulti
-	apibtc.AddressOperator       // GetAddressInfo
-}
-
 type importAddressUseCase struct {
-	bchClient    importAddrBCHClient
+	bchClient    apibtc.AddressImportClient
 	addrRepo     repowatch.AddressRepositorier
 	addrFileRepo file.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
@@ -37,10 +29,8 @@ type importAddressUseCase struct {
 }
 
 // NewImportBCHAddressUseCase creates a new BCH-specific ImportAddressUseCase
-// Note: Accepts a minimal interface matching the actual BCH implementation methods
-// BCH's BitcoinCash struct embeds Bitcoin, providing ImportMulti through that embedding
 func NewImportBCHAddressUseCase(
-	bchClient importAddrBCHClient,
+	bchClient apibtc.AddressImportClient,
 	addrRepo repowatch.AddressRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,

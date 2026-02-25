@@ -46,7 +46,7 @@ type sendTransactionUseCase struct {
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
-	btcClient apibtc.Bitcoiner,
+	btcClient sendTxBTCClient,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.BTCTxRepositorier,
 	txOutputRepo repowatch.TxOutputRepositorier,
