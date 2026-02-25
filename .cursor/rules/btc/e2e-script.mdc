@@ -13,13 +13,13 @@ Rules applied when creating or modifying Bitcoin E2E scripts.
 
 Read the following documents before creating or modifying scripts:
 
-| Document | Contents |
-|----------|----------|
-| `docs/chains/btc/operations/e2e-transaction-patterns.md` | Detailed specifications for all 11 patterns |
-| `docs/chains/btc/overview/address-types.md` | **CRITICAL**: Address types vs formats (taproot vs bech32m) |
-| `scripts/operation/common.sh` | Common utility functions |
-| `pkg/config/README.md` | Configuration override via environment variables |
-| `config/wallet/README.md` | Wallet configuration file policies |
+| Document                                                 | Contents                                                    |
+| -------------------------------------------------------- | ----------------------------------------------------------- |
+| `docs/chains/btc/operations/e2e-transaction-patterns.md` | Detailed specifications for all 11 patterns                 |
+| `docs/chains/btc/overview/address-types.md`              | **CRITICAL**: Address types vs formats (taproot vs bech32m) |
+| `scripts/operation/common.sh`                            | Common utility functions                                    |
+| `pkg/config/README.md`                                   | Configuration override via environment variables            |
+| `config/wallet/README.md`                                | Wallet configuration file policies                          |
 
 ## Script Structure Conventions
 
@@ -73,9 +73,9 @@ export WALLET_ADDRESS_TYPE="[type]"
 
 Use the appropriate configuration file based on the pattern:
 
-| Pattern | Account Config |
-|---------|----------------|
-| Single-sig | `config/wallet/account/account.yaml` |
+| Pattern         | Account Config                            |
+| --------------- | ----------------------------------------- |
+| Single-sig      | `config/wallet/account/account.yaml`      |
 | 2-of-3 Multisig | `config/wallet/account/account_2of3.yaml` |
 | 3-of-3 Multisig | `config/wallet/account/account_3of3.yaml` |
 
@@ -83,10 +83,10 @@ Use the appropriate configuration file based on the pattern:
 
 E2E scripts support two database backends via the `DB_TYPE` environment variable:
 
-| DB_TYPE | Description | Docker MySQL | Use Case |
-|---------|-------------|--------------|----------|
-| `sqlite` (**default**) | Local SQLite file | Not required | Fast testing, CI/CD |
-| `mysql` | Docker MySQL container | Required | Full integration test |
+| DB_TYPE                | Description            | Docker MySQL | Use Case              |
+| ---------------------- | ---------------------- | ------------ | --------------------- |
+| `sqlite` (**default**) | Local SQLite file      | Not required | Fast testing, CI/CD   |
+| `mysql`                | Docker MySQL container | Required     | Full integration test |
 
 ### Usage
 
@@ -100,9 +100,9 @@ make btc-e2e-reset P=1 DB=mysql
 
 ### SQLite Configuration Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DB_TYPE` | `sqlite` | Database type |
+| Variable         | Default                    | Description          |
+| ---------------- | -------------------------- | -------------------- |
+| `DB_TYPE`        | `sqlite`                   | Database type        |
 | `SQLITE_DB_PATH` | `./data/sqlite/btc/e2e.db` | SQLite database file |
 
 ### How It Works
@@ -131,10 +131,10 @@ db_query "keygen" "SELECT * FROM account_key LIMIT 5"
 
 **Manual queries** (when abstraction functions are not available):
 
-| DB_TYPE | Command |
-|---------|---------|
-| `sqlite` | `sqlite3 ./data/sqlite/btc/e2e.db "SELECT ..."` |
-| `mysql` | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."` |
+| DB_TYPE  | Command                                                                          |
+| -------- | -------------------------------------------------------------------------------- |
+| `sqlite` | `sqlite3 ./data/sqlite/btc/e2e.db "SELECT ..."`                                  |
+| `mysql`  | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."` |
 
 ## Configuration File Policy (Important)
 
@@ -159,12 +159,12 @@ export WALLET_ADDRESS_TYPE="legacy"
 
 `key_type` is **automatically derived** from `address_type`. The `WALLET_KEY_TYPE` environment variable is not needed.
 
-| address_type | Derived key_type | Use Case |
-|--------------|------------------|----------|
-| `legacy` | `bip44` | P2PKH (Pattern 1, 2) |
-| `p2sh-segwit` | `bip49` | P2SH-P2WPKH/P2SH-P2WSH (Pattern 3, 4, 8) |
-| `bech32` | `bip84` | Native SegWit (Pattern 5, 6, 7) |
-| `taproot` / `bech32m` | `bip86` | Taproot (Pattern 9, 10, 11) |
+| address_type          | Derived key_type | Use Case                                 |
+| --------------------- | ---------------- | ---------------------------------------- |
+| `legacy`              | `bip44`          | P2PKH (Pattern 1, 2)                     |
+| `p2sh-segwit`         | `bip49`          | P2SH-P2WPKH/P2SH-P2WSH (Pattern 3, 4, 8) |
+| `bech32`              | `bip84`          | Native SegWit (Pattern 5, 6, 7)          |
+| `taproot` / `bech32m` | `bip86`          | Taproot (Pattern 9, 10, 11)              |
 
 Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 
@@ -172,19 +172,19 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 
 ⚠️ **CRITICAL**: For P2TR patterns (9, 10, 11), use `address_type="taproot"` NOT `"bech32m"`. See `btc-terminology` skill for details.
 
-| Pattern | Description | address_type | Address Format | Signature |
-|---------|-------------|--------------|----------------|-----------|
-| 1 | P2PKH Single-sig | `legacy` | `m.../n...` | Single |
-| 2 | P2PKH 2-of-3 | `legacy` | `2...` (P2SH) | 2-of-3 |
-| 3 | P2SH-P2WPKH Single-sig | `p2sh-segwit` | `2...` | Single |
-| 4 | P2SH-P2WSH 2-of-3 | `p2sh-segwit` | `2...` | 2-of-3 |
-| 5 | P2WPKH Native SegWit Single-sig | `bech32` | `bcrt1q...` | Single |
-| 6 | P2WSH 2-of-3 | `bech32` | `bcrt1q...` (62 chars) | 2-of-3 |
-| 7 | P2WSH 3-of-3 | `bech32` | `bcrt1q...` (62 chars) | 3-of-3 |
-| 8 | P2SH-P2WSH 3-of-3 | `p2sh-segwit` | `2...` | 3-of-3 |
-| 9 | P2TR Taproot Single-sig | `taproot` | `bcrt1p...` | Single |
-| 10 | P2TR MuSig2 N-of-N | `taproot` | `bcrt1p...` | N-of-N |
-| 11 | P2TR Tapscript M-of-N | `taproot` | `bcrt1p...` | M-of-N |
+| Pattern | Description                     | address_type  | Address Format         | Signature |
+| ------- | ------------------------------- | ------------- | ---------------------- | --------- |
+| 1       | P2PKH Single-sig                | `legacy`      | `m.../n...`            | Single    |
+| 2       | P2PKH 2-of-3                    | `legacy`      | `2...` (P2SH)          | 2-of-3    |
+| 3       | P2SH-P2WPKH Single-sig          | `p2sh-segwit` | `2...`                 | Single    |
+| 4       | P2SH-P2WSH 2-of-3               | `p2sh-segwit` | `2...`                 | 2-of-3    |
+| 5       | P2WPKH Native SegWit Single-sig | `bech32`      | `bcrt1q...`            | Single    |
+| 6       | P2WSH 2-of-3                    | `bech32`      | `bcrt1q...` (62 chars) | 2-of-3    |
+| 7       | P2WSH 3-of-3                    | `bech32`      | `bcrt1q...` (62 chars) | 3-of-3    |
+| 8       | P2SH-P2WSH 3-of-3               | `p2sh-segwit` | `2...`                 | 3-of-3    |
+| 9       | P2TR Taproot Single-sig         | `taproot`     | `bcrt1p...`            | Single    |
+| 10      | P2TR MuSig2 N-of-N              | `taproot`     | `bcrt1p...`            | N-of-N    |
+| 11      | P2TR Tapscript M-of-N           | `taproot`     | `bcrt1p...`            | M-of-N    |
 
 **Note**: `address_type` values represent **address types** (semantic), NOT encoding formats. "bech32m" is an encoding format used by Taproot addresses, but you configure the type as "taproot". See `.claude/skills/btc-terminology/SKILL.md` for details.
 
@@ -213,13 +213,13 @@ make btc-e2e-reset P=2
 
 ### Available Makefile Targets
 
-| Target | Description |
-|--------|-------------|
-| `make btc-e2e-reset P=N` | Fresh start with reset (recommended) |
-| `make btc-e2e P=N` | Run E2E test |
-| `make btc-e2e-verbose P=N` | Run with verbose output |
-| `make btc-e2e-ci P=N` | Run in non-interactive mode |
-| `make btc-e2e-cleanup P=N` | Cleanup only |
+| Target                     | Description                          |
+| -------------------------- | ------------------------------------ |
+| `make btc-e2e-reset P=N`   | Fresh start with reset (recommended) |
+| `make btc-e2e P=N`         | Run E2E test                         |
+| `make btc-e2e-verbose P=N` | Run with verbose output              |
+| `make btc-e2e-ci P=N`      | Run in non-interactive mode          |
+| `make btc-e2e-cleanup P=N` | Cleanup only                         |
 
 ### Verification After Go Code Changes
 
@@ -253,19 +253,24 @@ make shfmt
 ## Progress Report
 
 ### Error Details
+
 [Error message that occurred]
 
 ### Attempted Fixes
+
 1. [Fix attempt 1]
 2. [Fix attempt 2]
 
 ### Current State
+
 [Description of current state]
 
 ### Environment Variable Status
+
 - WALLET_ADDRESS_TYPE: [value]
 
 ### Next Steps
+
 [Required next actions]
 ```
 
@@ -349,25 +354,25 @@ btc-e2e-p1-cleanup:
 
 **Current Scripts**:
 
-| Pattern | Script | Make Target | Status |
-|---------|--------|-------------|--------|
-| 1 | `e2e-p1-p2pkh-singlesig.sh` | `btc-e2e-p1` | ✅ |
-| 2 | `e2e-p2-p2pkh-2of3.sh` | `btc-e2e-p2` | ✅ |
-| 3 | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | `btc-e2e-p3` | ✅ |
-| 4 | `e2e-p4-p2sh-p2wsh-2of3.sh` | `btc-e2e-p4` | ✅ |
-| 5 | `e2e-p5-p2wpkh-singlesig.sh` | `btc-e2e-p5` | ✅ |
-| 6 | `e2e-p6-p2wsh-2of3.sh` | `btc-e2e-p6` | ✅ |
-| 7 | `e2e-p7-p2wsh-3of3.sh` | `btc-e2e-p7` | ✅ |
-| 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` | ✅ |
-| 9 | `e2e-p9-p2tr-singlesig.sh` | `btc-e2e-p9` | ✅ |
-| 10 | `e2e-p10-p2tr-musig2.sh` | `btc-e2e-p10` | ✅ |
-| 11 | `e2e-p11-p2tr-tapscript.sh` | `btc-e2e-p11` | ✅ |
+| Pattern | Script                            | Make Target   | Status |
+| ------- | --------------------------------- | ------------- | ------ |
+| 1       | `e2e-p1-p2pkh-singlesig.sh`       | `btc-e2e-p1`  | ✅     |
+| 2       | `e2e-p2-p2pkh-2of3.sh`            | `btc-e2e-p2`  | ✅     |
+| 3       | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | `btc-e2e-p3`  | ✅     |
+| 4       | `e2e-p4-p2sh-p2wsh-2of3.sh`       | `btc-e2e-p4`  | ✅     |
+| 5       | `e2e-p5-p2wpkh-singlesig.sh`      | `btc-e2e-p5`  | ✅     |
+| 6       | `e2e-p6-p2wsh-2of3.sh`            | `btc-e2e-p6`  | ✅     |
+| 7       | `e2e-p7-p2wsh-3of3.sh`            | `btc-e2e-p7`  | ✅     |
+| 8       | `e2e-p8-p2sh-p2wsh-3of3.sh`       | `btc-e2e-p8`  | ✅     |
+| 9       | `e2e-p9-p2tr-singlesig.sh`        | `btc-e2e-p9`  | ✅     |
+| 10      | `e2e-p10-p2tr-musig2.sh`          | `btc-e2e-p10` | ✅     |
+| 11      | `e2e-p11-p2tr-tapscript.sh`       | `btc-e2e-p11` | ✅     |
 
 ## Related Skills
 
-| Skill | Use Case |
-|-------|----------|
-| `shell-scripts` | Script creation/modification |
-| `go-development` | Go code changes |
-| `makefile-update` | Makefile updates |
-| `git-workflow` | Branch management |
+| Skill             | Use Case                     |
+| ----------------- | ---------------------------- |
+| `shell-scripts`   | Script creation/modification |
+| `go-development`  | Go code changes              |
+| `makefile-update` | Makefile updates             |
+| `git-workflow`    | Branch management            |

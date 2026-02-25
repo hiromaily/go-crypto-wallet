@@ -1,6 +1,6 @@
 ---
 description: Repository Pattern
-globs:
+globs: 
   - "internal/application/ports/repository/**/*.go"
   - "internal/infrastructure/repository/**/*.go"
 alwaysApply: false

@@ -88,6 +88,7 @@ Check if a project uses Bun:
 
 1. Look for `bun.lock` file (not `package-lock.json`)
 2. Check `engines` field in `package.json`:
+
    ```json
    "engines": {
      "bun": ">=1.3.6"
