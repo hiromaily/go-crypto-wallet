@@ -49,6 +49,9 @@ type AddressFileRepositorier interface {
 	CreateFilePath(accountType domainAccount.AccountType) string
 	ValidateFilePath(fileName string, accountType domainAccount.AccountType) error
 	ImportAddress(fileName string) ([]string, error)
+	// WriteXpubLine writes a single xpub CSV line to a new file and returns the file name.
+	// Format: coinTypeCode,accountType,44,extendedPubKey,derivationPath
+	WriteXpubLine(accountType domainAccount.AccountType, coinTypeCode, xpub, derivationPath string) (string, error)
 }
 
 // DescriptorFileWriter writes descriptor data to a file path.

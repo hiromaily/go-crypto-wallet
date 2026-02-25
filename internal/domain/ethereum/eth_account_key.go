@@ -2,7 +2,10 @@ package ethereum
 
 import (
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -73,6 +76,24 @@ func (k *ETHAccountKey) GetPrivateKey() string {
 // SECURITY: This stores sensitive private key material. Never log the value parameter.
 func (k *ETHAccountKey) SetAccountExtendedPrivkey(xpriv string) {
 	k.AccountExtendedPrivkey = xpriv
+}
+
+// DeriveAccountXpub derives the account-level extended public key (xpub) from the stored xpriv.
+// The returned xpub can be shared with the Watch wallet for child address derivation
+// without exposing any private key material.
+func (k *ETHAccountKey) DeriveAccountXpub() (string, error) {
+	if k.AccountExtendedPrivkey == "" {
+		return "", errors.New("accountXpriv not found for this account; run key generation first")
+	}
+	extKey, err := hdkeychain.NewKeyFromString(k.AccountExtendedPrivkey)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse accountXpriv: %w", err)
+	}
+	pubKey, err := extKey.Neuter()
+	if err != nil {
+		return "", fmt.Errorf("failed to derive accountXpub from accountXpriv: %w", err)
+	}
+	return pubKey.String(), nil
 }
 
 func (k *ETHAccountKey) updateTimestamp() {

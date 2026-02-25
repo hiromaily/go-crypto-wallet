@@ -2,6 +2,7 @@ package eth_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -67,6 +68,17 @@ func (*stubAddressFileRepo) ValidateFilePath(_ string, _ domainAccount.AccountTy
 
 func (*stubAddressFileRepo) ImportAddress(_ string) ([]string, error) {
 	return nil, nil
+}
+
+func (s *stubAddressFileRepo) WriteXpubLine(
+	accountType domainAccount.AccountType,
+	coinTypeCode, xpub, derivationPath string,
+) (string, error) {
+	line := fmt.Sprintf("%s,%s,44,%s,%s\n", coinTypeCode, accountType.String(), xpub, derivationPath)
+	if err := os.WriteFile(s.path, []byte(line), 0o600); err != nil {
+		return "", err
+	}
+	return s.path, nil
 }
 
 // newTestAccountXpriv generates a valid BIP-32 extended private key for testing.

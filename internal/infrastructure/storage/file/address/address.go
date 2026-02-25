@@ -44,6 +44,31 @@ func (*AddressFileRepository) ValidateFilePath(fileName string, accountType doma
 	return nil
 }
 
+// WriteXpubLine creates a new file and writes a single xpub CSV line.
+// Format: coinTypeCode,accountType,44,extendedPubKey,derivationPath
+func (r *AddressFileRepository) WriteXpubLine(
+	accountType domainAccount.AccountType,
+	coinTypeCode, xpub, derivationPath string,
+) (string, error) {
+	fileName := r.CreateFilePath(accountType)
+
+	f, err := os.Create(fileName) //nolint:gosec
+	if err != nil {
+		return "", fmt.Errorf("failed to create xpub file %s: %w", fileName, err)
+	}
+	defer func() {
+		if cerr := f.Close(); cerr != nil && err == nil {
+			err = fmt.Errorf("failed to close xpub file: %w", cerr)
+		}
+	}()
+
+	line := fmt.Sprintf("%s,%s,44,%s,%s\n", coinTypeCode, accountType.String(), xpub, derivationPath)
+	if _, err = fmt.Fprint(f, line); err != nil {
+		return "", fmt.Errorf("failed to write xpub file: %w", err)
+	}
+	return fileName, nil
+}
+
 // ImportAddress import pubkey from csv file
 func (*AddressFileRepository) ImportAddress(fileName string) ([]string, error) {
 	file, err := os.Open(fileName) //nolint:gosec
