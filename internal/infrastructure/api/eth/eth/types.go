@@ -31,12 +31,11 @@ type NetworkTypeETH string
 
 // network type
 const (
-	NetworkTypeETHMainNet    NetworkTypeETH = "mainnet"
-	NetworkTypeETHGoerli     NetworkTypeETH = "goerli"
-	NetworkTypeETHRegRinkeby NetworkTypeETH = "rinkeby"
-	NetworkTypeETHRopsten    NetworkTypeETH = "ropsten"
-	NetworkTypeETHAnvil      NetworkTypeETH = "anvil"
-	NetworkTypeETHLocal      NetworkTypeETH = "local"
+	NetworkTypeETHMainNet NetworkTypeETH = "mainnet"
+	NetworkTypeETHSepolia NetworkTypeETH = "sepolia"
+	NetworkTypeETHHolesky NetworkTypeETH = "holesky"
+	NetworkTypeETHAnvil   NetworkTypeETH = "anvil"
+	NetworkTypeETHLocal   NetworkTypeETH = "local"
 )
 
 // String converter
@@ -72,6 +71,23 @@ var ChainIDMap = map[uint16]ChainID{
 	5:    ChainIDGoerli,
 	42:   ChainIDKovan,
 	1337: ChainIDPrivateChains,
+}
+
+// ChainIDForNetwork returns the numeric chain ID for a given network type.
+// Returns 0 for unknown network types.
+func ChainIDForNetwork(network NetworkTypeETH) uint64 {
+	switch network {
+	case NetworkTypeETHMainNet:
+		return 1
+	case NetworkTypeETHSepolia:
+		return 11155111
+	case NetworkTypeETHHolesky:
+		return 17000
+	case NetworkTypeETHAnvil, NetworkTypeETHLocal:
+		return 1337
+	default:
+		return 0
+	}
 }
 
 // String converter
@@ -116,3 +132,22 @@ const GasLimit uint64 = 21000
 
 // Password this password is temporary until specification is fixed
 const Password string = "password"
+
+//----------------------------------------------------
+// EthNodeType
+//----------------------------------------------------
+
+// ETHNodeType identifies the Ethereum node implementation.
+type ETHNodeType string
+
+const (
+	// ETHNodeTypeAnvil represents a Foundry Anvil local development node.
+	ETHNodeTypeAnvil ETHNodeType = "anvil"
+	// ETHNodeTypeGeth represents a go-ethereum (Geth) node.
+	ETHNodeTypeGeth ETHNodeType = "geth"
+)
+
+// String converter
+func (n ETHNodeType) String() string {
+	return string(n)
+}

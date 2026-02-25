@@ -1,7 +1,7 @@
 # Implementation Plan
 
 - [ ] 1. Modernize ETH configuration with network types, node selection, and fee parameters
-- [ ] 1.1 (P) Add network type constants and replace deprecated network references
+- [x] 1.1 (P) Add network type constants and replace deprecated network references
   - Define `EthNetworkType` constants: mainnet, sepolia, holesky, local (removing Goerli, Rinkeby, Ropsten)
   - Add `ChainID` field with auto-population from `NetworkType` when not explicitly set
   - Add EIP-1559 fee config fields: `MaxFeePerGasCap` (absolute fee ceiling in Gwei)
@@ -10,7 +10,7 @@
   - Add PostgreSQL connection support alongside existing MySQL and SQLite
   - _Requirements: 3.1, 3.3, 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 1.2 (P) Add node-type selection to distinguish Anvil from Geth
+- [x] 1.2 (P) Add node-type selection to distinguish Anvil from Geth
   - Define `EthNodeType` constants: `anvil` and `geth`
   - Add `NodeType` field to the ETH config struct, defaulting to `anvil`
   - Route any node-specific behavior differences (e.g., key import method) through `NodeType` at the infrastructure layer so all use cases remain node-agnostic

@@ -330,6 +330,155 @@ file_path:
 	assert.False(t, conf.Database.PostgreSQL.Debug)
 }
 
+// TestEthereumNetworkTypeValidation tests that new network types pass and deprecated ones fail.
+func TestEthereumNetworkTypeValidation(t *testing.T) {
+	validNetworks := []string{"mainnet", "sepolia", "holesky", "anvil", "local"}
+	deprecatedNetworks := []string{"goerli", "rinkeby", "ropsten"}
+
+	baseConf := func(network string) WalletRoot {
+		return WalletRoot{
+			Ethereum: Ethereum{
+				Host:        "localhost",
+				Port:        8545,
+				NetworkType: network,
+			},
+			Database: Database{
+				Type:   "sqlite",
+				SQLite: SQLite{Path: "/tmp/test.db"},
+			},
+			Logger: Logger{
+				Service: "test",
+				Format:  "json",
+				Level:   "debug",
+			},
+			Tracer: Tracer{Type: "none"},
+			FilePath: FilePath{
+				Tx:         "/tmp/tx",
+				Address:    "/tmp/addr",
+				FullPubKey: "/tmp/pk",
+			},
+		}
+	}
+
+	t.Run("valid network types accepted", func(t *testing.T) {
+		for _, network := range validNetworks {
+			conf := baseConf(network)
+			err := conf.validate(domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
+			assert.NoError(t, err, "network_type %q should be valid", network)
+		}
+	})
+
+	t.Run("deprecated network types rejected", func(t *testing.T) {
+		for _, network := range deprecatedNetworks {
+			conf := baseConf(network)
+			err := conf.validate(domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
+			assert.Error(t, err, "network_type %q should be invalid", network)
+		}
+	})
+}
+
+// TestEthereumChainIDAutoPopulation tests that ChainID is derived from NetworkType when not set.
+func TestEthereumChainIDAutoPopulation(t *testing.T) {
+	tests := []struct {
+		network         string
+		explicitChainID uint64
+		wantChainID     uint64
+	}{
+		{network: "mainnet", wantChainID: 1},
+		{network: "sepolia", wantChainID: 11155111},
+		{network: "holesky", wantChainID: 17000},
+		{network: "anvil", wantChainID: 1337},
+		{network: "local", wantChainID: 1337},
+		// When ChainID is explicitly set, it should be preserved
+		{network: "mainnet", explicitChainID: 999, wantChainID: 999},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.network, func(t *testing.T) {
+			conf := WalletRoot{
+				Ethereum: Ethereum{
+					Host:        "localhost",
+					Port:        8545,
+					NetworkType: tt.network,
+					ChainID:     tt.explicitChainID,
+				},
+				Database: Database{
+					Type:   "sqlite",
+					SQLite: SQLite{Path: "/tmp/test.db"},
+				},
+				Logger: Logger{
+					Service: "test",
+					Format:  "json",
+					Level:   "debug",
+				},
+				Tracer: Tracer{Type: "none"},
+				FilePath: FilePath{
+					Tx:         "/tmp/tx",
+					Address:    "/tmp/addr",
+					FullPubKey: "/tmp/pk",
+				},
+			}
+			err := conf.validate(domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantChainID, conf.Ethereum.ChainID)
+		})
+	}
+}
+
+// TestEthereumNodeTypeValidation tests NodeType field validation and default assignment.
+func TestEthereumNodeTypeValidation(t *testing.T) {
+	makeConf := func(nodeType string) WalletRoot {
+		return WalletRoot{
+			Ethereum: Ethereum{
+				Host:        "localhost",
+				Port:        8545,
+				NetworkType: "anvil",
+				NodeType:    nodeType,
+			},
+			Database: Database{
+				Type:   "sqlite",
+				SQLite: SQLite{Path: "/tmp/test.db"},
+			},
+			Logger: Logger{
+				Service: "test",
+				Format:  "json",
+				Level:   "debug",
+			},
+			Tracer: Tracer{Type: "none"},
+			FilePath: FilePath{
+				Tx:         "/tmp/tx",
+				Address:    "/tmp/addr",
+				FullPubKey: "/tmp/pk",
+			},
+		}
+	}
+
+	t.Run("empty NodeType defaults to anvil", func(t *testing.T) {
+		conf := makeConf("")
+		err := conf.validate(domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
+		require.NoError(t, err)
+		assert.Equal(t, "anvil", conf.Ethereum.NodeType)
+	})
+
+	t.Run("anvil is valid", func(t *testing.T) {
+		conf := makeConf("anvil")
+		err := conf.validate(domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
+		require.NoError(t, err)
+	})
+
+	t.Run("geth is valid", func(t *testing.T) {
+		conf := makeConf("geth")
+		err := conf.validate(domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
+		require.NoError(t, err)
+	})
+
+	t.Run("invalid NodeType rejected", func(t *testing.T) {
+		conf := makeConf("parity")
+		err := conf.validate(domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
+		assert.Error(t, err)
+	})
+}
+
 // TestValidateDatabase_PostgreSQL tests PostgreSQL database validation rules.
 func TestValidateDatabase_PostgreSQL(t *testing.T) {
 	tests := []struct {
