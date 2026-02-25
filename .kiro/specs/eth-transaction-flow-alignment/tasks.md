@@ -56,7 +56,7 @@
   - Verify encoding handles both Type 0 (legacy) and Type 2 (EIP-1559) transactions correctly
   - _Requirements: 2.1, 2.2_
 
-- [ ] 4.3 Add offline-capable signing and update signer selection
+- [x] 4.3 Add offline-capable signing and update signer selection
   - Add `SignOnRawTransaction` variant that accepts `*ecdsa.PrivateKey` directly (no keystore password required)
   - Replace `types.NewLondonSigner(chainID)` with `types.LatestSignerForChainID(chainID)` for forward compatibility with future transaction types
   - Depends on 4.2 (encoding fix must be in place)

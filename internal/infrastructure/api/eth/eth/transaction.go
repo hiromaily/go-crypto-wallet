@@ -2,6 +2,7 @@ package eth
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"math/big"
@@ -217,8 +218,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase 
 		"chainID", chainID.Uint64(),
 		"key.PrivateKey", key.PrivateKey,
 	)
-	// var signer types.Signer = types.NewEIP155Signer(chainID)
-	signer := types.NewLondonSigner(chainID)
+	signer := types.LatestSignerForChainID(chainID)
 
 	// sign
 	signedTX, err := types.SignTx(tx, signer, key.PrivateKey)
@@ -488,4 +488,13 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	}
 
 	return domainRawTx, txParams, nil
+}
+
+// SignTxWithPrivateKey signs a raw transaction using a private key directly,
+// without requiring a keystore or node connection (fully offline operation).
+// Uses LatestSignerForChainID for forward compatibility with future transaction types.
+func (*Ethereum) SignTxWithPrivateKey(
+	rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+) (*domainEthereum.RawTx, error) {
+	return ethtx.SignTxOffline(rawTx, privKey, chainID)
 }
