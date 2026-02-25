@@ -216,7 +216,6 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase 
 	logger.Debug("call types.SignTx",
 		"tx", tx,
 		"chainID", chainID.Uint64(),
-		"key.PrivateKey", key.PrivateKey,
 	)
 	signer := types.LatestSignerForChainID(chainID)
 

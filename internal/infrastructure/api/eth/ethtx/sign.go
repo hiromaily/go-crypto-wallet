@@ -21,10 +21,13 @@ func SignTxOffline(
 	privKey *ecdsa.PrivateKey,
 	chainID *big.Int,
 ) (*domainEthereum.RawTx, error) {
+	if rawTx == nil {
+		return nil, errors.New("rawTx must not be nil")
+	}
 	if privKey == nil {
 		return nil, errors.New("private key must not be nil")
 	}
-	if chainID == nil || chainID.Sign() == 0 {
+	if chainID == nil || chainID.Sign() <= 0 {
 		return nil, errors.New("chainID must be a positive integer")
 	}
 

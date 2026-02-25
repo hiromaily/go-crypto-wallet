@@ -105,3 +105,25 @@ func TestSignTxOffline_NilPrivKey(t *testing.T) {
 	_, err := ethtx.SignTxOffline(rawTx, nil, big.NewInt(1337))
 	assert.Error(t, err)
 }
+
+// TestSignTxOffline_NilRawTx verifies that a nil rawTx returns an error.
+func TestSignTxOffline_NilRawTx(t *testing.T) {
+	privKey, err := crypto.GenerateKey()
+	require.NoError(t, err)
+	_, err = ethtx.SignTxOffline(nil, privKey, big.NewInt(1337))
+	assert.Error(t, err)
+}
+
+// TestSignTxOffline_NegativeChainID verifies that a negative chainID returns an error.
+func TestSignTxOffline_NegativeChainID(t *testing.T) {
+	privKey, err := crypto.GenerateKey()
+	require.NoError(t, err)
+	to := common.HexToAddress("0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0")
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce: 0, To: &to, Value: big.NewInt(1), Gas: 21000,
+		GasPrice: big.NewInt(1_000_000_000),
+	})
+	rawTx := newTestRawTx(t, tx, crypto.PubkeyToAddress(privKey.PublicKey).Hex())
+	_, err = ethtx.SignTxOffline(rawTx, privKey, big.NewInt(-1))
+	assert.Error(t, err)
+}
