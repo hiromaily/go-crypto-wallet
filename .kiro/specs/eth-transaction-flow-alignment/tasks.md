@@ -51,7 +51,7 @@
   - Compute `maxFeePerGas` from the latest block base fee using `baseFee × 2 + tip`
   - _Requirements: 2.3, 3.5_
 
-- [ ] 4.2 Fix transaction encoding to use EIP-2718 binary format
+- [x] 4.2 Fix transaction encoding to use EIP-2718 binary format
   - Replace `rlp.EncodeToBytes`/`rlp.Decode` with `tx.MarshalBinary()`/`tx.UnmarshalBinary()` in the ETH transaction encoding layer
   - Verify encoding handles both Type 0 (legacy) and Type 2 (EIP-1559) transactions correctly
   - _Requirements: 2.1, 2.2_
