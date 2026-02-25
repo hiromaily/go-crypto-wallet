@@ -34,12 +34,10 @@ func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
 	accountKeyRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return(
 		&domainBitcoin.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
 
-	var writtenPath string
 	var writtenData []byte
 	writer := filemocks.NewMockDescriptorFileWriter(t)
-	writer.EXPECT().WriteFile(mock.Anything, mock.Anything).
-		Run(func(path string, data []byte) {
-			writtenPath = path
+	writer.EXPECT().WriteFile("/tmp/descriptors.txt", mock.Anything).
+		Run(func(_ string, data []byte) {
 			writtenData = data
 		}).Return(nil)
 
@@ -53,7 +51,6 @@ func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, "/tmp/descriptors.txt", output.FilePath)
-	require.Equal(t, "/tmp/descriptors.txt", writtenPath)
 
 	// accountKeyRepo returns bip44 type, so only legacy (pkh) descriptors should be exported
 	expectedDescriptors := []string{
@@ -80,7 +77,7 @@ func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
 
 	var writtenData []byte
 	writer := filemocks.NewMockDescriptorFileWriter(t)
-	writer.EXPECT().WriteFile(mock.Anything, mock.Anything).
+	writer.EXPECT().WriteFile("/tmp/descriptors.json", mock.Anything).
 		Run(func(_ string, data []byte) {
 			writtenData = data
 		}).Return(nil)

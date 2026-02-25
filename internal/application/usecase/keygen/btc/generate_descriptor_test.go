@@ -116,9 +116,9 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 	})
 
 	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
-	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, mock.Anything).Return(
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, domainAuth.PurposeBIP84).Return(
 		&domainAuth.AuthFullPubkey{ExtendedPubKey: testDescriptorMainnetXpub}, nil)
-	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, mock.Anything).Return(
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, domainAuth.PurposeBIP84).Return(
 		&domainAuth.AuthFullPubkey{ExtendedPubKey: xpub2}, nil)
 	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
 	seedRepo := coldmocks.NewMockSeedRepositorier(t)
@@ -165,9 +165,9 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 	})
 
 	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
-	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, mock.Anything).Return(
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, domainAuth.PurposeBIP86).Return(
 		&domainAuth.AuthFullPubkey{ExtendedPubKey: testDescriptorMainnetXpub}, nil)
-	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, mock.Anything).Return(
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, domainAuth.PurposeBIP86).Return(
 		&domainAuth.AuthFullPubkey{ExtendedPubKey: xpub3}, nil)
 	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
 	seedRepo := coldmocks.NewMockSeedRepositorier(t)
@@ -243,9 +243,9 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 	})
 
 	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
-	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, mock.Anything).Return(
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType1, domainAuth.PurposeBIP49).Return(
 		&domainAuth.AuthFullPubkey{ExtendedPubKey: testDescriptorMainnetXpub}, nil)
-	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, mock.Anything).Return(
+	authRepo.EXPECT().GetOneByPurpose(domainAccount.AuthType2, domainAuth.PurposeBIP49).Return(
 		&domainAuth.AuthFullPubkey{ExtendedPubKey: xpub2}, nil)
 	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
 	seedRepo := coldmocks.NewMockSeedRepositorier(t)
