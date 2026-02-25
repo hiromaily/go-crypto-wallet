@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 
@@ -341,42 +340,41 @@ func (c *WalletRoot) validateDatabase() error {
 	return nil
 }
 
-// validEthNetworks lists all currently supported Ethereum network types.
-var validEthNetworks = []string{"mainnet", "sepolia", "holesky", "anvil", "local"}
+// supportedEthNetworks lists all currently supported Ethereum network types.
+// Used in error messages to guide operators when an invalid value is supplied.
+const supportedEthNetworks = "mainnet, sepolia, holesky, anvil, local"
 
 // validateEthereum validates Ethereum-specific configuration fields, applies defaults,
 // and auto-populates ChainID from NetworkType when not explicitly set.
+// A single switch covers both validation and ChainID derivation to keep the
+// two concerns in sync without duplicating the case list.
 func (c *WalletRoot) validateEthereum() error {
 	eth := &c.Ethereum
 
-	// Validate NetworkType against the supported list
-	valid := false
-	for _, n := range validEthNetworks {
-		if eth.NetworkType == n {
-			valid = true
-			break
+	// Validate NetworkType and auto-populate ChainID in one pass.
+	switch eth.NetworkType {
+	case "mainnet":
+		if eth.ChainID == 0 {
+			eth.ChainID = 1
 		}
-	}
-	if !valid {
+	case "sepolia":
+		if eth.ChainID == 0 {
+			eth.ChainID = 11155111
+		}
+	case "holesky":
+		if eth.ChainID == 0 {
+			eth.ChainID = 17000
+		}
+	case "anvil", "local":
+		if eth.ChainID == 0 {
+			eth.ChainID = 1337
+		}
+	default:
 		return fmt.Errorf(
 			"ethereum.network_type %q is not supported; valid values: %s",
 			eth.NetworkType,
-			strings.Join(validEthNetworks, ", "),
+			supportedEthNetworks,
 		)
-	}
-
-	// Auto-populate ChainID from NetworkType when not explicitly set
-	if eth.ChainID == 0 {
-		switch eth.NetworkType {
-		case "mainnet":
-			eth.ChainID = 1
-		case "sepolia":
-			eth.ChainID = 11155111
-		case "holesky":
-			eth.ChainID = 17000
-		case "anvil", "local":
-			eth.ChainID = 1337
-		}
 	}
 
 	// Default NodeType to anvil when not set
