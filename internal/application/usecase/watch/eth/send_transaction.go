@@ -15,14 +15,14 @@ import (
 )
 
 type sendTransactionUseCase struct {
-	ethClient    apieth.Ethereumer
+	ethClient    apieth.ETHTransactionSender
 	txDetailRepo repowatch.ETHDetailTXRepositorier
 	txFileRepo   file.TransactionFileRepositorier
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
-	ethClient apieth.Ethereumer,
+	ethClient apieth.ETHTransactionSender,
 	txDetailRepo repowatch.ETHDetailTXRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {

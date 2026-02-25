@@ -7,7 +7,7 @@ import (
 )
 
 // AddCommands adds all Ethereum API subcommands
-func AddCommands(parentCmd *cobra.Command, eth apieth.Ethereumer) {
+func AddCommands(parentCmd *cobra.Command, eth apieth.ETHRawKeyImporter) {
 	// importrawkey command
 	var (
 		importrawkeyPrivKey    string

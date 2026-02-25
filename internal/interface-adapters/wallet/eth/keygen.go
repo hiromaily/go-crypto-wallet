@@ -14,7 +14,7 @@ import (
 
 // ETHKeygen keygen wallet object
 type ETHKeygen struct {
-	ETH                     apieth.Ethereumer
+	ETH                     apieth.ETHKeygenSignClient
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	generateSeedUseCase     keygenusecase.GenerateSeedUseCase
@@ -26,7 +26,7 @@ type ETHKeygen struct {
 
 // NewETHKeygen returns ETHKeygen object
 func NewETHKeygen(
-	eth apieth.Ethereumer,
+	eth apieth.ETHKeygenSignClient,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 	generateSeedUseCase keygenusecase.GenerateSeedUseCase,

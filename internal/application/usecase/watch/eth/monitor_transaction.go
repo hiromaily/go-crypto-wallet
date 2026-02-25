@@ -13,7 +13,7 @@ import (
 )
 
 type monitorTransactionUseCase struct {
-	ethClient    apieth.Ethereumer
+	ethClient    apieth.EtherTxMonitor
 	addrRepo     repowatch.AddressRepositorier
 	txDetailRepo repowatch.ETHDetailTXRepositorier
 	confirmNum   uint64
@@ -21,7 +21,7 @@ type monitorTransactionUseCase struct {
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
-	ethClient apieth.Ethereumer,
+	ethClient apieth.EtherTxMonitor,
 	addrRepo repowatch.AddressRepositorier,
 	txDetailRepo repowatch.ETHDetailTXRepositorier,
 	confirmNum uint64,

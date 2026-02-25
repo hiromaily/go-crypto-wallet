@@ -4,6 +4,9 @@
 // by defining interfaces in the application layer that are implemented by the
 // infrastructure layer. All types used in these interfaces are domain types,
 // avoiding circular dependencies with the infrastructure layer.
+//
+// Usage restriction: Ethereumer MUST only be referenced in the DI layer (internal/di/).
+// All other layers MUST use the small, focused interfaces defined in this file.
 package eth
 
 import (
@@ -35,9 +38,22 @@ type TxCreateParams struct {
 	Nonce       uint64 // Transaction nonce
 }
 
-// Ethereumer defines the interface for Ethereum blockchain operations.
-// Implementations handle Ethereum RPC communication, transaction management,
-// and wallet operations.
+// Ethereumer is the full Ethereum interface.
+//
+// Usage restriction: Ethereumer MUST only be referenced in the DI layer (internal/di/).
+// All other layers (use cases, adapters, CLI) MUST use the small, focused interfaces
+// defined below to satisfy the Interface Segregation Principle.
+//
+// Use the focused interfaces instead:
+//
+//   - ETHLifecycle: Client lifecycle (Close, CoinTypeCode)
+//   - ETHKeyAccessor: Keystore access for key import
+//   - ETHTransactionSigner: Sign raw transactions
+//   - ETHTransactionSender: Broadcast signed transactions
+//   - ETHRawKeyImporter: Import raw keys via RPC (deprecated)
+//   - ETHNodeAPIClient: Node API operations for CLI
+//   - ERC20er: ERC-20 and ETH transaction creation
+//   - EtherTxMonitor: Transaction monitoring
 type Ethereumer interface {
 	// balance
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
@@ -129,8 +145,82 @@ type ERC20er interface {
 }
 
 // EtherTxMonitor defines the interface for monitoring Ethereum transactions.
-// Implementations track transaction confirmations and balance updates.
+// Used by watch wallet monitor-transaction use case.
 type EtherTxMonitor interface {
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
+}
+
+// =============================================================================
+// Interfaces for specific use - Interface Segregation Principle (ISP)
+// =============================================================================
+//
+// These interfaces are designed to be minimal and focused on specific use cases.
+// Use cases and adapters MUST depend on these small interfaces instead of the
+// large Ethereumer interface.
+//
+// DI Layer Integration:
+// - DI layer continues to inject the full Ethereumer implementation
+// - Go's implicit interface satisfaction handles the type conversion automatically
+//
+// =============================================================================
+
+// ETHLifecycle manages the Ethereum client lifecycle.
+// Used by wallet adapters (keygen, sign, watch) that need to close the connection
+// and identify the coin type.
+type ETHLifecycle interface {
+	Close()
+	CoinTypeCode() domainCoin.CoinTypeCode
+}
+
+// ETHKeyAccessor provides keystore access for private key import operations.
+// Used by keygen import-private-key use case.
+type ETHKeyAccessor interface {
+	GetKeyDir() string
+	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
+}
+
+// ETHTransactionSigner signs raw Ethereum transactions using the local keystore.
+// Used by keygen and sign sign-transaction use cases.
+type ETHTransactionSigner interface {
+	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
+}
+
+// ETHTransactionSender broadcasts signed Ethereum transactions to the network.
+// Used by watch wallet send-transaction use case.
+type ETHTransactionSender interface {
+	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
+}
+
+// ETHRawKeyImporter imports raw private keys via the Ethereum RPC.
+// Used by keygen API CLI commands.
+type ETHRawKeyImporter interface {
+	ImportRawKey(ctx context.Context, hexKey, passPhrase string) (string, error)
+}
+
+// ETHNodeAPIClient provides Ethereum node API operations for watch wallet CLI commands.
+type ETHNodeAPIClient interface {
+	ClientVersion(ctx context.Context) (string, error)
+	NetVersion(ctx context.Context) (uint16, error)
+	NodeInfo(ctx context.Context) (*p2p.NodeInfo, error)
+	Syncing(ctx context.Context) (*domainEthereum.ResponseSyncing, bool, error)
+}
+
+// =============================================================================
+// Composed Interfaces for Wallet Adapters
+// =============================================================================
+
+// ETHKeygenSignClient combines lifecycle and raw key import for keygen/sign wallet adapters.
+// Used by ETHKeygen and ETHSign wallet adapters, which need both lifecycle management
+// and the ability to expose the importrawkey CLI command.
+type ETHKeygenSignClient interface {
+	ETHLifecycle
+	ETHRawKeyImporter
+}
+
+// ETHWatchClient combines lifecycle and node API operations for the watch wallet adapter.
+// Used by ETHWatch wallet adapter, which needs lifecycle management and watch node CLI commands.
+type ETHWatchClient interface {
+	ETHLifecycle
+	ETHNodeAPIClient
 }

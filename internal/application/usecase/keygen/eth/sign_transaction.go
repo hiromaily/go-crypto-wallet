@@ -15,13 +15,13 @@ import (
 )
 
 type signTransactionUseCase struct {
-	eth        apieth.Ethereumer
+	eth        apieth.ETHTransactionSigner
 	txFileRepo file.TransactionFileRepositorier
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for ETH keygen
 func NewSignTransactionUseCase(
-	eth apieth.Ethereumer,
+	eth apieth.ETHTransactionSigner,
 	txFileRepo file.TransactionFileRepositorier,
 ) keygenusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{

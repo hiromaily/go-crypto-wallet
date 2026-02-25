@@ -7,7 +7,7 @@ import (
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 )
 
-func runNetVersion(eth apieth.Ethereumer) error {
+func runNetVersion(eth apieth.ETHNodeAPIClient) error {
 	version, err := eth.NetVersion(context.Background())
 	if err != nil {
 		return fmt.Errorf("fail to call eth.NetVersion() %w", err)

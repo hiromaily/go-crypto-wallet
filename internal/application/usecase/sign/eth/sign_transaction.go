@@ -16,14 +16,14 @@ import (
 )
 
 type signTransactionUseCase struct {
-	eth        apieth.Ethereumer
+	eth        apieth.ETHTransactionSigner
 	txFileRepo file.TransactionFileRepositorier
 	wtype      domainWallet.WalletType
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
-	ethAPI apieth.Ethereumer,
+	ethAPI apieth.ETHTransactionSigner,
 	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) signusecase.SignTransactionUseCase {
