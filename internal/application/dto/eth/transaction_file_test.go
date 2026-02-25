@@ -1,6 +1,7 @@
 package eth_test
 
 import (
+	"strings"
 	"testing"
 
 	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
@@ -92,8 +93,8 @@ func TestETHTransactionFileValidate_Legacy(t *testing.T) {
 				return
 			}
 			if tt.wantErr && tt.errMsg != "" {
-				if err == nil {
-					t.Errorf("Validate() expected error containing %q, got nil", tt.errMsg)
+				if err == nil || !strings.Contains(err.Error(), tt.errMsg) {
+					t.Errorf("Validate() error = %v, want error containing %q", err, tt.errMsg)
 				}
 			}
 		})
