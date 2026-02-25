@@ -117,3 +117,20 @@ type RawTx struct {
 	TxHex string
 	Hash  string
 }
+
+// TransactionReceipt represents the receipt of a processed Ethereum transaction.
+// Returned by GetTransactionReceipt after a transaction has been mined.
+// Status 1 indicates success; 0 indicates failure/revert.
+type TransactionReceipt struct {
+	TransactionHash   string
+	TransactionIndex  uint64
+	BlockHash         string
+	BlockNumber       uint64
+	From              string
+	To                string
+	CumulativeGasUsed uint64
+	GasUsed           uint64
+	ContractAddress   string
+	Status            uint64 // 1 = success, 0 = failure/revert
+	RevertReason      string // populated when Status == 0, if available
+}

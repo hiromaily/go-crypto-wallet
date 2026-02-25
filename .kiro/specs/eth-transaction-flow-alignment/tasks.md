@@ -24,17 +24,19 @@
   - `Ethereumer` preserved with DI-layer-only usage restriction comment
   - _Requirements: 5.2 (partial)_
 
-- [ ] 2.1b (P) Add EIP-1559 and monitoring port interfaces (required for Tasks 7, 9)
+- [x] 2.1b (P) Add EIP-1559 and monitoring port interfaces (required for Tasks 7, 9)
   - Define `BalanceChecker`, `TxCreator`, `GasEstimator`, `TxSigner`, `TxSender`, `TxMonitor`, `AddressValidator`, and `ChainConfigProvider` as separate interfaces in `interface.go`
   - Define composed interfaces `WatchTxCreationDeps` and `KeygenSignTxDeps` for use case convenience
+  - Added `TransactionReceipt` domain type to `internal/domain/ethereum/types.go` for `TxMonitor`
+  - `ETHTransactionSender` converted to type alias for `TxSender` to eliminate duplication
   - _Requirements: 5.2_
 
-- [ ] 2.2 (P) Add port-level DTOs to prevent infrastructure type leakage
-  - Define `TxCreateParams` struct in the ETH ports package to carry transaction creation parameters across the port boundary
-  - Ensure no infrastructure-specific types appear in the port interface signatures
+- [x] 2.2 (P) Add port-level DTOs to prevent infrastructure type leakage
+  - `TxCreateParams` struct already present in ETH ports package (added in PR #579)
+  - All new interfaces in 2.1b use only domain types — no infrastructure types in port signatures
   - _Requirements: 5.5_
 
-- [ ] 3. (P) Implement JSON transaction file format for air-gapped exchange
+- [x] 3. (P) Implement JSON transaction file format for air-gapped exchange
   - Define `ETHTransactionFile` struct with fields: version, tx_type, eth_tx_type, chain_id, nonce, from, to, value, gas, gas_price (legacy), max_fee_per_gas, max_priority_fee_per_gas, data, raw_tx_hex, signed_tx_hex
   - Use `tx.MarshalBinary()` (EIP-2718 envelope, not RLP) to correctly encode both legacy and EIP-1559 transactions
   - Implement write and read functions with field validation; return descriptive errors identifying missing or invalid fields
