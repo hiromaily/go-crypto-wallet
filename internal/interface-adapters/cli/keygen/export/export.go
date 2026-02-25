@@ -21,6 +21,18 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, containerGe
 	addressCmd.Flags().StringVar(&addressAccount, "account", "", "target account")
 	parentCmd.AddCommand(addressCmd)
 
+	// fullpubkey command (ETH only: exports accountXpub for Watch wallet derivation)
+	var fullpubkeyAccount string
+	fullpubkeyCmd := &cobra.Command{
+		Use:   "fullpubkey",
+		Short: "export account-level extended public key (ETH only) for Watch wallet",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runFullPubkey(containerGetter(), fullpubkeyAccount)
+		},
+	}
+	fullpubkeyCmd.Flags().StringVar(&fullpubkeyAccount, "account", "", "target account")
+	parentCmd.AddCommand(fullpubkeyCmd)
+
 	// descriptor command
 	var (
 		descriptorAccount       string

@@ -239,6 +239,11 @@ table "eth_account_key" {
     comment = "private key (hex encoded)"
   }
 
+  column "account_extended_privkey" {
+    null = true
+    type = varchar(255)
+  }
+
   column "idx" {
     type    = bigint
     null    = false

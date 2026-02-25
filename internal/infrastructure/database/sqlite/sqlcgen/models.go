@@ -106,14 +106,15 @@ type BtcTxOutput struct {
 }
 
 type EthAccountKey struct {
-	ID            int64
-	Account       string
-	Address       string
-	FullPublicKey string
-	PrivateKey    string
-	Idx           int64
-	AddrStatus    int64
-	UpdatedAt     sql.NullString
+	ID                     int64
+	Account                string
+	Address                string
+	FullPublicKey          string
+	PrivateKey             string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int64
+	UpdatedAt              sql.NullString
 }
 
 type EthDetailTx struct {

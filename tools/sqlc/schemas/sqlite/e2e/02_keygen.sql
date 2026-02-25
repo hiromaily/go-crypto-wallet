@@ -42,6 +42,7 @@ CREATE TABLE eth_account_key (
   address TEXT NOT NULL,
   full_public_key TEXT NOT NULL,
   private_key TEXT NOT NULL,
+  account_extended_privkey TEXT,
   idx INTEGER NOT NULL,
   addr_status INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),

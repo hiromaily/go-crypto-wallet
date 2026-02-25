@@ -44,6 +44,13 @@ type ImportFullPubkeyUseCase interface {
 	Import(ctx context.Context, input ImportFullPubkeyInput) error
 }
 
+// ExportFullPubkeyUseCase exports the account-level extended public key to a file (ETH only).
+// The exported xpub allows the Watch wallet to derive and verify child addresses
+// without holding private keys.
+type ExportFullPubkeyUseCase interface {
+	Export(ctx context.Context, input ExportFullPubkeyInput) (ExportFullPubkeyOutput, error)
+}
+
 // GenerateKeyUseCase generates keys (XRP only)
 type GenerateKeyUseCase interface {
 	Generate(ctx context.Context, input GenerateKeyInput) error
@@ -146,6 +153,16 @@ type ExportAddressInput struct {
 
 // ExportAddressOutput represents output from exporting addresses
 type ExportAddressOutput struct {
+	FileName string
+}
+
+// ExportFullPubkeyInput represents input for exporting the account-level extended public key (ETH)
+type ExportFullPubkeyInput struct {
+	AccountType domainAccount.AccountType
+}
+
+// ExportFullPubkeyOutput represents output from exporting the account-level extended public key (ETH)
+type ExportFullPubkeyOutput struct {
 	FileName string
 }
 

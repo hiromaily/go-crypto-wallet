@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
@@ -11,6 +12,7 @@ import (
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 )
 
@@ -158,4 +160,58 @@ func (w *AccountHDWalletRepo) Insert(
 		idxFrom++
 	}
 	return w.accountKeyRepo.InsertBulk(accountKeyItems)
+}
+
+//-----------------------------------------------------------------------------
+// ETHHDWalletRepo
+//-----------------------------------------------------------------------------
+
+// ETHHDWalletRepo implements repocold.HDWalletRepo for ETH using ETHAccountKeyRepositorier.
+// This allows the shared GenerateHDWalletUseCase to work with ETH key generation.
+type ETHHDWalletRepo struct {
+	ethAccountKeyRepo repocold.ETHAccountKeyRepositorier
+}
+
+// NewETHHDWalletRepo creates a new ETHHDWalletRepo
+func NewETHHDWalletRepo(ethAccountKeyRepo repocold.ETHAccountKeyRepositorier) *ETHHDWalletRepo {
+	return &ETHHDWalletRepo{
+		ethAccountKeyRepo: ethAccountKeyRepo,
+	}
+}
+
+// GetMaxIndex returns the maximum key index for the given account type.
+func (r *ETHHDWalletRepo) GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error) {
+	return r.ethAccountKeyRepo.GetMaxIndex(ctx, accountType)
+}
+
+// Insert stores newly generated ETH wallet keys with the account-level extended private key.
+func (r *ETHHDWalletRepo) Insert(
+	keys []domainKey.WalletKey,
+	accountXpriv string,
+	idx int64,
+	coinTypeCode domainCoin.CoinTypeCode,
+	accountType domainAccount.AccountType,
+	keyType domainKey.KeyType,
+) error {
+	items := make([]*domainEth.ETHAccountKey, 0, len(keys))
+	for i, key := range keys {
+		ethKey, err := domainEth.NewETHAccountKey(
+			accountType,
+			key.P2PKHAddr, // Ethereum address stored in P2PKHAddr field
+			key.FullPubKey,
+			key.WIF, // Private key stored in WIF field for ETH
+			idx+int64(i),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to create ETH account key at index %d: %w", idx+int64(i), err)
+		}
+		if accountXpriv != "" {
+			ethKey.SetAccountExtendedPrivkey(accountXpriv)
+		}
+		items = append(items, ethKey)
+	}
+	if err := r.ethAccountKeyRepo.InsertBulk(items); err != nil {
+		return fmt.Errorf("failed to insert ETH account keys: %w", err)
+	}
+	return nil
 }

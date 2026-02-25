@@ -59,6 +59,7 @@ CREATE TABLE eth_account_key (
     address character varying(42) NOT NULL,
     full_public_key character varying(130) NOT NULL,
     private_key character varying(64) NOT NULL,
+    account_extended_privkey character varying(255),
     idx bigint NOT NULL,
     addr_status smallint DEFAULT 0 NOT NULL,
     updated_at timestamp with time zone DEFAULT now(),

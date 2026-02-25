@@ -11,7 +11,7 @@ import (
 )
 
 const getETHAccountKeyByAddress = `-- name: GetETHAccountKeyByAddress :one
-SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at
+SELECT id, account, address, full_public_key, private_key, account_extended_privkey, idx, addr_status, updated_at
 FROM eth_account_key
 WHERE address = $1
 LIMIT 1
@@ -26,6 +26,7 @@ func (q *Queries) GetETHAccountKeyByAddress(ctx context.Context, address string)
 		&i.Address,
 		&i.FullPublicKey,
 		&i.PrivateKey,
+		&i.AccountExtendedPrivkey,
 		&i.Idx,
 		&i.AddrStatus,
 		&i.UpdatedAt,
@@ -34,7 +35,7 @@ func (q *Queries) GetETHAccountKeyByAddress(ctx context.Context, address string)
 }
 
 const getETHAccountKeysByAddrStatus = `-- name: GetETHAccountKeysByAddrStatus :many
-SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at
+SELECT id, account, address, full_public_key, private_key, account_extended_privkey, idx, addr_status, updated_at
 FROM eth_account_key
 WHERE account = $1
   AND addr_status = $2
@@ -60,6 +61,7 @@ func (q *Queries) GetETHAccountKeysByAddrStatus(ctx context.Context, arg GetETHA
 			&i.Address,
 			&i.FullPublicKey,
 			&i.PrivateKey,
+			&i.AccountExtendedPrivkey,
 			&i.Idx,
 			&i.AddrStatus,
 			&i.UpdatedAt,
@@ -92,7 +94,7 @@ func (q *Queries) GetMaxETHAccountKeyIndex(ctx context.Context, account string) 
 }
 
 const getOneETHAccountKeyByMaxID = `-- name: GetOneETHAccountKeyByMaxID :one
-SELECT id, account, address, full_public_key, private_key, idx, addr_status, updated_at
+SELECT id, account, address, full_public_key, private_key, account_extended_privkey, idx, addr_status, updated_at
 FROM eth_account_key
 WHERE account = $1
 ORDER BY id DESC
@@ -108,6 +110,7 @@ func (q *Queries) GetOneETHAccountKeyByMaxID(ctx context.Context, account string
 		&i.Address,
 		&i.FullPublicKey,
 		&i.PrivateKey,
+		&i.AccountExtendedPrivkey,
 		&i.Idx,
 		&i.AddrStatus,
 		&i.UpdatedAt,
@@ -116,25 +119,19 @@ func (q *Queries) GetOneETHAccountKeyByMaxID(ctx context.Context, account string
 }
 
 const insertETHAccountKey = `-- name: InsertETHAccountKey :one
-INSERT INTO eth_account_key (
-    account,
-    address,
-    full_public_key,
-    private_key,
-    idx,
-    addr_status
-  )
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO eth_account_key (account, address, full_public_key, private_key, account_extended_privkey, idx, addr_status)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id
 `
 
 type InsertETHAccountKeyParams struct {
-	Account       string
-	Address       string
-	FullPublicKey string
-	PrivateKey    string
-	Idx           int64
-	AddrStatus    int16
+	Account                string
+	Address                string
+	FullPublicKey          string
+	PrivateKey             string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int16
 }
 
 func (q *Queries) InsertETHAccountKey(ctx context.Context, arg InsertETHAccountKeyParams) (int64, error) {
@@ -143,6 +140,7 @@ func (q *Queries) InsertETHAccountKey(ctx context.Context, arg InsertETHAccountK
 		arg.Address,
 		arg.FullPublicKey,
 		arg.PrivateKey,
+		arg.AccountExtendedPrivkey,
 		arg.Idx,
 		arg.AddrStatus,
 	)

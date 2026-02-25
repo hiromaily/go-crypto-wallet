@@ -20,15 +20,8 @@ FROM eth_account_key
 WHERE address = $1
 LIMIT 1;
 -- name: InsertETHAccountKey :one
-INSERT INTO eth_account_key (
-    account,
-    address,
-    full_public_key,
-    private_key,
-    idx,
-    addr_status
-  )
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO eth_account_key (account, address, full_public_key, private_key, account_extended_privkey, idx, addr_status)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id;
 -- name: UpdateETHAccountKeyAddrStatus :execresult
 UPDATE eth_account_key

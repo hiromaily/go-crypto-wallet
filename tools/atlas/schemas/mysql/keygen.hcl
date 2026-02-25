@@ -217,6 +217,12 @@ table "eth_account_key" {
     comment = "private key (hex encoded)"
   }
 
+  column "account_extended_privkey" {
+    null    = true
+    type    = varchar(255)
+    comment = "BIP32 account-level extended private key for offline signing derivation"
+  }
+
   column "idx" {
     type    = bigint
     null    = false

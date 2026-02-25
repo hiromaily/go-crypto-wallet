@@ -27,7 +27,7 @@ func NewETHAccountKeyRepositorySqlc(dbConn *sql.DB) *ETHAccountKeyRepositorySqlc
 }
 
 // convertToETHAccountKey converts sqlcgen.EthAccountKey to domain.EthAccountKey entity.
-// SECURITY: Handles private key data - never log the private key field.
+// SECURITY: Handles private key data - never log the private key or account_extended_privkey fields.
 func convertToETHAccountKey(sqlcKey *sqlcgen.EthAccountKey) (*domainEth.ETHAccountKey, error) {
 	addrStatus, err := domainAddress.AddrStatusFromInt8(int8(sqlcKey.AddrStatus))
 	if err != nil {
@@ -42,6 +42,10 @@ func convertToETHAccountKey(sqlcKey *sqlcgen.EthAccountKey) (*domainEth.ETHAccou
 		PrivateKey:    sqlcKey.PrivateKey, // Private key - NEVER log
 		Idx:           sqlcKey.Idx,
 		AddrStatus:    addrStatus,
+	}
+
+	if sqlcKey.AccountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = sqlcKey.AccountExtendedPrivkey.String
 	}
 
 	if sqlcKey.UpdatedAt.Valid {
@@ -65,6 +69,10 @@ func convertFromETHAccountKey(key *domainEth.ETHAccountKey) *sqlcgen.EthAccountK
 		PrivateKey:    key.PrivateKey,
 		Idx:           key.Idx,
 		AddrStatus:    int64(key.AddrStatus.Int8()),
+	}
+
+	if key.AccountExtendedPrivkey != "" {
+		sqlcKey.AccountExtendedPrivkey = sql.NullString{String: key.AccountExtendedPrivkey, Valid: true}
 	}
 
 	if key.UpdatedAt != nil {
@@ -155,12 +163,13 @@ func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*domainEth.ETHAccountKe
 	for _, item := range items {
 		sqlcItem := convertFromETHAccountKey(item)
 		_, err := qtx.InsertETHAccountKey(ctx, sqlcgen.InsertETHAccountKeyParams{
-			Account:       sqlcItem.Account,
-			Address:       sqlcItem.Address,
-			FullPublicKey: sqlcItem.FullPublicKey,
-			PrivateKey:    sqlcItem.PrivateKey,
-			Idx:           sqlcItem.Idx,
-			AddrStatus:    sqlcItem.AddrStatus,
+			Account:                sqlcItem.Account,
+			Address:                sqlcItem.Address,
+			FullPublicKey:          sqlcItem.FullPublicKey,
+			PrivateKey:             sqlcItem.PrivateKey,
+			AccountExtendedPrivkey: sqlcItem.AccountExtendedPrivkey,
+			Idx:                    sqlcItem.Idx,
+			AddrStatus:             sqlcItem.AddrStatus,
 		})
 		if err != nil {
 			_ = tx.Rollback()

@@ -106,6 +106,7 @@ type Container interface {
 	NewKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase
 	NewKeygenExportDescriptorUseCase() keygenusecase.ExportDescriptorUseCase
 	NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase
+	NewKeygenExportFullPubkeyUseCase() keygenusecase.ExportFullPubkeyUseCase
 	NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase
 	NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase
 	NewKeygenCreateMuSig2AddressUseCase() keygenusecase.CreateMuSig2AddressUseCase
@@ -224,9 +225,10 @@ func (c *container) newETHKeygener() wallets.Keygener {
 		c.pkgContainer.NewDatabaseClient(),
 		c.walletType,
 		c.newKeygenGenerateSeedUseCase(),
-		c.newKeygenGenerateHDWalletUseCase(),
+		c.newETHKeygenGenerateHDWalletUseCase(),
 		c.newETHKeygenImportPrivateKeyUseCase(),
 		c.newKeygenExportAddressUseCase(),
+		c.newETHKeygenExportFullPubkeyUseCase(),
 		c.newETHKeygenSignTransactionUseCase(),
 	)
 }
@@ -837,6 +839,17 @@ func (c *container) newHdWalletRepo() repocold.HDWalletRepo {
 	}
 }
 
+func (c *container) newETHHdWalletRepo() repocold.HDWalletRepo {
+	switch c.conf.Database.Type {
+	case "postgres":
+		return coldpostgres.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
+	case "sqlite":
+		return coldsqlite.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
+	default:
+		return coldmysql.NewETHHDWalletRepo(c.newEthAccountKeyRepo())
+	}
+}
+
 func (c *container) newKeyGenerator() portsWallet.Generator {
 	var chainConf *chaincfg.Params
 	switch {
@@ -1228,6 +1241,13 @@ func (c *container) NewKeygenExportAddressUseCase() keygenusecase.ExportAddressU
 	return c.newKeygenExportAddressUseCase()
 }
 
+func (c *container) NewKeygenExportFullPubkeyUseCase() keygenusecase.ExportFullPubkeyUseCase {
+	if !domainCoin.IsETHGroup(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("ExportFullPubkeyUseCase is only supported for ETH, got coinType[%s]", c.conf.CoinTypeCode))
+	}
+	return c.newETHKeygenExportFullPubkeyUseCase()
+}
+
 func (c *container) NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
@@ -1611,6 +1631,14 @@ func (c *container) newKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDW
 	)
 }
 
+func (c *container) newETHKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
+	return keygenusecaseshared.NewGenerateHDWalletUseCase(
+		c.newETHHdWalletRepo(),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
+	)
+}
+
 func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
 	return keygenusecaseshared.NewGenerateSeedUseCase(
 		c.newSeedRepo(),
@@ -1696,6 +1724,14 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 	return keygenusecaseeth.NewImportPrivateKeyUseCase(
 		c.newETH(),
 		c.newEthAccountKeyRepo(),
+	)
+}
+
+func (c *container) newETHKeygenExportFullPubkeyUseCase() keygenusecase.ExportFullPubkeyUseCase {
+	return keygenusecaseeth.NewExportFullPubkeyUseCase(
+		c.newEthAccountKeyRepo(),
+		c.newPubkeyFileStorager(),
+		c.conf.CoinTypeCode,
 	)
 }
 

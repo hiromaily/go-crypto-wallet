@@ -10,17 +10,18 @@ import (
 
 // ETHAccountKey represents an Ethereum account key with associated address in the domain layer.
 //
-// SECURITY NOTE: The PrivateKey field contains the private key in hexadecimal format.
-// This must NEVER be logged or exposed in error messages. Handle with extreme care.
+// SECURITY NOTE: The PrivateKey and AccountExtendedPrivkey fields contain sensitive key material.
+// These must NEVER be logged or exposed in error messages. Handle with extreme care.
 type ETHAccountKey struct {
-	ID            int64
-	Account       domainAccount.AccountType
-	Address       string // Ethereum address (0x...)
-	FullPublicKey string // Full public key (uncompressed, 65 bytes hex)
-	PrivateKey    string // Private key (hex encoded) - NEVER log this field
-	Idx           int64  // Index for HD wallet
-	AddrStatus    domainAddress.AddrStatus
-	UpdatedAt     *time.Time
+	ID                     int64
+	Account                domainAccount.AccountType
+	Address                string // Ethereum address (0x...)
+	FullPublicKey          string // Full public key (uncompressed, 65 bytes hex)
+	PrivateKey             string // Private key (hex encoded) - NEVER log this field
+	AccountExtendedPrivkey string // BIP32 account-level extended private key - NEVER log this field
+	Idx                    int64  // Index for HD wallet
+	AddrStatus             domainAddress.AddrStatus
+	UpdatedAt              *time.Time
 }
 
 // NewETHAccountKey creates a new ETHAccountKey entity for key generation.
@@ -66,6 +67,12 @@ func (k *ETHAccountKey) UpdateAddrStatus(status domainAddress.AddrStatus) {
 // SECURITY: This returns sensitive private key data. Never log the return value.
 func (k *ETHAccountKey) GetPrivateKey() string {
 	return k.PrivateKey
+}
+
+// SetAccountExtendedPrivkey sets the BIP32 account-level extended private key.
+// SECURITY: This stores sensitive private key material. Never log the value parameter.
+func (k *ETHAccountKey) SetAccountExtendedPrivkey(xpriv string) {
+	k.AccountExtendedPrivkey = xpriv
 }
 
 func (k *ETHAccountKey) updateTimestamp() {
