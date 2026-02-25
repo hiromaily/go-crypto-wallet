@@ -381,13 +381,11 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	}
 
 	// Calculate EIP-1559 fees
-	// maxPriorityFeePerGas: Configurable priority fee (tip for miners/validators)
-	// Default: 2 Gwei if not configured
-	priorityFeeGwei := e.conf.MaxPriorityFeePerGas
-	if priorityFeeGwei == 0 {
-		priorityFeeGwei = 2 // Default to 2 Gwei
+	// maxPriorityFeePerGas: suggested by the node with config fallback
+	maxPriorityFeePerGas, err := e.SuggestGasTipCap(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call eth.SuggestGasTipCap(): %w", err)
 	}
-	maxPriorityFeePerGas := new(big.Int).SetUint64(priorityFeeGwei * 1000000000) // Convert Gwei to Wei
 
 	// maxFeePerGas: (baseFee * 2) + maxPriorityFee
 	// The doubling provides buffer for baseFee increases between tx creation and inclusion

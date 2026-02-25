@@ -45,7 +45,7 @@
   - _Requirements: 2.5, 6.1, 6.2, 6.4, 6.5_
 
 - [ ] 4. Update the Ethereum client for EIP-1559 fee estimation and modern transaction encoding
-- [ ] 4.1 Add dynamic fee estimation methods to the Ethereum client
+- [x] 4.1 Add dynamic fee estimation methods to the Ethereum client
   - Add `SuggestGasTipCap` wrapper method calling `ethClient.SuggestGasTipCap(ctx)` with fallback to the config default when the RPC call fails
   - Add `SupportsEIP1559` detection method that inspects the connected node's block header for base fee support
   - Compute `maxFeePerGas` from the latest block base fee using `baseFee × 2 + tip`

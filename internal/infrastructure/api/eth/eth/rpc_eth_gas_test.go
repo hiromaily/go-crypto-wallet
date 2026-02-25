@@ -24,6 +24,15 @@ func (egt *ethGasTest) TestGasPrice() {
 	egt.T().Log("gasPrice:", price)
 }
 
+// TestSuggestGasTipCap is test for SuggestGasTipCap
+func (egt *ethGasTest) TestSuggestGasTipCap() {
+	ctx := context.Background()
+	tip, err := egt.ETH.SuggestGasTipCap(ctx)
+	egt.NoError(err)
+	egt.NotNil(tip)
+	egt.T().Log("suggestGasTipCap:", tip)
+}
+
 func TestEthGasTestSuite(t *testing.T) {
 	suite.Run(t, new(ethGasTest))
 }

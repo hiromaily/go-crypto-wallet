@@ -88,6 +88,7 @@ type Ethereumer interface {
 	// rpc_eth_gas
 	GasPrice(ctx context.Context) (*big.Int, error)
 	EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error)
+	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
 	// rpc_eth_tx
 	Sign(ctx context.Context, hexAddr, message string) (string, error)
 	SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error)
