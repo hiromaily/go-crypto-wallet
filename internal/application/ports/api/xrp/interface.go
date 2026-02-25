@@ -23,7 +23,7 @@ import (
 type XRPer interface {
 	XRPAdminer
 	XRPPublicer
-	XRPAPIer
+	XRPAPIProvider
 
 	// balance
 	GetBalance(ctx context.Context, addr string) (float64, error)
@@ -49,9 +49,9 @@ type SignerEntryInput struct {
 	Weight  uint32
 }
 
-// XRPAPIer defines the interface for XRP API operations.
+// XRPAPIProvider defines the interface for XRP API operations.
 // Implementations handle account management, address generation, and transaction operations.
-type XRPAPIer interface {
+type XRPAPIProvider interface {
 	// XRPAccountAPI
 	GetAccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseGetAccountInfo, error)
 	// XRPAddressAPI

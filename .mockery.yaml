@@ -29,7 +29,7 @@ packages:
       pkgname: "mocks"
     interfaces:
       XRPer:
-      XRPAPIer:
+      XRPAPIProvider:
       XRPPublicer:
       XRPAdminer:
       TransactionSubmitter:
