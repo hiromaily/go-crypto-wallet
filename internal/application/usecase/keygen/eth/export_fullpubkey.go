@@ -91,10 +91,7 @@ func (u *exportFullPubkeyUseCase) deriveAccountXpub(
 		return "", "", fmt.Errorf("failed to derive accountXpub from accountXpriv: %w", err)
 	}
 
-	// BIP-44 derivation path at account level: m/44'/coin'/account'
-	// ETH BIP44 coin type is 60
-	const ethCoinType = 60
-	path := fmt.Sprintf("m/44'/%d'/%d'", ethCoinType, accountType.BIP44AccountIndex())
+	path := domainCoin.BIP44AccountPath(u.coinTypeCode, accountType.BIP44AccountIndex())
 
 	return pubKey.String(), path, nil
 }

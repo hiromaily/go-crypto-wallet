@@ -1,6 +1,10 @@
 package coin
 
-import "github.com/btcsuite/btcd/chaincfg"
+import (
+	"fmt"
+
+	"github.com/btcsuite/btcd/chaincfg"
+)
 
 // CoinType creates a separate subtree for every cryptocurrency.
 // This follows SLIP-0044 standard for HD wallet derivation paths.
@@ -151,6 +155,17 @@ var ERC20Map = map[ERC20Token]bool{
 func IsERC20Token(val string) bool {
 	_, ok := ERC20Map[ERC20Token(val)]
 	return ok
+}
+
+// BIP44AccountPath returns the BIP44 account-level derivation path string.
+// Format: m/44'/coinType'/accountIndex'
+//
+// This is the path to the account-level xpub/xpriv used for HD wallet key derivation.
+// The accountIndex comes from AccountType.BIP44AccountIndex().
+// Example for ETH deposit account: m/44'/60'/0'
+func BIP44AccountPath(coinTypeCode CoinTypeCode, accountIndex uint32) string {
+	coinType := CoinTypeCodeValue[coinTypeCode].Uint32()
+	return fmt.Sprintf("m/44'/%d'/%d'", coinType, accountIndex)
 }
 
 // GetCoinType returns CoinType based on network configuration
