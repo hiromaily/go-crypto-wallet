@@ -102,12 +102,23 @@ func (r *AddressRepositorySqlc) GetAll(...) ([]*domainAddress.Address, error) {
 
 ## Testing
 
-- Use mocks in `mocks/` directories for unit tests
+- Use mocks in `mocks/` directories for unit tests — see @.claude/rules/internal/mockery.md
 - Use `testutil/` for test helpers
 - Integration tests with real systems when needed
+
+## Mock Generation Rule
+
+Every interface defined under `internal/application/ports/` MUST have a mockery-generated mock
+in the corresponding `mocks/` subdirectory. See @.claude/rules/internal/mockery.md for:
+
+- Placement convention (ports package → infrastructure mocks directory)
+- How to add a new interface to `.mockery.yaml`
+- Test usage pattern (`NewMock*(t)` + `.EXPECT()`)
+- Exceptions (`Ethereumer`, type aliases, use case interfaces)
 
 ## Related Rules
 
 - @.claude/rules/internal/clean-architecture.md - Layer dependencies
+- @.claude/rules/internal/mockery.md - Mock generation rules (mockery)
 - @.claude/rules/go/repository.md - Repository pattern details
 - @.claude/rules/go/di.md - Dependency injection

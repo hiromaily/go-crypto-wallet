@@ -28,10 +28,13 @@ packages:
       dir: "internal/infrastructure/api/xrp/mocks"
       pkgname: "mocks"
     interfaces:
-      Rippler:
-      RippleAPIer:
-      RipplePublicer:
-      RippleAdminer:
+      XRPer:
+      XRPAPIProvider:
+      XRPPublicer:
+      XRPAdminer:
+      TransactionSubmitter:
+      AccountInfoProvider:
+      TransactionPreparer:
 
   # File storage - interface in application/ports, implementation in infrastructure
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/file:
@@ -41,6 +44,7 @@ packages:
     interfaces:
       TransactionFileRepositorier:
       AddressFileRepositorier:
+      DescriptorFileWriter:
 
   # Watch wallet persistence interfaces
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch:
@@ -56,6 +60,30 @@ packages:
       TxRepositorier:
       ETHDetailTXRepositorier:
       XRPDetailTXRepositorier:
+
+  # Ethereum API - interface in application/ports, implementation in infrastructure
+  # Excludes: Ethereumer (DI-only monolithic), ETHTransactionSender (type alias for TxSender),
+  # and composed interfaces (ETHKeygenSignClient, ETHWatchClient, WatchTxCreationDeps, KeygenSignTxDeps)
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth:
+    config:
+      dir: "internal/infrastructure/api/eth/mocks"
+      pkgname: "mocks"
+    interfaces:
+      ETHLifecycle:
+      ETHKeyAccessor:
+      ETHTransactionSigner:
+      ETHRawKeyImporter:
+      ETHNodeAPIClient:
+      ERC20er:
+      EtherTxMonitor:
+      ChainConfigProvider:
+      BalanceChecker:
+      TxCreator:
+      GasEstimator:
+      TxSigner:
+      TxSender:
+      TxMonitor:
+      AddressValidator:
 
   # Cold wallet persistence interfaces
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold:

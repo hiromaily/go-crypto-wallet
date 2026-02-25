@@ -1,0 +1,22 @@
+{
+  "feature_name": "replace-manualstub-mockery",
+  "created_at": "2026-02-25T22:00:00+09:00",
+  "updated_at": "2026-02-25T23:45:00+09:00",
+  "language": "en",
+  "phase": "tasks-generated",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": true
+}

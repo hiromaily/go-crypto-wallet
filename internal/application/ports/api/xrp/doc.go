@@ -9,7 +9,7 @@
 // # Interfaces
 //
 //   - XRPer: Main interface combining admin, public, and API operations
-//   - XRPAPIer: Interface for XRP API operations (account, address, transaction)
+//   - XRPAPIProvider: Interface for XRP API operations (account, address, transaction)
 //   - XRPPublicer: Interface for public node operations
 //   - XRPAdminer: Interface for admin node operations
 //
