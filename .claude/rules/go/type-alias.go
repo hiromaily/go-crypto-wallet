@@ -55,7 +55,7 @@ type AuthType int
 
 These prevent accidental misuse (e.g., passing a raw `string` where a `CoinTypeCode` is expected).
 
-### 4. Import Path Aliases Are Discouraged
+### 3. Import Path Aliases Are Discouraged
 
 Package import aliases (`import foo "github.com/.../bar"`) should be avoided unless:
 
