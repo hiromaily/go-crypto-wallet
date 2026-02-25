@@ -88,7 +88,7 @@ keygen --config config/wallet/btc/keygen.yaml --coin btc create hdkey --account 
 keygen --config config/wallet/btc/keygen.yaml --coin btc export address --account client
 
 # Export descriptors (BTC only)
-keygen --config config/wallet/btc/keygen.yaml --coin btc descriptor export --account payment --output data/descriptor/btc/payment.json
+keygen --config config/wallet/btc/keygen.yaml --coin btc create descriptor export --account payment --output data/descriptor/btc/payment.json
 
 # Import private keys to Bitcoin Core
 keygen --config config/wallet/btc/keygen.yaml --coin btc import privkey --account client
