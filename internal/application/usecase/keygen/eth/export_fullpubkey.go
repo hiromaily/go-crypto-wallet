@@ -39,9 +39,9 @@ func NewExportFullPubkeyUseCase(
 }
 
 // Export derives the accountXpub from the stored accountXpriv and writes it to a CSV file.
-// The file uses the same 6-field CSV format as the BTC sign wallet:
+// The file uses a 5-field ETH-specific CSV format (no multisig auth type):
 //
-//	coinTypeCode,authType,purpose,extendedPubKey,fingerprint,derivationPath
+//	coinTypeCode,accountType,purpose,extendedPubKey,derivationPath
 func (u *exportFullPubkeyUseCase) Export(
 	ctx context.Context,
 	input keygenusecase.ExportFullPubkeyInput,
