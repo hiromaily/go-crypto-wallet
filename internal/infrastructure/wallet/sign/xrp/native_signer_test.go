@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	xrpcrypto "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
+	xrpcrypto "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 func TestNativeSigner_SignTransaction_Ed25519(t *testing.T) {
