@@ -12,7 +12,7 @@ import (
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
+	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 // XRPKeyStrategy implements CoinKeyStrategy for Ripple (XRP).

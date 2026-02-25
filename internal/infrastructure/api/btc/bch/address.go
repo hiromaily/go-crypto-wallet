@@ -8,7 +8,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
-	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/bch"
+	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/chains/bch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

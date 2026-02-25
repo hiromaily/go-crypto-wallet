@@ -14,7 +14,7 @@ XRP (Ripple) cryptocurrency utilities for address encoding, hashing, and key man
 ### Using KeyGenerator
 
 ```go
-import xrp "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
+import xrp "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 
 // Create a key generator with Ed25519 (recommended)
 gen := xrp.NewKeyGenerator(xrp.AlgorithmEd25519)

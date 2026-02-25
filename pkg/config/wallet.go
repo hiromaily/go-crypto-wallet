@@ -63,15 +63,26 @@ type Ethereum struct {
 	IPCPath    string `toml:"ipc_path" yaml:"ipc_path" mapstructure:"ipc_path"`
 	Port       int    `toml:"port" yaml:"port" mapstructure:"port" validate:"required"`
 	DisableTLS bool   `toml:"disable_tls" yaml:"disable_tls" mapstructure:"disable_tls"`
-	//nolint:lll,revive
-	NetworkType string `toml:"network_type" yaml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten anvil local"`
-	KeyDirName  string `toml:"keydir" yaml:"keydir" mapstructure:"keydir"`
+	// NetworkType selects the Ethereum network. Supported: mainnet, sepolia, holesky, anvil, local.
+	// Deprecated values (goerli, rinkeby, ropsten) are no longer accepted.
+	//nolint:lll
+	NetworkType string `toml:"network_type" yaml:"network_type" mapstructure:"network_type"`
+	// NodeType identifies the Ethereum node implementation. Supported: anvil (default), geth.
+	//nolint:lll
+	NodeType string `toml:"node_type" yaml:"node_type" mapstructure:"node_type" validate:"omitempty,oneof=anvil geth"`
+	// ChainID is the numeric EIP-155 chain ID. Auto-populated from NetworkType when not set.
+	ChainID    uint64 `toml:"chain_id" yaml:"chain_id" mapstructure:"chain_id"`
+	KeyDirName string `toml:"keydir" yaml:"keydir" mapstructure:"keydir"`
 	//nolint:lll,revive
 	ConfirmationNum uint64                          `toml:"confirmation_num" yaml:"confirmation_num" mapstructure:"confirmation_num"`
 	ERC20Token      domainCoin.ERC20Token           `toml:"erc20_token" yaml:"erc20_token" mapstructure:"erc20_token"`
 	ERC20s          map[domainCoin.ERC20Token]ERC20 `toml:"erc20s" yaml:"erc20s" mapstructure:"erc20s"`
 	//nolint:lll,revive
 	MaxPriorityFeePerGas uint64 `toml:"max_priority_fee_per_gas" yaml:"max_priority_fee_per_gas" mapstructure:"max_priority_fee_per_gas"` // EIP-1559: priority fee in Gwei (default: 2)
+	//nolint:lll,revive
+	MaxFeePerGasCap uint64 `toml:"max_fee_per_gas_cap" yaml:"max_fee_per_gas_cap" mapstructure:"max_fee_per_gas_cap"` // EIP-1559: absolute fee ceiling in Gwei
+	// KeystorePassword is the keystore encryption password. Replaces the hardcoded default.
+	KeystorePassword string `toml:"keystore_password" yaml:"keystore_password" mapstructure:"keystore_password"`
 }
 
 // ERC20 information
@@ -263,6 +274,9 @@ func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domain
 		default:
 		}
 	case domainCoin.ETH, domainCoin.ERC20:
+		if err := c.validateEthereum(); err != nil {
+			return err
+		}
 		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
 			return err
 		}
@@ -321,6 +335,51 @@ func (c *WalletRoot) validateDatabase() error {
 		}
 	default:
 		return fmt.Errorf("unsupported database type: %s (must be mysql, sqlite, or postgres)", c.Database.Type)
+	}
+
+	return nil
+}
+
+// supportedEthNetworks lists all currently supported Ethereum network types.
+// Used in error messages to guide operators when an invalid value is supplied.
+const supportedEthNetworks = "mainnet, sepolia, holesky, anvil, local"
+
+// validateEthereum validates Ethereum-specific configuration fields, applies defaults,
+// and auto-populates ChainID from NetworkType when not explicitly set.
+// A single switch covers both validation and ChainID derivation to keep the
+// two concerns in sync without duplicating the case list.
+func (c *WalletRoot) validateEthereum() error {
+	eth := &c.Ethereum
+
+	// Validate NetworkType and auto-populate ChainID in one pass.
+	switch eth.NetworkType {
+	case "mainnet":
+		if eth.ChainID == 0 {
+			eth.ChainID = 1
+		}
+	case "sepolia":
+		if eth.ChainID == 0 {
+			eth.ChainID = 11155111
+		}
+	case "holesky":
+		if eth.ChainID == 0 {
+			eth.ChainID = 17000
+		}
+	case "anvil", "local":
+		if eth.ChainID == 0 {
+			eth.ChainID = 1337
+		}
+	default:
+		return fmt.Errorf(
+			"ethereum.network_type %q is not supported; valid values: %s",
+			eth.NetworkType,
+			supportedEthNetworks,
+		)
+	}
+
+	// Default NodeType to anvil when not set
+	if eth.NodeType == "" {
+		eth.NodeType = "anvil"
 	}
 
 	return nil

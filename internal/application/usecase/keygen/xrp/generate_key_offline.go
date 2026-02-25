@@ -17,7 +17,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
-	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

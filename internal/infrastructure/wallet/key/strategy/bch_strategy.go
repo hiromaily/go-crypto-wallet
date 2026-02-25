@@ -10,7 +10,7 @@ import (
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/bch"
+	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/chains/bch"
 )
 
 // BCHKeyStrategy implements CoinKeyStrategy for Bitcoin Cash (BCH).

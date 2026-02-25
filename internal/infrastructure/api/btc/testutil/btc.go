@@ -10,8 +10,8 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	bitcoin "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc"
+	cryptocurrency "github.com/hiromaily/go-crypto-wallet/pkg/chains"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
 )
 
 var bc apibtc.Bitcoiner

@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	xrpcrypto "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
+	xrpcrypto "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 // NativeSigner implements XRP transaction signing using native Go code.

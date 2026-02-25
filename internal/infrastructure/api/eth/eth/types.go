@@ -31,12 +31,11 @@ type NetworkTypeETH string
 
 // network type
 const (
-	NetworkTypeETHMainNet    NetworkTypeETH = "mainnet"
-	NetworkTypeETHGoerli     NetworkTypeETH = "goerli"
-	NetworkTypeETHRegRinkeby NetworkTypeETH = "rinkeby"
-	NetworkTypeETHRopsten    NetworkTypeETH = "ropsten"
-	NetworkTypeETHAnvil      NetworkTypeETH = "anvil"
-	NetworkTypeETHLocal      NetworkTypeETH = "local"
+	NetworkTypeETHMainNet NetworkTypeETH = "mainnet"
+	NetworkTypeETHSepolia NetworkTypeETH = "sepolia"
+	NetworkTypeETHHolesky NetworkTypeETH = "holesky"
+	NetworkTypeETHAnvil   NetworkTypeETH = "anvil"
+	NetworkTypeETHLocal   NetworkTypeETH = "local"
 )
 
 // String converter
@@ -44,39 +43,21 @@ func (n NetworkTypeETH) String() string {
 	return string(n)
 }
 
-//----------------------------------------------------
-// ChainID
-//----------------------------------------------------
-
-// ChainID type of network ID // not net-version
-// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
-type ChainID string
-
-// chain-id
-const (
-	ChainIDMainNet       ChainID = "Ethereum mainnet"
-	ChainIDMorden        ChainID = "Morden Expanse mainnet"
-	ChainIDRopsten       ChainID = "Ropsten"
-	ChainIDRinkeby       ChainID = "Rinkeby"
-	ChainIDGoerli        ChainID = "Goerli"
-	ChainIDKovan         ChainID = "Kovan"
-	ChainIDPrivateChains ChainID = "Geth private chains"
-)
-
-// ChainIDMap chainID mapping
-var ChainIDMap = map[uint16]ChainID{
-	1:    ChainIDMainNet,
-	2:    ChainIDMorden,
-	3:    ChainIDRopsten,
-	4:    ChainIDRinkeby,
-	5:    ChainIDGoerli,
-	42:   ChainIDKovan,
-	1337: ChainIDPrivateChains,
-}
-
-// String converter
-func (c ChainID) String() string {
-	return string(c)
+// ChainIDForNetwork returns the numeric EIP-155 chain ID for a given network type.
+// Returns 0 for unknown network types.
+func ChainIDForNetwork(network NetworkTypeETH) uint64 {
+	switch network {
+	case NetworkTypeETHMainNet:
+		return 1
+	case NetworkTypeETHSepolia:
+		return 11155111
+	case NetworkTypeETHHolesky:
+		return 17000
+	case NetworkTypeETHAnvil, NetworkTypeETHLocal:
+		return 1337
+	default:
+		return 0
+	}
 }
 
 //----------------------------------------------------
@@ -116,3 +97,22 @@ const GasLimit uint64 = 21000
 
 // Password this password is temporary until specification is fixed
 const Password string = "password"
+
+//----------------------------------------------------
+// EthNodeType
+//----------------------------------------------------
+
+// ETHNodeType identifies the Ethereum node implementation.
+type ETHNodeType string
+
+const (
+	// ETHNodeTypeAnvil represents a Foundry Anvil local development node.
+	ETHNodeTypeAnvil ETHNodeType = "anvil"
+	// ETHNodeTypeGeth represents a go-ethereum (Geth) node.
+	ETHNodeTypeGeth ETHNodeType = "geth"
+)
+
+// String converter
+func (n ETHNodeType) String() string {
+	return string(n)
+}
