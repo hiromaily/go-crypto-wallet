@@ -17,11 +17,16 @@
   - _Requirements: 9.1, 9.2_
 
 - [ ] 2. Define ISP-compliant port interfaces for ETH blockchain operations
-- [ ] 2.1 (P) Create focused single-responsibility port interfaces
-  - Define `BalanceChecker`, `TxCreator`, `GasEstimator`, `TxSigner`, `TxSender`, `TxMonitor`, `AddressValidator`, and `ChainConfigProvider` as separate interfaces
-  - Mirror the BTC port pattern in `internal/application/ports/api/btc/interfaces_small.go`
+- [x] 2.1a (DONE PR #575) Add lifecycle, key access, transaction sign/send, raw key import, and node API interfaces
+  - Added `ETHLifecycle`, `ETHKeyAccessor`, `ETHTransactionSigner`, `ETHTransactionSender`, `ETHRawKeyImporter`, `ETHNodeAPIClient`
+  - Added composed `ETHKeygenSignClient`, `ETHWatchClient`
+  - Added to `internal/application/ports/api/eth/interface.go` (not a separate `interfaces_small.go`)
+  - `Ethereumer` preserved with DI-layer-only usage restriction comment
+  - _Requirements: 5.2 (partial)_
+
+- [ ] 2.1b (P) Add EIP-1559 and monitoring port interfaces (required for Tasks 7, 9)
+  - Define `BalanceChecker`, `TxCreator`, `GasEstimator`, `TxSigner`, `TxSender`, `TxMonitor`, `AddressValidator`, and `ChainConfigProvider` as separate interfaces in `interface.go`
   - Define composed interfaces `WatchTxCreationDeps` and `KeygenSignTxDeps` for use case convenience
-  - Preserve the existing `Ethereumer` interface unchanged to allow backward-compatible migration
   - _Requirements: 5.2_
 
 - [ ] 2.2 (P) Add port-level DTOs to prevent infrastructure type leakage
@@ -113,15 +118,19 @@
   - _Requirements: 8.3, 8.5_
 
 - [ ] 10. Migrate all ETH use cases to Clean Architecture compliance
-- [ ] 10.1 Remove direct infrastructure imports from ETH use cases
-  - Update all ETH use cases to import only from the port interfaces layer, never directly from the infrastructure layer
-  - Declare local interface types within each use case file using the small port interfaces (mirrors BTC pattern)
-  - Depends on Task 2 (small port interfaces must exist)
+- [~] 10.1 Remove direct infrastructure imports from ETH use cases (Partially done — PR #575)
+  - [x] Removed `ethereum` infrastructure package imports from all use cases (PR #575)
+  - [ ] Remove remaining `apiethimpl` infrastructure imports (3 files still import for `Password` constant):
+    - `internal/application/usecase/keygen/eth/sign_transaction.go`
+    - `internal/application/usecase/sign/eth/sign_transaction.go`
+    - `internal/application/usecase/keygen/eth/import_private_key.go`
+  - Completion blocked by Task 10.3 (configurable password injection)
   - _Requirements: 5.1_
 
-- [ ] 10.2 (P) Remove deprecated monolithic Ethereumer interface
-  - Delete the deprecated `Ethereumer` interface definition after all use cases have migrated to small port interfaces
-  - Verify the existing `Ethereum` struct still satisfies all small interfaces via Go's implicit satisfaction
+- [~] 10.2 (P) Restrict/deprecate monolithic Ethereumer interface (Partially done — PR #575)
+  - [x] `Ethereumer` in `internal/application/ports/api/eth/interface.go` now carries a DI-layer-only usage restriction comment (PR #575)
+  - [x] The deprecated `internal/infrastructure/api/eth/api-interface.go` has been deleted (PR #575)
+  - [ ] Final removal of `Ethereumer` from `interface.go` — evaluate after Tasks 6.2, 7, 8, 9 complete DI wiring migration
   - Depends on 10.1
   - _Requirements: 5.3_
 

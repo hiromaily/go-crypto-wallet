@@ -60,8 +60,8 @@
 | Need | Existing Asset | Gap |
 |------|---------------|-----|
 | Port-only use case imports | `internal/application/ports/api/eth/interface.go` — port interfaces exist | **Constraint**: 4 use cases import from infrastructure |
-| ISP-compliant interfaces | BTC has `interfaces_small.go` with 15+ small interfaces | **Missing**: ETH has monolithic `Ethereumer` (70+ methods) |
-| Remove deprecated interfaces | `internal/infrastructure/api/eth/api-interface.go` — marked `Deprecated:` | **Missing**: still imported by use cases |
+| ISP-compliant interfaces | `internal/application/ports/api/eth/interface.go` — focused interfaces added: `ETHLifecycle`, `ETHKeyAccessor`, `ETHTransactionSigner`, `ETHTransactionSender`, `ETHRawKeyImporter`, `ETHNodeAPIClient`, composed `ETHKeygenSignClient`, `ETHWatchClient` | **Partially done (PR #575)**: lifecycle/sign/send/import interfaces added; EIP-1559 and monitoring interfaces (`TxCreator`, `GasEstimator`, `TxMonitor`, etc.) still needed for Tasks 7, 9 |
+| Remove deprecated interfaces | `internal/infrastructure/api/eth/api-interface.go` — **Deleted (PR #575)** | **Done (PR #575)** |
 | Configurable password | `apiethimpl.Password = "password"` hardcoded | **Missing**: no config injection |
 | Port-level DTOs | `apieth.TxCreateParams` exists | Partial: some DTOs exist, others leak infrastructure types |
 
@@ -123,7 +123,7 @@
 **Approach**: Build new packages for multisig, offline signing, and ISP interfaces alongside existing code.
 
 **New components**:
-- `internal/application/ports/api/eth/interfaces_small.go` — ISP interfaces (following BTC pattern)
+- ~~`internal/application/ports/api/eth/interfaces_small.go`~~ — **Done (PR #575)**: ISP interfaces added directly to `internal/application/ports/api/eth/interface.go` (not a separate `interfaces_small.go`)
 - `internal/infrastructure/api/eth/safe/` — Safe contract interaction package
 - `internal/application/usecase/keygen/eth/create_multisig_address.go` — Safe address setup
 - `internal/domain/ethereum/eth_multisig_tx.go` — Multisig transaction domain type
@@ -237,10 +237,11 @@
 
 | File | Violation | Fix |
 |------|-----------|-----|
-| `usecase/keygen/eth/sign_transaction.go` | Imports `ethereum` (infra) + `apiethimpl` (infra) | Use port interfaces |
-| `usecase/sign/eth/sign_transaction.go` | Same | Use port interfaces |
-| `usecase/watch/eth/send_transaction.go` | Imports `ethereum` (infra) | Use port interfaces |
-| `usecase/watch/eth/monitor_transaction.go` | Imports `ethereum` (infra) | Use port interfaces |
+| `usecase/keygen/eth/sign_transaction.go` | Still imports `apiethimpl` (infra) for `Password` constant | Replace with config injection (Task 10.3) |
+| `usecase/sign/eth/sign_transaction.go` | Still imports `apiethimpl` (infra) for `Password` constant | Replace with config injection (Task 10.3) |
+| `usecase/keygen/eth/import_private_key.go` | Still imports `apiethimpl` (infra) for `Password` constant | Replace with config injection (Task 10.3) |
+| ~~`usecase/watch/eth/send_transaction.go`~~ | ~~Imports `ethereum` (infra)~~ | **Done (PR #575)**: now uses `apieth.ETHTransactionSender` |
+| ~~`usecase/watch/eth/monitor_transaction.go`~~ | ~~Imports `ethereum` (infra)~~ | **Done (PR #575)**: now uses port interfaces |
 
 ### Security Constraints
 
@@ -250,7 +251,7 @@
 
 ### BTC Reference Patterns to Follow
 
-- ISP interfaces: `interfaces_small.go` with granular interfaces + composed interfaces for common use cases
+- ISP interfaces: ETH uses `interface.go` (not a separate `interfaces_small.go`) — implemented: `ETHLifecycle`, `ETHKeyAccessor`, `ETHTransactionSigner`, `ETHTransactionSender`, `ETHRawKeyImporter`, `ETHNodeAPIClient`, composed `ETHKeygenSignClient`, `ETHWatchClient`
 - Sign wallet adapter: `btcwallet.NewBTCSign()` with proper DI wiring
 - DI container: `newBTCSigner()` pattern at `container.go:313`
 - Transaction file: PSBT-based structured format (ETH equivalent: JSON)
