@@ -11,9 +11,9 @@ import (
 	"time"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
 )

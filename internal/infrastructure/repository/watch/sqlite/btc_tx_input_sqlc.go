@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlite/sqlcgen"
 )
@@ -31,8 +31,8 @@ func NewBTCTxInputRepositorySqlc(
 }
 
 // convertToBtcTxInput converts sqlcgen.BtcTxInput to domain.BtcTxInput entity
-func convertToBtcTxInput(sqlcInput *sqlcgen.BtcTxInput) (*domainBitcoin.BTCTxInput, error) {
-	input := &domainBitcoin.BTCTxInput{
+func convertToBtcTxInput(sqlcInput *sqlcgen.BtcTxInput) (*domainBTC.BTCTxInput, error) {
+	input := &domainBTC.BTCTxInput{
 		ID:                 sqlcInput.ID,
 		TxID:               sqlcInput.TxID,
 		InputTxid:          sqlcInput.InputTxid,
@@ -55,7 +55,7 @@ func convertToBtcTxInput(sqlcInput *sqlcgen.BtcTxInput) (*domainBitcoin.BTCTxInp
 }
 
 // convertFromBTCTxInput converts domain.BTCTxInput entity to sqlcgen.BTCTxInput
-func convertFromBTCTxInput(input *domainBitcoin.BTCTxInput) *sqlcgen.BtcTxInput {
+func convertFromBTCTxInput(input *domainBTC.BTCTxInput) *sqlcgen.BtcTxInput {
 	inputAmount, _ := strconv.ParseFloat(input.InputAmount, 64)
 	sqlcInput := &sqlcgen.BtcTxInput{
 		ID:                 input.ID,
@@ -80,7 +80,7 @@ func convertFromBTCTxInput(input *domainBitcoin.BTCTxInput) *sqlcgen.BtcTxInput 
 }
 
 // GetOne get one record by ID
-func (r *TxInputRepositorySqlc) GetOne(id int64) (*domainBitcoin.BTCTxInput, error) {
+func (r *TxInputRepositorySqlc) GetOne(id int64) (*domainBTC.BTCTxInput, error) {
 	ctx := context.Background()
 
 	input, err := r.queries.GetBtcTxInputByID(ctx, id)
@@ -92,7 +92,7 @@ func (r *TxInputRepositorySqlc) GetOne(id int64) (*domainBitcoin.BTCTxInput, err
 }
 
 // GetAllByTxID returns all records by tx ID
-func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBitcoin.BTCTxInput, error) {
+func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBTC.BTCTxInput, error) {
 	ctx := context.Background()
 
 	inputs, err := r.queries.GetBtcTxInputsByTxID(ctx, id)
@@ -100,7 +100,7 @@ func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBitcoin.BTCTxIn
 		return nil, fmt.Errorf("failed to call GetBtcTxInputsByTxID(): %w", err)
 	}
 
-	result := make([]*domainBitcoin.BTCTxInput, 0, len(inputs))
+	result := make([]*domainBTC.BTCTxInput, 0, len(inputs))
 	for i := range inputs {
 		input, err := convertToBtcTxInput(&inputs[i])
 		if err != nil {
@@ -113,7 +113,7 @@ func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainBitcoin.BTCTxIn
 }
 
 // Insert inserts one record
-func (r *TxInputRepositorySqlc) Insert(txItem *domainBitcoin.BTCTxInput) error {
+func (r *TxInputRepositorySqlc) Insert(txItem *domainBTC.BTCTxInput) error {
 	ctx := context.Background()
 
 	sqlcInput := convertFromBTCTxInput(txItem)
@@ -135,7 +135,7 @@ func (r *TxInputRepositorySqlc) Insert(txItem *domainBitcoin.BTCTxInput) error {
 }
 
 // InsertBulk inserts multiple records
-func (r *TxInputRepositorySqlc) InsertBulk(txItems []*domainBitcoin.BTCTxInput) error {
+func (r *TxInputRepositorySqlc) InsertBulk(txItems []*domainBTC.BTCTxInput) error {
 	ctx := context.Background()
 
 	tx, err := r.db.BeginTx(ctx, nil)

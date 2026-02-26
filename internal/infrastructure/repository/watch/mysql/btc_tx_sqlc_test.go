@@ -9,7 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
@@ -26,7 +26,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	// Insert
 	hex := "unsigned-hex-sqlc"
 	actionType := domainTx.ActionTypePayment
-	txItem := domainBitcoin.NewBTCTransaction(
+	txItem := domainBTC.NewBTCTransaction(
 		domainCoin.BTC,
 		actionType,
 		domainTx.TxTypeUnsigned,

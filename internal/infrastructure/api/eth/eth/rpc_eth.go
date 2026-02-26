@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mitchellh/mapstructure"
 
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -39,7 +39,7 @@ type ResponseSyncing struct {
 // Syncing returns sync status or bool
 //   - return false if not syncing (it means syncing is done)
 //   - there seems 2 different responses
-func (e *Ethereum) Syncing(ctx context.Context) (*domainEthereum.ResponseSyncing, bool, error) {
+func (e *Ethereum) Syncing(ctx context.Context) (*domainETH.ResponseSyncing, bool, error) {
 	var result any
 
 	err := e.rpcClient.CallContext(ctx, &result, "eth_syncing")
@@ -169,7 +169,7 @@ func (e *Ethereum) EnsureBlockNumber(ctx context.Context, loopCount int) (*big.I
 // - On goerli testnet, balance can be found just after sending coins
 // - TODO: which quantityTag should be used `QuantityTagLatest` or `QuantityTagPending`
 func (e *Ethereum) GetBalance(
-	ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag,
+	ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag,
 ) (*big.Int, error) {
 	// Convert domain type to infrastructure type
 	infraQuantityTag := FromDomainQuantityTag(quantityTag)
@@ -212,7 +212,7 @@ func (e *Ethereum) GetBalance(
 // - after sending coin from this address, result is counted??
 // - generated new address is always 0
 func (e *Ethereum) GetTransactionCount(
-	ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag,
+	ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag,
 ) (*big.Int, error) {
 	// Convert domain type to infrastructure type
 	infraQuantityTag := FromDomainQuantityTag(quantityTag)
@@ -411,7 +411,7 @@ type BlockInfo struct {
 
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
-func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainEthereum.BlockInfo, error) {
+func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainETH.BlockInfo, error) {
 	// convert int64 to hex
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 

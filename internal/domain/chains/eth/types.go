@@ -1,9 +1,9 @@
-// Package ethereum defines domain types for Ethereum blockchain operations.
+// Package eth defines domain types for Ethereum blockchain operations.
 //
 // These types are used in application layer interfaces following Clean Architecture
 // principles. Infrastructure implementations convert between these domain types
 // and their infrastructure-specific representations.
-package ethereum
+package eth
 
 import "math/big"
 

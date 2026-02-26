@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -23,8 +23,8 @@ func NewXRPPendingMultisigRepositorySqlc(dbConn *sql.DB) *XRPPendingMultisigRepo
 }
 
 // convertToXRPPendingMultisig converts sqlcgen.XrpPendingMultisig to domain.XRPPendingMultisig entity.
-func convertToXRPPendingMultisig(sqlcPending *sqlcgen.XrpPendingMultisig) *domainXrp.XRPPendingMultisig {
-	pending := &domainXrp.XRPPendingMultisig{
+func convertToXRPPendingMultisig(sqlcPending *sqlcgen.XrpPendingMultisig) *domainXRP.XRPPendingMultisig {
+	pending := &domainXRP.XRPPendingMultisig{
 		ID:             sqlcPending.ID,
 		TxUUID:         sqlcPending.TxUuid,
 		AccountID:      sqlcPending.AccountID,
@@ -32,7 +32,7 @@ func convertToXRPPendingMultisig(sqlcPending *sqlcgen.XrpPendingMultisig) *domai
 		XRPTxType:      sqlcPending.XrpTxType,
 		RequiredQuorum: sqlcPending.RequiredQuorum,
 		CurrentWeight:  sqlcPending.CurrentWeight,
-		Status:         domainXrp.MultisigStatus(sqlcPending.Status),
+		Status:         domainXRP.MultisigStatus(sqlcPending.Status),
 	}
 
 	if sqlcPending.CombinedTxBlob.Valid {
@@ -55,19 +55,19 @@ func convertToXRPPendingMultisig(sqlcPending *sqlcgen.XrpPendingMultisig) *domai
 }
 
 // convertDomainStatusToSqlc converts domain MultisigStatus to sqlcgen XrpPendingMultisigStatus
-func convertDomainStatusToSqlc(status domainXrp.MultisigStatus) sqlcgen.XrpPendingMultisigStatus {
+func convertDomainStatusToSqlc(status domainXRP.MultisigStatus) sqlcgen.XrpPendingMultisigStatus {
 	switch status {
-	case domainXrp.MultisigStatusPending:
+	case domainXRP.MultisigStatusPending:
 		return sqlcgen.XrpPendingMultisigStatusPending
-	case domainXrp.MultisigStatusReady:
+	case domainXRP.MultisigStatusReady:
 		return sqlcgen.XrpPendingMultisigStatusReady
-	case domainXrp.MultisigStatusSubmitted:
+	case domainXRP.MultisigStatusSubmitted:
 		return sqlcgen.XrpPendingMultisigStatusSubmitted
-	case domainXrp.MultisigStatusConfirmed:
+	case domainXRP.MultisigStatusConfirmed:
 		return sqlcgen.XrpPendingMultisigStatusConfirmed
-	case domainXrp.MultisigStatusFailed:
+	case domainXRP.MultisigStatusFailed:
 		return sqlcgen.XrpPendingMultisigStatusFailed
-	case domainXrp.MultisigStatusExpired:
+	case domainXRP.MultisigStatusExpired:
 		return sqlcgen.XrpPendingMultisigStatusExpired
 	default:
 		return sqlcgen.XrpPendingMultisigStatusPending
@@ -77,7 +77,7 @@ func convertDomainStatusToSqlc(status domainXrp.MultisigStatus) sqlcgen.XrpPendi
 // GetByID returns a pending multi-sig transaction by its ID
 func (r *XRPPendingMultisigRepositorySqlc) GetByID(
 	ctx context.Context, id int64,
-) (*domainXrp.XRPPendingMultisig, error) {
+) (*domainXRP.XRPPendingMultisig, error) {
 	sqlcPending, err := r.queries.GetXRPPendingMultisigByID(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -92,7 +92,7 @@ func (r *XRPPendingMultisigRepositorySqlc) GetByID(
 // GetByUUID returns a pending multi-sig transaction by its UUID
 func (r *XRPPendingMultisigRepositorySqlc) GetByUUID(
 	ctx context.Context, txUUID string,
-) (*domainXrp.XRPPendingMultisig, error) {
+) (*domainXRP.XRPPendingMultisig, error) {
 	sqlcPending, err := r.queries.GetXRPPendingMultisigByUUID(ctx, txUUID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -106,8 +106,8 @@ func (r *XRPPendingMultisigRepositorySqlc) GetByUUID(
 
 // GetByAccountIDAndStatus returns pending multi-sig transactions for an account with a specific status
 func (r *XRPPendingMultisigRepositorySqlc) GetByAccountIDAndStatus(
-	ctx context.Context, accountID string, status domainXrp.MultisigStatus,
-) ([]*domainXrp.XRPPendingMultisig, error) {
+	ctx context.Context, accountID string, status domainXRP.MultisigStatus,
+) ([]*domainXRP.XRPPendingMultisig, error) {
 	params := sqlcgen.GetXRPPendingMultisigsByAccountIDParams{
 		AccountID: accountID,
 		Status:    convertDomainStatusToSqlc(status),
@@ -118,7 +118,7 @@ func (r *XRPPendingMultisigRepositorySqlc) GetByAccountIDAndStatus(
 		return nil, fmt.Errorf("failed to call GetXRPPendingMultisigsByAccountID(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPPendingMultisig, 0, len(sqlcPendings))
+	result := make([]*domainXRP.XRPPendingMultisig, 0, len(sqlcPendings))
 	for i := range sqlcPendings {
 		result = append(result, convertToXRPPendingMultisig(&sqlcPendings[i]))
 	}
@@ -128,8 +128,8 @@ func (r *XRPPendingMultisigRepositorySqlc) GetByAccountIDAndStatus(
 
 // GetByStatus returns all pending multi-sig transactions with a specific status
 func (r *XRPPendingMultisigRepositorySqlc) GetByStatus(
-	ctx context.Context, status domainXrp.MultisigStatus,
-) ([]*domainXrp.XRPPendingMultisig, error) {
+	ctx context.Context, status domainXRP.MultisigStatus,
+) ([]*domainXRP.XRPPendingMultisig, error) {
 	sqlcStatus := convertDomainStatusToSqlc(status)
 
 	sqlcPendings, err := r.queries.GetXRPPendingMultisigsByStatus(ctx, sqlcStatus)
@@ -137,7 +137,7 @@ func (r *XRPPendingMultisigRepositorySqlc) GetByStatus(
 		return nil, fmt.Errorf("failed to call GetXRPPendingMultisigsByStatus(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPPendingMultisig, 0, len(sqlcPendings))
+	result := make([]*domainXRP.XRPPendingMultisig, 0, len(sqlcPendings))
 	for i := range sqlcPendings {
 		result = append(result, convertToXRPPendingMultisig(&sqlcPendings[i]))
 	}
@@ -148,13 +148,13 @@ func (r *XRPPendingMultisigRepositorySqlc) GetByStatus(
 // GetExpired returns pending transactions that have expired
 func (r *XRPPendingMultisigRepositorySqlc) GetExpired(
 	ctx context.Context,
-) ([]*domainXrp.XRPPendingMultisig, error) {
+) ([]*domainXRP.XRPPendingMultisig, error) {
 	sqlcPendings, err := r.queries.GetExpiredXRPPendingMultisigs(ctx, sql.NullTime{Time: time.Now(), Valid: true})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetExpiredXRPPendingMultisigs(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPPendingMultisig, 0, len(sqlcPendings))
+	result := make([]*domainXRP.XRPPendingMultisig, 0, len(sqlcPendings))
 	for i := range sqlcPendings {
 		result = append(result, convertToXRPPendingMultisig(&sqlcPendings[i]))
 	}
@@ -164,7 +164,7 @@ func (r *XRPPendingMultisigRepositorySqlc) GetExpired(
 
 // Insert creates a new pending multi-sig transaction and returns the inserted ID
 func (r *XRPPendingMultisigRepositorySqlc) Insert(
-	ctx context.Context, pending *domainXrp.XRPPendingMultisig,
+	ctx context.Context, pending *domainXRP.XRPPendingMultisig,
 ) (int64, error) {
 	params := sqlcgen.InsertXRPPendingMultisigParams{
 		TxUuid:         pending.TxUUID,
@@ -218,7 +218,7 @@ func (r *XRPPendingMultisigRepositorySqlc) UpdateWeight(
 
 // UpdateStatus updates the status of a pending transaction
 func (r *XRPPendingMultisigRepositorySqlc) UpdateStatus(
-	ctx context.Context, id int64, status domainXrp.MultisigStatus,
+	ctx context.Context, id int64, status domainXRP.MultisigStatus,
 ) error {
 	params := sqlcgen.UpdateXRPPendingMultisigStatusParams{
 		Status:    convertDomainStatusToSqlc(status),

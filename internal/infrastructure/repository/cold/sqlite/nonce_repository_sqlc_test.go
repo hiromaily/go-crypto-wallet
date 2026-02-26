@@ -10,8 +10,8 @@ import (
 
 	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 )
 
 // setupNonceTable creates the musig2_nonces table for testing

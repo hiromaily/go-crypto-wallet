@@ -18,7 +18,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
@@ -68,7 +68,7 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	xpriv := testDescriptorMainnetXpriv
-	accountKey := &domainBitcoin.BTCAccountKey{
+	accountKey := &domainBTC.BTCAccountKey{
 		FullPublicKey:          testDescriptorMainnetXpub,
 		KeyType:                string(domainKey.KeyTypeBIP84),
 		Account:                domainAccount.AccountTypeDeposit,
@@ -204,7 +204,7 @@ func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
 	t.Parallel()
 
 	accountRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
-	accountRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return((*domainBitcoin.BTCAccountKey)(nil), nil)
+	accountRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return((*domainBTC.BTCAccountKey)(nil), nil)
 	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
 
 	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)

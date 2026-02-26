@@ -8,8 +8,8 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
 )
 
@@ -31,18 +31,18 @@ func NewXRPAccountKeyRepositorySqlc(
 
 // convertToXRPAccountKey converts sqlcgen.XrpAccountKey to domain.XrpAccountKey entity.
 // SECURITY: Handles master seed data - never log the master seed fields.
-func convertToXRPAccountKey(sqlcKey *sqlcgen.XrpAccountKey) (*domainXrp.XRPAccountKey, error) {
+func convertToXRPAccountKey(sqlcKey *sqlcgen.XrpAccountKey) (*domainXRP.XRPAccountKey, error) {
 	addrStatus, err := domainAddress.AddrStatusFromInt8(int8(sqlcKey.AddrStatus))
 	if err != nil {
 		return nil, fmt.Errorf("invalid addr status in database: %w", err)
 	}
 
-	key := &domainXrp.XRPAccountKey{
+	key := &domainXRP.XRPAccountKey{
 		ID:               sqlcKey.ID,
 		CoinTypeCode:     domainCoin.CoinTypeCode(sqlcKey.Coin),
 		Account:          domainAccount.AccountType(sqlcKey.Account),
 		AccountID:        sqlcKey.AccountID,
-		KeyType:          domainXrp.XRPKeyType(sqlcKey.KeyType),
+		KeyType:          domainXRP.XRPKeyType(sqlcKey.KeyType),
 		MasterKey:        sqlcKey.MasterKey,
 		MasterSeed:       sqlcKey.MasterSeed,    // Master seed - NEVER log
 		MasterSeedHex:    sqlcKey.MasterSeedHex, // Master seed hex - NEVER log
@@ -61,7 +61,7 @@ func convertToXRPAccountKey(sqlcKey *sqlcgen.XrpAccountKey) (*domainXrp.XRPAccou
 }
 
 // convertFromXRPAccountKey converts domain.XrpAccountKey entity to sqlcgen.XrpAccountKey.
-func convertFromXRPAccountKey(key *domainXrp.XRPAccountKey) *sqlcgen.XrpAccountKey {
+func convertFromXRPAccountKey(key *domainXRP.XRPAccountKey) *sqlcgen.XrpAccountKey {
 	sqlcKey := &sqlcgen.XrpAccountKey{
 		ID:               key.ID,
 		Coin:             key.CoinTypeCode.String(),
@@ -88,7 +88,7 @@ func convertFromXRPAccountKey(key *domainXrp.XRPAccountKey) *sqlcgen.XrpAccountK
 // GetAllAddrStatus returns all XRPAccountKey by addr_status
 func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 	ctx context.Context, accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-) ([]*domainXrp.XRPAccountKey, error) {
+) ([]*domainXRP.XRPAccountKey, error) {
 	xrpKeys, err := r.queries.GetXRPAccountKeysByAddrStatus(ctx, sqlcgen.GetXRPAccountKeysByAddrStatusParams{
 		Coin:       r.coinTypeCode.String(),
 		Account:    accountType.String(),
@@ -98,7 +98,7 @@ func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 		return nil, fmt.Errorf("failed to call GetXRPAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPAccountKey, 0, len(xrpKeys))
+	result := make([]*domainXRP.XRPAccountKey, 0, len(xrpKeys))
 	for i := range xrpKeys {
 		key, err := convertToXRPAccountKey(&xrpKeys[i])
 		if err != nil {
@@ -127,7 +127,7 @@ func (r *XRPAccountKeyRepositorySqlc) GetSecret(
 }
 
 // InsertBulk inserts multiple records
-func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*domainXrp.XRPAccountKey) error {
+func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*domainXRP.XRPAccountKey) error {
 	for _, item := range items {
 		sqlcItem := convertFromXRPAccountKey(item)
 		_, err := r.queries.InsertXRPAccountKey(ctx, sqlcgen.InsertXRPAccountKeyParams{

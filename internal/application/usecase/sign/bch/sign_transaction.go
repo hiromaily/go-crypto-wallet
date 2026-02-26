@@ -8,7 +8,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/bchutil"
+	bchshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/shared/bch"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -94,7 +94,7 @@ func (u *signTransactionUseCase) Sign(
 	}
 
 	// Parse the BCH raw tx content (hex + prevtx metadata)
-	txHex, prevTxs, err := bchutil.ParseRawTxContent(txContent)
+	txHex, prevTxs, err := bchshared.ParseRawTxContent(txContent)
 	if err != nil {
 		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to parse raw tx content: %w", err)
 	}
@@ -138,9 +138,9 @@ func (u *signTransactionUseCase) Sign(
 	// Reference: docs/chains/bch/README.md - "Known Issues and Workarounds"
 	// Related: Issue #485, Issue #433
 	isMultisig := u.multisigAccount != nil
-	if bchutil.ShouldIncludePrevTxMetadata(isSigned, isMultisig) {
+	if bchshared.ShouldIncludePrevTxMetadata(isSigned, isMultisig) {
 		// Include prevTx metadata for next signer (multisig or not yet fully signed)
-		content := bchutil.FormatSignedTxContent(signedHex, prevTxs)
+		content := bchshared.FormatSignedTxContent(signedHex, prevTxs)
 		generatedFileName, err = u.txFileRepo.WriteFile(path, content)
 	} else {
 		// For fully signed single-sig transactions, just write the hex
@@ -169,7 +169,7 @@ func (u *signTransactionUseCase) Sign(
 // Sign wallet uses auth key from auth_account_key table.
 func (u *signTransactionUseCase) sign(
 	txHex string,
-	prevTxs []bchutil.PrevTx,
+	prevTxs []bchshared.PrevTx,
 	actionType domainTx.ActionType,
 ) (string, bool, error) {
 	// Get account type from action
@@ -195,7 +195,7 @@ func (u *signTransactionUseCase) sign(
 	}
 
 	// Convert prevTxs to DTO format
-	dtoPrevTxs := bchutil.ConvertPrevTxsToDTO(prevTxs)
+	dtoPrevTxs := bchshared.ConvertPrevTxsToDTO(prevTxs)
 
 	// Sign with auth key
 	wif := authKey.WalletImportFormat

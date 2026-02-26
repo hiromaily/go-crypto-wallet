@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	watchmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mysql"
@@ -50,7 +50,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 
 	// Create test eth detail tx
 	uuid := "eth-uuid-sqlc-test"
-	ethTx, err := domainEth.NewETHDetailTx(
+	ethTx, err := domainETH.NewETHDetailTx(
 		txID,
 		uuid,
 		domainTx.TxTypeUnsigned,
@@ -136,7 +136,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTx1, err := domainEth.NewETHDetailTx(
+	bulkTx1, err := domainETH.NewETHDetailTx(
 		txID2,
 		"eth-uuid-bulk-1",
 		domainTx.TxTypeUnsigned,
@@ -152,7 +152,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to create bulk ETHDetailTx 1")
 	bulkTx1.UnsignedHexTx = "0xunsigned-bulk-1"
 
-	bulkTx2, err := domainEth.NewETHDetailTx(
+	bulkTx2, err := domainETH.NewETHDetailTx(
 		txID2,
 		"eth-uuid-bulk-2",
 		domainTx.TxTypeUnsigned,
@@ -168,7 +168,7 @@ func TestETHDetailTXSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to create bulk ETHDetailTx 2")
 	bulkTx2.UnsignedHexTx = "0xunsigned-bulk-2"
 
-	bulkTxs := []*domainEth.ETHDetailTx{bulkTx1, bulkTx2}
+	bulkTxs := []*domainETH.ETHDetailTx{bulkTx1, bulkTx2}
 
 	err = ethDetailTXRepo.InsertBulk(bulkTxs)
 	require.NoError(t, err, "fail to call InsertBulk()")

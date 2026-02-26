@@ -5,7 +5,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 )
 
 // GenerateHDWalletUseCase generates HD wallet keys
@@ -174,7 +174,7 @@ type ImportPrivateKeyInput struct {
 // CreateMultisigAddressInput represents input for creating multisig addresses
 type CreateMultisigAddressInput struct {
 	AccountType domainAccount.AccountType
-	AddressType domainBitcoin.AddressType
+	AddressType domainBTC.AddressType
 }
 
 // CreateMuSig2AddressInput represents input for creating MuSig2 Taproot addresses

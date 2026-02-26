@@ -10,9 +10,9 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 )
 
@@ -127,7 +127,7 @@ func (w *AccountHDWalletRepo) Insert(
 	keyType domainKey.KeyType,
 ) error {
 	// insert key information to btc_account_key table
-	accountKeyItems := make([]*domainBitcoin.BTCAccountKey, len(keys))
+	accountKeyItems := make([]*domainBTC.BTCAccountKey, len(keys))
 	now := time.Now()
 	for idx, keyItem := range keys {
 		var taprootAddr *string
@@ -135,7 +135,7 @@ func (w *AccountHDWalletRepo) Insert(
 			taprootAddr = &keyItem.TaprootAddr
 		}
 
-		accountKeyItems[idx] = &domainBitcoin.BTCAccountKey{
+		accountKeyItems[idx] = &domainBTC.BTCAccountKey{
 			CoinTypeCode:       coinTypeCode,
 			KeyType:            keyType.String(),
 			Account:            accountType,
@@ -193,9 +193,9 @@ func (r *ETHHDWalletRepo) Insert(
 	accountType domainAccount.AccountType,
 	keyType domainKey.KeyType,
 ) error {
-	items := make([]*domainEth.ETHAccountKey, 0, len(keys))
+	items := make([]*domainETH.ETHAccountKey, 0, len(keys))
 	for i, key := range keys {
-		ethKey, err := domainEth.NewETHAccountKey(
+		ethKey, err := domainETH.NewETHAccountKey(
 			accountType,
 			key.P2PKHAddr, // Ethereum address stored in P2PKHAddr field
 			key.FullPubKey,

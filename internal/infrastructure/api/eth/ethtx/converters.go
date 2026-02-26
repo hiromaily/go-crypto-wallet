@@ -1,15 +1,15 @@
 package ethtx
 
 import (
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 )
 
 // ToDomainRawTx converts infrastructure RawTx to domain RawTx.
-func ToDomainRawTx(infra *RawTx) *domainEthereum.RawTx {
+func ToDomainRawTx(infra *RawTx) *domainETH.RawTx {
 	if infra == nil {
 		return nil
 	}
-	return &domainEthereum.RawTx{
+	return &domainETH.RawTx{
 		UUID:  infra.UUID,
 		From:  infra.From,
 		To:    infra.To,
@@ -21,7 +21,7 @@ func ToDomainRawTx(infra *RawTx) *domainEthereum.RawTx {
 }
 
 // FromDomainRawTx converts domain RawTx to infrastructure RawTx.
-func FromDomainRawTx(domain *domainEthereum.RawTx) *RawTx {
+func FromDomainRawTx(domain *domainETH.RawTx) *RawTx {
 	if domain == nil {
 		return nil
 	}

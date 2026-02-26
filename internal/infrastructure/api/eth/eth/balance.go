@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 )
 
 // UserAmount user address and amount
@@ -14,11 +14,11 @@ type UserAmount struct {
 }
 
 // GetTotalBalance returns total amount and addresses
-func (e *Ethereum) GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount) {
+func (e *Ethereum) GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainETH.UserAmount) {
 	total := new(big.Int)
 	userAmounts := make([]UserAmount, 0, len(addrs))
 	for _, addr := range addrs {
-		balance, err := e.GetBalance(ctx, addr, domainEthereum.QuantityTagPending)
+		balance, err := e.GetBalance(ctx, addr, domainETH.QuantityTagPending)
 		if err != nil {
 			continue
 		}

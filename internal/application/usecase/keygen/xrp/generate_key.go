@@ -10,9 +10,9 @@ import (
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -73,7 +73,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 	}()
 
 	// Generate XRP keys
-	items := make([]*domainXrp.XRPAccountKey, 0, len(walletKeys))
+	items := make([]*domainXRP.XRPAccountKey, 0, len(walletKeys))
 	for _, v := range walletKeys {
 		// TODO:
 		// - WIF => badSeed
@@ -88,11 +88,11 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		}
 
 		// TODO: passphrase or related ID should be stored in table??
-		xrpKey, err := domainXrp.NewXRPAccountKey(
+		xrpKey, err := domainXRP.NewXRPAccountKey(
 			u.coinTypeCode,
 			input.AccountType,
 			generatedKey.AccountID,
-			domainXrp.XRPKeyType(apixrpimpl.GetXRPKeyTypeValue(generatedKey.KeyType)),
+			domainXRP.XRPKeyType(apixrpimpl.GetXRPKeyTypeValue(generatedKey.KeyType)),
 			generatedKey.MasterSeed,
 			generatedKey.MasterSeedHex,
 			generatedKey.PublicKey,

@@ -13,8 +13,8 @@ import (
 	"golang.org/x/crypto/sha3"
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -99,7 +99,7 @@ func (e *ERC20) FloatToBigInt(v float64) *big.Int {
 	return big.NewInt(int64(v))
 }
 
-func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ domainEthereum.QuantityTag) (*big.Int, error) {
+func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ domainETH.QuantityTag) (*big.Int, error) {
 	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))
 	if err != nil {
 		return nil, fmt.Errorf("fail to call e.contract.BalanceOf(%s): %w", hexAddr, err)
@@ -123,7 +123,7 @@ func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ domainEthereum
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainEthereum.RawTx, *apieth.TxCreateParams, error) {
+) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")

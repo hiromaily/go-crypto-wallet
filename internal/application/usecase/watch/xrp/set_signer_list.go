@@ -10,8 +10,8 @@ import (
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
@@ -58,15 +58,15 @@ func (u *setSignerListUseCase) Execute(
 	}
 
 	// Validate signer entries using domain validator
-	signerInputs := make([]domainXrp.SignerEntryInput, len(input.SignerEntries))
+	signerInputs := make([]domainXRP.SignerEntryInput, len(input.SignerEntries))
 	for i, entry := range input.SignerEntries {
-		signerInputs[i] = domainXrp.SignerEntryInput{
+		signerInputs[i] = domainXRP.SignerEntryInput{
 			Account: entry.Account,
 			Weight:  entry.Weight,
 		}
 	}
 
-	if err := domainXrp.ValidateSignerEntries(signerInputs, input.SignerQuorum); err != nil {
+	if err := domainXRP.ValidateSignerEntries(signerInputs, input.SignerQuorum); err != nil {
 		return watchusecase.SetSignerListOutput{},
 			fmt.Errorf("invalid signer entries: %w", err)
 	}
@@ -82,7 +82,7 @@ func (u *setSignerListUseCase) Execute(
 
 	// Prepare the SignerListSet transaction
 	instructions := &dtoxrp.Instructions{
-		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
+		MaxLedgerVersionOffset: domainXRP.MaxLedgerVersionOffset,
 	}
 
 	_, txJSON, err := u.xrper.PrepareSignerListSetTransaction(
@@ -106,7 +106,7 @@ func (u *setSignerListUseCase) Execute(
 	}
 
 	// Create new signer list record (will be activated after tx is confirmed)
-	signerList, err := domainXrp.NewXRPSignerList(input.AccountAddress, input.SignerQuorum)
+	signerList, err := domainXRP.NewXRPSignerList(input.AccountAddress, input.SignerQuorum)
 	if err != nil {
 		return watchusecase.SetSignerListOutput{},
 			fmt.Errorf("failed to create signer list entity: %w", err)
@@ -121,7 +121,7 @@ func (u *setSignerListUseCase) Execute(
 
 	// Create signer entries
 	for _, entry := range input.SignerEntries {
-		signerEntry, err := domainXrp.NewXRPSignerEntry(signerListID, entry.Account, entry.Weight)
+		signerEntry, err := domainXRP.NewXRPSignerEntry(signerListID, entry.Account, entry.Weight)
 		if err != nil {
 			return watchusecase.SetSignerListOutput{},
 				fmt.Errorf("failed to create signer entry entity: %w", err)

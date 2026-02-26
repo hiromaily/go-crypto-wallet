@@ -8,7 +8,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlite/sqlcgen"
 )
@@ -33,7 +33,7 @@ func NewBTCAccountKeyRepositorySqlc(
 
 // convertToBTCAccountKey converts sqlcgen.BtcAccountKey to domain.BTCAccountKey entity.
 // SECURITY: Handles WIF (private key) data - never log the wallet import format field.
-func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCAccountKey, error) {
+func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBTC.BTCAccountKey, error) {
 	addrStatus, err := domainAddress.AddrStatusFromInt8(int8(sqlcKey.AddrStatus))
 	if err != nil {
 		return nil, fmt.Errorf("invalid addr status in database: %w", err)
@@ -49,7 +49,7 @@ func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCA
 		return nil, fmt.Errorf("invalid account type from database: %s", sqlcKey.Account)
 	}
 
-	key := &domainBitcoin.BTCAccountKey{
+	key := &domainBTC.BTCAccountKey{
 		ID:                 sqlcKey.ID,
 		CoinTypeCode:       coinTypeCode,
 		KeyType:            sqlcKey.KeyType,
@@ -87,7 +87,7 @@ func convertToBTCAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BTCA
 }
 
 // convertFromBTCAccountKey converts domain.BTCAccountKey entity to sqlcgen.BtcAccountKey.
-func convertFromBTCAccountKey(key *domainBitcoin.BTCAccountKey) *sqlcgen.BtcAccountKey {
+func convertFromBTCAccountKey(key *domainBTC.BTCAccountKey) *sqlcgen.BtcAccountKey {
 	sqlcKey := &sqlcgen.BtcAccountKey{
 		ID:                 key.ID,
 		Coin:               key.CoinTypeCode.String(),
@@ -153,7 +153,7 @@ func rowToBtcAccountKey(
 // convertRowToBTCAccountKey converts GetOneBtcAccountKeyByMaxIDRow to domain entity.
 func convertRowToBTCAccountKeyFromMaxID(
 	row *sqlcgen.GetOneBtcAccountKeyByMaxIDRow,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	key := rowToBtcAccountKey(
 		row.ID, row.Coin, row.KeyType, row.Account, row.P2pkhAddress,
 		row.P2shSegwitAddress, row.Bech32Address, row.TaprootAddress,
@@ -166,7 +166,7 @@ func convertRowToBTCAccountKeyFromMaxID(
 // convertRowToBTCAccountKeyFromAddrStatus converts GetBtcAccountKeysByAddrStatusRow to domain entity.
 func convertRowToBTCAccountKeyFromAddrStatus(
 	row *sqlcgen.GetBtcAccountKeysByAddrStatusRow,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	key := rowToBtcAccountKey(
 		row.ID, row.Coin, row.KeyType, row.Account, row.P2pkhAddress,
 		row.P2shSegwitAddress, row.Bech32Address, row.TaprootAddress,
@@ -179,7 +179,7 @@ func convertRowToBTCAccountKeyFromAddrStatus(
 // convertRowToBTCAccountKeyFromMultisig converts GetBtcAccountKeysByMultisigAddressesRow to domain entity.
 func convertRowToBTCAccountKeyFromMultisig(
 	row *sqlcgen.GetBtcAccountKeysByMultisigAddressesRow,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	key := rowToBtcAccountKey(
 		row.ID, row.Coin, row.KeyType, row.Account, row.P2pkhAddress,
 		row.P2shSegwitAddress, row.Bech32Address, row.TaprootAddress,
@@ -212,7 +212,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(
 // GetOneMaxID returns one record by max id
 func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(
 	accountType domainAccount.AccountType,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetOneBtcAccountKeyByMaxID(ctx, sqlcgen.GetOneBtcAccountKeyByMaxIDParams{
@@ -229,7 +229,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(
 // GetAllAddrStatus returns all BtcAccountKey by addr_status
 func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-) ([]*domainBitcoin.BTCAccountKey, error) {
+) ([]*domainBTC.BTCAccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetBtcAccountKeysByAddrStatus(ctx, sqlcgen.GetBtcAccountKeysByAddrStatusParams{
@@ -241,7 +241,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 		return nil, fmt.Errorf("failed to call GetBtcAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*domainBitcoin.BTCAccountKey, 0, len(accountKeys))
+	result := make([]*domainBTC.BTCAccountKey, 0, len(accountKeys))
 	for i := range accountKeys {
 		domainKey, err := convertRowToBTCAccountKeyFromAddrStatus(&accountKeys[i])
 		if err != nil {
@@ -256,7 +256,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 // GetAllMultiAddr returns all BtcAccountKey by multisig_address
 func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 	accountType domainAccount.AccountType, addrs []string,
-) ([]*domainBitcoin.BTCAccountKey, error) {
+) ([]*domainBTC.BTCAccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetBtcAccountKeysByMultisigAddresses(
@@ -271,7 +271,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 		return nil, fmt.Errorf("failed to call GetBtcAccountKeysByMultisigAddresses(): %w", err)
 	}
 
-	result := make([]*domainBitcoin.BTCAccountKey, 0, len(accountKeys))
+	result := make([]*domainBTC.BTCAccountKey, 0, len(accountKeys))
 	for i := range accountKeys {
 		domainKey, err := convertRowToBTCAccountKeyFromMultisig(&accountKeys[i])
 		if err != nil {
@@ -284,7 +284,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 }
 
 // InsertBulk inserts multiple records
-func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*domainBitcoin.BTCAccountKey) error {
+func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*domainBTC.BTCAccountKey) error {
 	ctx := context.Background()
 
 	// Begin transaction to ensure atomicity of bulk insert
@@ -397,7 +397,7 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddrStatus(
 
 // UpdateMultisigAddr updates multisig_address
 func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddr(
-	accountType domainAccount.AccountType, item *domainBitcoin.BTCAccountKey,
+	accountType domainAccount.AccountType, item *domainBTC.BTCAccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -425,7 +425,7 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddr(
 
 // UpdateMultisigAddrs updates all multisig_address with transaction atomicity
 func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddrs(
-	accountType domainAccount.AccountType, items []*domainBitcoin.BTCAccountKey,
+	accountType domainAccount.AccountType, items []*domainBTC.BTCAccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 

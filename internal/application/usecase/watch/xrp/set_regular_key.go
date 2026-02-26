@@ -10,8 +10,8 @@ import (
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
@@ -56,7 +56,7 @@ func (u *setRegularKeyUseCase) Execute(
 
 	// Prepare the SetRegularKey transaction
 	instructions := &dtoxrp.Instructions{
-		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
+		MaxLedgerVersionOffset: domainXRP.MaxLedgerVersionOffset,
 	}
 
 	txInput, txJSON, err := u.xrper.PrepareSetRegularKeyTransaction(
@@ -82,7 +82,7 @@ func (u *setRegularKeyUseCase) Execute(
 		}
 
 		// Create new regular key record (will be activated after tx is confirmed)
-		regularKey, err := domainXrp.NewXRPRegularKey(
+		regularKey, err := domainXRP.NewXRPRegularKey(
 			input.AccountAddress,
 			input.RegularKeyAddress,
 			"", // Public key will be set later

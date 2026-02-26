@@ -14,8 +14,8 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	keygenusecaseeth "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/eth"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	coldmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mocks"
 	filemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )
@@ -47,7 +47,7 @@ func TestExportFullPubkeyUseCase_Export_Success(t *testing.T) {
 
 	xpriv := newTestAccountXpriv(t)
 
-	ethKey, err := domainEth.NewETHAccountKey(
+	ethKey, err := domainETH.NewETHAccountKey(
 		domainAccount.AccountTypeDeposit,
 		"0xabcdef1234567890abcdef1234567890abcdef12",
 		"0x04...",
@@ -113,7 +113,7 @@ func TestExportFullPubkeyUseCase_Export_Success(t *testing.T) {
 func TestExportFullPubkeyUseCase_Export_MissingXpriv(t *testing.T) {
 	t.Parallel()
 
-	ethKey, err := domainEth.NewETHAccountKey(
+	ethKey, err := domainETH.NewETHAccountKey(
 		domainAccount.AccountTypeDeposit,
 		"0xabcdef1234567890abcdef1234567890abcdef12",
 		"0x04...",

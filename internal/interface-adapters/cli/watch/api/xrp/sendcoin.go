@@ -11,7 +11,7 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
@@ -24,7 +24,7 @@ func runSendCoin(xrpAPI apixrp.XRPer, txData *config.RippleTxData, receiverAddr 
 	// send coin
 	// PrepareTransaction
 	instructions := &dtoxrp.Instructions{
-		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
+		MaxLedgerVersionOffset: domainXRP.MaxLedgerVersionOffset,
 	}
 	fmt.Printf("sender: %s, receiver: %s, amount: %v\n", txData.Account, receiverAddr, amount)
 	txJSON, _, err := xrpAPI.CreateRawTransaction(context.TODO(), txData.Account, receiverAddr, amount, instructions)

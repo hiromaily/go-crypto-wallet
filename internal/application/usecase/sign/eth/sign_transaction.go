@@ -8,7 +8,7 @@ import (
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
@@ -56,12 +56,12 @@ func (u *signTransactionUseCase) Sign(
 
 	txHexs := make([]string, 0, len(serializedTxs))
 	for _, serializedTx := range serializedTxs {
-		var rawTx domainEthereum.RawTx
+		var rawTx domainETH.RawTx
 		if err = serializer.GetDefaultSerializer().DecodeFromString(serializedTx, &rawTx); err != nil {
 			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call serial.DecodeFromString(): %w", err)
 		}
 		// sign
-		var signedRawTx *domainEthereum.RawTx
+		var signedRawTx *domainETH.RawTx
 		signedRawTx, err = u.eth.SignOnRawTransaction(&rawTx, apiethimpl.Password)
 		if err != nil {
 			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call eth.SignOnRawTransaction(): %w", err)

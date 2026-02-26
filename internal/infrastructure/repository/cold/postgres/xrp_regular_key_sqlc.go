@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
 )
 
@@ -23,8 +23,8 @@ func NewXRPRegularKeyRepositorySqlc(dbConn *sql.DB) *XRPRegularKeyRepositorySqlc
 }
 
 // convertToXRPRegularKey converts sqlcgen.XrpRegularKey to domain.XRPRegularKey entity.
-func convertToXRPRegularKey(sqlcKey *sqlcgen.XrpRegularKey) *domainXrp.XRPRegularKey {
-	key := &domainXrp.XRPRegularKey{
+func convertToXRPRegularKey(sqlcKey *sqlcgen.XrpRegularKey) *domainXRP.XRPRegularKey {
+	key := &domainXRP.XRPRegularKey{
 		ID:                sqlcKey.ID,
 		AccountID:         sqlcKey.AccountID,
 		RegularKeyAddress: sqlcKey.RegularKeyAddress,
@@ -49,7 +49,7 @@ func convertToXRPRegularKey(sqlcKey *sqlcgen.XrpRegularKey) *domainXrp.XRPRegula
 // GetByAccountID returns the active regular key for an account
 func (r *XRPRegularKeyRepositorySqlc) GetByAccountID(
 	ctx context.Context, accountID string,
-) (*domainXrp.XRPRegularKey, error) {
+) (*domainXRP.XRPRegularKey, error) {
 	sqlcKey, err := r.queries.GetXRPRegularKeyByAccountID(ctx, accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -64,13 +64,13 @@ func (r *XRPRegularKeyRepositorySqlc) GetByAccountID(
 // GetAllByAccountID returns all regular keys (active and inactive) for an account
 func (r *XRPRegularKeyRepositorySqlc) GetAllByAccountID(
 	ctx context.Context, accountID string,
-) ([]*domainXrp.XRPRegularKey, error) {
+) ([]*domainXRP.XRPRegularKey, error) {
 	sqlcKeys, err := r.queries.GetXRPRegularKeysByAccountID(ctx, accountID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetXRPRegularKeysByAccountID(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPRegularKey, 0, len(sqlcKeys))
+	result := make([]*domainXRP.XRPRegularKey, 0, len(sqlcKeys))
 	for i := range sqlcKeys {
 		result = append(result, convertToXRPRegularKey(&sqlcKeys[i]))
 	}
@@ -81,13 +81,13 @@ func (r *XRPRegularKeyRepositorySqlc) GetAllByAccountID(
 // GetActiveKeys returns all currently active regular keys
 func (r *XRPRegularKeyRepositorySqlc) GetActiveKeys(
 	ctx context.Context,
-) ([]*domainXrp.XRPRegularKey, error) {
+) ([]*domainXRP.XRPRegularKey, error) {
 	sqlcKeys, err := r.queries.GetActiveXRPRegularKeys(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetActiveXRPRegularKeys(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPRegularKey, 0, len(sqlcKeys))
+	result := make([]*domainXRP.XRPRegularKey, 0, len(sqlcKeys))
 	for i := range sqlcKeys {
 		result = append(result, convertToXRPRegularKey(&sqlcKeys[i]))
 	}
@@ -98,7 +98,7 @@ func (r *XRPRegularKeyRepositorySqlc) GetActiveKeys(
 // GetByAddress returns a regular key by its address
 func (r *XRPRegularKeyRepositorySqlc) GetByAddress(
 	ctx context.Context, regularKeyAddress string,
-) (*domainXrp.XRPRegularKey, error) {
+) (*domainXRP.XRPRegularKey, error) {
 	sqlcKey, err := r.queries.GetXRPRegularKeyByAddress(ctx, regularKeyAddress)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -112,7 +112,7 @@ func (r *XRPRegularKeyRepositorySqlc) GetByAddress(
 
 // Insert creates a new regular key record
 func (r *XRPRegularKeyRepositorySqlc) Insert(
-	ctx context.Context, key *domainXrp.XRPRegularKey,
+	ctx context.Context, key *domainXRP.XRPRegularKey,
 ) (int64, error) {
 	params := sqlcgen.InsertXRPRegularKeyParams{
 		AccountID:         key.AccountID,

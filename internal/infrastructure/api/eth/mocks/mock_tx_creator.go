@@ -7,8 +7,8 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	eth0 "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -40,31 +40,31 @@ func (_m *MockTxCreator) EXPECT() *MockTxCreator_Expecter {
 }
 
 // CreateRawTransaction provides a mock function for the type MockTxCreator
-func (_mock *MockTxCreator) CreateRawTransaction(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*ethereum.RawTx, *eth.TxCreateParams, error) {
+func (_mock *MockTxCreator) CreateRawTransaction(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *eth0.TxCreateParams, error) {
 	ret := _mock.Called(ctx, fromAddr, toAddr, amount, additionalNonce)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateRawTransaction")
 	}
 
-	var r0 *ethereum.RawTx
-	var r1 *eth.TxCreateParams
+	var r0 *eth.RawTx
+	var r1 *eth0.TxCreateParams
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) (*ethereum.RawTx, *eth.TxCreateParams, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) (*eth.RawTx, *eth0.TxCreateParams, error)); ok {
 		return returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) *ethereum.RawTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) *eth.RawTx); ok {
 		r0 = returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.RawTx)
+			r0 = ret.Get(0).(*eth.RawTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint64, int) *eth.TxCreateParams); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint64, int) *eth0.TxCreateParams); ok {
 		r1 = returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*eth.TxCreateParams)
+			r1 = ret.Get(1).(*eth0.TxCreateParams)
 		}
 	}
 	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, uint64, int) error); ok {
@@ -123,42 +123,42 @@ func (_c *MockTxCreator_CreateRawTransaction_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *MockTxCreator_CreateRawTransaction_Call) Return(rawTx *ethereum.RawTx, txCreateParams *eth.TxCreateParams, err error) *MockTxCreator_CreateRawTransaction_Call {
+func (_c *MockTxCreator_CreateRawTransaction_Call) Return(rawTx *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockTxCreator_CreateRawTransaction_Call {
 	_c.Call.Return(rawTx, txCreateParams, err)
 	return _c
 }
 
-func (_c *MockTxCreator_CreateRawTransaction_Call) RunAndReturn(run func(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*ethereum.RawTx, *eth.TxCreateParams, error)) *MockTxCreator_CreateRawTransaction_Call {
+func (_c *MockTxCreator_CreateRawTransaction_Call) RunAndReturn(run func(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *eth0.TxCreateParams, error)) *MockTxCreator_CreateRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CreateRawTransactionEIP1559 provides a mock function for the type MockTxCreator
-func (_mock *MockTxCreator) CreateRawTransactionEIP1559(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*ethereum.RawTx, *eth.TxCreateParams, error) {
+func (_mock *MockTxCreator) CreateRawTransactionEIP1559(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *eth0.TxCreateParams, error) {
 	ret := _mock.Called(ctx, fromAddr, toAddr, amount, additionalNonce)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateRawTransactionEIP1559")
 	}
 
-	var r0 *ethereum.RawTx
-	var r1 *eth.TxCreateParams
+	var r0 *eth.RawTx
+	var r1 *eth0.TxCreateParams
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) (*ethereum.RawTx, *eth.TxCreateParams, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) (*eth.RawTx, *eth0.TxCreateParams, error)); ok {
 		return returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) *ethereum.RawTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) *eth.RawTx); ok {
 		r0 = returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.RawTx)
+			r0 = ret.Get(0).(*eth.RawTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint64, int) *eth.TxCreateParams); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint64, int) *eth0.TxCreateParams); ok {
 		r1 = returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*eth.TxCreateParams)
+			r1 = ret.Get(1).(*eth0.TxCreateParams)
 		}
 	}
 	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, uint64, int) error); ok {
@@ -217,12 +217,12 @@ func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) Run(run func(ctx conte
 	return _c
 }
 
-func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) Return(rawTx *ethereum.RawTx, txCreateParams *eth.TxCreateParams, err error) *MockTxCreator_CreateRawTransactionEIP1559_Call {
+func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) Return(rawTx *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockTxCreator_CreateRawTransactionEIP1559_Call {
 	_c.Call.Return(rawTx, txCreateParams, err)
 	return _c
 }
 
-func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) RunAndReturn(run func(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*ethereum.RawTx, *eth.TxCreateParams, error)) *MockTxCreator_CreateRawTransactionEIP1559_Call {
+func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) RunAndReturn(run func(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *eth0.TxCreateParams, error)) *MockTxCreator_CreateRawTransactionEIP1559_Call {
 	_c.Call.Return(run)
 	return _c
 }

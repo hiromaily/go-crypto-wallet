@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/ethtx"
 )
 
-func newTestRawTx(t *testing.T, tx *types.Transaction, fromHex string) *domainEthereum.RawTx {
+func newTestRawTx(t *testing.T, tx *types.Transaction, fromHex string) *domainETH.RawTx {
 	t.Helper()
 	txHex, err := ethtx.EncodeTx(tx)
 	require.NoError(t, err)
@@ -22,7 +22,7 @@ func newTestRawTx(t *testing.T, tx *types.Transaction, fromHex string) *domainEt
 	if tx.To() != nil {
 		toHex = tx.To().Hex()
 	}
-	return &domainEthereum.RawTx{
+	return &domainETH.RawTx{
 		UUID:  "test-uuid",
 		From:  fromHex,
 		To:    toHex,

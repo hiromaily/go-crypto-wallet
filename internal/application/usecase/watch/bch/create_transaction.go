@@ -18,7 +18,7 @@ import (
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/shared"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -413,7 +413,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 	inputTotal btcutil.Amount,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
 	changeAddrStr string,
-) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*domainBitcoin.BTCTxOutput, error) {
+) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*domainBTC.BTCTxOutput, error) {
 	logger.Debug("BCH use case: calculateOutputTotal called",
 		"tx_size", msgTx.SerializeSize(),
 		"adjustment_fee", adjustmentFee,
@@ -439,7 +439,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 	changeAddrWithoutPrefix = strings.TrimPrefix(changeAddrWithoutPrefix, "bchtest:")
 
 	var outputTotal btcutil.Amount
-	txRepoOutputs := make([]*domainBitcoin.BTCTxOutput, 0, len(txPrevOutputs))
+	txRepoOutputs := make([]*domainBTC.BTCTxOutput, 0, len(txPrevOutputs))
 
 	for addr, amt := range txPrevOutputs {
 		isChangeAddr := addr.String() == changeAddrWithoutPrefix
@@ -450,7 +450,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
-			output, err := domainBitcoin.NewBTCTxOutput(
+			output, err := domainBTC.NewBTCTxOutput(
 				0,
 				addr.String(),
 				receiver.String(),
@@ -470,7 +470,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert change amount to decimal: %w", err)
 			}
-			output, err := domainBitcoin.NewBTCTxOutput(
+			output, err := domainBTC.NewBTCTxOutput(
 				0,
 				addr.String(),
 				sender.String(),
@@ -486,7 +486,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
-			output, err := domainBitcoin.NewBTCTxOutput(
+			output, err := domainBTC.NewBTCTxOutput(
 				0,
 				addr.String(),
 				receiver.String(),

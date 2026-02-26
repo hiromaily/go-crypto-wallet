@@ -14,7 +14,7 @@ import (
 	keygenusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	coldmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mocks"
 	filemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )
@@ -32,7 +32,7 @@ func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
 	}
 	accountKeyRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
 	accountKeyRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return(
-		&domainBitcoin.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
+		&domainBTC.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
 
 	var writtenData []byte
 	writer := filemocks.NewMockDescriptorFileWriter(t)
@@ -73,7 +73,7 @@ func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
 	}
 	accountKeyRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
 	accountKeyRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypePayment).Return(
-		&domainBitcoin.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
+		&domainBTC.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
 
 	var writtenData []byte
 	writer := filemocks.NewMockDescriptorFileWriter(t)
@@ -113,7 +113,7 @@ func TestExportDescriptorUseCase_InvalidFormat(t *testing.T) {
 
 	accountKeyRepo := coldmocks.NewMockBTCAccountKeyRepositorier(t)
 	accountKeyRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return(
-		&domainBitcoin.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
+		&domainBTC.BTCAccountKey{ID: 1, KeyType: "bip44"}, nil)
 	writer := filemocks.NewMockDescriptorFileWriter(t)
 
 	useCase := keygenusecasebtc.NewExportDescriptorUseCase(

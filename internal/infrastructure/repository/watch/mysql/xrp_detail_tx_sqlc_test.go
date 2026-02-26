@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	watchmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mysql"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	pkgmysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -50,7 +50,7 @@ func TestXRPDetailTxSqlc(t *testing.T) {
 
 	// Create test xrp detail tx
 	uuid := "xrp-uuid-sqlc-test"
-	xrpTx, err := domainXrp.NewXRPDetailTx(
+	xrpTx, err := domainXRP.NewXRPDetailTx(
 		txID,
 		uuid,
 		domainTx.TxTypeUnsigned,
@@ -150,7 +150,7 @@ func TestXRPDetailTxSqlc(t *testing.T) {
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTx1, err := domainXrp.NewXRPDetailTx(
+	bulkTx1, err := domainXRP.NewXRPDetailTx(
 		txID2,
 		"xrp-uuid-bulk-1",
 		domainTx.TxTypeUnsigned,
@@ -168,7 +168,7 @@ func TestXRPDetailTxSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to create bulk XRPDetailTx 1")
 	bulkTx1.SigningPubkey = "pubkey-bulk-1"
 
-	bulkTx2, err := domainXrp.NewXRPDetailTx(
+	bulkTx2, err := domainXRP.NewXRPDetailTx(
 		txID2,
 		"xrp-uuid-bulk-2",
 		domainTx.TxTypeUnsigned,
@@ -186,7 +186,7 @@ func TestXRPDetailTxSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to create bulk XRPDetailTx 2")
 	bulkTx2.SigningPubkey = "pubkey-bulk-2"
 
-	bulkTxs := []*domainXrp.XRPDetailTx{bulkTx1, bulkTx2}
+	bulkTxs := []*domainXRP.XRPDetailTx{bulkTx1, bulkTx2}
 
 	err = xrpDetailTxRepo.InsertBulk(bulkTxs)
 	require.NoError(t, err, "fail to call InsertBulk()")

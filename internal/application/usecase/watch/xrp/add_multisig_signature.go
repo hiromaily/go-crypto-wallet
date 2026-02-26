@@ -9,7 +9,7 @@ import (
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 )
 
 // xrpAddMultisigSigClient defines the interface for XRP operations needed by addMultisigSignatureUseCase.
@@ -109,7 +109,7 @@ func (*addMultisigSignatureUseCase) validateInput(
 func (u *addMultisigSignatureUseCase) getPendingTransaction(
 	ctx context.Context,
 	txUUID string,
-) (*domainXrp.XRPPendingMultisig, error) {
+) (*domainXRP.XRPPendingMultisig, error) {
 	pendingTx, err := u.pendingMultisigRepo.GetByUUID(ctx, txUUID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get pending transaction: %w", err)
@@ -141,7 +141,7 @@ func (u *addMultisigSignatureUseCase) checkExistingSignature(
 func (u *addMultisigSignatureUseCase) getSignerEntry(
 	ctx context.Context,
 	accountID, signerAccount string,
-) (*domainXrp.XRPSignerEntry, error) {
+) (*domainXRP.XRPSignerEntry, error) {
 	signerList, err := u.signerListRepo.GetByAccountID(ctx, accountID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signer list: %w", err)
@@ -166,7 +166,7 @@ func (u *addMultisigSignatureUseCase) createAndInsertSignature(
 	input watchusecase.AddMultisigSignatureInput,
 	weight uint32,
 ) error {
-	signature, err := domainXrp.NewXRPMultisigSignature(
+	signature, err := domainXRP.NewXRPMultisigSignature(
 		pendingID,
 		input.SignerAccount,
 		input.SignedTxBlob,

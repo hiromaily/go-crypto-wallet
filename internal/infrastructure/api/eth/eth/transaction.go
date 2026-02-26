@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -20,7 +20,7 @@ import (
 // when creating multiple transaction from same address, nonce should be incremented
 func (e *Ethereum) getNonce(ctx context.Context, fromAddr string, additionalNonce int) (uint64, error) {
 	// by calling GetTransactionCount()
-	nonce, err := e.GetTransactionCount(ctx, fromAddr, domainEthereum.QuantityTagPending)
+	nonce, err := e.GetTransactionCount(ctx, fromAddr, domainETH.QuantityTagPending)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call eth.GetTransactionCount(): %w", err)
 	}
@@ -87,7 +87,7 @@ func (e *Ethereum) calculateFee(
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainEthereum.RawTx, *apieth.TxCreateParams, error) {
+) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -100,7 +100,7 @@ func (e *Ethereum) CreateRawTransaction(
 
 	// TODO: pending status should be included in target balance??
 	// TODO: if block is still syncing, proper balance is not returned
-	balance, err := e.GetBalance(ctx, fromAddr, domainEthereum.QuantityTagPending)
+	balance, err := e.GetBalance(ctx, fromAddr, domainETH.QuantityTagPending)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -162,7 +162,7 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	// create domain RawTx
-	domainRawTx := &domainEthereum.RawTx{
+	domainRawTx := &domainETH.RawTx{
 		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
@@ -189,7 +189,7 @@ func (e *Ethereum) CreateRawTransaction(
 // SignOnRawTransaction signs on raw transaction
 // - https://ethereum.stackexchange.com/questions/16472/signing-a-raw-transaction-in-go
 // - Note: this requires private key on this machine, if node is working remotely, it would not work.
-func (e *Ethereum) SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error) {
+func (e *Ethereum) SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase string) (*domainETH.RawTx, error) {
 	// Convert domain type to infrastructure type
 	infraRawTx := ethtx.FromDomainRawTx(rawTx)
 
@@ -332,7 +332,7 @@ func (e *Ethereum) SupportsEIP1559(ctx context.Context) bool {
 // Use SupportsEIP1559() to check compatibility before calling this method.
 func (e *Ethereum) CreateRawTransactionEIP1559(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainEthereum.RawTx, *apieth.TxCreateParams, error) {
+) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -349,7 +349,7 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	}
 
 	// Get balance
-	balance, err := e.GetBalance(ctx, fromAddr, domainEthereum.QuantityTagPending)
+	balance, err := e.GetBalance(ctx, fromAddr, domainETH.QuantityTagPending)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -465,7 +465,7 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	}
 
 	// create domain RawTx
-	domainRawTx := &domainEthereum.RawTx{
+	domainRawTx := &domainETH.RawTx{
 		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
@@ -493,7 +493,7 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 // without requiring a keystore or node connection (fully offline operation).
 // Uses LatestSignerForChainID for forward compatibility with future transaction types.
 func (*Ethereum) SignTxWithPrivateKey(
-	rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
-) (*domainEthereum.RawTx, error) {
+	rawTx *domainETH.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+) (*domainETH.RawTx, error) {
 	return ethtx.SignTxOffline(rawTx, privKey, chainID)
 }

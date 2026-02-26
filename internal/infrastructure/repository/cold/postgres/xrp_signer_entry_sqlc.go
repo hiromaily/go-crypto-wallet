@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
 )
 
@@ -23,8 +23,8 @@ func NewXRPSignerEntryRepositorySqlc(dbConn *sql.DB) *XRPSignerEntryRepositorySq
 }
 
 // convertToXRPSignerEntry converts sqlcgen.XrpSignerEntry to domain.XRPSignerEntry entity.
-func convertToXRPSignerEntry(sqlcEntry *sqlcgen.XrpSignerEntry) *domainXrp.XRPSignerEntry {
-	entry := &domainXrp.XRPSignerEntry{
+func convertToXRPSignerEntry(sqlcEntry *sqlcgen.XrpSignerEntry) *domainXRP.XRPSignerEntry {
+	entry := &domainXRP.XRPSignerEntry{
 		ID:            sqlcEntry.ID,
 		SignerListID:  sqlcEntry.SignerListID,
 		SignerAccount: sqlcEntry.SignerAccount,
@@ -41,13 +41,13 @@ func convertToXRPSignerEntry(sqlcEntry *sqlcgen.XrpSignerEntry) *domainXrp.XRPSi
 // GetByListID returns all signer entries for a signer list
 func (r *XRPSignerEntryRepositorySqlc) GetByListID(
 	ctx context.Context, signerListID int64,
-) ([]*domainXrp.XRPSignerEntry, error) {
+) ([]*domainXRP.XRPSignerEntry, error) {
 	sqlcEntries, err := r.queries.GetXRPSignerEntriesByListID(ctx, signerListID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetXRPSignerEntriesByListID(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPSignerEntry, 0, len(sqlcEntries))
+	result := make([]*domainXRP.XRPSignerEntry, 0, len(sqlcEntries))
 	for i := range sqlcEntries {
 		result = append(result, convertToXRPSignerEntry(&sqlcEntries[i]))
 	}
@@ -58,7 +58,7 @@ func (r *XRPSignerEntryRepositorySqlc) GetByListID(
 // GetByID returns a signer entry by its ID
 func (r *XRPSignerEntryRepositorySqlc) GetByID(
 	ctx context.Context, id int64,
-) (*domainXrp.XRPSignerEntry, error) {
+) (*domainXRP.XRPSignerEntry, error) {
 	sqlcEntry, err := r.queries.GetXRPSignerEntryByID(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -73,7 +73,7 @@ func (r *XRPSignerEntryRepositorySqlc) GetByID(
 // GetByListAndAccount returns a signer entry by list ID and signer account
 func (r *XRPSignerEntryRepositorySqlc) GetByListAndAccount(
 	ctx context.Context, signerListID int64, signerAccount string,
-) (*domainXrp.XRPSignerEntry, error) {
+) (*domainXRP.XRPSignerEntry, error) {
 	params := sqlcgen.GetXRPSignerEntryByListAndAccountParams{
 		SignerListID:  signerListID,
 		SignerAccount: signerAccount,
@@ -112,7 +112,7 @@ func (r *XRPSignerEntryRepositorySqlc) GetTotalWeight(
 
 // Insert creates a new signer entry and returns the inserted ID
 func (r *XRPSignerEntryRepositorySqlc) Insert(
-	ctx context.Context, entry *domainXrp.XRPSignerEntry,
+	ctx context.Context, entry *domainXRP.XRPSignerEntry,
 ) (int64, error) {
 	params := sqlcgen.InsertXRPSignerEntryParams{
 		SignerListID:  entry.SignerListID,
@@ -137,7 +137,7 @@ func (r *XRPSignerEntryRepositorySqlc) Insert(
 
 // InsertBulk creates multiple signer entries for a list
 func (r *XRPSignerEntryRepositorySqlc) InsertBulk(
-	ctx context.Context, entries []*domainXrp.XRPSignerEntry,
+	ctx context.Context, entries []*domainXRP.XRPSignerEntry,
 ) error {
 	for _, entry := range entries {
 		_, err := r.Insert(ctx, entry)

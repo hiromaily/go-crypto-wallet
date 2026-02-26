@@ -8,9 +8,9 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
@@ -32,13 +32,13 @@ func NewXRPDetailTxInputRepositorySqlc(
 }
 
 // convertToXRPDetailTx converts sqlcgen.XrpDetailTx to domain.XRPDetailTx entity
-func convertToXRPDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XRPDetailTx, error) {
+func convertToXRPDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXRP.XRPDetailTx, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
 	}
 
-	tx := &domainXrp.XRPDetailTx{
+	tx := &domainXRP.XRPDetailTx{
 		ID:                    sqlcTx.ID,
 		TxID:                  sqlcTx.TxID,
 		UUID:                  sqlcTx.Uuid,
@@ -69,7 +69,7 @@ func convertToXRPDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XRPDetailTx, 
 }
 
 // convertFromXRPDetailTx converts domain.XRPDetailTx entity to sqlcgen.XrpDetailTx
-func convertFromXRPDetailTx(tx *domainXrp.XRPDetailTx) *sqlcgen.XrpDetailTx {
+func convertFromXRPDetailTx(tx *domainXRP.XRPDetailTx) *sqlcgen.XrpDetailTx {
 	sqlcTx := &sqlcgen.XrpDetailTx{
 		ID:                    tx.ID,
 		TxID:                  tx.TxID,
@@ -101,7 +101,7 @@ func convertFromXRPDetailTx(tx *domainXrp.XRPDetailTx) *sqlcgen.XrpDetailTx {
 }
 
 // GetOne get one record by ID
-func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*domainXrp.XRPDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*domainXRP.XRPDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTx, err := r.queries.GetXRPDetailTxByID(ctx, id)
@@ -113,7 +113,7 @@ func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*domainXrp.XRPDetailT
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainXrp.XRPDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainXRP.XRPDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTxs, err := r.queries.GetXRPDetailTxsByTxID(ctx, id)
@@ -121,7 +121,7 @@ func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainXrp.XR
 		return nil, fmt.Errorf("failed to call GetXRPDetailTxsByTxID(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPDetailTx, len(xrpTxs))
+	result := make([]*domainXRP.XRPDetailTx, len(xrpTxs))
 	for i := range xrpTxs {
 		domainTx, err := convertToXRPDetailTx(&xrpTxs[i])
 		if err != nil {
@@ -149,7 +149,7 @@ func (r *XRPDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *domainXrp.XRPDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *domainXRP.XRPDetailTx) error {
 	ctx := context.Background()
 
 	sqlcTx := convertFromXRPDetailTx(txItem)
@@ -183,7 +183,7 @@ func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *domainXrp.XRPDetailTx) e
 }
 
 // InsertBulk inserts multiple records
-func (r *XRPDetailTxInputRepositorySqlc) InsertBulk(txItems []*domainXrp.XRPDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) InsertBulk(txItems []*domainXRP.XRPDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err

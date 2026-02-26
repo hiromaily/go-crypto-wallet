@@ -10,9 +10,9 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	btc0 "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/quagmt/udecimal"
 	mock "github.com/stretchr/testify/mock"
@@ -46,26 +46,26 @@ func (_m *MockBitcoiner) EXPECT() *MockBitcoiner_Expecter {
 }
 
 // AddMultisigAddress provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType bitcoin.AddressType) (*btc.MultisigAddress, error) {
+func (_mock *MockBitcoiner) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType btc.AddressType) (*btc0.MultisigAddress, error) {
 	ret := _mock.Called(requiredSigs, addresses, accountName, addressType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddMultisigAddress")
 	}
 
-	var r0 *btc.MultisigAddress
+	var r0 *btc0.MultisigAddress
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int, []string, string, bitcoin.AddressType) (*btc.MultisigAddress, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int, []string, string, btc.AddressType) (*btc0.MultisigAddress, error)); ok {
 		return returnFunc(requiredSigs, addresses, accountName, addressType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int, []string, string, bitcoin.AddressType) *btc.MultisigAddress); ok {
+	if returnFunc, ok := ret.Get(0).(func(int, []string, string, btc.AddressType) *btc0.MultisigAddress); ok {
 		r0 = returnFunc(requiredSigs, addresses, accountName, addressType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.MultisigAddress)
+			r0 = ret.Get(0).(*btc0.MultisigAddress)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int, []string, string, bitcoin.AddressType) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(int, []string, string, btc.AddressType) error); ok {
 		r1 = returnFunc(requiredSigs, addresses, accountName, addressType)
 	} else {
 		r1 = ret.Error(1)
@@ -82,12 +82,12 @@ type MockBitcoiner_AddMultisigAddress_Call struct {
 //   - requiredSigs int
 //   - addresses []string
 //   - accountName string
-//   - addressType bitcoin.AddressType
+//   - addressType btc.AddressType
 func (_e *MockBitcoiner_Expecter) AddMultisigAddress(requiredSigs interface{}, addresses interface{}, accountName interface{}, addressType interface{}) *MockBitcoiner_AddMultisigAddress_Call {
 	return &MockBitcoiner_AddMultisigAddress_Call{Call: _e.mock.On("AddMultisigAddress", requiredSigs, addresses, accountName, addressType)}
 }
 
-func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, addresses []string, accountName string, addressType bitcoin.AddressType)) *MockBitcoiner_AddMultisigAddress_Call {
+func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, addresses []string, accountName string, addressType btc.AddressType)) *MockBitcoiner_AddMultisigAddress_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 int
 		if args[0] != nil {
@@ -101,9 +101,9 @@ func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, 
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 bitcoin.AddressType
+		var arg3 btc.AddressType
 		if args[3] != nil {
-			arg3 = args[3].(bitcoin.AddressType)
+			arg3 = args[3].(btc.AddressType)
 		}
 		run(
 			arg0,
@@ -115,12 +115,12 @@ func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, 
 	return _c
 }
 
-func (_c *MockBitcoiner_AddMultisigAddress_Call) Return(multisigAddress *btc.MultisigAddress, err error) *MockBitcoiner_AddMultisigAddress_Call {
+func (_c *MockBitcoiner_AddMultisigAddress_Call) Return(multisigAddress *btc0.MultisigAddress, err error) *MockBitcoiner_AddMultisigAddress_Call {
 	_c.Call.Return(multisigAddress, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_AddMultisigAddress_Call) RunAndReturn(run func(requiredSigs int, addresses []string, accountName string, addressType bitcoin.AddressType) (*btc.MultisigAddress, error)) *MockBitcoiner_AddMultisigAddress_Call {
+func (_c *MockBitcoiner_AddMultisigAddress_Call) RunAndReturn(run func(requiredSigs int, addresses []string, accountName string, addressType btc.AddressType) (*btc0.MultisigAddress, error)) *MockBitcoiner_AddMultisigAddress_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -409,7 +409,7 @@ func (_c *MockBitcoiner_ConfirmationBlock_Call) RunAndReturn(run func() uint64) 
 }
 
 // CreatePSBT provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx, senderAccount account.AccountType) (string, error) {
+func (_mock *MockBitcoiner) CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc0.PreviousTx, senderAccount account.AccountType) (string, error) {
 	ret := _mock.Called(msgTx, prevTxs, senderAccount)
 
 	if len(ret) == 0 {
@@ -418,15 +418,15 @@ func (_mock *MockBitcoiner) CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc.Previous
 
 	var r0 string
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx, account.AccountType) (string, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc0.PreviousTx, account.AccountType) (string, error)); ok {
 		return returnFunc(msgTx, prevTxs, senderAccount)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx, account.AccountType) string); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc0.PreviousTx, account.AccountType) string); ok {
 		r0 = returnFunc(msgTx, prevTxs, senderAccount)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
-	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []btc.PreviousTx, account.AccountType) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []btc0.PreviousTx, account.AccountType) error); ok {
 		r1 = returnFunc(msgTx, prevTxs, senderAccount)
 	} else {
 		r1 = ret.Error(1)
@@ -441,21 +441,21 @@ type MockBitcoiner_CreatePSBT_Call struct {
 
 // CreatePSBT is a helper method to define mock.On call
 //   - msgTx *wire.MsgTx
-//   - prevTxs []btc.PreviousTx
+//   - prevTxs []btc0.PreviousTx
 //   - senderAccount account.AccountType
 func (_e *MockBitcoiner_Expecter) CreatePSBT(msgTx interface{}, prevTxs interface{}, senderAccount interface{}) *MockBitcoiner_CreatePSBT_Call {
 	return &MockBitcoiner_CreatePSBT_Call{Call: _e.mock.On("CreatePSBT", msgTx, prevTxs, senderAccount)}
 }
 
-func (_c *MockBitcoiner_CreatePSBT_Call) Run(run func(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx, senderAccount account.AccountType)) *MockBitcoiner_CreatePSBT_Call {
+func (_c *MockBitcoiner_CreatePSBT_Call) Run(run func(msgTx *wire.MsgTx, prevTxs []btc0.PreviousTx, senderAccount account.AccountType)) *MockBitcoiner_CreatePSBT_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *wire.MsgTx
 		if args[0] != nil {
 			arg0 = args[0].(*wire.MsgTx)
 		}
-		var arg1 []btc.PreviousTx
+		var arg1 []btc0.PreviousTx
 		if args[1] != nil {
-			arg1 = args[1].([]btc.PreviousTx)
+			arg1 = args[1].([]btc0.PreviousTx)
 		}
 		var arg2 account.AccountType
 		if args[2] != nil {
@@ -475,7 +475,7 @@ func (_c *MockBitcoiner_CreatePSBT_Call) Return(s string, err error) *MockBitcoi
 	return _c
 }
 
-func (_c *MockBitcoiner_CreatePSBT_Call) RunAndReturn(run func(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx, senderAccount account.AccountType) (string, error)) *MockBitcoiner_CreatePSBT_Call {
+func (_c *MockBitcoiner_CreatePSBT_Call) RunAndReturn(run func(msgTx *wire.MsgTx, prevTxs []btc0.PreviousTx, senderAccount account.AccountType) (string, error)) *MockBitcoiner_CreatePSBT_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -668,23 +668,23 @@ func (_c *MockBitcoiner_DecodeAddress_Call) RunAndReturn(run func(addr string) (
 }
 
 // DecodeRawTransaction provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) DecodeRawTransaction(hexTx string) (*btc.RawTransaction, error) {
+func (_mock *MockBitcoiner) DecodeRawTransaction(hexTx string) (*btc0.RawTransaction, error) {
 	ret := _mock.Called(hexTx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DecodeRawTransaction")
 	}
 
-	var r0 *btc.RawTransaction
+	var r0 *btc0.RawTransaction
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.RawTransaction, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc0.RawTransaction, error)); ok {
 		return returnFunc(hexTx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.RawTransaction); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *btc0.RawTransaction); ok {
 		r0 = returnFunc(hexTx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.RawTransaction)
+			r0 = ret.Get(0).(*btc0.RawTransaction)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -719,12 +719,12 @@ func (_c *MockBitcoiner_DecodeRawTransaction_Call) Run(run func(hexTx string)) *
 	return _c
 }
 
-func (_c *MockBitcoiner_DecodeRawTransaction_Call) Return(rawTransaction *btc.RawTransaction, err error) *MockBitcoiner_DecodeRawTransaction_Call {
+func (_c *MockBitcoiner_DecodeRawTransaction_Call) Return(rawTransaction *btc0.RawTransaction, err error) *MockBitcoiner_DecodeRawTransaction_Call {
 	_c.Call.Return(rawTransaction, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_DecodeRawTransaction_Call) RunAndReturn(run func(hexTx string) (*btc.RawTransaction, error)) *MockBitcoiner_DecodeRawTransaction_Call {
+func (_c *MockBitcoiner_DecodeRawTransaction_Call) RunAndReturn(run func(hexTx string) (*btc0.RawTransaction, error)) *MockBitcoiner_DecodeRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1215,23 +1215,23 @@ func (_c *MockBitcoiner_FloatToDecimal_Call) RunAndReturn(run func(f float64) (u
 }
 
 // FundRawTransaction provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) FundRawTransaction(hex string) (*btc.FundRawTransactionResult, error) {
+func (_mock *MockBitcoiner) FundRawTransaction(hex string) (*btc0.FundRawTransactionResult, error) {
 	ret := _mock.Called(hex)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FundRawTransaction")
 	}
 
-	var r0 *btc.FundRawTransactionResult
+	var r0 *btc0.FundRawTransactionResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.FundRawTransactionResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc0.FundRawTransactionResult, error)); ok {
 		return returnFunc(hex)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.FundRawTransactionResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *btc0.FundRawTransactionResult); ok {
 		r0 = returnFunc(hex)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.FundRawTransactionResult)
+			r0 = ret.Get(0).(*btc0.FundRawTransactionResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -1266,12 +1266,12 @@ func (_c *MockBitcoiner_FundRawTransaction_Call) Run(run func(hex string)) *Mock
 	return _c
 }
 
-func (_c *MockBitcoiner_FundRawTransaction_Call) Return(fundRawTransactionResult *btc.FundRawTransactionResult, err error) *MockBitcoiner_FundRawTransaction_Call {
+func (_c *MockBitcoiner_FundRawTransaction_Call) Return(fundRawTransactionResult *btc0.FundRawTransactionResult, err error) *MockBitcoiner_FundRawTransaction_Call {
 	_c.Call.Return(fundRawTransactionResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_FundRawTransaction_Call) RunAndReturn(run func(hex string) (*btc.FundRawTransactionResult, error)) *MockBitcoiner_FundRawTransaction_Call {
+func (_c *MockBitcoiner_FundRawTransaction_Call) RunAndReturn(run func(hex string) (*btc0.FundRawTransactionResult, error)) *MockBitcoiner_FundRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1337,23 +1337,23 @@ func (_c *MockBitcoiner_GetAccount_Call) RunAndReturn(run func(addr string) (str
 }
 
 // GetAddressInfo provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetAddressInfo(addr string) (*btc.AddressInfo, error) {
+func (_mock *MockBitcoiner) GetAddressInfo(addr string) (*btc0.AddressInfo, error) {
 	ret := _mock.Called(addr)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAddressInfo")
 	}
 
-	var r0 *btc.AddressInfo
+	var r0 *btc0.AddressInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.AddressInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc0.AddressInfo, error)); ok {
 		return returnFunc(addr)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.AddressInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *btc0.AddressInfo); ok {
 		r0 = returnFunc(addr)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.AddressInfo)
+			r0 = ret.Get(0).(*btc0.AddressInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -1388,12 +1388,12 @@ func (_c *MockBitcoiner_GetAddressInfo_Call) Run(run func(addr string)) *MockBit
 	return _c
 }
 
-func (_c *MockBitcoiner_GetAddressInfo_Call) Return(addressInfo *btc.AddressInfo, err error) *MockBitcoiner_GetAddressInfo_Call {
+func (_c *MockBitcoiner_GetAddressInfo_Call) Return(addressInfo *btc0.AddressInfo, err error) *MockBitcoiner_GetAddressInfo_Call {
 	_c.Call.Return(addressInfo, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetAddressInfo_Call) RunAndReturn(run func(addr string) (*btc.AddressInfo, error)) *MockBitcoiner_GetAddressInfo_Call {
+func (_c *MockBitcoiner_GetAddressInfo_Call) RunAndReturn(run func(addr string) (*btc0.AddressInfo, error)) *MockBitcoiner_GetAddressInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1693,23 +1693,23 @@ func (_c *MockBitcoiner_GetBlockCount_Call) RunAndReturn(run func() (int64, erro
 }
 
 // GetBlockchainInfo provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetBlockchainInfo() (*btc.BlockchainInfo, error) {
+func (_mock *MockBitcoiner) GetBlockchainInfo() (*btc0.BlockchainInfo, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetBlockchainInfo")
 	}
 
-	var r0 *btc.BlockchainInfo
+	var r0 *btc0.BlockchainInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*btc.BlockchainInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() (*btc0.BlockchainInfo, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() *btc.BlockchainInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func() *btc0.BlockchainInfo); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.BlockchainInfo)
+			r0 = ret.Get(0).(*btc0.BlockchainInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -1737,12 +1737,12 @@ func (_c *MockBitcoiner_GetBlockchainInfo_Call) Run(run func()) *MockBitcoiner_G
 	return _c
 }
 
-func (_c *MockBitcoiner_GetBlockchainInfo_Call) Return(blockchainInfo *btc.BlockchainInfo, err error) *MockBitcoiner_GetBlockchainInfo_Call {
+func (_c *MockBitcoiner_GetBlockchainInfo_Call) Return(blockchainInfo *btc0.BlockchainInfo, err error) *MockBitcoiner_GetBlockchainInfo_Call {
 	_c.Call.Return(blockchainInfo, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetBlockchainInfo_Call) RunAndReturn(run func() (*btc.BlockchainInfo, error)) *MockBitcoiner_GetBlockchainInfo_Call {
+func (_c *MockBitcoiner_GetBlockchainInfo_Call) RunAndReturn(run func() (*btc0.BlockchainInfo, error)) *MockBitcoiner_GetBlockchainInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1794,23 +1794,23 @@ func (_c *MockBitcoiner_GetChainConf_Call) RunAndReturn(run func() *chaincfg.Par
 }
 
 // GetDescriptorInfo provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetDescriptorInfo(descriptor string) (*btc.DescriptorInfo, error) {
+func (_mock *MockBitcoiner) GetDescriptorInfo(descriptor string) (*btc0.DescriptorInfo, error) {
 	ret := _mock.Called(descriptor)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetDescriptorInfo")
 	}
 
-	var r0 *btc.DescriptorInfo
+	var r0 *btc0.DescriptorInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.DescriptorInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc0.DescriptorInfo, error)); ok {
 		return returnFunc(descriptor)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.DescriptorInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *btc0.DescriptorInfo); ok {
 		r0 = returnFunc(descriptor)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.DescriptorInfo)
+			r0 = ret.Get(0).(*btc0.DescriptorInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -1845,12 +1845,12 @@ func (_c *MockBitcoiner_GetDescriptorInfo_Call) Run(run func(descriptor string))
 	return _c
 }
 
-func (_c *MockBitcoiner_GetDescriptorInfo_Call) Return(descriptorInfo *btc.DescriptorInfo, err error) *MockBitcoiner_GetDescriptorInfo_Call {
+func (_c *MockBitcoiner_GetDescriptorInfo_Call) Return(descriptorInfo *btc0.DescriptorInfo, err error) *MockBitcoiner_GetDescriptorInfo_Call {
 	_c.Call.Return(descriptorInfo, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetDescriptorInfo_Call) RunAndReturn(run func(descriptor string) (*btc.DescriptorInfo, error)) *MockBitcoiner_GetDescriptorInfo_Call {
+func (_c *MockBitcoiner_GetDescriptorInfo_Call) RunAndReturn(run func(descriptor string) (*btc0.DescriptorInfo, error)) *MockBitcoiner_GetDescriptorInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1922,23 +1922,23 @@ func (_c *MockBitcoiner_GetFee_Call) RunAndReturn(run func(tx *wire.MsgTx, adjus
 }
 
 // GetNetworkInfo provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetNetworkInfo() (*btc.NetworkInfo, error) {
+func (_mock *MockBitcoiner) GetNetworkInfo() (*btc0.NetworkInfo, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetNetworkInfo")
 	}
 
-	var r0 *btc.NetworkInfo
+	var r0 *btc0.NetworkInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*btc.NetworkInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() (*btc0.NetworkInfo, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() *btc.NetworkInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func() *btc0.NetworkInfo); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.NetworkInfo)
+			r0 = ret.Get(0).(*btc0.NetworkInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -1966,12 +1966,12 @@ func (_c *MockBitcoiner_GetNetworkInfo_Call) Run(run func()) *MockBitcoiner_GetN
 	return _c
 }
 
-func (_c *MockBitcoiner_GetNetworkInfo_Call) Return(networkInfo *btc.NetworkInfo, err error) *MockBitcoiner_GetNetworkInfo_Call {
+func (_c *MockBitcoiner_GetNetworkInfo_Call) Return(networkInfo *btc0.NetworkInfo, err error) *MockBitcoiner_GetNetworkInfo_Call {
 	_c.Call.Return(networkInfo, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetNetworkInfo_Call) RunAndReturn(run func() (*btc.NetworkInfo, error)) *MockBitcoiner_GetNetworkInfo_Call {
+func (_c *MockBitcoiner_GetNetworkInfo_Call) RunAndReturn(run func() (*btc0.NetworkInfo, error)) *MockBitcoiner_GetNetworkInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2099,23 +2099,23 @@ func (_c *MockBitcoiner_GetRawTransactionByHex_Call) RunAndReturn(run func(strHa
 }
 
 // GetTransactionByTxID provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetTransactionByTxID(txID string) (*btc.TransactionResult, error) {
+func (_mock *MockBitcoiner) GetTransactionByTxID(txID string) (*btc0.TransactionResult, error) {
 	ret := _mock.Called(txID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTransactionByTxID")
 	}
 
-	var r0 *btc.TransactionResult
+	var r0 *btc0.TransactionResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.TransactionResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc0.TransactionResult, error)); ok {
 		return returnFunc(txID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.TransactionResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *btc0.TransactionResult); ok {
 		r0 = returnFunc(txID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.TransactionResult)
+			r0 = ret.Get(0).(*btc0.TransactionResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -2150,12 +2150,12 @@ func (_c *MockBitcoiner_GetTransactionByTxID_Call) Run(run func(txID string)) *M
 	return _c
 }
 
-func (_c *MockBitcoiner_GetTransactionByTxID_Call) Return(transactionResult *btc.TransactionResult, err error) *MockBitcoiner_GetTransactionByTxID_Call {
+func (_c *MockBitcoiner_GetTransactionByTxID_Call) Return(transactionResult *btc0.TransactionResult, err error) *MockBitcoiner_GetTransactionByTxID_Call {
 	_c.Call.Return(transactionResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetTransactionByTxID_Call) RunAndReturn(run func(txID string) (*btc.TransactionResult, error)) *MockBitcoiner_GetTransactionByTxID_Call {
+func (_c *MockBitcoiner_GetTransactionByTxID_Call) RunAndReturn(run func(txID string) (*btc0.TransactionResult, error)) *MockBitcoiner_GetTransactionByTxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2289,7 +2289,7 @@ func (_c *MockBitcoiner_GetTxOutByTxID_Call) RunAndReturn(run func(txID string, 
 }
 
 // GetUnspentListAddrs provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetUnspentListAddrs(unspentList []btc.UnspentOutput, accountType account.AccountType) []string {
+func (_mock *MockBitcoiner) GetUnspentListAddrs(unspentList []btc0.UnspentOutput, accountType account.AccountType) []string {
 	ret := _mock.Called(unspentList, accountType)
 
 	if len(ret) == 0 {
@@ -2297,7 +2297,7 @@ func (_mock *MockBitcoiner) GetUnspentListAddrs(unspentList []btc.UnspentOutput,
 	}
 
 	var r0 []string
-	if returnFunc, ok := ret.Get(0).(func([]btc.UnspentOutput, account.AccountType) []string); ok {
+	if returnFunc, ok := ret.Get(0).(func([]btc0.UnspentOutput, account.AccountType) []string); ok {
 		r0 = returnFunc(unspentList, accountType)
 	} else {
 		if ret.Get(0) != nil {
@@ -2313,17 +2313,17 @@ type MockBitcoiner_GetUnspentListAddrs_Call struct {
 }
 
 // GetUnspentListAddrs is a helper method to define mock.On call
-//   - unspentList []btc.UnspentOutput
+//   - unspentList []btc0.UnspentOutput
 //   - accountType account.AccountType
 func (_e *MockBitcoiner_Expecter) GetUnspentListAddrs(unspentList interface{}, accountType interface{}) *MockBitcoiner_GetUnspentListAddrs_Call {
 	return &MockBitcoiner_GetUnspentListAddrs_Call{Call: _e.mock.On("GetUnspentListAddrs", unspentList, accountType)}
 }
 
-func (_c *MockBitcoiner_GetUnspentListAddrs_Call) Run(run func(unspentList []btc.UnspentOutput, accountType account.AccountType)) *MockBitcoiner_GetUnspentListAddrs_Call {
+func (_c *MockBitcoiner_GetUnspentListAddrs_Call) Run(run func(unspentList []btc0.UnspentOutput, accountType account.AccountType)) *MockBitcoiner_GetUnspentListAddrs_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []btc.UnspentOutput
+		var arg0 []btc0.UnspentOutput
 		if args[0] != nil {
-			arg0 = args[0].([]btc.UnspentOutput)
+			arg0 = args[0].([]btc0.UnspentOutput)
 		}
 		var arg1 account.AccountType
 		if args[1] != nil {
@@ -2342,7 +2342,7 @@ func (_c *MockBitcoiner_GetUnspentListAddrs_Call) Return(strings []string) *Mock
 	return _c
 }
 
-func (_c *MockBitcoiner_GetUnspentListAddrs_Call) RunAndReturn(run func(unspentList []btc.UnspentOutput, accountType account.AccountType) []string) *MockBitcoiner_GetUnspentListAddrs_Call {
+func (_c *MockBitcoiner_GetUnspentListAddrs_Call) RunAndReturn(run func(unspentList []btc0.UnspentOutput, accountType account.AccountType) []string) *MockBitcoiner_GetUnspentListAddrs_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2513,26 +2513,26 @@ func (_c *MockBitcoiner_ImportAddressWithoutReScan_Call) RunAndReturn(run func(p
 }
 
 // ImportDescriptors provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ImportDescriptors(requests []btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error) {
+func (_mock *MockBitcoiner) ImportDescriptors(requests []btc0.ImportDescriptorsRequest) ([]btc0.ImportDescriptorsResponse, error) {
 	ret := _mock.Called(requests)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ImportDescriptors")
 	}
 
-	var r0 []btc.ImportDescriptorsResponse
+	var r0 []btc0.ImportDescriptorsResponse
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func([]btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func([]btc0.ImportDescriptorsRequest) ([]btc0.ImportDescriptorsResponse, error)); ok {
 		return returnFunc(requests)
 	}
-	if returnFunc, ok := ret.Get(0).(func([]btc.ImportDescriptorsRequest) []btc.ImportDescriptorsResponse); ok {
+	if returnFunc, ok := ret.Get(0).(func([]btc0.ImportDescriptorsRequest) []btc0.ImportDescriptorsResponse); ok {
 		r0 = returnFunc(requests)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]btc.ImportDescriptorsResponse)
+			r0 = ret.Get(0).([]btc0.ImportDescriptorsResponse)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func([]btc.ImportDescriptorsRequest) error); ok {
+	if returnFunc, ok := ret.Get(1).(func([]btc0.ImportDescriptorsRequest) error); ok {
 		r1 = returnFunc(requests)
 	} else {
 		r1 = ret.Error(1)
@@ -2546,16 +2546,16 @@ type MockBitcoiner_ImportDescriptors_Call struct {
 }
 
 // ImportDescriptors is a helper method to define mock.On call
-//   - requests []btc.ImportDescriptorsRequest
+//   - requests []btc0.ImportDescriptorsRequest
 func (_e *MockBitcoiner_Expecter) ImportDescriptors(requests interface{}) *MockBitcoiner_ImportDescriptors_Call {
 	return &MockBitcoiner_ImportDescriptors_Call{Call: _e.mock.On("ImportDescriptors", requests)}
 }
 
-func (_c *MockBitcoiner_ImportDescriptors_Call) Run(run func(requests []btc.ImportDescriptorsRequest)) *MockBitcoiner_ImportDescriptors_Call {
+func (_c *MockBitcoiner_ImportDescriptors_Call) Run(run func(requests []btc0.ImportDescriptorsRequest)) *MockBitcoiner_ImportDescriptors_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []btc.ImportDescriptorsRequest
+		var arg0 []btc0.ImportDescriptorsRequest
 		if args[0] != nil {
-			arg0 = args[0].([]btc.ImportDescriptorsRequest)
+			arg0 = args[0].([]btc0.ImportDescriptorsRequest)
 		}
 		run(
 			arg0,
@@ -2564,37 +2564,37 @@ func (_c *MockBitcoiner_ImportDescriptors_Call) Run(run func(requests []btc.Impo
 	return _c
 }
 
-func (_c *MockBitcoiner_ImportDescriptors_Call) Return(importDescriptorsResponses []btc.ImportDescriptorsResponse, err error) *MockBitcoiner_ImportDescriptors_Call {
+func (_c *MockBitcoiner_ImportDescriptors_Call) Return(importDescriptorsResponses []btc0.ImportDescriptorsResponse, err error) *MockBitcoiner_ImportDescriptors_Call {
 	_c.Call.Return(importDescriptorsResponses, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ImportDescriptors_Call) RunAndReturn(run func(requests []btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error)) *MockBitcoiner_ImportDescriptors_Call {
+func (_c *MockBitcoiner_ImportDescriptors_Call) RunAndReturn(run func(requests []btc0.ImportDescriptorsRequest) ([]btc0.ImportDescriptorsResponse, error)) *MockBitcoiner_ImportDescriptors_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ImportMulti provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ImportMulti(requests []btc.ImportMultiRequest, options *btc.ImportMultiOptions) ([]btc.ImportMultiResponse, error) {
+func (_mock *MockBitcoiner) ImportMulti(requests []btc0.ImportMultiRequest, options *btc0.ImportMultiOptions) ([]btc0.ImportMultiResponse, error) {
 	ret := _mock.Called(requests, options)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ImportMulti")
 	}
 
-	var r0 []btc.ImportMultiResponse
+	var r0 []btc0.ImportMultiResponse
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func([]btc.ImportMultiRequest, *btc.ImportMultiOptions) ([]btc.ImportMultiResponse, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func([]btc0.ImportMultiRequest, *btc0.ImportMultiOptions) ([]btc0.ImportMultiResponse, error)); ok {
 		return returnFunc(requests, options)
 	}
-	if returnFunc, ok := ret.Get(0).(func([]btc.ImportMultiRequest, *btc.ImportMultiOptions) []btc.ImportMultiResponse); ok {
+	if returnFunc, ok := ret.Get(0).(func([]btc0.ImportMultiRequest, *btc0.ImportMultiOptions) []btc0.ImportMultiResponse); ok {
 		r0 = returnFunc(requests, options)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]btc.ImportMultiResponse)
+			r0 = ret.Get(0).([]btc0.ImportMultiResponse)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func([]btc.ImportMultiRequest, *btc.ImportMultiOptions) error); ok {
+	if returnFunc, ok := ret.Get(1).(func([]btc0.ImportMultiRequest, *btc0.ImportMultiOptions) error); ok {
 		r1 = returnFunc(requests, options)
 	} else {
 		r1 = ret.Error(1)
@@ -2608,21 +2608,21 @@ type MockBitcoiner_ImportMulti_Call struct {
 }
 
 // ImportMulti is a helper method to define mock.On call
-//   - requests []btc.ImportMultiRequest
-//   - options *btc.ImportMultiOptions
+//   - requests []btc0.ImportMultiRequest
+//   - options *btc0.ImportMultiOptions
 func (_e *MockBitcoiner_Expecter) ImportMulti(requests interface{}, options interface{}) *MockBitcoiner_ImportMulti_Call {
 	return &MockBitcoiner_ImportMulti_Call{Call: _e.mock.On("ImportMulti", requests, options)}
 }
 
-func (_c *MockBitcoiner_ImportMulti_Call) Run(run func(requests []btc.ImportMultiRequest, options *btc.ImportMultiOptions)) *MockBitcoiner_ImportMulti_Call {
+func (_c *MockBitcoiner_ImportMulti_Call) Run(run func(requests []btc0.ImportMultiRequest, options *btc0.ImportMultiOptions)) *MockBitcoiner_ImportMulti_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []btc.ImportMultiRequest
+		var arg0 []btc0.ImportMultiRequest
 		if args[0] != nil {
-			arg0 = args[0].([]btc.ImportMultiRequest)
+			arg0 = args[0].([]btc0.ImportMultiRequest)
 		}
-		var arg1 *btc.ImportMultiOptions
+		var arg1 *btc0.ImportMultiOptions
 		if args[1] != nil {
-			arg1 = args[1].(*btc.ImportMultiOptions)
+			arg1 = args[1].(*btc0.ImportMultiOptions)
 		}
 		run(
 			arg0,
@@ -2632,12 +2632,12 @@ func (_c *MockBitcoiner_ImportMulti_Call) Run(run func(requests []btc.ImportMult
 	return _c
 }
 
-func (_c *MockBitcoiner_ImportMulti_Call) Return(importMultiResponses []btc.ImportMultiResponse, err error) *MockBitcoiner_ImportMulti_Call {
+func (_c *MockBitcoiner_ImportMulti_Call) Return(importMultiResponses []btc0.ImportMultiResponse, err error) *MockBitcoiner_ImportMulti_Call {
 	_c.Call.Return(importMultiResponses, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ImportMulti_Call) RunAndReturn(run func(requests []btc.ImportMultiRequest, options *btc.ImportMultiOptions) ([]btc.ImportMultiResponse, error)) *MockBitcoiner_ImportMulti_Call {
+func (_c *MockBitcoiner_ImportMulti_Call) RunAndReturn(run func(requests []btc0.ImportMultiRequest, options *btc0.ImportMultiOptions) ([]btc0.ImportMultiResponse, error)) *MockBitcoiner_ImportMulti_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2919,23 +2919,23 @@ func (_c *MockBitcoiner_IsPSBTComplete_Call) RunAndReturn(run func(psbtBase64 st
 }
 
 // ListDescriptors provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ListDescriptors(privateDescriptors bool) (*btc.ListDescriptorsResult, error) {
+func (_mock *MockBitcoiner) ListDescriptors(privateDescriptors bool) (*btc0.ListDescriptorsResult, error) {
 	ret := _mock.Called(privateDescriptors)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListDescriptors")
 	}
 
-	var r0 *btc.ListDescriptorsResult
+	var r0 *btc0.ListDescriptorsResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(bool) (*btc.ListDescriptorsResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(bool) (*btc0.ListDescriptorsResult, error)); ok {
 		return returnFunc(privateDescriptors)
 	}
-	if returnFunc, ok := ret.Get(0).(func(bool) *btc.ListDescriptorsResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(bool) *btc0.ListDescriptorsResult); ok {
 		r0 = returnFunc(privateDescriptors)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.ListDescriptorsResult)
+			r0 = ret.Get(0).(*btc0.ListDescriptorsResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(bool) error); ok {
@@ -2970,34 +2970,34 @@ func (_c *MockBitcoiner_ListDescriptors_Call) Run(run func(privateDescriptors bo
 	return _c
 }
 
-func (_c *MockBitcoiner_ListDescriptors_Call) Return(listDescriptorsResult *btc.ListDescriptorsResult, err error) *MockBitcoiner_ListDescriptors_Call {
+func (_c *MockBitcoiner_ListDescriptors_Call) Return(listDescriptorsResult *btc0.ListDescriptorsResult, err error) *MockBitcoiner_ListDescriptors_Call {
 	_c.Call.Return(listDescriptorsResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ListDescriptors_Call) RunAndReturn(run func(privateDescriptors bool) (*btc.ListDescriptorsResult, error)) *MockBitcoiner_ListDescriptors_Call {
+func (_c *MockBitcoiner_ListDescriptors_Call) RunAndReturn(run func(privateDescriptors bool) (*btc0.ListDescriptorsResult, error)) *MockBitcoiner_ListDescriptors_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ListUnspent provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ListUnspent(confirmationNum uint64) ([]btc.UnspentOutput, error) {
+func (_mock *MockBitcoiner) ListUnspent(confirmationNum uint64) ([]btc0.UnspentOutput, error) {
 	ret := _mock.Called(confirmationNum)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListUnspent")
 	}
 
-	var r0 []btc.UnspentOutput
+	var r0 []btc0.UnspentOutput
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(uint64) ([]btc.UnspentOutput, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(uint64) ([]btc0.UnspentOutput, error)); ok {
 		return returnFunc(confirmationNum)
 	}
-	if returnFunc, ok := ret.Get(0).(func(uint64) []btc.UnspentOutput); ok {
+	if returnFunc, ok := ret.Get(0).(func(uint64) []btc0.UnspentOutput); ok {
 		r0 = returnFunc(confirmationNum)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]btc.UnspentOutput)
+			r0 = ret.Get(0).([]btc0.UnspentOutput)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(uint64) error); ok {
@@ -3032,34 +3032,34 @@ func (_c *MockBitcoiner_ListUnspent_Call) Run(run func(confirmationNum uint64)) 
 	return _c
 }
 
-func (_c *MockBitcoiner_ListUnspent_Call) Return(unspentOutputs []btc.UnspentOutput, err error) *MockBitcoiner_ListUnspent_Call {
+func (_c *MockBitcoiner_ListUnspent_Call) Return(unspentOutputs []btc0.UnspentOutput, err error) *MockBitcoiner_ListUnspent_Call {
 	_c.Call.Return(unspentOutputs, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ListUnspent_Call) RunAndReturn(run func(confirmationNum uint64) ([]btc.UnspentOutput, error)) *MockBitcoiner_ListUnspent_Call {
+func (_c *MockBitcoiner_ListUnspent_Call) RunAndReturn(run func(confirmationNum uint64) ([]btc0.UnspentOutput, error)) *MockBitcoiner_ListUnspent_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ListUnspentByAccount provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ListUnspentByAccount(accountType account.AccountType, confirmationNum uint64) ([]btc.UnspentOutput, error) {
+func (_mock *MockBitcoiner) ListUnspentByAccount(accountType account.AccountType, confirmationNum uint64) ([]btc0.UnspentOutput, error) {
 	ret := _mock.Called(accountType, confirmationNum)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListUnspentByAccount")
 	}
 
-	var r0 []btc.UnspentOutput
+	var r0 []btc0.UnspentOutput
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, uint64) ([]btc.UnspentOutput, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, uint64) ([]btc0.UnspentOutput, error)); ok {
 		return returnFunc(accountType, confirmationNum)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, uint64) []btc.UnspentOutput); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, uint64) []btc0.UnspentOutput); ok {
 		r0 = returnFunc(accountType, confirmationNum)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]btc.UnspentOutput)
+			r0 = ret.Get(0).([]btc0.UnspentOutput)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType, uint64) error); ok {
@@ -3100,12 +3100,12 @@ func (_c *MockBitcoiner_ListUnspentByAccount_Call) Run(run func(accountType acco
 	return _c
 }
 
-func (_c *MockBitcoiner_ListUnspentByAccount_Call) Return(unspentOutputs []btc.UnspentOutput, err error) *MockBitcoiner_ListUnspentByAccount_Call {
+func (_c *MockBitcoiner_ListUnspentByAccount_Call) Return(unspentOutputs []btc0.UnspentOutput, err error) *MockBitcoiner_ListUnspentByAccount_Call {
 	_c.Call.Return(unspentOutputs, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ListUnspentByAccount_Call) RunAndReturn(run func(accountType account.AccountType, confirmationNum uint64) ([]btc.UnspentOutput, error)) *MockBitcoiner_ListUnspentByAccount_Call {
+func (_c *MockBitcoiner_ListUnspentByAccount_Call) RunAndReturn(run func(accountType account.AccountType, confirmationNum uint64) ([]btc0.UnspentOutput, error)) *MockBitcoiner_ListUnspentByAccount_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3162,7 +3162,7 @@ func (_c *MockBitcoiner_LoadWallet_Call) RunAndReturn(run func(fileName string) 
 }
 
 // LockUnspent provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) LockUnspent(tx *btc.UnspentOutput) error {
+func (_mock *MockBitcoiner) LockUnspent(tx *btc0.UnspentOutput) error {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
@@ -3170,7 +3170,7 @@ func (_mock *MockBitcoiner) LockUnspent(tx *btc.UnspentOutput) error {
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*btc.UnspentOutput) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(*btc0.UnspentOutput) error); ok {
 		r0 = returnFunc(tx)
 	} else {
 		r0 = ret.Error(0)
@@ -3184,16 +3184,16 @@ type MockBitcoiner_LockUnspent_Call struct {
 }
 
 // LockUnspent is a helper method to define mock.On call
-//   - tx *btc.UnspentOutput
+//   - tx *btc0.UnspentOutput
 func (_e *MockBitcoiner_Expecter) LockUnspent(tx interface{}) *MockBitcoiner_LockUnspent_Call {
 	return &MockBitcoiner_LockUnspent_Call{Call: _e.mock.On("LockUnspent", tx)}
 }
 
-func (_c *MockBitcoiner_LockUnspent_Call) Run(run func(tx *btc.UnspentOutput)) *MockBitcoiner_LockUnspent_Call {
+func (_c *MockBitcoiner_LockUnspent_Call) Run(run func(tx *btc0.UnspentOutput)) *MockBitcoiner_LockUnspent_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *btc.UnspentOutput
+		var arg0 *btc0.UnspentOutput
 		if args[0] != nil {
-			arg0 = args[0].(*btc.UnspentOutput)
+			arg0 = args[0].(*btc0.UnspentOutput)
 		}
 		run(
 			arg0,
@@ -3207,29 +3207,29 @@ func (_c *MockBitcoiner_LockUnspent_Call) Return(err error) *MockBitcoiner_LockU
 	return _c
 }
 
-func (_c *MockBitcoiner_LockUnspent_Call) RunAndReturn(run func(tx *btc.UnspentOutput) error) *MockBitcoiner_LockUnspent_Call {
+func (_c *MockBitcoiner_LockUnspent_Call) RunAndReturn(run func(tx *btc0.UnspentOutput) error) *MockBitcoiner_LockUnspent_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Logging provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) Logging() (*btc.LoggingResult, error) {
+func (_mock *MockBitcoiner) Logging() (*btc0.LoggingResult, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for Logging")
 	}
 
-	var r0 *btc.LoggingResult
+	var r0 *btc0.LoggingResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*btc.LoggingResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() (*btc0.LoggingResult, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() *btc.LoggingResult); ok {
+	if returnFunc, ok := ret.Get(0).(func() *btc0.LoggingResult); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.LoggingResult)
+			r0 = ret.Get(0).(*btc0.LoggingResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -3257,34 +3257,34 @@ func (_c *MockBitcoiner_Logging_Call) Run(run func()) *MockBitcoiner_Logging_Cal
 	return _c
 }
 
-func (_c *MockBitcoiner_Logging_Call) Return(loggingResult *btc.LoggingResult, err error) *MockBitcoiner_Logging_Call {
+func (_c *MockBitcoiner_Logging_Call) Return(loggingResult *btc0.LoggingResult, err error) *MockBitcoiner_Logging_Call {
 	_c.Call.Return(loggingResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_Logging_Call) RunAndReturn(run func() (*btc.LoggingResult, error)) *MockBitcoiner_Logging_Call {
+func (_c *MockBitcoiner_Logging_Call) RunAndReturn(run func() (*btc0.LoggingResult, error)) *MockBitcoiner_Logging_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ParsePSBT provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ParsePSBT(psbtBase64 string) (*btc.ParsedPSBT, error) {
+func (_mock *MockBitcoiner) ParsePSBT(psbtBase64 string) (*btc0.ParsedPSBT, error) {
 	ret := _mock.Called(psbtBase64)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ParsePSBT")
 	}
 
-	var r0 *btc.ParsedPSBT
+	var r0 *btc0.ParsedPSBT
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.ParsedPSBT, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc0.ParsedPSBT, error)); ok {
 		return returnFunc(psbtBase64)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.ParsedPSBT); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *btc0.ParsedPSBT); ok {
 		r0 = returnFunc(psbtBase64)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.ParsedPSBT)
+			r0 = ret.Get(0).(*btc0.ParsedPSBT)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -3319,12 +3319,12 @@ func (_c *MockBitcoiner_ParsePSBT_Call) Run(run func(psbtBase64 string)) *MockBi
 	return _c
 }
 
-func (_c *MockBitcoiner_ParsePSBT_Call) Return(parsedPSBT *btc.ParsedPSBT, err error) *MockBitcoiner_ParsePSBT_Call {
+func (_c *MockBitcoiner_ParsePSBT_Call) Return(parsedPSBT *btc0.ParsedPSBT, err error) *MockBitcoiner_ParsePSBT_Call {
 	_c.Call.Return(parsedPSBT, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ParsePSBT_Call) RunAndReturn(run func(psbtBase64 string) (*btc.ParsedPSBT, error)) *MockBitcoiner_ParsePSBT_Call {
+func (_c *MockBitcoiner_ParsePSBT_Call) RunAndReturn(run func(psbtBase64 string) (*btc0.ParsedPSBT, error)) *MockBitcoiner_ParsePSBT_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3729,7 +3729,7 @@ func (_c *MockBitcoiner_SignPSBTWithKey_Call) RunAndReturn(run func(psbtBase64 s
 }
 
 // SignRawTransaction provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) SignRawTransaction(tx *wire.MsgTx, prevtxs []btc.PreviousTx) (*wire.MsgTx, bool, error) {
+func (_mock *MockBitcoiner) SignRawTransaction(tx *wire.MsgTx, prevtxs []btc0.PreviousTx) (*wire.MsgTx, bool, error) {
 	ret := _mock.Called(tx, prevtxs)
 
 	if len(ret) == 0 {
@@ -3739,22 +3739,22 @@ func (_mock *MockBitcoiner) SignRawTransaction(tx *wire.MsgTx, prevtxs []btc.Pre
 	var r0 *wire.MsgTx
 	var r1 bool
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx) (*wire.MsgTx, bool, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc0.PreviousTx) (*wire.MsgTx, bool, error)); ok {
 		return returnFunc(tx, prevtxs)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx) *wire.MsgTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc0.PreviousTx) *wire.MsgTx); ok {
 		r0 = returnFunc(tx, prevtxs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*wire.MsgTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []btc.PreviousTx) bool); ok {
+	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []btc0.PreviousTx) bool); ok {
 		r1 = returnFunc(tx, prevtxs)
 	} else {
 		r1 = ret.Get(1).(bool)
 	}
-	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []btc.PreviousTx) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []btc0.PreviousTx) error); ok {
 		r2 = returnFunc(tx, prevtxs)
 	} else {
 		r2 = ret.Error(2)
@@ -3769,20 +3769,20 @@ type MockBitcoiner_SignRawTransaction_Call struct {
 
 // SignRawTransaction is a helper method to define mock.On call
 //   - tx *wire.MsgTx
-//   - prevtxs []btc.PreviousTx
+//   - prevtxs []btc0.PreviousTx
 func (_e *MockBitcoiner_Expecter) SignRawTransaction(tx interface{}, prevtxs interface{}) *MockBitcoiner_SignRawTransaction_Call {
 	return &MockBitcoiner_SignRawTransaction_Call{Call: _e.mock.On("SignRawTransaction", tx, prevtxs)}
 }
 
-func (_c *MockBitcoiner_SignRawTransaction_Call) Run(run func(tx *wire.MsgTx, prevtxs []btc.PreviousTx)) *MockBitcoiner_SignRawTransaction_Call {
+func (_c *MockBitcoiner_SignRawTransaction_Call) Run(run func(tx *wire.MsgTx, prevtxs []btc0.PreviousTx)) *MockBitcoiner_SignRawTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *wire.MsgTx
 		if args[0] != nil {
 			arg0 = args[0].(*wire.MsgTx)
 		}
-		var arg1 []btc.PreviousTx
+		var arg1 []btc0.PreviousTx
 		if args[1] != nil {
-			arg1 = args[1].([]btc.PreviousTx)
+			arg1 = args[1].([]btc0.PreviousTx)
 		}
 		run(
 			arg0,
@@ -3797,13 +3797,13 @@ func (_c *MockBitcoiner_SignRawTransaction_Call) Return(msgTx *wire.MsgTx, b boo
 	return _c
 }
 
-func (_c *MockBitcoiner_SignRawTransaction_Call) RunAndReturn(run func(tx *wire.MsgTx, prevtxs []btc.PreviousTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransaction_Call {
+func (_c *MockBitcoiner_SignRawTransaction_Call) RunAndReturn(run func(tx *wire.MsgTx, prevtxs []btc0.PreviousTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SignRawTransactionWithKey provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc.PreviousTx) (*wire.MsgTx, bool, error) {
+func (_mock *MockBitcoiner) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc0.PreviousTx) (*wire.MsgTx, bool, error) {
 	ret := _mock.Called(tx, privKeysWIF, prevtxs)
 
 	if len(ret) == 0 {
@@ -3813,22 +3813,22 @@ func (_mock *MockBitcoiner) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWI
 	var r0 *wire.MsgTx
 	var r1 bool
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []btc.PreviousTx) (*wire.MsgTx, bool, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []btc0.PreviousTx) (*wire.MsgTx, bool, error)); ok {
 		return returnFunc(tx, privKeysWIF, prevtxs)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []btc.PreviousTx) *wire.MsgTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []btc0.PreviousTx) *wire.MsgTx); ok {
 		r0 = returnFunc(tx, privKeysWIF, prevtxs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*wire.MsgTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []string, []btc.PreviousTx) bool); ok {
+	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []string, []btc0.PreviousTx) bool); ok {
 		r1 = returnFunc(tx, privKeysWIF, prevtxs)
 	} else {
 		r1 = ret.Get(1).(bool)
 	}
-	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []string, []btc.PreviousTx) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []string, []btc0.PreviousTx) error); ok {
 		r2 = returnFunc(tx, privKeysWIF, prevtxs)
 	} else {
 		r2 = ret.Error(2)
@@ -3844,12 +3844,12 @@ type MockBitcoiner_SignRawTransactionWithKey_Call struct {
 // SignRawTransactionWithKey is a helper method to define mock.On call
 //   - tx *wire.MsgTx
 //   - privKeysWIF []string
-//   - prevtxs []btc.PreviousTx
+//   - prevtxs []btc0.PreviousTx
 func (_e *MockBitcoiner_Expecter) SignRawTransactionWithKey(tx interface{}, privKeysWIF interface{}, prevtxs interface{}) *MockBitcoiner_SignRawTransactionWithKey_Call {
 	return &MockBitcoiner_SignRawTransactionWithKey_Call{Call: _e.mock.On("SignRawTransactionWithKey", tx, privKeysWIF, prevtxs)}
 }
 
-func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Run(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc.PreviousTx)) *MockBitcoiner_SignRawTransactionWithKey_Call {
+func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Run(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc0.PreviousTx)) *MockBitcoiner_SignRawTransactionWithKey_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *wire.MsgTx
 		if args[0] != nil {
@@ -3859,9 +3859,9 @@ func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Run(run func(tx *wire.Ms
 		if args[1] != nil {
 			arg1 = args[1].([]string)
 		}
-		var arg2 []btc.PreviousTx
+		var arg2 []btc0.PreviousTx
 		if args[2] != nil {
-			arg2 = args[2].([]btc.PreviousTx)
+			arg2 = args[2].([]btc0.PreviousTx)
 		}
 		run(
 			arg0,
@@ -3877,7 +3877,7 @@ func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Return(msgTx *wire.MsgTx
 	return _c
 }
 
-func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) RunAndReturn(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc.PreviousTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransactionWithKey_Call {
+func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) RunAndReturn(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc0.PreviousTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransactionWithKey_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -4220,23 +4220,23 @@ func (_c *MockBitcoiner_UnlockUnspent_Call) RunAndReturn(run func() error) *Mock
 }
 
 // ValidateAddress provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ValidateAddress(addr string) (*btc.ValidateAddressResult, error) {
+func (_mock *MockBitcoiner) ValidateAddress(addr string) (*btc0.ValidateAddressResult, error) {
 	ret := _mock.Called(addr)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ValidateAddress")
 	}
 
-	var r0 *btc.ValidateAddressResult
+	var r0 *btc0.ValidateAddressResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.ValidateAddressResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc0.ValidateAddressResult, error)); ok {
 		return returnFunc(addr)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.ValidateAddressResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *btc0.ValidateAddressResult); ok {
 		r0 = returnFunc(addr)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.ValidateAddressResult)
+			r0 = ret.Get(0).(*btc0.ValidateAddressResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -4271,12 +4271,12 @@ func (_c *MockBitcoiner_ValidateAddress_Call) Run(run func(addr string)) *MockBi
 	return _c
 }
 
-func (_c *MockBitcoiner_ValidateAddress_Call) Return(validateAddressResult *btc.ValidateAddressResult, err error) *MockBitcoiner_ValidateAddress_Call {
+func (_c *MockBitcoiner_ValidateAddress_Call) Return(validateAddressResult *btc0.ValidateAddressResult, err error) *MockBitcoiner_ValidateAddress_Call {
 	_c.Call.Return(validateAddressResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ValidateAddress_Call) RunAndReturn(run func(addr string) (*btc.ValidateAddressResult, error)) *MockBitcoiner_ValidateAddress_Call {
+func (_c *MockBitcoiner_ValidateAddress_Call) RunAndReturn(run func(addr string) (*btc0.ValidateAddressResult, error)) *MockBitcoiner_ValidateAddress_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -4333,18 +4333,18 @@ func (_c *MockBitcoiner_ValidatePSBT_Call) RunAndReturn(run func(psbtBase64 stri
 }
 
 // Version provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) Version() bitcoin.Version {
+func (_mock *MockBitcoiner) Version() btc.Version {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for Version")
 	}
 
-	var r0 bitcoin.Version
-	if returnFunc, ok := ret.Get(0).(func() bitcoin.Version); ok {
+	var r0 btc.Version
+	if returnFunc, ok := ret.Get(0).(func() btc.Version); ok {
 		r0 = returnFunc()
 	} else {
-		r0 = ret.Get(0).(bitcoin.Version)
+		r0 = ret.Get(0).(btc.Version)
 	}
 	return r0
 }
@@ -4366,12 +4366,12 @@ func (_c *MockBitcoiner_Version_Call) Run(run func()) *MockBitcoiner_Version_Cal
 	return _c
 }
 
-func (_c *MockBitcoiner_Version_Call) Return(version bitcoin.Version) *MockBitcoiner_Version_Call {
+func (_c *MockBitcoiner_Version_Call) Return(version btc.Version) *MockBitcoiner_Version_Call {
 	_c.Call.Return(version)
 	return _c
 }
 
-func (_c *MockBitcoiner_Version_Call) RunAndReturn(run func() bitcoin.Version) *MockBitcoiner_Version_Call {
+func (_c *MockBitcoiner_Version_Call) RunAndReturn(run func() btc.Version) *MockBitcoiner_Version_Call {
 	_c.Call.Return(run)
 	return _c
 }
