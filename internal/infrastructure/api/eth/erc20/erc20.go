@@ -217,10 +217,26 @@ func (e *ERC20) CreateRawTransaction(
 		Fee:         txFee.Uint64(),
 		GasLimit:    uint32(gasLimit),
 		Nonce:       nonce,
+		EthTxType:   0, // legacy transaction
+		GasPrice:    gasPrice.Uint64(),
 	}
 
 	// Convert infrastructure RawTx to domain RawTx
 	return ethtx.ToDomainRawTx(infraRawTx), txParams, nil
+}
+
+// SupportsEIP1559 always returns false for ERC-20 tokens.
+// ERC-20 token transfers use legacy transactions.
+func (*ERC20) SupportsEIP1559(_ context.Context) bool {
+	return false
+}
+
+// CreateRawTransactionEIP1559 delegates to CreateRawTransaction for ERC-20 tokens.
+// ERC-20 token transfers use legacy transactions, so this is a fallback.
+func (e *ERC20) CreateRawTransactionEIP1559(
+	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
+	return e.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
 }
 
 func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {

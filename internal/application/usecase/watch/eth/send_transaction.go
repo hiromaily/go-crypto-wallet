@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
@@ -43,72 +42,60 @@ func (u *sendTransactionUseCase) Execute(
 		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
 
-	logger.Debug("send_tx", "action_type", actionType.String())
+	logger.Debug("send_tx", "action_type", actionType.String(), "tx_id", txID)
 
-	// Read hex from file
-	data, err := u.txFileRepo.ReadFileSlice(input.FilePath)
+	// Read signed transaction JSON file
+	txFile, err := u.txFileRepo.ReadETHJSONFile(input.FilePath)
 	if err != nil {
-		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ReadFile(): %w", err)
+		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ReadETHJSONFile(): %w", err)
 	}
 
-	// Process each signed transaction from the file
-	for _, txHex := range data {
-		// data is csv [rawTx.TxHex, signedRawTx.TxHex]
-		// rawTx.TxHex is used to record status by updating database
-		tmp := strings.Split(txHex, ",")
-		if len(tmp) != 2 {
-			return watchusecase.SendTransactionOutput{}, errors.New("data format is invalid in file")
-		}
-		uuid := tmp[0]
-		signedTx := tmp[1]
-
-		// Send signed transaction to Ethereum network
-		var sentTx string
-		sentTx, err = u.ethClient.SendSignedRawTransaction(ctx, signedTx)
-		if err != nil {
-			logger.Warn("fail to call eth.SendSignedRawTransaction()",
-				"error", err,
-			)
-			continue
-		}
-		if sentTx == "" {
-			logger.Warn("no sentTx by calling eth.SendSignedRawTransaction()",
-				"error", err,
-			)
-			continue
-		}
-
-		// Update eth_detail_tx table
-		var affectedNum int64
-		affectedNum, err = u.txDetailRepo.UpdateAfterTxSent(uuid, domainTx.TxTypeSent, signedTx, sentTx)
-		if err != nil {
-			// TODO: even if error occurred, tx is already sent. so db should be corrected manually
-			logger.Warn(
-				"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. "+
-					"So database should be updated manually",
-				"tx_id", txID,
-				"tx_type", domainTx.TxTypeSent.String(),
-				"tx_type_value", domainTx.TxTypeSent.Int8(),
-				"signed_hex_tx", signedTx,
-				"sent_hash_tx", sentTx,
-			)
-			continue
-		}
-		if affectedNum == 0 {
-			logger.Info("no records to update tx_table",
-				"tx_id", txID,
-				"tx_type", domainTx.TxTypeSent.String(),
-				"tx_type_value", domainTx.TxTypeSent.Int8(),
-				"signed_hex_tx", signedTx,
-				"sent_hash_tx", sentTx,
-			)
-			continue
-		}
+	// Validate required fields before submission
+	if txFile.UUID == "" {
+		return watchusecase.SendTransactionOutput{}, errors.New("uuid is empty in transaction file")
+	}
+	if txFile.SignedTxHex == "" {
+		return watchusecase.SendTransactionOutput{}, errors.New("signed_tx_hex is empty in transaction file")
 	}
 
-	// TODO: update is_allocated in account_pubkey_table
-	// Ethereum should use same address because no utxo
+	// Send signed transaction to Ethereum network
+	sentTxHash, err := u.ethClient.SendSignedRawTransaction(ctx, txFile.SignedTxHex)
+	if err != nil {
+		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call eth.SendSignedRawTransaction(): %w", err)
+	}
+
+	logger.Info("transaction submitted",
+		"uuid", txFile.UUID,
+		"from", txFile.From,
+		"to", txFile.To,
+		"tx_hash", sentTxHash,
+	)
+
+	// Update eth_detail_tx table: persist txHash and mark as TxTypeSent
+	affectedNum, err := u.txDetailRepo.UpdateAfterTxSent(
+		txFile.UUID, domainTx.TxTypeSent, txFile.SignedTxHex, sentTxHash)
+	if err != nil {
+		// Transaction is already sent; return the hash so the caller knows, but surface the DB error
+		logger.Warn(
+			"fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. "+
+				"So database should be updated manually",
+			"uuid", txFile.UUID,
+			"tx_type", domainTx.TxTypeSent.String(),
+			"signed_hex_tx", txFile.SignedTxHex,
+			"sent_hash_tx", sentTxHash,
+		)
+		return watchusecase.SendTransactionOutput{TxID: sentTxHash},
+			fmt.Errorf("fail to call txDetailRepo.UpdateAfterTxSent(): %w", err)
+	}
+	if affectedNum == 0 {
+		logger.Info("no records updated in eth_detail_tx",
+			"uuid", txFile.UUID,
+			"tx_type", domainTx.TxTypeSent.String(),
+			"sent_hash_tx", sentTxHash,
+		)
+	}
+
 	return watchusecase.SendTransactionOutput{
-		TxID: "",
+		TxID: sentTxHash,
 	}, nil
 }

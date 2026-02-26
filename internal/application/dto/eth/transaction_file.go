@@ -22,6 +22,7 @@ type ETHTransactionFile struct {
 	EthTxType uint8  `json:"eth_tx_type"` // 0=legacy, 2=EIP-1559
 
 	// Transaction identity
+	UUID    string `json:"uuid"`     // Internal UUID for database record lookup after broadcast
 	ChainID uint64 `json:"chain_id"` // EIP-155 chain identifier
 	Nonce   uint64 `json:"nonce"`    // Sender transaction count
 	From    string `json:"from"`     // Sender address
@@ -43,6 +44,12 @@ type ETHTransactionFile struct {
 	RawTxHex    string `json:"raw_tx_hex"`              // Always present; unsigned tx binary
 	SignedTxHex string `json:"signed_tx_hex,omitempty"` // Present only when tx_type == "signed"
 }
+
+// EthTxType constants for Ethereum transaction type identifiers.
+const (
+	EthTxTypeLegacy  uint8 = 0 // Legacy (Type 0) transaction
+	EthTxTypeEIP1559 uint8 = 2 // EIP-1559 (Type 2) dynamic fee transaction
+)
 
 // Sentinel errors for validation failures.
 var (
@@ -101,7 +108,7 @@ func (f *ETHTransactionFile) validateHeader() error {
 	if f.TxType != string(domainTx.TxTypeUnsigned) && f.TxType != string(domainTx.TxTypeSigned) {
 		return ErrInvalidETHTxType
 	}
-	if f.EthTxType != 0 && f.EthTxType != 2 {
+	if f.EthTxType != EthTxTypeLegacy && f.EthTxType != EthTxTypeEIP1559 {
 		return ErrInvalidETHTxTypeCode
 	}
 	if f.ChainID == 0 {
@@ -133,11 +140,11 @@ func (f *ETHTransactionFile) validateTransactionFields() error {
 // validateFeeFields checks required fee fields based on the transaction type.
 func (f *ETHTransactionFile) validateFeeFields() error {
 	switch f.EthTxType {
-	case 0: // Legacy
+	case EthTxTypeLegacy:
 		if f.GasPrice == "" {
 			return ErrMissingETHGasPrice
 		}
-	case 2: // EIP-1559
+	case EthTxTypeEIP1559:
 		if f.MaxFeePerGas == "" {
 			return ErrMissingETHMaxFeePerGas
 		}

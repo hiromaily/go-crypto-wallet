@@ -91,7 +91,7 @@
   - Inject all required dependencies: account key repository, transaction file repository, chain config provider
   - _Requirements: 1.5_
 
-- [ ] 7. (P) Update Watch wallet transaction creation for EIP-1559
+- [x] 7. (P) Update Watch wallet transaction creation for EIP-1559
   - Check EIP-1559 support via `SupportsEIP1559`; fall back to constructing a legacy `LegacyTx` when the node does not support it
   - Estimate `maxPriorityFeePerGas` using `SuggestGasTipCap` with config fallback; compute `maxFeePerGas = baseFee × 2 + tip`
   - Construct an EIP-1559 `DynamicFeeTx` with both fee fields when supported
@@ -100,7 +100,7 @@
   - Depends on: Tasks 1, 2, 3, 4
   - _Requirements: 2.1, 2.2, 2.3, 6.1_
 
-- [ ] 8. (P) Update Watch wallet transaction broadcast to read from signed files
+- [x] 8. (P) Update Watch wallet transaction broadcast to read from signed files
   - Read the signed transaction JSON file using the transaction file repo
   - Deserialize and validate the signature before broadcasting
   - Submit via `eth_sendRawTransaction` and persist the returned txHash to the database as `TxTypeSent`
