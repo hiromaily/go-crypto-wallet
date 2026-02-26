@@ -59,6 +59,8 @@ eth_init_database
 # Priority: Environment Variables > Config File > Default Values
 #
 # Pattern 1 uses Anvil by default; override with NODE_TYPE=geth for Geth.
+# ETH uses BIP44 derivation (eth-address -> bip44), required to initialize key generator.
+export WALLET_ADDRESS_TYPE="eth-address"
 export WALLET_ETHEREUM_NETWORK_TYPE="${NODE_TYPE:-anvil}"
 export WALLET_ETHEREUM_PORT="${ETH_RPC_PORT}"
 
@@ -72,8 +74,9 @@ eth_get_config_paths
 KEY_NUM=5
 
 # Accounts used in this E2E test
+# createTransferTx restricts receiver to internal accounts (not client, not authorization)
 PAYMENT_ACCOUNT="payment"
-CLIENT_ACCOUNT="client"
+CLIENT_ACCOUNT="deposit"
 
 # Amount (ETH) to fund sender address and transfer
 FUNDING_AMOUNT_ETH=100
@@ -153,17 +156,17 @@ keygen_phase() {
 	log_step "Key Generation Phase (Keygen wallet)"
 
 	log_substep "Creating mnemonic seed"
-	eth_keygen_cmd -coin eth create seed || {
+	eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" create seed || {
 		log_warn "Seed already exists or error, continuing..."
 	}
 
 	log_substep "Creating ${KEY_NUM} HD keys for '${PAYMENT_ACCOUNT}' account"
-	eth_keygen_cmd -coin eth create hdkey \
+	eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" create hdkey \
 		--account "${PAYMENT_ACCOUNT}" \
 		--keynum "${KEY_NUM}"
 
 	log_substep "Creating ${KEY_NUM} HD keys for '${CLIENT_ACCOUNT}' account"
-	eth_keygen_cmd -coin eth create hdkey \
+	eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" create hdkey \
 		--account "${CLIENT_ACCOUNT}" \
 		--keynum "${KEY_NUM}"
 
@@ -175,26 +178,24 @@ keygen_phase() {
 ###############################################################################
 
 address_setup_phase() {
-	log_step "AccountXpub Export → Watch Address Import Phase"
+	log_step "Address Export (Keygen DB) → Watch Address Import Phase"
 
-	# Export and import xpub for each account (watch needs both to create transfer tx)
+	# Export ETH addresses from keygen DB as a watch-compatible CSV and import into watch wallet.
+	# watch import address uses ConvertAddressLine which expects BTC-style 8-field CSV;
+	# eth_export_watch_address_csv creates that format using the keygen SQLite DB directly.
 	for account in "${PAYMENT_ACCOUNT}" "${CLIENT_ACCOUNT}"; do
-		log_substep "Exporting accountXpub for '${account}'"
-		local export_output
-		export_output=$(eth_keygen_cmd -coin eth export fullpubkey \
-			--account "${account}" 2>&1)
-		local xpub_file
-		xpub_file=$(eth_extract_file_path "${export_output}")
+		log_substep "Exporting '${account}' addresses from keygen DB"
+		local csv_file
+		csv_file=$(eth_export_watch_address_csv "${account}")
 
-		if [ -z "${xpub_file}" ]; then
-			log_error "Failed to extract xpub file path for '${account}'"
-			log_error "Output: ${export_output}"
+		if [ -z "${csv_file}" ] || [ ! -f "${csv_file}" ] || [ ! -s "${csv_file}" ]; then
+			log_error "Failed to create address CSV for '${account}'"
 			return 1
 		fi
-		log_info "  ${account} xpub: ${xpub_file}"
+		log_info "  ${account} address CSV: ${csv_file}"
 
 		log_substep "Importing '${account}' addresses into watch wallet"
-		eth_watch_cmd -coin eth import address --file "${xpub_file}"
+		eth_watch_cmd -c "${ETH_CONFIG_WATCH}" --coin "${ETH_COIN}" import address --file "${csv_file}"
 	done
 
 	log_info "Address setup completed"
@@ -230,7 +231,7 @@ create_tx_phase() {
 
 	log_substep "Creating unsigned transfer tx: ${PAYMENT_ACCOUNT} → ${CLIENT_ACCOUNT} (${TRANSFER_AMOUNT_ETH} ETH)"
 	local create_output
-	create_output=$(eth_watch_cmd -coin eth create transfer \
+	create_output=$(eth_watch_cmd -c "${ETH_CONFIG_WATCH}" --coin "${ETH_COIN}" create transfer \
 		--account1 "${PAYMENT_ACCOUNT}" \
 		--account2 "${CLIENT_ACCOUNT}" \
 		--amount "${TRANSFER_AMOUNT_ETH}" 2>&1) || {
@@ -263,7 +264,7 @@ sign_tx_phase() {
 
 	log_substep "Signing transaction: ${UNSIGNED_TX_FILE}"
 	local sign_output
-	sign_output=$(eth_keygen_cmd -coin eth sign signature \
+	sign_output=$(eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" sign signature \
 		--file "${UNSIGNED_TX_FILE}" 2>&1) || {
 		log_error "Failed to sign transaction"
 		log_error "Output: ${sign_output}"
@@ -297,7 +298,7 @@ send_tx_phase() {
 
 	log_substep "Sending signed transaction: ${SIGNED_TX_FILE}"
 	local send_output
-	send_output=$(eth_watch_cmd -coin eth send tx \
+	send_output=$(eth_watch_cmd -c "${ETH_CONFIG_WATCH}" --coin "${ETH_COIN}" send tx \
 		--file "${SIGNED_TX_FILE}" 2>&1) || {
 		log_error "Failed to send transaction"
 		log_error "Output: ${send_output}"
@@ -323,7 +324,7 @@ monitor_phase() {
 	log_step "Monitoring Phase (Watch wallet)"
 
 	log_substep "Monitoring sent transactions for confirmation"
-	eth_watch_cmd -coin eth monitor senttx || {
+	eth_watch_cmd -c "${ETH_CONFIG_WATCH}" --coin "${ETH_COIN}" monitor senttx || {
 		log_warn "Monitor returned non-zero (may be no transactions to monitor yet)"
 	}
 
@@ -343,6 +344,7 @@ e2e_full_workflow() {
 
 	eth_check_prerequisites
 	eth_setup_infrastructure
+	eth_init_sqlite_db
 
 	keygen_phase
 	address_setup_phase

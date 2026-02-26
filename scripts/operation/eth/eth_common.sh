@@ -131,6 +131,40 @@ eth_sign_cmd() {
 }
 
 ###############################################################################
+# SQLite Schema Initialization
+###############################################################################
+
+# Initialize SQLite databases for E2E testing using the composite schemas.
+# Must be called after eth_init_database() sets SQLITE_*_DB_PATH.
+eth_init_sqlite_db() {
+	if [ "${DB_TYPE}" != "sqlite" ]; then
+		return 0
+	fi
+
+	local project_root
+	project_root="$(cd "${_ETH_COMMON_DIR}/../../.." && pwd)"
+
+	local watch_schema="${project_root}/tools/sqlc/schemas/sqlite/e2e/01_watch.sql"
+	local keygen_schema="${project_root}/tools/sqlc/schemas/sqlite/e2e/02_keygen.sql"
+
+	if [ -f "${watch_schema}" ]; then
+		rm -f "${SQLITE_WATCH_DB_PATH}"
+		sqlite3 "${SQLITE_WATCH_DB_PATH}" <"${watch_schema}"
+		log_info "Watch SQLite DB initialized"
+	else
+		log_warn "Watch schema not found: ${watch_schema}"
+	fi
+
+	if [ -f "${keygen_schema}" ]; then
+		rm -f "${SQLITE_KEYGEN_DB_PATH}"
+		sqlite3 "${SQLITE_KEYGEN_DB_PATH}" <"${keygen_schema}"
+		log_info "Keygen SQLite DB initialized"
+	else
+		log_warn "Keygen schema not found: ${keygen_schema}"
+	fi
+}
+
+###############################################################################
 # Infrastructure Setup
 ###############################################################################
 
@@ -227,18 +261,45 @@ eth_full_reset() {
 # Database Query Functions (SQLite)
 ###############################################################################
 
-# Get the first payment address from the watch wallet DB
+# Get the first unallocated address for an account from the watch wallet DB
 # Usage: addr=$(eth_get_payment_address "payment")
 eth_get_payment_address() {
 	local account="${1:-payment}"
 
 	if [ "${DB_TYPE}" = "sqlite" ]; then
 		sqlite3 "${SQLITE_WATCH_DB_PATH}" \
-			"SELECT wallet_address FROM account_pubkey_table WHERE account='${account}' AND is_allocated=0 LIMIT 1" 2>/dev/null || true
+			"SELECT wallet_address FROM address WHERE coin='eth' AND account='${account}' AND is_allocated=0 LIMIT 1" 2>/dev/null || true
 	else
 		log_warn "eth_get_payment_address: MySQL support not yet implemented"
 		echo ""
 	fi
+}
+
+# Export ETH addresses from keygen DB as a CSV file compatible with watch import address.
+# The watch's import address use case uses ConvertAddressLine which expects 8 fields:
+#   coinTypeCode,accountType,P2PKHAddress,P2SHSegwitAddress,Bech32Address,FullPublicKey,MultisigAddress,Idx
+# For ETH, the ETH address goes in the P2PKHAddress slot (field 2), others are empty.
+#
+# Usage: csv_file=$(eth_export_watch_address_csv "payment")
+eth_export_watch_address_csv() {
+	local account="$1"
+	local project_root
+	project_root="$(cd "${_ETH_COMMON_DIR}/../../.." && pwd)"
+	local addr_dir="${project_root}/data/address/eth"
+	mkdir -p "${addr_dir}"
+
+	local tmp_file="${addr_dir}/${account}_$(date +%s%N 2>/dev/null || date +%s).csv"
+
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		# Query keygen DB for ETH addresses, emit 8-field CSV (P2PKHAddress=ETH address, rest empty)
+		sqlite3 "${SQLITE_KEYGEN_DB_PATH}" \
+			"SELECT 'eth'||','||account||','||address||',,,,,'||idx FROM eth_account_key WHERE account='${account}'" \
+			>"${tmp_file}" 2>/dev/null || true
+	else
+		log_warn "eth_export_watch_address_csv: MySQL support not yet implemented"
+	fi
+
+	echo "${tmp_file}"
 }
 
 ###############################################################################

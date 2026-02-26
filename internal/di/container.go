@@ -877,11 +877,19 @@ func (c *container) newKeyGenerator() portsWallet.Generator {
 func (c *container) getKeyType() domainKey.KeyType {
 	// Derive KeyType from AddressType to ensure consistency
 	// address_type and key_type have a 1:1 mapping:
-	//   - legacy      -> bip44
-	//   - p2sh-segwit -> bip49
-	//   - bech32      -> bip84
-	//   - taproot     -> bip86
-	keyType, err := c.conf.AddressType.ToKeyType()
+	//   - legacy       -> bip44
+	//   - p2sh-segwit  -> bip49
+	//   - bech32       -> bip84
+	//   - taproot      -> bip86
+	//   - eth-address  -> bip44 (ETH uses BIP44 derivation, m/44'/60'/0'/0/x)
+	//
+	// ETH config files do not set address_type (ETH has only one address format).
+	// When AddressType is empty and the coin is ETH, default to BIP44.
+	addrType := c.conf.AddressType
+	if addrType == "" && domainCoin.IsETHGroup(c.conf.CoinTypeCode) {
+		addrType = domainAddress.AddrTypeETH
+	}
+	keyType, err := addrType.ToKeyType()
 	if err != nil {
 		// Unsupported address type is a critical configuration error.
 		// Panic to prevent silent failures that could lead to incorrect
@@ -1214,6 +1222,9 @@ func (c *container) NewXRPWatchSubmitMultisigTxUseCase() watchusecase.SubmitMult
 // Keygen Use Cases
 
 func (c *container) NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
+	if domainCoin.IsETHGroup(c.conf.CoinTypeCode) {
+		return c.newETHKeygenGenerateHDWalletUseCase()
+	}
 	return c.newKeygenGenerateHDWalletUseCase()
 }
 
