@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/testutil"
 )
 
@@ -20,7 +19,7 @@ type personalTest struct {
 
 // TestImportRawKey is test for ImportRawKey
 func (pt *personalTest) TestImportRawKey() {
-	pw := apiethimpl.Password
+	pw := "password"
 
 	type args struct {
 		key string
@@ -75,7 +74,7 @@ func (pt *personalTest) TestListAccounts() {
 // TestNewAccount is test for ListAccounts
 func (pt *personalTest) TestNewAccount() {
 	ctx := context.Background()
-	addr, err := pt.ETH.NewAccount(ctx, apiethimpl.Password, account.AccountTypeClient)
+	addr, err := pt.ETH.NewAccount(ctx, "password", account.AccountTypeClient)
 	pt.NoError(err)
 	pt.T().Log("address:", addr)
 }
@@ -85,7 +84,7 @@ func (pt *personalTest) TestLockAccount() {
 	addr := "0x852d4ae6bfa5ae9d44d3ac03122674bcb32a0861"
 
 	// unlock
-	isUnlocked, err := pt.ETH.UnlockAccount(ctx, addr, apiethimpl.Password, uint64(1))
+	isUnlocked, err := pt.ETH.UnlockAccount(ctx, addr, "password", uint64(1))
 	pt.NoError(err)
 	if !isUnlocked {
 		pt.T().Error("address is not unlocked")

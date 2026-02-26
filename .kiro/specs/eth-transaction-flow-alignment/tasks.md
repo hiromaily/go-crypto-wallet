@@ -120,26 +120,25 @@
   - _Requirements: 8.3, 8.5_
 
 - [ ] 10. Migrate all ETH use cases to Clean Architecture compliance
-- [~] 10.1 Remove direct infrastructure imports from ETH use cases (Partially done — PR #575)
+- [x] 10.1 Remove direct infrastructure imports from ETH use cases (Partially done — PR #575)
   - [x] Removed `ethereum` infrastructure package imports from all use cases (PR #575)
-  - [ ] Remove remaining `apiethimpl` infrastructure imports (3 files still import for `Password` constant):
-    - `internal/application/usecase/keygen/eth/sign_transaction.go`
+  - [x] Removed `apiethimpl` infrastructure imports from 3 files by injecting `keystorePassword` via constructor:
+    - `internal/application/usecase/keygen/eth/sign_transaction.go` (was already clean)
     - `internal/application/usecase/sign/eth/sign_transaction.go`
     - `internal/application/usecase/keygen/eth/import_private_key.go`
-  - Completion blocked by Task 10.3 (configurable password injection)
+  - Password now sourced from `c.conf.Ethereum.KeystorePassword` in DI container
   - _Requirements: 5.1_
 
-- [~] 10.2 (P) Restrict/deprecate monolithic Ethereumer interface (Partially done — PR #575)
+- [x] 10.2 (P) Restrict/deprecate monolithic Ethereumer interface (Partially done — PR #575)
   - [x] `Ethereumer` in `internal/application/ports/api/eth/interface.go` now carries a DI-layer-only usage restriction comment (PR #575)
   - [x] The deprecated `internal/infrastructure/api/eth/api-interface.go` has been deleted (PR #575)
-  - [ ] Final removal of `Ethereumer` from `interface.go` — evaluate after Tasks 6.2, 7, 8, 9 complete DI wiring migration
-  - Depends on 10.1
+  - [~] Final removal of `Ethereumer` from `interface.go` — evaluated and deferred: `Ethereumer` is kept as it serves as the initialization contract in the DI layer
   - _Requirements: 5.3_
 
-- [ ] 10.3 (P) Replace hardcoded password constant with configurable injection
-  - Remove the hardcoded `Password = "password"` constant from the ETH infrastructure package
-  - Inject the keystore password via the configuration system using the `KeystorePassword` field added in Task 1.1
-  - Depends on 10.1
+- [x] 10.3 (P) Replace hardcoded password constant with configurable injection
+  - Removed the hardcoded `Password = "password"` constant from `types.go`
+  - Use case layer already injects keystore password via `c.conf.Ethereum.KeystorePassword` (done in Task 10.1)
+  - Updated integration test files to use literal `"password"` string directly
   - _Requirements: 5.4_
 
 - [ ] 11. Docker Compose node profiles and E2E verification scripts
