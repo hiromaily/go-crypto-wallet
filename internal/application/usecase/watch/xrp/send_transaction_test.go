@@ -13,6 +13,7 @@ import (
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	xrpapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )
@@ -33,45 +34,9 @@ const (
 		"A5F00C1C26DA0BFA83140000000000000000000000000455553440000000000000000000000000000000000000000002"
 )
 
-// MockTransactionSubmitter is a mock implementation of TransactionSubmitter for testing
-type MockTransactionSubmitter struct {
-	mock.Mock
-}
-
-func (m *MockTransactionSubmitter) SubmitTransaction(
-	ctx context.Context,
-	signedTx string,
-) (*dtoxrp.SentTx, uint64, error) {
-	args := m.Called(ctx, signedTx)
-	if args.Get(0) == nil {
-		return nil, args.Get(1).(uint64), args.Error(2)
-	}
-	return args.Get(0).(*dtoxrp.SentTx), args.Get(1).(uint64), args.Error(2)
-}
-
-func (m *MockTransactionSubmitter) WaitValidation(
-	ctx context.Context,
-	targetLedgerVersion uint64,
-) (uint64, error) {
-	args := m.Called(ctx, targetLedgerVersion)
-	return args.Get(0).(uint64), args.Error(1)
-}
-
-func (m *MockTransactionSubmitter) GetTransaction(
-	ctx context.Context,
-	txID string,
-	targetLedgerVersion uint64,
-) (*dtoxrp.TxInfo, error) {
-	args := m.Called(ctx, txID, targetLedgerVersion)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*dtoxrp.TxInfo), args.Error(1)
-}
-
 // sendTestDependencies holds all mock dependencies for SendTransactionUseCase testing
 type sendTestDependencies struct {
-	submitter    *MockTransactionSubmitter
+	submitter    *xrpapiamocks.MockTransactionSubmitter
 	txDetailRepo *repomocks.MockXRPDetailTXRepositorier
 	txFileRepo   *storagemocks.MockTransactionFileRepositorier
 }
@@ -80,7 +45,7 @@ type sendTestDependencies struct {
 func newSendTestDependencies(t *testing.T) *sendTestDependencies {
 	t.Helper()
 	return &sendTestDependencies{
-		submitter:    &MockTransactionSubmitter{},
+		submitter:    xrpapiamocks.NewMockTransactionSubmitter(t),
 		txDetailRepo: repomocks.NewMockXRPDetailTXRepositorier(t),
 		txFileRepo:   storagemocks.NewMockTransactionFileRepositorier(t),
 	}
@@ -96,11 +61,12 @@ func createSendUseCase(deps *sendTestDependencies) watchusecase.SendTransactionU
 }
 
 func TestSendTransactionUseCase_Execute_InvalidFilePath(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "invalid-path", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("invalid-path", domainTx.TxTypeSigned).
 		Return(domainTx.ActionType(""), domainTx.TxType(""), int64(0), 0, errors.New("invalid file path"))
 
 	input := watchusecase.SendTransactionInput{
@@ -112,17 +78,17 @@ func TestSendTransactionUseCase_Execute_InvalidFilePath(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "fail to call txFileRepo.ValidateFilePath()")
 	assert.Empty(t, output.TxID)
-	deps.txFileRepo.AssertExpectations(t)
 }
 
 func TestSendTransactionUseCase_Execute_JSONParsingError(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "valid-path.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("valid-path.json", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.On("ReadXRPJSONFile", "valid-path.json").
+	deps.txFileRepo.EXPECT().ReadXRPJSONFile("valid-path.json").
 		Return((*dtoxrp.XRPTransactionFile)(nil), errors.New("invalid JSON format"))
 
 	input := watchusecase.SendTransactionInput{
@@ -135,10 +101,10 @@ func TestSendTransactionUseCase_Execute_JSONParsingError(t *testing.T) {
 	assert.Contains(t, err.Error(), "fail to call txFileRepo.ReadXRPJSONFile()")
 	assert.Contains(t, err.Error(), "invalid JSON format")
 	assert.Empty(t, output.TxID)
-	deps.txFileRepo.AssertExpectations(t)
 }
 
 func TestSendTransactionUseCase_Execute_IncompleteTransaction(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -163,9 +129,9 @@ func TestSendTransactionUseCase_Execute_IncompleteTransaction(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.On("ReadXRPJSONFile", "signed.json").
+	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
 		Return(txFile, nil)
 
 	input := watchusecase.SendTransactionInput{
@@ -178,10 +144,10 @@ func TestSendTransactionUseCase_Execute_IncompleteTransaction(t *testing.T) {
 	assert.Contains(t, err.Error(), "transaction is incomplete")
 	assert.Contains(t, err.Error(), "requires 2 signatures but has 1")
 	assert.Empty(t, output.TxID)
-	deps.txFileRepo.AssertExpectations(t)
 }
 
 func TestSendTransactionUseCase_Execute_NullSignedBlob(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -204,9 +170,9 @@ func TestSendTransactionUseCase_Execute_NullSignedBlob(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.On("ReadXRPJSONFile", "signed.json").
+	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
 		Return(txFile, nil)
 
 	input := watchusecase.SendTransactionInput{
@@ -218,10 +184,10 @@ func TestSendTransactionUseCase_Execute_NullSignedBlob(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "signedBlob is null for transaction")
 	assert.Empty(t, output.TxID)
-	deps.txFileRepo.AssertExpectations(t)
 }
 
 func TestSendTransactionUseCase_Execute_EmptySignedBlob(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -245,9 +211,9 @@ func TestSendTransactionUseCase_Execute_EmptySignedBlob(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.On("ReadXRPJSONFile", "signed.json").
+	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
 		Return(txFile, nil)
 
 	input := watchusecase.SendTransactionInput{
@@ -259,10 +225,10 @@ func TestSendTransactionUseCase_Execute_EmptySignedBlob(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "signedBlob is empty for transaction")
 	assert.Empty(t, output.TxID)
-	deps.txFileRepo.AssertExpectations(t)
 }
 
 func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -287,11 +253,11 @@ func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.On("ReadXRPJSONFile", "signed.json").
+	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
 		Return(txFile, nil)
-	deps.submitter.On("SubmitTransaction", mock.Anything, signedBlob).
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob).
 		Return((*dtoxrp.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
 
 	input := watchusecase.SendTransactionInput{
@@ -303,11 +269,10 @@ func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
 	// Should not return error for individual transaction failures (logged as warnings)
 	require.NoError(t, err)
 	assert.Empty(t, output.TxID)
-	deps.txFileRepo.AssertExpectations(t)
-	deps.submitter.AssertExpectations(t)
 }
 
 func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -349,17 +314,17 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.On("ReadXRPJSONFile", "signed.json").
+	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
 		Return(txFile, nil)
-	deps.submitter.On("SubmitTransaction", mock.Anything, signedBlob).
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob).
 		Return(sentTx, uint64(12340), nil)
-	deps.submitter.On("WaitValidation", mock.Anything, uint64(12345)).
+	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12345)).
 		Return(uint64(12345), nil)
-	deps.submitter.On("GetTransaction", mock.Anything, txHash, uint64(12340)).
+	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash, uint64(12340)).
 		Return(txInfo, nil)
-	deps.txDetailRepo.On("UpdateAfterTxSent",
+	deps.txDetailRepo.EXPECT().UpdateAfterTxSent(
 		"01234567-89ab-cdef-0123-456789abcdef",
 		domainTx.TxTypeSent,
 		txHash,
@@ -375,12 +340,10 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, txHash, output.TxID, "should return transaction hash")
-	deps.txFileRepo.AssertExpectations(t)
-	deps.submitter.AssertExpectations(t)
-	deps.txDetailRepo.AssertExpectations(t)
 }
 
 func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -444,29 +407,29 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.On("ValidateFilePath", "signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 2, nil)
-	deps.txFileRepo.On("ReadXRPJSONFile", "signed.json").
+	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
 		Return(txFile, nil)
 
 	// Transaction 1
-	deps.submitter.On("SubmitTransaction", mock.Anything, signedBlob1).
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob1).
 		Return(sentTx1, uint64(12340), nil)
-	deps.submitter.On("WaitValidation", mock.Anything, uint64(12345)).
+	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12345)).
 		Return(uint64(12345), nil)
-	deps.submitter.On("GetTransaction", mock.Anything, txHash1, uint64(12340)).
+	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash1, uint64(12340)).
 		Return(txInfo1, nil)
-	deps.txDetailRepo.On("UpdateAfterTxSent", "uuid-1", domainTx.TxTypeSent, txHash1, signedBlob1, uint64(12340)).
+	deps.txDetailRepo.EXPECT().UpdateAfterTxSent("uuid-1", domainTx.TxTypeSent, txHash1, signedBlob1, uint64(12340)).
 		Return(int64(1), nil)
 
 	// Transaction 2
-	deps.submitter.On("SubmitTransaction", mock.Anything, signedBlob2).
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob2).
 		Return(sentTx2, uint64(12341), nil)
-	deps.submitter.On("WaitValidation", mock.Anything, uint64(12346)).
+	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12346)).
 		Return(uint64(12346), nil)
-	deps.submitter.On("GetTransaction", mock.Anything, txHash2, uint64(12341)).
+	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash2, uint64(12341)).
 		Return(txInfo2, nil)
-	deps.txDetailRepo.On("UpdateAfterTxSent", "uuid-2", domainTx.TxTypeSent, txHash2, signedBlob2, uint64(12341)).
+	deps.txDetailRepo.EXPECT().UpdateAfterTxSent("uuid-2", domainTx.TxTypeSent, txHash2, signedBlob2, uint64(12341)).
 		Return(int64(1), nil)
 
 	input := watchusecase.SendTransactionInput{
@@ -483,7 +446,4 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 		output.TxID == txHash1 || output.TxID == txHash2,
 		"should return one of the submitted transaction hashes",
 	)
-	deps.txFileRepo.AssertExpectations(t)
-	deps.submitter.AssertExpectations(t)
-	deps.txDetailRepo.AssertExpectations(t)
 }

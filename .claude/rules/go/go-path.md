@@ -1,3 +1,7 @@
+---
+paths: ["**/*.go"]
+---
+
 # Go Path Configuration Rules
 
 ## Overview
@@ -41,8 +45,8 @@ go version
 
 ## Expected Environment
 
-| Variable | Expected Value |
-|----------|----------------|
-| `which go` | `/opt/homebrew/bin/go` |
-| `go version` | Matches `go.mod` version |
-| `GOROOT` | `/opt/homebrew/Cellar/go/<version>/libexec` |
+| Variable     | Expected Value                              |
+| ------------ | ------------------------------------------- |
+| `which go`   | `/opt/homebrew/bin/go`                      |
+| `go version` | Matches `go.mod` version                    |
+| `GOROOT`     | `/opt/homebrew/Cellar/go/<version>/libexec` |
