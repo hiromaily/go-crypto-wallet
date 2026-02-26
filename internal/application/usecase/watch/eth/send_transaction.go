@@ -50,7 +50,10 @@ func (u *sendTransactionUseCase) Execute(
 		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ReadETHJSONFile(): %w", err)
 	}
 
-	// Validate that signed_tx_hex is present
+	// Validate required fields before submission
+	if txFile.UUID == "" {
+		return watchusecase.SendTransactionOutput{}, errors.New("uuid is empty in transaction file")
+	}
 	if txFile.SignedTxHex == "" {
 		return watchusecase.SendTransactionOutput{}, errors.New("signed_tx_hex is empty in transaction file")
 	}

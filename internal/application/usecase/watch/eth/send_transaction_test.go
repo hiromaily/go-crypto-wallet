@@ -114,6 +114,30 @@ func TestETHSendTransactionUseCase_Execute_ReadJSONError(t *testing.T) {
 	assert.Empty(t, output.TxID)
 }
 
+func TestETHSendTransactionUseCase_Execute_EmptyUUID(t *testing.T) {
+	t.Parallel()
+	deps := newEthSendTxTestDeps(t)
+	useCase := newEthSendTxUseCase(deps)
+
+	txFile := testSignedETHFile()
+	txFile.UUID = "" // missing UUID — DB update would silently affect 0 rows
+
+	deps.txFileRepo.EXPECT().
+		ValidateFilePath(testETHSignedFilePath, domainTx.TxTypeSigned).
+		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(1), 1, nil)
+	deps.txFileRepo.EXPECT().
+		ReadETHJSONFile(testETHSignedFilePath).
+		Return(txFile, nil)
+
+	output, err := useCase.Execute(context.Background(), watchusecase.SendTransactionInput{
+		FilePath: testETHSignedFilePath,
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "uuid is empty")
+	assert.Empty(t, output.TxID)
+}
+
 func TestETHSendTransactionUseCase_Execute_EmptySignedTxHex(t *testing.T) {
 	t.Parallel()
 	deps := newEthSendTxTestDeps(t)
