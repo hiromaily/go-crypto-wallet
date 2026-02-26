@@ -120,13 +120,13 @@
   - _Requirements: 8.3, 8.5_
 
 - [ ] 10. Migrate all ETH use cases to Clean Architecture compliance
-- [~] 10.1 Remove direct infrastructure imports from ETH use cases (Partially done — PR #575)
+- [x] 10.1 Remove direct infrastructure imports from ETH use cases (Partially done — PR #575)
   - [x] Removed `ethereum` infrastructure package imports from all use cases (PR #575)
-  - [ ] Remove remaining `apiethimpl` infrastructure imports (3 files still import for `Password` constant):
-    - `internal/application/usecase/keygen/eth/sign_transaction.go`
+  - [x] Removed `apiethimpl` infrastructure imports from 3 files by injecting `keystorePassword` via constructor:
+    - `internal/application/usecase/keygen/eth/sign_transaction.go` (was already clean)
     - `internal/application/usecase/sign/eth/sign_transaction.go`
     - `internal/application/usecase/keygen/eth/import_private_key.go`
-  - Completion blocked by Task 10.3 (configurable password injection)
+  - Password now sourced from `c.conf.Ethereum.KeystorePassword` in DI container
   - _Requirements: 5.1_
 
 - [~] 10.2 (P) Restrict/deprecate monolithic Ethereumer interface (Partially done — PR #575)

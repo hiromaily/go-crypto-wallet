@@ -1724,6 +1724,7 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 	return keygenusecaseeth.NewImportPrivateKeyUseCase(
 		c.newETH(),
 		c.newEthAccountKeyRepo(),
+		c.conf.Ethereum.KeystorePassword,
 	)
 }
 
@@ -1896,6 +1897,7 @@ func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUs
 		c.newETH(),
 		c.newTxFileRepo(),
 		c.walletType,
+		c.conf.Ethereum.KeystorePassword,
 	)
 }
 

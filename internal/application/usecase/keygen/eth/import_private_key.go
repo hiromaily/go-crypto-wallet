@@ -11,23 +11,25 @@ import (
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type importPrivateKeyUseCase struct {
-	eth            apieth.ETHKeyAccessor
-	accountKeyRepo repocold.ETHAccountKeyRepositorier
+	eth              apieth.ETHKeyAccessor
+	accountKeyRepo   repocold.ETHAccountKeyRepositorier
+	keystorePassword string
 }
 
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase
 func NewImportPrivateKeyUseCase(
 	eth apieth.ETHKeyAccessor,
 	accountKeyRepo repocold.ETHAccountKeyRepositorier,
+	keystorePassword string,
 ) keygenusecase.ImportPrivateKeyUseCase {
 	return &importPrivateKeyUseCase{
-		eth:            eth,
-		accountKeyRepo: accountKeyRepo,
+		eth:              eth,
+		accountKeyRepo:   accountKeyRepo,
+		keystorePassword: keystorePassword,
 	}
 }
 
@@ -75,7 +77,7 @@ func (u *importPrivateKeyUseCase) Import(
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
 		// TODO: where password should come from
 		var acct accounts.Account
-		acct, err = ks.ImportECDSA(ecdsaKey, apiethimpl.Password)
+		acct, err = ks.ImportECDSA(ecdsaKey, u.keystorePassword)
 		if err != nil {
 			// It continues even if error occurred
 			// Because database stores status, import run again by same command for this key

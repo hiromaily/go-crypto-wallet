@@ -11,14 +11,14 @@ import (
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
 type signTransactionUseCase struct {
-	eth        apieth.ETHTransactionSigner
-	txFileRepo file.TransactionFileRepositorier
-	wtype      domainWallet.WalletType
+	eth              apieth.ETHTransactionSigner
+	txFileRepo       file.TransactionFileRepositorier
+	wtype            domainWallet.WalletType
+	keystorePassword string
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
@@ -26,11 +26,13 @@ func NewSignTransactionUseCase(
 	ethAPI apieth.ETHTransactionSigner,
 	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
+	keystorePassword string,
 ) signusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{
-		eth:        ethAPI,
-		txFileRepo: txFileRepo,
-		wtype:      wtype,
+		eth:              ethAPI,
+		txFileRepo:       txFileRepo,
+		wtype:            wtype,
+		keystorePassword: keystorePassword,
 	}
 }
 
@@ -62,7 +64,7 @@ func (u *signTransactionUseCase) Sign(
 		}
 		// sign
 		var signedRawTx *domainETH.RawTx
-		signedRawTx, err = u.eth.SignOnRawTransaction(&rawTx, apiethimpl.Password)
+		signedRawTx, err = u.eth.SignOnRawTransaction(&rawTx, u.keystorePassword)
 		if err != nil {
 			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call eth.SignOnRawTransaction(): %w", err)
 		}
