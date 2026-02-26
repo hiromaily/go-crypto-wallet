@@ -1,0 +1,98 @@
+name: ETH E2E Tests
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/operation/eth/**/*.sh"
+      - "scripts/operation/common.sh"
+      - "config/wallet/eth/**"
+      - "make/wallet/eth.mk"
+      - "compose.eth.yaml"
+      - ".github/workflows/eth-e2e.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/operation/eth/**/*.sh"
+      - "scripts/operation/common.sh"
+      - "config/wallet/eth/**"
+      - "make/wallet/eth.mk"
+      - "compose.eth.yaml"
+      - ".github/workflows/eth-e2e.yml"
+  workflow_dispatch:
+    inputs:
+      node_type:
+        description: "Ethereum node type"
+        required: false
+        default: "anvil"
+        type: choice
+        options:
+          - anvil
+          - geth
+
+env:
+  GO_VERSION: "1.25.6"
+  # Check for updates: https://github.com/docker/compose/releases
+  # Note: v5.x requires Docker 28+, use v2.x for broader compatibility
+  DOCKER_COMPOSE_VERSION: "2.40.3"
+
+permissions:
+  contents: read
+
+jobs:
+  eth-e2e:
+    name: ETH E2E (Pattern 1 - Single-sig EIP-1559)
+    # ubuntu-latest required: Docker is pre-installed (ubuntu-slim lacks Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Install Docker Compose V2
+        run: |
+          # Install Docker Compose V2 plugin (supports 'docker compose' syntax)
+          DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+          mkdir -p $DOCKER_CONFIG/cli-plugins
+          compose_base=https://github.com/docker/compose/releases/download
+          compose_url=${compose_base}/v${{ env.DOCKER_COMPOSE_VERSION }}/docker-compose-linux-x86_64
+          curl -SL "${compose_url}" -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
+          chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+          docker compose version
+
+      - name: Build project
+        run: make build-all
+
+      - name: Run ETH E2E Pattern 1
+        run: |
+          NODE_TYPE="${{ github.event.inputs.node_type || 'anvil' }}" \
+            make eth-e2e-p1-ci
+
+      - name: Upload E2E transaction files on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: eth-e2e-tx-files
+          path: data/tx/eth/
+          retention-days: 7
+
+      - name: Upload E2E SQLite databases on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: eth-e2e-databases
+          path: data/sqlite/eth/
+          retention-days: 3
