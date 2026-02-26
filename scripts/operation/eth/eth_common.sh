@@ -19,6 +19,10 @@ source "${_ETH_COMMON_DIR}/../common.sh"
 # ETH Default Configuration
 ###############################################################################
 
+# Ensure GOPATH is set — CI runners may not have it as an environment variable
+GOPATH="${GOPATH:-$(go env GOPATH)}"
+export GOPATH
+
 # Coin identifier
 ETH_COIN="eth"
 
