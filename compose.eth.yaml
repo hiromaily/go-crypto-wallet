@@ -1,3 +1,32 @@
+# ETH compose file: Ethereum node services only (anvil, geth, lodestar)
+#
+# Database services are provided by compose.yaml (shared with all chains).
+# Use compose.yaml together with this file when a database backend is needed.
+#
+# Usage:
+# [reset]
+#   docker compose -f compose.eth.yaml down -v
+#
+# [anvil node only]
+#   docker compose -f compose.eth.yaml --profile anvil up
+#
+# [anvil + postgres]
+#   docker compose -f compose.yaml -f compose.eth.yaml --profile anvil --profile postgres up
+#
+# [anvil + mysql]
+#   docker compose -f compose.yaml -f compose.eth.yaml --profile anvil --profile mysql up
+#
+# [geth + lodestar node only]
+#   docker compose -f compose.eth.yaml --profile geth up
+#
+# [geth + postgres]
+#   docker compose -f compose.yaml -f compose.eth.yaml --profile geth --profile postgres up
+#
+# [call JSON-RPC on anvil]
+#   curl -X POST -H "Content-Type: application/json" \
+#     --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' \
+#     http://localhost:${ANVIL_RPC_PORT:-8546}
+
 networks:
   eth:
     name: eth
@@ -8,20 +37,19 @@ services:
   # foundry/anvil
   # - https://getfoundry.sh/anvil/overview/
   #------------------------------------------------------------------------
-  # Example of commands to container
-  # - run
-  #  $ docker compose -f compose.eth.yaml up anvil
-  # - call JSON-RPC
-  #  $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://localhost:${ANVIL_RPC_PORT:-8546}
-  # - fork mainnet/testnet
-  #  $ ANVIL_FORK_URL="https://..." docker compose -f compose.eth.yaml up anvil
-  # Notes
+  # Profile: anvil
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile anvil up
+  #
+  # Notes:
   # - Uses custom mnemonic to avoid EIP-7702 delegation on default accounts
   # - Defaults to port 8546 to run alongside geth/ganache
   # - Designed to run independently (no dependencies)
+  # - Fork mainnet/testnet: ANVIL_FORK_URL="https://..." ... up anvil
   #
   anvil:
     image: ghcr.io/foundry-rs/foundry:latest
+    profiles: ["anvil"]
     container_name: anvil
     ports:
       - "${ANVIL_RPC_PORT:-8546}:8545"
@@ -46,24 +74,71 @@ services:
         fi; exec anvil --host 0.0.0.0 --port 8545 --chain-id ${ANVIL_CHAIN_ID:-31337} --mnemonic "${ANVIL_MNEMONIC:-toy echo orbit embrace opinion file client report history bomb regret life}" --block-time ${ANVIL_BLOCK_TIME:-1} $${ANVIL_ARGS}
 
   #########################################################################
-  # ethereum/client-go
+  # ethereum/client-go (Geth) — local dev mode
+  # - https://geth.ethereum.org/docs/developers/dapp-developer/dev-mode
+  #------------------------------------------------------------------------
+  # Profile: geth-dev
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile geth-dev up
+  #
+  # Notes:
+  # - Uses geth --dev: ephemeral PoA chain with a pre-funded coinbase account
+  # - No consensus client (Lodestar) required — dev mode uses PoA mining
+  # - Chain ID: 1337 (same as anvil default)
+  # - RPC port: 8545 (mapped to GETH_HTTP_PORT, default 8545)
+  # - The coinbase account is auto-unlocked; use eth_sendTransaction to fund addresses
+  # - Block time: 1 second (--dev.period=1)
+  #########################################################################
+  geth-dev:
+    image: built-client-go:${GETH_VERSION:-latest}
+    profiles: ["geth-dev"]
+    build:
+      context: .
+      dockerfile: ./docker/nodes/eth/Dockerfile.geth
+      args:
+        - VERSION=${GETH_VERSION:-latest}
+    container_name: geth-dev
+    ports:
+      - ${GETH_HTTP_PORT:-8545}:8545
+    command:
+      - --dev
+      - --dev.period=1
+      - --http
+      - --http.api=web3,eth,net,admin,personal,debug
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.vhosts=*
+      - --http.corsdomain=*
+    networks:
+      - eth
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-X", "POST", "-H", "Content-Type: application/json", "--data", '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}', "http://127.0.0.1:8545"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+
+  #########################################################################
+  # ethereum/client-go (Geth) — testnet mode
   # - https://github.com/ethereum/go-ethereum/wiki/Running-in-Docker
   #------------------------------------------------------------------------
-  # Example of commands to container
-  # - Use console inside container
-  #  1. $ docker compose -f compose.eth.yaml exec geth sh
-  #  2. # geth attach or geth attach ipc://root/.ethereum/goerli/geth.ipc
-  #  3. > eth.syncing
-  # - Call JSON-RPC (https://eth.wiki/json-rpc/API)
-  #   $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545
-  # - [WIP] Use console outside container
-  #   $ geth attach ./docker/nodes/eth/sepolia/geth.ipc => not working yet
-  #   $ geth attach ipc:./docker/nodes/eth/sepolia/geth.ipc => not working yet
-  #   $ docker exec -it geth geth attach ipc://root/.ethereum/goerli/geth.ipc => it works
+  # Profile: geth
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile geth up
+  #
+  # Notes:
+  # - Use console inside container:
+  #     docker compose -f compose.eth.yaml exec geth sh
+  #     geth attach ipc:///data/geth.ipc
+  # - Call JSON-RPC:
+  #     curl -X POST -H "Content-Type: application/json" \
+  #       --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' \
+  #       http://localhost:8545
   #########################################################################
   geth:
     # https://hub.docker.com/r/ethereum/client-go/
     image: built-client-go:${GETH_VERSION:-latest}
+    profiles: ["geth"]
     build:
       context: .
       dockerfile: ./docker/nodes/eth/Dockerfile.geth
@@ -78,8 +153,6 @@ services:
       - ${GETH_HTTP_PORT:-8545}:${GETH_HTTP_PORT:-8545} # RPC Port
       - 0.0.0.0:30303:30303/tcp
       - 0.0.0.0:30303:30303/udp
-    #stdin_open: true
-    #tty: true
     command:
       - --${TARGET_NETWORK} # network. e.g. sepolia
       - --networkid=11155111
@@ -107,12 +180,13 @@ services:
       retries: 10
       start_period: 30s
 
-  # Apple Silicon MacOS would not be run
-  # - https://github.com/ChainSafe/lodestar/issues/4801
+  # Consensus layer client for Geth (required for post-Merge networks)
+  # Apple Silicon MacOS may not run — https://github.com/ChainSafe/lodestar/issues/4801
   # lodestar version must be v1.4.0-rc.1 or higher
   lodestar:
     # https://hub.docker.com/r/chainsafe/lodestar
     image: "chainsafe/lodestar:${LODESTAR_VERSION:-latest}"
+    profiles: ["geth"]
     container_name: ${TARGET_NETWORK}-lodestar
     volumes:
       - ./docker/nodes/eth/${TARGET_NETWORK}:/data

@@ -2,38 +2,42 @@
 # Ethereum Targets
 ###############################################################################
 
+# E2E defaults (can be overridden on the command line, e.g. NODE_TYPE=geth DB=mysql)
+NODE_TYPE ?= anvil # anvil, geth
+DB ?= sqlite
+
 ###############################################################################
 # Docker Compose Targets
 ###############################################################################
 
-# run ethereum node server
+# run ethereum node server (Geth + Lodestar)
 .PHONY: up-docker-eth
 up-docker-eth:
 	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml up geth lodestar
+	docker compose -f compose.eth.yaml --profile geth up
 
 .PHONY: up-docker-eth-d
 up-docker-eth-d:
 	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml up -d geth lodestar
+	docker compose -f compose.eth.yaml --profile geth up -d
 
 .PHONY: stop-docker-eth
 stop-docker-eth:
 	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml stop
+	docker compose -f compose.eth.yaml --profile geth stop
 
-# run ethereum lodestar
+# run ethereum lodestar (requires geth profile)
 .PHONY: up-docker-lodestar
 up-docker-lodestar:
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml up lodestar
+	docker compose -f compose.eth.yaml --profile geth up lodestar
 
 ###############################################################################
 # Geth specific
@@ -72,43 +76,46 @@ check-execution-syncing:
 generate-eth-key-local:
 	./scripts/operation/generate-eth-key.sh eth
 
-###############################################################################
-# Grafana
-###############################################################################
-# http://localhost:3000
 
 ###############################################################################
 # Anvil (Foundry Local Node)
 ###############################################################################
 .PHONY: up-docker-anvil
 up-docker-anvil:
-	docker compose -f compose.eth.yaml up -d anvil
+	docker compose -f compose.eth.yaml --profile anvil up -d anvil
 
 .PHONY: stop-docker-anvil
 stop-docker-anvil:
-	docker compose -f compose.eth.yaml stop anvil
+	docker compose -f compose.eth.yaml --profile anvil stop anvil
 
 ###############################################################################
 # E2E Tests
+#
+# Pattern 1: Single-sig EIP-1559
+#   NODE_TYPE: anvil (default) or geth
+#   DB:        sqlite (default) or mysql
+#
+# Usage:
+#   make eth-e2e-p1-reset             # Run with Anvil + SQLite
+#   make eth-e2e-p1-reset NODE_TYPE=geth DB=mysql  # Run with Geth + MySQL
 ###############################################################################
 
-# Pattern 1: Anvil Basic
 .PHONY: eth-e2e-p1-reset
 eth-e2e-p1-reset: build-all
-	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --reset
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --reset
 
 .PHONY: eth-e2e-p1
 eth-e2e-p1: build-all
-	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh
 
 .PHONY: eth-e2e-p1-verbose
 eth-e2e-p1-verbose: build-all
-	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --verbose
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --verbose
 
 .PHONY: eth-e2e-p1-ci
 eth-e2e-p1-ci: build-all
-	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --non-interactive
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --non-interactive
 
 .PHONY: eth-e2e-p1-cleanup
 eth-e2e-p1-cleanup:
-	DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --cleanup
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --cleanup

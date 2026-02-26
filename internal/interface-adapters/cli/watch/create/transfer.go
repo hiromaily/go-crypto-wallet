@@ -50,13 +50,16 @@ func runTransfer(container di.Container, account1, account2 string, amount, fee 
 		return fmt.Errorf("fail to create transfer transaction: %w", err)
 	}
 
-	if output.TransactionHex == "" {
+	if output.TransactionHex == "" && output.FileName == "" {
 		fmt.Println("No utxo")
 		return nil
 	}
 
 	// TODO: output should be json if json option is true
-	fmt.Printf("[hex]: %s\n[fileName]: %s\n", output.TransactionHex, output.FileName)
+	if output.TransactionHex != "" {
+		fmt.Printf("[hex]: %s\n", output.TransactionHex)
+	}
+	fmt.Printf("[fileName]: %s\n", output.FileName)
 
 	return nil
 }
