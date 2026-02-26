@@ -568,6 +568,7 @@ func (*createTransactionUseCase) buildETHTransactionFile(
 		Version:   1,
 		TxType:    string(domainTx.TxTypeUnsigned),
 		EthTxType: txParams.EthTxType,
+		UUID:      txParams.UUID,
 		ChainID:   txParams.ChainID,
 		Nonce:     txParams.Nonce,
 		From:      txParams.FromAddress,

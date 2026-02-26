@@ -100,7 +100,7 @@
   - Depends on: Tasks 1, 2, 3, 4
   - _Requirements: 2.1, 2.2, 2.3, 6.1_
 
-- [ ] 8. (P) Update Watch wallet transaction broadcast to read from signed files
+- [x] 8. (P) Update Watch wallet transaction broadcast to read from signed files
   - Read the signed transaction JSON file using the transaction file repo
   - Deserialize and validate the signature before broadcasting
   - Submit via `eth_sendRawTransaction` and persist the returned txHash to the database as `TxTypeSent`

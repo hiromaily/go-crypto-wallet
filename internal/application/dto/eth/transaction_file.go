@@ -22,6 +22,7 @@ type ETHTransactionFile struct {
 	EthTxType uint8  `json:"eth_tx_type"` // 0=legacy, 2=EIP-1559
 
 	// Transaction identity
+	UUID    string `json:"uuid"`     // Internal UUID for database record lookup after broadcast
 	ChainID uint64 `json:"chain_id"` // EIP-155 chain identifier
 	Nonce   uint64 `json:"nonce"`    // Sender transaction count
 	From    string `json:"from"`     // Sender address
