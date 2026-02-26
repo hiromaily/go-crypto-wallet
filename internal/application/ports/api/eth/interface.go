@@ -5,7 +5,8 @@
 // infrastructure layer. All types used in these interfaces are domain types,
 // avoiding circular dependencies with the infrastructure layer.
 //
-// All layers MUST use the small, focused interfaces defined in this file.
+// Usage restriction: Ethereumer MUST only be referenced in the DI layer (internal/di/).
+// All other layers MUST use the small, focused interfaces defined in this file.
 package eth
 
 import (
@@ -14,8 +15,12 @@ import (
 	"math/big"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 )
@@ -38,6 +43,107 @@ type TxCreateParams struct {
 	GasPrice             uint64 // Wei (legacy Type 0 only)
 	MaxFeePerGas         uint64 // Wei (EIP-1559 Type 2 only)
 	MaxPriorityFeePerGas uint64 // Wei (EIP-1559 Type 2 only)
+}
+
+// Ethereumer is the full Ethereum interface.
+//
+// Usage restriction: Ethereumer MUST only be referenced in the DI layer (internal/di/).
+// All other layers (use cases, adapters, CLI) MUST use the small, focused interfaces
+// defined below to satisfy the Interface Segregation Principle.
+//
+// Use the focused interfaces instead:
+//
+//   - ETHLifecycle: Client lifecycle (Close, CoinTypeCode)
+//   - ETHKeyAccessor: Keystore access for key import
+//   - ETHTransactionSigner: Sign raw transactions
+//   - ETHTransactionSender: Broadcast signed transactions
+//   - ETHRawKeyImporter: Import raw keys via RPC (deprecated)
+//   - ETHNodeAPIClient: Node API operations for CLI
+//   - ERC20er: ERC-20 and ETH transaction creation
+//   - EtherTxMonitor: Transaction monitoring
+type Ethereumer interface {
+	// balance
+	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainETH.UserAmount)
+	// client
+	BalanceAt(ctx context.Context, hexAddr string) (*big.Int, error)
+	SendRawTx(ctx context.Context, tx *types.Transaction) error
+	// ethereum
+	Close()
+	CoinTypeCode() domainCoin.CoinTypeCode
+	GetChainConf() *chaincfg.Params
+	// key
+	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
+	GetKeyDir() string
+	GetPrivKey(hexAddr, password string) (*keystore.Key, error)
+	// rpc_admin
+	AddPeer(ctx context.Context, nodeURL string) error
+	AdminDataDir(ctx context.Context) (string, error)
+	NodeInfo(ctx context.Context) (*p2p.NodeInfo, error)
+	AdminPeers(ctx context.Context) ([]*p2p.PeerInfo, error)
+	// rpc_eth
+	Syncing(ctx context.Context) (*domainETH.ResponseSyncing, bool, error)
+	ProtocolVersion(ctx context.Context) (uint64, error)
+	Coinbase(ctx context.Context) (string, error)
+	Accounts(ctx context.Context) ([]string, error)
+	BlockNumber(ctx context.Context) (*big.Int, error)
+	EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error)
+	GetBalance(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
+	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
+	GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
+	GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
+	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainETH.BlockInfo, error)
+	// rpc_eth_gas
+	GasPrice(ctx context.Context) (*big.Int, error)
+	EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error)
+	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
+	// rpc_eth_tx
+	Sign(ctx context.Context, hexAddr, message string) (string, error)
+	SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error)
+	SendRawTransaction(ctx context.Context, signedTx string) (string, error)
+	SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error)
+	GetTransactionByHash(ctx context.Context, hashTx string) (*domainETH.ResponseGetTransaction, error)
+	GetTransactionReceipt(ctx context.Context, hashTx string) (*domainETH.ResponseGetTransactionReceipt, error)
+	// GetTxReceipt returns a clean domain receipt; returns (nil, nil) if not yet mined.
+	GetTxReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error)
+	// rpc_miner
+	StartMining(ctx context.Context) error
+	StopMining(ctx context.Context) error
+	Mining(ctx context.Context) (bool, error)
+	HashRate(ctx context.Context) (*big.Int, error)
+	// rpc_net
+	NetVersion(ctx context.Context) (uint16, error)
+	NetListening(ctx context.Context) (bool, error)
+	NetPeerCount(ctx context.Context) (*big.Int, error)
+	// rpc_personal
+	ImportRawKey(ctx context.Context, hexKey, passPhrase string) (string, error)
+	ListAccounts(ctx context.Context) ([]string, error)
+	NewAccount(ctx context.Context, passphrase string, accountType domainAccount.AccountType) (string, error)
+	LockAccount(ctx context.Context, hexAddr string) error
+	UnlockAccount(ctx context.Context, hexAddr, passphrase string, duration uint64) (bool, error)
+	// rpc_web3
+	ClientVersion(ctx context.Context) (string, error)
+	SHA3(ctx context.Context, data string) (string, error)
+	// transaction
+	CreateRawTransaction(
+		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+	) (*domainETH.RawTx, *TxCreateParams, error)
+	CreateRawTransactionEIP1559(
+		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+	) (*domainETH.RawTx, *TxCreateParams, error)
+	SupportsEIP1559(ctx context.Context) bool
+	SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase string) (*domainETH.RawTx, error)
+	SignTxWithPrivateKey(
+		rawTx *domainETH.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+	) (*domainETH.RawTx, error)
+	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
+	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
+	// util
+	DecodeBig(input string) (*big.Int, error)
+	ValidateAddr(addr string) error
+	FromWei(v int64) *big.Int
+	FromGWei(v int64) *big.Int
+	FromFloatEther(v float64) *big.Int
+	FloatToBigInt(v float64) *big.Int
 }
 
 // ERC20er defines the interface for ERC-20 token and native ETH transaction creation.

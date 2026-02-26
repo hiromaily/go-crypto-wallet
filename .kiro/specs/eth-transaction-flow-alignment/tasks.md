@@ -132,7 +132,7 @@
 - [x] 10.2 (P) Restrict/deprecate monolithic Ethereumer interface (Partially done — PR #575)
   - [x] `Ethereumer` in `internal/application/ports/api/eth/interface.go` now carries a DI-layer-only usage restriction comment (PR #575)
   - [x] The deprecated `internal/infrastructure/api/eth/api-interface.go` has been deleted (PR #575)
-  - [x] Final removal of `Ethereumer` from `interface.go` — DI container now holds concrete `*apiethimpl.Ethereum` type; focused ISP interfaces retained
+  - [~] Final removal of `Ethereumer` from `interface.go` — evaluated and deferred: `Ethereumer` is kept as it serves as the initialization contract in the DI layer
   - _Requirements: 5.3_
 
 - [x] 10.3 (P) Replace hardcoded password constant with configurable injection

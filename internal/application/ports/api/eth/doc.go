@@ -8,6 +8,10 @@
 //
 // # Interface Categories
 //
+// ## Monolithic Interface (DI layer only)
+//
+//   - Ethereumer: Full Ethereum RPC interface — MUST only be used in internal/di/
+//
 // ## Token / Legacy Monitoring Interfaces
 //
 //   - ERC20er: Interface for ERC-20 token operations

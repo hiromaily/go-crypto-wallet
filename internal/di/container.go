@@ -32,7 +32,6 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
-	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
@@ -146,7 +145,7 @@ type container struct {
 	// wallet
 	walletType domainWallet.WalletType
 	btc        apibtc.Bitcoiner
-	eth        *apiethimpl.Ethereum
+	eth        apieth.Ethereumer
 	erc20      apieth.ERC20er
 	xrp        apixrp.XRPer
 	// client
@@ -485,7 +484,7 @@ func (*container) newMuSig2Service() *apibtcimpl.MuSig2Service {
 	return apibtcimpl.NewMuSig2Service()
 }
 
-func (c *container) newETH() *apiethimpl.Ethereum {
+func (c *container) newETH() apieth.Ethereumer {
 	if c.eth == nil {
 		var err error
 		c.eth, err = ethimpl.NewEthereum(
