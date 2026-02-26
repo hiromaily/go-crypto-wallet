@@ -1,27 +1,87 @@
+# ETH compose file with node profiles and multi-DB support
+#
+# Usage:
+# [reset]
+#   docker compose -f compose.eth.yaml down -v
+#
+# [anvil node only]
+#   docker compose -f compose.eth.yaml --profile anvil up anvil
+#
+# [anvil + postgres]
+#   docker compose -f compose.eth.yaml --profile anvil --profile postgres up
+#
+# [anvil + mysql]
+#   docker compose -f compose.eth.yaml --profile anvil --profile mysql up
+#
+# [geth node only]
+#   docker compose -f compose.eth.yaml --profile geth up geth lodestar
+#
+# [geth + postgres]
+#   docker compose -f compose.eth.yaml --profile geth --profile postgres up
+#
+# [call JSON-RPC on anvil]
+#   curl -X POST -H "Content-Type: application/json" \
+#     --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' \
+#     http://localhost:${ANVIL_RPC_PORT:-8546}
+
+volumes:
+  eth-postgres: {}
+  eth-mysql: {}
+
 networks:
   eth:
     name: eth
     driver: bridge
+
+# Common migration service configuration templates
+x-postgres-migration-base: &postgres-migration-base
+  image: arigaio/atlas:1.1.0
+  profiles: ["postgres"]
+  volumes:
+    - "./tools/atlas:/app/atlas"
+  working_dir: /app/atlas
+  depends_on:
+    eth-postgres:
+      condition: service_healthy
+  networks:
+    - eth
+  environment:
+    - ATLAS_NO_UPDATE_NOTIFIER=true
+  restart: "no"
+
+x-mysql-migration-base: &mysql-migration-base
+  image: arigaio/atlas:1.1.0
+  profiles: ["mysql"]
+  volumes:
+    - "./tools/atlas:/app/atlas"
+  working_dir: /app/atlas
+  depends_on:
+    eth-mysql:
+      condition: service_healthy
+  networks:
+    - eth
+  environment:
+    - ATLAS_NO_UPDATE_NOTIFIER=true
+  restart: "no"
 
 services:
   #########################################################################
   # foundry/anvil
   # - https://getfoundry.sh/anvil/overview/
   #------------------------------------------------------------------------
-  # Example of commands to container
-  # - run
-  #  $ docker compose -f compose.eth.yaml up anvil
-  # - call JSON-RPC
-  #  $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://localhost:${ANVIL_RPC_PORT:-8546}
-  # - fork mainnet/testnet
-  #  $ ANVIL_FORK_URL="https://..." docker compose -f compose.eth.yaml up anvil
-  # Notes
+  # Profile: anvil
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile anvil up anvil
+  #
+  # Notes:
   # - Uses custom mnemonic to avoid EIP-7702 delegation on default accounts
   # - Defaults to port 8546 to run alongside geth/ganache
   # - Designed to run independently (no dependencies)
+  # - Fork mainnet/testnet: ANVIL_FORK_URL="https://..." ... up anvil
   #
   anvil:
     image: ghcr.io/foundry-rs/foundry:latest
+    profiles: ["anvil"]
     container_name: anvil
     ports:
       - "${ANVIL_RPC_PORT:-8546}:8545"
@@ -46,24 +106,26 @@ services:
         fi; exec anvil --host 0.0.0.0 --port 8545 --chain-id ${ANVIL_CHAIN_ID:-31337} --mnemonic "${ANVIL_MNEMONIC:-toy echo orbit embrace opinion file client report history bomb regret life}" --block-time ${ANVIL_BLOCK_TIME:-1} $${ANVIL_ARGS}
 
   #########################################################################
-  # ethereum/client-go
+  # ethereum/client-go (Geth)
   # - https://github.com/ethereum/go-ethereum/wiki/Running-in-Docker
   #------------------------------------------------------------------------
-  # Example of commands to container
-  # - Use console inside container
-  #  1. $ docker compose -f compose.eth.yaml exec geth sh
-  #  2. # geth attach or geth attach ipc://root/.ethereum/goerli/geth.ipc
-  #  3. > eth.syncing
-  # - Call JSON-RPC (https://eth.wiki/json-rpc/API)
-  #   $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545
-  # - [WIP] Use console outside container
-  #   $ geth attach ./docker/nodes/eth/sepolia/geth.ipc => not working yet
-  #   $ geth attach ipc:./docker/nodes/eth/sepolia/geth.ipc => not working yet
-  #   $ docker exec -it geth geth attach ipc://root/.ethereum/goerli/geth.ipc => it works
+  # Profile: geth
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile geth up geth lodestar
+  #
+  # Notes:
+  # - Use console inside container:
+  #     docker compose -f compose.eth.yaml exec geth sh
+  #     geth attach ipc://root/.ethereum/goerli/geth.ipc
+  # - Call JSON-RPC:
+  #     curl -X POST -H "Content-Type: application/json" \
+  #       --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' \
+  #       http://localhost:8545
   #########################################################################
   geth:
     # https://hub.docker.com/r/ethereum/client-go/
     image: built-client-go:${GETH_VERSION:-latest}
+    profiles: ["geth"]
     build:
       context: .
       dockerfile: ./docker/nodes/eth/Dockerfile.geth
@@ -78,8 +140,6 @@ services:
       - ${GETH_HTTP_PORT:-8545}:${GETH_HTTP_PORT:-8545} # RPC Port
       - 0.0.0.0:30303:30303/tcp
       - 0.0.0.0:30303:30303/udp
-    #stdin_open: true
-    #tty: true
     command:
       - --${TARGET_NETWORK} # network. e.g. sepolia
       - --networkid=11155111
@@ -107,12 +167,13 @@ services:
       retries: 10
       start_period: 30s
 
-  # Apple Silicon MacOS would not be run
-  # - https://github.com/ChainSafe/lodestar/issues/4801
+  # Consensus layer client for Geth (required for post-Merge networks)
+  # Apple Silicon MacOS may not run — https://github.com/ChainSafe/lodestar/issues/4801
   # lodestar version must be v1.4.0-rc.1 or higher
   lodestar:
     # https://hub.docker.com/r/chainsafe/lodestar
     image: "chainsafe/lodestar:${LODESTAR_VERSION:-latest}"
+    profiles: ["geth"]
     container_name: ${TARGET_NETWORK}-lodestar
     volumes:
       - ./docker/nodes/eth/${TARGET_NETWORK}:/data
@@ -150,3 +211,137 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+
+  #########################################################################
+  # PostgreSQL Database
+  # Profile: postgres
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile anvil --profile postgres up
+  #########################################################################
+  eth-postgres:
+    image: postgres:18.2
+    profiles: ["postgres"]
+    container_name: eth-postgres
+    volumes:
+      # IMPORTANT: PostgreSQL 18+ uses version-specific subdirectories under /var/lib/postgresql
+      - eth-postgres:/var/lib/postgresql
+      - "./docker/postgres/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${POSTGRESQL_PORT:-5432}:5432"
+    networks:
+      - eth
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  #########################################################################
+  # MySQL Database
+  # Profile: mysql
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile anvil --profile mysql up
+  #
+  # Note: MySQL 8.4 uses caching_sha2_password by default (requires SSL).
+  # Connect with: mysql -h localhost -u hiromaily -p --ssl-mode=REQUIRED
+  #########################################################################
+  eth-mysql:
+    image: mysql:8.4
+    profiles: ["mysql"]
+    container_name: eth-mysql
+    volumes:
+      - eth-mysql:/var/lib/mysql
+      - "./docker/mysql/conf.d:/etc/mysql/conf.d"
+      - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - eth
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  #########################################################################
+  # PostgreSQL Migration (Atlas)
+  # Activated with --profile postgres
+  #########################################################################
+  eth-postgres-migrate-watch:
+    !!merge <<: *postgres-migration-base
+    container_name: eth-postgres-migrate-watch
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgres/watch"
+      - --url
+      - "postgres://postgres:postgres@eth-postgres:5432/watch?sslmode=disable"
+
+  eth-postgres-migrate-keygen:
+    !!merge <<: *postgres-migration-base
+    container_name: eth-postgres-migrate-keygen
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgres/keygen"
+      - --url
+      - "postgres://postgres:postgres@eth-postgres:5432/keygen?sslmode=disable"
+
+  eth-postgres-migrate-sign:
+    !!merge <<: *postgres-migration-base
+    container_name: eth-postgres-migrate-sign
+    command:
+      - migrate
+      - apply
+      - --dir
+      - "file://migrations/postgres/sign"
+      - --url
+      - "postgres://postgres:postgres@eth-postgres:5432/sign?sslmode=disable"
+
+  #########################################################################
+  # MySQL Migration (Atlas)
+  # Activated with --profile mysql
+  #########################################################################
+  eth-mysql-migrate-watch:
+    !!merge <<: *mysql-migration-base
+    container_name: eth-mysql-migrate-watch
+    command:
+      - migrate
+      - apply
+      - --dir
+      - file://migrations/mysql/watch
+      - --url
+      - "mysql://root:root@eth-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
+
+  eth-mysql-migrate-keygen:
+    !!merge <<: *mysql-migration-base
+    container_name: eth-mysql-migrate-keygen
+    command:
+      - migrate
+      - apply
+      - --dir
+      - file://migrations/mysql/keygen
+      - --url
+      - "mysql://root:root@eth-mysql:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
+
+  eth-mysql-migrate-sign:
+    !!merge <<: *mysql-migration-base
+    container_name: eth-mysql-migrate-sign
+    command:
+      - migrate
+      - apply
+      - --dir
+      - file://migrations/mysql/sign
+      - --url
+      - "mysql://root:root@eth-mysql:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"

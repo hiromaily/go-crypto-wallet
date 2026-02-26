@@ -119,7 +119,7 @@
   - Implement exponential backoff retry when the Ethereum node becomes unreachable; log the connectivity issue at WARN level including the retry count
   - _Requirements: 8.3, 8.5_
 
-- [ ] 10. Migrate all ETH use cases to Clean Architecture compliance
+- [x] 10. Migrate all ETH use cases to Clean Architecture compliance
 - [x] 10.1 Remove direct infrastructure imports from ETH use cases (Partially done — PR #575)
   - [x] Removed `ethereum` infrastructure package imports from all use cases (PR #575)
   - [x] Removed `apiethimpl` infrastructure imports from 3 files by injecting `keystorePassword` via constructor:
@@ -142,7 +142,7 @@
   - _Requirements: 5.4_
 
 - [ ] 11. Docker Compose node profiles and E2E verification scripts
-- [ ] 11.1 (P) Add Docker Compose service profiles for Anvil and Geth with multi-DB support
+- [x] 11.1 (P) Add Docker Compose service profiles for Anvil and Geth with multi-DB support
   - Add `anvil` profile service using `ghcr.io/foundry-rs/foundry:latest` configured with chain ID, pre-funded accounts, and block time
   - Add `geth` profile service using `ethereum/client-go:stable` as an alternative testing node
   - Support multiple database backends (PostgreSQL, MySQL, SQLite) consistent with BTC/BCH compose structure
