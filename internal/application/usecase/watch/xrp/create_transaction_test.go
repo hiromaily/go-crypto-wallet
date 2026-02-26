@@ -65,6 +65,7 @@ func createUseCase(deps *testDependencies) watchusecase.CreateTransactionUseCase
 }
 
 func TestCreateTransactionUseCase_Execute_InvalidActionType(t *testing.T) {
+	t.Parallel()
 	deps := newTestDependencies(t)
 	useCase := createUseCase(deps)
 
@@ -80,6 +81,7 @@ func TestCreateTransactionUseCase_Execute_InvalidActionType(t *testing.T) {
 }
 
 func TestCreateTransactionUseCase_Execute_TransferWithInsufficientBalance(t *testing.T) {
+	t.Parallel()
 	deps := newTestDependencies(t)
 	useCase := createUseCase(deps)
 
@@ -108,6 +110,7 @@ func TestCreateTransactionUseCase_Execute_TransferWithInsufficientBalance(t *tes
 }
 
 func TestCreateTransactionUseCase_Execute_TransferWithValidBalance(t *testing.T) {
+	t.Parallel()
 	t.Skip("Skipping until DB transaction is mocked - requires comprehensive DB mock setup")
 	// This test requires:
 	// 1. Mock database connection with transaction support
@@ -117,6 +120,7 @@ func TestCreateTransactionUseCase_Execute_TransferWithValidBalance(t *testing.T)
 }
 
 func TestCreateTransactionUseCase_Execute_GetBalanceError(t *testing.T) {
+	t.Parallel()
 	deps := newTestDependencies(t)
 	useCase := createUseCase(deps)
 
@@ -146,6 +150,7 @@ func TestCreateTransactionUseCase_Execute_GetBalanceError(t *testing.T) {
 }
 
 func TestCreateTransactionUseCase_Execute_GetAddressError(t *testing.T) {
+	t.Parallel()
 	deps := newTestDependencies(t)
 	useCase := createUseCase(deps)
 
@@ -169,6 +174,7 @@ func TestCreateTransactionUseCase_Execute_GetAddressError(t *testing.T) {
 }
 
 func TestCreateTransactionUseCase_Execute_NilSenderAddress(t *testing.T) {
+	t.Parallel()
 	deps := newTestDependencies(t)
 	useCase := createUseCase(deps)
 
@@ -192,6 +198,7 @@ func TestCreateTransactionUseCase_Execute_NilSenderAddress(t *testing.T) {
 }
 
 func TestCreateTransactionUseCase_Execute_NilReceiverAddress(t *testing.T) {
+	t.Parallel()
 	deps := newTestDependencies(t)
 	useCase := createUseCase(deps)
 
@@ -223,7 +230,9 @@ func TestCreateTransactionUseCase_Execute_NilReceiverAddress(t *testing.T) {
 }
 
 func TestCreateTransactionUseCase_Dependencies(t *testing.T) {
+	t.Parallel()
 	t.Run("uses segregated interfaces instead of full XRPer interface", func(t *testing.T) {
+		t.Parallel()
 		deps := newTestDependencies(t)
 
 		// Create use case - should accept AccountInfoProvider and TransactionPreparer separately

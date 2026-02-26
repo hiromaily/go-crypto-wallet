@@ -61,6 +61,7 @@ func createSendUseCase(deps *sendTestDependencies) watchusecase.SendTransactionU
 }
 
 func TestSendTransactionUseCase_Execute_InvalidFilePath(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -80,6 +81,7 @@ func TestSendTransactionUseCase_Execute_InvalidFilePath(t *testing.T) {
 }
 
 func TestSendTransactionUseCase_Execute_JSONParsingError(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -102,6 +104,7 @@ func TestSendTransactionUseCase_Execute_JSONParsingError(t *testing.T) {
 }
 
 func TestSendTransactionUseCase_Execute_IncompleteTransaction(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -144,6 +147,7 @@ func TestSendTransactionUseCase_Execute_IncompleteTransaction(t *testing.T) {
 }
 
 func TestSendTransactionUseCase_Execute_NullSignedBlob(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -183,6 +187,7 @@ func TestSendTransactionUseCase_Execute_NullSignedBlob(t *testing.T) {
 }
 
 func TestSendTransactionUseCase_Execute_EmptySignedBlob(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -223,6 +228,7 @@ func TestSendTransactionUseCase_Execute_EmptySignedBlob(t *testing.T) {
 }
 
 func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -266,6 +272,7 @@ func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
 }
 
 func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
@@ -336,6 +343,7 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 }
 
 func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
+	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
