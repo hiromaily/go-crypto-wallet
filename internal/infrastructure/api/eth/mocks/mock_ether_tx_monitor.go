@@ -174,3 +174,71 @@ func (_c *MockEtherTxMonitor_GetTotalBalance_Call) RunAndReturn(run func(ctx con
 	_c.Call.Return(run)
 	return _c
 }
+
+// GetTxReceipt provides a mock function for the type MockEtherTxMonitor
+func (_mock *MockEtherTxMonitor) GetTxReceipt(ctx context.Context, txHash string) (*eth.TransactionReceipt, error) {
+	ret := _mock.Called(ctx, txHash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTxReceipt")
+	}
+
+	var r0 *eth.TransactionReceipt
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*eth.TransactionReceipt, error)); ok {
+		return returnFunc(ctx, txHash)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *eth.TransactionReceipt); ok {
+		r0 = returnFunc(ctx, txHash)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*eth.TransactionReceipt)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, txHash)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEtherTxMonitor_GetTxReceipt_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTxReceipt'
+type MockEtherTxMonitor_GetTxReceipt_Call struct {
+	*mock.Call
+}
+
+// GetTxReceipt is a helper method to define mock.On call
+//   - ctx context.Context
+//   - txHash string
+func (_e *MockEtherTxMonitor_Expecter) GetTxReceipt(ctx interface{}, txHash interface{}) *MockEtherTxMonitor_GetTxReceipt_Call {
+	return &MockEtherTxMonitor_GetTxReceipt_Call{Call: _e.mock.On("GetTxReceipt", ctx, txHash)}
+}
+
+func (_c *MockEtherTxMonitor_GetTxReceipt_Call) Run(run func(ctx context.Context, txHash string)) *MockEtherTxMonitor_GetTxReceipt_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEtherTxMonitor_GetTxReceipt_Call) Return(transactionReceipt *eth.TransactionReceipt, err error) *MockEtherTxMonitor_GetTxReceipt_Call {
+	_c.Call.Return(transactionReceipt, err)
+	return _c
+}
+
+func (_c *MockEtherTxMonitor_GetTxReceipt_Call) RunAndReturn(run func(ctx context.Context, txHash string) (*eth.TransactionReceipt, error)) *MockEtherTxMonitor_GetTxReceipt_Call {
+	_c.Call.Return(run)
+	return _c
+}

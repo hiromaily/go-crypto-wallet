@@ -3,14 +3,22 @@ package eth
 import (
 	"context"
 	"fmt"
+	"time"
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
+
+// maxReceiptRetries is the maximum number of retry attempts for node connectivity failures.
+const maxReceiptRetries = 3
+
+// initialRetryDelay is the base delay for exponential backoff.
+const initialRetryDelay = time.Second
 
 type monitorTransactionUseCase struct {
 	ethClient    apieth.EtherTxMonitor
@@ -35,20 +43,10 @@ func NewMonitorTransactionUseCase(
 }
 
 func (u *monitorTransactionUseCase) UpdateTxStatus(ctx context.Context) error {
-	// update tx_type for TxTypeSent
 	err := u.updateStatusTxTypeSent(ctx)
 	if err != nil {
 		return fmt.Errorf("fail to call updateStatusTxTypeSent(): %w", err)
 	}
-
-	// update tx_type for TxTypeDone
-	// - TODO: notification
-	// for _, actionType := range types {
-	//	err := u.updateStatusTxTypeDone(actionType)
-	//	if err != nil {
-	//		return fmt.Errorf("fail to call updateStatusTxTypeDone() ActionType: %s: %w", actionType, err)
-	//	}
-	//}
 	return nil
 }
 
@@ -77,35 +75,120 @@ func (u *monitorTransactionUseCase) MonitorBalance(
 	return nil
 }
 
-// update TxTypeSent to TxTypeDone if confirmation is 6 or more
+// updateStatusTxTypeSent processes all TxTypeSent transactions and updates their status.
 func (u *monitorTransactionUseCase) updateStatusTxTypeSent(ctx context.Context) error {
-	// get records whose status is TxTypeSent
 	hashes, err := u.txDetailRepo.GetSentHashTx(domainTx.TxTypeSent)
 	if err != nil {
 		return fmt.Errorf("fail to call txDetailRepo.GetSentHashTx(TxTypeSent): %w", err)
 	}
 
-	// get hash in detail and check confirmation
 	for _, sentHash := range hashes {
-		// check confirmation
-		var confirmNum uint64
-		confirmNum, err = u.ethClient.GetConfirmation(ctx, sentHash)
-		if err != nil {
-			return fmt.Errorf("fail to call eth.GetConfirmation() sentHash: %s: %w", sentHash, err)
-		}
-		logger.Info("confirmation",
-			"sentHash", sentHash,
-			"confirmation num", confirmNum)
-		if confirmNum < u.confirmNum {
-			continue
-		}
-		// update status
-		_, err = u.txDetailRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, sentHash)
-		if err != nil {
-			logger.Warn("failed to call txDetailRepo.UpdateTxTypeBySentHashTx()",
+		if err := u.processTransaction(ctx, sentHash); err != nil {
+			logger.Warn("failed to process transaction",
+				"sentHash", sentHash,
 				"error", err,
 			)
 		}
 	}
 	return nil
+}
+
+// processTransaction handles status check and update for a single transaction.
+// It checks the receipt for on-chain success/failure, counts confirmations,
+// and transitions the transaction through TxTypeSent → TxTypeDone (or TxTypeCancel).
+func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sentHash string) error {
+	// Get receipt with exponential backoff retry for node connectivity failures.
+	receipt, err := u.getReceiptWithRetry(ctx, sentHash)
+	if err != nil {
+		return fmt.Errorf("fail to get transaction receipt for %s: %w", sentHash, err)
+	}
+	if receipt == nil {
+		// Transaction not yet mined; will be rechecked in the next monitoring cycle.
+		logger.Info("transaction not yet mined, skipping", "sentHash", sentHash)
+		return nil
+	}
+
+	// EVM status 0 means the transaction was reverted or failed on-chain.
+	if receipt.Status == 0 {
+		logger.Warn("transaction failed or reverted on-chain",
+			"sentHash", sentHash,
+			"revertReason", receipt.RevertReason,
+		)
+		if _, err := u.txDetailRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeCancel, sentHash); err != nil {
+			logger.Warn("failed to update tx type to canceled",
+				"sentHash", sentHash,
+				"error", err,
+			)
+		}
+		// Free the sender address even on failure to prevent the address from
+		// remaining permanently allocated when a transaction reverts on-chain.
+		if _, err := u.addrRepo.UpdateIsAllocated(false, receipt.From); err != nil {
+			return fmt.Errorf(
+				"fail to call addrRepo.UpdateIsAllocated() after failed tx sentHash=%s: %w", sentHash, err,
+			)
+		}
+		return nil
+	}
+
+	// Check confirmation depth against the configured threshold.
+	confirmNum, err := u.ethClient.GetConfirmation(ctx, sentHash)
+	if err != nil {
+		return fmt.Errorf("fail to call eth.GetConfirmation() sentHash=%s: %w", sentHash, err)
+	}
+	logger.Info("confirmation",
+		"sentHash", sentHash,
+		"confirmationNum", confirmNum,
+	)
+	if confirmNum < u.confirmNum {
+		return nil
+	}
+
+	// Confirmations sufficient — mark as done.
+	if _, err := u.txDetailRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, sentHash); err != nil {
+		return fmt.Errorf(
+			"fail to call txDetailRepo.UpdateTxTypeBySentHashTx(TxTypeDone) sentHash=%s: %w", sentHash, err,
+		)
+	}
+
+	// Free the sender address to prevent double-spending on future transactions.
+	if _, err := u.addrRepo.UpdateIsAllocated(false, receipt.From); err != nil {
+		return fmt.Errorf("fail to call addrRepo.UpdateIsAllocated() sentHash=%s: %w", sentHash, err)
+	}
+
+	return nil
+}
+
+// getReceiptWithRetry retrieves a transaction receipt with exponential backoff retry
+// for node connectivity failures. Logs each failure at WARN level with the retry count.
+// Returns (nil, nil) when the transaction has not yet been mined.
+// Returns (nil, error) when all retry attempts are exhausted.
+func (u *monitorTransactionUseCase) getReceiptWithRetry(
+	ctx context.Context, txHash string,
+) (*domainETH.TransactionReceipt, error) {
+	for attempt := 0; attempt < maxReceiptRetries; attempt++ {
+		receipt, err := u.ethClient.GetTxReceipt(ctx, txHash)
+		if err == nil {
+			return receipt, nil // nil means "not yet mined"
+		}
+
+		logger.Warn("Ethereum node connectivity failure, retrying",
+			"txHash", txHash,
+			"attempt", attempt+1,
+			"maxRetries", maxReceiptRetries,
+			"error", err,
+		)
+
+		if attempt+1 == maxReceiptRetries {
+			return nil, fmt.Errorf("failed to get receipt after %d attempts: %w", maxReceiptRetries, err)
+		}
+
+		// Exponential backoff: 1s, 2s, 4s, ...
+		backoff := initialRetryDelay * (1 << uint(attempt))
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(backoff):
+		}
+	}
+	return nil, nil
 }

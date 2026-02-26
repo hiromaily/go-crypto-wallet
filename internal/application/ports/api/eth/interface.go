@@ -103,6 +103,8 @@ type Ethereumer interface {
 	SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error)
 	GetTransactionByHash(ctx context.Context, hashTx string) (*domainETH.ResponseGetTransaction, error)
 	GetTransactionReceipt(ctx context.Context, hashTx string) (*domainETH.ResponseGetTransactionReceipt, error)
+	// GetTxReceipt returns a clean domain receipt; returns (nil, nil) if not yet mined.
+	GetTxReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error)
 	// rpc_miner
 	StartMining(ctx context.Context) error
 	StopMining(ctx context.Context) error
@@ -169,6 +171,10 @@ type ERC20er interface {
 type EtherTxMonitor interface {
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainETH.UserAmount)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
+	// GetTxReceipt retrieves a transaction receipt as a clean domain type.
+	// Returns (nil, nil) when the transaction has not yet been included in a block.
+	// Returns (nil, error) on node connectivity or parsing failures.
+	GetTxReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error)
 }
 
 // =============================================================================
