@@ -1,4 +1,7 @@
-# ETH compose file with node profiles and multi-DB support
+# ETH compose file: Ethereum node services only (anvil, geth, lodestar)
+#
+# Database services are provided by compose.yaml (shared with all chains).
+# Use compose.yaml together with this file when a database backend is needed.
 #
 # Usage:
 # [reset]
@@ -8,61 +11,26 @@
 #   docker compose -f compose.eth.yaml --profile anvil up
 #
 # [anvil + postgres]
-#   docker compose -f compose.eth.yaml --profile anvil --profile postgres up
+#   docker compose -f compose.yaml -f compose.eth.yaml --profile anvil --profile postgres up
 #
 # [anvil + mysql]
-#   docker compose -f compose.eth.yaml --profile anvil --profile mysql up
+#   docker compose -f compose.yaml -f compose.eth.yaml --profile anvil --profile mysql up
 #
 # [geth + lodestar node only]
 #   docker compose -f compose.eth.yaml --profile geth up
 #
 # [geth + postgres]
-#   docker compose -f compose.eth.yaml --profile geth --profile postgres up
+#   docker compose -f compose.yaml -f compose.eth.yaml --profile geth --profile postgres up
 #
 # [call JSON-RPC on anvil]
 #   curl -X POST -H "Content-Type: application/json" \
 #     --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' \
 #     http://localhost:${ANVIL_RPC_PORT:-8546}
 
-volumes:
-  eth-postgres: {}
-  eth-mysql: {}
-
 networks:
   eth:
     name: eth
     driver: bridge
-
-# Common migration service configuration templates
-x-postgres-migration-base: &postgres-migration-base
-  image: arigaio/atlas:1.1.0
-  profiles: ["postgres"]
-  volumes:
-    - "./tools/atlas:/app/atlas"
-  working_dir: /app/atlas
-  depends_on:
-    eth-postgres:
-      condition: service_healthy
-  networks:
-    - eth
-  environment:
-    - ATLAS_NO_UPDATE_NOTIFIER=true
-  restart: "no"
-
-x-mysql-migration-base: &mysql-migration-base
-  image: arigaio/atlas:1.1.0
-  profiles: ["mysql"]
-  volumes:
-    - "./tools/atlas:/app/atlas"
-  working_dir: /app/atlas
-  depends_on:
-    eth-mysql:
-      condition: service_healthy
-  networks:
-    - eth
-  environment:
-    - ATLAS_NO_UPDATE_NOTIFIER=true
-  restart: "no"
 
 services:
   #########################################################################
@@ -211,137 +179,3 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
-
-  #########################################################################
-  # PostgreSQL Database
-  # Profile: postgres
-  # Example:
-  #   docker compose -f compose.eth.yaml --profile anvil --profile postgres up
-  #########################################################################
-  eth-postgres:
-    image: postgres:18.2
-    profiles: ["postgres"]
-    container_name: eth-postgres
-    volumes:
-      # IMPORTANT: PostgreSQL 18+ uses version-specific subdirectories under /var/lib/postgresql
-      - eth-postgres:/var/lib/postgresql
-      - "./docker/postgres/init.d:/docker-entrypoint-initdb.d"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "${POSTGRESQL_PORT:-5432}:5432"
-    networks:
-      - eth
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  #########################################################################
-  # MySQL Database
-  # Profile: mysql
-  # Example:
-  #   docker compose -f compose.eth.yaml --profile anvil --profile mysql up
-  #
-  # Note: MySQL 8.4 uses caching_sha2_password by default (requires SSL).
-  # Connect with: mysql -h localhost -u hiromaily -p --ssl-mode=REQUIRED
-  #########################################################################
-  eth-mysql:
-    image: mysql:8.4
-    profiles: ["mysql"]
-    container_name: eth-mysql
-    volumes:
-      - eth-mysql:/var/lib/mysql
-      - "./docker/mysql/conf.d:/etc/mysql/conf.d"
-      - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: hiromaily
-      MYSQL_PASSWORD: hiromaily
-    ports:
-      - "${MYSQL_PORT:-3306}:3306"
-    networks:
-      - eth
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  #########################################################################
-  # PostgreSQL Migration (Atlas)
-  # Activated with --profile postgres
-  #########################################################################
-  eth-postgres-migrate-watch:
-    !!merge <<: *postgres-migration-base
-    container_name: eth-postgres-migrate-watch
-    command:
-      - migrate
-      - apply
-      - --dir
-      - "file://migrations/postgres/watch"
-      - --url
-      - "postgres://postgres:postgres@eth-postgres:5432/watch?sslmode=disable"
-
-  eth-postgres-migrate-keygen:
-    !!merge <<: *postgres-migration-base
-    container_name: eth-postgres-migrate-keygen
-    command:
-      - migrate
-      - apply
-      - --dir
-      - "file://migrations/postgres/keygen"
-      - --url
-      - "postgres://postgres:postgres@eth-postgres:5432/keygen?sslmode=disable"
-
-  eth-postgres-migrate-sign:
-    !!merge <<: *postgres-migration-base
-    container_name: eth-postgres-migrate-sign
-    command:
-      - migrate
-      - apply
-      - --dir
-      - "file://migrations/postgres/sign"
-      - --url
-      - "postgres://postgres:postgres@eth-postgres:5432/sign?sslmode=disable"
-
-  #########################################################################
-  # MySQL Migration (Atlas)
-  # Activated with --profile mysql
-  #########################################################################
-  eth-mysql-migrate-watch:
-    !!merge <<: *mysql-migration-base
-    container_name: eth-mysql-migrate-watch
-    command:
-      - migrate
-      - apply
-      - --dir
-      - file://migrations/mysql/watch
-      - --url
-      - "mysql://root:root@eth-mysql:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
-
-  eth-mysql-migrate-keygen:
-    !!merge <<: *mysql-migration-base
-    container_name: eth-mysql-migrate-keygen
-    command:
-      - migrate
-      - apply
-      - --dir
-      - file://migrations/mysql/keygen
-      - --url
-      - "mysql://root:root@eth-mysql:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
-
-  eth-mysql-migrate-sign:
-    !!merge <<: *mysql-migration-base
-    container_name: eth-mysql-migrate-sign
-    command:
-      - migrate
-      - apply
-      - --dir
-      - file://migrations/mysql/sign
-      - --url
-      - "mysql://root:root@eth-mysql:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"

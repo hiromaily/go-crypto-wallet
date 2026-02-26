@@ -37,9 +37,6 @@ fi
 # MySQL credentials (can be overridden via environment variables)
 ETH_MYSQL_ROOT_PASSWORD="${ETH_MYSQL_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-root}}"
 
-# Docker volume name
-ETH_DOCKER_VOLUME_NAME="${ETH_DOCKER_VOLUME_NAME:-go-crypto-wallet_eth-mysql}"
-
 ###############################################################################
 # Database Configuration
 ###############################################################################
