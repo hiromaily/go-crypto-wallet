@@ -129,11 +129,10 @@
   - Password now sourced from `c.conf.Ethereum.KeystorePassword` in DI container
   - _Requirements: 5.1_
 
-- [~] 10.2 (P) Restrict/deprecate monolithic Ethereumer interface (Partially done — PR #575)
+- [x] 10.2 (P) Restrict/deprecate monolithic Ethereumer interface (Partially done — PR #575)
   - [x] `Ethereumer` in `internal/application/ports/api/eth/interface.go` now carries a DI-layer-only usage restriction comment (PR #575)
   - [x] The deprecated `internal/infrastructure/api/eth/api-interface.go` has been deleted (PR #575)
-  - [ ] Final removal of `Ethereumer` from `interface.go` — evaluate after Tasks 6.2, 7, 8, 9 complete DI wiring migration
-  - Depends on 10.1
+  - [x] Final removal of `Ethereumer` from `interface.go` — DI container now holds concrete `*apiethimpl.Ethereum` type; focused ISP interfaces retained
   - _Requirements: 5.3_
 
 - [ ] 10.3 (P) Replace hardcoded password constant with configurable injection

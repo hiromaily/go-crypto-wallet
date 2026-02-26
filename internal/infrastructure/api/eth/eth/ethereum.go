@@ -16,9 +16,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
-// Compile-time check that Ethereum implements Ethereumer interface
-var _ apieth.Ethereumer = (*Ethereum)(nil)
-
 // Compile-time check that Ethereum implements EtherTxMonitor interface
 var _ apieth.EtherTxMonitor = (*Ethereum)(nil)
 
