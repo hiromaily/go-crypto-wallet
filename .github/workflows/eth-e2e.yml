@@ -76,6 +76,15 @@ jobs:
       - name: Build project
         run: make build-all
 
+      - name: Pull Docker images
+        run: |
+          # ghcr.io can be slow on CI runners; retry up to 3 times
+          for i in 1 2 3; do
+            docker pull ghcr.io/foundry-rs/foundry:latest && break
+            echo "Pull attempt ${i} failed, retrying in 10s..."
+            sleep 10
+          done
+
       - name: Run ETH E2E Pattern 1
         run: |
           NODE_TYPE="${{ github.event.inputs.node_type || 'anvil' }}" \
