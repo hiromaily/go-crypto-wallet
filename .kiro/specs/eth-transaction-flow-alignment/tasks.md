@@ -107,14 +107,14 @@
   - Depends on: Tasks 2, 3, 4
   - _Requirements: 6.3_
 
-- [ ] 9. Fix Watch wallet transaction monitoring
-- [ ] 9.1 (P) Implement confirmation counting and success status transition
+- [x] 9. Fix Watch wallet transaction monitoring
+- [x] 9.1 (P) Implement confirmation counting and success status transition
   - Query `eth_getTransactionReceipt` and `eth_blockNumber` to compute the current confirmation count
   - Transition transaction status from `TxTypeSent` to `TxTypeDone` once confirmations reach the configured threshold
   - Update `is_allocated` in `account_pubkey_table` after a confirmed successful send to prevent double-spending
   - _Requirements: 8.1, 8.2, 8.4_
 
-- [ ] 9.2 (P) Detect failed transactions and handle node connectivity failures
+- [x] 9.2 (P) Detect failed transactions and handle node connectivity failures
   - Detect transactions that fail or revert on-chain; update status to a failure state with the revert reason if available
   - Implement exponential backoff retry when the Ethereum node becomes unreachable; log the connectivity issue at WARN level including the retry count
   - _Requirements: 8.3, 8.5_

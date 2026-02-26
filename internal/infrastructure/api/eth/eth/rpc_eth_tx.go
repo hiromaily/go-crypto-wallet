@@ -307,5 +307,30 @@ func (e *Ethereum) GetTransactionReceipt(
 	return ToDomainResponseGetTransactionReceipt(infraResponse), nil
 }
 
+// GetTxReceipt retrieves a transaction receipt and converts it to the clean domain type.
+// Returns (nil, nil) when the transaction has not yet been included in a block.
+// Returns (nil, error) on node connectivity or parsing failures.
+func (e *Ethereum) GetTxReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error) {
+	resp, err := e.GetTransactionReceipt(ctx, txHash)
+	if err != nil {
+		if err.Error() == "response is empty" {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("fail to call GetTransactionReceipt(): %w", err)
+	}
+	return &domainETH.TransactionReceipt{
+		TransactionHash:   resp.TransactionHash,
+		TransactionIndex:  uint64(resp.TransactionIndex),
+		BlockHash:         resp.BlockHash,
+		BlockNumber:       uint64(resp.BlockNumber),
+		From:              resp.From,
+		To:                resp.To,
+		CumulativeGasUsed: uint64(resp.CumulativeGasUsed),
+		GasUsed:           uint64(resp.GasUsed),
+		ContractAddress:   resp.ContractAddress,
+		Status:            uint64(resp.Status),
+	}, nil
+}
+
 // eth_pendingTransactions
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_pendingtransactions
