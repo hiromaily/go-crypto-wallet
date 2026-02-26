@@ -17,8 +17,8 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type generateDescriptorUseCase struct {

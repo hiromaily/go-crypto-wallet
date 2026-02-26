@@ -96,8 +96,8 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 
-	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 )
 
@@ -204,8 +204,8 @@ func ExampleGenerateMuSig2Nonce() {
 
 	// Initialize dependencies
 	var (
-		musig2Service apibtc.MuSig2Servicer // Provides MuSig2 cryptographic operations
-		nonceRepo     multisig.NonceRepository  // Repository for nonce storage
+		musig2Service apibtc.MuSig2Servicer    // Provides MuSig2 cryptographic operations
+		nonceRepo     multisig.NonceRepository // Repository for nonce storage
 	)
 
 	// Create the use case

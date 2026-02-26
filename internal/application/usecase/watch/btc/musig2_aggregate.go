@@ -333,7 +333,7 @@ func ExampleAggregateMuSig2Signatures() {
 	// Initialize dependencies
 	var (
 		musig2Service apibtc.MuSig2Servicer // Provides MuSig2 cryptographic operations
-		btcClient     muSig2BTCClient           // Bitcoin Core RPC client (for broadcast)
+		btcClient     muSig2BTCClient       // Bitcoin Core RPC client (for broadcast)
 	)
 
 	// Create the use case

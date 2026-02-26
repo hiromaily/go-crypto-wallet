@@ -5,9 +5,9 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 
+	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 )
 
 // HDKeyOperatorImpl implements the application ports HDKeyOperator interface.

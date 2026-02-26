@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
 // GenerateMultisigDescriptor generates a traditional multisig descriptor.
