@@ -154,9 +154,6 @@ eth_check_prerequisites() {
 eth_setup_infrastructure() {
 	log_step "Setting Up Infrastructure (NODE_TYPE=${NODE_TYPE})"
 
-	local compose_profile
-	local rpc_check_cmd
-
 	case "${NODE_TYPE}" in
 	geth)
 		compose_profile="geth"
@@ -259,12 +256,12 @@ eth_fund_address() {
 	fi
 
 	# Convert ETH to Wei using bc for precision (1 ETH = 10^18 Wei)
+	# Use bc for both multiplication and hex conversion: values exceed 2^63 (e.g. 100 ETH = 10^20 Wei)
 	local amount_wei_dec
 	amount_wei_dec=$(echo "${amount_eth} * 1000000000000000000" | bc)
 
-	# Convert decimal Wei to hex
 	local amount_wei_hex
-	amount_wei_hex=$(printf "0x%x" "${amount_wei_dec}")
+	amount_wei_hex="0x$(echo "obase=16; ${amount_wei_dec}" | bc)"
 
 	log_substep "Funding ${address} with ${amount_eth} ETH (${amount_wei_hex} Wei)"
 

@@ -177,24 +177,25 @@ keygen_phase() {
 address_setup_phase() {
 	log_step "AccountXpub Export → Watch Address Import Phase"
 
-	# Export accountXpub for payment account
-	log_substep "Exporting accountXpub for '${PAYMENT_ACCOUNT}'"
-	local payment_export_output
-	payment_export_output=$(eth_keygen_cmd -coin eth export fullpubkey \
-		--account "${PAYMENT_ACCOUNT}" 2>&1)
-	local payment_xpub_file
-	payment_xpub_file=$(eth_extract_file_path "${payment_export_output}")
+	# Export and import xpub for each account (watch needs both to create transfer tx)
+	for account in "${PAYMENT_ACCOUNT}" "${CLIENT_ACCOUNT}"; do
+		log_substep "Exporting accountXpub for '${account}'"
+		local export_output
+		export_output=$(eth_keygen_cmd -coin eth export fullpubkey \
+			--account "${account}" 2>&1)
+		local xpub_file
+		xpub_file=$(eth_extract_file_path "${export_output}")
 
-	if [ -z "${payment_xpub_file}" ]; then
-		log_error "Failed to extract payment xpub file path"
-		log_error "Output: ${payment_export_output}"
-		return 1
-	fi
-	log_info "Payment xpub file: ${payment_xpub_file}"
+		if [ -z "${xpub_file}" ]; then
+			log_error "Failed to extract xpub file path for '${account}'"
+			log_error "Output: ${export_output}"
+			return 1
+		fi
+		log_info "  ${account} xpub: ${xpub_file}"
 
-	# Import payment addresses into watch wallet
-	log_substep "Importing '${PAYMENT_ACCOUNT}' addresses into watch wallet"
-	eth_watch_cmd -coin eth import address --file "${payment_xpub_file}"
+		log_substep "Importing '${account}' addresses into watch wallet"
+		eth_watch_cmd -coin eth import address --file "${xpub_file}"
+	done
 
 	log_info "Address setup completed"
 }
