@@ -285,7 +285,8 @@ eth_export_watch_address_csv() {
 	local addr_dir="${project_root}/data/address/eth"
 	mkdir -p "${addr_dir}"
 
-	local tmp_file="${addr_dir}/${account}_$(date +%s%N 2>/dev/null || date +%s).csv"
+	local tmp_file
+	tmp_file="${addr_dir}/${account}_$(date +%s%N 2>/dev/null || date +%s).csv"
 
 	if [ "${DB_TYPE}" = "sqlite" ]; then
 		# Query keygen DB for ETH addresses, emit 8-field CSV (P2PKHAddress=ETH address, rest empty)
