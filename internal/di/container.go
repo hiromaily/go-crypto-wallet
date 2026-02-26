@@ -1792,6 +1792,7 @@ func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTrans
 	return keygenusecaseeth.NewSignTransactionUseCase(
 		c.newETH(),
 		c.newTxFileRepo(),
+		c.newEthAccountKeyRepo(),
 	)
 }
 
