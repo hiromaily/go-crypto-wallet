@@ -526,7 +526,9 @@ type WatchAPIClient interface {
 // Used by keygen/sign musig2 use cases.
 type MuSig2Servicer interface {
 	CreateContext(privKey *btcec.PrivateKey, allPubKeys []*btcec.PublicKey, sortKeys bool) (*musig2.Context, error)
-	CreateContextWithTaproot(privKey *btcec.PrivateKey, allPubKeys []*btcec.PublicKey, sortKeys bool) (*musig2.Context, error)
+	CreateContextWithTaproot(
+		privKey *btcec.PrivateKey, allPubKeys []*btcec.PublicKey, sortKeys bool,
+	) (*musig2.Context, error)
 	CreateSession(ctx *musig2.Context) (*musig2.Session, error)
 	GetPublicNonce(session *musig2.Session) [66]byte
 	RegisterPubNonce(session *musig2.Session, pubNonce [66]byte) (bool, error)
@@ -546,12 +548,22 @@ type DescriptorParserr interface {
 // DescriptorServicer generates output descriptors for various address types.
 // Used by keygen generate-descriptor use case.
 type DescriptorServicer interface {
-	GenerateTaprootDescriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
-	GenerateBech32Descriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
-	GenerateP2SHSegWitDescriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
-	GenerateP2PKHDescriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
+	GenerateTaprootDescriptor(
+		fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool,
+	) (string, error)
+	GenerateBech32Descriptor(
+		fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool,
+	) (string, error)
+	GenerateP2SHSegWitDescriptor(
+		fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool,
+	) (string, error)
+	GenerateP2PKHDescriptor(
+		fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool,
+	) (string, error)
 	GenerateTaprootScriptPathDescriptor(signers []dtobtc.MultisigSigner, isChange bool) (string, error)
-	GenerateMultisigDescriptor(requiredSigs int, signers []dtobtc.MultisigSigner, isChange bool, descriptorType domainWallet.DescriptorType) (string, error)
+	GenerateMultisigDescriptor(
+		requiredSigs int, signers []dtobtc.MultisigSigner, isChange bool, descriptorType domainWallet.DescriptorType,
+	) (string, error)
 }
 
 // HDKeyOperator derives HD keys and fingerprints from seeds.

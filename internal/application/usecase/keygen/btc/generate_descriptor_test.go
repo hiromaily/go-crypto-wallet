@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	keygenusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -24,17 +24,18 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	coldmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mocks"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 )
 
-// createTestCoinStrategy creates a BTC coin strategy for testing
-func createTestCoinStrategy(
+// createTestHDKeyOperator creates an HDKeyOperator for testing using infrastructure.
+func createTestHDKeyOperator(
 	t *testing.T,
 	conf *chaincfg.Params,
-) portsWallet.CoinKeyStrategy {
+) apibtc.HDKeyOperator {
 	t.Helper()
 	strategy, err := infraKey.CreateCoinKeyStrategy(domainCoin.BTC, conf)
 	require.NoError(t, err, "Failed to create test coin strategy")
-	return strategy
+	return infraKey.NewHDKeyOperator(domainCoin.BTC, conf, strategy)
 }
 
 const (
@@ -49,16 +50,14 @@ const (
 func TestNewGenerateDescriptorUseCase(t *testing.T) {
 	t.Parallel()
 
-	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		nil,
 		nil,
 		nil,
-		domainCoin.BTC,
+		nil, // hdKeyOp - nil for constructor test
 		nil,
-		coinStrategy,
 	)
 	require.NotNil(t, useCase)
 }
@@ -78,19 +77,17 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 	accountRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return(accountKey, nil)
 	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
 
-	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
 		authRepo,
 		accountRepo,
 		nil,
-		domainCoin.BTC,
+		nil, // hdKeyOp - not needed for single-sig
 		nil,
-		coinStrategy,
 	)
 
-	fp, err := infraKey.FingerprintFromExtendedKey(testDescriptorMainnetXpub)
+	fp, err := btcpkg.FingerprintFromExtendedKey(testDescriptorMainnetXpub)
 	require.NoError(t, err)
 
 	output, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
@@ -99,7 +96,7 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 		IsChange:    false,
 	})
 	require.NoError(t, err)
-	require.Equal(t, "wpkh(["+fp.String()+"/84'/0'/0']"+testDescriptorMainnetXpub+"/0/*)", output.Descriptor)
+	require.Equal(t, "wpkh(["+fp+"/84'/0'/0']"+testDescriptorMainnetXpub+"/0/*)", output.Descriptor)
 	require.False(t, output.IsMultisig)
 }
 
@@ -126,16 +123,15 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 		&domainKey.Seed{Seed: hex.EncodeToString(testSeed)}, nil)
 
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
-	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
+	hdKeyOp := createTestHDKeyOperator(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
 		authRepo,
 		accountRepo,
 		seedRepo,
-		domainCoin.BTC,
+		hdKeyOp,
 		multiConfig,
-		coinStrategy,
 	)
 
 	output, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
@@ -174,16 +170,15 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 	seedRepo.EXPECT().GetOne(mock.Anything).Return(
 		&domainKey.Seed{Seed: hex.EncodeToString(testSeed)}, nil)
 
-	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
+	hdKeyOp := createTestHDKeyOperator(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		authRepo,
 		accountRepo,
 		seedRepo,
-		domainCoin.BTC,
+		hdKeyOp,
 		multiConfig,
-		coinStrategy,
 	)
 
 	output, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
@@ -207,16 +202,14 @@ func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
 	accountRepo.EXPECT().GetOneMaxID(domainAccount.AccountTypeDeposit).Return((*domainBTC.BTCAccountKey)(nil), nil)
 	authRepo := coldmocks.NewMockAuthFullPubkeyRepositorier(t)
 
-	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		authRepo,
 		accountRepo,
 		nil,
-		domainCoin.BTC,
+		nil, // hdKeyOp - not needed for single-sig
 		nil,
-		coinStrategy,
 	)
 
 	_, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
@@ -253,16 +246,15 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 		&domainKey.Seed{Seed: hex.EncodeToString(testSeed)}, nil)
 
 	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
-	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
+	hdKeyOp := createTestHDKeyOperator(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
 		authRepo,
 		accountRepo,
 		seedRepo,
-		domainCoin.BTC,
+		hdKeyOp,
 		multiConfig,
-		coinStrategy,
 	)
 
 	// Test P2SH-SegWit (BIP49) descriptor generation
@@ -302,16 +294,14 @@ func TestGenerateDescriptorUseCase_MultisigMissingSeed(t *testing.T) {
 	seedRepo := coldmocks.NewMockSeedRepositorier(t)
 	seedRepo.EXPECT().GetOne(mock.Anything).Return((*domainKey.Seed)(nil), nil)
 
-	coinStrategy := createTestCoinStrategy(t, &chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		authRepo,
 		accountRepo,
 		seedRepo,
-		domainCoin.BTC,
+		nil, // hdKeyOp - not reached because seed is nil
 		multiConfig,
-		coinStrategy,
 	)
 
 	_, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{

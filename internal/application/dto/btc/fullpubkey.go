@@ -21,7 +21,11 @@ type FullPubKeyFormat struct {
 }
 
 // CreateFullPubKeyLine creates line for csv (legacy format with compressed pubkey only)
-func CreateFullPubKeyLine(coinTypeCode domainCoin.CoinTypeCode, authType domainAccount.AuthType, fullPubKey string) string {
+func CreateFullPubKeyLine(
+	coinTypeCode domainCoin.CoinTypeCode,
+	authType domainAccount.AuthType,
+	fullPubKey string,
+) string {
 	// 0: coinTypeCode
 	// 1: authType
 	// 2: fullPubKey (compressed)
