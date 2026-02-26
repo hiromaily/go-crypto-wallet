@@ -5,7 +5,7 @@
 #   docker compose -f compose.eth.yaml down -v
 #
 # [anvil node only]
-#   docker compose -f compose.eth.yaml --profile anvil up anvil
+#   docker compose -f compose.eth.yaml --profile anvil up
 #
 # [anvil + postgres]
 #   docker compose -f compose.eth.yaml --profile anvil --profile postgres up
@@ -13,8 +13,8 @@
 # [anvil + mysql]
 #   docker compose -f compose.eth.yaml --profile anvil --profile mysql up
 #
-# [geth node only]
-#   docker compose -f compose.eth.yaml --profile geth up geth lodestar
+# [geth + lodestar node only]
+#   docker compose -f compose.eth.yaml --profile geth up
 #
 # [geth + postgres]
 #   docker compose -f compose.eth.yaml --profile geth --profile postgres up
@@ -71,7 +71,7 @@ services:
   #------------------------------------------------------------------------
   # Profile: anvil
   # Example:
-  #   docker compose -f compose.eth.yaml --profile anvil up anvil
+  #   docker compose -f compose.eth.yaml --profile anvil up
   #
   # Notes:
   # - Uses custom mnemonic to avoid EIP-7702 delegation on default accounts
@@ -111,12 +111,12 @@ services:
   #------------------------------------------------------------------------
   # Profile: geth
   # Example:
-  #   docker compose -f compose.eth.yaml --profile geth up geth lodestar
+  #   docker compose -f compose.eth.yaml --profile geth up
   #
   # Notes:
   # - Use console inside container:
   #     docker compose -f compose.eth.yaml exec geth sh
-  #     geth attach ipc://root/.ethereum/goerli/geth.ipc
+  #     geth attach ipc:///data/geth.ipc
   # - Call JSON-RPC:
   #     curl -X POST -H "Content-Type: application/json" \
   #       --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' \
