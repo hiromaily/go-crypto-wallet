@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Modernize ETH configuration with network types, node selection, and fee parameters
+- [x] 1. Modernize ETH configuration with network types, node selection, and fee parameters
 - [x] 1.1 (P) Add network type constants and replace deprecated network references
   - Define `EthNetworkType` constants: mainnet, sepolia, holesky, local (removing Goerli, Rinkeby, Ropsten)
   - Add `ChainID` field with auto-population from `NetworkType` when not explicitly set
@@ -16,7 +16,7 @@
   - Route any node-specific behavior differences (e.g., key import method) through `NodeType` at the infrastructure layer so all use cases remain node-agnostic
   - _Requirements: 9.1, 9.2_
 
-- [ ] 2. Define ISP-compliant port interfaces for ETH blockchain operations
+- [x] 2. Define ISP-compliant port interfaces for ETH blockchain operations
 - [x] 2.1a (DONE PR #575) Add lifecycle, key access, transaction sign/send, raw key import, and node API interfaces
   - Added `ETHLifecycle`, `ETHKeyAccessor`, `ETHTransactionSigner`, `ETHTransactionSender`, `ETHRawKeyImporter`, `ETHNodeAPIClient`
   - Added composed `ETHKeygenSignClient`, `ETHWatchClient`
@@ -44,7 +44,7 @@
   - Include `eth_tx_type` (0=legacy, 2=EIP-1559) so the offline signer can distinguish formats without parsing the raw hex
   - _Requirements: 2.5, 6.1, 6.2, 6.4, 6.5_
 
-- [ ] 4. Update the Ethereum client for EIP-1559 fee estimation and modern transaction encoding
+- [x] 4. Update the Ethereum client for EIP-1559 fee estimation and modern transaction encoding
 - [x] 4.1 Add dynamic fee estimation methods to the Ethereum client
   - Add `SuggestGasTipCap` wrapper method calling `ethClient.SuggestGasTipCap(ctx)` with fallback to the config default when the RPC call fails
   - Add `SupportsEIP1559` detection method that inspects the connected node's block header for base fee support
@@ -62,7 +62,7 @@
   - Depends on 4.2 (encoding fix must be in place)
   - _Requirements: 2.4_
 
-- [ ] 5. Verify and strengthen HD key generation in the Keygen wallet
+- [x] 5. Verify and strengthen HD key generation in the Keygen wallet
 - [x] 5.1 (P) Ensure BIP-39/BIP-44 key generation is robust and persists accountXpriv
   - Verify BIP-44 derivation path `m/44'/60'/0'/0/x` is used consistently for all ETH key generation
   - Verify Ethereum addresses are derived from secp256k1 public keys via Keccak-256 (last 20 bytes)
@@ -77,7 +77,7 @@
   - _Requirements: 4.3_
 
 - [ ] 6. Implement Keygen offline transaction signing use case
-- [ ] 6.1 Implement offline signing logic for ETH transactions
+- [x] 6.1 Implement offline signing logic for ETH transactions
   - Read unsigned transaction JSON file using the transaction file repo (Task 3)
   - Retrieve `accountXpriv` from the database and derive the child private key at the BIP-44 index matching the transaction's target account
   - Return a clear error identifying the missing key index when the required key is not available
@@ -86,7 +86,7 @@
   - Make no network or RPC calls during signing (fully offline operation)
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.4_
 
-- [ ] 6.2 Wire DI container for ETH Keygen signing
+- [x] 6.2 Wire DI container for ETH Keygen signing
   - Replace the current "not implemented yet" stub in the DI container with a fully instantiated ETH Keygen signing use case
   - Inject all required dependencies: account key repository, transaction file repository, chain config provider
   - _Requirements: 1.5_
