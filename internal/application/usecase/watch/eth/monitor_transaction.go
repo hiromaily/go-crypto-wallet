@@ -120,6 +120,13 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 				"error", err,
 			)
 		}
+		// Free the sender address even on failure to prevent the address from
+		// remaining permanently allocated when a transaction reverts on-chain.
+		if _, err := u.addrRepo.UpdateIsAllocated(false, receipt.From); err != nil {
+			return fmt.Errorf(
+				"fail to call addrRepo.UpdateIsAllocated() after failed tx sentHash=%s: %w", sentHash, err,
+			)
+		}
 		return nil
 	}
 
@@ -138,19 +145,14 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 
 	// Confirmations sufficient — mark as done.
 	if _, err := u.txDetailRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, sentHash); err != nil {
-		logger.Warn("failed to update tx type to done",
-			"sentHash", sentHash,
-			"error", err,
+		return fmt.Errorf(
+			"fail to call txDetailRepo.UpdateTxTypeBySentHashTx(TxTypeDone) sentHash=%s: %w", sentHash, err,
 		)
-		return nil
 	}
 
 	// Free the sender address to prevent double-spending on future transactions.
 	if _, err := u.addrRepo.UpdateIsAllocated(false, receipt.From); err != nil {
-		logger.Warn("failed to update is_allocated",
-			"address", receipt.From,
-			"error", err,
-		)
+		return fmt.Errorf("fail to call addrRepo.UpdateIsAllocated() sentHash=%s: %w", sentHash, err)
 	}
 
 	return nil

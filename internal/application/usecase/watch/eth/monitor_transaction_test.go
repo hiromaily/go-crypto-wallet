@@ -116,7 +116,7 @@ func TestETHMonitorTransactionUseCase_UpdateTxStatus_TxNotYetMined(t *testing.T)
 	require.NoError(t, err)
 }
 
-// Task 9.2: Transaction fails on-chain (status=0) — transition to TxTypeCancel.
+// Task 9.2: Transaction fails on-chain (status=0) — transition to TxTypeCancel and free sender address.
 func TestETHMonitorTransactionUseCase_UpdateTxStatus_FailedTransaction(t *testing.T) {
 	t.Parallel()
 	deps := newEthMonitorTxTestDeps(t)
@@ -130,6 +130,9 @@ func TestETHMonitorTransactionUseCase_UpdateTxStatus_FailedTransaction(t *testin
 		Return(testFailedReceipt(), nil)
 	deps.txDetailRepo.EXPECT().
 		UpdateTxTypeBySentHashTx(domainTx.TxTypeCancel, testMonitorSentHash).
+		Return(int64(1), nil)
+	deps.addrRepo.EXPECT().
+		UpdateIsAllocated(false, testETHFromAddr).
 		Return(int64(1), nil)
 
 	err := useCase.UpdateTxStatus(context.Background())
@@ -206,6 +209,57 @@ func TestETHMonitorTransactionUseCase_UpdateTxStatus_ConnectivityFailure(t *test
 	// UpdateTxStatus warns on per-tx failure but does not propagate it
 	err := useCase.UpdateTxStatus(ctx)
 	require.NoError(t, err) // per-tx errors are logged, not returned
+}
+
+// UpdateTxTypeBySentHashTx failure on success path — error is propagated.
+func TestETHMonitorTransactionUseCase_UpdateTxStatus_UpdateTxTypeDoneError(t *testing.T) {
+	t.Parallel()
+	deps := newEthMonitorTxTestDeps(t)
+	useCase := newEthMonitorTxUseCase(deps)
+
+	deps.txDetailRepo.EXPECT().
+		GetSentHashTx(domainTx.TxTypeSent).
+		Return([]string{testMonitorSentHash}, nil)
+	deps.ethClient.EXPECT().
+		GetTxReceipt(context.Background(), testMonitorSentHash).
+		Return(testSuccessReceipt(), nil)
+	deps.ethClient.EXPECT().
+		GetConfirmation(context.Background(), testMonitorSentHash).
+		Return(uint64(8), nil)
+	deps.txDetailRepo.EXPECT().
+		UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, testMonitorSentHash).
+		Return(int64(0), errors.New("db write error"))
+
+	// per-tx error is logged at WARN, not propagated by UpdateTxStatus
+	err := useCase.UpdateTxStatus(context.Background())
+	require.NoError(t, err)
+}
+
+// UpdateIsAllocated failure on success path — error is propagated.
+func TestETHMonitorTransactionUseCase_UpdateTxStatus_UpdateIsAllocatedError(t *testing.T) {
+	t.Parallel()
+	deps := newEthMonitorTxTestDeps(t)
+	useCase := newEthMonitorTxUseCase(deps)
+
+	deps.txDetailRepo.EXPECT().
+		GetSentHashTx(domainTx.TxTypeSent).
+		Return([]string{testMonitorSentHash}, nil)
+	deps.ethClient.EXPECT().
+		GetTxReceipt(context.Background(), testMonitorSentHash).
+		Return(testSuccessReceipt(), nil)
+	deps.ethClient.EXPECT().
+		GetConfirmation(context.Background(), testMonitorSentHash).
+		Return(uint64(8), nil)
+	deps.txDetailRepo.EXPECT().
+		UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, testMonitorSentHash).
+		Return(int64(1), nil)
+	deps.addrRepo.EXPECT().
+		UpdateIsAllocated(false, testETHFromAddr).
+		Return(int64(0), errors.New("db write error"))
+
+	// per-tx error is logged at WARN, not propagated by UpdateTxStatus
+	err := useCase.UpdateTxStatus(context.Background())
+	require.NoError(t, err)
 }
 
 // Task 9.1: GetConfirmation fails — warn and continue.
