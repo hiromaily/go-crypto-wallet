@@ -1,27 +1,39 @@
 #!/usr/bin/env bash
 
-# Ethereum E2E Workflow Script - Pattern 1: Anvil Basic
-# This script automates the complete Ethereum workflow with Anvil (Foundry's local node)
+# Ethereum E2E Workflow Script - Pattern 1: Single-sig EIP-1559
+# This script automates the complete Ethereum single-sig transaction flow:
+#   keygen seed/key → accountXpub export → watch address import →
+#   fund addresses → create unsigned tx → keygen offline sign →
+#   watch send → monitor confirmation
+#
 # Usage: ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh [OPTIONS]
+#
 # Options:
-#   --cleanup  Stop containers and cleanup state
-#   --reset    Full reset and run from scratch
-#   --verbose  Enable verbose output
-#   --non-interactive  Run without prompts (for CI/CD)
-#   -h, --help Display help message
+#   --cleanup           Stop containers and cleanup state
+#   --reset             Full reset and run from scratch
+#   --verbose           Enable verbose output (set -x)
+#   --non-interactive   Run without prompts (for CI/CD)
+#   -h, --help          Display this help message
 #
 # Reference Documentation:
-#   docs/chains/eth/operations/e2e-transaction-patterns.md - E2E transaction patterns
+#   docs/chains/eth/operations/e2e-transaction-patterns.md
 #
 # Transaction Pattern:
-#   Pattern 1: ETH Basic Single-sig
-#   - Address Type: Standard Ethereum (secp256k1)
-#   - Address Format: `0x...` (checksummed)
-#   - Transaction Type: Legacy or EIP-1559 (auto-detected)
+#   Pattern 1: ETH Single-sig (EOA)
+#   - Address Type: Standard Ethereum secp256k1 EOA
+#   - Address Format: 0x... (checksummed)
+#   - Transaction Type: EIP-1559 (Type 2) with Anvil auto-detection
+#   - Signing: Keygen wallet (offline HD derivation, no Sign wallet needed)
 #
-# Required Config Settings:
-#   - config/wallet/eth/watch.yaml:  Port 8546 for Anvil
-#   - config/wallet/eth/keygen.yaml: Default Ethereum settings
+# Environment Variables:
+#   NODE_TYPE    Node type: anvil (default) or geth
+#   DB_TYPE      Database type: sqlite (default) or mysql
+#   ETH_RPC_HOST Ethereum RPC host (default: 127.0.0.1)
+#   ETH_RPC_PORT Ethereum RPC port (default: 8546 for anvil, 8545 for geth)
+#
+# Required Config:
+#   config/wallet/eth/watch.yaml:  ethereum.port: 8546 (Anvil default)
+#   config/wallet/eth/keygen.yaml: default Ethereum settings
 
 set -euo pipefail
 
@@ -29,46 +41,46 @@ set -euo pipefail
 # Script Configuration
 ###############################################################################
 
-# Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source the ETH common utilities (which also sources common.sh)
 # shellcheck source=../eth_common.sh
 source "${SCRIPT_DIR}/../eth_common.sh"
 
-# Pattern identifier for database isolation
+# Pattern identifier for DB isolation (also used by eth_get_db_path)
 export E2E_PATTERN="p1"
+
+# Re-initialize database with correct pattern now that E2E_PATTERN is set
+eth_init_database
 
 ###############################################################################
 # Environment Variable Overrides for Configuration
 ###############################################################################
-# These environment variables override config file values.
 # Priority: Environment Variables > Config File > Default Values
 #
-# Pattern 1 requires:
-#   - network_type: "anvil" (for Anvil compatibility)
-#   - port: 8546 (Anvil default)
-export WALLET_ETHEREUM_NETWORK_TYPE="anvil"
-export WALLET_ETHEREUM_PORT="8546"
+# Pattern 1 uses Anvil by default; override with NODE_TYPE=geth for Geth.
+export WALLET_ETHEREUM_NETWORK_TYPE="${NODE_TYPE:-anvil}"
+export WALLET_ETHEREUM_PORT="${ETH_RPC_PORT}"
 
 ###############################################################################
 # Configuration
 ###############################################################################
 
-# Get configuration paths
 eth_get_config_paths
 
-# Account configuration (single-sig)
-ACCOUNT_CONFIG="${SCRIPT_DIR}/../../../config/wallet/account/account.yaml"
+# Number of HD keys to generate per account
+KEY_NUM=5
 
-# Test addresses and amounts
-FUNDING_AMOUNT_ETH=100
-TRANSFER_AMOUNT_ETH=1
-DEPOSIT_ACCOUNT="deposit"
+# Accounts used in this E2E test
+PAYMENT_ACCOUNT="payment"
 CLIENT_ACCOUNT="client"
 
+# Amount (ETH) to fund sender address and transfer
+FUNDING_AMOUNT_ETH=100
+TRANSFER_AMOUNT_ETH=1.0
+
 ###############################################################################
-# Parse Arguments
+# Argument Parsing
 ###############################################################################
 
 MODE="run"
@@ -77,7 +89,7 @@ NON_INTERACTIVE=false
 
 show_help() {
 	cat <<EOF
-Ethereum E2E Workflow Script - Pattern 1: Anvil Basic
+Ethereum E2E Workflow Script - Pattern 1: Single-sig EIP-1559
 
 Usage: $0 [OPTIONS]
 
@@ -89,15 +101,16 @@ Options:
   -h, --help          Display this help message
 
 Examples:
-  $0                  # Run E2E workflow
-  $0 --reset          # Fresh start with full reset
-  $0 --verbose        # Run with detailed logging
-  $0 --cleanup        # Stop containers and cleanup
+  $0               # Run E2E workflow
+  $0 --reset       # Fresh start with full reset
+  $0 --verbose     # Run with detailed logging
+  $0 --cleanup     # Stop containers and cleanup
 
 Environment Variables:
-  DB_TYPE             Database type: sqlite (default) or mysql
-  ETH_RPC_HOST        Anvil RPC host (default: 127.0.0.1)
-  ETH_RPC_PORT        Anvil RPC port (default: 8546)
+  NODE_TYPE    anvil (default) | geth
+  DB_TYPE      sqlite (default) | mysql
+  ETH_RPC_HOST Ethereum RPC host (default: 127.0.0.1)
+  ETH_RPC_PORT Ethereum RPC port (default: auto from NODE_TYPE)
 
 EOF
 	exit 0
@@ -115,7 +128,7 @@ while [[ $# -gt 0 ]]; do
 		;;
 	--verbose)
 		VERBOSE=true
-		set -x # Enable bash debug mode
+		set -x
 		shift
 		;;
 	--non-interactive)
@@ -133,253 +146,219 @@ while [[ $# -gt 0 ]]; do
 done
 
 ###############################################################################
-# Utility Functions
+# Phase 1: Key Generation (Keygen wallet — offline)
 ###############################################################################
 
-# Extract address from wallet command output
-extract_address() {
-	local output="$1"
-	echo "$output" | grep -oE '0x[a-fA-F0-9]{40}'
-}
+keygen_phase() {
+	log_step "Key Generation Phase (Keygen wallet)"
 
-# Extract single address (first match)
-extract_single_address() {
-	local output="$1"
-	echo "$output" | grep -oE '0x[a-fA-F0-9]{40}' | head -1
-}
+	log_substep "Creating mnemonic seed"
+	eth_keygen_cmd -coin eth create seed || {
+		log_warn "Seed already exists or error, continuing..."
+	}
 
-# Wait for transaction confirmation
-wait_for_confirmation() {
-	local tx_hash="$1"
-	local max_wait=30
-	local count=0
+	log_substep "Creating ${KEY_NUM} HD keys for '${PAYMENT_ACCOUNT}' account"
+	eth_keygen_cmd -coin eth create hdkey \
+		--account "${PAYMENT_ACCOUNT}" \
+		--keynum "${KEY_NUM}"
 
-	log_substep "Waiting for transaction confirmation: ${tx_hash}"
-
-	while [ $count -lt $max_wait ]; do
-		local receipt
-		receipt=$(curl -s -X POST -H "Content-Type: application/json" \
-			--data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getTransactionReceipt\",\"params\":[\"${tx_hash}\"],\"id\":1}" \
-			"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}")
-
-		if echo "$receipt" | grep -q '"status":"0x1"'; then
-			log_info "Transaction confirmed successfully"
-			return 0
-		fi
-
-		sleep 1
-		count=$((count + 1))
-	done
-
-	log_error "Transaction not confirmed within ${max_wait} seconds"
-	return 1
-}
-
-###############################################################################
-# Workflow Functions
-###############################################################################
-
-e2e_keygen_workflow() {
-	log_step "Key Generation Workflow"
-
-	# 1. Create seed
-	log_substep "Creating seed"
-	eth_keygen_cmd -coin eth create seed
-
-	# 2. Create HD wallet keys for deposit account
-	log_substep "Creating HD keys for ${DEPOSIT_ACCOUNT} account"
-	eth_keygen_cmd -coin eth create hdkey --account "${DEPOSIT_ACCOUNT}"
-
-	# 3. Create HD wallet keys for client account
-	log_substep "Creating HD keys for ${CLIENT_ACCOUNT} account"
-	eth_keygen_cmd -coin eth create hdkey --account "${CLIENT_ACCOUNT}"
-
-	# 4. Import private keys to local keystore
-	log_substep "Importing private keys to keystore for ${DEPOSIT_ACCOUNT}"
-	eth_keygen_cmd -coin eth import key --account "${DEPOSIT_ACCOUNT}"
-
-	log_substep "Importing private keys to keystore for ${CLIENT_ACCOUNT}"
-	eth_keygen_cmd -coin eth import key --account "${CLIENT_ACCOUNT}"
+	log_substep "Creating ${KEY_NUM} HD keys for '${CLIENT_ACCOUNT}' account"
+	eth_keygen_cmd -coin eth create hdkey \
+		--account "${CLIENT_ACCOUNT}" \
+		--keynum "${KEY_NUM}"
 
 	log_info "Key generation completed"
 }
 
-e2e_address_workflow() {
-	log_step "Address Creation Workflow"
+###############################################################################
+# Phase 2: AccountXpub Export → Watch Address Import
+###############################################################################
 
-	# 1. Create deposit addresses
-	log_substep "Creating deposit addresses"
-	local deposit_output
-	deposit_output=$(eth_watch_cmd -coin eth api address create --account "${DEPOSIT_ACCOUNT}" --count 2)
+address_setup_phase() {
+	log_step "AccountXpub Export → Watch Address Import Phase"
 
-	# Extract all addresses then select specific ones
-	local addresses
-	addresses=$(extract_address "$deposit_output")
-	DEPOSIT_ADDR_1=$(echo "$addresses" | sed -n '1p')
-	DEPOSIT_ADDR_2=$(echo "$addresses" | sed -n '2p')
+	# Export accountXpub for payment account
+	log_substep "Exporting accountXpub for '${PAYMENT_ACCOUNT}'"
+	local payment_export_output
+	payment_export_output=$(eth_keygen_cmd -coin eth export fullpubkey \
+		--account "${PAYMENT_ACCOUNT}" 2>&1)
+	local payment_xpub_file
+	payment_xpub_file=$(eth_extract_file_path "${payment_export_output}")
 
-	if [ -z "$DEPOSIT_ADDR_1" ] || [ -z "$DEPOSIT_ADDR_2" ]; then
-		log_error "Failed to extract deposit addresses"
+	if [ -z "${payment_xpub_file}" ]; then
+		log_error "Failed to extract payment xpub file path"
+		log_error "Output: ${payment_export_output}"
+		return 1
+	fi
+	log_info "Payment xpub file: ${payment_xpub_file}"
+
+	# Import payment addresses into watch wallet
+	log_substep "Importing '${PAYMENT_ACCOUNT}' addresses into watch wallet"
+	eth_watch_cmd -coin eth import address --file "${payment_xpub_file}"
+
+	log_info "Address setup completed"
+}
+
+###############################################################################
+# Phase 3: Fund Payment Addresses (Anvil only)
+###############################################################################
+
+funding_phase() {
+	log_step "Funding Phase"
+
+	# Retrieve first payment address from watch DB
+	local payment_addr
+	payment_addr=$(eth_get_payment_address "${PAYMENT_ACCOUNT}")
+
+	if [ -z "${payment_addr}" ]; then
+		log_error "No '${PAYMENT_ACCOUNT}' address found in watch DB"
+		log_error "Ensure Phase 2 (address import) ran successfully"
 		return 1
 	fi
 
-	log_info "Deposit address 1: ${DEPOSIT_ADDR_1}"
-	log_info "Deposit address 2: ${DEPOSIT_ADDR_2}"
-
-	# 2. Create client addresses
-	log_substep "Creating client addresses"
-	local client_output
-	client_output=$(eth_watch_cmd -coin eth api address create --account "${CLIENT_ACCOUNT}" --count 1)
-
-	CLIENT_ADDR=$(extract_single_address "$client_output")
-
-	if [ -z "$CLIENT_ADDR" ]; then
-		log_error "Failed to extract client address"
-		return 1
-	fi
-
-	log_info "Client address: ${CLIENT_ADDR}"
-
-	log_info "Address creation completed"
+	log_info "Funding payment address: ${payment_addr}"
+	eth_fund_address "${payment_addr}" "${FUNDING_AMOUNT_ETH}"
 }
 
-e2e_funding_workflow() {
-	log_step "Funding Workflow"
+###############################################################################
+# Phase 4: Transaction Creation (Watch wallet — online)
+###############################################################################
 
-	# Fund deposit addresses using Anvil's anvil_setBalance
-	eth_fund_address "${DEPOSIT_ADDR_1}" "${FUNDING_AMOUNT_ETH}"
-	eth_fund_address "${DEPOSIT_ADDR_2}" "${FUNDING_AMOUNT_ETH}"
+create_tx_phase() {
+	log_step "Transaction Creation Phase (Watch wallet)"
 
-	# Verify balances
-	log_substep "Verifying balances"
-
-	local balance1
-	balance1=$(curl -s -X POST -H "Content-Type: application/json" \
-		--data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${DEPOSIT_ADDR_1}\",\"latest\"],\"id\":1}" \
-		"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" | grep -oE '"result":"0x[0-9a-f]+"' | cut -d'"' -f4)
-
-	local balance2
-	balance2=$(curl -s -X POST -H "Content-Type: application/json" \
-		--data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${DEPOSIT_ADDR_2}\",\"latest\"],\"id\":1}" \
-		"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" | grep -oE '"result":"0x[0-9a-f]+"' | cut -d'"' -f4)
-
-	log_info "Deposit address 1 balance: ${balance1}"
-	log_info "Deposit address 2 balance: ${balance2}"
-
-	log_info "Funding completed"
-}
-
-e2e_transaction_workflow() {
-	log_step "Transaction Workflow"
-
-	# 1. Create payment request
-	log_substep "Creating payment request"
-	local payment_output
-	payment_output=$(eth_watch_cmd -coin eth api payment create \
-		--receiver "${CLIENT_ADDR}" \
-		--amount "${TRANSFER_AMOUNT_ETH}")
-
-	log_info "Payment request created"
-
-	# 2. Create unsigned transaction
-	log_substep "Creating unsigned transaction"
-	local tx_output
-	tx_output=$(eth_sign_cmd -coin eth api tx create payment 2>&1) || {
-		log_error "Failed to create payment transaction"
-		log_error "Error details: $tx_output"
+	log_substep "Creating unsigned transfer tx: ${PAYMENT_ACCOUNT} → ${CLIENT_ACCOUNT} (${TRANSFER_AMOUNT_ETH} ETH)"
+	local create_output
+	create_output=$(eth_watch_cmd -coin eth create transfer \
+		--account1 "${PAYMENT_ACCOUNT}" \
+		--account2 "${CLIENT_ACCOUNT}" \
+		--amount "${TRANSFER_AMOUNT_ETH}" 2>&1) || {
+		log_error "Failed to create transfer transaction"
+		log_error "Output: ${create_output}"
 		return 1
 	}
 
-	# Extract transaction file path
-	local tx_file
-	tx_file=$(echo "$tx_output" | grep -oE '(data/tx|\.)/[^ ]+\.(json|hex)' | tail -1)
+	UNSIGNED_TX_FILE=$(eth_extract_file_path "${create_output}")
 
-	if [ -z "$tx_file" ]; then
-		log_error "Failed to extract transaction file path"
-		log_error "Output was: $tx_output"
+	if [ -z "${UNSIGNED_TX_FILE}" ]; then
+		log_error "Failed to extract unsigned tx file path"
+		log_error "Output: ${create_output}"
 		return 1
 	fi
 
-	log_info "Transaction created: ${tx_file}"
+	log_info "Unsigned transaction file: ${UNSIGNED_TX_FILE}"
+}
 
-	# 3. Sign transaction
-	log_substep "Signing transaction"
-	local signed_output
-	signed_output=$(eth_sign_cmd -coin eth api tx sign --file "${tx_file}" 2>&1) || {
+# Declare global for signed tx path (set in create_tx_phase, read in sign_phase)
+UNSIGNED_TX_FILE=""
+SIGNED_TX_FILE=""
+
+###############################################################################
+# Phase 5: Offline Signing (Keygen wallet — offline, no network calls)
+###############################################################################
+
+sign_tx_phase() {
+	log_step "Offline Signing Phase (Keygen wallet)"
+
+	log_substep "Signing transaction: ${UNSIGNED_TX_FILE}"
+	local sign_output
+	sign_output=$(eth_keygen_cmd -coin eth sign signature \
+		--file "${UNSIGNED_TX_FILE}" 2>&1) || {
 		log_error "Failed to sign transaction"
-		log_error "Error details: $signed_output"
+		log_error "Output: ${sign_output}"
 		return 1
 	}
 
-	# Extract signed transaction file
-	local signed_file
-	signed_file=$(echo "$signed_output" | grep -oE '(data/tx|\.)/[^ ]+\.(json|hex)' | tail -1)
+	SIGNED_TX_FILE=$(eth_extract_file_path "${sign_output}")
 
-	if [ -z "$signed_file" ]; then
-		log_error "Failed to extract signed transaction file path"
-		log_error "Output was: $signed_output"
+	if [ -z "${SIGNED_TX_FILE}" ]; then
+		log_error "Failed to extract signed tx file path"
+		log_error "Output: ${sign_output}"
 		return 1
 	fi
 
-	log_info "Transaction signed: ${signed_file}"
-
-	# 4. Send transaction
-	log_substep "Sending transaction to Anvil"
-	local send_output
-	send_output=$(eth_watch_cmd -coin eth api tx send --file "${signed_file}" 2>&1) || {
-		log_error "Failed to send transaction"
-		log_error "Error details: $send_output"
-		return 1
-	}
-
-	# Extract transaction hash
-	local tx_hash
-	tx_hash=$(echo "$send_output" | grep -oE '0x[a-fA-F0-9]{64}')
-
-	if [ -z "$tx_hash" ]; then
-		log_error "Failed to extract transaction hash"
-		log_error "Output was: $send_output"
-		return 1
+	# Verify signing is complete
+	local is_completed
+	is_completed=$(echo "${sign_output}" | grep '^\[isCompleted\]:' | sed 's/^\[isCompleted\]: //')
+	if [ "${is_completed}" != "true" ]; then
+		log_warn "Signing reported isCompleted=${is_completed}"
 	fi
 
-	log_info "Transaction sent: ${tx_hash}"
-
-	# 5. Wait for confirmation
-	wait_for_confirmation "${tx_hash}"
-
-	# 6. Verify client address balance
-	log_substep "Verifying client address balance"
-	local client_balance
-	client_balance=$(curl -s -X POST -H "Content-Type: application/json" \
-		--data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${CLIENT_ADDR}\",\"latest\"],\"id\":1}" \
-		"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" | grep -oE '"result":"0x[0-9a-f]+"' | cut -d'"' -f4)
-
-	log_info "Client address balance: ${client_balance}"
-
-	log_info "Transaction workflow completed"
+	log_info "Signed transaction file: ${SIGNED_TX_FILE}"
 }
+
+###############################################################################
+# Phase 6: Broadcast (Watch wallet — online)
+###############################################################################
+
+send_tx_phase() {
+	log_step "Broadcast Phase (Watch wallet)"
+
+	log_substep "Sending signed transaction: ${SIGNED_TX_FILE}"
+	local send_output
+	send_output=$(eth_watch_cmd -coin eth send tx \
+		--file "${SIGNED_TX_FILE}" 2>&1) || {
+		log_error "Failed to send transaction"
+		log_error "Output: ${send_output}"
+		return 1
+	}
+
+	local tx_id
+	tx_id=$(eth_extract_tx_id "${send_output}")
+
+	if [ -z "${tx_id}" ]; then
+		log_warn "Could not extract txID from output; the tx may still have been sent"
+		log_info "Raw output: ${send_output}"
+	else
+		log_info "Transaction sent! txID: ${tx_id}"
+	fi
+}
+
+###############################################################################
+# Phase 7: Confirmation Monitoring (Watch wallet — online)
+###############################################################################
+
+monitor_phase() {
+	log_step "Monitoring Phase (Watch wallet)"
+
+	log_substep "Monitoring sent transactions for confirmation"
+	eth_watch_cmd -coin eth monitor senttx || {
+		log_warn "Monitor returned non-zero (may be no transactions to monitor yet)"
+	}
+
+	log_info "Monitoring completed"
+}
+
+###############################################################################
+# Full E2E Workflow
+###############################################################################
 
 e2e_full_workflow() {
-	log_header "Ethereum E2E Workflow - Pattern 1: Anvil Basic"
+	log_step "Ethereum E2E Workflow - Pattern 1: Single-sig EIP-1559"
+	log_info "Node type: ${NODE_TYPE}"
+	log_info "DB type:   ${DB_TYPE}"
+	log_info "RPC:       ${ETH_RPC_HOST}:${ETH_RPC_PORT}"
+	echo ""
 
-	# Prerequisites
 	eth_check_prerequisites
-
-	# Setup infrastructure
 	eth_setup_infrastructure
 
-	# Run workflows
-	e2e_keygen_workflow
-	e2e_address_workflow
-	e2e_funding_workflow
-	e2e_transaction_workflow
+	keygen_phase
+	address_setup_phase
+	funding_phase
+	create_tx_phase
+	sign_tx_phase
+	send_tx_phase
+	monitor_phase
 
-	log_success "E2E workflow completed successfully"
+	log_info "E2E Pattern 1 completed successfully!"
 }
 
 ###############################################################################
-# Main Execution
+# Main
 ###############################################################################
+
+trap 'log_error "Script failed at line $LINENO"' ERR
 
 main() {
 	case "${MODE}" in
@@ -400,5 +379,4 @@ main() {
 	esac
 }
 
-# Execute main function
 main

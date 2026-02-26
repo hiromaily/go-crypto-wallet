@@ -149,7 +149,7 @@
   - Ensure both node profiles share the same Watch/Keygen wallet service definitions
   - _Requirements: 3.4, 9.3, 9.4_
 
-- [ ] 11.2 Create E2E shell scripts for the full ETH transaction flow
+- [x] 11.2 Create E2E shell scripts for the full ETH transaction flow
   - Mirror the BTC/BCH E2E script structure at `scripts/operation/btc/e2e/`
   - Cover the complete single-sig flow: keygen seed/key → accountXpub export → watch address import → create unsigned tx → keygen sign → watch send → monitor confirmation
   - Accept `NODE_TYPE=anvil|geth` as an environment variable for node selection

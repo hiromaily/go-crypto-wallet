@@ -22,15 +22,23 @@ source "${_ETH_COMMON_DIR}/../common.sh"
 # Coin identifier
 ETH_COIN="eth"
 
-# RPC configuration for Anvil (default port 8546 to avoid conflict with Geth)
+# Node type: anvil (default) or geth
+# Override via NODE_TYPE=geth environment variable
+NODE_TYPE="${NODE_TYPE:-anvil}"
+
+# RPC configuration (Anvil defaults to port 8546 to avoid conflict with Geth)
 ETH_RPC_HOST="${ETH_RPC_HOST:-127.0.0.1}"
-ETH_RPC_PORT="${ETH_RPC_PORT:-8546}"
+if [ "${NODE_TYPE}" = "geth" ]; then
+	ETH_RPC_PORT="${ETH_RPC_PORT:-8545}"
+else
+	ETH_RPC_PORT="${ETH_RPC_PORT:-8546}"
+fi
 
 # MySQL credentials (can be overridden via environment variables)
 ETH_MYSQL_ROOT_PASSWORD="${ETH_MYSQL_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-root}}"
 
 # Docker volume name
-ETH_DOCKER_VOLUME_NAME="${ETH_DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-mysql}"
+ETH_DOCKER_VOLUME_NAME="${ETH_DOCKER_VOLUME_NAME:-go-crypto-wallet_eth-mysql}"
 
 ###############################################################################
 # Database Configuration
@@ -42,7 +50,7 @@ DB_TYPE="${DB_TYPE:-sqlite}"
 # E2E Pattern identifier (set by each E2E script)
 E2E_PATTERN="${E2E_PATTERN:-}"
 
-# Get database file path with pattern suffix
+# Get database file path with pattern suffix for a given wallet type
 eth_get_db_path() {
 	local wallet_type="${1:-watch}"
 	local db_suffix=""
@@ -54,16 +62,25 @@ eth_get_db_path() {
 	echo "./data/sqlite/eth/${wallet_type}${db_suffix}.db"
 }
 
-# Initialize database configuration
+# Separate DB paths for each wallet type (mirrors BTC pattern)
+SQLITE_WATCH_DB_PATH=""
+SQLITE_KEYGEN_DB_PATH=""
+
+# Initialize database configuration — sets SQLITE_*_DB_PATH and exports env vars
 eth_init_database() {
 	if [ "${DB_TYPE}" = "sqlite" ]; then
 		export WALLET_DATABASE_TYPE="sqlite"
-		WALLET_DATABASE_SQLITE_PATH="$(eth_get_db_path "watch")"
-		export WALLET_DATABASE_SQLITE_PATH
-		log_info "Using SQLite database: ${WALLET_DATABASE_SQLITE_PATH}"
 
-		# Create directory if it doesn't exist
-		mkdir -p "$(dirname "${WALLET_DATABASE_SQLITE_PATH}")"
+		SQLITE_WATCH_DB_PATH="$(eth_get_db_path "watch")"
+		SQLITE_KEYGEN_DB_PATH="$(eth_get_db_path "keygen")"
+
+		# Create directories if they don't exist
+		mkdir -p "$(dirname "${SQLITE_WATCH_DB_PATH}")"
+		mkdir -p "$(dirname "${SQLITE_KEYGEN_DB_PATH}")"
+
+		log_info "Using SQLite databases:"
+		log_info "  watch:  ${SQLITE_WATCH_DB_PATH}"
+		log_info "  keygen: ${SQLITE_KEYGEN_DB_PATH}"
 	else
 		export WALLET_DATABASE_TYPE="mysql"
 		log_info "Using MySQL database"
@@ -87,14 +104,26 @@ eth_get_config_paths() {
 
 ###############################################################################
 # Wallet Command Wrappers
+# Each wrapper injects the wallet-specific SQLite DB path so that watch and
+# keygen operate on isolated databases (mirrors BTC btc_watch_cmd pattern).
 ###############################################################################
 
 eth_watch_cmd() {
-	"${GOPATH}/bin/watch" "$@"
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		WALLET_DATABASE_SQLITE_PATH="${SQLITE_WATCH_DB_PATH}" \
+			"${GOPATH}/bin/watch" "$@"
+	else
+		"${GOPATH}/bin/watch" "$@"
+	fi
 }
 
 eth_keygen_cmd() {
-	"${GOPATH}/bin/keygen" "$@"
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		WALLET_DATABASE_SQLITE_PATH="${SQLITE_KEYGEN_DB_PATH}" \
+			"${GOPATH}/bin/keygen" "$@"
+	else
+		"${GOPATH}/bin/keygen" "$@"
+	fi
 }
 
 eth_sign_cmd() {
@@ -119,37 +148,44 @@ eth_check_prerequisites() {
 		return 1
 	fi
 
-	if [ ! -f "${GOPATH}/bin/sign" ]; then
-		log_error "sign binary not found. Run 'make build-all' first."
-		return 1
-	fi
-
 	log_info "All prerequisites met"
 }
 
 eth_setup_infrastructure() {
-	log_step "Setting Up Infrastructure"
+	log_step "Setting Up Infrastructure (NODE_TYPE=${NODE_TYPE})"
 
-	# Start Anvil
-	log_substep "Starting Anvil node"
-	docker compose -f compose.eth.yaml up -d anvil
+	local compose_profile
+	local rpc_check_cmd
 
-	# Wait for Anvil to be ready
-	log_substep "Waiting for Anvil to be ready..."
-	local max_wait=30
+	case "${NODE_TYPE}" in
+	geth)
+		compose_profile="geth"
+		log_substep "Starting Geth + Lodestar nodes"
+		docker compose -f compose.eth.yaml --profile geth up -d
+		;;
+	anvil | *)
+		compose_profile="anvil"
+		log_substep "Starting Anvil node"
+		docker compose -f compose.eth.yaml --profile anvil up -d anvil
+		;;
+	esac
+
+	# Wait for RPC endpoint to be ready
+	log_substep "Waiting for ETH node (${NODE_TYPE}) on ${ETH_RPC_HOST}:${ETH_RPC_PORT}..."
+	local max_wait=60
 	local count=0
 	while [ $count -lt $max_wait ]; do
 		if curl -s -X POST -H "Content-Type: application/json" \
 			--data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
 			"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" >/dev/null 2>&1; then
-			log_info "Anvil is ready"
+			log_info "ETH node is ready"
 			return 0
 		fi
 		sleep 1
 		count=$((count + 1))
 	done
 
-	log_error "Anvil failed to start within ${max_wait} seconds"
+	log_error "ETH node (${NODE_TYPE}) failed to start within ${max_wait} seconds"
 	return 1
 }
 
@@ -160,11 +196,21 @@ eth_setup_infrastructure() {
 eth_cleanup() {
 	log_step "Cleaning Up"
 
-	log_substep "Stopping Anvil"
-	docker compose -f compose.eth.yaml stop anvil
+	case "${NODE_TYPE}" in
+	geth)
+		log_substep "Stopping Geth + Lodestar"
+		docker compose -f compose.eth.yaml --profile geth stop || true
+		;;
+	anvil | *)
+		log_substep "Stopping Anvil"
+		docker compose -f compose.eth.yaml --profile anvil stop anvil || true
+		;;
+	esac
 
-	log_substep "Removing SQLite databases"
-	rm -f ./data/sqlite/eth/*-e2e*.db
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		log_substep "Removing SQLite databases"
+		rm -f ./data/sqlite/eth/*-e2e*.db
+	fi
 
 	log_info "Cleanup completed"
 }
@@ -181,16 +227,38 @@ eth_full_reset() {
 }
 
 ###############################################################################
+# Database Query Functions (SQLite)
+###############################################################################
+
+# Get the first payment address from the watch wallet DB
+# Usage: addr=$(eth_get_payment_address "payment")
+eth_get_payment_address() {
+	local account="${1:-payment}"
+
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		sqlite3 "${SQLITE_WATCH_DB_PATH}" \
+			"SELECT wallet_address FROM account_pubkey_table WHERE account='${account}' AND is_allocated=0 LIMIT 1" 2>/dev/null || true
+	else
+		log_warn "eth_get_payment_address: MySQL support not yet implemented"
+		echo ""
+	fi
+}
+
+###############################################################################
 # Utility Functions
 ###############################################################################
 
-# Fund an address using anvil_setBalance RPC
+# Fund an address using anvil_setBalance RPC (Anvil only)
 eth_fund_address() {
 	local address="$1"
 	local amount_eth="${2:-100}" # Default 100 ETH
 
+	if [ "${NODE_TYPE}" = "geth" ]; then
+		log_warn "eth_fund_address: auto-funding not supported on Geth; fund address manually"
+		return 0
+	fi
+
 	# Convert ETH to Wei using bc for precision (1 ETH = 10^18 Wei)
-	# Note: bash arithmetic can't handle values > 2^63-1, so we use bc
 	local amount_wei_dec
 	amount_wei_dec=$(echo "${amount_eth} * 1000000000000000000" | bc)
 
@@ -198,7 +266,7 @@ eth_fund_address() {
 	local amount_wei_hex
 	amount_wei_hex=$(printf "0x%x" "${amount_wei_dec}")
 
-	log_substep "Funding address ${address} with ${amount_eth} ETH"
+	log_substep "Funding ${address} with ${amount_eth} ETH (${amount_wei_hex} Wei)"
 
 	curl -s -X POST -H "Content-Type: application/json" \
 		--data "{\"jsonrpc\":\"2.0\",\"method\":\"anvil_setBalance\",\"params\":[\"${address}\",\"${amount_wei_hex}\"],\"id\":1}" \
@@ -207,17 +275,25 @@ eth_fund_address() {
 	log_info "Address funded successfully"
 }
 
-# Extract file path from command output
+# Extract a file path tagged with [fileName]: from command output
+# Usage: file=$(eth_extract_file_path "$output")
 eth_extract_file_path() {
 	local output="$1"
-	echo "$output" | grep -oE '(data/tx|\.)/[^ ]+\.(hex|json)' | tail -1
+	echo "$output" | grep '^\[fileName\]:' | sed 's/^\[fileName\]: //'
+}
+
+# Extract txID from watch send tx output
+# Usage: txid=$(eth_extract_tx_id "$output")
+eth_extract_tx_id() {
+	local output="$1"
+	echo "$output" | grep -oE '0x[a-fA-F0-9]{64}' | head -1
 }
 
 ###############################################################################
 # Initialization
 ###############################################################################
 
-# Initialize database configuration
+# Initialize database configuration (runs on source)
 eth_init_database
 
-log_info "ETH common utilities loaded (coin=${ETH_COIN}, db_type=${DB_TYPE})"
+log_info "ETH common utilities loaded (coin=${ETH_COIN}, node_type=${NODE_TYPE}, db_type=${DB_TYPE})"
