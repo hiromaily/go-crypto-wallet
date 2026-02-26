@@ -19,7 +19,7 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
-	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 )
 
 const (
@@ -30,10 +30,10 @@ const (
 func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 	t.Parallel()
 
-	fp, err := infraKey.FingerprintFromExtendedKey(testDescriptorMainnetXpub)
+	fp, err := btcpkg.FingerprintFromExtendedKey(testDescriptorMainnetXpub)
 	require.NoError(t, err)
 
-	desc := fmt.Sprintf("wpkh([%s/84'/0'/0']%s/0/*)", fp.String(), testDescriptorMainnetXpub)
+	desc := fmt.Sprintf("wpkh([%s/84'/0'/0']%s/0/*)", fp, testDescriptorMainnetXpub)
 
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "desc.txt")
@@ -97,10 +97,10 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 func TestImportDescriptorUseCase_ValidateOnly(t *testing.T) {
 	t.Parallel()
 
-	fp, err := infraKey.FingerprintFromExtendedKey(testDescriptorMainnetXpub)
+	fp, err := btcpkg.FingerprintFromExtendedKey(testDescriptorMainnetXpub)
 	require.NoError(t, err)
 
-	desc := fmt.Sprintf("wpkh([%s/84'/0'/0']%s/0/*)", fp.String(), testDescriptorMainnetXpub)
+	desc := fmt.Sprintf("wpkh([%s/84'/0'/0']%s/0/*)", fp, testDescriptorMainnetXpub)
 
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "desc.txt")

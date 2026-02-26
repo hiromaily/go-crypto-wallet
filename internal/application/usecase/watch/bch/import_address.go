@@ -16,7 +16,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -81,7 +80,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		inner := strings.Split(key, ",")
 
 		// Convert address format
-		addrFmt, err := address.ConvertLine(u.bchClient.CoinTypeCode(), inner)
+		addrFmt, err := appdto.ConvertAddressLine(u.bchClient.CoinTypeCode(), inner)
 		if err != nil {
 			return fmt.Errorf("failed to convert address format: %w", err)
 		}

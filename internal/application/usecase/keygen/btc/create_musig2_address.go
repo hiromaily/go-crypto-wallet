@@ -99,16 +99,16 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type createMuSig2AddressUseCase struct {
-	musig2Service      *apibtcimpl.MuSig2Service
+	musig2Service      apibtc.MuSig2Servicer
 	chainConfig        *chaincfg.Params
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier
 	accountKeyRepo     repocold.BTCAccountKeyRepositorier
@@ -117,7 +117,7 @@ type createMuSig2AddressUseCase struct {
 
 // NewCreateMuSig2AddressUseCase creates a new CreateMuSig2AddressUseCase
 func NewCreateMuSig2AddressUseCase(
-	musig2Service *apibtcimpl.MuSig2Service,
+	musig2Service apibtc.MuSig2Servicer,
 	chainConfig *chaincfg.Params,
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier,
 	accountKeyRepo repocold.BTCAccountKeyRepositorier,
@@ -278,7 +278,7 @@ func ExampleCreateMuSig2Address() {
 
 	// Initialize dependencies (simplified for example)
 	var (
-		musig2Service      *apibtcimpl.MuSig2Service           // Provides MuSig2 cryptographic operations
+		musig2Service      apibtc.MuSig2Servicer               // Provides MuSig2 cryptographic operations
 		chainConfig        = &chaincfg.TestNet3Params          // Bitcoin network configuration
 		authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier // Repository for auth public keys
 		accountKeyRepo     repocold.BTCAccountKeyRepositorier  // Repository for account keys

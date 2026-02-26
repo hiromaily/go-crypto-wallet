@@ -12,7 +12,6 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 type importAddressUseCase struct {
@@ -53,7 +52,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		inner := strings.Split(key, ",")
 
 		var addrFmt *appdto.AddressFormat
-		addrFmt, err = address.ConvertLine(u.coinTypeCode, inner)
+		addrFmt, err = appdto.ConvertAddressLine(u.coinTypeCode, inner)
 		if err != nil {
 			return err
 		}

@@ -22,6 +22,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
@@ -104,7 +105,7 @@ func normalizeDerivationPath(path string) string {
 }
 
 func (d *DescriptorService) formatAndSortMultisigKeys(
-	signers []MultisigSigner,
+	signers []dtobtc.MultisigSigner,
 	isChange bool,
 	shouldSort bool,
 ) ([]string, error) {

@@ -2,18 +2,15 @@ package xrp
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -25,7 +22,6 @@ type xrpKeyGenClient interface {
 
 type generateKeyUseCase struct {
 	xrp               xrpKeyGenClient
-	dbConn            *sql.DB
 	coinTypeCode      domainCoin.CoinTypeCode
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
 }
@@ -35,13 +31,11 @@ type generateKeyUseCase struct {
 // Typically, apixrp.XRPer is passed which implements all required methods.
 func NewGenerateKeyUseCase(
 	xrp xrpKeyGenClient,
-	dbConn *sql.DB,
 	coinTypeCode domainCoin.CoinTypeCode,
 	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,
 ) keygenusecase.GenerateKeyUseCase {
 	return &generateKeyUseCase{
 		xrp:               xrp,
-		dbConn:            dbConn,
 		coinTypeCode:      coinTypeCode,
 		xrpAccountKeyRepo: xrpAccountKeyRepo,
 	}
@@ -59,27 +53,13 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		"len(keys)", len(walletKeys),
 	)
 
-	// Start transaction
-	dtx, err := u.dbConn.Begin()
-	if err != nil {
-		return fmt.Errorf("failed to call db.Begin(): %w", err)
-	}
-	defer func() {
-		if err != nil {
-			_ = dtx.Rollback() // Error already being handled
-		} else {
-			_ = dtx.Commit() // Error already being handled
-		}
-	}()
-
 	// Generate XRP keys
 	items := make([]*domainXRP.XRPAccountKey, 0, len(walletKeys))
 	for _, v := range walletKeys {
 		// TODO:
 		// - WIF => badSeed
 		// - P2PKHAddr => badSeed
-		var generatedKey *dtoxrp.ResponseWalletPropose
-		generatedKey, err = u.xrp.WalletPropose(ctx, v.P2SHSegWitAddr)
+		generatedKey, err := u.xrp.WalletPropose(ctx, v.P2SHSegWitAddr)
 		if err != nil {
 			return fmt.Errorf("fail to call xrp.WalletPropose(): %w", err)
 		}
@@ -92,7 +72,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 			u.coinTypeCode,
 			input.AccountType,
 			generatedKey.AccountID,
-			domainXRP.XRPKeyType(apixrpimpl.GetXRPKeyTypeValue(generatedKey.KeyType)),
+			domainXRP.ParseXRPKeyType(generatedKey.KeyType),
 			generatedKey.MasterSeed,
 			generatedKey.MasterSeedHex,
 			generatedKey.PublicKey,
@@ -117,8 +97,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 	}
 
 	// Insert keys to DB
-	err = u.xrpAccountKeyRepo.InsertBulk(ctx, items)
-	if err != nil {
+	if err := u.xrpAccountKeyRepo.InsertBulk(ctx, items); err != nil {
 		return fmt.Errorf("fail to call xrpAccountKeyRepo.InsertBulk() for XRP: %w", err)
 	}
 

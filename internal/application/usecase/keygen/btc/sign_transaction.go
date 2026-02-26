@@ -31,7 +31,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -358,7 +358,7 @@ func (u *signTransactionUseCase) deriveFallbackWIFsForP2TR(
 	// Derive keys at multiple indices (both receive and change paths)
 	for change := uint32(0); change <= 1; change++ {
 		for idx := uint32(0); idx < 10; idx++ {
-			childKey, err := infraKey.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, idx)
+			childKey, err := btcpkg.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, idx)
 			if err != nil {
 				logger.Debug("failed to derive key", "change", change, "index", idx, "error", err)
 				continue
@@ -409,7 +409,7 @@ func (u *signTransactionUseCase) deriveWIFFromBIP32Path(
 		"derivation_path", firstDeriv.Path)
 
 	// Derive child private key at the correct address index
-	childKey, err := infraKey.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, addressIndex)
+	childKey, err := btcpkg.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, addressIndex)
 	if err != nil {
 		return fmt.Errorf("failed to derive child key for input %d at index %d: %w", inputIndex, addressIndex, err)
 	}

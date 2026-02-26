@@ -9,17 +9,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/btcsuite/btcd/btcutil/hdkeychain"
-
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
-
-// MultisigSigner represents a signer in a multisignature descriptor.
-type MultisigSigner struct {
-	Fingerprint    string
-	DerivationPath string
-	ExtendedKey    *hdkeychain.ExtendedKey
-}
 
 // GenerateMultisigDescriptor generates a traditional multisig descriptor.
 //
@@ -29,7 +21,7 @@ type MultisigSigner struct {
 //   - P2SH (Legacy): sh(multi(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...))
 func (d *DescriptorService) GenerateMultisigDescriptor(
 	requiredSigs int,
-	signers []MultisigSigner,
+	signers []dtobtc.MultisigSigner,
 	isChange bool,
 	descriptorType domainWallet.DescriptorType,
 ) (string, error) {
@@ -102,7 +94,7 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 	return descriptor, nil
 }
 
-func (d *DescriptorService) formatMultisigKey(signer MultisigSigner, changeIndex int) (string, error) {
+func (d *DescriptorService) formatMultisigKey(signer dtobtc.MultisigSigner, changeIndex int) (string, error) {
 	if signer.ExtendedKey == nil {
 		return "", errors.New("extended public key is nil")
 	}

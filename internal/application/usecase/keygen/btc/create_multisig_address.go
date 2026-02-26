@@ -11,7 +11,7 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -144,7 +144,7 @@ func (u *createMultisigAddressUseCase) Create(
 
 // deriveAccountPublicKey derives an account-specific compressed public key from a coin-level extended public key.
 //
-// This function uses the common infraKey.DeriveAccountKey helper and extracts the compressed public key.
+// This function uses the common btcpkg.DeriveAccountKey helper and extracts the compressed public key.
 //
 // Parameters:
 //   - extendedPubKey: Extended public key at m/purpose'/coin' level (xpub/tpub format)
@@ -158,7 +158,7 @@ func (*createMultisigAddressUseCase) deriveAccountPublicKey(
 	accountType domainAccount.AccountType,
 ) (string, error) {
 	// Use common derivation helper
-	accountKey, err := infraKey.DeriveAccountKey(extendedPubKey, accountType)
+	accountKey, err := btcpkg.DeriveAccountKey(extendedPubKey, accountType.BIP44AccountIndex())
 	if err != nil {
 		return "", err
 	}

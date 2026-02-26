@@ -7,21 +7,21 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
-	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 )
 
 type muSig2SignUseCase struct {
-	musig2Service *apibtcimpl.MuSig2Service
+	musig2Service apibtc.MuSig2Servicer
 	nonceRepo     multisig.NonceRepository
 	authKeyRepo   repocold.AuthAccountKeyRepositorier
 }
 
 // NewMuSig2SignUseCase creates a new MuSig2SignUseCase for BTC sign wallet.
 func NewMuSig2SignUseCase(
-	musig2Service *apibtcimpl.MuSig2Service,
+	musig2Service apibtc.MuSig2Servicer,
 	nonceRepo multisig.NonceRepository,
 	authKeyRepo repocold.AuthAccountKeyRepositorier,
 ) signusecase.MuSig2SignUseCase {

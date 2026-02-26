@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 )
 
 // GenerateTaprootScriptPathDescriptor generates a Taproot descriptor with multiple script-path pubkeys.
@@ -20,7 +22,7 @@ import (
 // - internal_key: First signer's key (can spend via key path - most efficient)
 // - Script tree: Remaining signers' keys wrapped in pk() (can spend via script path)
 func (d *DescriptorService) GenerateTaprootScriptPathDescriptor(
-	signers []MultisigSigner,
+	signers []dtobtc.MultisigSigner,
 	isChange bool,
 ) (string, error) {
 	if len(signers) < 2 {

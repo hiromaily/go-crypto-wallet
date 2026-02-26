@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strings"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -49,7 +49,7 @@ func (u *importFullPubkeyUseCase) Import(
 	for _, key := range pubKeys {
 		inner := strings.Split(key, ",")
 
-		fpk, err := fullpubkey.ConvertLine(u.btc.CoinTypeCode(), inner)
+		fpk, err := dtobtc.ConvertFullPubKeyLine(u.btc.CoinTypeCode(), inner)
 		if err != nil {
 			return err
 		}
