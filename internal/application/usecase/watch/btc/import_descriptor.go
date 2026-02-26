@@ -29,7 +29,6 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/retry"
 )
@@ -43,7 +42,7 @@ type importDescBTCClient interface {
 
 type importDescriptorUseCase struct {
 	btcClient importDescBTCClient
-	parser    *apibtcimpl.DescriptorParser
+	parser    apibtc.DescriptorParserr
 	chainConf *chaincfg.Params
 	addrRepo  repowatch.AddressRepositorier
 	coinType  domainCoin.CoinTypeCode
@@ -52,7 +51,7 @@ type importDescriptorUseCase struct {
 // NewImportDescriptorUseCase creates a descriptor import use case.
 func NewImportDescriptorUseCase(
 	btcClient importDescBTCClient,
-	parser *apibtcimpl.DescriptorParser,
+	parser apibtc.DescriptorParserr,
 	chainConf *chaincfg.Params,
 	addrRepo repowatch.AddressRepositorier,
 	coinType domainCoin.CoinTypeCode,

@@ -29,7 +29,7 @@ import (
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -278,7 +278,7 @@ func (u *signTransactionUseCase) deriveWIFForPSBT(
 		"derivation_path", firstDeriv.Path)
 
 	// Derive child private key at the correct address index
-	childKey, err := infraKey.DeriveChildPrivateKey(*authKey.AccountExtendedPrivkey, change, addressIndex)
+	childKey, err := btcpkg.DeriveChildPrivateKey(*authKey.AccountExtendedPrivkey, change, addressIndex)
 	if err != nil {
 		return "", fmt.Errorf("failed to derive child key at index %d: %w", addressIndex, err)
 	}

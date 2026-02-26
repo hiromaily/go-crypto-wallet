@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
@@ -14,7 +15,6 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -119,7 +119,7 @@ func (u *exportAddressUseCase) exportAccountKey(
 	// Export any address, wallet side chooses proper address
 	for _, record := range accountKeyTable {
 		// Each line of csv data
-		tmpData := address.CreateLine(record)
+		tmpData := appdto.CreateAddressLine(record)
 		_, err = writer.WriteString(strings.Join(tmpData, ",") + "\n")
 		if err != nil {
 			return "", fmt.Errorf("fail to call writer.WriteString(%s): %w", fileName, err)

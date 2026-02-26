@@ -8,20 +8,22 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
-	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 )
 
 type exportFullPubkeyUseCase struct {
 	authKeyRepo    repocold.AuthAccountKeyRepositorier
 	seedRepo       repocold.SeedRepositorier
 	pubkeyFileRepo file.AddressFileRepositorier
+	hdKeyOp        apibtc.HDKeyOperator
 	coinTypeCode   domainCoin.CoinTypeCode
 	authType       domainAccount.AuthType
 	wtype          domainWallet.WalletType
@@ -33,6 +35,7 @@ func NewExportFullPubkeyUseCase(
 	authKeyRepo repocold.AuthAccountKeyRepositorier,
 	seedRepo repocold.SeedRepositorier,
 	pubkeyFileRepo file.AddressFileRepositorier,
+	hdKeyOp apibtc.HDKeyOperator,
 	coinTypeCode domainCoin.CoinTypeCode,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,
@@ -42,6 +45,7 @@ func NewExportFullPubkeyUseCase(
 		authKeyRepo:    authKeyRepo,
 		seedRepo:       seedRepo,
 		pubkeyFileRepo: pubkeyFileRepo,
+		hdKeyOp:        hdKeyOp,
 		coinTypeCode:   coinTypeCode,
 		authType:       authType,
 		wtype:          wtype,
@@ -58,7 +62,7 @@ func (u *exportFullPubkeyUseCase) Export(ctx context.Context) (signusecase.Expor
 	}
 
 	// Convert seed string to bytes
-	seedBytes, err := infraKey.SeedToByte(seedData.Seed)
+	seedBytes, err := btcpkg.SeedToByte(seedData.Seed)
 	if err != nil {
 		return signusecase.ExportFullPubkeyOutput{},
 			fmt.Errorf("fail to decode seed: %w", err)
@@ -105,14 +109,7 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 	}
 
 	// Get master fingerprint once (same for all BIP purposes)
-	// Use any purpose for fingerprint calculation since it's derived from seed
-	coinStrategy, err := infraKey.CreateCoinKeyStrategy(u.coinTypeCode, u.chainConfig)
-	if err != nil {
-		return "", fmt.Errorf("failed to create coin strategy: %w", err)
-	}
-	tempHdKey := infraKey.NewHDKey(infraKey.PurposeTypeBIP44, u.coinTypeCode, u.chainConfig, coinStrategy)
-	tempDescGenerator := infraKey.NewDescriptorGenerator(tempHdKey, u.chainConfig)
-	fingerprint, err := tempDescGenerator.GetMasterFingerprintHex(seed)
+	fingerprint, err := u.hdKeyOp.GetMasterFingerprintHex(seed)
 	if err != nil {
 		return "", fmt.Errorf("fail to get master fingerprint: %w", err)
 	}
@@ -120,20 +117,10 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 	// Export extended public keys for all 4 BIP purposes
 	// Each sign wallet exports 4 xpubs (one for each BIP purpose)
 	// to support all address types (Legacy, P2SH-SegWit, Native SegWit, Taproot)
-	purposes := []infraKey.PurposeType{
-		infraKey.PurposeTypeBIP44, // Legacy (P2PKH)
-		infraKey.PurposeTypeBIP49, // P2SH-SegWit
-		infraKey.PurposeTypeBIP84, // Native SegWit (Bech32)
-		infraKey.PurposeTypeBIP86, // Taproot
-	}
+	purposes := []uint8{44, 49, 84, 86}
 
 	for _, purpose := range purposes {
-		// Create HDKey for this BIP purpose, reusing the strategy created outside the loop
-		hdKey := infraKey.NewHDKey(purpose, u.coinTypeCode, u.chainConfig, coinStrategy)
-
-		// Derive extended public key from seed
-		descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)
-
+		// Derive coin-level extended public key from seed for this BIP purpose
 		// Export purpose/coin-level extended public key (NOT account-level)
 		// This allows keygen to derive account-specific keys for deposit, payment, stored
 		// Path: m/purpose'/coin' (BIP48-style for multisig, stopping at coin level)
@@ -144,7 +131,7 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 		//   that can derive ALL multisig accounts
 		// - Keygen will derive account-specific keys:
 		//   m/purpose'/coin'/0' for deposit, m/purpose'/coin'/1' for payment, etc.
-		extendedPubKey, err := descGenerator.GetCoinLevelXPub(seed)
+		extendedPubKey, err := u.hdKeyOp.GetCoinLevelXPub(seed, purpose)
 		if err != nil {
 			return "", fmt.Errorf("fail to derive extended public key for BIP%d: %w", purpose, err)
 		}
@@ -162,10 +149,10 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 
 		// output: coinType, authType, purpose, extendedPubKey, fingerprint, derivationPath
 		_, err = writer.WriteString(
-			fullpubkey.CreateExtendedLine(
+			dtobtc.CreateExtendedFullPubKeyLine(
 				u.coinTypeCode,
 				authType,
-				uint8(purpose),
+				purpose,
 				extendedPubKey,
 				fingerprint,
 				derivationPath,

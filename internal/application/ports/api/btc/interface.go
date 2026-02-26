@@ -1,8 +1,12 @@
 package btc
 
 import (
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/btcsuite/btcd/btcec/v2/schnorr"
+	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
@@ -12,6 +16,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
 // Bitcoiner is the full Bitcoin/BitcoinCash interface.
@@ -511,4 +516,48 @@ type WatchAPIClient interface {
 	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
 	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
 	UnlockUnspent() error
+}
+
+// -----------------------------------------------------------------------------
+// MuSig2, Descriptor, and HD Key Interfaces
+// -----------------------------------------------------------------------------
+
+// MuSig2Servicer provides MuSig2 multi-signature functionality.
+// Used by keygen/sign musig2 use cases.
+type MuSig2Servicer interface {
+	CreateContext(privKey *btcec.PrivateKey, allPubKeys []*btcec.PublicKey, sortKeys bool) (*musig2.Context, error)
+	CreateContextWithTaproot(privKey *btcec.PrivateKey, allPubKeys []*btcec.PublicKey, sortKeys bool) (*musig2.Context, error)
+	CreateSession(ctx *musig2.Context) (*musig2.Session, error)
+	GetPublicNonce(session *musig2.Session) [66]byte
+	RegisterPubNonce(session *musig2.Session, pubNonce [66]byte) (bool, error)
+	Sign(session *musig2.Session, messageHash [32]byte) (*musig2.PartialSignature, error)
+	CombineSig(session *musig2.Session, partialSig *musig2.PartialSignature) (bool, error)
+	FinalSig(session *musig2.Session) (*schnorr.Signature, error)
+	GetCombinedKey(ctx *musig2.Context) (*btcec.PublicKey, error)
+	VerifySignature(signature *schnorr.Signature, messageHash [32]byte, aggregatedKey *btcec.PublicKey) bool
+}
+
+// DescriptorParserr parses descriptor strings into domain descriptor objects.
+// Note: double 'r' to avoid conflict with descriptorParser local variable.
+type DescriptorParserr interface {
+	Parse(descriptorStr string) (*domainWallet.Descriptor, error)
+}
+
+// DescriptorServicer generates output descriptors for various address types.
+// Used by keygen generate-descriptor use case.
+type DescriptorServicer interface {
+	GenerateTaprootDescriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
+	GenerateBech32Descriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
+	GenerateP2SHSegWitDescriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
+	GenerateP2PKHDescriptor(fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool) (string, error)
+	GenerateTaprootScriptPathDescriptor(signers []dtobtc.MultisigSigner, isChange bool) (string, error)
+	GenerateMultisigDescriptor(requiredSigs int, signers []dtobtc.MultisigSigner, isChange bool, descriptorType domainWallet.DescriptorType) (string, error)
+}
+
+// HDKeyOperator derives HD keys and fingerprints from seeds.
+// Used by keygen generate-descriptor and sign export-fullpubkey use cases.
+type HDKeyOperator interface {
+	GetMasterFingerprintHex(seed []byte) (string, error)
+	GetCoinLevelXPub(seed []byte, purpose uint8) (string, error)
+	GetAccountXPub(seed []byte, purpose uint8, accountType domainAccount.AccountType) (string, error)
 }

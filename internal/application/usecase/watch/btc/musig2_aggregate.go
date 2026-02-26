@@ -136,7 +136,6 @@ import (
 
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
-	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 )
 
 // muSig2BTCClient defines the minimal interface for MuSig2 aggregation.
@@ -147,13 +146,13 @@ type muSig2BTCClient interface {
 }
 
 type aggregateMuSig2SignaturesUseCase struct {
-	musig2Service *apibtcimpl.MuSig2Service
+	musig2Service apibtc.MuSig2Servicer
 	btcClient     muSig2BTCClient
 }
 
 // NewAggregateMuSig2SignaturesUseCase creates a new AggregateMuSig2SignaturesUseCase for BTC watch wallet.
 func NewAggregateMuSig2SignaturesUseCase(
-	musig2Service *apibtcimpl.MuSig2Service,
+	musig2Service apibtc.MuSig2Servicer,
 	btcClient muSig2BTCClient,
 ) watchusecase.AggregateMuSig2SignaturesUseCase {
 	return &aggregateMuSig2SignaturesUseCase{
@@ -333,7 +332,7 @@ func ExampleAggregateMuSig2Signatures() {
 
 	// Initialize dependencies
 	var (
-		musig2Service *apibtcimpl.MuSig2Service // Provides MuSig2 cryptographic operations
+		musig2Service apibtc.MuSig2Servicer // Provides MuSig2 cryptographic operations
 		btcClient     muSig2BTCClient           // Bitcoin Core RPC client (for broadcast)
 	)
 

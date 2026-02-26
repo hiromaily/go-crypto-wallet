@@ -9,40 +9,37 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
-	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
-	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 )
 
 type generateDescriptorUseCase struct {
-	descriptorService  *apibtcimpl.DescriptorService
+	descriptorService  apibtc.DescriptorServicer
 	chainConfig        *chaincfg.Params
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier
 	accountKeyRepo     repocold.BTCAccountKeyRepositorier
 	seedRepo           repocold.SeedRepositorier
-	coinTypeCode       domainCoin.CoinTypeCode
+	hdKeyOp            apibtc.HDKeyOperator
 	multisigConfig     *domainAccount.MultisigConfig
-	coinStrategy       portsWallet.CoinKeyStrategy // Coin-specific key generation strategy
 }
 
 // NewGenerateDescriptorUseCase creates a descriptor generation use case.
 func NewGenerateDescriptorUseCase(
-	descriptorService *apibtcimpl.DescriptorService,
+	descriptorService apibtc.DescriptorServicer,
 	chainConfig *chaincfg.Params,
 	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier,
 	accountKeyRepo repocold.BTCAccountKeyRepositorier,
 	seedRepo repocold.SeedRepositorier,
-	coinTypeCode domainCoin.CoinTypeCode,
+	hdKeyOp apibtc.HDKeyOperator,
 	multisigConfig *domainAccount.MultisigConfig,
-	coinStrategy portsWallet.CoinKeyStrategy,
 ) keygenusecase.GenerateDescriptorUseCase {
 	return &generateDescriptorUseCase{
 		descriptorService:  descriptorService,
@@ -50,9 +47,8 @@ func NewGenerateDescriptorUseCase(
 		authFullPubKeyRepo: authFullPubKeyRepo,
 		accountKeyRepo:     accountKeyRepo,
 		seedRepo:           seedRepo,
-		coinTypeCode:       coinTypeCode,
+		hdKeyOp:            hdKeyOp,
 		multisigConfig:     multisigConfig,
-		coinStrategy:       coinStrategy,
 	}
 }
 
@@ -165,7 +161,7 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 	}
 
 	// Calculate fingerprint from extended key
-	fp, err := infraKey.FingerprintFromExtendedKey(xpub.String())
+	fp, err := btcpkg.FingerprintFromExtendedKey(xpub.String())
 	if err != nil {
 		return "", fmt.Errorf("calculate fingerprint: %w", err)
 	}
@@ -178,11 +174,11 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 	logger.Debug("generating descriptor",
 		"address_type", input.AddressType.String(),
 		"derivation_path", derivationPath,
-		"fingerprint", fp.String(),
+		"fingerprint", fp,
 	)
 
 	var descriptor string
-	fpStr := fp.String()
+	fpStr := fp
 	switch input.AddressType {
 	case domainAddress.AddrTypeTaproot:
 		descriptor, err = u.descriptorService.GenerateTaprootDescriptor(
@@ -271,7 +267,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	authTypes []domainAccount.AuthType,
 	addressType domainAddress.AddrType,
 	accountType domainAccount.AccountType,
-) ([]apibtcimpl.MultisigSigner, error) {
+) ([]dtobtc.MultisigSigner, error) {
 	derivationPath, err := derivationPathForAddress(addressType, true, accountType, u.chainConfig)
 	if err != nil {
 		return nil, err
@@ -284,7 +280,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	}
 
 	// Reserve space for keygen key + auth keys
-	signers := make([]apibtcimpl.MultisigSigner, 0, len(authTypes)+1)
+	signers := make([]dtobtc.MultisigSigner, 0, len(authTypes)+1)
 
 	// CRITICAL FIX: Include keygen wallet's own key in multisig
 	// Without this, descriptors only contain auth keys, resulting in (N-1)-of-(N-1) instead of N-of-N
@@ -343,14 +339,14 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 		if authKey.Fingerprint != nil {
 			fp = authKey.Fingerprint.String()
 		} else {
-			finger, err := infraKey.FingerprintFromExtendedKey(accountExtendedKey)
+			finger, err := btcpkg.FingerprintFromExtendedKey(accountExtendedKey)
 			if err != nil {
 				return nil, fmt.Errorf("calculate fingerprint for %s: %w", authType.String(), err)
 			}
-			fp = finger.String()
+			fp = finger
 		}
 
-		signers = append(signers, apibtcimpl.MultisigSigner{
+		signers = append(signers, dtobtc.MultisigSigner{
 			Fingerprint:    fp,
 			DerivationPath: derivationPath,
 			ExtendedKey:    xpub,
@@ -367,74 +363,68 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 	accountType domainAccount.AccountType,
 	addressType domainAddress.AddrType,
 	derivationPath string,
-) (apibtcimpl.MultisigSigner, error) {
+) (dtobtc.MultisigSigner, error) {
 	// Get seed from repository
 	seedData, err := u.seedRepo.GetOne(ctx)
 	if err != nil {
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
+		return dtobtc.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
 	}
 	if seedData == nil {
-		return apibtcimpl.MultisigSigner{}, errors.New("seed not found - run 'keygen seed' first")
+		return dtobtc.MultisigSigner{}, errors.New("seed not found - run 'keygen seed' first")
 	}
 
 	// Convert seed string to bytes
-	seedBytes, err := infraKey.SeedToByte(seedData.Seed)
+	seedBytes, err := btcpkg.SeedToByte(seedData.Seed)
 	if err != nil {
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf("decode seed: %w", err)
+		return dtobtc.MultisigSigner{}, fmt.Errorf("decode seed: %w", err)
 	}
 
 	// Determine BIP purpose from address type
 	purpose, err := domainAuth.PurposeForAddressType(addressType.String())
 	if err != nil {
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf(
+		return dtobtc.MultisigSigner{}, fmt.Errorf(
 			"determine purpose for address type %s: %w", addressType.String(), err)
 	}
 
-	// Map BIP purpose to infraKey.PurposeType
-	var purposeType infraKey.PurposeType
+	// Map BIP purpose to uint8 value
+	var purposeVal uint8
 	switch purpose {
 	case domainAuth.PurposeBIP44:
-		purposeType = infraKey.PurposeTypeBIP44
+		purposeVal = 44
 	case domainAuth.PurposeBIP49:
-		purposeType = infraKey.PurposeTypeBIP49
+		purposeVal = 49
 	case domainAuth.PurposeBIP84:
-		purposeType = infraKey.PurposeTypeBIP84
+		purposeVal = 84
 	case domainAuth.PurposeBIP86:
-		purposeType = infraKey.PurposeTypeBIP86
+		purposeVal = 86
 	default:
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
+		return dtobtc.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
 	}
 
-	// Create HD key for this purpose using the strategy provided at initialization
-	hdKey := infraKey.NewHDKey(purposeType, u.coinTypeCode, u.chainConfig, u.coinStrategy)
-
-	// Create descriptor generator
-	descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)
-
-	// Generate account-level extended public key from seed
-	accountXPub, err := descGenerator.GetAccountXPub(seedBytes, accountType)
+	// Generate account-level extended public key from seed using HDKeyOperator
+	accountXPub, err := u.hdKeyOp.GetAccountXPub(seedBytes, purposeVal, accountType)
 	if err != nil {
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf("generate account xpub: %w", err)
+		return dtobtc.MultisigSigner{}, fmt.Errorf("generate account xpub: %w", err)
 	}
 
 	// Parse extended public key
 	xpub, err := hdkeychain.NewKeyFromString(accountXPub)
 	if err != nil {
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf("parse keygen extended key: %w", err)
+		return dtobtc.MultisigSigner{}, fmt.Errorf("parse keygen extended key: %w", err)
 	}
 
 	// Verify network match
 	if u.chainConfig != nil && !xpub.IsForNet(u.chainConfig) {
-		return apibtcimpl.MultisigSigner{}, errors.New("keygen extended key network mismatch")
+		return dtobtc.MultisigSigner{}, errors.New("keygen extended key network mismatch")
 	}
 
 	// Get master fingerprint
-	fingerprint, err := descGenerator.GetMasterFingerprintHex(seedBytes)
+	fingerprint, err := u.hdKeyOp.GetMasterFingerprintHex(seedBytes)
 	if err != nil {
-		return apibtcimpl.MultisigSigner{}, fmt.Errorf("calculate keygen fingerprint: %w", err)
+		return dtobtc.MultisigSigner{}, fmt.Errorf("calculate keygen fingerprint: %w", err)
 	}
 
-	return apibtcimpl.MultisigSigner{
+	return dtobtc.MultisigSigner{
 		Fingerprint:    fingerprint,
 		DerivationPath: derivationPath,
 		ExtendedKey:    xpub,
@@ -523,7 +513,7 @@ func selectRequiredSigConfig(
 
 // deriveAccountExtendedKey derives an account-specific extended public key from a coin-level extended public key.
 //
-// This is a wrapper around infraKey.DeriveAccountKey that returns the extended key as a string.
+// This is a wrapper around btcpkg.DeriveAccountKey that returns the extended key as a string.
 //
 // Parameters:
 //   - coinLevelExtendedKey: Extended public key at m/purpose'/coin' level (xpub/tpub format)
@@ -537,7 +527,7 @@ func (*generateDescriptorUseCase) deriveAccountExtendedKey(
 	accountType domainAccount.AccountType,
 ) (string, error) {
 	// Use common derivation helper
-	accountKey, err := infraKey.DeriveAccountKey(coinLevelExtendedKey, accountType)
+	accountKey, err := btcpkg.DeriveAccountKey(coinLevelExtendedKey, accountType.BIP44AccountIndex())
 	if err != nil {
 		return "", err
 	}

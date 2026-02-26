@@ -17,6 +17,17 @@ const (
 	XRPKeyTypeEd25519   XRPKeyType = 1
 )
 
+// ParseXRPKeyType converts a key type string (e.g. "secp256k1", "ed25519") to the domain XRPKeyType.
+// Returns XRPKeyTypeSecp256k1 as the default if the string is unrecognized.
+func ParseXRPKeyType(s string) XRPKeyType {
+	switch s {
+	case "ed25519":
+		return XRPKeyTypeEd25519
+	default:
+		return XRPKeyTypeSecp256k1
+	}
+}
+
 // XRPAccountKey represents an XRP account key with associated address in the domain layer.
 //
 // SECURITY NOTE: The MasterSeed and MasterSeedHex fields contain sensitive key material.

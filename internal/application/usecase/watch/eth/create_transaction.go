@@ -2,7 +2,6 @@ package eth
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"math/big"
@@ -11,19 +10,19 @@ import (
 	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	persistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type createTransactionUseCase struct {
 	ethClient       apieth.ERC20er
-	dbConn          *sql.DB
+	unitOfWork      persistence.UnitOfWork
 	addrRepo        repowatch.AddressRepositorier
 	txRepo          repowatch.TxRepositorier
 	txDetailRepo    repowatch.ETHDetailTXRepositorier
@@ -36,7 +35,7 @@ type createTransactionUseCase struct {
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
 	ethClient apieth.ERC20er,
-	dbConn *sql.DB,
+	unitOfWork persistence.UnitOfWork,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.TxRepositorier,
 	txDetailRepo repowatch.ETHDetailTXRepositorier,
@@ -47,7 +46,7 @@ func NewCreateTransactionUseCase(
 ) watchusecase.CreateTransactionUseCase {
 	return &createTransactionUseCase{
 		ethClient:       ethClient,
-		dbConn:          dbConn,
+		unitOfWork:      unitOfWork,
 		addrRepo:        addrRepo,
 		txRepo:          txRepo,
 		txDetailRepo:    txDetailRepo,
@@ -120,7 +119,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 		return "", nil
 	}
 
-	txID, err := u.updateDB(targetAction, txDetailItems, nil)
+	txID, err := u.updateDB(ctx, targetAction, txDetailItems, nil)
 	logger.Debug("update result",
 		"txID", txID,
 		"error", err,
@@ -183,7 +182,7 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 		return "", nil
 	}
 
-	txID, err := u.updateDB(targetAction, txDetailItems, paymentRequestIds)
+	txID, err := u.updateDB(ctx, targetAction, txDetailItems, paymentRequestIds)
 	if err != nil {
 		return "", err
 	}
@@ -267,7 +266,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 	txDetailItems := []*domainETH.ETHDetailTx{txDetailItem}
 
-	txID, err := u.updateDB(targetAction, txDetailItems, nil)
+	txID, err := u.updateDB(ctx, targetAction, txDetailItems, nil)
 	if err != nil {
 		return "", err
 	}
@@ -482,25 +481,23 @@ func (u *createTransactionUseCase) createRawTx(
 }
 
 func (u *createTransactionUseCase) updateDB(
+	ctx context.Context,
 	targetAction domainTx.ActionType,
 	txDetailItems []*domainETH.ETHDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
-	dtx, err := u.dbConn.Begin()
+	tx, err := u.unitOfWork.Begin(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("fail to start transaction: %w", err)
 	}
 	defer func() {
 		if err != nil {
-			_ = dtx.Rollback() // Error already being handled
+			_ = tx.Rollback() // Error already being handled
 		} else {
-			_ = dtx.Commit() // Error already being handled
+			_ = tx.Commit() // Error already being handled
 		}
 	}()
-
-	// Wrap SQL transaction in abstract Transaction interface
-	tx := database.NewSQLTransaction(dtx)
 
 	// Create transactional repositories that use the transaction
 	txRepoWithTx, err := u.txRepo.WithTransaction(tx)

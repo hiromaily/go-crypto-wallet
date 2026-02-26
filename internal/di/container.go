@@ -31,6 +31,7 @@ import (
 	apibchimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/bch"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
+	infraDB "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
@@ -479,8 +480,7 @@ func (c *container) newBTC() apibtc.Bitcoiner {
 	return c.btc
 }
 
-// TODO: define interface for MuSig2Service
-func (*container) newMuSig2Service() *apibtcimpl.MuSig2Service {
+func (*container) newMuSig2Service() apibtc.MuSig2Servicer {
 	return apibtcimpl.NewMuSig2Service()
 }
 
@@ -1488,7 +1488,7 @@ func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 	return watchusecaseeth.NewCreateTransactionUseCase(
 		targetEthAPI,
-		c.pkgContainer.NewDatabaseClient(),
+		infraDB.NewSQLUnitOfWork(c.pkgContainer.NewDatabaseClient()),
 		c.newAddressRepo(),
 		c.newTxRepo(),
 		c.newETHTxDetailRepo(),
@@ -1527,7 +1527,7 @@ func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTra
 	return watchusecasexrp.NewCreateTransactionUseCase(
 		xrpClient, // AccountInfoProvider
 		xrpClient, // TransactionPreparer
-		c.pkgContainer.NewDatabaseClient(),
+		infraDB.NewSQLUnitOfWork(c.pkgContainer.NewDatabaseClient()),
 		c.pkgContainer.NewUUIDHandler(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
@@ -1655,12 +1655,12 @@ func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressU
 }
 
 func (c *container) newBTCKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase {
-	// Create coin strategy once at DI initialization
 	chainConf := c.newBTC().GetChainConf()
 	coinStrategy, err := infraKey.CreateCoinKeyStrategy(c.conf.CoinTypeCode, chainConf)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create coin strategy for descriptor use case: %v", err))
 	}
+	hdKeyOp := infraKey.NewHDKeyOperator(c.conf.CoinTypeCode, chainConf, coinStrategy)
 
 	return keygenusecasebtc.NewGenerateDescriptorUseCase(
 		apibtcimpl.NewDescriptorService(chainConf),
@@ -1668,9 +1668,8 @@ func (c *container) newBTCKeygenGenerateDescriptorUseCase() keygenusecase.Genera
 		c.newAuthFullPubKeyRepo(),
 		c.newAccountKeyRepo(),
 		c.newSeedRepo(),
-		c.conf.CoinTypeCode,
+		hdKeyOp,
 		c.newMultiAccount(),
-		coinStrategy,
 	)
 }
 
@@ -1763,7 +1762,6 @@ func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUs
 	// Use API-based key generation (legacy behavior)
 	return keygenusecasexrp.NewGenerateKeyUseCase(
 		c.newXRP(),
-		c.pkgContainer.NewDatabaseClient(),
 		c.conf.CoinTypeCode,
 		c.newXRPAccountKeyRepo(),
 	)
@@ -1863,14 +1861,22 @@ func (c *container) newBTCSignImportPrivateKeyUseCase(
 func (c *container) newBTCSignExportFullPubkeyUseCase(
 	authType domainAccount.AuthType,
 ) signusecase.ExportFullPubkeyUseCase {
+	chainConf := c.newBTC().GetChainConf()
+	coinStrategy, err := infraKey.CreateCoinKeyStrategy(c.conf.CoinTypeCode, chainConf)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create coin strategy for export fullpubkey use case: %v", err))
+	}
+	hdKeyOp := infraKey.NewHDKeyOperator(c.conf.CoinTypeCode, chainConf, coinStrategy)
+
 	return signusecasebtc.NewExportFullPubkeyUseCase(
 		c.newAuthKeyRepo(),
 		c.newSeedRepo(),
 		c.newPubkeyFileStorager(),
+		hdKeyOp,
 		c.conf.CoinTypeCode,
 		authType,
 		c.walletType,
-		c.newBTC().GetChainConf(),
+		chainConf,
 	)
 }
 

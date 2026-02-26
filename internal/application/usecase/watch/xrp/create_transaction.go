@@ -2,7 +2,6 @@ package xrp
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"strconv"
@@ -12,22 +11,28 @@ import (
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	persistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
+// userAmount holds an XRP address and its balance
+type userAmount struct {
+	Address string
+	Amount  float64
+}
+
 type createTransactionUseCase struct {
 	accountInfo     apixrp.AccountInfoProvider
 	txPreparer      apixrp.TransactionPreparer
-	dbConn          *sql.DB
+	unitOfWork      persistence.UnitOfWork
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        repowatch.AddressRepositorier
 	txRepo          repowatch.TxRepositorier
@@ -52,7 +57,7 @@ type createTransactionUseCase struct {
 func NewCreateTransactionUseCase(
 	accountInfo apixrp.AccountInfoProvider,
 	txPreparer apixrp.TransactionPreparer,
-	dbConn *sql.DB,
+	unitOfWork persistence.UnitOfWork,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.TxRepositorier,
@@ -65,7 +70,7 @@ func NewCreateTransactionUseCase(
 	return &createTransactionUseCase{
 		accountInfo:     accountInfo,
 		txPreparer:      txPreparer,
-		dbConn:          dbConn,
+		unitOfWork:      unitOfWork,
 		uuidHandler:     uuidHandler,
 		addrRepo:        addrRepo,
 		txRepo:          txRepo,
@@ -140,7 +145,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 		return "", nil
 	}
 
-	txID, err := u.updateDB(targetAction, txDetailItems, nil)
+	txID, err := u.updateDB(ctx, targetAction, txDetailItems, nil)
 	if err != nil {
 		return "", err
 	}
@@ -198,7 +203,7 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 		return "", nil
 	}
 
-	txID, err := u.updateDB(targetAction, txDetailItems, paymentRequestIds)
+	txID, err := u.updateDB(ctx, targetAction, txDetailItems, paymentRequestIds)
 	if err != nil {
 		return "", err
 	}
@@ -331,7 +336,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 	txDetailItems := []*domainXRP.XRPDetailTx{txDetailItem}
 
-	txID, err := u.updateDB(targetAction, txDetailItems, nil)
+	txID, err := u.updateDB(ctx, targetAction, txDetailItems, nil)
 	if err != nil {
 		return "", err
 	}
@@ -352,7 +357,7 @@ func (u *createTransactionUseCase) createTransferTx(
 func (u *createTransactionUseCase) getUserAmounts(
 	ctx context.Context,
 	sender domainAccount.AccountType,
-) ([]apixrpimpl.UserAmount, error) {
+) ([]userAmount, error) {
 	// get addresses for sender account
 	addrs, err := u.addrRepo.GetAll(sender)
 	if err != nil {
@@ -360,7 +365,7 @@ func (u *createTransactionUseCase) getUserAmounts(
 	}
 
 	// target addresses
-	var userAmounts []apixrpimpl.UserAmount
+	var userAmounts []userAmount
 	// address list for sender
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
@@ -374,7 +379,7 @@ func (u *createTransactionUseCase) getUserAmounts(
 			logger.Debug("account_info",
 				"address", addr.WalletAddress, "balance", balance)
 			if balance != 0 {
-				userAmounts = append(userAmounts, apixrpimpl.UserAmount{Address: addr.WalletAddress, Amount: balance})
+				userAmounts = append(userAmounts, userAmount{Address: addr.WalletAddress, Amount: balance})
 			}
 		}
 	}
@@ -385,7 +390,7 @@ func (u *createTransactionUseCase) getUserAmounts(
 func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
-	userAmounts []apixrpimpl.UserAmount,
+	userAmounts []userAmount,
 ) ([]string, []*domainXRP.XRPDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.getAndValidateAddress(receiver, "deposit")
@@ -492,7 +497,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, float64, 
 		userPayments[idx].floatAmount = amt
 
 		// validate address
-		if !apixrpimpl.ValidateAddress(userPayments[idx].receiverAddr) {
+		if !xrpkg.ValidateAddress(userPayments[idx].receiverAddr) {
 			// fatal error
 			logger.Error("address is invalid",
 				"address", userPayments[idx].receiverAddr,
@@ -596,25 +601,23 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 // updateDB updates database in a transaction
 func (u *createTransactionUseCase) updateDB(
+	ctx context.Context,
 	targetAction domainTx.ActionType,
 	txDetailItems []*domainXRP.XRPDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
-	dtx, err := u.dbConn.Begin()
+	tx, err := u.unitOfWork.Begin(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("fail to start transaction: %w", err)
 	}
 	defer func() {
 		if err != nil {
-			_ = dtx.Rollback() // Error already being handled
+			_ = tx.Rollback() // Error already being handled
 		} else {
-			_ = dtx.Commit() // Error already being handled
+			_ = tx.Commit() // Error already being handled
 		}
 	}()
-
-	// Wrap SQL transaction in abstract Transaction interface
-	tx := database.NewSQLTransaction(dtx)
 
 	// Create transactional repositories that use the transaction
 	txRepoWithTx, err := u.txRepo.WithTransaction(tx)
