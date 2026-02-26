@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
-	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/testutil"
 )
 
@@ -122,7 +121,7 @@ func (txt *transactionTest) TestSignAndSendRawTransaction() {
 				senderAddr:   "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
 				receiverAddr: "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
 				amount:       0,
-				password:     apiethimpl.Password,
+				password:     "password",
 			},
 			want: want{false, false},
 		},

@@ -135,10 +135,10 @@
   - [x] Final removal of `Ethereumer` from `interface.go` — DI container now holds concrete `*apiethimpl.Ethereum` type; focused ISP interfaces retained
   - _Requirements: 5.3_
 
-- [ ] 10.3 (P) Replace hardcoded password constant with configurable injection
-  - Remove the hardcoded `Password = "password"` constant from the ETH infrastructure package
-  - Inject the keystore password via the configuration system using the `KeystorePassword` field added in Task 1.1
-  - Depends on 10.1
+- [x] 10.3 (P) Replace hardcoded password constant with configurable injection
+  - Removed the hardcoded `Password = "password"` constant from `types.go`
+  - Use case layer already injects keystore password via `c.conf.Ethereum.KeystorePassword` (done in Task 10.1)
+  - Updated integration test files to use literal `"password"` string directly
   - _Requirements: 5.4_
 
 - [ ] 11. Docker Compose node profiles and E2E verification scripts

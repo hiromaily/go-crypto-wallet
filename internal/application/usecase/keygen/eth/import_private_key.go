@@ -75,7 +75,6 @@ func (u *importPrivateKeyUseCase) Import(
 
 		// Import ECDSA key into keystore
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
-		// TODO: where password should come from
 		var acct accounts.Account
 		acct, err = ks.ImportECDSA(ecdsaKey, u.keystorePassword)
 		if err != nil {

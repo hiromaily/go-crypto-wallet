@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/testutil"
 )
 
@@ -48,7 +47,7 @@ func (kt *keyTest) TestGetPrivKey() {
 
 	for _, tt := range tests {
 		kt.T().Run(tt.name, func(t *testing.T) {
-			prikey, err := kt.ETH.GetPrivKey(tt.args.addr, apiethimpl.Password)
+			prikey, err := kt.ETH.GetPrivKey(tt.args.addr, "password")
 			kt.Equal(tt.want.isErr, err != nil)
 			if err == nil && prikey == nil {
 				t.Error("prikey is nil")
