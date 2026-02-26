@@ -181,6 +181,8 @@ func (e *Ethereum) CreateRawTransaction(
 		Fee:         txFee.Uint64(),
 		GasLimit:    uint32(estimatedGas.Uint64()),
 		Nonce:       nonce,
+		EthTxType:   0, // legacy transaction
+		GasPrice:    gasPrice.Uint64(),
 	}
 
 	return domainRawTx, txParams, nil
@@ -477,13 +479,17 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 
 	// create TxCreateParams DTO for use case layer
 	txParams := &apieth.TxCreateParams{
-		UUID:        uid.String(),
-		FromAddress: fromAddr,
-		ToAddress:   toAddr,
-		Amount:      newValue.Uint64(),
-		Fee:         txFee.Uint64(),
-		GasLimit:    uint32(estimatedGas.Uint64()),
-		Nonce:       nonce,
+		UUID:                 uid.String(),
+		FromAddress:          fromAddr,
+		ToAddress:            toAddr,
+		Amount:               newValue.Uint64(),
+		Fee:                  txFee.Uint64(),
+		GasLimit:             uint32(estimatedGas.Uint64()),
+		Nonce:                nonce,
+		EthTxType:            2, // EIP-1559 transaction
+		ChainID:              chainID.Uint64(),
+		MaxFeePerGas:         maxFeePerGas.Uint64(),
+		MaxPriorityFeePerGas: maxPriorityFeePerGas.Uint64(),
 	}
 
 	return domainRawTx, txParams, nil

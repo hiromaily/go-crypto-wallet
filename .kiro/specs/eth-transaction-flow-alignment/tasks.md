@@ -91,7 +91,7 @@
   - Inject all required dependencies: account key repository, transaction file repository, chain config provider
   - _Requirements: 1.5_
 
-- [ ] 7. (P) Update Watch wallet transaction creation for EIP-1559
+- [x] 7. (P) Update Watch wallet transaction creation for EIP-1559
   - Check EIP-1559 support via `SupportsEIP1559`; fall back to constructing a legacy `LegacyTx` when the node does not support it
   - Estimate `maxPriorityFeePerGas` using `SuggestGasTipCap` with config fallback; compute `maxFeePerGas = baseFee × 2 + tip`
   - Construct an EIP-1559 `DynamicFeeTx` with both fee fields when supported

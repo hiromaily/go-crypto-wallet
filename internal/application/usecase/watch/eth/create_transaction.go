@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"strconv"
 
+	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -18,7 +19,6 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
 type createTransactionUseCase struct {
@@ -112,7 +112,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 		return "", nil
 	}
 
-	serializedTxs, txDetailItems, err := u.createDepositRawTransactions(ctx, sender, receiver, userAmounts)
+	rawTxInfos, txDetailItems, err := u.createDepositRawTransactions(ctx, sender, receiver, userAmounts)
 	if err != nil {
 		return "", err
 	}
@@ -129,12 +129,12 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 		return "", err
 	}
 
-	// save transaction result to file
+	// save transaction result to JSON file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
+	if len(rawTxInfos) != 0 {
+		generatedFileName, err = u.writeETHJSONFiles(ctx, targetAction, sender, txID, rawTxInfos)
 		if err != nil {
-			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("fail to call writeETHJSONFiles(): %w", err)
 		}
 	}
 
@@ -175,7 +175,7 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 	}
 
 	// create raw transaction each address
-	serializedTxs, txDetailItems, err := u.createPaymentRawTransactions(ctx, sender, receiver, userPayments, senderAddr)
+	rawTxInfos, txDetailItems, err := u.createPaymentRawTransactions(ctx, sender, receiver, userPayments, senderAddr)
 	if err != nil {
 		return "", err
 	}
@@ -188,12 +188,12 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 		return "", err
 	}
 
-	// save transaction result to file
+	// save transaction result to JSON file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
+	if len(rawTxInfos) != 0 {
+		generatedFileName, err = u.writeETHJSONFiles(ctx, targetAction, sender, txID, rawTxInfos)
 		if err != nil {
-			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("fail to call writeETHJSONFiles(): %w", err)
 		}
 	}
 
@@ -249,26 +249,19 @@ func (u *createTransactionUseCase) createTransferTx(
 		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(receiver): %w", err)
 	}
 
-	// call CreateRawTransaction
-	rawTx, txParams, err := u.ethClient.CreateRawTransaction(ctx,
-		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
+	// Create transaction: prefer EIP-1559 when supported, fall back to legacy
+	rawTx, txParams, err := u.createRawTx(
+		ctx, senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
 		return "", fmt.Errorf(
-			"fail to call eth.CreateRawTransaction(), sender address: %s: %w",
+			"fail to call createRawTx(), sender address: %s: %w",
 			senderAddr.WalletAddress, err)
 	}
 
-	rawTxHex := rawTx.TxHex
-	logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
-
-	serializedTx, err := serializer.GetDefaultSerializer().EncodeToString(rawTx)
-	if err != nil {
-		return "", fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
-	}
-	serializedTxs := []string{serializedTx}
+	logger.Debug("rawTxHex", "rawTxHex", rawTx.TxHex)
 
 	// create domain entity ETHDetailTx from DTO
-	txDetailItem, err := u.createETHDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeTransfer)
+	txDetailItem, err := u.createETHDetailTx(txParams, sender, receiver, rawTx.TxHex, domainTx.ActionTypeTransfer)
 	if err != nil {
 		return "", fmt.Errorf("fail to create ETHDetailTx: %w", err)
 	}
@@ -279,16 +272,23 @@ func (u *createTransactionUseCase) createTransferTx(
 		return "", err
 	}
 
-	// save transaction result to file
+	// save transaction result to JSON file
+	rawTxInfos := []rawTxInfo{{rawTx: rawTx, txParams: txParams}}
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
+	if len(rawTxInfos) != 0 {
+		generatedFileName, err = u.writeETHJSONFiles(ctx, targetAction, sender, txID, rawTxInfos)
 		if err != nil {
-			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("fail to call writeETHJSONFiles(): %w", err)
 		}
 	}
 
 	return generatedFileName, nil
+}
+
+// rawTxInfo holds a raw transaction and its creation parameters together.
+type rawTxInfo struct {
+	rawTx    *domainETH.RawTx
+	txParams *apieth.TxCreateParams
 }
 
 // userPayment represents user's payment address and amount
@@ -337,7 +337,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []domainETH.UserAmount,
-) ([]string, []*domainETH.ETHDetailTx, error) {
+) ([]rawTxInfo, []*domainETH.ETHDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -347,39 +347,29 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	}
 
 	// create raw transaction each address
-	serializedTxs := make([]string, 0, len(userAmounts))
+	rawTxInfos := make([]rawTxInfo, 0, len(userAmounts))
 	txDetailItems := make([]*domainETH.ETHDetailTx, 0, len(userAmounts))
 	for _, val := range userAmounts {
-		// call CreateRawTransaction
-		var rawTx *domainETH.RawTx
-		var txParams *apieth.TxCreateParams
-		rawTx, txParams, err = u.ethClient.CreateRawTransaction(
-			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
-		if err != nil {
+		// Create transaction: prefer EIP-1559 when supported, fall back to legacy
+		rawTx, txParams, txErr := u.createRawTx(ctx, val.Address, depositAddr.WalletAddress, 0, 0)
+		if txErr != nil {
 			return nil, nil, fmt.Errorf(
-				"fail to call addrRepo.CreateRawTransaction(), sender address: %s: %w",
-				val.Address, err)
+				"fail to call createRawTx(), sender address: %s: %w",
+				val.Address, txErr)
 		}
 
-		rawTxHex := rawTx.TxHex
-		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
-
-		var serializedTx string
-		serializedTx, err = serializer.GetDefaultSerializer().EncodeToString(rawTx)
-		if err != nil {
-			return nil, nil, fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
-		}
-		serializedTxs = append(serializedTxs, serializedTx)
+		logger.Debug("rawTxHex", "rawTxHex", rawTx.TxHex)
+		rawTxInfos = append(rawTxInfos, rawTxInfo{rawTx: rawTx, txParams: txParams})
 
 		// create domain entity ETHDetailTx from DTO
 		var txDetailItem *domainETH.ETHDetailTx
-		txDetailItem, err = u.createETHDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeDeposit)
+		txDetailItem, err = u.createETHDetailTx(txParams, sender, receiver, rawTx.TxHex, domainTx.ActionTypeDeposit)
 		if err != nil {
 			return nil, nil, fmt.Errorf("fail to create ETHDetailTx: %w", err)
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
-	return serializedTxs, txDetailItems, nil
+	return rawTxInfos, txDetailItems, nil
 }
 
 func (u *createTransactionUseCase) createUserPayment() ([]userPayment, *big.Int, []int64, error) {
@@ -452,38 +442,46 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *domainAddress.Address,
-) ([]string, []*domainETH.ETHDetailTx, error) {
-	serializedTxs := make([]string, 0, len(userPayments))
+) ([]rawTxInfo, []*domainETH.ETHDetailTx, error) {
+	rawTxInfos := make([]rawTxInfo, 0, len(userPayments))
 	txDetailItems := make([]*domainETH.ETHDetailTx, 0, len(userPayments))
 	additionalNonce := 0
-	for _, userPayment := range userPayments {
-		// call CreateRawTransaction
-		rawTx, txParams, err := u.ethClient.CreateRawTransaction(ctx,
-			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
+	for _, up := range userPayments {
+		// Create transaction: prefer EIP-1559 when supported, fall back to legacy
+		rawTx, txParams, err := u.createRawTx(
+			ctx, senderAddr.WalletAddress, up.receiverAddr, up.amount.Uint64(), additionalNonce)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
-				"fail to call addrRepo.CreateRawTransaction(), sender address: %s: %w",
+				"fail to call createRawTx(), sender address: %s: %w",
 				senderAddr.WalletAddress, err)
 		}
 		additionalNonce++
 
-		rawTxHex := rawTx.TxHex
-		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
-
-		serializedTx, err := serializer.GetDefaultSerializer().EncodeToString(rawTx)
-		if err != nil {
-			return nil, nil, fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
-		}
-		serializedTxs = append(serializedTxs, serializedTx)
+		logger.Debug("rawTxHex", "rawTxHex", rawTx.TxHex)
+		rawTxInfos = append(rawTxInfos, rawTxInfo{rawTx: rawTx, txParams: txParams})
 
 		// create domain entity ETHDetailTx from DTO
-		txDetailItem, err := u.createETHDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypePayment)
+		txDetailItem, err := u.createETHDetailTx(txParams, sender, receiver, rawTx.TxHex, domainTx.ActionTypePayment)
 		if err != nil {
 			return nil, nil, fmt.Errorf("fail to create ETHDetailTx: %w", err)
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
-	return serializedTxs, txDetailItems, nil
+	return rawTxInfos, txDetailItems, nil
+}
+
+// createRawTx creates a raw transaction, preferring EIP-1559 when the connected node supports it.
+// Falls back to legacy transaction when EIP-1559 is not supported.
+func (u *createTransactionUseCase) createRawTx(
+	ctx context.Context,
+	fromAddr, toAddr string,
+	amount uint64,
+	additionalNonce int,
+) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
+	if u.ethClient.SupportsEIP1559(ctx) {
+		return u.ethClient.CreateRawTransactionEIP1559(ctx, fromAddr, toAddr, amount, additionalNonce)
+	}
+	return u.ethClient.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
 }
 
 func (u *createTransactionUseCase) updateDB(
@@ -543,21 +541,60 @@ func (u *createTransactionUseCase) updateDB(
 	return txID, nil
 }
 
-// generateHexFile generates file for hex txID and encoded previous addresses
-func (u *createTransactionUseCase) generateHexFile(
-	actionType domainTx.ActionType, senderAccount domainAccount.AccountType, txID int64, serializedTxs []string,
+// writeETHJSONFiles writes unsigned transaction data to JSON files in ETHTransactionFile format.
+// Returns the file name of the last written file (consistent with BTC pattern for multi-tx batches).
+func (u *createTransactionUseCase) writeETHJSONFiles(
+	ctx context.Context,
+	actionType domainTx.ActionType,
+	senderAccount domainAccount.AccountType,
+	txID int64,
+	rawTxInfos []rawTxInfo,
 ) (string, error) {
-	// add senderAccount to first line
-	serializedTxs = append([]string{senderAccount.String()}, serializedTxs...)
+	_ = senderAccount // preserved for future use (e.g., metadata)
+	_ = ctx           // available for future async file writing
 
-	// create file
-	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, txID, 0)
-	generatedFileName, err := u.txFileRepo.WriteFileSlice(path, serializedTxs)
-	if err != nil {
-		return "", fmt.Errorf("fail to call txFileRepo.WriteFile(): %w", err)
+	var lastFileName string
+	for i, info := range rawTxInfos {
+		txFile := u.buildETHTransactionFile(info.rawTx, info.txParams)
+
+		path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, txID, i)
+		fileName, err := u.txFileRepo.WriteETHJSONFile(path, txFile)
+		if err != nil {
+			return "", fmt.Errorf("fail to call txFileRepo.WriteETHJSONFile(): %w", err)
+		}
+		lastFileName = fileName
+	}
+	return lastFileName, nil
+}
+
+// buildETHTransactionFile constructs an ETHTransactionFile from a raw transaction and its creation params.
+func (*createTransactionUseCase) buildETHTransactionFile(
+	rawTx *domainETH.RawTx,
+	txParams *apieth.TxCreateParams,
+) *dtoeth.ETHTransactionFile {
+	txFile := &dtoeth.ETHTransactionFile{
+		Version:   1,
+		TxType:    string(domainTx.TxTypeUnsigned),
+		EthTxType: txParams.EthTxType,
+		ChainID:   txParams.ChainID,
+		Nonce:     txParams.Nonce,
+		From:      txParams.FromAddress,
+		To:        txParams.ToAddress,
+		Value:     strconv.FormatUint(txParams.Amount, 10),
+		Gas:       uint64(txParams.GasLimit),
+		RawTxHex:  rawTx.TxHex,
 	}
 
-	return generatedFileName, nil
+	if txParams.EthTxType == 2 {
+		// EIP-1559 fields
+		txFile.MaxFeePerGas = strconv.FormatUint(txParams.MaxFeePerGas, 10)
+		txFile.MaxPriorityFeePerGas = strconv.FormatUint(txParams.MaxPriorityFeePerGas, 10)
+	} else {
+		// Legacy fields
+		txFile.GasPrice = strconv.FormatUint(txParams.GasPrice, 10)
+	}
+
+	return txFile
 }
 
 // createETHDetailTx constructs the domain entity ETHDetailTx from the DTO returned by infrastructure layer.
