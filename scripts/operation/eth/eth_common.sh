@@ -187,12 +187,12 @@ eth_setup_infrastructure() {
 
 	case "${NODE_TYPE}" in
 	geth)
-		compose_profile="geth"
-		log_substep "Starting Geth + Lodestar nodes"
-		docker compose -f compose.eth.yaml --profile geth up -d
+		# Use geth-dev profile: local PoA dev chain (geth --dev), no sync required.
+		# The testnet geth profile requires Sepolia sync (hours) and is not for E2E testing.
+		log_substep "Starting Geth dev node (geth --dev, chain ID 1337)"
+		docker compose -f compose.eth.yaml --profile geth-dev up -d
 		;;
 	anvil | *)
-		compose_profile="anvil"
 		log_substep "Starting Anvil node"
 		docker compose -f compose.eth.yaml --profile anvil up -d anvil
 		;;
@@ -226,12 +226,12 @@ eth_cleanup() {
 
 	case "${NODE_TYPE}" in
 	geth)
-		log_substep "Stopping Geth + Lodestar"
-		docker compose -f compose.eth.yaml --profile geth stop || true
+		log_substep "Stopping Geth dev node"
+		docker compose -f compose.eth.yaml --profile geth-dev down || true
 		;;
 	anvil | *)
 		log_substep "Stopping Anvil"
-		docker compose -f compose.eth.yaml --profile anvil stop anvil || true
+		docker compose -f compose.eth.yaml --profile anvil down anvil || true
 		;;
 	esac
 
@@ -303,15 +303,12 @@ eth_export_watch_address_csv() {
 # Utility Functions
 ###############################################################################
 
-# Fund an address using anvil_setBalance RPC (Anvil only)
+# Fund an address with ETH.
+# - Anvil: uses anvil_setBalance (instant, no gas needed)
+# - Geth dev: sends ETH from the pre-funded coinbase account via eth_sendTransaction
 eth_fund_address() {
 	local address="$1"
 	local amount_eth="${2:-100}" # Default 100 ETH
-
-	if [ "${NODE_TYPE}" = "geth" ]; then
-		log_warn "eth_fund_address: auto-funding not supported on Geth; fund address manually"
-		return 0
-	fi
 
 	# Convert ETH to Wei using bc for precision (1 ETH = 10^18 Wei)
 	# Use bc for both multiplication and hex conversion: values exceed 2^63 (e.g. 100 ETH = 10^20 Wei)
@@ -323,9 +320,45 @@ eth_fund_address() {
 
 	log_substep "Funding ${address} with ${amount_eth} ETH (${amount_wei_hex} Wei)"
 
-	curl -s -X POST -H "Content-Type: application/json" \
-		--data "{\"jsonrpc\":\"2.0\",\"method\":\"anvil_setBalance\",\"params\":[\"${address}\",\"${amount_wei_hex}\"],\"id\":1}" \
-		"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" >/dev/null
+	if [ "${NODE_TYPE}" = "geth" ]; then
+		# geth --dev auto-unlocks the first account (developer account).
+		# Use eth_accounts (eth_coinbase is not available in recent geth versions).
+		local dev_account
+		dev_account=$(curl -s -X POST -H "Content-Type: application/json" \
+			--data '{"jsonrpc":"2.0","method":"eth_accounts","params":[],"id":1}' \
+			"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" |
+			grep -oE '"0x[a-fA-F0-9]{40}"' | head -1 | tr -d '"' || true)
+
+		if [ -z "${dev_account}" ]; then
+			log_error "eth_fund_address: failed to get dev account from geth dev node"
+			return 1
+		fi
+
+		curl -s -X POST -H "Content-Type: application/json" \
+			--data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_sendTransaction\",\"params\":[{\"from\":\"${dev_account}\",\"to\":\"${address}\",\"value\":\"${amount_wei_hex}\",\"gas\":\"0x5208\"}],\"id\":1}" \
+			"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" >/dev/null
+
+		# Wait for the transaction to be mined (geth --dev mines on each tx submission,
+		# but there may be a brief delay before the balance is reflected).
+		local wait_count=0
+		local max_wait_balance=10
+		while [ "${wait_count}" -lt "${max_wait_balance}" ]; do
+			local balance
+			balance=$(curl -s -X POST -H "Content-Type: application/json" \
+				--data "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${address}\",\"latest\"],\"id\":1}" \
+				"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" |
+				grep -oE '"result":"0x[a-fA-F0-9]+"' | sed 's/"result":"//;s/"//' || true)
+			if [ -n "${balance}" ] && [ "${balance}" != "0x0" ]; then
+				break
+			fi
+			sleep 1
+			wait_count=$((wait_count + 1))
+		done
+	else
+		curl -s -X POST -H "Content-Type: application/json" \
+			--data "{\"jsonrpc\":\"2.0\",\"method\":\"anvil_setBalance\",\"params\":[\"${address}\",\"${amount_wei_hex}\"],\"id\":1}" \
+			"http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" >/dev/null
+	fi
 
 	log_info "Address funded successfully"
 }

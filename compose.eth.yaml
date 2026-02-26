@@ -74,7 +74,52 @@ services:
         fi; exec anvil --host 0.0.0.0 --port 8545 --chain-id ${ANVIL_CHAIN_ID:-31337} --mnemonic "${ANVIL_MNEMONIC:-toy echo orbit embrace opinion file client report history bomb regret life}" --block-time ${ANVIL_BLOCK_TIME:-1} $${ANVIL_ARGS}
 
   #########################################################################
-  # ethereum/client-go (Geth)
+  # ethereum/client-go (Geth) — local dev mode
+  # - https://geth.ethereum.org/docs/developers/dapp-developer/dev-mode
+  #------------------------------------------------------------------------
+  # Profile: geth-dev
+  # Example:
+  #   docker compose -f compose.eth.yaml --profile geth-dev up
+  #
+  # Notes:
+  # - Uses geth --dev: ephemeral PoA chain with a pre-funded coinbase account
+  # - No consensus client (Lodestar) required — dev mode uses PoA mining
+  # - Chain ID: 1337 (same as anvil default)
+  # - RPC port: 8545 (mapped to GETH_HTTP_PORT, default 8545)
+  # - The coinbase account is auto-unlocked; use eth_sendTransaction to fund addresses
+  # - Block time: 1 second (--dev.period=1)
+  #########################################################################
+  geth-dev:
+    image: built-client-go:${GETH_VERSION:-latest}
+    profiles: ["geth-dev"]
+    build:
+      context: .
+      dockerfile: ./docker/nodes/eth/Dockerfile.geth
+      args:
+        - VERSION=${GETH_VERSION:-latest}
+    container_name: geth-dev
+    ports:
+      - ${GETH_HTTP_PORT:-8545}:8545
+    command:
+      - --dev
+      - --dev.period=1
+      - --http
+      - --http.api=web3,eth,net,admin,personal,debug
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.vhosts=*
+      - --http.corsdomain=*
+    networks:
+      - eth
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-X", "POST", "-H", "Content-Type: application/json", "--data", '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}', "http://127.0.0.1:8545"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+
+  #########################################################################
+  # ethereum/client-go (Geth) — testnet mode
   # - https://github.com/ethereum/go-ethereum/wiki/Running-in-Docker
   #------------------------------------------------------------------------
   # Profile: geth

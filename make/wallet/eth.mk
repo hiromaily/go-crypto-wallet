@@ -3,7 +3,7 @@
 ###############################################################################
 
 # E2E defaults (can be overridden on the command line, e.g. NODE_TYPE=geth DB=mysql)
-NODE_TYPE ?= anvil
+NODE_TYPE ?= anvil # anvil, geth
 DB ?= sqlite
 
 ###############################################################################
@@ -76,10 +76,6 @@ check-execution-syncing:
 generate-eth-key-local:
 	./scripts/operation/generate-eth-key.sh eth
 
-###############################################################################
-# Grafana
-###############################################################################
-# http://localhost:3000
 
 ###############################################################################
 # Anvil (Foundry Local Node)
@@ -106,20 +102,20 @@ stop-docker-anvil:
 
 .PHONY: eth-e2e-p1-reset
 eth-e2e-p1-reset: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --reset
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --reset
 
 .PHONY: eth-e2e-p1
 eth-e2e-p1: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh
 
 .PHONY: eth-e2e-p1-verbose
 eth-e2e-p1-verbose: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --verbose
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --verbose
 
 .PHONY: eth-e2e-p1-ci
 eth-e2e-p1-ci: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --non-interactive
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --non-interactive
 
 .PHONY: eth-e2e-p1-cleanup
 eth-e2e-p1-cleanup:
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh --cleanup
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --cleanup

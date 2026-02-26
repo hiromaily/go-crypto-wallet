@@ -1,3 +1,6 @@
+#
+# This compose.yaml contains only the Bitcoin Node service.
+#
 networks:
   btc:
     name: btc

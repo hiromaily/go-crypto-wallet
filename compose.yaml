@@ -1,3 +1,6 @@
+#
+# This compose.yaml contains only the Database service.
+#
 # [reset]
 # docker compose down -v
 # [mysql]

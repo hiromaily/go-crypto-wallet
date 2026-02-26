@@ -6,7 +6,7 @@
 #   fund addresses → create unsigned tx → keygen offline sign →
 #   watch send → monitor confirmation
 #
-# Usage: ./scripts/operation/eth/e2e/e2e-p1-anvil-basic.sh [OPTIONS]
+# Usage: ./scripts/operation/eth/e2e/e2e-p1.sh [OPTIONS]
 #
 # Options:
 #   --cleanup           Stop containers and cleanup state
@@ -61,7 +61,13 @@ eth_init_database
 # Pattern 1 uses Anvil by default; override with NODE_TYPE=geth for Geth.
 # ETH uses BIP44 derivation (eth-address -> bip44), required to initialize key generator.
 export WALLET_ADDRESS_TYPE="eth-address"
-export WALLET_ETHEREUM_NETWORK_TYPE="${NODE_TYPE:-anvil}"
+# NODE_TYPE is the client type (anvil/geth); WALLET_ETHEREUM_NETWORK_TYPE is the network name.
+# For geth --dev (E2E), use "local" (chain ID 1337, same as anvil); for anvil, use "anvil".
+if [ "${NODE_TYPE}" = "geth" ]; then
+	export WALLET_ETHEREUM_NETWORK_TYPE="local"
+else
+	export WALLET_ETHEREUM_NETWORK_TYPE="anvil"
+fi
 export WALLET_ETHEREUM_PORT="${ETH_RPC_PORT}"
 
 ###############################################################################
