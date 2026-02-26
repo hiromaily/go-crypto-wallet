@@ -9,60 +9,21 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/xrp"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	xrpapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 	pkguuid "github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
-// MockAccountInfoProvider is a mock implementation of AccountInfoProvider for testing
-type MockAccountInfoProvider struct {
-	mock.Mock
-}
-
-func (m *MockAccountInfoProvider) GetAccountInfo(
-	ctx context.Context,
-	address string,
-) (*dtoxrp.ResponseGetAccountInfo, error) {
-	args := m.Called(ctx, address)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*dtoxrp.ResponseGetAccountInfo), args.Error(1)
-}
-
-func (m *MockAccountInfoProvider) GetBalance(ctx context.Context, addr string) (float64, error) {
-	args := m.Called(ctx, addr)
-	return args.Get(0).(float64), args.Error(1)
-}
-
-// MockTransactionPreparer is a mock implementation of TransactionPreparer for testing
-type MockTransactionPreparer struct {
-	mock.Mock
-}
-
-func (m *MockTransactionPreparer) CreateRawTransaction(
-	ctx context.Context,
-	senderAccount, receiverAccount string,
-	amount float64,
-	instructions *dtoxrp.Instructions,
-) (*dtoxrp.TxInput, string, error) {
-	args := m.Called(ctx, senderAccount, receiverAccount, amount, instructions)
-	if args.Get(0) == nil {
-		return nil, "", args.Error(2)
-	}
-	return args.Get(0).(*dtoxrp.TxInput), args.String(1), args.Error(2)
-}
-
 // testDependencies holds all mock dependencies for testing
 type testDependencies struct {
-	accountInfo  *MockAccountInfoProvider
-	txPreparer   *MockTransactionPreparer
+	accountInfo  *xrpapiamocks.MockAccountInfoProvider
+	txPreparer   *xrpapiamocks.MockTransactionPreparer
 	addrRepo     *repomocks.MockAddressRepositorier
 	txRepo       *repomocks.MockTxRepositorier
 	txDetailRepo *repomocks.MockXRPDetailTXRepositorier
@@ -75,8 +36,8 @@ type testDependencies struct {
 func newTestDependencies(t *testing.T) *testDependencies {
 	t.Helper()
 	return &testDependencies{
-		accountInfo:  &MockAccountInfoProvider{},
-		txPreparer:   &MockTransactionPreparer{},
+		accountInfo:  xrpapiamocks.NewMockAccountInfoProvider(t),
+		txPreparer:   xrpapiamocks.NewMockTransactionPreparer(t),
 		addrRepo:     repomocks.NewMockAddressRepositorier(t),
 		txRepo:       repomocks.NewMockTxRepositorier(t),
 		txDetailRepo: repomocks.NewMockXRPDetailTXRepositorier(t),
@@ -128,8 +89,8 @@ func TestCreateTransactionUseCase_Execute_TransferWithInsufficientBalance(t *tes
 	}
 
 	// Setup mocks
-	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypePayment).Return(senderAddr, nil)
-	deps.accountInfo.On("GetBalance", mock.Anything, "rSenderAddress123").Return(10.0, nil)
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypePayment).Return(senderAddr, nil)
+	deps.accountInfo.EXPECT().GetBalance(mock.Anything, "rSenderAddress123").Return(10.0, nil)
 
 	input := watchusecase.CreateTransactionInput{
 		ActionType:      domainTx.ActionTypeTransfer.String(),
@@ -144,8 +105,6 @@ func TestCreateTransactionUseCase_Execute_TransferWithInsufficientBalance(t *tes
 	assert.Contains(t, err.Error(), "sender balance")
 	assert.Contains(t, err.Error(), "insufficient")
 	assert.Empty(t, output.FileName)
-	deps.addrRepo.AssertExpectations(t)
-	deps.accountInfo.AssertExpectations(t)
 }
 
 func TestCreateTransactionUseCase_Execute_TransferWithValidBalance(t *testing.T) {
@@ -167,8 +126,8 @@ func TestCreateTransactionUseCase_Execute_GetBalanceError(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypePayment).Return(senderAddr, nil)
-	deps.accountInfo.On("GetBalance", mock.Anything, "rSenderAddress123").
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypePayment).Return(senderAddr, nil)
+	deps.accountInfo.EXPECT().GetBalance(mock.Anything, "rSenderAddress123").
 		Return(0.0, errors.New("network error"))
 
 	input := watchusecase.CreateTransactionInput{
@@ -184,8 +143,6 @@ func TestCreateTransactionUseCase_Execute_GetBalanceError(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to get balance")
 	assert.Contains(t, err.Error(), "network error")
 	assert.Empty(t, output.FileName)
-	deps.addrRepo.AssertExpectations(t)
-	deps.accountInfo.AssertExpectations(t)
 }
 
 func TestCreateTransactionUseCase_Execute_GetAddressError(t *testing.T) {
@@ -193,7 +150,7 @@ func TestCreateTransactionUseCase_Execute_GetAddressError(t *testing.T) {
 	useCase := createUseCase(deps)
 
 	// Setup mocks
-	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypePayment).
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypePayment).
 		Return((*domainAddress.Address)(nil), errors.New("database error"))
 
 	input := watchusecase.CreateTransactionInput{
@@ -209,7 +166,6 @@ func TestCreateTransactionUseCase_Execute_GetAddressError(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to get sender address")
 	assert.Contains(t, err.Error(), "database error")
 	assert.Empty(t, output.FileName)
-	deps.addrRepo.AssertExpectations(t)
 }
 
 func TestCreateTransactionUseCase_Execute_NilSenderAddress(t *testing.T) {
@@ -217,7 +173,7 @@ func TestCreateTransactionUseCase_Execute_NilSenderAddress(t *testing.T) {
 	useCase := createUseCase(deps)
 
 	// Setup mocks - repository returns nil address without error (no unallocated address exists)
-	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypePayment).
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypePayment).
 		Return((*domainAddress.Address)(nil), nil)
 
 	input := watchusecase.CreateTransactionInput{
@@ -233,7 +189,6 @@ func TestCreateTransactionUseCase_Execute_NilSenderAddress(t *testing.T) {
 	assert.Contains(t, err.Error(), "no unallocated address found")
 	assert.Contains(t, err.Error(), "sender account")
 	assert.Empty(t, output.FileName)
-	deps.addrRepo.AssertExpectations(t)
 }
 
 func TestCreateTransactionUseCase_Execute_NilReceiverAddress(t *testing.T) {
@@ -246,10 +201,10 @@ func TestCreateTransactionUseCase_Execute_NilReceiverAddress(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypePayment).Return(senderAddr, nil)
-	deps.accountInfo.On("GetBalance", mock.Anything, "rSenderAddress123").Return(100.0, nil)
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypePayment).Return(senderAddr, nil)
+	deps.accountInfo.EXPECT().GetBalance(mock.Anything, "rSenderAddress123").Return(100.0, nil)
 	// Receiver address returns nil without error
-	deps.addrRepo.On("GetOneUnAllocated", domainAccount.AccountTypeDeposit).
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypeDeposit).
 		Return((*domainAddress.Address)(nil), nil)
 
 	input := watchusecase.CreateTransactionInput{
@@ -265,8 +220,6 @@ func TestCreateTransactionUseCase_Execute_NilReceiverAddress(t *testing.T) {
 	assert.Contains(t, err.Error(), "no unallocated address found")
 	assert.Contains(t, err.Error(), "receiver account")
 	assert.Empty(t, output.FileName)
-	deps.addrRepo.AssertExpectations(t)
-	deps.accountInfo.AssertExpectations(t)
 }
 
 func TestCreateTransactionUseCase_Dependencies(t *testing.T) {

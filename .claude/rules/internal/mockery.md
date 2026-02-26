@@ -81,7 +81,8 @@ Always regenerate with `make mockery` instead of editing manually.
 ## Exceptions
 
 - **`Ethereumer` (ETH)**: DI-layer-only monolithic interface — do NOT add to `.mockery.yaml`.
-- **`ETHTransactionSender`**: Type alias for `TxSender` — mock `TxSender` instead.
+- **`ETHTransactionSender`**: Type alias for `TxSender` — mockery cannot generate mocks for type aliases; mock `TxSender` instead.
+- **Composed ETH interfaces** (`ETHKeygenSignClient`, `ETHWatchClient`, `WatchTxCreationDeps`, `KeygenSignTxDeps`): Leaf interface mocks satisfy all compositions implicitly — do NOT add composed interfaces to `.mockery.yaml`.
 - **Use case interfaces** (`internal/application/usecase/*/interfaces.go`): These are NOT ports interfaces. Simple struct stubs are acceptable for testing use case orchestration.
 - **Compile-time conformance stubs** in `*_test.go` files (e.g., in `ports/` packages): These are intentional type-check helpers, not test doubles — keep them as-is.
 
