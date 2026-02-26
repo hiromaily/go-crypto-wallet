@@ -132,7 +132,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 	// save transaction result to JSON file
 	var generatedFileName string
 	if len(rawTxInfos) != 0 {
-		generatedFileName, err = u.writeETHJSONFiles(ctx, targetAction, sender, txID, rawTxInfos)
+		generatedFileName, err = u.writeETHJSONFiles(targetAction, txID, rawTxInfos)
 		if err != nil {
 			return "", fmt.Errorf("fail to call writeETHJSONFiles(): %w", err)
 		}
@@ -191,7 +191,7 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 	// save transaction result to JSON file
 	var generatedFileName string
 	if len(rawTxInfos) != 0 {
-		generatedFileName, err = u.writeETHJSONFiles(ctx, targetAction, sender, txID, rawTxInfos)
+		generatedFileName, err = u.writeETHJSONFiles(targetAction, txID, rawTxInfos)
 		if err != nil {
 			return "", fmt.Errorf("fail to call writeETHJSONFiles(): %w", err)
 		}
@@ -274,12 +274,9 @@ func (u *createTransactionUseCase) createTransferTx(
 
 	// save transaction result to JSON file
 	rawTxInfos := []rawTxInfo{{rawTx: rawTx, txParams: txParams}}
-	var generatedFileName string
-	if len(rawTxInfos) != 0 {
-		generatedFileName, err = u.writeETHJSONFiles(ctx, targetAction, sender, txID, rawTxInfos)
-		if err != nil {
-			return "", fmt.Errorf("fail to call writeETHJSONFiles(): %w", err)
-		}
+	generatedFileName, err := u.writeETHJSONFiles(targetAction, txID, rawTxInfos)
+	if err != nil {
+		return "", fmt.Errorf("fail to call writeETHJSONFiles(): %w", err)
 	}
 
 	return generatedFileName, nil
@@ -544,15 +541,10 @@ func (u *createTransactionUseCase) updateDB(
 // writeETHJSONFiles writes unsigned transaction data to JSON files in ETHTransactionFile format.
 // Returns the file name of the last written file (consistent with BTC pattern for multi-tx batches).
 func (u *createTransactionUseCase) writeETHJSONFiles(
-	ctx context.Context,
 	actionType domainTx.ActionType,
-	senderAccount domainAccount.AccountType,
 	txID int64,
 	rawTxInfos []rawTxInfo,
 ) (string, error) {
-	_ = senderAccount // preserved for future use (e.g., metadata)
-	_ = ctx           // available for future async file writing
-
 	var lastFileName string
 	for i, info := range rawTxInfos {
 		txFile := u.buildETHTransactionFile(info.rawTx, info.txParams)
@@ -585,7 +577,7 @@ func (*createTransactionUseCase) buildETHTransactionFile(
 		RawTxHex:  rawTx.TxHex,
 	}
 
-	if txParams.EthTxType == 2 {
+	if txParams.EthTxType == dtoeth.EthTxTypeEIP1559 {
 		// EIP-1559 fields
 		txFile.MaxFeePerGas = strconv.FormatUint(txParams.MaxFeePerGas, 10)
 		txFile.MaxPriorityFeePerGas = strconv.FormatUint(txParams.MaxPriorityFeePerGas, 10)
