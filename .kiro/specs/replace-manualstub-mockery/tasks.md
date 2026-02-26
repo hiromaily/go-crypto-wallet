@@ -20,22 +20,22 @@
   - Verify `make go-lint` and `make check-build` pass with no errors, confirming the generated code compiles correctly against all interface definitions
   - _Requirements: 1.1, 1.4, 2.2, 3.2, 3.3, 4.1, 4.2, 4.3, 5.4_
 
-- [ ] 2. (P) Replace BTC keygen manual stubs with generated mocks
+- [x] 2. (P) Replace BTC keygen manual stubs with generated mocks
 
-- [ ] 2.1 (P) Replace cold-repository stubs in the generate-descriptor test file
+- [x] 2.1 (P) Replace cold-repository stubs in the generate-descriptor test file
   - Remove the `stubAccountRepo`, `stubAuthRepo`, and `stubSeedRepo` struct definitions from the test file
   - Add the cold-repository mocks package import and replace each stub construction with the corresponding `NewMock*(t)` constructor
   - Set up EXPECT() expectations that match the exact method calls and arguments the production code makes on those repositories
   - _Requirements: 1.1, 1.3, 1.5_
 
-- [ ] 2.2 (P) Replace the account-key and file-writer stubs in the export-descriptor test file
+- [x] 2.2 (P) Replace the account-key and file-writer stubs in the export-descriptor test file
   - Remove the `stubAccountKeyRepo` and `stubDescriptorFileWriter` struct definitions from the test file
   - Add imports for the cold-repository and file-storage mocks packages and use `NewMock*(t)` constructors in their place
   - Preserve the `stubDescriptorGenerator` struct intact — it implements a use case interface and is intentionally out of scope for mockery generation (see Non-Goals in design.md)
   - Set up EXPECT() expectations matching the arguments the production export-descriptor logic passes at runtime
   - _Requirements: 1.2, 1.3, 1.5_
 
-- [ ] 2.3 Verify BTC keygen tests pass after stub replacement
+- [x] 2.3 Verify BTC keygen tests pass after stub replacement
   - Run `make gotest` scoped to the BTC keygen use case package
   - Confirm every test case passes and no new failures are introduced by the mock replacements
   - _Requirements: 1.6_
