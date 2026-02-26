@@ -8,7 +8,7 @@ import (
 	"github.com/quagmt/udecimal"
 
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
@@ -61,8 +61,8 @@ func (h *TxDBHelper) InsertTxTableForUnsigned(
 	inputTotal,
 	outputTotal,
 	fee btcutil.Amount,
-	txInputs []*domainBitcoin.BTCTxInput,
-	txOutputs []*domainBitcoin.BTCTxOutput,
+	txInputs []*domainBTC.BTCTxInput,
+	txOutputs []*domainBTC.BTCTxOutput,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// skip if same hex is already stored
@@ -88,7 +88,7 @@ func (h *TxDBHelper) InsertTxTableForUnsigned(
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert fee amount to decimal: %w", err)
 	}
-	txItem := domainBitcoin.NewBTCTransaction(
+	txItem := domainBTC.NewBTCTransaction(
 		h.converter.CoinTypeCode(),
 		actionType,
 		domainTx.TxTypeUnsigned,

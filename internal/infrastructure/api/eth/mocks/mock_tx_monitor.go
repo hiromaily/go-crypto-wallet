@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -105,23 +105,23 @@ func (_c *MockTxMonitor_GetConfirmation_Call) RunAndReturn(run func(ctx context.
 }
 
 // GetTransactionReceipt provides a mock function for the type MockTxMonitor
-func (_mock *MockTxMonitor) GetTransactionReceipt(ctx context.Context, txHash string) (*ethereum.TransactionReceipt, error) {
+func (_mock *MockTxMonitor) GetTransactionReceipt(ctx context.Context, txHash string) (*eth.TransactionReceipt, error) {
 	ret := _mock.Called(ctx, txHash)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTransactionReceipt")
 	}
 
-	var r0 *ethereum.TransactionReceipt
+	var r0 *eth.TransactionReceipt
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*ethereum.TransactionReceipt, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*eth.TransactionReceipt, error)); ok {
 		return returnFunc(ctx, txHash)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *ethereum.TransactionReceipt); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *eth.TransactionReceipt); ok {
 		r0 = returnFunc(ctx, txHash)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.TransactionReceipt)
+			r0 = ret.Get(0).(*eth.TransactionReceipt)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -162,12 +162,12 @@ func (_c *MockTxMonitor_GetTransactionReceipt_Call) Run(run func(ctx context.Con
 	return _c
 }
 
-func (_c *MockTxMonitor_GetTransactionReceipt_Call) Return(transactionReceipt *ethereum.TransactionReceipt, err error) *MockTxMonitor_GetTransactionReceipt_Call {
+func (_c *MockTxMonitor_GetTransactionReceipt_Call) Return(transactionReceipt *eth.TransactionReceipt, err error) *MockTxMonitor_GetTransactionReceipt_Call {
 	_c.Call.Return(transactionReceipt, err)
 	return _c
 }
 
-func (_c *MockTxMonitor_GetTransactionReceipt_Call) RunAndReturn(run func(ctx context.Context, txHash string) (*ethereum.TransactionReceipt, error)) *MockTxMonitor_GetTransactionReceipt_Call {
+func (_c *MockTxMonitor_GetTransactionReceipt_Call) RunAndReturn(run func(ctx context.Context, txHash string) (*eth.TransactionReceipt, error)) *MockTxMonitor_GetTransactionReceipt_Call {
 	_c.Call.Return(run)
 	return _c
 }

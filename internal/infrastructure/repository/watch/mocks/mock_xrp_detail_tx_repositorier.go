@@ -7,8 +7,8 @@ package mocks
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	mock "github.com/stretchr/testify/mock"
 )
 

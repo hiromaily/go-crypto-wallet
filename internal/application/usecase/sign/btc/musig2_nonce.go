@@ -9,8 +9,8 @@ import (
 
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 )
 
 type generateMuSig2NonceUseCase struct {

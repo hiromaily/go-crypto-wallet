@@ -13,7 +13,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
 )
 
@@ -57,7 +57,7 @@ func TestETHAccountKeyRepositorySqlc_InsertBulk(t *testing.T) {
 
 	repo := coldsqlite.NewETHAccountKeyRepositorySqlc(db)
 
-	accountKeys := []*domainEthereum.ETHAccountKey{
+	accountKeys := []*domainETH.ETHAccountKey{
 		{
 			Account:       domainAccount.AccountTypeClient,
 			Address:       "0x1234567890123456789012345678901234567890",
@@ -91,7 +91,7 @@ func TestETHAccountKeyRepositorySqlc_GetMaxIndex(t *testing.T) {
 
 	repo := coldsqlite.NewETHAccountKeyRepositorySqlc(db)
 
-	accountKeys := []*domainEthereum.ETHAccountKey{
+	accountKeys := []*domainETH.ETHAccountKey{
 		{
 			Account:       domainAccount.AccountTypeClient,
 			Address:       "0x1234567890123456789012345678901234567890",
@@ -130,7 +130,7 @@ func TestETHAccountKeyRepositorySqlc_GetOneMaxID(t *testing.T) {
 
 	repo := coldsqlite.NewETHAccountKeyRepositorySqlc(db)
 
-	accountKeys := []*domainEthereum.ETHAccountKey{
+	accountKeys := []*domainETH.ETHAccountKey{
 		{
 			Account:       domainAccount.AccountTypeClient,
 			Address:       "0x1234567890123456789012345678901234567890",
@@ -170,7 +170,7 @@ func TestETHAccountKeyRepositorySqlc_GetAllAddrStatus(t *testing.T) {
 
 	repo := coldsqlite.NewETHAccountKeyRepositorySqlc(db)
 
-	accountKeys := []*domainEthereum.ETHAccountKey{
+	accountKeys := []*domainETH.ETHAccountKey{
 		{
 			Account:       domainAccount.AccountTypeClient,
 			Address:       "0x1234567890123456789012345678901234567890",
@@ -212,7 +212,7 @@ func TestETHAccountKeyRepositorySqlc_UpdateAddrStatus(t *testing.T) {
 
 	repo := coldsqlite.NewETHAccountKeyRepositorySqlc(db)
 
-	accountKeys := []*domainEthereum.ETHAccountKey{
+	accountKeys := []*domainETH.ETHAccountKey{
 		{
 			Account:       domainAccount.AccountTypeClient,
 			Address:       "0x1234567890123456789012345678901234567890",

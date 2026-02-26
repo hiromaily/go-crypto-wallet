@@ -8,7 +8,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
 )
@@ -40,7 +40,7 @@ type btcAccountKeyRow interface {
 
 // convertBtcAccountKeyRow is a helper to convert query row types to domain.BTCAccountKey
 // This reduces code duplication between different query result converters
-func convertBtcAccountKeyRow[T btcAccountKeyRow](row T) (*domainBitcoin.BTCAccountKey, error) {
+func convertBtcAccountKeyRow[T btcAccountKeyRow](row T) (*domainBTC.BTCAccountKey, error) {
 	// Extract fields using type switch to handle different row types
 	var (
 		id                     int64
@@ -120,7 +120,7 @@ func convertBtcAccountKeyRow[T btcAccountKeyRow](row T) (*domainBitcoin.BTCAccou
 		return nil, fmt.Errorf("invalid addr status in database: %w", err)
 	}
 
-	key := &domainBitcoin.BTCAccountKey{
+	key := &domainBTC.BTCAccountKey{
 		ID:                 id,
 		CoinTypeCode:       domainCoin.CoinTypeCode(coin),
 		KeyType:            keyType,
@@ -152,26 +152,26 @@ func convertBtcAccountKeyRow[T btcAccountKeyRow](row T) (*domainBitcoin.BTCAccou
 // convertGetOneBtcAccountKeyByMaxIDRow converts row to domain.BtcAccountKey entity.
 func convertGetOneBtcAccountKeyByMaxIDRow(
 	row *sqlcgen.GetOneBtcAccountKeyByMaxIDRow,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	return convertBtcAccountKeyRow(row)
 }
 
 // convertGetBtcAccountKeysByAddrStatusRow converts row to domain.BtcAccountKey entity.
 func convertGetBtcAccountKeysByAddrStatusRow(
 	row *sqlcgen.GetBtcAccountKeysByAddrStatusRow,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	return convertBtcAccountKeyRow(row)
 }
 
 // convertGetBtcAccountKeysByMultisigAddressesRow converts row to domain.BtcAccountKey entity.
 func convertGetBtcAccountKeysByMultisigAddressesRow(
 	row *sqlcgen.GetBtcAccountKeysByMultisigAddressesRow,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	return convertBtcAccountKeyRow(row)
 }
 
 // convertFromBTCAccountKey converts domain.BTCAccountKey entity to sqlcgen.BtcAccountKey.
-func convertFromBTCAccountKey(key *domainBitcoin.BTCAccountKey) *sqlcgen.BtcAccountKey {
+func convertFromBTCAccountKey(key *domainBTC.BTCAccountKey) *sqlcgen.BtcAccountKey {
 	sqlcKey := &sqlcgen.BtcAccountKey{
 		ID:                 key.ID,
 		Coin:               key.CoinTypeCode.String(),
@@ -229,7 +229,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(
 
 // GetOneMaxID returns one record by max id
 func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType,
-) (*domainBitcoin.BTCAccountKey, error) {
+) (*domainBTC.BTCAccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetOneBtcAccountKeyByMaxID(ctx, sqlcgen.GetOneBtcAccountKeyByMaxIDParams{
@@ -246,7 +246,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Acco
 // GetAllAddrStatus returns all BtcAccountKey by addr_status
 func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-) ([]*domainBitcoin.BTCAccountKey, error) {
+) ([]*domainBTC.BTCAccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetBtcAccountKeysByAddrStatus(ctx, sqlcgen.GetBtcAccountKeysByAddrStatusParams{
@@ -258,7 +258,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 		return nil, fmt.Errorf("failed to call GetBtcAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*domainBitcoin.BTCAccountKey, 0, len(accountKeys))
+	result := make([]*domainBTC.BTCAccountKey, 0, len(accountKeys))
 	for i := range accountKeys {
 		domainKey, err := convertGetBtcAccountKeysByAddrStatusRow(&accountKeys[i])
 		if err != nil {
@@ -273,7 +273,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 // GetAllMultiAddr returns all BtcAccountKey by multisig_address
 func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 	accountType domainAccount.AccountType, addrs []string,
-) ([]*domainBitcoin.BTCAccountKey, error) {
+) ([]*domainBTC.BTCAccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetBtcAccountKeysByMultisigAddresses(
@@ -288,7 +288,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 		return nil, fmt.Errorf("failed to call GetBtcAccountKeysByMultisigAddresses(): %w", err)
 	}
 
-	result := make([]*domainBitcoin.BTCAccountKey, 0, len(accountKeys))
+	result := make([]*domainBTC.BTCAccountKey, 0, len(accountKeys))
 	for i := range accountKeys {
 		domainKey, err := convertGetBtcAccountKeysByMultisigAddressesRow(&accountKeys[i])
 		if err != nil {
@@ -301,7 +301,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 }
 
 // InsertBulk inserts multiple records
-func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*domainBitcoin.BTCAccountKey) error {
+func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*domainBTC.BTCAccountKey) error {
 	ctx := context.Background()
 
 	// Begin transaction to ensure atomicity of bulk insert
@@ -405,7 +405,7 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddrStatus(
 
 // UpdateMultisigAddr updates multisig_address
 func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddr(
-	accountType domainAccount.AccountType, item *domainBitcoin.BTCAccountKey,
+	accountType domainAccount.AccountType, item *domainBTC.BTCAccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -433,7 +433,7 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddr(
 
 // UpdateMultisigAddrs updates all multisig_address with transaction
 func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddrs(
-	accountType domainAccount.AccountType, items []*domainBitcoin.BTCAccountKey,
+	accountType domainAccount.AccountType, items []*domainBTC.BTCAccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 

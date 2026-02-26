@@ -26,10 +26,10 @@ import (
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
-	usecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/shared"
+	usecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/shared"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -183,7 +183,7 @@ func (u *signTransactionUseCase) signWithAccount(
 		domainAddress.AddrStatusPrivKeyImported,
 	}
 
-	var accountKeys []*domainBitcoin.BTCAccountKey
+	var accountKeys []*domainBTC.BTCAccountKey
 	var err error
 	for _, status := range statuses {
 		accountKeys, err = u.accountKeyRepo.GetAllAddrStatus(senderAccount, status)
@@ -292,7 +292,7 @@ func (u *signTransactionUseCase) signWithAccount(
 // This ensures signatures match the descriptor-derived public keys regardless of address indices.
 func (u *signTransactionUseCase) deriveWIFsForPSBT(
 	psbtBase64 string,
-	accountKey *domainBitcoin.BTCAccountKey,
+	accountKey *domainBTC.BTCAccountKey,
 ) ([]string, error) {
 	// Legacy workflow: Use stored WIF directly if no account xpriv available
 	if accountKey.AccountExtendedPrivkey == nil || *accountKey.AccountExtendedPrivkey == "" {
@@ -349,7 +349,7 @@ func (u *signTransactionUseCase) deriveWIFsForPSBT(
 // deriveFallbackWIFsForP2TR derives WIFs at multiple indices for P2TR inputs without BIP32 derivation.
 // P2TR (Taproot) inputs don't include BIP32 derivation info, so we try common indices.
 func (u *signTransactionUseCase) deriveFallbackWIFsForP2TR(
-	accountKey *domainBitcoin.BTCAccountKey,
+	accountKey *domainBTC.BTCAccountKey,
 	inputIndex int,
 	wifKeys map[string]struct{},
 ) {
@@ -378,7 +378,7 @@ func (u *signTransactionUseCase) deriveFallbackWIFsForP2TR(
 
 // deriveWIFFromBIP32Path parses BIP32 derivation path and derives the corresponding WIF.
 func (u *signTransactionUseCase) deriveWIFFromBIP32Path(
-	accountKey *domainBitcoin.BTCAccountKey,
+	accountKey *domainBTC.BTCAccountKey,
 	input dtobtc.ParsedPSBTInput,
 	inputIndex int,
 	wifKeys map[string]struct{},

@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -116,7 +116,7 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(ctx context.Context, tx *types.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
 func (e *Ethereum) GetTransactionByHash(
 	ctx context.Context, hashTx string,
-) (*domainEthereum.ResponseGetTransaction, error) {
+) (*domainETH.ResponseGetTransaction, error) {
 	var resMap map[string]string
 	err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionByHash", hashTx)
 	if err != nil {
@@ -188,7 +188,7 @@ func (e *Ethereum) GetTransactionByHash(
 //nolint:gocyclo
 func (e *Ethereum) GetTransactionReceipt(
 	ctx context.Context, hashTx string,
-) (*domainEthereum.ResponseGetTransactionReceipt, error) {
+) (*domainETH.ResponseGetTransactionReceipt, error) {
 	// timeout
 	ch := make(chan error, 1)
 	// FIXME: timeout configuration

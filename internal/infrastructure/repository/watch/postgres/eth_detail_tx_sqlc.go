@@ -8,8 +8,8 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
@@ -32,13 +32,13 @@ func NewETHDetailTXInputRepositorySqlc(
 }
 
 // convertToETHDetailTx converts sqlcgen.EthDetailTx to domain.ETHDetailTx entity
-func convertToETHDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.ETHDetailTx, error) {
+func convertToETHDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainETH.ETHDetailTx, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(int8(sqlcTx.CurrentTxType))
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
 	}
 
-	tx := &domainEth.ETHDetailTx{
+	tx := &domainETH.ETHDetailTx{
 		ID:              sqlcTx.ID,
 		TxID:            sqlcTx.TxID,
 		UUID:            sqlcTx.Uuid,
@@ -67,7 +67,7 @@ func convertToETHDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.ETHDetailTx, 
 }
 
 // GetOne get one record by ID
-func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*domainEth.ETHDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*domainETH.ETHDetailTx, error) {
 	ctx := context.Background()
 
 	ethTx, err := r.queries.GetETHDetailTXByID(ctx, id)
@@ -79,7 +79,7 @@ func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*domainEth.ETHDetailT
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainEth.ETHDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainETH.ETHDetailTx, error) {
 	ctx := context.Background()
 
 	ethTxs, err := r.queries.GetETHDetailTXsByTxID(ctx, id)
@@ -87,7 +87,7 @@ func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainEth.ET
 		return nil, fmt.Errorf("failed to call GetETHDetailTXsByTxID(): %w", err)
 	}
 
-	result := make([]*domainEth.ETHDetailTx, len(ethTxs))
+	result := make([]*domainETH.ETHDetailTx, len(ethTxs))
 	for i := range ethTxs {
 		domainTx, err := convertToETHDetailTx(&ethTxs[i])
 		if err != nil {
@@ -115,7 +115,7 @@ func (r *ETHDetailTXInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *domainEth.ETHDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *domainETH.ETHDetailTx) error {
 	ctx := context.Background()
 
 	var unsignedUpdatedAt, sentUpdatedAt sql.NullTime
@@ -152,7 +152,7 @@ func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *domainEth.ETHDetailTx) e
 }
 
 // InsertBulk inserts multiple records
-func (r *ETHDetailTXInputRepositorySqlc) InsertBulk(txItems []*domainEth.ETHDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) InsertBulk(txItems []*domainETH.ETHDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err

@@ -26,7 +26,7 @@ import (
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

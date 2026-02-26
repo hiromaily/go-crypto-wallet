@@ -6,7 +6,7 @@ import (
 	"github.com/quagmt/udecimal"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -35,7 +35,7 @@ func ParseListUnspentTx(
 ) (*ParsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
-	txRepoTxInputs := make([]*domainBitcoin.BTCTxInput, 0, len(unspentList))
+	txRepoTxInputs := make([]*domainBTC.BTCTxInput, 0, len(unspentList))
 	prevTxs := make([]dtobtc.PreviousTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
@@ -59,7 +59,7 @@ func ParseListUnspentTx(
 			logger.Error("fail to convert input amount to decimal", "error", err)
 			continue
 		}
-		input, err := domainBitcoin.NewBTCTxInput(
+		input, err := domainBTC.NewBTCTxInput(
 			0, // TxID will be set later
 			txItem.TxID,
 			txItem.Vout,

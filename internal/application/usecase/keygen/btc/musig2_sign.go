@@ -126,8 +126,8 @@ import (
 	"github.com/btcsuite/btcd/btcec/v2"
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 )
 
 type muSig2SignUseCase struct {

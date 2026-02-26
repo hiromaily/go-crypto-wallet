@@ -7,9 +7,9 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/bchutil"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
-	usecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/shared"
+	usecaseshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/shared"
+	bchshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/shared/bch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -59,7 +59,7 @@ func (u *signTransactionUseCase) Sign(
 	}
 
 	// Parse the BCH raw tx content (hex + prevtx metadata)
-	txHex, prevTxs, err := bchutil.ParseRawTxContent(txContent)
+	txHex, prevTxs, err := bchshared.ParseRawTxContent(txContent)
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to parse raw tx content: %w", err)
 	}
@@ -103,9 +103,9 @@ func (u *signTransactionUseCase) Sign(
 	// Reference: docs/chains/bch/README.md - "Known Issues and Workarounds"
 	// Related: Issue #485, Issue #433
 	isMultisig := u.multisigAccount != nil
-	if bchutil.ShouldIncludePrevTxMetadata(isSigned, isMultisig) {
+	if bchshared.ShouldIncludePrevTxMetadata(isSigned, isMultisig) {
 		// Include prevTx metadata for next signer (multisig or not yet fully signed)
-		content := bchutil.FormatSignedTxContent(signedHex, prevTxs)
+		content := bchshared.FormatSignedTxContent(signedHex, prevTxs)
 		generatedFileName, err = u.txFileRepo.WriteHexFile(basePath, content)
 	} else {
 		// For fully signed single-sig transactions, just write the hex
@@ -135,7 +135,7 @@ func (u *signTransactionUseCase) Sign(
 // BCH uses SIGHASH_FORKID (0x41) which is handled internally by the BCH node.
 func (u *signTransactionUseCase) sign(
 	txHex string,
-	prevTxs []bchutil.PrevTx,
+	prevTxs []bchshared.PrevTx,
 	actionType domainTx.ActionType,
 ) (string, bool, error) {
 	// Infer sender account from action type
@@ -160,7 +160,7 @@ func (u *signTransactionUseCase) sign(
 	}
 
 	// Convert prevTxs to DTO format
-	dtoPrevTxs := bchutil.ConvertPrevTxsToDTO(prevTxs)
+	dtoPrevTxs := bchshared.ConvertPrevTxsToDTO(prevTxs)
 
 	// Sign raw transaction with WIF keys
 	// BCH nodes handle SIGHASH_FORKID internally

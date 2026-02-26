@@ -8,7 +8,7 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -40,26 +40,26 @@ func (_m *MockTxSigner) EXPECT() *MockTxSigner_Expecter {
 }
 
 // SignTxWithPrivateKey provides a mock function for the type MockTxSigner
-func (_mock *MockTxSigner) SignTxWithPrivateKey(rawTx *ethereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int) (*ethereum.RawTx, error) {
+func (_mock *MockTxSigner) SignTxWithPrivateKey(rawTx *eth.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int) (*eth.RawTx, error) {
 	ret := _mock.Called(rawTx, privKey, chainID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SignTxWithPrivateKey")
 	}
 
-	var r0 *ethereum.RawTx
+	var r0 *eth.RawTx
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*ethereum.RawTx, *ecdsa.PrivateKey, *big.Int) (*ethereum.RawTx, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*eth.RawTx, *ecdsa.PrivateKey, *big.Int) (*eth.RawTx, error)); ok {
 		return returnFunc(rawTx, privKey, chainID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*ethereum.RawTx, *ecdsa.PrivateKey, *big.Int) *ethereum.RawTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(*eth.RawTx, *ecdsa.PrivateKey, *big.Int) *eth.RawTx); ok {
 		r0 = returnFunc(rawTx, privKey, chainID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.RawTx)
+			r0 = ret.Get(0).(*eth.RawTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*ethereum.RawTx, *ecdsa.PrivateKey, *big.Int) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(*eth.RawTx, *ecdsa.PrivateKey, *big.Int) error); ok {
 		r1 = returnFunc(rawTx, privKey, chainID)
 	} else {
 		r1 = ret.Error(1)
@@ -73,18 +73,18 @@ type MockTxSigner_SignTxWithPrivateKey_Call struct {
 }
 
 // SignTxWithPrivateKey is a helper method to define mock.On call
-//   - rawTx *ethereum.RawTx
+//   - rawTx *eth.RawTx
 //   - privKey *ecdsa.PrivateKey
 //   - chainID *big.Int
 func (_e *MockTxSigner_Expecter) SignTxWithPrivateKey(rawTx interface{}, privKey interface{}, chainID interface{}) *MockTxSigner_SignTxWithPrivateKey_Call {
 	return &MockTxSigner_SignTxWithPrivateKey_Call{Call: _e.mock.On("SignTxWithPrivateKey", rawTx, privKey, chainID)}
 }
 
-func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Run(run func(rawTx *ethereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int)) *MockTxSigner_SignTxWithPrivateKey_Call {
+func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Run(run func(rawTx *eth.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int)) *MockTxSigner_SignTxWithPrivateKey_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *ethereum.RawTx
+		var arg0 *eth.RawTx
 		if args[0] != nil {
-			arg0 = args[0].(*ethereum.RawTx)
+			arg0 = args[0].(*eth.RawTx)
 		}
 		var arg1 *ecdsa.PrivateKey
 		if args[1] != nil {
@@ -103,12 +103,12 @@ func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Run(run func(rawTx *ethereum.R
 	return _c
 }
 
-func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Return(rawTx1 *ethereum.RawTx, err error) *MockTxSigner_SignTxWithPrivateKey_Call {
+func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Return(rawTx1 *eth.RawTx, err error) *MockTxSigner_SignTxWithPrivateKey_Call {
 	_c.Call.Return(rawTx1, err)
 	return _c
 }
 
-func (_c *MockTxSigner_SignTxWithPrivateKey_Call) RunAndReturn(run func(rawTx *ethereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int) (*ethereum.RawTx, error)) *MockTxSigner_SignTxWithPrivateKey_Call {
+func (_c *MockTxSigner_SignTxWithPrivateKey_Call) RunAndReturn(run func(rawTx *eth.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int) (*eth.RawTx, error)) *MockTxSigner_SignTxWithPrivateKey_Call {
 	_c.Call.Return(run)
 	return _c
 }

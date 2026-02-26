@@ -2,17 +2,17 @@ package watch
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
 // ETHDetailTXRepositorier is ETHDetailTXRepository interface
 type ETHDetailTXRepositorier interface {
-	GetOne(id int64) (*domainEth.ETHDetailTx, error)
-	GetAllByTxID(id int64) ([]*domainEth.ETHDetailTx, error)
+	GetOne(id int64) (*domainETH.ETHDetailTx, error)
+	GetAllByTxID(id int64) ([]*domainETH.ETHDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *domainEth.ETHDetailTx) error
-	InsertBulk(txItems []*domainEth.ETHDetailTx) error
+	Insert(txItem *domainETH.ETHDetailTx) error
+	InsertBulk(txItems []*domainETH.ETHDetailTx) error
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)

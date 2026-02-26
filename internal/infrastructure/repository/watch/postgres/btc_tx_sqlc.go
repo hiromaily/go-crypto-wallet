@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
@@ -27,13 +27,13 @@ func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode
 }
 
 // convertToBtcTransaction converts sqlcgen.BtcTx to domain.BtcTransaction entity
-func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BTCTransaction, error) {
+func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBTC.BTCTransaction, error) {
 	currentTxType, err := domainTx.TxTypeFromInt8(int8(sqlcTx.CurrentTxType))
 	if err != nil {
 		return nil, fmt.Errorf("invalid tx type in database: %w", err)
 	}
 
-	tx := &domainBitcoin.BTCTransaction{
+	tx := &domainBTC.BTCTransaction{
 		ID:                sqlcTx.ID,
 		CoinTypeCode:      domainCoin.CoinTypeCode(sqlcTx.Coin),
 		ActionType:        domainTx.ActionType(sqlcTx.Action),
@@ -57,7 +57,7 @@ func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BTCTransacti
 }
 
 // GetOne returns one record by ID
-func (r *BTCTxRepositorySqlc) GetOne(id int64) (*domainBitcoin.BTCTransaction, error) {
+func (r *BTCTxRepositorySqlc) GetOne(id int64) (*domainBTC.BTCTransaction, error) {
 	ctx := context.Background()
 
 	btcTx, err := r.queries.GetBtcTxByID(ctx, id)
@@ -119,7 +119,7 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType domainTx.ActionType, txTy
 // InsertUnsignedTx inserts records
 func (r *BTCTxRepositorySqlc) InsertUnsignedTx(
 	actionType domainTx.ActionType,
-	txItem *domainBitcoin.BTCTransaction,
+	txItem *domainBTC.BTCTransaction,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -152,7 +152,7 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(
 }
 
 // Update updates by domain.BtcTransaction (entire update)
-func (r *BTCTxRepositorySqlc) Update(txItem *domainBitcoin.BTCTransaction) (int64, error) {
+func (r *BTCTxRepositorySqlc) Update(txItem *domainBTC.BTCTransaction) (int64, error) {
 	ctx := context.Background()
 
 	var unsignedUpdatedAt, sentUpdatedAt sql.NullTime

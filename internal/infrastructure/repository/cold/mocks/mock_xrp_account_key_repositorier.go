@@ -9,7 +9,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	mock "github.com/stretchr/testify/mock"
 )
 

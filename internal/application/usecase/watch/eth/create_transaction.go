@@ -14,7 +14,7 @@ import (
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -224,7 +224,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	if err != nil {
 		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
-	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, domainEthereum.QuantityTagLatest)
+	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, domainETH.QuantityTagLatest)
 	if err != nil {
 		return "", fmt.Errorf("fail to call eth.GetBalance(sender): %w", err)
 	}
@@ -272,7 +272,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	if err != nil {
 		return "", fmt.Errorf("fail to create ETHDetailTx: %w", err)
 	}
-	txDetailItems := []*domainEthereum.ETHDetailTx{txDetailItem}
+	txDetailItems := []*domainETH.ETHDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -302,7 +302,7 @@ type userPayment struct {
 func (u *createTransactionUseCase) getUserAmounts(
 	ctx context.Context,
 	sender domainAccount.AccountType,
-) ([]domainEthereum.UserAmount, error) {
+) ([]domainETH.UserAmount, error) {
 	// get addresses for client account
 	addrs, err := u.addrRepo.GetAll(sender)
 	if err != nil {
@@ -310,20 +310,20 @@ func (u *createTransactionUseCase) getUserAmounts(
 	}
 
 	// target addresses
-	var userAmounts []domainEthereum.UserAmount
+	var userAmounts []domainETH.UserAmount
 
 	// address list for client
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		var balance *big.Int
-		balance, err = u.ethClient.GetBalance(ctx, addr.WalletAddress, domainEthereum.QuantityTagLatest)
+		balance, err = u.ethClient.GetBalance(ctx, addr.WalletAddress, domainETH.QuantityTagLatest)
 		if err != nil {
 			logger.Warn("fail to call .GetBalance()",
 				"address", addr.WalletAddress,
 				"error", err,
 			)
 		} else if balance.Uint64() != 0 {
-			userAmounts = append(userAmounts, domainEthereum.UserAmount{
+			userAmounts = append(userAmounts, domainETH.UserAmount{
 				Address: addr.WalletAddress,
 				Amount:  balance.Uint64(),
 			})
@@ -336,8 +336,8 @@ func (u *createTransactionUseCase) getUserAmounts(
 func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
-	userAmounts []domainEthereum.UserAmount,
-) ([]string, []*domainEthereum.ETHDetailTx, error) {
+	userAmounts []domainETH.UserAmount,
+) ([]string, []*domainETH.ETHDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -348,10 +348,10 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*domainEthereum.ETHDetailTx, 0, len(userAmounts))
+	txDetailItems := make([]*domainETH.ETHDetailTx, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		var rawTx *domainEthereum.RawTx
+		var rawTx *domainETH.RawTx
 		var txParams *apieth.TxCreateParams
 		rawTx, txParams, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
@@ -372,7 +372,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create domain entity ETHDetailTx from DTO
-		var txDetailItem *domainEthereum.ETHDetailTx
+		var txDetailItem *domainETH.ETHDetailTx
 		txDetailItem, err = u.createETHDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeDeposit)
 		if err != nil {
 			return nil, nil, fmt.Errorf("fail to create ETHDetailTx: %w", err)
@@ -436,7 +436,7 @@ func (u *createTransactionUseCase) validateAmount(
 	totalAmount *big.Int,
 ) error {
 	// check sender's total balance
-	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, domainEthereum.QuantityTagPending)
+	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, domainETH.QuantityTagPending)
 	if err != nil {
 		return fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -452,9 +452,9 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *domainAddress.Address,
-) ([]string, []*domainEthereum.ETHDetailTx, error) {
+) ([]string, []*domainETH.ETHDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*domainEthereum.ETHDetailTx, 0, len(userPayments))
+	txDetailItems := make([]*domainETH.ETHDetailTx, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
@@ -488,7 +488,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*domainEthereum.ETHDetailTx,
+	txDetailItems []*domainETH.ETHDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
@@ -567,10 +567,10 @@ func (*createTransactionUseCase) createETHDetailTx(
 	sender, receiver domainAccount.AccountType,
 	rawTxHex string,
 	_ domainTx.ActionType,
-) (*domainEthereum.ETHDetailTx, error) {
+) (*domainETH.ETHDetailTx, error) {
 	// Create domain entity from DTO
 	// Note: CurrentTxType is set to TxTypeUnsigned since we're creating unsigned transactions
-	txDetailItem, err := domainEthereum.NewETHDetailTx(
+	txDetailItem, err := domainETH.NewETHDetailTx(
 		0, // TxID - will be set when saving to DB
 		txParams.UUID,
 		domainTx.TxTypeUnsigned,

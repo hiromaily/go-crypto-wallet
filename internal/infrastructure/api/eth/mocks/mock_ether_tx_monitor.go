@@ -8,7 +8,7 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -106,7 +106,7 @@ func (_c *MockEtherTxMonitor_GetConfirmation_Call) RunAndReturn(run func(ctx con
 }
 
 // GetTotalBalance provides a mock function for the type MockEtherTxMonitor
-func (_mock *MockEtherTxMonitor) GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []ethereum.UserAmount) {
+func (_mock *MockEtherTxMonitor) GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []eth.UserAmount) {
 	ret := _mock.Called(ctx, addrs)
 
 	if len(ret) == 0 {
@@ -114,8 +114,8 @@ func (_mock *MockEtherTxMonitor) GetTotalBalance(ctx context.Context, addrs []st
 	}
 
 	var r0 *big.Int
-	var r1 []ethereum.UserAmount
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []string) (*big.Int, []ethereum.UserAmount)); ok {
+	var r1 []eth.UserAmount
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []string) (*big.Int, []eth.UserAmount)); ok {
 		return returnFunc(ctx, addrs)
 	}
 	if returnFunc, ok := ret.Get(0).(func(context.Context, []string) *big.Int); ok {
@@ -125,11 +125,11 @@ func (_mock *MockEtherTxMonitor) GetTotalBalance(ctx context.Context, addrs []st
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, []string) []ethereum.UserAmount); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, []string) []eth.UserAmount); ok {
 		r1 = returnFunc(ctx, addrs)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).([]ethereum.UserAmount)
+			r1 = ret.Get(1).([]eth.UserAmount)
 		}
 	}
 	return r0, r1
@@ -165,12 +165,12 @@ func (_c *MockEtherTxMonitor_GetTotalBalance_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *MockEtherTxMonitor_GetTotalBalance_Call) Return(intParam *big.Int, userAmounts []ethereum.UserAmount) *MockEtherTxMonitor_GetTotalBalance_Call {
+func (_c *MockEtherTxMonitor_GetTotalBalance_Call) Return(intParam *big.Int, userAmounts []eth.UserAmount) *MockEtherTxMonitor_GetTotalBalance_Call {
 	_c.Call.Return(intParam, userAmounts)
 	return _c
 }
 
-func (_c *MockEtherTxMonitor_GetTotalBalance_Call) RunAndReturn(run func(ctx context.Context, addrs []string) (*big.Int, []ethereum.UserAmount)) *MockEtherTxMonitor_GetTotalBalance_Call {
+func (_c *MockEtherTxMonitor_GetTotalBalance_Call) RunAndReturn(run func(ctx context.Context, addrs []string) (*big.Int, []eth.UserAmount)) *MockEtherTxMonitor_GetTotalBalance_Call {
 	_c.Call.Return(run)
 	return _c
 }

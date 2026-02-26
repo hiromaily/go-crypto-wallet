@@ -11,7 +11,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -714,15 +714,15 @@ func ToMultisigAddress(result *AddMultisigAddressResult) *dtobtc.MultisigAddress
 
 // FromAddressType converts Bitcoin Core RPC AddressType to user-facing AddrType
 // Note: Converts "bech32m" (Bitcoin Core value) to "taproot" (user-facing value)
-func FromAddressType(addrType domainBitcoin.AddressType) domainAddress.AddrType {
+func FromAddressType(addrType domainBTC.AddressType) domainAddress.AddrType {
 	switch addrType {
-	case domainBitcoin.AddressTypeLegacy:
+	case domainBTC.AddressTypeLegacy:
 		return domainAddress.AddrTypeLegacy
-	case domainBitcoin.AddressTypeP2SHSegwit:
+	case domainBTC.AddressTypeP2SHSegwit:
 		return domainAddress.AddrTypeP2shSegwit
-	case domainBitcoin.AddressTypeBech32:
+	case domainBTC.AddressTypeBech32:
 		return domainAddress.AddrTypeBech32
-	case domainBitcoin.AddressTypeTaproot: // "bech32m" -> "taproot"
+	case domainBTC.AddressTypeTaproot: // "bech32m" -> "taproot"
 		return domainAddress.AddrTypeTaproot
 	default:
 		// This indicates a programming error (unhandled domain type).
@@ -733,36 +733,36 @@ func FromAddressType(addrType domainBitcoin.AddressType) domainAddress.AddrType 
 
 // ToAddressType converts user-facing AddrType to Bitcoin Core RPC AddressType
 // Note: Converts "taproot" (user-facing value) to "bech32m" (Bitcoin Core value)
-func ToAddressType(addrType domainAddress.AddrType) domainBitcoin.AddressType {
+func ToAddressType(addrType domainAddress.AddrType) domainBTC.AddressType {
 	switch addrType {
 	case domainAddress.AddrTypeLegacy:
-		return domainBitcoin.AddressTypeLegacy
+		return domainBTC.AddressTypeLegacy
 	case domainAddress.AddrTypeP2shSegwit:
-		return domainBitcoin.AddressTypeP2SHSegwit
+		return domainBTC.AddressTypeP2SHSegwit
 	case domainAddress.AddrTypeBech32:
-		return domainBitcoin.AddressTypeBech32
+		return domainBTC.AddressTypeBech32
 	case domainAddress.AddrTypeTaproot: // "taproot" -> "bech32m"
-		return domainBitcoin.AddressTypeTaproot
+		return domainBTC.AddressTypeTaproot
 	case domainAddress.AddrTypeBCHCashAddr:
 		// BCH uses legacy address format in domain model
-		return domainBitcoin.AddressTypeLegacy
+		return domainBTC.AddressTypeLegacy
 	case domainAddress.AddrTypeETH:
 		// ETH not supported in Bitcoin domain
-		return domainBitcoin.AddressTypeLegacy
+		return domainBTC.AddressTypeLegacy
 	default:
 		// Log warning for unknown infrastructure types to improve observability
 		logger.Warn("unknown infrastructure address type, defaulting to legacy",
 			"address_type", addrType)
-		return domainBitcoin.AddressTypeLegacy
+		return domainBTC.AddressTypeLegacy
 	}
 }
 
 // ToBTCVersion converts infrastructure BTCVersion to domain Version
-func ToBTCVersion(ver BTCVersion) domainBitcoin.Version {
-	return domainBitcoin.Version(ver)
+func ToBTCVersion(ver BTCVersion) domainBTC.Version {
+	return domainBTC.Version(ver)
 }
 
 // FromBTCVersion converts domain Version to infrastructure BTCVersion
-func FromBTCVersion(ver domainBitcoin.Version) BTCVersion {
+func FromBTCVersion(ver domainBTC.Version) BTCVersion {
 	return BTCVersion(ver)
 }

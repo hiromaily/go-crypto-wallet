@@ -1,4 +1,4 @@
-package bitcoin
+package btc
 
 // Version represents Bitcoin Core version
 type Version int

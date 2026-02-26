@@ -11,7 +11,7 @@ import (
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
@@ -76,7 +76,7 @@ func (u *createMultisigTxUseCase) Execute(
 
 	// Prepare the transaction (Payment for now)
 	instructions := &dtoxrp.Instructions{
-		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
+		MaxLedgerVersionOffset: domainXRP.MaxLedgerVersionOffset,
 	}
 
 	_, txJSON, err := u.xrper.CreateRawTransaction(
@@ -103,7 +103,7 @@ func (u *createMultisigTxUseCase) Execute(
 	}
 
 	// Create pending multisig record
-	pendingMultisig, err := domainXrp.NewXRPPendingMultisig(
+	pendingMultisig, err := domainXRP.NewXRPPendingMultisig(
 		uid.String(),
 		input.AccountAddress,
 		txJSON,

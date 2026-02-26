@@ -16,9 +16,9 @@ import (
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 )
 
 // MockXRPSignClient is a mock implementation of xrpSignClient for testing
@@ -55,12 +55,12 @@ func (m *MockXRPAccountKeyRepo) GetAllAddrStatus(
 	ctx context.Context,
 	accountType domainAccount.AccountType,
 	addrStatus domainAddress.AddrStatus,
-) ([]*domainXrp.XRPAccountKey, error) {
+) ([]*domainXRP.XRPAccountKey, error) {
 	args := m.Called(ctx, accountType, addrStatus)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]*domainXrp.XRPAccountKey), args.Error(1)
+	return args.Get(0).([]*domainXRP.XRPAccountKey), args.Error(1)
 }
 
 func (m *MockXRPAccountKeyRepo) GetSecret(
@@ -72,7 +72,7 @@ func (m *MockXRPAccountKeyRepo) GetSecret(
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockXRPAccountKeyRepo) InsertBulk(ctx context.Context, items []*domainXrp.XRPAccountKey) error {
+func (m *MockXRPAccountKeyRepo) InsertBulk(ctx context.Context, items []*domainXRP.XRPAccountKey) error {
 	args := m.Called(ctx, items)
 	return args.Error(0)
 }

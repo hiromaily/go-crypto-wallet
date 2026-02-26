@@ -8,8 +8,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	eth0 "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -41,31 +41,31 @@ func (_m *MockERC20er) EXPECT() *MockERC20er_Expecter {
 }
 
 // CreateRawTransaction provides a mock function for the type MockERC20er
-func (_mock *MockERC20er) CreateRawTransaction(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*ethereum.RawTx, *eth.TxCreateParams, error) {
+func (_mock *MockERC20er) CreateRawTransaction(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *eth0.TxCreateParams, error) {
 	ret := _mock.Called(ctx, fromAddr, toAddr, amount, additionalNonce)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateRawTransaction")
 	}
 
-	var r0 *ethereum.RawTx
-	var r1 *eth.TxCreateParams
+	var r0 *eth.RawTx
+	var r1 *eth0.TxCreateParams
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) (*ethereum.RawTx, *eth.TxCreateParams, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) (*eth.RawTx, *eth0.TxCreateParams, error)); ok {
 		return returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) *ethereum.RawTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint64, int) *eth.RawTx); ok {
 		r0 = returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.RawTx)
+			r0 = ret.Get(0).(*eth.RawTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint64, int) *eth.TxCreateParams); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint64, int) *eth0.TxCreateParams); ok {
 		r1 = returnFunc(ctx, fromAddr, toAddr, amount, additionalNonce)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*eth.TxCreateParams)
+			r1 = ret.Get(1).(*eth0.TxCreateParams)
 		}
 	}
 	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, uint64, int) error); ok {
@@ -124,12 +124,12 @@ func (_c *MockERC20er_CreateRawTransaction_Call) Run(run func(ctx context.Contex
 	return _c
 }
 
-func (_c *MockERC20er_CreateRawTransaction_Call) Return(rawTx *ethereum.RawTx, txCreateParams *eth.TxCreateParams, err error) *MockERC20er_CreateRawTransaction_Call {
+func (_c *MockERC20er_CreateRawTransaction_Call) Return(rawTx *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockERC20er_CreateRawTransaction_Call {
 	_c.Call.Return(rawTx, txCreateParams, err)
 	return _c
 }
 
-func (_c *MockERC20er_CreateRawTransaction_Call) RunAndReturn(run func(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*ethereum.RawTx, *eth.TxCreateParams, error)) *MockERC20er_CreateRawTransaction_Call {
+func (_c *MockERC20er_CreateRawTransaction_Call) RunAndReturn(run func(ctx context.Context, fromAddr string, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *eth0.TxCreateParams, error)) *MockERC20er_CreateRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -188,7 +188,7 @@ func (_c *MockERC20er_FloatToBigInt_Call) RunAndReturn(run func(v float64) *big.
 }
 
 // GetBalance provides a mock function for the type MockERC20er
-func (_mock *MockERC20er) GetBalance(ctx context.Context, hexAddr string, quantityTag ethereum.QuantityTag) (*big.Int, error) {
+func (_mock *MockERC20er) GetBalance(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error) {
 	ret := _mock.Called(ctx, hexAddr, quantityTag)
 
 	if len(ret) == 0 {
@@ -197,17 +197,17 @@ func (_mock *MockERC20er) GetBalance(ctx context.Context, hexAddr string, quanti
 
 	var r0 *big.Int
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ethereum.QuantityTag) (*big.Int, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, eth.QuantityTag) (*big.Int, error)); ok {
 		return returnFunc(ctx, hexAddr, quantityTag)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ethereum.QuantityTag) *big.Int); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, eth.QuantityTag) *big.Int); ok {
 		r0 = returnFunc(ctx, hexAddr, quantityTag)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*big.Int)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, ethereum.QuantityTag) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, eth.QuantityTag) error); ok {
 		r1 = returnFunc(ctx, hexAddr, quantityTag)
 	} else {
 		r1 = ret.Error(1)
@@ -223,12 +223,12 @@ type MockERC20er_GetBalance_Call struct {
 // GetBalance is a helper method to define mock.On call
 //   - ctx context.Context
 //   - hexAddr string
-//   - quantityTag ethereum.QuantityTag
+//   - quantityTag eth.QuantityTag
 func (_e *MockERC20er_Expecter) GetBalance(ctx interface{}, hexAddr interface{}, quantityTag interface{}) *MockERC20er_GetBalance_Call {
 	return &MockERC20er_GetBalance_Call{Call: _e.mock.On("GetBalance", ctx, hexAddr, quantityTag)}
 }
 
-func (_c *MockERC20er_GetBalance_Call) Run(run func(ctx context.Context, hexAddr string, quantityTag ethereum.QuantityTag)) *MockERC20er_GetBalance_Call {
+func (_c *MockERC20er_GetBalance_Call) Run(run func(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag)) *MockERC20er_GetBalance_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -238,9 +238,9 @@ func (_c *MockERC20er_GetBalance_Call) Run(run func(ctx context.Context, hexAddr
 		if args[1] != nil {
 			arg1 = args[1].(string)
 		}
-		var arg2 ethereum.QuantityTag
+		var arg2 eth.QuantityTag
 		if args[2] != nil {
-			arg2 = args[2].(ethereum.QuantityTag)
+			arg2 = args[2].(eth.QuantityTag)
 		}
 		run(
 			arg0,
@@ -256,7 +256,7 @@ func (_c *MockERC20er_GetBalance_Call) Return(intParam *big.Int, err error) *Moc
 	return _c
 }
 
-func (_c *MockERC20er_GetBalance_Call) RunAndReturn(run func(ctx context.Context, hexAddr string, quantityTag ethereum.QuantityTag) (*big.Int, error)) *MockERC20er_GetBalance_Call {
+func (_c *MockERC20er_GetBalance_Call) RunAndReturn(run func(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)) *MockERC20er_GetBalance_Call {
 	_c.Call.Return(run)
 	return _c
 }

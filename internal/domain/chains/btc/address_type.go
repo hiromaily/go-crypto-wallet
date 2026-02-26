@@ -1,4 +1,4 @@
-package bitcoin
+package btc
 
 // AddressType represents Bitcoin address type for Bitcoin Core RPC communication
 type AddressType string

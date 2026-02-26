@@ -8,7 +8,7 @@ import (
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 )
 
 type submitMultisigTxUseCase struct {
@@ -50,7 +50,7 @@ func (u *submitMultisigTxUseCase) Execute(
 	}
 
 	// Check if transaction is ready for submission
-	if pendingTx.Status != domainXrp.MultisigStatusReady {
+	if pendingTx.Status != domainXRP.MultisigStatusReady {
 		return watchusecase.SubmitMultisigTxOutput{},
 			fmt.Errorf("transaction is not ready for submission (status: %s)", pendingTx.Status)
 	}

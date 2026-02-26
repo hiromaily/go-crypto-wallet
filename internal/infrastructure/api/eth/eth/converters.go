@@ -1,20 +1,20 @@
 package eth
 
 import (
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 )
 
 // ToDomainUserAmount converts infrastructure UserAmount to domain UserAmount.
-func ToDomainUserAmount(infra UserAmount) domainEthereum.UserAmount {
-	return domainEthereum.UserAmount{
+func ToDomainUserAmount(infra UserAmount) domainETH.UserAmount {
+	return domainETH.UserAmount{
 		Address: infra.Address,
 		Amount:  infra.Amount,
 	}
 }
 
 // ToDomainUserAmounts converts a slice of infrastructure UserAmount to domain UserAmount.
-func ToDomainUserAmounts(infra []UserAmount) []domainEthereum.UserAmount {
-	result := make([]domainEthereum.UserAmount, len(infra))
+func ToDomainUserAmounts(infra []UserAmount) []domainETH.UserAmount {
+	result := make([]domainETH.UserAmount, len(infra))
 	for i, ua := range infra {
 		result[i] = ToDomainUserAmount(ua)
 	}
@@ -22,21 +22,21 @@ func ToDomainUserAmounts(infra []UserAmount) []domainEthereum.UserAmount {
 }
 
 // FromDomainQuantityTag converts domain QuantityTag to infrastructure QuantityTag.
-func FromDomainQuantityTag(domain domainEthereum.QuantityTag) QuantityTag {
+func FromDomainQuantityTag(domain domainETH.QuantityTag) QuantityTag {
 	return QuantityTag(domain)
 }
 
 // ToDomainQuantityTag converts infrastructure QuantityTag to domain QuantityTag.
-func ToDomainQuantityTag(infra QuantityTag) domainEthereum.QuantityTag {
-	return domainEthereum.QuantityTag(infra)
+func ToDomainQuantityTag(infra QuantityTag) domainETH.QuantityTag {
+	return domainETH.QuantityTag(infra)
 }
 
 // ToDomainBlockInfo converts infrastructure BlockInfo to domain BlockInfo.
-func ToDomainBlockInfo(infra *BlockInfo) *domainEthereum.BlockInfo {
+func ToDomainBlockInfo(infra *BlockInfo) *domainETH.BlockInfo {
 	if infra == nil {
 		return nil
 	}
-	return &domainEthereum.BlockInfo{
+	return &domainETH.BlockInfo{
 		Number:           infra.Number,
 		Hash:             infra.Hash,
 		ParentHash:       infra.ParentHash,
@@ -60,11 +60,11 @@ func ToDomainBlockInfo(infra *BlockInfo) *domainEthereum.BlockInfo {
 }
 
 // ToDomainResponseGetTransaction converts infrastructure ResponseGetTransaction to domain.
-func ToDomainResponseGetTransaction(infra *ResponseGetTransaction) *domainEthereum.ResponseGetTransaction {
+func ToDomainResponseGetTransaction(infra *ResponseGetTransaction) *domainETH.ResponseGetTransaction {
 	if infra == nil {
 		return nil
 	}
-	return &domainEthereum.ResponseGetTransaction{
+	return &domainETH.ResponseGetTransaction{
 		BlockHash:        infra.BlockHash,
 		BlockNumber:      infra.BlockNumber,
 		From:             infra.From,
@@ -85,11 +85,11 @@ func ToDomainResponseGetTransaction(infra *ResponseGetTransaction) *domainEthere
 // ToDomainResponseGetTransactionReceipt converts infrastructure ResponseGetTransactionReceipt to domain.
 func ToDomainResponseGetTransactionReceipt(
 	infra *ResponseGetTransactionReceipt,
-) *domainEthereum.ResponseGetTransactionReceipt {
+) *domainETH.ResponseGetTransactionReceipt {
 	if infra == nil {
 		return nil
 	}
-	return &domainEthereum.ResponseGetTransactionReceipt{
+	return &domainETH.ResponseGetTransactionReceipt{
 		TransactionHash:   infra.TransactionHash,
 		TransactionIndex:  infra.TransactionIndex,
 		BlockHash:         infra.BlockHash,
@@ -106,11 +106,11 @@ func ToDomainResponseGetTransactionReceipt(
 }
 
 // ToDomainResponseSyncing converts infrastructure ResponseSyncing to domain.
-func ToDomainResponseSyncing(infra *ResponseSyncing) *domainEthereum.ResponseSyncing {
+func ToDomainResponseSyncing(infra *ResponseSyncing) *domainETH.ResponseSyncing {
 	if infra == nil {
 		return nil
 	}
-	return &domainEthereum.ResponseSyncing{
+	return &domainETH.ResponseSyncing{
 		StartingBlock:       infra.StartingBlock,
 		HighestBlock:        infra.HighestBlock,
 		CurrentBlock:        infra.CurrentBlock,

@@ -9,8 +9,8 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 )
 
 // NonceRepositorySqlc implements NonceRepository using SQLC-generated code.

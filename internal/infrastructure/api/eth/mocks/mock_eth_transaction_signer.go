@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -37,26 +37,26 @@ func (_m *MockETHTransactionSigner) EXPECT() *MockETHTransactionSigner_Expecter 
 }
 
 // SignOnRawTransaction provides a mock function for the type MockETHTransactionSigner
-func (_mock *MockETHTransactionSigner) SignOnRawTransaction(rawTx *ethereum.RawTx, passphrase string) (*ethereum.RawTx, error) {
+func (_mock *MockETHTransactionSigner) SignOnRawTransaction(rawTx *eth.RawTx, passphrase string) (*eth.RawTx, error) {
 	ret := _mock.Called(rawTx, passphrase)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SignOnRawTransaction")
 	}
 
-	var r0 *ethereum.RawTx
+	var r0 *eth.RawTx
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*ethereum.RawTx, string) (*ethereum.RawTx, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*eth.RawTx, string) (*eth.RawTx, error)); ok {
 		return returnFunc(rawTx, passphrase)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*ethereum.RawTx, string) *ethereum.RawTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(*eth.RawTx, string) *eth.RawTx); ok {
 		r0 = returnFunc(rawTx, passphrase)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.RawTx)
+			r0 = ret.Get(0).(*eth.RawTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*ethereum.RawTx, string) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(*eth.RawTx, string) error); ok {
 		r1 = returnFunc(rawTx, passphrase)
 	} else {
 		r1 = ret.Error(1)
@@ -70,17 +70,17 @@ type MockETHTransactionSigner_SignOnRawTransaction_Call struct {
 }
 
 // SignOnRawTransaction is a helper method to define mock.On call
-//   - rawTx *ethereum.RawTx
+//   - rawTx *eth.RawTx
 //   - passphrase string
 func (_e *MockETHTransactionSigner_Expecter) SignOnRawTransaction(rawTx interface{}, passphrase interface{}) *MockETHTransactionSigner_SignOnRawTransaction_Call {
 	return &MockETHTransactionSigner_SignOnRawTransaction_Call{Call: _e.mock.On("SignOnRawTransaction", rawTx, passphrase)}
 }
 
-func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Run(run func(rawTx *ethereum.RawTx, passphrase string)) *MockETHTransactionSigner_SignOnRawTransaction_Call {
+func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Run(run func(rawTx *eth.RawTx, passphrase string)) *MockETHTransactionSigner_SignOnRawTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *ethereum.RawTx
+		var arg0 *eth.RawTx
 		if args[0] != nil {
-			arg0 = args[0].(*ethereum.RawTx)
+			arg0 = args[0].(*eth.RawTx)
 		}
 		var arg1 string
 		if args[1] != nil {
@@ -94,12 +94,12 @@ func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Run(run func(rawTx
 	return _c
 }
 
-func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Return(rawTx1 *ethereum.RawTx, err error) *MockETHTransactionSigner_SignOnRawTransaction_Call {
+func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Return(rawTx1 *eth.RawTx, err error) *MockETHTransactionSigner_SignOnRawTransaction_Call {
 	_c.Call.Return(rawTx1, err)
 	return _c
 }
 
-func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) RunAndReturn(run func(rawTx *ethereum.RawTx, passphrase string) (*ethereum.RawTx, error)) *MockETHTransactionSigner_SignOnRawTransaction_Call {
+func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) RunAndReturn(run func(rawTx *eth.RawTx, passphrase string) (*eth.RawTx, error)) *MockETHTransactionSigner_SignOnRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

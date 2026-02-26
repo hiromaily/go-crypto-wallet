@@ -10,7 +10,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 )
 
@@ -63,7 +63,7 @@ type BitcoinCompatible interface {
 	ConfirmationBlock() uint64
 	FeeRangeMax() float64
 	FeeRangeMin() float64
-	Version() domainBitcoin.Version
+	Version() domainBTC.Version
 	CoinTypeCode() domainCoin.CoinTypeCode
 
 	// fee.go
@@ -87,7 +87,7 @@ type BitcoinCompatible interface {
 
 	// multisig.go (P2SH works for both, but BCH should not use P2WSH or P2TR address types)
 	AddMultisigAddress(
-		requiredSigs int, addresses []string, accountName string, addressType domainBitcoin.AddressType,
+		requiredSigs int, addresses []string, accountName string, addressType domainBTC.AddressType,
 	) (*dtobtc.MultisigAddress, error)
 
 	// network.go

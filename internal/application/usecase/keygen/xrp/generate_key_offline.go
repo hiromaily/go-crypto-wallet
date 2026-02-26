@@ -14,9 +14,9 @@ import (
 
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -96,7 +96,7 @@ func (u *offlineGenerateKeyUseCase) Generate(
 	keyGen := xrpkg.NewKeyGenerator(u.keyAlgorithm)
 
 	// Generate XRP keys
-	items := make([]*domainXrp.XRPAccountKey, 0, len(walletKeys))
+	items := make([]*domainXRP.XRPAccountKey, 0, len(walletKeys))
 	for i, v := range walletKeys {
 		// Derive XRP key from the HD wallet private key
 		hdPrivKey, err := u.extractPrivateKeyBytes(v)
@@ -114,7 +114,7 @@ func (u *offlineGenerateKeyUseCase) Generate(
 		keyType := u.convertAlgorithmToKeyType(keyPair.Algorithm)
 
 		// Create domain entity
-		xrpKey, err := domainXrp.NewXRPAccountKey(
+		xrpKey, err := domainXRP.NewXRPAccountKey(
 			u.coinTypeCode,
 			input.AccountType,
 			keyPair.ClassicAddress, // AccountID
@@ -169,14 +169,14 @@ func (*offlineGenerateKeyUseCase) extractPrivateKeyBytes(wk domainKey.WalletKey)
 	)
 }
 
-// convertAlgorithmToKeyType converts xrpkg.KeyAlgorithm to domainXrp.XRPKeyType.
-func (*offlineGenerateKeyUseCase) convertAlgorithmToKeyType(alg xrpkg.KeyAlgorithm) domainXrp.XRPKeyType {
+// convertAlgorithmToKeyType converts xrpkg.KeyAlgorithm to domainXRP.XRPKeyType.
+func (*offlineGenerateKeyUseCase) convertAlgorithmToKeyType(alg xrpkg.KeyAlgorithm) domainXRP.XRPKeyType {
 	switch alg {
 	case xrpkg.AlgorithmEd25519:
-		return domainXrp.XRPKeyTypeEd25519
+		return domainXRP.XRPKeyTypeEd25519
 	case xrpkg.AlgorithmSecp256k1:
-		return domainXrp.XRPKeyTypeSecp256k1
+		return domainXRP.XRPKeyTypeSecp256k1
 	default:
-		return domainXrp.XRPKeyTypeSecp256k1
+		return domainXRP.XRPKeyTypeSecp256k1
 	}
 }

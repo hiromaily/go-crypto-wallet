@@ -10,8 +10,8 @@ import (
 	"modernc.org/sqlite"
 	sqlitelib "modernc.org/sqlite/lib"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlite/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 )
 
 // NonceRepositorySqlc implements NonceRepository using SQLC-generated code.

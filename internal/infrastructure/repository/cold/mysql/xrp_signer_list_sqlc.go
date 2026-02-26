@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -23,8 +23,8 @@ func NewXRPSignerListRepositorySqlc(dbConn *sql.DB) *XRPSignerListRepositorySqlc
 }
 
 // convertToXRPSignerList converts sqlcgen.XrpSignerList to domain.XRPSignerList entity.
-func convertToXRPSignerList(sqlcList *sqlcgen.XrpSignerList) *domainXrp.XRPSignerList {
-	list := &domainXrp.XRPSignerList{
+func convertToXRPSignerList(sqlcList *sqlcgen.XrpSignerList) *domainXRP.XRPSignerList {
+	list := &domainXRP.XRPSignerList{
 		ID:           sqlcList.ID,
 		AccountID:    sqlcList.AccountID,
 		SignerQuorum: sqlcList.SignerQuorum,
@@ -47,7 +47,7 @@ func convertToXRPSignerList(sqlcList *sqlcgen.XrpSignerList) *domainXrp.XRPSigne
 // GetByAccountID returns the active signer list for an account
 func (r *XRPSignerListRepositorySqlc) GetByAccountID(
 	ctx context.Context, accountID string,
-) (*domainXrp.XRPSignerList, error) {
+) (*domainXRP.XRPSignerList, error) {
 	sqlcList, err := r.queries.GetXRPSignerListByAccountID(ctx, accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -62,7 +62,7 @@ func (r *XRPSignerListRepositorySqlc) GetByAccountID(
 // GetByID returns a signer list by its ID
 func (r *XRPSignerListRepositorySqlc) GetByID(
 	ctx context.Context, id int64,
-) (*domainXrp.XRPSignerList, error) {
+) (*domainXRP.XRPSignerList, error) {
 	sqlcList, err := r.queries.GetXRPSignerListByID(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -77,13 +77,13 @@ func (r *XRPSignerListRepositorySqlc) GetByID(
 // GetHistoryByAccountID returns all signer lists (active and inactive) for an account
 func (r *XRPSignerListRepositorySqlc) GetHistoryByAccountID(
 	ctx context.Context, accountID string,
-) ([]*domainXrp.XRPSignerList, error) {
+) ([]*domainXRP.XRPSignerList, error) {
 	sqlcLists, err := r.queries.GetXRPSignerListHistoryByAccountID(ctx, accountID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetXRPSignerListHistoryByAccountID(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPSignerList, 0, len(sqlcLists))
+	result := make([]*domainXRP.XRPSignerList, 0, len(sqlcLists))
 	for i := range sqlcLists {
 		result = append(result, convertToXRPSignerList(&sqlcLists[i]))
 	}
@@ -93,7 +93,7 @@ func (r *XRPSignerListRepositorySqlc) GetHistoryByAccountID(
 
 // Insert creates a new signer list record and returns the inserted ID
 func (r *XRPSignerListRepositorySqlc) Insert(
-	ctx context.Context, signerList *domainXrp.XRPSignerList,
+	ctx context.Context, signerList *domainXRP.XRPSignerList,
 ) (int64, error) {
 	params := sqlcgen.InsertXRPSignerListParams{
 		AccountID:    signerList.AccountID,

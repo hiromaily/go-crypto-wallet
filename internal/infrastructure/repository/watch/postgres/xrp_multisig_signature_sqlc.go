@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/postgres/sqlcgen"
 )
 
@@ -23,8 +23,8 @@ func NewXRPMultisigSignatureRepositorySqlc(dbConn *sql.DB) *XRPMultisigSignature
 }
 
 // convertToXRPMultisigSignature converts sqlcgen.XrpMultisigSignature to domain.XRPMultisigSignature entity.
-func convertToXRPMultisigSignature(sqlcSig *sqlcgen.XrpMultisigSignature) *domainXrp.XRPMultisigSignature {
-	sig := &domainXrp.XRPMultisigSignature{
+func convertToXRPMultisigSignature(sqlcSig *sqlcgen.XrpMultisigSignature) *domainXRP.XRPMultisigSignature {
+	sig := &domainXRP.XRPMultisigSignature{
 		ID:                sqlcSig.ID,
 		PendingMultisigID: sqlcSig.PendingMultisigID,
 		SignerAccount:     sqlcSig.SignerAccount,
@@ -42,7 +42,7 @@ func convertToXRPMultisigSignature(sqlcSig *sqlcgen.XrpMultisigSignature) *domai
 // GetByID returns a signature by its ID
 func (r *XRPMultisigSignatureRepositorySqlc) GetByID(
 	ctx context.Context, id int64,
-) (*domainXrp.XRPMultisigSignature, error) {
+) (*domainXRP.XRPMultisigSignature, error) {
 	sqlcSig, err := r.queries.GetXRPMultisigSignatureByID(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -57,13 +57,13 @@ func (r *XRPMultisigSignatureRepositorySqlc) GetByID(
 // GetByPendingID returns all signatures for a pending multi-sig transaction
 func (r *XRPMultisigSignatureRepositorySqlc) GetByPendingID(
 	ctx context.Context, pendingMultisigID int64,
-) ([]*domainXrp.XRPMultisigSignature, error) {
+) ([]*domainXRP.XRPMultisigSignature, error) {
 	sqlcSigs, err := r.queries.GetXRPMultisigSignaturesByPendingID(ctx, pendingMultisigID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetXRPMultisigSignaturesByPendingID(): %w", err)
 	}
 
-	result := make([]*domainXrp.XRPMultisigSignature, 0, len(sqlcSigs))
+	result := make([]*domainXRP.XRPMultisigSignature, 0, len(sqlcSigs))
 	for i := range sqlcSigs {
 		result = append(result, convertToXRPMultisigSignature(&sqlcSigs[i]))
 	}
@@ -74,7 +74,7 @@ func (r *XRPMultisigSignatureRepositorySqlc) GetByPendingID(
 // GetByPendingAndSigner returns a signature by pending ID and signer account
 func (r *XRPMultisigSignatureRepositorySqlc) GetByPendingAndSigner(
 	ctx context.Context, pendingMultisigID int64, signerAccount string,
-) (*domainXrp.XRPMultisigSignature, error) {
+) (*domainXRP.XRPMultisigSignature, error) {
 	params := sqlcgen.GetXRPMultisigSignatureByPendingAndSignerParams{
 		PendingMultisigID: pendingMultisigID,
 		SignerAccount:     signerAccount,
@@ -125,7 +125,7 @@ func (r *XRPMultisigSignatureRepositorySqlc) GetTotalWeight(
 
 // Insert creates a new signature and returns the inserted ID
 func (r *XRPMultisigSignatureRepositorySqlc) Insert(
-	ctx context.Context, signature *domainXrp.XRPMultisigSignature,
+	ctx context.Context, signature *domainXRP.XRPMultisigSignature,
 ) (int64, error) {
 	params := sqlcgen.InsertXRPMultisigSignatureParams{
 		PendingMultisigID: signature.PendingMultisigID,

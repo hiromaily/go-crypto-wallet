@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -222,24 +222,24 @@ func (_c *MockETHNodeAPIClient_NodeInfo_Call) RunAndReturn(run func(ctx context.
 }
 
 // Syncing provides a mock function for the type MockETHNodeAPIClient
-func (_mock *MockETHNodeAPIClient) Syncing(ctx context.Context) (*ethereum.ResponseSyncing, bool, error) {
+func (_mock *MockETHNodeAPIClient) Syncing(ctx context.Context) (*eth.ResponseSyncing, bool, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Syncing")
 	}
 
-	var r0 *ethereum.ResponseSyncing
+	var r0 *eth.ResponseSyncing
 	var r1 bool
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*ethereum.ResponseSyncing, bool, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*eth.ResponseSyncing, bool, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *ethereum.ResponseSyncing); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *eth.ResponseSyncing); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ethereum.ResponseSyncing)
+			r0 = ret.Get(0).(*eth.ResponseSyncing)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) bool); ok {
@@ -279,12 +279,12 @@ func (_c *MockETHNodeAPIClient_Syncing_Call) Run(run func(ctx context.Context)) 
 	return _c
 }
 
-func (_c *MockETHNodeAPIClient_Syncing_Call) Return(responseSyncing *ethereum.ResponseSyncing, b bool, err error) *MockETHNodeAPIClient_Syncing_Call {
+func (_c *MockETHNodeAPIClient_Syncing_Call) Return(responseSyncing *eth.ResponseSyncing, b bool, err error) *MockETHNodeAPIClient_Syncing_Call {
 	_c.Call.Return(responseSyncing, b, err)
 	return _c
 }
 
-func (_c *MockETHNodeAPIClient_Syncing_Call) RunAndReturn(run func(ctx context.Context) (*ethereum.ResponseSyncing, bool, error)) *MockETHNodeAPIClient_Syncing_Call {
+func (_c *MockETHNodeAPIClient_Syncing_Call) RunAndReturn(run func(ctx context.Context) (*eth.ResponseSyncing, bool, error)) *MockETHNodeAPIClient_Syncing_Call {
 	_c.Call.Return(run)
 	return _c
 }

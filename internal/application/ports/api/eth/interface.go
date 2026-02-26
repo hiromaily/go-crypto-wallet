@@ -21,8 +21,8 @@ import (
 	"github.com/ethereum/go-ethereum/p2p"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 )
 
 // TxCreateParams contains the parameters returned from transaction creation
@@ -56,7 +56,7 @@ type TxCreateParams struct {
 //   - EtherTxMonitor: Transaction monitoring
 type Ethereumer interface {
 	// balance
-	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
+	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainETH.UserAmount)
 	// client
 	BalanceAt(ctx context.Context, hexAddr string) (*big.Int, error)
 	SendRawTx(ctx context.Context, tx *types.Transaction) error
@@ -74,17 +74,17 @@ type Ethereumer interface {
 	NodeInfo(ctx context.Context) (*p2p.NodeInfo, error)
 	AdminPeers(ctx context.Context) ([]*p2p.PeerInfo, error)
 	// rpc_eth
-	Syncing(ctx context.Context) (*domainEthereum.ResponseSyncing, bool, error)
+	Syncing(ctx context.Context) (*domainETH.ResponseSyncing, bool, error)
 	ProtocolVersion(ctx context.Context) (uint64, error)
 	Coinbase(ctx context.Context) (string, error)
 	Accounts(ctx context.Context) ([]string, error)
 	BlockNumber(ctx context.Context) (*big.Int, error)
 	EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error)
-	GetBalance(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
-	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
+	GetBalance(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
+	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
 	GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
 	GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
-	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainEthereum.BlockInfo, error)
+	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainETH.BlockInfo, error)
 	// rpc_eth_gas
 	GasPrice(ctx context.Context) (*big.Int, error)
 	EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error)
@@ -94,8 +94,8 @@ type Ethereumer interface {
 	SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error)
 	SendRawTransaction(ctx context.Context, signedTx string) (string, error)
 	SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error)
-	GetTransactionByHash(ctx context.Context, hashTx string) (*domainEthereum.ResponseGetTransaction, error)
-	GetTransactionReceipt(ctx context.Context, hashTx string) (*domainEthereum.ResponseGetTransactionReceipt, error)
+	GetTransactionByHash(ctx context.Context, hashTx string) (*domainETH.ResponseGetTransaction, error)
+	GetTransactionReceipt(ctx context.Context, hashTx string) (*domainETH.ResponseGetTransactionReceipt, error)
 	// rpc_miner
 	StartMining(ctx context.Context) error
 	StopMining(ctx context.Context) error
@@ -117,15 +117,15 @@ type Ethereumer interface {
 	// transaction
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	) (*domainETH.RawTx, *TxCreateParams, error)
 	CreateRawTransactionEIP1559(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	) (*domainETH.RawTx, *TxCreateParams, error)
 	SupportsEIP1559(ctx context.Context) bool
-	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
+	SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase string) (*domainETH.RawTx, error)
 	SignTxWithPrivateKey(
-		rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
-	) (*domainEthereum.RawTx, error)
+		rawTx *domainETH.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+	) (*domainETH.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
 	// util
@@ -142,16 +142,16 @@ type Ethereumer interface {
 type ERC20er interface {
 	ValidateAddr(addr string) error
 	FloatToBigInt(v float64) *big.Int
-	GetBalance(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
+	GetBalance(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	) (*domainETH.RawTx, *TxCreateParams, error)
 }
 
 // EtherTxMonitor defines the interface for monitoring Ethereum transactions.
 // Used by watch wallet monitor-transaction use case.
 type EtherTxMonitor interface {
-	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
+	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainETH.UserAmount)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
 }
 
@@ -187,7 +187,7 @@ type ETHKeyAccessor interface {
 // ETHTransactionSigner signs raw Ethereum transactions using the local keystore.
 // Used by keygen and sign sign-transaction use cases.
 type ETHTransactionSigner interface {
-	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
+	SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase string) (*domainETH.RawTx, error)
 }
 
 // ETHTransactionSender broadcasts signed Ethereum transactions to the network.
@@ -209,7 +209,7 @@ type ETHNodeAPIClient interface {
 	ClientVersion(ctx context.Context) (string, error)
 	NetVersion(ctx context.Context) (uint16, error)
 	NodeInfo(ctx context.Context) (*p2p.NodeInfo, error)
-	Syncing(ctx context.Context) (*domainEthereum.ResponseSyncing, bool, error)
+	Syncing(ctx context.Context) (*domainETH.ResponseSyncing, bool, error)
 }
 
 // =============================================================================
@@ -264,10 +264,10 @@ type BalanceChecker interface {
 type TxCreator interface {
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	) (*domainETH.RawTx, *TxCreateParams, error)
 	CreateRawTransactionEIP1559(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *TxCreateParams, error)
+	) (*domainETH.RawTx, *TxCreateParams, error)
 	SupportsEIP1559(ctx context.Context) bool
 }
 
@@ -287,8 +287,8 @@ type GasEstimator interface {
 // operation without requiring an Ethereum node or keystore.
 type TxSigner interface {
 	SignTxWithPrivateKey(
-		rawTx *domainEthereum.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
-	) (*domainEthereum.RawTx, error)
+		rawTx *domainETH.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
+	) (*domainETH.RawTx, error)
 }
 
 // TxSender broadcasts signed transactions to the network.
@@ -301,7 +301,7 @@ type TxSender interface {
 // TxMonitor retrieves transaction status and confirmation count.
 // Used by watch wallet monitor-transaction use case.
 type TxMonitor interface {
-	GetTransactionReceipt(ctx context.Context, txHash string) (*domainEthereum.TransactionReceipt, error)
+	GetTransactionReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error)
 	GetConfirmation(ctx context.Context, txHash string) (uint64, error)
 }
 
