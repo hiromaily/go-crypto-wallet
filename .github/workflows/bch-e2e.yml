@@ -9,7 +9,8 @@ on:
       - "go.sum"
       - "scripts/operation/bch/**/*.sh"
       - "scripts/operation/common.sh"
-      - "config/wallet/**"
+      - "config/wallet/bch/**"
+      - "make/bch_e2e.mk"
       - ".github/workflows/bch-e2e.yml"
   push:
     branches:
@@ -20,7 +21,8 @@ on:
       - "go.sum"
       - "scripts/operation/bch/**/*.sh"
       - "scripts/operation/common.sh"
-      - "config/wallet/**"
+      - "config/wallet/bch/**"
+      - "make/bch_e2e.mk"
       - ".github/workflows/bch-e2e.yml"
   workflow_dispatch:
     inputs:

@@ -9,7 +9,7 @@ on:
       - "go.sum"
       - "scripts/operation/btc/**/*.sh"
       - "scripts/operation/common.sh"
-      - "config/wallet/**"
+      - "config/wallet/btc/**"
       - "make/btc_e2e.mk"
       - ".github/workflows/btc-e2e.yml"
   push:
@@ -21,7 +21,7 @@ on:
       - "go.sum"
       - "scripts/operation/btc/**/*.sh"
       - "scripts/operation/common.sh"
-      - "config/wallet/**"
+      - "config/wallet/btc/**"
       - "make/btc_e2e.mk"
       - ".github/workflows/btc-e2e.yml"
   workflow_dispatch:
