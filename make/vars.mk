@@ -18,8 +18,8 @@ GOLANGCI_VERSION=v2.8.0
 # ETH Variables
 GETH_HTTP_PORT=8546
 BEACON_HTTP_PORT=9596
-GETH_VERSION=v1.10.26
-LODESTAR_VERSION=v1.4.3
+GETH_VERSION=v1.17.0
+LODESTAR_VERSION=v1.40.0
 #ETH_CHAIN_ID=11155111 # used in docker-compose.eth.yml.
 TARGET_NETWORK=sepolia
 # https://eth-clients.github.io/checkpoint-sync-endpoints/
