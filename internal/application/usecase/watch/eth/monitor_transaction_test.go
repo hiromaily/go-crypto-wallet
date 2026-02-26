@@ -46,7 +46,6 @@ func newEthMonitorTxUseCase(deps *ethMonitorTxTestDependencies) watchusecase.Mon
 
 const (
 	testMonitorSentHash = "0xaabbccdd1234567890aabbccdd1234567890aabbccdd1234567890aabbccdd12"
-	testMonitorFromAddr = "0xAbcdef1234567890AbCdEf1234567890AbCdEf12"
 	testConfirmNum      = uint64(6)
 )
 
@@ -54,7 +53,7 @@ func testSuccessReceipt() *domainETH.TransactionReceipt {
 	return &domainETH.TransactionReceipt{
 		TransactionHash: testMonitorSentHash,
 		BlockNumber:     100,
-		From:            testMonitorFromAddr,
+		From:            testETHFromAddr,
 		To:              testETHToAddr,
 		Status:          1, // success
 	}
@@ -64,7 +63,7 @@ func testFailedReceipt() *domainETH.TransactionReceipt {
 	return &domainETH.TransactionReceipt{
 		TransactionHash: testMonitorSentHash,
 		BlockNumber:     100,
-		From:            testMonitorFromAddr,
+		From:            testETHFromAddr,
 		To:              testETHToAddr,
 		Status:          0, // failure/revert
 		RevertReason:    "execution reverted: insufficient balance",
@@ -176,7 +175,7 @@ func TestETHMonitorTransactionUseCase_UpdateTxStatus_ConfirmedSuccess(t *testing
 		UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, testMonitorSentHash).
 		Return(int64(1), nil)
 	deps.addrRepo.EXPECT().
-		UpdateIsAllocated(false, testMonitorFromAddr).
+		UpdateIsAllocated(false, testETHFromAddr).
 		Return(int64(1), nil)
 
 	err := useCase.UpdateTxStatus(context.Background())
@@ -251,7 +250,7 @@ func TestETHMonitorTransactionUseCase_MonitorBalance_Success(t *testing.T) {
 	deps := newEthMonitorTxTestDeps(t)
 	useCase := newEthMonitorTxUseCase(deps)
 
-	addrs := []string{testMonitorFromAddr}
+	addrs := []string{testETHFromAddr}
 	balance := big.NewInt(1000000000000000000) // 1 ETH
 
 	for _, acnt := range []domainAccount.AccountType{
@@ -265,7 +264,7 @@ func TestETHMonitorTransactionUseCase_MonitorBalance_Success(t *testing.T) {
 			Return(addrs, nil)
 		deps.ethClient.EXPECT().
 			GetTotalBalance(context.Background(), addrs).
-			Return(balance, []domainETH.UserAmount{{Address: testMonitorFromAddr, Amount: uint64(balance.Int64())}})
+			Return(balance, []domainETH.UserAmount{{Address: testETHFromAddr, Amount: uint64(balance.Int64())}})
 	}
 
 	err := useCase.MonitorBalance(context.Background(), watchusecase.MonitorBalanceInput{})

@@ -48,6 +48,11 @@ type ResponseGetTransactionReceipt struct {
 	Status            int64    `json:"status"`
 }
 
+// errReceiptNotFound is returned by GetTransactionReceipt when the node responds
+// with null (transaction not yet included in a block). GetTxReceipt treats this
+// as a non-error "pending" state rather than a failure.
+var errReceiptNotFound = errors.New("response is empty")
+
 // Sign calculates an Ethereum specific signature with:
 //
 //	sign(keccak256("\x19Ethereum Signed Message:\n" + len(message) + message)))
@@ -229,7 +234,7 @@ func (e *Ethereum) GetTransactionReceipt(
 	}
 
 	if len(resMap) == 0 {
-		return nil, errors.New("response is empty")
+		return nil, errReceiptNotFound
 	}
 
 	transactionHash, err := castToString(resMap["transactionHash"])
@@ -313,7 +318,7 @@ func (e *Ethereum) GetTransactionReceipt(
 func (e *Ethereum) GetTxReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error) {
 	resp, err := e.GetTransactionReceipt(ctx, txHash)
 	if err != nil {
-		if err.Error() == "response is empty" {
+		if errors.Is(err, errReceiptNotFound) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("fail to call GetTransactionReceipt(): %w", err)

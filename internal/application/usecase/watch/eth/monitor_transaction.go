@@ -94,10 +94,10 @@ func (u *monitorTransactionUseCase) updateStatusTxTypeSent(ctx context.Context) 
 }
 
 // processTransaction handles status check and update for a single transaction.
-// Task 9.1: confirmation counting and TxTypeDone transition with is_allocated update.
-// Task 9.2: failed transaction detection and node connectivity retry.
+// It checks the receipt for on-chain success/failure, counts confirmations,
+// and transitions the transaction through TxTypeSent → TxTypeDone (or TxTypeCancel).
 func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sentHash string) error {
-	// Task 9.2: Get receipt with exponential backoff retry for connectivity failures.
+	// Get receipt with exponential backoff retry for node connectivity failures.
 	receipt, err := u.getReceiptWithRetry(ctx, sentHash)
 	if err != nil {
 		return fmt.Errorf("fail to get transaction receipt for %s: %w", sentHash, err)
@@ -108,7 +108,7 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 		return nil
 	}
 
-	// Task 9.2: Detect failed/reverted transactions (EVM status 0 = failure).
+	// EVM status 0 means the transaction was reverted or failed on-chain.
 	if receipt.Status == 0 {
 		logger.Warn("transaction failed or reverted on-chain",
 			"sentHash", sentHash,
@@ -123,7 +123,7 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 		return nil
 	}
 
-	// Task 9.1: Check confirmation count against the configured threshold.
+	// Check confirmation depth against the configured threshold.
 	confirmNum, err := u.ethClient.GetConfirmation(ctx, sentHash)
 	if err != nil {
 		return fmt.Errorf("fail to call eth.GetConfirmation() sentHash=%s: %w", sentHash, err)
@@ -136,7 +136,7 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 		return nil
 	}
 
-	// Task 9.1: Transition from TxTypeSent to TxTypeDone once confirmations reach the threshold.
+	// Confirmations sufficient — mark as done.
 	if _, err := u.txDetailRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, sentHash); err != nil {
 		logger.Warn("failed to update tx type to done",
 			"sentHash", sentHash,
@@ -145,7 +145,7 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 		return nil
 	}
 
-	// Task 9.1: Update is_allocated to free the sender address and prevent double-spending.
+	// Free the sender address to prevent double-spending on future transactions.
 	if _, err := u.addrRepo.UpdateIsAllocated(false, receipt.From); err != nil {
 		logger.Warn("failed to update is_allocated",
 			"address", receipt.From,
@@ -157,7 +157,7 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 }
 
 // getReceiptWithRetry retrieves a transaction receipt with exponential backoff retry
-// for node connectivity failures (Task 9.2).
+// for node connectivity failures. Logs each failure at WARN level with the retry count.
 // Returns (nil, nil) when the transaction has not yet been mined.
 // Returns (nil, error) when all retry attempts are exhausted.
 func (u *monitorTransactionUseCase) getReceiptWithRetry(
@@ -169,7 +169,6 @@ func (u *monitorTransactionUseCase) getReceiptWithRetry(
 			return receipt, nil // nil means "not yet mined"
 		}
 
-		// Task 9.2: Log connectivity issue at WARN level including the retry count.
 		logger.Warn("Ethereum node connectivity failure, retrying",
 			"txHash", txHash,
 			"attempt", attempt+1,
@@ -181,7 +180,7 @@ func (u *monitorTransactionUseCase) getReceiptWithRetry(
 			return nil, fmt.Errorf("failed to get receipt after %d attempts: %w", maxReceiptRetries, err)
 		}
 
-		// Task 9.2: Exponential backoff: 1s, 2s, 4s, ...
+		// Exponential backoff: 1s, 2s, 4s, ...
 		backoff := initialRetryDelay * (1 << uint(attempt))
 		select {
 		case <-ctx.Done():
