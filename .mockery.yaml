@@ -85,6 +85,15 @@ packages:
       TxMonitor:
       AddressValidator:
 
+  # Persistence (UnitOfWork / Transaction) - used by watch wallet use cases
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence:
+    config:
+      dir: "internal/infrastructure/persistence/mocks"
+      pkgname: "mocks"
+    interfaces:
+      UnitOfWork:
+      Transaction:
+
   # Cold wallet persistence interfaces
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold:
     config:

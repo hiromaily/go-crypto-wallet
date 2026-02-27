@@ -6,38 +6,43 @@
 NODE_TYPE ?= anvil # anvil, geth
 DB ?= sqlite
 
+# ETH Variables
+GETH_HTTP_PORT=8546
+BEACON_HTTP_PORT=9596
+GETH_VERSION=v1.17.0
+LODESTAR_VERSION=v1.40.0
+#ETH_CHAIN_ID=11155111 # used in docker-compose.eth.yml.
+TARGET_NETWORK=sepolia
+# https://eth-clients.github.io/checkpoint-sync-endpoints/
+CHECKPOINT_SYNC_URL=https://beaconstate-${TARGET_NETWORK}.chainsafe.io
+
 ###############################################################################
 # Docker Compose Targets
 ###############################################################################
 
+# Common environment variables for ETH docker compose
+ETH_COMPOSE_ENV := \
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL)
+
 # run ethereum node server (Geth + Lodestar)
-.PHONY: up-docker-eth
-up-docker-eth:
-	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
-	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
-	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml --profile geth up
+.PHONY: up-docker-geth
+up-docker-geth:
+	$(ETH_COMPOSE_ENV) docker compose -f compose.eth.yaml --profile geth up
 
-.PHONY: up-docker-eth-d
-up-docker-eth-d:
-	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
-	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
-	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml --profile geth up -d
+.PHONY: up-docker-geth-d
+up-docker-geth-d:
+	$(ETH_COMPOSE_ENV) docker compose -f compose.eth.yaml --profile geth up -d
 
-.PHONY: stop-docker-eth
-stop-docker-eth:
-	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
-	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
-	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml --profile geth stop
+.PHONY: stop-docker-geth
+stop-docker-geth:
+	$(ETH_COMPOSE_ENV) docker compose -f compose.eth.yaml --profile geth stop
 
 # run ethereum lodestar (requires geth profile)
 .PHONY: up-docker-lodestar
 up-docker-lodestar:
-	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
-	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f compose.eth.yaml --profile geth up lodestar
+	$(ETH_COMPOSE_ENV) docker compose -f compose.eth.yaml --profile geth up lodestar
 
 ###############################################################################
 # Geth specific
@@ -45,12 +50,6 @@ up-docker-lodestar:
 .PHONY:geth-help
 geth-help:
 	docker run --rm ethereum/client-go:$(GETH_VERSION) --help
-
-# geth image based on ethereum/client-go:v1.10.26 with curl commnad
-.PHONY:build-geth-image
-build-geth-image:
-	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
-	docker compose -f compose.eth.yaml build --no-cache geth
 
 .PHONY:import-geth-data
 import-geth-data:
