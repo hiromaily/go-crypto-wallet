@@ -105,7 +105,7 @@ make sqlc
 
 # 6. Verify
 make check-build
-make gotest
+make go-test
 ```
 
 ## Available Make Targets
@@ -135,11 +135,11 @@ make gotest
 
 When modifying schema HCL files, **always consult** the official Atlas HCL documentation for the target dialect:
 
-| Dialect    | Documentation URL                    |
-| ---------- | ------------------------------------ |
-| PostgreSQL | https://atlasgo.io/hcl/postgres      |
-| MySQL      | https://atlasgo.io/hcl/mysql         |
-| SQLite     | https://atlasgo.io/hcl/sqlite        |
+| Dialect    | Documentation URL               |
+| ---------- | ------------------------------- |
+| PostgreSQL | https://atlasgo.io/hcl/postgres |
+| MySQL      | https://atlasgo.io/hcl/mysql    |
+| SQLite     | https://atlasgo.io/hcl/sqlite   |
 
 ### When to Consult the Documentation
 
@@ -156,17 +156,17 @@ You **MUST** refer to the official documentation when:
 
 #### Column Attributes (All Dialects)
 
-| Attribute        | Description                        | Dialects          |
-| ---------------- | ---------------------------------- | ----------------- |
-| `type`           | Column data type (required)        | All               |
-| `null`           | Allow NULL values                  | All               |
-| `default`        | Default value (bool/string/number/`sql()`) | All        |
-| `auto_increment` | Auto-increment column              | MySQL, SQLite     |
-| `identity`       | Identity column                    | PostgreSQL        |
-| `unsigned`       | Unsigned integer                   | MySQL, SQLite     |
-| `comment`        | Column documentation               | MySQL, PostgreSQL |
-| `charset`        | Character set                      | MySQL             |
-| `collate`        | Collation                          | MySQL, PostgreSQL |
+| Attribute        | Description                                | Dialects          |
+| ---------------- | ------------------------------------------ | ----------------- |
+| `type`           | Column data type (required)                | All               |
+| `null`           | Allow NULL values                          | All               |
+| `default`        | Default value (bool/string/number/`sql()`) | All               |
+| `auto_increment` | Auto-increment column                      | MySQL, SQLite     |
+| `identity`       | Identity column                            | PostgreSQL        |
+| `unsigned`       | Unsigned integer                           | MySQL, SQLite     |
+| `comment`        | Column documentation                       | MySQL, PostgreSQL |
+| `charset`        | Character set                              | MySQL             |
+| `collate`        | Collation                                  | MySQL, PostgreSQL |
 
 #### Foreign Key Actions
 
@@ -289,24 +289,24 @@ index "idx_unique_account" {
 
 ### Enum-like Columns
 
-| MySQL                        | PostgreSQL                                              |
-| ---------------------------- | ------------------------------------------------------- |
-| Inline: `enum("btc", "bch")` | `varchar(N)` + `check` constraint (NOT native `enum`)   |
-|                              | e.g., `check "chk_coin" { expr = "coin IN ('btc')" }`  |
+| MySQL                        | PostgreSQL                                            |
+| ---------------------------- | ----------------------------------------------------- |
+| Inline: `enum("btc", "bch")` | `varchar(N)` + `check` constraint (NOT native `enum`) |
+|                              | e.g., `check "chk_coin" { expr = "coin IN ('btc')" }` |
 
 ### Column Types
 
-| MySQL Type      | PostgreSQL Type | Notes                             |
-| --------------- | --------------- | --------------------------------- |
-| `bigint`        | `bigint`        | Same                              |
-| `int`           | `integer`       | Different keyword                 |
-| `tinyint`       | `smallint`      | Different keyword                 |
-| `varchar(n)`    | `varchar(n)`    | Same                              |
-| `text`          | `text`          | Same                              |
-| `datetime`      | `timestamptz`   | PostgreSQL uses timezone-aware    |
-| `bool`          | `boolean`       | Same behavior                     |
-| `decimal(p,s)`  | `numeric(p,s)`  | Different keyword                 |
-| `blob`          | `bytea`         | Binary data (e.g., MuSig2 nonces) |
+| MySQL Type      | PostgreSQL Type     | Notes                                                |
+| --------------- | ------------------- | ---------------------------------------------------- |
+| `bigint`        | `bigint`            | Same                                                 |
+| `int`           | `integer`           | Different keyword                                    |
+| `tinyint`       | `smallint`          | Different keyword                                    |
+| `varchar(n)`    | `varchar(n)`        | Same                                                 |
+| `text`          | `text`              | Same                                                 |
+| `datetime`      | `timestamptz`       | PostgreSQL uses timezone-aware                       |
+| `bool`          | `boolean`           | Same behavior                                        |
+| `decimal(p,s)`  | `numeric(p,s)`      | Different keyword                                    |
+| `blob`          | `bytea`             | Binary data (e.g., MuSig2 nonces)                    |
 | Inline `enum()` | `varchar` + `check` | PostgreSQL uses CHECK constraints (not native enums) |
 
 ## Auto-Generated Files
@@ -344,7 +344,7 @@ Regenerate with `make atlas-dev-reset` (or `make atlas-dev-reset DB_DIALECT=post
 
 - [ ] Run `make regenerate-all-from-atlas` + `make regenerate-all-from-atlas-sqlite` (PostgreSQL) or `make regenerate-all-from-atlas-mysql` (MySQL)
 - [ ] `make check-build` passes
-- [ ] `make gotest` passes
+- [ ] `make go-test` passes
 - [ ] Both MySQL and PostgreSQL schemas are consistent
 
 ## Related Documentation

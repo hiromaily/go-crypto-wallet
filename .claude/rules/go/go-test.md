@@ -12,10 +12,10 @@ Rules for writing and modifying test files (`*_test.go`) in go-crypto-wallet.
 
 ## Package Naming
 
-| Test type | Package declaration | When |
-|---|---|---|
-| Unit test | `package btc` | Same package — direct access to unexported symbols |
-| Integration test | `package btc_test` | External package — tests that depend on a database or other external infrastructure |
+| Test type        | Package declaration | When                                                                                |
+| ---------------- | ------------------- | ----------------------------------------------------------------------------------- |
+| Unit test        | `package btc`       | Same package — direct access to unexported symbols                                  |
+| Integration test | `package btc_test`  | External package — tests that depend on a database or other external infrastructure |
 
 ```go
 // unit_test.go — same package
@@ -31,10 +31,10 @@ package btc_test
 
 Always use [testify](https://github.com/stretchr/testify). **Never** use `t.Errorf`, `t.Fatalf`, or `reflect.DeepEqual` directly.
 
-| Package | When to use |
-|---------|-------------|
+| Package   | When to use                                         |
+| --------- | --------------------------------------------------- |
 | `require` | Fatal assertion — test stops immediately on failure |
-| `assert` | Non-fatal assertion — test continues after failure |
+| `assert`  | Non-fatal assertion — test continues after failure  |
 
 ```go
 // ✅ GOOD
@@ -76,13 +76,13 @@ func (s *stubRepo) GetOneMaxID(accountType AccountType) (*Key, error) { ... }
 
 **Import alias convention**:
 
-| Mocks package | Import alias |
-|---|---|
-| `infrastructure/api/btc/mocks` | `btcapiamocks` |
-| `infrastructure/api/eth/mocks` | `ethapiamocks` |
-| `infrastructure/api/xrp/mocks` | `xrpapiamocks` |
-| `infrastructure/repository/cold/mocks` | `coldmocks` |
-| `infrastructure/repository/watch/mocks` | `repomocks` |
+| Mocks package                                   | Import alias   |
+| ----------------------------------------------- | -------------- |
+| `infrastructure/api/btc/mocks`                  | `btcapiamocks` |
+| `infrastructure/api/eth/mocks`                  | `ethapiamocks` |
+| `infrastructure/api/xrp/mocks`                  | `xrpapiamocks` |
+| `infrastructure/repository/cold/mocks`          | `coldmocks`    |
+| `infrastructure/repository/watch/mocks`         | `repomocks`    |
 | `infrastructure/storage/file/transaction/mocks` | `storagemocks` |
 
 ## Helper Functions
@@ -193,7 +193,7 @@ Before committing test-only changes:
 
 ```bash
 make go-lint        # Required: zero lint errors
-make gotest         # Required: all tests pass
+make go-test         # Required: all tests pass
 ```
 
 ## Related Rules

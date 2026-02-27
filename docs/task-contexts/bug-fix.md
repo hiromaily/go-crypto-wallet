@@ -94,10 +94,10 @@ if err != nil {
 make go-lint      # リンターチェック
 make tidy         # 依存関係の整理
 make check-build  # ビルド確認
-make gotest       # テスト実行
+make go-test       # テスト実行
 
 # 追加の検証（該当する場合）
-make gotest-integration  # 統合テスト
+make go-test-integration  # 統合テスト
 make check-vuln          # セキュリティ脆弱性チェック（セキュリティ関連の修正時）
 ```
 
@@ -130,7 +130,7 @@ gh issue view {issue_number}
 
 ```bash
 # 全ての検証コマンドを実行
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### Step 5: コミットとPR

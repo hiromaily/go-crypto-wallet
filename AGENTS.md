@@ -95,7 +95,7 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 
 | Language | Lint | Build | Test |
 |----------|------|-------|------|
-| Go | `make go-lint` | `make check-build` | `make gotest` |
+| Go | `make go-lint` | `make check-build` | `make go-test` |
 | TypeScript | `npm run lint` | `npm run build` | `npm test` |
 | Shell | `make shfmt` | - | - |
 

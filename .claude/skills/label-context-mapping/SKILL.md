@@ -18,54 +18,54 @@ Central mapping from GitHub labels to Skills and Context documents.
 
 ### Type Labels → Context Documents
 
-| Label | Context Document |
-|-------|------------------|
-| `bug` | `docs/task-contexts/bug-fix.md` |
-| `enhancement` | `docs/task-contexts/feature-add.md` |
-| `refactoring` | `docs/task-contexts/refactoring.md` |
-| `documentation` | `docs/task-contexts/documentation.md` |
-| `security` | `docs/task-contexts/security.md` |
-| `technical-debt` | `docs/task-contexts/refactoring.md` |
-| `test` | `docs/task-contexts/test.md` |
+| Label            | Context Document                      |
+| ---------------- | ------------------------------------- |
+| `bug`            | `docs/task-contexts/bug-fix.md`       |
+| `enhancement`    | `docs/task-contexts/feature-add.md`   |
+| `refactoring`    | `docs/task-contexts/refactoring.md`   |
+| `documentation`  | `docs/task-contexts/documentation.md` |
+| `security`       | `docs/task-contexts/security.md`      |
+| `technical-debt` | `docs/task-contexts/refactoring.md`   |
+| `test`           | `docs/task-contexts/test.md`          |
 
 ### Language Labels → Skills
 
-| Label | Skill | Verification |
-|-------|-------|--------------|
-| `lang:go` | `go-development` | `make go-lint && make tidy && make check-build && make gotest` |
+| Label             | Skill                    | Verification                                                                        |
+| ----------------- | ------------------------ | ----------------------------------------------------------------------------------- |
+| `lang:go`         | `go-development`         | `make go-lint && make tidy && make check-build && make go-test`                     |
 | `lang:typescript` | `typescript-development` | See skill for app-specific commands (Bun for xrpl-grpc-server, npm for erc20-token) |
-| `lang:solidity` | `solidity-development` | `truffle compile && truffle test` |
+| `lang:solidity`   | `solidity-development`   | `truffle compile && truffle test`                                                   |
 
 ### Scope Labels → Skills
 
-| Label | Skill | Verification |
-|-------|-------|--------------|
-| `scope:docs` | `docs-update` | Markdown formatting |
-| `scope:devops` | `devops` | `yamllint`, workflow test |
-| `scope:scripts` | `shell-scripts` | `make shfmt` |
-| `scope:makefile` | `makefile-update` | `make mk-lint` |
-| `scope:db` | `db-migration` (+ `go-development`) | `make atlas-fmt && make atlas-lint && make sqlc` |
-| `scope:config` | - | Syntax validation |
-| `scope:proto` | - | `make proto` |
+| Label            | Skill                               | Verification                                     |
+| ---------------- | ----------------------------------- | ------------------------------------------------ |
+| `scope:docs`     | `docs-update`                       | Markdown formatting                              |
+| `scope:devops`   | `devops`                            | `yamllint`, workflow test                        |
+| `scope:scripts`  | `shell-scripts`                     | `make shfmt`                                     |
+| `scope:makefile` | `makefile-update`                   | `make mk-lint`                                   |
+| `scope:db`       | `db-migration` (+ `go-development`) | `make atlas-fmt && make atlas-lint && make sqlc` |
+| `scope:config`   | -                                   | Syntax validation                                |
+| `scope:proto`    | -                                   | `make proto`                                     |
 
 ### Chain Labels → Context Documents
 
-| Label | Context Documents |
-|-------|-------------------|
-| `chain:btc` | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
-| `chain:bch` | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
-| `chain:eth` | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| Label         | Context Documents                                                   |
+| ------------- | ------------------------------------------------------------------- |
+| `chain:btc`   | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
+| `chain:bch`   | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
+| `chain:eth`   | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
 | `chain:erc20` | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
-| `chain:xrp` | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
-| `chain:all` | `docs/task-contexts/chain-specific.md` |
+| `chain:xrp`   | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
+| `chain:all`   | `docs/task-contexts/chain-specific.md`                              |
 
 ### Test Scope Labels → Verification
 
-| Label | Verification |
-|-------|--------------|
-| `unit-test` | `make gotest` |
-| `integration-test` | `make gotest-integration` |
-| `e2e-test` | `make btc-e2e-*` or chain-specific E2E |
+| Label              | Verification                           |
+| ------------------ | -------------------------------------- |
+| `unit-test`        | `make go-test`                         |
+| `integration-test` | `make go-test-integration`             |
+| `e2e-test`         | `make btc-e2e-*` or chain-specific E2E |
 
 ## Loading Procedure
 
@@ -84,14 +84,14 @@ Central mapping from GitHub labels to Skills and Context documents.
 
 ### Mapping Examples
 
-| Labels | Skills Loaded | Contexts Loaded |
-|--------|---------------|-----------------|
-| `bug`, `lang:go`, `chain:btc` | `git-workflow`, `go-development` | bug-fix.md, chains/btc.md |
-| `enhancement`, `lang:typescript`, `chain:xrp` | `git-workflow`, `typescript-development` | feature-add.md, chains/xrp.md |
-| `documentation`, `scope:docs` | `git-workflow`, `docs-update` | documentation.md |
-| `refactoring`, `scope:db`, `lang:go` | `git-workflow`, `db-migration`, `go-development` | refactoring.md, db-change.md |
-| `test`, `lang:go`, `unit-test` | `git-workflow`, `go-development` | test.md |
-| `security`, `lang:go` | `git-workflow`, `go-development` | security.md |
+| Labels                                        | Skills Loaded                                    | Contexts Loaded               |
+| --------------------------------------------- | ------------------------------------------------ | ----------------------------- |
+| `bug`, `lang:go`, `chain:btc`                 | `git-workflow`, `go-development`                 | bug-fix.md, chains/btc.md     |
+| `enhancement`, `lang:typescript`, `chain:xrp` | `git-workflow`, `typescript-development`         | feature-add.md, chains/xrp.md |
+| `documentation`, `scope:docs`                 | `git-workflow`, `docs-update`                    | documentation.md              |
+| `refactoring`, `scope:db`, `lang:go`          | `git-workflow`, `db-migration`, `go-development` | refactoring.md, db-change.md  |
+| `test`, `lang:go`, `unit-test`                | `git-workflow`, `go-development`                 | test.md                       |
+| `security`, `lang:go`                         | `git-workflow`, `go-development`                 | security.md                   |
 
 ## Label Selection Rules
 

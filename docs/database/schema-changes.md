@@ -285,7 +285,7 @@ make check-build
 
 ```bash
 # Unit tests
-make gotest
+make go-test
 
 # Integration tests (MySQL)
 make integration-test
@@ -830,7 +830,7 @@ make atlas-migrate-docker
 make sqlc-all
 make go-lint
 make check-build
-make gotest
+make go-test
 ```
 
 ### 3. Keep Migrations Small and Focused
@@ -925,7 +925,7 @@ Ensure CI tests schema changes:
     make atlas-migrate-docker
     make sqlc-all
     make check-build
-    make gotest
+    make go-test
 ```
 
 ### 10. Documentation

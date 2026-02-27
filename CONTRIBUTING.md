@@ -31,7 +31,7 @@ make setup
 ```bash
 make go-lint       # Lint check
 make check-build   # Build verification
-make gotest        # Run tests
+make go-test        # Run tests
 ```
 
 ## Commit Message Conventions
@@ -174,7 +174,7 @@ Closes #XXX
 
 - [ ] Run `make go-lint` - no errors
 - [ ] Run `make check-build` - build succeeds
-- [ ] Run `make gotest` - all tests pass
+- [ ] Run `make go-test` - all tests pass
 - [ ] Commit messages follow Conventional Commits format
 - [ ] PR title follows the format above
 

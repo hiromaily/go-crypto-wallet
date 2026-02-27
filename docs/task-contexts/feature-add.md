@@ -121,10 +121,10 @@ if err != nil {
 make go-lint      # リンターチェック
 make tidy         # 依存関係の整理
 make check-build  # ビルド確認
-make gotest       # テスト実行
+make go-test       # テスト実行
 
 # 追加の検証（該当する場合）
-make gotest-integration  # 統合テスト
+make go-test-integration  # 統合テスト
 make sqlc                # SQLCコード生成（DB変更時）
 make mockery             # モック生成（新インターフェース追加時）
 ```
@@ -174,7 +174,7 @@ Integration Tests:
 
 ```bash
 # 全ての検証コマンドを実行
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### Step 6: PRドラフト

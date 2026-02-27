@@ -133,7 +133,7 @@ make sqlc
 
 # ビルドとテスト
 make check-build
-make gotest
+make go-test
 ```
 
 ## Database Change Workflow
@@ -243,7 +243,7 @@ internal/infrastructure/repository/{entity}/
 ### Step 9: 最終検証
 
 ```bash
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### Step 10: コミット
@@ -275,7 +275,7 @@ git commit -m "feat(db): add new_table schema and queries
 5. tools/sqlc/ にクエリ追加
 6. make sqlc
 7. Repository実装
-8. make gotest
+8. make go-test
 ```
 
 ### Scenario 2: カラム追加
@@ -287,7 +287,7 @@ git commit -m "feat(db): add new_table schema and queries
 4. 既存データへの影響確認
 5. 関連SQLCクエリの更新
 6. make sqlc
-7. make gotest
+7. make go-test
 ```
 
 ### Scenario 3: カラム削除（注意が必要）

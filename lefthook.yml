@@ -56,7 +56,7 @@ pre-commit:
     #   root: "/"
     #   glob: "**/*.{go}"
     #   run: |
-    #     make gotest
+    #     make go-test
     #   stage_fixed: false
 
     # shell scripts

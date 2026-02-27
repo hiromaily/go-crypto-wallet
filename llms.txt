@@ -53,7 +53,7 @@ docs/          → Documentation
 
 | Language | Lint | Format | Build | Test |
 |----------|------|--------|-------|------|
-| Go | `make go-lint` | `make go-fmt` | `make check-build` | `make gotest` |
+| Go | `make go-lint` | `make go-fmt` | `make check-build` | `make go-test` |
 | TypeScript | `npm run lint` | `npm run format` | `npm run build` | `npm test` |
 | Shell | - | `make shfmt` | - | - |
 

@@ -36,7 +36,7 @@
   - _Requirements: 1.2, 1.3, 1.5_
 
 - [x] 2.3 Verify BTC keygen tests pass after stub replacement
-  - Run `make gotest` scoped to the BTC keygen use case package
+  - Run `make go-test` scoped to the BTC keygen use case package
   - Confirm every test case passes and no new failures are introduced by the mock replacements
   - _Requirements: 1.6_
 
@@ -55,7 +55,7 @@
   - _Requirements: 2.3, 2.4_
 
 - [x] 3.3 Verify XRP watch tests pass after mock replacement
-  - Run `make gotest` scoped to the XRP watch use case package
+  - Run `make go-test` scoped to the XRP watch use case package
   - Confirm every test case passes and no new failures are introduced by the mock replacements
   - _Requirements: 2.5_
 
@@ -82,6 +82,6 @@
 
 - [x] 5.2 Run complete build and test verification across all changed areas
   - Run `make go-lint` and `make check-build` to confirm the entire codebase compiles with no errors or warnings
-  - Run `make gotest` across all packages that were modified to confirm no regressions
+  - Run `make go-test` across all packages that were modified to confirm no regressions
   - Confirm that no manually-written mock structs for ports interfaces remain anywhere in the codebase (search for struct types implementing ports interfaces in test files outside `mocks/` directories)
   - _Requirements: 1.6, 2.5, 3.5, 4.3_

@@ -23,7 +23,7 @@ E2E test scripts are located in:
 
 ```bash
 # Run Go unit tests
-make gotest
+make go-test
 
 # Run BTC E2E tests
 make btc-e2e-setup

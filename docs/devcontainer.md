@@ -185,7 +185,7 @@ claude-code
 # Go 1.25.6 matches exactly what's in go.mod
 
 # 6. Claude can run tests
-# Claude runs: make gotest
+# Claude runs: make go-test
 # Integration tests work with proper build tags
 ```
 
@@ -272,7 +272,7 @@ code .  # or cursor .
 
 # 4. Develop normally
 make check-build
-make gotest
+make go-test
 make go-lint
 
 # 5. Docker Compose works through mounted socket

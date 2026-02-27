@@ -71,7 +71,7 @@ Determine appropriate verification commands based on the edited file extension:
 
 | File Extension | Required Verification | Optional |
 |----------------|----------------------|----------|
-| `*.go` | `make go-lint`, `make check-build` | `make gotest` |
+| `*.go` | `make go-lint`, `make check-build` | `make go-test` |
 | `*.md`, `*.mdc` | (none) | markdownlint |
 | `*.sql`, `*.hcl` | `make atlas-fmt`, `make atlas-lint` | |
 | `*.yaml`, `*.toml` | (none) | |
@@ -166,7 +166,7 @@ internal/interface-adapters/cli/
 ```bash
 make go-lint      # Required: Linter check
 make check-build  # Required: Build verification
-make gotest       # Recommended: Run tests (when functionality changes)
+make go-test       # Recommended: Run tests (when functionality changes)
 make tidy         # Recommended: Tidy dependencies (when imports change)
 ```
 
@@ -197,7 +197,7 @@ make sqlc         # On schema change
 Task Received
     │
     ├─ Editing Go files?
-    │   └─ Yes → make go-lint, make check-build, (make gotest)
+    │   └─ Yes → make go-lint, make check-build, (make go-test)
     │
     ├─ Documentation only?
     │   └─ Yes → No verification commands needed

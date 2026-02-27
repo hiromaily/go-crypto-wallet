@@ -10,50 +10,50 @@ Rules for modifying Go files (`*.go`) in go-crypto-wallet.
 
 ## Applicable Directories
 
-| Directory | Description |
-|-----------|-------------|
+| Directory   | Description                                |
+| ----------- | ------------------------------------------ |
 | `internal/` | Core application code (Clean Architecture) |
-| `pkg/` | Reusable shared packages |
-| `cmd/` | Application entry points |
+| `pkg/`      | Reusable shared packages                   |
+| `cmd/`      | Application entry points                   |
 
 ## Verification Commands
 
 **ALWAYS run before committing:**
 
-| Command | Purpose | Required |
-|---------|---------|----------|
-| `make go-lint` | Lint and auto-fix | ✅ Yes |
-| `make tidy` | `go mod tidy` | ✅ Yes |
-| `make check-build` | Build verification (no binary) | ✅ Yes |
-| `make gotest` | Run unit tests | Recommended |
+| Command            | Purpose                        | Required    |
+| ------------------ | ------------------------------ | ----------- |
+| `make go-lint`     | Lint and auto-fix              | ✅ Yes      |
+| `make tidy`        | `go mod tidy`                  | ✅ Yes      |
+| `make check-build` | Build verification (no binary) | ✅ Yes      |
+| `make go-test`     | Run unit tests                 | Recommended |
 
 ### Quick One-Liner
 
 ```bash
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### Additional Commands
 
-| Command | Purpose |
-|---------|---------|
-| `make go-fmt` | Format only (gofmt) |
-| `make go-imports` | Format imports |
-| `make go-staticcheck` | Additional static analysis |
-| `make go-check-vuln` | Security vulnerability check |
-| `make gotest-integration` | Integration tests |
+| Command                    | Purpose                      |
+| -------------------------- | ---------------------------- |
+| `make go-fmt`              | Format only (gofmt)          |
+| `make go-imports`          | Format imports               |
+| `make go-staticcheck`      | Additional static analysis   |
+| `make go-check-vuln`       | Security vulnerability check |
+| `make go-test-integration` | Integration tests            |
 
 ## Build Rules
 
 **CRITICAL: Never run `go build` directly. Always use Makefile targets.**
 
-| Purpose | Command | Output Location |
-|---------|---------|-----------------|
-| Verify build (no binary) | `make check-build` | `/dev/null` |
-| Build all | `make build-all` | `${GOPATH}/bin/` |
-| Build watch only | `make build-watch` | `${GOPATH}/bin/watch` |
-| Build keygen only | `make build-keygen` | `${GOPATH}/bin/keygen` |
-| Build sign only | `make build-sign` | `${GOPATH}/bin/sign{1,2}` |
+| Purpose                  | Command             | Output Location           |
+| ------------------------ | ------------------- | ------------------------- |
+| Verify build (no binary) | `make check-build`  | `/dev/null`               |
+| Build all                | `make build-all`    | `${GOPATH}/bin/`          |
+| Build watch only         | `make build-watch`  | `${GOPATH}/bin/watch`     |
+| Build keygen only        | `make build-keygen` | `${GOPATH}/bin/keygen`    |
+| Build sign only          | `make build-sign`   | `${GOPATH}/bin/sign{1,2}` |
 
 ## Code Style
 
@@ -89,12 +89,12 @@ if err != nil {
 
 **`panic()` is ONLY allowed in:**
 
-| Location | Allowed | Reason |
-|----------|---------|--------|
-| `cmd/*/main.go` | ✅ Yes | Application entry points |
-| `internal/di/` | ✅ Yes | Configuration/DI errors at startup |
-| `pkg/di/` | ✅ Yes | Configuration/DI errors at startup |
-| Other packages | ❌ No | Must return errors instead |
+| Location        | Allowed | Reason                             |
+| --------------- | ------- | ---------------------------------- |
+| `cmd/*/main.go` | ✅ Yes  | Application entry points           |
+| `internal/di/`  | ✅ Yes  | Configuration/DI errors at startup |
+| `pkg/di/`       | ✅ Yes  | Configuration/DI errors at startup |
+| Other packages  | ❌ No   | Must return errors instead         |
 
 **Rationale**: Panic should only occur during initialization/startup for unrecoverable configuration errors. All runtime errors must be handled via error returns.
 
@@ -125,12 +125,12 @@ func (c *container) NewFooUseCase() FooUseCase {
 
 ### Naming Conventions
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Package | lowercase, no underscores | `account`, `transaction` |
-| Exported | UpperCamelCase | `GetAccountKey` |
-| Unexported | lowerCamelCase | `calculateFee` |
-| Interface | Behavior + "er" | `Validator`, `Reader` |
+| Type       | Convention                | Example                  |
+| ---------- | ------------------------- | ------------------------ |
+| Package    | lowercase, no underscores | `account`, `transaction` |
+| Exported   | UpperCamelCase            | `GetAccountKey`          |
+| Unexported | lowerCamelCase            | `calculateFee`           |
+| Interface  | Behavior + "er"           | `Validator`, `Reader`    |
 
 ## Auto-Generated Files
 

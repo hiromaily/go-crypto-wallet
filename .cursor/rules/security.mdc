@@ -45,5 +45,5 @@ Before committing security-related changes:
 ```bash
 make go-check-vuln
 make go-lint
-make gotest
+make go-test
 ```

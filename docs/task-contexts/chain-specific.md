@@ -244,7 +244,7 @@ internal/interface-adapters/cli/
 make check-build
 
 # テスト実行
-make gotest
+make go-test
 
 # 特定チェーンのテスト（例: BTC）
 go test ./internal/application/usecase/watch/btc/...
