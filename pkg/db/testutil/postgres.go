@@ -1,4 +1,4 @@
-// Package testutil provides shared helpers for PostgreSQL repository integration tests.
+// Package testutil provides shared helpers for PostgreSQL integration tests.
 package testutil
 
 import (

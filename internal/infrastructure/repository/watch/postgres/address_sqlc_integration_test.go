@@ -14,8 +14,8 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	dbtest "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/testutil"
 	watchpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/postgres"
+	dbtest "github.com/hiromaily/go-crypto-wallet/pkg/db/testutil"
 )
 
 // openWatchDB opens a connection to the watch PostgreSQL database for testing.

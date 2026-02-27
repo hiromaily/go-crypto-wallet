@@ -17,8 +17,8 @@ import (
 	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	coldpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/postgres"
-	dbtest "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
+	dbtest "github.com/hiromaily/go-crypto-wallet/pkg/db/testutil"
 )
 
 // openKeygenDB opens a connection to the keygen PostgreSQL database for testing.
