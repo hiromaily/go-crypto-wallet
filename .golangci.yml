@@ -1,6 +1,6 @@
 version: "2"
 
-# Active 45 linters, 65s
+# Active 46 linters, 65s
 # go tool golangci-lint run -v
 
 run:
