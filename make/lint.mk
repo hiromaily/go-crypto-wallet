@@ -29,6 +29,10 @@ go-lint:
 go-lint-deps:
 	./scripts/lint/deps.sh
 
+.PHONY: go-lint-visibility
+go-lint-visibility:
+	./scripts/lint/visibility.sh
+
 
 # verify golangci-lint configuration
 # Note: run after modifying .golangci.yml
