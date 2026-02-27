@@ -148,7 +148,7 @@ func (e *Ethereum) BlockNumber(ctx context.Context) (*big.Int, error) {
 // EnsureBlockNumber calls BlockNumber() several times
 func (e *Ethereum) EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error) {
 	latestBlockNumber := new(big.Int)
-	for i := 0; i < loopCount; i++ {
+	for i := range loopCount {
 		if i != 0 {
 			time.Sleep(500 * time.Millisecond)
 		}

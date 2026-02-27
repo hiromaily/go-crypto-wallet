@@ -137,7 +137,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 		}()
 
 		// Collect all nonces
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			result := <-nonceResults
 			require.NoError(t, result.Err, "Failed to generate nonce for signer %d", i+1)
 			require.NotEmpty(t, result.Nonce, "Nonce should not be empty for signer %d", i+1)

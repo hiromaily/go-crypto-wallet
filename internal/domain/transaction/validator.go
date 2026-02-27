@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
@@ -80,13 +81,7 @@ func CanTransitionTo(from, to TxType) bool {
 		return false
 	}
 
-	for _, allowed := range allowedTransitions {
-		if to == allowed {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(allowedTransitions, to)
 }
 
 // ValidateTransition validates a transaction state transition.

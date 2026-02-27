@@ -2,6 +2,7 @@ package xrp
 
 import (
 	"encoding/hex"
+	"maps"
 	"strings"
 	"testing"
 )
@@ -139,7 +140,7 @@ func TestSigner_DeterministicSigning(t *testing.T) {
 	// Sign the same transaction multiple times
 	var previousTxID string
 	var previousSignature string
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		result, err := signer.SignTransaction(txFields, keyPair.Seed)
 		if err != nil {
 			t.Fatalf("SignTransaction failed on iteration %d: %v", i, err)
@@ -613,9 +614,7 @@ func BenchmarkSignTransaction_Ed25519(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		// Make a copy to avoid mutation
 		txCopy := make(map[string]any)
-		for k, v := range txFields {
-			txCopy[k] = v
-		}
+		maps.Copy(txCopy, txFields)
 		_, err := signer.SignTransaction(txCopy, keyPair.Seed)
 		if err != nil {
 			b.Fatalf("SignTransaction failed: %v", err)
@@ -646,9 +645,7 @@ func BenchmarkSignTransaction_Secp256k1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		// Make a copy to avoid mutation
 		txCopy := make(map[string]any)
-		for k, v := range txFields {
-			txCopy[k] = v
-		}
+		maps.Copy(txCopy, txFields)
 		_, err := signer.SignTransaction(txCopy, keyPair.Seed)
 		if err != nil {
 			b.Fatalf("SignTransaction failed: %v", err)

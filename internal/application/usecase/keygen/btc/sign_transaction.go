@@ -357,7 +357,7 @@ func (u *signTransactionUseCase) deriveFallbackWIFsForP2TR(
 
 	// Derive keys at multiple indices (both receive and change paths)
 	for change := uint32(0); change <= 1; change++ {
-		for idx := uint32(0); idx < 10; idx++ {
+		for idx := range uint32(10) {
 			childKey, err := btcpkg.DeriveChildPrivateKey(*accountKey.AccountExtendedPrivkey, change, idx)
 			if err != nil {
 				logger.Debug("failed to derive key", "change", change, "index", idx, "error", err)

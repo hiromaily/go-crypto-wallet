@@ -157,10 +157,7 @@ func TestSQLiteTransaction_MaxOpenConns1_Deadlock(t *testing.T) {
 	var wg sync.WaitGroup
 	deadlockDetected := false
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
+	wg.Go(func() {
 		// Step 1: Read query (holds the single connection)
 		var count int64
 		err := db.QueryRow("SELECT COUNT(*) FROM test_item WHERE name = ?", "item1").Scan(&count)
@@ -178,7 +175,7 @@ func TestSQLiteTransaction_MaxOpenConns1_Deadlock(t *testing.T) {
 			// Expected: context deadline exceeded (deadlock)
 			deadlockDetected = true
 		}
-	}()
+	})
 
 	wg.Wait()
 

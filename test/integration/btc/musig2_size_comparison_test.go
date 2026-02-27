@@ -427,7 +427,7 @@ func calculateMultiInputTraditionalTxVSize(inputCount, m, n int) int {
 	baseSize := 4 + 1 + 1 + 1 + 4 // = 11 bytes
 
 	// Inputs
-	for i := 0; i < inputCount; i++ {
+	for range inputCount {
 		// Non-witness part per input
 		baseSize += 41
 

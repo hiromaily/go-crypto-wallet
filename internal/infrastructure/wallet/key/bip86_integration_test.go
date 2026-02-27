@@ -129,7 +129,7 @@ func TestBIP86IntegrationKeyConsistency(t *testing.T) {
 	const iterations = 5
 	var previousKeys []string
 
-	for i := 0; i < iterations; i++ {
+	for i := range iterations {
 		keys, err := generator.CreateKey(seed, accountType, 0, 3)
 		require.NoError(t, err, "iteration %d: key generation should succeed", i)
 

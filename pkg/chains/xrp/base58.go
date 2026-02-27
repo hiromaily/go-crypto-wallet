@@ -52,9 +52,7 @@ func Base58Decode(b, alphabet string) ([]byte, error) {
 	// In that case we'll use the bigRadix[n] lookup for the appropriate power.
 	for t := b; len(t) > 0; {
 		n := len(t)
-		if n > 10 {
-			n = 10
-		}
+		n = min(n, 10)
 
 		total := uint64(0)
 		for _, v := range t[:n] {
@@ -124,7 +122,7 @@ func Base58Encode(b []byte, alphabet string) string {
 			}
 		} else {
 			m := mod.Int64()
-			for i := 0; i < 10; i++ {
+			for range 10 {
 				answer = append(answer, alphabet[m%58])
 				m /= 58
 			}

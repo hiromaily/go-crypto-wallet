@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 package integration
 
@@ -145,8 +144,7 @@ func loadDescriptorRecords(path string) ([]descriptorRecord, error) {
 	}
 
 	// Fallback: treat as plain descriptors (one per line)
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
+	for line := range strings.SplitSeq(string(data), "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue

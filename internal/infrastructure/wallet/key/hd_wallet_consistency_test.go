@@ -360,7 +360,7 @@ func TestHDWalletMultipleIndices(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify that keys at indices 5-9 match
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			assert.Equal(t, keys1[5+i].P2PKHAddr, keys2[i].P2PKHAddr,
 				"P2PKH address should match for index %d", 5+i)
 			assert.Equal(t, keys1[5+i].Bech32Addr, keys2[i].Bech32Addr,

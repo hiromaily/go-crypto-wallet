@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -675,13 +676,7 @@ func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
 		}
 
 		// Check if the label is present in the address labels
-		labelFound := false
-		for _, addrLabel := range info.Labels {
-			if addrLabel == label {
-				labelFound = true
-				break
-			}
-		}
+		labelFound := slices.Contains(info.Labels, label)
 
 		if !labelFound {
 			logger.Debug("label not found in address info, will retry",
