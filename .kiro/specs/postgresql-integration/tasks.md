@@ -266,8 +266,8 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Test SSL mode variations (disable, require, verify-ca, verify-full)
   - _Requirements: 9.1_
 
-- [ ] 10. Implement PostgreSQL repository integration tests
-- [ ] 10.1 Create address repository integration tests
+- [x] 10. Implement PostgreSQL repository integration tests
+- [x] 10.1 Create address repository integration tests
   - Create test file for PostgreSQL address repository
   - Test CRUD operations: Insert, GetByID, GetAll, Update
   - Test type conversion: domain.Address ↔ sqlcgen.Address
@@ -276,7 +276,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Use PostgreSQL test database separate from production
   - _Requirements: 9.2, 9.4_
 
-- [ ] 10.2 Create transaction repository integration tests
+- [x] 10.2 Create transaction repository integration tests
   - Test BTC transaction repositories (tx, input, output)
   - Test ETH and XRP transaction repositories
   - Verify decimal precision for cryptocurrency amounts (NUMERIC 26,10)
@@ -284,7 +284,7 @@ This implementation plan adds PostgreSQL 18.2 as a third database backend alongs
   - Validate query filtering (by coin type, status, dates)
   - _Requirements: 9.2, 9.4_
 
-- [ ] 10.3 Create account key repository integration tests
+- [x] 10.3 Create account key repository integration tests
   - Test account key repositories for BTC, ETH, XRP, auth
   - Test seed and nonce repository operations
   - Test XRP signer list repositories
