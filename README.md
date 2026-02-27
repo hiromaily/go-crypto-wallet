@@ -123,6 +123,16 @@ BCH supports P2PKH and P2SH patterns with CashAddr format. SegWit and Taproot ar
 > **Note**: BCH uses CashAddr format (`bitcoincash:q...` for P2PKH, `bitcoincash:p...` for P2SH on mainnet).
 > BCH signing requires SIGHASH_FORKID (0x41) for replay protection.
 
+### Ethereum (ETH) Transaction Patterns
+
+ETH supports EIP-1559 (Type 2) transactions with EOA single-sig.
+
+| Pattern | Type | Address Format | Transaction Type | Status |
+|---------|------|----------------|------------------|--------|
+| **P1** | Single-sig (EOA) | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
+
+> **Note**: Supports both Anvil and Geth nodes. Database backend is configurable (SQLite/MySQL/PostgreSQL).
+
 ### Quick Start
 
 ```bash
@@ -135,9 +145,13 @@ make bch-e2e P=1    # P2PKH Single-sig
 make bch-e2e P=2    # P2SH 2-of-3 Multisig
 make bch-e2e P=3    # P2SH 3-of-3 Multisig
 
+# ETH: Run pattern
+make eth-e2e-p1     # Single-sig EIP-1559
+
 # Fresh start with full reset
 make btc-e2e-reset P=5
 make bch-e2e-reset P=3
+make eth-e2e-p1-reset
 
 # CI/CD mode (non-interactive)
 make btc-e2e-ci P=3
