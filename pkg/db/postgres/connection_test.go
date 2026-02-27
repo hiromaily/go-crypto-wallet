@@ -35,8 +35,10 @@ func TestNewPostgres_InvalidHost(t *testing.T) {
 func TestNewPostgres_DefaultPort(t *testing.T) {
 	t.Parallel()
 
+	// Use an unreachable hostname (not localhost) to guarantee a connection
+	// failure regardless of whether a PostgreSQL server is running locally.
 	conf := &config.PostgreSQL{
-		Host:    "localhost",
+		Host:    "invalid-host-that-does-not-exist.example",
 		Port:    0, // Should default to 5432
 		DB:      "nonexistent",
 		User:    "testuser",
@@ -45,25 +47,27 @@ func TestNewPostgres_DefaultPort(t *testing.T) {
 	}
 
 	db, err := postgres.NewPostgres(conf)
-	// Expect a ping error (connection refused/timeout), not a DSN parse error.
+	// Expect a ping error (DNS lookup failure), not a DSN parse error.
 	// If we got "failed to open postgres connection" it would indicate a DSN issue.
 	require.Error(t, err)
 	assert.Nil(t, db)
 	assert.Contains(t, err.Error(), "failed to ping postgres database")
 }
 
-// TestNewPostgres_DefaultSSLMode verifies that SSLMode="" defaults to "disable" and
+// TestNewPostgres_DefaultSSLMode verifies that SSLMode="" defaults to "prefer" and
 // does not produce a DSN parse error.
 func TestNewPostgres_DefaultSSLMode(t *testing.T) {
 	t.Parallel()
 
+	// Use an unreachable hostname (not localhost) to guarantee a connection
+	// failure regardless of whether a PostgreSQL server is running locally.
 	conf := &config.PostgreSQL{
-		Host:    "localhost",
+		Host:    "invalid-host-that-does-not-exist.example",
 		Port:    5432,
 		DB:      "nonexistent",
 		User:    "testuser",
 		Pass:    "testpass",
-		SSLMode: "", // Should default to "disable"
+		SSLMode: "", // Should default to "prefer"
 	}
 
 	db, err := postgres.NewPostgres(conf)
