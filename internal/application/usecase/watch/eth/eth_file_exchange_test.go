@@ -57,6 +57,39 @@ const (
 	flowChainID      = uint64(31337)
 )
 
+// setupCreateTxDBMocks sets up mock expectations for the database transaction
+// lifecycle used by the Watch Create use case: Begin → WithTransaction (3×) →
+// InsertUnsignedTx → InsertBulk → Commit. Extracted to avoid duplication across
+// the EIP-1559 and legacy-fallback test cases.
+func setupCreateTxDBMocks(
+	t *testing.T,
+	uow *persistencemocks.MockUnitOfWork,
+	dbTx *persistencemocks.MockTransaction,
+	txRepo *repomocks.MockTxRepositorier,
+	txDetailRepo *repomocks.MockETHDetailTXRepositorier,
+	payReqRepo *repomocks.MockPaymentRequestRepositorier,
+	ctx context.Context,
+) {
+	t.Helper()
+	uow.EXPECT().Begin(ctx).Return(dbTx, nil)
+	txRepo.EXPECT().WithTransaction(dbTx).Return(txRepo, nil)
+	txDetailRepo.EXPECT().WithTransaction(dbTx).Return(txDetailRepo, nil)
+	payReqRepo.EXPECT().WithTransaction(dbTx).Return(payReqRepo, nil)
+	txRepo.EXPECT().InsertUnsignedTx(domainTx.ActionTypeDeposit).Return(flowTxID, nil)
+	txDetailRepo.EXPECT().
+		InsertBulk(mock.MatchedBy(func(items []*domainETH.ETHDetailTx) bool {
+			if len(items) != 1 {
+				return false
+			}
+			item := items[0]
+			return item.SenderAddress == flowFromAddr &&
+				item.ReceiverAddress == flowToAddr &&
+				item.UUID == flowUUID
+		})).
+		Return(nil)
+	dbTx.EXPECT().Commit().Return(nil)
+}
+
 // newFlowAccountXpriv generates a valid BIP-44 ETH account-level xpriv for testing.
 func newFlowAccountXpriv(t *testing.T) string {
 	t.Helper()
@@ -179,27 +212,7 @@ func TestETHFileExchange_EIP1559Path(t *testing.T) {
 		)
 
 	// DB transaction: Begin → WithTransaction → Insert → Commit
-	createUoW.EXPECT().
-		Begin(ctx).
-		Return(createTx, nil)
-	createTxRepo.EXPECT().
-		WithTransaction(createTx).
-		Return(createTxRepo, nil)
-	createTxDetailRepo.EXPECT().
-		WithTransaction(createTx).
-		Return(createTxDetailRepo, nil)
-	createPayReqRepo.EXPECT().
-		WithTransaction(createTx).
-		Return(createPayReqRepo, nil)
-	createTxRepo.EXPECT().
-		InsertUnsignedTx(domainTx.ActionTypeDeposit).
-		Return(flowTxID, nil)
-	createTxDetailRepo.EXPECT().
-		InsertBulk(mock.AnythingOfType("[]*eth.ETHDetailTx")).
-		Return(nil)
-	createTx.EXPECT().
-		Commit().
-		Return(nil)
+	setupCreateTxDBMocks(t, createUoW, createTx, createTxRepo, createTxDetailRepo, createPayReqRepo, ctx)
 
 	// File repo
 	createTxFileRepo.EXPECT().
@@ -395,15 +408,7 @@ func TestETHFileExchange_LegacyFallback(t *testing.T) {
 			nil,
 		)
 
-	createUoW.EXPECT().Begin(ctx).Return(createTx, nil)
-	createTxRepo.EXPECT().WithTransaction(createTx).Return(createTxRepo, nil)
-	createTxDetailRepo.EXPECT().WithTransaction(createTx).Return(createTxDetailRepo, nil)
-	createPayReqRepo.EXPECT().WithTransaction(createTx).Return(createPayReqRepo, nil)
-	createTxRepo.EXPECT().InsertUnsignedTx(domainTx.ActionTypeDeposit).Return(flowTxID, nil)
-	createTxDetailRepo.EXPECT().
-		InsertBulk(mock.AnythingOfType("[]*eth.ETHDetailTx")).
-		Return(nil)
-	createTx.EXPECT().Commit().Return(nil)
+	setupCreateTxDBMocks(t, createUoW, createTx, createTxRepo, createTxDetailRepo, createPayReqRepo, ctx)
 
 	createTxFileRepo.EXPECT().
 		CreateFilePath(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, flowTxID, 0).
