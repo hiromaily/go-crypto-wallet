@@ -262,9 +262,9 @@ func setupKeygenWallet(t *testing.T) di.Container {
 	t.Helper()
 
 	// Use relative path from this test file location
-	// test/integration/ -> ../../config/wallet/
-	confPath := filepath.Join("..", "..", "config", "wallet", "btc_keygen.yaml")
-	accountConfPath := filepath.Join("..", "..", "config", "wallet", "account.yaml")
+	// test/integration/btc/ -> ../../../config/wallet/
+	confPath := filepath.Join("..", "..", "..", "config", "wallet", "btc_keygen.yaml")
+	accountConfPath := filepath.Join("..", "..", "..", "config", "wallet", "account.yaml")
 
 	// Load wallet configuration
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeKeyGen, domainCoin.BTC)
@@ -285,8 +285,8 @@ func setupSignWallet(t *testing.T, authName string) di.Container {
 	t.Helper()
 
 	// Use relative path from this test file location
-	confPath := filepath.Join("..", "..", "data", "config", "btc_sign.toml")
-	accountConfPath := filepath.Join("..", "..", "data", "config", "account.toml")
+	confPath := filepath.Join("..", "..", "..", "data", "config", "btc_sign.toml")
+	accountConfPath := filepath.Join("..", "..", "..", "data", "config", "account.toml")
 
 	// Load wallet configuration
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeSign, domainCoin.BTC)
@@ -311,8 +311,8 @@ func setupWatchWallet(t *testing.T) di.Container {
 	t.Helper()
 
 	// Use relative path from this test file location
-	confPath := filepath.Join("..", "..", "data", "config", "btc_watch.toml")
-	accountConfPath := filepath.Join("..", "..", "data", "config", "account.toml")
+	confPath := filepath.Join("..", "..", "..", "data", "config", "btc_watch.toml")
+	accountConfPath := filepath.Join("..", "..", "..", "data", "config", "account.toml")
 
 	// Load wallet configuration
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeWatchOnly, domainCoin.BTC)
