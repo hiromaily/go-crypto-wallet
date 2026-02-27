@@ -5,9 +5,6 @@ package postgres_test
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"os"
-	"strconv"
 	"testing"
 	"time"
 
@@ -17,49 +14,19 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	dbtest "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/testutil"
 	watchpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/postgres"
-	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	pkgpostgres "github.com/hiromaily/go-crypto-wallet/pkg/db/postgres"
 )
-
-// postgresWatchConf builds a PostgreSQL config from environment variables.
-// Defaults match the Docker Compose wallet-postgres service configuration.
-func postgresWatchConf() *config.PostgreSQL {
-	port := 5432
-	if p := os.Getenv("POSTGRES_PORT"); p != "" {
-		if v, err := strconv.Atoi(p); err == nil {
-			port = v
-		}
-	}
-	return &config.PostgreSQL{
-		Host:    envOrDefaultWatch("POSTGRES_HOST", "localhost"),
-		Port:    port,
-		DB:      envOrDefaultWatch("POSTGRES_DB", "watch"),
-		User:    envOrDefaultWatch("POSTGRES_USER", "postgres"),
-		Pass:    envOrDefaultWatch("POSTGRES_PASS", "postgres"),
-		SSLMode: "disable",
-	}
-}
-
-func envOrDefaultWatch(key, defaultVal string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return defaultVal
-}
 
 // openWatchDB opens a connection to the watch PostgreSQL database for testing.
 func openWatchDB(t *testing.T) *sql.DB {
 	t.Helper()
-	db, err := pkgpostgres.NewPostgres(postgresWatchConf())
-	require.NoError(t, err, "failed to connect to PostgreSQL watch database")
-	t.Cleanup(func() { _ = db.Close() })
-	return db
+	return dbtest.OpenTestDB(t, dbtest.NewTestPostgresConf("POSTGRES_DB", "watch"))
 }
 
 // uniqueAddress generates a test wallet address with a unique suffix to avoid conflicts.
 func uniqueAddress(prefix string) string {
-	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
+	return dbtest.UniqueStr(prefix)
 }
 
 // cleanupAddresses deletes test addresses matching the given prefix from the database.
@@ -184,13 +151,15 @@ func TestAddressRepository_UpdateIsAllocated(t *testing.T) {
 	// Verify the update persisted.
 	rows, err := repo.GetAll(domainAccount.AccountTypeClient)
 	require.NoError(t, err)
+	var found *domainAddress.Address
 	for _, a := range rows {
 		if a.WalletAddress == addr {
-			assert.True(t, a.IsAllocated, "address should be marked as allocated after update")
-			return
+			found = a
+			break
 		}
 	}
-	t.Errorf("address %q not found after update", addr)
+	require.NotNil(t, found, "address %q not found after update", addr)
+	assert.True(t, found.IsAllocated, "address should be marked as allocated after update")
 }
 
 // TestAddressRepository_TypeConversion verifies domain.Address ↔ sqlcgen.Address
@@ -255,17 +224,19 @@ func TestAddressRepository_NullUpdatedAt(t *testing.T) {
 	rows, err := repo.GetAll(domainAccount.AccountTypeClient)
 	require.NoError(t, err)
 
+	var found *domainAddress.Address
 	for _, a := range rows {
 		if a.WalletAddress == addr {
-			// UpdatedAt may be nil or populated by the DB default (now()).
-			// The key assertion is that the converter handles sql.NullTime
-			// without panicking. The field value itself is acceptable either way.
-			// (The schema sets DEFAULT now(), so the DB may fill it in.)
-			t.Logf("UpdatedAt for inserted address: %v", a.UpdatedAt)
-			return
+			found = a
+			break
 		}
 	}
-	t.Errorf("address %q not found in GetAll result", addr)
+	require.NotNil(t, found, "address %q not found in GetAll result", addr)
+	// UpdatedAt may be nil or populated by the DB default (now()).
+	// The key assertion is that the converter handles sql.NullTime
+	// without panicking. The field value itself is acceptable either way.
+	// (The schema sets DEFAULT now(), so the DB may fill it in.)
+	t.Logf("UpdatedAt for inserted address: %v", found.UpdatedAt)
 }
 
 // TestAddressRepository_InsertWithUpdatedAt verifies that an explicit UpdatedAt value
@@ -293,14 +264,16 @@ func TestAddressRepository_InsertWithUpdatedAt(t *testing.T) {
 	rows, err := repo.GetAll(domainAccount.AccountTypeClient)
 	require.NoError(t, err)
 
+	var found *domainAddress.Address
 	for _, a := range rows {
 		if a.WalletAddress == addr {
-			// UpdatedAt should be non-nil when explicitly provided.
-			require.NotNil(t, a.UpdatedAt, "UpdatedAt should not be nil when explicitly set")
-			return
+			found = a
+			break
 		}
 	}
-	t.Errorf("address %q not found in GetAll result", addr)
+	require.NotNil(t, found, "address %q not found in GetAll result", addr)
+	// UpdatedAt should be non-nil when explicitly provided.
+	require.NotNil(t, found.UpdatedAt, "UpdatedAt should not be nil when explicitly set")
 }
 
 // TestAddressRepository_CheckConstraint_InvalidCoin verifies that inserting an address

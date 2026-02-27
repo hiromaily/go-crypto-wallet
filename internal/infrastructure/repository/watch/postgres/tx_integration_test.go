@@ -260,14 +260,16 @@ func TestBTCTxInputRepository_DecimalPrecision(t *testing.T) {
 
 	inputs, err := repo.GetAllByTxID(2000)
 	require.NoError(t, err)
+	var found *domainBTC.BTCTxInput
 	for _, inp := range inputs {
 		if inp.InputTxid == inputTxid {
-			assert.Equal(t, preciseAmount, inp.InputAmount,
-				"input_amount NUMERIC(26,10) should preserve full precision")
-			return
+			found = inp
+			break
 		}
 	}
-	t.Errorf("inserted input %q not found", inputTxid)
+	require.NotNil(t, found, "inserted input %q not found", inputTxid)
+	assert.Equal(t, preciseAmount, found.InputAmount,
+		"input_amount NUMERIC(26,10) should preserve full precision")
 }
 
 // TestBTCTxInputRepository_GetAllByTxID verifies that InsertBulk stores multiple inputs
@@ -488,14 +490,16 @@ func TestETHDetailTxRepository_UpdateAfterTxSent(t *testing.T) {
 
 	all, err := repo.GetAllByTxID(7000)
 	require.NoError(t, err)
+	var found *domainETH.ETHDetailTx
 	for _, item := range all {
 		if item.UUID == uuid {
-			assert.Equal(t, domainTx.TxTypeSent, item.CurrentTxType)
-			assert.Equal(t, sentHash, item.SentHashTx)
-			return
+			found = item
+			break
 		}
 	}
-	t.Errorf("ETH tx with uuid %q not found after update", uuid)
+	require.NotNil(t, found, "ETH tx with uuid %q not found after update", uuid)
+	assert.Equal(t, domainTx.TxTypeSent, found.CurrentTxType)
+	assert.Equal(t, sentHash, found.SentHashTx)
 }
 
 // ============================================================
@@ -624,16 +628,18 @@ func TestXRPDetailTxRepository_UpdateAfterTxSent(t *testing.T) {
 
 	all, err := repo.GetAllByTxID(10000)
 	require.NoError(t, err)
+	var found *domainXRP.XRPDetailTx
 	for _, item := range all {
 		if item.UUID == uuid {
-			assert.Equal(t, domainTx.TxTypeSent, item.CurrentTxType)
-			assert.Equal(t, signedTxID, item.SignedTxID)
-			assert.Equal(t, txBlob, item.TxBlob)
-			assert.Equal(t, uint64(999), item.EarliestLedgerVersion)
-			return
+			found = item
+			break
 		}
 	}
-	t.Errorf("XRP tx with uuid %q not found after update", uuid)
+	require.NotNil(t, found, "XRP tx with uuid %q not found after update", uuid)
+	assert.Equal(t, domainTx.TxTypeSent, found.CurrentTxType)
+	assert.Equal(t, signedTxID, found.SignedTxID)
+	assert.Equal(t, txBlob, found.TxBlob)
+	assert.Equal(t, uint64(999), found.EarliestLedgerVersion)
 }
 
 // ============================================================

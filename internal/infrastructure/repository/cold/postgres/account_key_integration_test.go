@@ -5,11 +5,7 @@ package postgres_test
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"os"
-	"strconv"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,49 +17,19 @@ import (
 	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	coldpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/postgres"
+	dbtest "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
-	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	pkgpostgres "github.com/hiromaily/go-crypto-wallet/pkg/db/postgres"
 )
-
-// postgresKeygenConf builds a PostgreSQL config for the keygen database from environment variables.
-// Defaults match the Docker Compose wallet-postgres service configuration.
-func postgresKeygenConf() *config.PostgreSQL {
-	port := 5432
-	if p := os.Getenv("POSTGRES_PORT"); p != "" {
-		if v, err := strconv.Atoi(p); err == nil {
-			port = v
-		}
-	}
-	return &config.PostgreSQL{
-		Host:    envOrDefaultCold("POSTGRES_HOST", "localhost"),
-		Port:    port,
-		DB:      envOrDefaultCold("POSTGRES_KEYGEN_DB", "keygen"),
-		User:    envOrDefaultCold("POSTGRES_USER", "postgres"),
-		Pass:    envOrDefaultCold("POSTGRES_PASS", "postgres"),
-		SSLMode: "disable",
-	}
-}
-
-func envOrDefaultCold(key, defaultVal string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return defaultVal
-}
 
 // openKeygenDB opens a connection to the keygen PostgreSQL database for testing.
 func openKeygenDB(t *testing.T) *sql.DB {
 	t.Helper()
-	db, err := pkgpostgres.NewPostgres(postgresKeygenConf())
-	require.NoError(t, err, "failed to connect to PostgreSQL keygen database")
-	t.Cleanup(func() { _ = db.Close() })
-	return db
+	return dbtest.OpenTestDB(t, dbtest.NewTestPostgresConf("POSTGRES_KEYGEN_DB", "keygen"))
 }
 
 // uniqueStr generates a test string with a unique nano-timestamp suffix.
 func uniqueStr(prefix string) string {
-	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
+	return dbtest.UniqueStr(prefix)
 }
 
 // cleanupBTCAccountKeys deletes test BTC account keys matching the given p2pkh addresses.
@@ -485,7 +451,7 @@ func TestSeedRepository_Insert_and_GetOne(t *testing.T) {
 
 	repo := coldpostgres.NewSeedRepositorySqlc(db, domainCoin.BTC)
 
-	testSeed := fmt.Sprintf("encrypted_seed_%d", time.Now().UnixNano())
+	testSeed := uniqueStr("encrypted_seed")
 	ctx := context.Background()
 
 	err := repo.Insert(ctx, testSeed)
