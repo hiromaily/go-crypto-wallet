@@ -11,7 +11,6 @@ import (
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	persistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -19,6 +18,7 @@ import (
 	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
+	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
@@ -32,7 +32,7 @@ type userAmount struct {
 type createTransactionUseCase struct {
 	accountInfo     apixrp.AccountInfoProvider
 	txPreparer      apixrp.TransactionPreparer
-	unitOfWork      persistence.UnitOfWork
+	unitOfWork      dbtx.UnitOfWork
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        repowatch.AddressRepositorier
 	txRepo          repowatch.TxRepositorier
@@ -57,7 +57,7 @@ type createTransactionUseCase struct {
 func NewCreateTransactionUseCase(
 	accountInfo apixrp.AccountInfoProvider,
 	txPreparer apixrp.TransactionPreparer,
-	unitOfWork persistence.UnitOfWork,
+	unitOfWork dbtx.UnitOfWork,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.TxRepositorier,

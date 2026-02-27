@@ -34,7 +34,6 @@ import (
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
-	infraDB "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
 	coldpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/postgres"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
@@ -54,6 +53,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 	pkgdi "github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
@@ -1499,7 +1499,7 @@ func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 	return watchusecaseeth.NewCreateTransactionUseCase(
 		targetEthAPI,
-		infraDB.NewSQLUnitOfWork(c.pkgContainer.NewDatabaseClient()),
+		dbtx.NewSQLUnitOfWork(c.pkgContainer.NewDatabaseClient()),
 		c.newAddressRepo(),
 		c.newTxRepo(),
 		c.newETHTxDetailRepo(),
@@ -1538,7 +1538,7 @@ func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTra
 	return watchusecasexrp.NewCreateTransactionUseCase(
 		xrpClient, // AccountInfoProvider
 		xrpClient, // TransactionPreparer
-		infraDB.NewSQLUnitOfWork(c.pkgContainer.NewDatabaseClient()),
+		dbtx.NewSQLUnitOfWork(c.pkgContainer.NewDatabaseClient()),
 		c.pkgContainer.NewUUIDHandler(),
 		c.newAddressRepo(),
 		c.newTxRepo(),

@@ -34,10 +34,10 @@ import (
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	ethapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/mocks"
-	persistencemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/persistence/mocks"
 	coldmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
+	persistencemocks "github.com/hiromaily/go-crypto-wallet/pkg/db/tx/mocks"
 )
 
 // ---------------------------------------------------------------------------
