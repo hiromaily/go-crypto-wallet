@@ -363,25 +363,15 @@ go test -v ./...
 
 ## Test Utilities
 
-The project provides test utilities in `pkg/testutil/`:
+Test utilities are co-located with the package they support in a `testutil/` subdirectory.
+A global `pkg/testutil/` package is **not used** in this project.
 
-- `btc.go`: Bitcoin test utilities
-- `eth.go`: Ethereum test utilities
-- `xrp.go`: XRP test utilities
-- `repository.go`: Repository test utilities
-- `suite.go`: Test suite utilities
+**Examples:**
 
-**Using Test Utilities:**
+- `pkg/db/testutil/` — PostgreSQL connection helpers for database tests
 
-```go
-import "github.com/hiromaily/go-crypto-wallet/pkg/testutil"
-
-func TestSomething(t *testing.T) {
-    // Use test utilities
-    btcAddr := testutil.GenerateBTCTestAddress()
-    // ...
-}
-```
+**Rule**: Create a `testutil/` subdirectory inside the package the utilities belong to,
+never a standalone top-level `pkg/testutil/` or `internal/testutil/` package.
 
 ## Test Assertions with Testify
 
