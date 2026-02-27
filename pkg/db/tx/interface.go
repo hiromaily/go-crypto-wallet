@@ -1,4 +1,4 @@
-package persistence
+package tx
 
 import "context"
 
@@ -24,7 +24,7 @@ type UnitOfWork interface {
 	// RunInTransaction executes the provided function within a transaction.
 	// If the function returns an error, the transaction is rolled back.
 	// If the function succeeds, the transaction is committed.
-	RunInTransaction(ctx context.Context, fn func(tx Transaction) error) error
+	RunInTransaction(ctx context.Context, fn func(transaction Transaction) error) error
 }
 
 // TransactionBeginner is a minimal interface for components that can begin transactions.

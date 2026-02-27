@@ -7,12 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlite/sqlcgen"
+	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 )
 
 // PaymentRequestRepositorySqlc is repository for payment_request table using sqlc (SQLite)
@@ -223,11 +222,11 @@ func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 
 // WithTransaction returns a new repository instance that uses the provided transaction
 func (r *PaymentRequestRepositorySqlc) WithTransaction(
-	tx persistence.Transaction,
+	tx dbtx.Transaction,
 ) (repowatch.PaymentRequestRepositorier, error) {
-	sqlTx := database.UnwrapSQLTx(tx)
+	sqlTx := dbtx.UnwrapSQLTx(tx)
 	if sqlTx == nil {
-		return nil, database.ErrUnsupportedTransaction
+		return nil, dbtx.ErrUnsupportedTransaction
 	}
 	return &PaymentRequestRepositorySqlc{
 		db:           r.db,

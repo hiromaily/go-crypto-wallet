@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 )
 
 // ETHDetailTXInputRepositorySqlc is repository for eth_detail_tx table using sqlc
@@ -256,11 +255,11 @@ func (r *ETHDetailTXInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 
 // WithTransaction returns a new repository instance that uses the provided transaction
 func (r *ETHDetailTXInputRepositorySqlc) WithTransaction(
-	tx persistence.Transaction,
+	tx dbtx.Transaction,
 ) (repowatch.ETHDetailTXRepositorier, error) {
-	sqlTx := database.UnwrapSQLTx(tx)
+	sqlTx := dbtx.UnwrapSQLTx(tx)
 	if sqlTx == nil {
-		return nil, database.ErrUnsupportedTransaction
+		return nil, dbtx.ErrUnsupportedTransaction
 	}
 	return &ETHDetailTXInputRepositorySqlc{
 		queries:      r.queries.WithTx(sqlTx),

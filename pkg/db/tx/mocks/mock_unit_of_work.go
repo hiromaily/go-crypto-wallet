@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	"github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +39,23 @@ func (_m *MockUnitOfWork) EXPECT() *MockUnitOfWork_Expecter {
 }
 
 // Begin provides a mock function for the type MockUnitOfWork
-func (_mock *MockUnitOfWork) Begin(ctx context.Context) (persistence.Transaction, error) {
+func (_mock *MockUnitOfWork) Begin(ctx context.Context) (tx.Transaction, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Begin")
 	}
 
-	var r0 persistence.Transaction
+	var r0 tx.Transaction
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (persistence.Transaction, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (tx.Transaction, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) persistence.Transaction); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) tx.Transaction); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(persistence.Transaction)
+			r0 = ret.Get(0).(tx.Transaction)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -90,18 +90,18 @@ func (_c *MockUnitOfWork_Begin_Call) Run(run func(ctx context.Context)) *MockUni
 	return _c
 }
 
-func (_c *MockUnitOfWork_Begin_Call) Return(transaction persistence.Transaction, err error) *MockUnitOfWork_Begin_Call {
+func (_c *MockUnitOfWork_Begin_Call) Return(transaction tx.Transaction, err error) *MockUnitOfWork_Begin_Call {
 	_c.Call.Return(transaction, err)
 	return _c
 }
 
-func (_c *MockUnitOfWork_Begin_Call) RunAndReturn(run func(ctx context.Context) (persistence.Transaction, error)) *MockUnitOfWork_Begin_Call {
+func (_c *MockUnitOfWork_Begin_Call) RunAndReturn(run func(ctx context.Context) (tx.Transaction, error)) *MockUnitOfWork_Begin_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RunInTransaction provides a mock function for the type MockUnitOfWork
-func (_mock *MockUnitOfWork) RunInTransaction(ctx context.Context, fn func(tx persistence.Transaction) error) error {
+func (_mock *MockUnitOfWork) RunInTransaction(ctx context.Context, fn func(transaction tx.Transaction) error) error {
 	ret := _mock.Called(ctx, fn)
 
 	if len(ret) == 0 {
@@ -109,7 +109,7 @@ func (_mock *MockUnitOfWork) RunInTransaction(ctx context.Context, fn func(tx pe
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, func(tx persistence.Transaction) error) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, func(transaction tx.Transaction) error) error); ok {
 		r0 = returnFunc(ctx, fn)
 	} else {
 		r0 = ret.Error(0)
@@ -124,20 +124,20 @@ type MockUnitOfWork_RunInTransaction_Call struct {
 
 // RunInTransaction is a helper method to define mock.On call
 //   - ctx context.Context
-//   - fn func(tx persistence.Transaction) error
+//   - fn func(transaction tx.Transaction) error
 func (_e *MockUnitOfWork_Expecter) RunInTransaction(ctx interface{}, fn interface{}) *MockUnitOfWork_RunInTransaction_Call {
 	return &MockUnitOfWork_RunInTransaction_Call{Call: _e.mock.On("RunInTransaction", ctx, fn)}
 }
 
-func (_c *MockUnitOfWork_RunInTransaction_Call) Run(run func(ctx context.Context, fn func(tx persistence.Transaction) error)) *MockUnitOfWork_RunInTransaction_Call {
+func (_c *MockUnitOfWork_RunInTransaction_Call) Run(run func(ctx context.Context, fn func(transaction tx.Transaction) error)) *MockUnitOfWork_RunInTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 func(tx persistence.Transaction) error
+		var arg1 func(transaction tx.Transaction) error
 		if args[1] != nil {
-			arg1 = args[1].(func(tx persistence.Transaction) error)
+			arg1 = args[1].(func(transaction tx.Transaction) error)
 		}
 		run(
 			arg0,
@@ -152,7 +152,7 @@ func (_c *MockUnitOfWork_RunInTransaction_Call) Return(err error) *MockUnitOfWor
 	return _c
 }
 
-func (_c *MockUnitOfWork_RunInTransaction_Call) RunAndReturn(run func(ctx context.Context, fn func(tx persistence.Transaction) error) error) *MockUnitOfWork_RunInTransaction_Call {
+func (_c *MockUnitOfWork_RunInTransaction_Call) RunAndReturn(run func(ctx context.Context, fn func(transaction tx.Transaction) error) error) *MockUnitOfWork_RunInTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

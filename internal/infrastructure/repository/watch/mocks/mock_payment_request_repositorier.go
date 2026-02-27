@@ -5,9 +5,9 @@
 package mocks
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
+	"github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -386,8 +386,8 @@ func (_c *MockPaymentRequestRepositorier_UpdatePaymentID_Call) RunAndReturn(run 
 }
 
 // WithTransaction provides a mock function for the type MockPaymentRequestRepositorier
-func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx persistence.Transaction) (watch.PaymentRequestRepositorier, error) {
-	ret := _mock.Called(tx)
+func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx1 tx.Transaction) (watch.PaymentRequestRepositorier, error) {
+	ret := _mock.Called(tx1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WithTransaction")
@@ -395,18 +395,18 @@ func (_mock *MockPaymentRequestRepositorier) WithTransaction(tx persistence.Tran
 
 	var r0 watch.PaymentRequestRepositorier
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) (watch.PaymentRequestRepositorier, error)); ok {
-		return returnFunc(tx)
+	if returnFunc, ok := ret.Get(0).(func(tx.Transaction) (watch.PaymentRequestRepositorier, error)); ok {
+		return returnFunc(tx1)
 	}
-	if returnFunc, ok := ret.Get(0).(func(persistence.Transaction) watch.PaymentRequestRepositorier); ok {
-		r0 = returnFunc(tx)
+	if returnFunc, ok := ret.Get(0).(func(tx.Transaction) watch.PaymentRequestRepositorier); ok {
+		r0 = returnFunc(tx1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(watch.PaymentRequestRepositorier)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(persistence.Transaction) error); ok {
-		r1 = returnFunc(tx)
+	if returnFunc, ok := ret.Get(1).(func(tx.Transaction) error); ok {
+		r1 = returnFunc(tx1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -419,16 +419,16 @@ type MockPaymentRequestRepositorier_WithTransaction_Call struct {
 }
 
 // WithTransaction is a helper method to define mock.On call
-//   - tx persistence.Transaction
-func (_e *MockPaymentRequestRepositorier_Expecter) WithTransaction(tx interface{}) *MockPaymentRequestRepositorier_WithTransaction_Call {
-	return &MockPaymentRequestRepositorier_WithTransaction_Call{Call: _e.mock.On("WithTransaction", tx)}
+//   - tx1 tx.Transaction
+func (_e *MockPaymentRequestRepositorier_Expecter) WithTransaction(tx1 interface{}) *MockPaymentRequestRepositorier_WithTransaction_Call {
+	return &MockPaymentRequestRepositorier_WithTransaction_Call{Call: _e.mock.On("WithTransaction", tx1)}
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Run(run func(tx persistence.Transaction)) *MockPaymentRequestRepositorier_WithTransaction_Call {
+func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Run(run func(tx1 tx.Transaction)) *MockPaymentRequestRepositorier_WithTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 persistence.Transaction
+		var arg0 tx.Transaction
 		if args[0] != nil {
-			arg0 = args[0].(persistence.Transaction)
+			arg0 = args[0].(tx.Transaction)
 		}
 		run(
 			arg0,
@@ -442,7 +442,7 @@ func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) Return(paymentReq
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) RunAndReturn(run func(tx persistence.Transaction) (watch.PaymentRequestRepositorier, error)) *MockPaymentRequestRepositorier_WithTransaction_Call {
+func (_c *MockPaymentRequestRepositorier_WithTransaction_Call) RunAndReturn(run func(tx1 tx.Transaction) (watch.PaymentRequestRepositorier, error)) *MockPaymentRequestRepositorier_WithTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

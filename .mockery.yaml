@@ -86,9 +86,9 @@ packages:
       AddressValidator:
 
   # Persistence (UnitOfWork / Transaction) - used by watch wallet use cases
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence:
+  github.com/hiromaily/go-crypto-wallet/pkg/db/tx:
     config:
-      dir: "internal/infrastructure/persistence/mocks"
+      dir: "pkg/db/tx/mocks"
       pkgname: "mocks"
     interfaces:
       UnitOfWork:

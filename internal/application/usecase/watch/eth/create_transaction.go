@@ -10,19 +10,19 @@ import (
 	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	persistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type createTransactionUseCase struct {
 	ethClient       apieth.ERC20er
-	unitOfWork      persistence.UnitOfWork
+	unitOfWork      dbtx.UnitOfWork
 	addrRepo        repowatch.AddressRepositorier
 	txRepo          repowatch.TxRepositorier
 	txDetailRepo    repowatch.ETHDetailTXRepositorier
@@ -35,7 +35,7 @@ type createTransactionUseCase struct {
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
 	ethClient apieth.ERC20er,
-	unitOfWork persistence.UnitOfWork,
+	unitOfWork dbtx.UnitOfWork,
 	addrRepo repowatch.AddressRepositorier,
 	txRepo repowatch.TxRepositorier,
 	txDetailRepo repowatch.ETHDetailTXRepositorier,

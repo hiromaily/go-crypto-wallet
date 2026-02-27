@@ -1,8 +1,8 @@
 package watch
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 )
 
 // TxRepositorier is TxRepository interface
@@ -12,5 +12,5 @@ type TxRepositorier interface {
 	InsertUnsignedTx(actionType domainTx.ActionType) (int64, error)
 	Update(txItem *domainTx.Transaction) (int64, error)
 	DeleteAll() (int64, error)
-	WithTransaction(tx persistence.Transaction) (TxRepositorier, error)
+	WithTransaction(tx dbtx.Transaction) (TxRepositorier, error)
 }
