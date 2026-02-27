@@ -340,13 +340,13 @@ func TestWithMocks(t *testing.T) {
 **Unit Tests:**
 
 ```bash
-make gotest
+make go-test
 ```
 
 **Integration Tests:**
 
 ```bash
-make gotest-integration
+make go-test-integration
 ```
 
 **Test Coverage:**
@@ -398,7 +398,7 @@ import "github.com/stretchr/testify/assert"
 
 func TestMultipleAssertions(t *testing.T) {
     result := SomeFunction()
-    
+
     assert.NotNil(t, result)
     assert.Equal(t, expectedValue, result.Value)
     assert.Contains(t, result.Message, "expected text")
@@ -417,7 +417,7 @@ import "github.com/stretchr/testify/require"
 func TestWithDependency(t *testing.T) {
     result, err := SomeFunction()
     require.NoError(t, err)  // Test stops here if error occurs
-    
+
     // This code only runs if the above assertion passes
     require.Equal(t, expectedValue, result.Value)
 }

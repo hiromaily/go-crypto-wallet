@@ -119,7 +119,7 @@
 
 - `make mockery` regenerates all configured mocks simultaneously — if an interface changes, all mocks are regenerated correctly. Risk: low.
 - ETH `infrastructure/api/eth/mocks/` directory does not exist yet — mockery creates it automatically. Risk: none.
-- BTC test refactoring may introduce `EXPECT()` call mismatches — mitigated by running `make gotest` after each test file update.
+- BTC test refactoring may introduce `EXPECT()` call mismatches — mitigated by running `make go-test` after each test file update.
 - `stubDescriptorGenerator` left as struct stub — documents an exception. Risk of future contributors adding more use-case stubs. Mitigated by Claude rule documenting the exception explicitly.
 
 ---

@@ -153,7 +153,7 @@ make atlas-migrate-docker
 make sqlc && make sqlc-sqlite && make sqlc-postgres
 
 # Testing
-make go-lint && make check-build && make gotest
+make go-lint && make check-build && make go-test
 ```
 
 ## Implementation Guidance

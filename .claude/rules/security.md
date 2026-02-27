@@ -27,11 +27,11 @@ Refer to @docs/guidelines/security.md for full security requirements.
 
 ### Wallet Architecture
 
-| Wallet | Environment | Security Level |
-|--------|-------------|----------------|
-| Watch | Online | Public keys only |
+| Wallet | Environment | Security Level         |
+| ------ | ----------- | ---------------------- |
+| Watch  | Online      | Public keys only       |
 | Keygen | **Offline** | Generates private keys |
-| Sign | **Offline** | Signs transactions |
+| Sign   | **Offline** | Signs transactions     |
 
 ## Verification
 
@@ -40,5 +40,5 @@ Before committing security-related changes:
 ```bash
 make go-check-vuln
 make go-lint
-make gotest
+make go-test
 ```

@@ -166,7 +166,7 @@ make sqlc-all      # all backends
 make check-build
 
 # 5. Run tests
-make gotest
+make go-test
 ```
 
 ## Full Regeneration from Running Database

@@ -41,9 +41,9 @@ This document evaluates the go-crypto-wallet project against each best practice,
 
 | Mechanism | Status | Details |
 |-----------|--------|---------|
-| Makefile verification targets | Implemented | `make go-lint`, `make check-build`, `make gotest` |
+| Makefile verification targets | Implemented | `make go-lint`, `make check-build`, `make go-test` |
 | File-type verification matrix | Implemented | `.claude/rules/task-context-loading.md` maps file extensions to verification commands |
-| go-development skill | Implemented | Enforces `make go-lint && make tidy && make check-build && make gotest` |
+| go-development skill | Implemented | Enforces `make go-lint && make tidy && make check-build && make go-test` |
 | Pre-commit hooks (lefthook) | Implemented | Conventional commit enforcement |
 | Security vulnerability scan | Implemented | `make go-check-vuln` |
 | docs/task-contexts/verification.md | Implemented | Central verification command reference |
@@ -53,7 +53,7 @@ This document evaluates the go-crypto-wallet project against each best practice,
 | Priority | Recommendation | Rationale |
 |----------|---------------|-----------|
 | High | Add a hook to auto-run `make go-lint` after Go file edits | Hooks guarantee execution (unlike advisory CLAUDE.md rules). Best practice: "Use hooks for actions that must happen every time with zero exceptions." |
-| Medium | Add integration test targets per chain | Currently `make gotest` runs unit tests only; chain-specific integration tests would strengthen verification |
+| Medium | Add integration test targets per chain | Currently `make go-test` runs unit tests only; chain-specific integration tests would strengthen verification |
 | Low | Consider screenshot verification for any future web UI components | Not currently applicable (CLI-only project) |
 
 ---
@@ -232,6 +232,7 @@ Well-configured. The allow list covers standard development commands while maint
 #### Current Implementation
 
 The project has **extensive skills** covering:
+
 - Language-specific development (Go, TypeScript, Solidity, Shell)
 - Task-type workflows (git-workflow, fix-pr-review, fix-issue)
 - Chain-specific knowledge (bch-development, btc-terminology)
@@ -405,35 +406,36 @@ The Kiro spec workflow (`/kiro:spec-init` -> `/kiro:spec-requirements`) already 
 
 ### Medium Priority
 
-2. **Create custom subagents** (`.claude/agents/`)
+1. **Create custom subagents** (`.claude/agents/`)
    - `security-reviewer.md`: Review code for private key leaks, injection, OWASP issues
    - `architecture-reviewer.md`: Verify Clean Architecture layer separation
    - Reference: [Subagents Guide](https://code.claude.com/docs/en/sub-agents)
 
-3. **Add compaction instructions to CLAUDE.md**
+2. **Add compaction instructions to CLAUDE.md**
+
    ```markdown
    # Context Management
    When compacting, preserve: modified file list, current spec phase,
    chain context, and all verification results.
    ```
 
-4. **Document subagent usage patterns**
+3. **Document subagent usage patterns**
    - Add to `docs/guidelines/workflow.md`: when to use subagents for exploration vs. main context
 
-5. **Adopt Writer/Reviewer pattern for security-critical changes**
+4. **Adopt Writer/Reviewer pattern for security-critical changes**
    - One session implements; another reviews with fresh context
    - Essential for crypto wallet security
 
-6. **Audit rules for redundancy**
+5. **Audit rules for redundancy**
    - Some rules appear in both CLAUDE.md -> AGENTS.md and `.claude/rules/`
    - Consolidate to reduce context consumption
 
 ### Low Priority
 
-7. **Explore code intelligence plugin** for Go symbol navigation
-8. **Consider headless Claude in CI** for automated security review
-9. **Add session naming conventions** for spec-related work
-10. **Document Plan Mode vs Kiro specs decision criteria**
+1. **Explore code intelligence plugin** for Go symbol navigation
+2. **Consider headless Claude in CI** for automated security review
+3. **Add session naming conventions** for spec-related work
+4. **Document Plan Mode vs Kiro specs decision criteria**
 
 ---
 

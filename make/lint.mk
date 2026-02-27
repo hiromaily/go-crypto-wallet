@@ -13,7 +13,7 @@ go-fmt:
 # format imports
 .PHONY: go-imports
 imports:
-	./scripts/imports.sh
+	./scripts/lint/imports.sh
 
 # lint by golangci-lint
 .PHONY: go-lint-check
@@ -24,6 +24,11 @@ go-lint-check:
 .PHONY: go-lint
 go-lint:
 	go tool golangci-lint run --fix
+
+.PHONY: go-lint-deps
+go-lint-deps:
+	./scripts/lint/deps.sh
+
 
 # verify golangci-lint configuration
 # Note: run after modifying .golangci.yml

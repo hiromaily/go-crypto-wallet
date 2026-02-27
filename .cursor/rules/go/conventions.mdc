@@ -28,12 +28,12 @@ Rules for modifying Go files (`*.go`) in go-crypto-wallet.
 | `make go-lint` | Lint and auto-fix | ✅ Yes |
 | `make tidy` | `go mod tidy` | ✅ Yes |
 | `make check-build` | Build verification (no binary) | ✅ Yes |
-| `make gotest` | Run unit tests | Recommended |
+| `make go-test` | Run unit tests | Recommended |
 
 ### Quick One-Liner
 
 ```bash
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### Additional Commands
@@ -44,7 +44,7 @@ make go-lint && make tidy && make check-build && make gotest
 | `make go-imports` | Format imports |
 | `make go-staticcheck` | Additional static analysis |
 | `make go-check-vuln` | Security vulnerability check |
-| `make gotest-integration` | Integration tests |
+| `make go-test-integration` | Integration tests |
 
 ## Build Rules
 

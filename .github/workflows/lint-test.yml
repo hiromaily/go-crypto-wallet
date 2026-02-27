@@ -219,4 +219,4 @@ jobs:
           cache: true
       - name: Run Unit Test
         working-directory: ./
-        run: make gotest
+        run: make go-test

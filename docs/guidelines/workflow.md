@@ -149,12 +149,12 @@ After making code changes, always run these commands in order:
 1. `make go-lint` - Fix linting issues automatically
 2. `make tidy` - Organize dependencies and clean up `go.mod`
 3. `make check-build` - Verify that the code builds successfully
-4. `make gotest` - Run Go tests to verify functionality
+4. `make go-test` - Run Go tests to verify functionality
 
 **Optional but Recommended:**
 
 - `make go-check-vuln` - Run security vulnerability scan (for security-related changes)
-- `make gotest-integration` - Run integration tests (if applicable)
+- `make go-test-integration` - Run integration tests (if applicable)
 
 **Important**:
 
@@ -201,7 +201,7 @@ After making code changes, always run these commands in order:
 ## Verification
 - [ ] `make go-lint` passes
 - [ ] `make check-build` passes
-- [ ] `make gotest` passes
+- [ ] `make go-test` passes
 - [ ] Security scan completed (if applicable)
 
 Closes #[issue_number]
@@ -320,13 +320,13 @@ If Go files (`.go`) were changed, run these commands in order and ensure:
 make go-lint       # Fix linting issues (not 'fix-lint')
 make tidy          # Organize dependencies
 make check-build   # Verify builds successfully
-make gotest        # Run all tests
+make go-test        # Run all tests
 ```
 
 **Optional but Recommended:**
 
 - `make go-check-vuln` - Run security vulnerability scan (for security-related changes)
-- `make gotest-integration` - Run integration tests (if applicable)
+- `make go-test-integration` - Run integration tests (if applicable)
 
 #### For Markdown File Changes Only
 

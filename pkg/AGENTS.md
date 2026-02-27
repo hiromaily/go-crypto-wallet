@@ -41,7 +41,7 @@ This is non-negotiable:
 ```bash
 make go-lint      # Lint and auto-fix
 make check-build  # Build verification
-make gotest       # Run unit tests
+make go-test       # Run unit tests
 make tidy         # go mod tidy
 ```
 

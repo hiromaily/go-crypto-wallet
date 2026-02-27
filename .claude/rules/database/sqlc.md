@@ -1,5 +1,10 @@
 ---
-paths: ["tools/sqlc/**/*.sql", "tools/sqlc/*.yml", "internal/infrastructure/database/*/sqlcgen/*.go"]
+paths:
+  [
+    "tools/sqlc/**/*.sql",
+    "tools/sqlc/*.yml",
+    "internal/infrastructure/database/*/sqlcgen/*.go",
+  ]
 ---
 
 # sqlc File Rules
@@ -11,32 +16,32 @@ The project supports **three database backends**: PostgreSQL (default), MySQL, a
 
 ## File Categories
 
-| Path | Description | Editable |
-| --- | --- | --- |
-| `tools/sqlc/queries/postgres/*.sql` | SQLC query definitions (PostgreSQL) | Yes |
-| `tools/sqlc/queries/mysql/*.sql` | SQLC query definitions (MySQL) | Yes |
-| `tools/sqlc/schemas/postgres/*.sql` | SQLC schema files (PostgreSQL) | Auto-generated |
-| `tools/sqlc/schemas/mysql/*.sql` | SQLC schema files (MySQL) | Auto-generated |
-| `tools/sqlc/schemas/sqlite/*.sql` | SQLC schema files (SQLite) | Auto-generated |
-| `tools/sqlc/sqlc_postgres.yml` | SQLC config (PostgreSQL) | Yes |
-| `tools/sqlc/sqlc_mysql.yml` | SQLC config (MySQL) | Yes |
-| `tools/sqlc/sqlc_sqlite.yml` | SQLC config (SQLite) | Yes |
-| `internal/infrastructure/database/postgres/sqlcgen/*.go` | Generated Go code (PostgreSQL) | Auto-generated |
-| `internal/infrastructure/database/mysql/sqlcgen/*.go` | Generated Go code (MySQL) | Auto-generated |
-| `internal/infrastructure/database/sqlite/sqlcgen/*.go` | Generated Go code (SQLite) | Auto-generated |
-| `tools/atlas/migrations/**/*.sql` | Atlas migration files | Auto-generated |
-| `docker/*.sql` | Initial data/seed scripts | Yes |
+| Path                                                     | Description                         | Editable       |
+| -------------------------------------------------------- | ----------------------------------- | -------------- |
+| `tools/sqlc/queries/postgres/*.sql`                      | SQLC query definitions (PostgreSQL) | Yes            |
+| `tools/sqlc/queries/mysql/*.sql`                         | SQLC query definitions (MySQL)      | Yes            |
+| `tools/sqlc/schemas/postgres/*.sql`                      | SQLC schema files (PostgreSQL)      | Auto-generated |
+| `tools/sqlc/schemas/mysql/*.sql`                         | SQLC schema files (MySQL)           | Auto-generated |
+| `tools/sqlc/schemas/sqlite/*.sql`                        | SQLC schema files (SQLite)          | Auto-generated |
+| `tools/sqlc/sqlc_postgres.yml`                           | SQLC config (PostgreSQL)            | Yes            |
+| `tools/sqlc/sqlc_mysql.yml`                              | SQLC config (MySQL)                 | Yes            |
+| `tools/sqlc/sqlc_sqlite.yml`                             | SQLC config (SQLite)                | Yes            |
+| `internal/infrastructure/database/postgres/sqlcgen/*.go` | Generated Go code (PostgreSQL)      | Auto-generated |
+| `internal/infrastructure/database/mysql/sqlcgen/*.go`    | Generated Go code (MySQL)           | Auto-generated |
+| `internal/infrastructure/database/sqlite/sqlcgen/*.go`   | Generated Go code (SQLite)          | Auto-generated |
+| `tools/atlas/migrations/**/*.sql`                        | Atlas migration files               | Auto-generated |
+| `docker/*.sql`                                           | Initial data/seed scripts           | Yes            |
 
 ## Verification Commands
 
 ### SQLC Validation
 
-| Command | Purpose | Required |
-| --- | --- | --- |
-| `make sqlc-compile` | Check syntax and type errors (postgres + mysql) | Yes |
-| `make sqlc-vet` | Check for potential issues (postgres + mysql) | Yes |
-| `make sqlc-validate` | Compile + vet combined | Recommended |
-| `make sqlc-lint` | Alias for sqlc-vet | |
+| Command              | Purpose                                         | Required    |
+| -------------------- | ----------------------------------------------- | ----------- |
+| `make sqlc-compile`  | Check syntax and type errors (postgres + mysql) | Yes         |
+| `make sqlc-vet`      | Check for potential issues (postgres + mysql)   | Yes         |
+| `make sqlc-validate` | Compile + vet combined                          | Recommended |
+| `make sqlc-lint`     | Alias for sqlc-vet                              |             |
 
 ### After Changes
 
@@ -88,13 +93,13 @@ WHERE id = ?;
 
 ### Query Annotations
 
-| Annotation | Description |
-| --- | --- |
-| `:one` | Returns single row |
-| `:many` | Returns multiple rows |
-| `:exec` | Executes without return |
+| Annotation    | Description                       |
+| ------------- | --------------------------------- |
+| `:one`        | Returns single row                |
+| `:many`       | Returns multiple rows             |
+| `:exec`       | Executes without return           |
 | `:execresult` | Returns result with affected rows |
-| `:execrows` | Returns number of affected rows |
+| `:execrows`   | Returns number of affected rows   |
 
 ## Auto-Generated Files
 
@@ -163,7 +168,7 @@ make sqlc-all      # all backends
 make check-build
 
 # 5. Run tests
-make gotest
+make go-test
 ```
 
 ## Full Regeneration from Running Database

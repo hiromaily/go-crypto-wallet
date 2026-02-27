@@ -41,7 +41,7 @@ version: 1.0.0
 ```
 ❌ make go-lint（ドキュメント編集時は不要）
 ❌ make check-build（ドキュメント編集時は不要）
-❌ make gotest（ドキュメント編集時は不要）
+❌ make go-test（ドキュメント編集時は不要）
 ```
 
 ### 2. Markdown フォーマット推奨
@@ -79,7 +79,7 @@ version: 1.0.0
 # markdown-link-check docs/**/*.md
 ```
 
-**重要**: ドキュメントのみの変更では `make go-lint`, `make check-build`, `make gotest` は実行しないでください。
+**重要**: ドキュメントのみの変更では `make go-lint`, `make check-build`, `make go-test` は実行しないでください。
 
 ## Documentation Workflow
 

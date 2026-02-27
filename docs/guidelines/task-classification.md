@@ -33,7 +33,7 @@ Specify the programming language involved.
 
 | Label | Description | Skill | Verification |
 |-------|-------------|-------|--------------|
-| `lang:go` | Go language code | `go-development` | `make go-lint && make gotest` |
+| `lang:go` | Go language code | `go-development` | `make go-lint && make go-test` |
 | `lang:typescript` | TypeScript/JavaScript code | `typescript-development` | `npm run lint && npm run build` |
 | `lang:solidity` | Solidity smart contracts | `solidity-development` | `truffle compile && truffle test` |
 
@@ -70,8 +70,8 @@ Specify the test granularity when Type is `test`.
 
 | Label | Description | Verification |
 |-------|-------------|--------------|
-| `unit-test` | Unit test additions or fixes | `make gotest` |
-| `integration-test` | Integration test additions or fixes | `make gotest-integration` |
+| `unit-test` | Unit test additions or fixes | `make go-test` |
+| `integration-test` | Integration test additions or fixes | `make go-test-integration` |
 | `e2e-test` | End-to-end test additions or fixes | `make btc-e2e-*` |
 
 ## Label Selection Rules
@@ -129,7 +129,7 @@ Priority Order:
 
 | File Extension | Required | Optional |
 |----------------|----------|----------|
-| `*.go` | `make go-lint`, `make check-build` | `make gotest` |
+| `*.go` | `make go-lint`, `make check-build` | `make go-test` |
 | `*.md`, `*.mdc` | - | markdownlint |
 | `*.sql`, `*.hcl` | `make atlas-fmt`, `make atlas-lint` | `make sqlc` |
 | `*.yaml`, `*.toml` | - | yamllint |

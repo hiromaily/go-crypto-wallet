@@ -39,39 +39,39 @@ See [label-context-mapping](../skills/label-context-mapping/SKILL.md) for comple
 
 If no GitHub labels are available, determine task type from keywords:
 
-| Keywords | Task Type | Context File |
-|----------|-----------|--------------|
-| bug, fix, error, issue | `bug` | `docs/task-contexts/bug-fix.md` |
-| add, implement, feature, new | `enhancement` | `docs/task-contexts/feature-add.md` |
-| refactor, reorganize, move, cleanup | `refactoring` | `docs/task-contexts/refactoring.md` |
-| schema, DB, table, column, migration | `db-change` | `docs/task-contexts/db-change.md` |
-| document, README, description, docs, comment | `documentation` | `docs/task-contexts/documentation.md` |
-| test, coverage, spec, unit test, integration test | `test` | `docs/task-contexts/test.md` |
-| security, vulnerability, CVE | `security` | `docs/task-contexts/security.md` |
+| Keywords                                          | Task Type       | Context File                          |
+| ------------------------------------------------- | --------------- | ------------------------------------- |
+| bug, fix, error, issue                            | `bug`           | `docs/task-contexts/bug-fix.md`       |
+| add, implement, feature, new                      | `enhancement`   | `docs/task-contexts/feature-add.md`   |
+| refactor, reorganize, move, cleanup               | `refactoring`   | `docs/task-contexts/refactoring.md`   |
+| schema, DB, table, column, migration              | `db-change`     | `docs/task-contexts/db-change.md`     |
+| document, README, description, docs, comment      | `documentation` | `docs/task-contexts/documentation.md` |
+| test, coverage, spec, unit test, integration test | `test`          | `docs/task-contexts/test.md`          |
+| security, vulnerability, CVE                      | `security`      | `docs/task-contexts/security.md`      |
 
 ## Chain Detection
 
 Identify the chain from the following keywords:
 
-| Keywords | Chain | Context Files |
-|----------|-------|---------------|
-| Bitcoin, BTC, Taproot, Descriptor, PSBT, MuSig2 | BTC | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
-| Bitcoin Cash, BCH, CashAddr | BCH | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
-| Ethereum, ETH, ERC-20, Gas, Nonce | ETH | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
-| Ripple, XRP, Destination Tag | XRP | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
+| Keywords                                        | Chain | Context Files                                                       |
+| ----------------------------------------------- | ----- | ------------------------------------------------------------------- |
+| Bitcoin, BTC, Taproot, Descriptor, PSBT, MuSig2 | BTC   | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
+| Bitcoin Cash, BCH, CashAddr                     | BCH   | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
+| Ethereum, ETH, ERC-20, Gas, Nonce               | ETH   | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| Ripple, XRP, Destination Tag                    | XRP   | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
 
 ## File Type Detection for Verification
 
 Determine appropriate verification commands based on the edited file extension:
 
-| File Extension | Required Verification | Optional |
-|----------------|----------------------|----------|
-| `*.go` | `make go-lint`, `make check-build` | `make gotest` |
-| `*.md`, `*.mdc` | (none) | markdownlint |
-| `*.sql`, `*.hcl` | `make atlas-fmt`, `make atlas-lint` | |
-| `*.yaml`, `*.toml` | (none) | |
-| `*.sh` | (none) | shellcheck |
-| `*.proto` | `make proto` | |
+| File Extension     | Required Verification               | Optional       |
+| ------------------ | ----------------------------------- | -------------- |
+| `*.go`             | `make go-lint`, `make check-build`  | `make go-test` |
+| `*.md`, `*.mdc`    | (none)                              | markdownlint   |
+| `*.sql`, `*.hcl`   | `make atlas-fmt`, `make atlas-lint` |                |
+| `*.yaml`, `*.toml` | (none)                              |                |
+| `*.sh`             | (none)                              | shellcheck     |
+| `*.proto`          | `make proto`                        |                |
 
 **Important**: Do **NOT** run Go-related verification commands for documentation-only (`*.md`) changes.
 
@@ -156,23 +156,23 @@ internal/interface-adapters/cli/
 
 ## Verification Commands by File Type
 
-### Go Files (*.go)
+### Go Files (\*.go)
 
 ```bash
 make go-lint      # Required: Linter check
 make check-build  # Required: Build verification
-make gotest       # Recommended: Run tests (when functionality changes)
+make go-test       # Recommended: Run tests (when functionality changes)
 make tidy         # Recommended: Tidy dependencies (when imports change)
 ```
 
-### Documentation Files (*.md)
+### Documentation Files (\*.md)
 
 ```bash
 # Go-related commands not required
 # Optional: markdownlint (if installed)
 ```
 
-### Database Files (*.sql,*.hcl)
+### Database Files (_.sql,_.hcl)
 
 ```bash
 make atlas-fmt    # Required: Format
@@ -180,7 +180,7 @@ make atlas-lint   # Required: Lint
 make sqlc         # On schema change
 ```
 
-### Shell Scripts (*.sh)
+### Shell Scripts (\*.sh)
 
 ```bash
 # Optional: shellcheck (if installed)
@@ -192,7 +192,7 @@ make sqlc         # On schema change
 Task Received
     │
     ├─ Editing Go files?
-    │   └─ Yes → make go-lint, make check-build, (make gotest)
+    │   └─ Yes → make go-lint, make check-build, (make go-test)
     │
     ├─ Documentation only?
     │   └─ Yes → No verification commands needed

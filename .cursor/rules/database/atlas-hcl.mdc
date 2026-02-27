@@ -108,7 +108,7 @@ make sqlc
 
 # 6. Verify
 make check-build
-make gotest
+make go-test
 ```
 
 ## Available Make Targets
@@ -140,9 +140,9 @@ When modifying schema HCL files, **always consult** the official Atlas HCL docum
 
 | Dialect    | Documentation URL                    |
 | ---------- | ------------------------------------ |
-| PostgreSQL | https://atlasgo.io/hcl/postgres      |
-| MySQL      | https://atlasgo.io/hcl/mysql         |
-| SQLite     | https://atlasgo.io/hcl/sqlite        |
+| PostgreSQL | <https://atlasgo.io/hcl/postgres>      |
+| MySQL      | <https://atlasgo.io/hcl/mysql>         |
+| SQLite     | <https://atlasgo.io/hcl/sqlite>        |
 
 ### When to Consult the Documentation
 
@@ -347,7 +347,7 @@ Regenerate with `make atlas-dev-reset` (or `make atlas-dev-reset DB_DIALECT=post
 
 - [ ] Run `make regenerate-all-from-atlas` + `make regenerate-all-from-atlas-sqlite` (PostgreSQL) or `make regenerate-all-from-atlas-mysql` (MySQL)
 - [ ] `make check-build` passes
-- [ ] `make gotest` passes
+- [ ] `make go-test` passes
 - [ ] Both MySQL and PostgreSQL schemas are consistent
 
 ## Related Documentation

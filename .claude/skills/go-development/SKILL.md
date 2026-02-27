@@ -14,11 +14,11 @@ Workflow for Go code changes in this repository.
 
 ## Applicable Directories
 
-| Directory | Description |
-|-----------|-------------|
+| Directory   | Description                                |
+| ----------- | ------------------------------------------ |
 | `internal/` | Core application code (Clean Architecture) |
-| `pkg/` | Reusable shared packages |
-| `cmd/` | Application entry points |
+| `pkg/`      | Reusable shared packages                   |
+| `cmd/`      | Application entry points                   |
 
 ## Workflow
 
@@ -29,7 +29,7 @@ Edit Go files following the rules in `.claude/rules/go.md`.
 ### 2. Verify (from rules/go.md)
 
 ```bash
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### 3. Self-Review Checklist

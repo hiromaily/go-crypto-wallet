@@ -46,6 +46,7 @@ git checkout -b {type}/{brief-description}-{issue-number}
 ### If on Wrong Feature Branch
 
 Ask the user:
+
 > "You are currently on branch `{current-branch}`. Should I:
 >
 > 1. Continue working on this branch?
@@ -85,14 +86,14 @@ git checkout -b {type}/{brief-description}-{issue-number}
 - Description should be short and meaningful (use kebab-case)
 - Issue number at the end (just the number, no "issue-" prefix)
 
-| Type | Prefix | Example |
-|------|--------|---------|
-| Feature | `feature/` | `feature/add-taproot-support-123` |
-| Bug fix | `fix/` | `fix/db-connection-error-456` |
-| Refactoring | `refactor/` | `refactor/clean-arch-layer-789` |
-| Documentation | `docs/` | `docs/update-readme-311` |
-| DevOps/CI | `ci/` | `ci/add-lint-workflow-100` |
-| Chore | `chore/` | `chore/update-deps-200` |
+| Type          | Prefix      | Example                           |
+| ------------- | ----------- | --------------------------------- |
+| Feature       | `feature/`  | `feature/add-taproot-support-123` |
+| Bug fix       | `fix/`      | `fix/db-connection-error-456`     |
+| Refactoring   | `refactor/` | `refactor/clean-arch-layer-789`   |
+| Documentation | `docs/`     | `docs/update-readme-311`          |
+| DevOps/CI     | `ci/`       | `ci/add-lint-workflow-100`        |
+| Chore         | `chore/`    | `chore/update-deps-200`           |
 
 ### Branch Rules
 
@@ -151,19 +152,19 @@ Closes #{issue_number}
 
 ### Types (Required)
 
-| Type | Description | Release Impact |
-|------|-------------|----------------|
-| `feat` | New feature | MINOR |
-| `fix` | Bug fix | PATCH |
-| `docs` | Documentation only | - |
-| `refactor` | Code refactoring (no feature/fix) | - |
-| `test` | Adding or updating tests | - |
-| `ci` | CI/CD changes | - |
-| `chore` | Maintenance tasks | - |
-| `build` | Build system changes | - |
-| `perf` | Performance improvements | PATCH |
-| `style` | Code style (formatting, etc.) | - |
-| `revert` | Revert a previous commit | - |
+| Type       | Description                       | Release Impact |
+| ---------- | --------------------------------- | -------------- |
+| `feat`     | New feature                       | MINOR          |
+| `fix`      | Bug fix                           | PATCH          |
+| `docs`     | Documentation only                | -              |
+| `refactor` | Code refactoring (no feature/fix) | -              |
+| `test`     | Adding or updating tests          | -              |
+| `ci`       | CI/CD changes                     | -              |
+| `chore`    | Maintenance tasks                 | -              |
+| `build`    | Build system changes              | -              |
+| `perf`     | Performance improvements          | PATCH          |
+| `style`    | Code style (formatting, etc.)     | -              |
+| `revert`   | Revert a previous commit          | -              |
 
 ### Breaking Changes
 
@@ -178,16 +179,16 @@ fix!: remove deprecated API endpoint
 
 The following are suggested scopes, but other alphanumeric scopes are also permitted.
 
-| Scope | Description |
-|-------|-------------|
-| `btc` | Bitcoin-related |
+| Scope | Description          |
+| ----- | -------------------- |
+| `btc` | Bitcoin-related      |
 | `bch` | Bitcoin Cash-related |
-| `eth` | Ethereum-related |
-| `xrp` | XRP-related |
-| `db` | Database |
-| `api` | API changes |
-| `cli` | CLI changes |
-| `pr` | PR review fixes |
+| `eth` | Ethereum-related     |
+| `xrp` | XRP-related          |
+| `db`  | Database             |
+| `api` | API changes          |
+| `cli` | CLI changes          |
+| `pr`  | PR review fixes      |
 
 ### Examples
 
@@ -260,11 +261,11 @@ After commits are pushed, ALWAYS ask:
 
 ### When to Ask
 
-| Situation | Action |
-|-----------|--------|
-| Single commit task | Ask before creating PR |
-| Multi-phase task | Ask after ALL phases are complete |
-| User explicitly requests PR | Create PR without asking |
+| Situation                   | Action                            |
+| --------------------------- | --------------------------------- |
+| Single commit task          | Ask before creating PR            |
+| Multi-phase task            | Ask after ALL phases are complete |
+| User explicitly requests PR | Create PR without asking          |
 
 ### Create PR
 
@@ -304,18 +305,22 @@ Examples:
 
 ```markdown
 ## Summary
+
 - Brief description of changes
 
 ## Changes
+
 - Change 1
 - Change 2
 
 ## Test plan
+
 - [ ] Unit tests pass
 - [ ] Integration tests pass (if applicable)
 - [ ] Manual testing completed
 
 ## Related
+
 - Closes #{issue_number}
 - Related to #{other_issue}
 ```
@@ -328,25 +333,25 @@ Examples:
 
 Execute verification commands for the modified file types:
 
-| File Type | Required Commands |
-|-----------|-------------------|
-| Go (`*.go`) | `make go-lint && make tidy && make check-build && make gotest` |
+| File Type           | Required Commands                                                                  |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| Go (`*.go`)         | `make go-lint && make tidy && make check-build && make go-test`                    |
 | TypeScript (`*.ts`) | See `typescript-development` skill (Bun for xrpl-grpc-server, npm for erc20-token) |
-| Shell (`*.sh`) | `make shfmt` |
-| Makefile | `make mk-lint` |
-| SQL/HCL | `make atlas-fmt && make atlas-lint` |
+| Shell (`*.sh`)      | `make shfmt`                                                                       |
+| Makefile            | `make mk-lint`                                                                     |
+| SQL/HCL             | `make atlas-fmt && make atlas-lint`                                                |
 
 ### Step 2: Complete Self-Review Checklist
 
 Read the applicable language skill and verify ALL checklist items:
 
-| File Type | Skill | Section to Check |
-|-----------|-------|------------------|
-| Go (`*.go`) | `go-development` | Self-Review Checklist |
-| TypeScript/JS | `typescript-development` | Self-Review Checklist |
-| Shell (`*.sh`) | `shell-scripts` | Verification Checklist |
-| Makefile | `makefile-update` | Verification Checklist |
-| SQL/HCL | `db-migration` | Verification Checklist |
+| File Type      | Skill                    | Section to Check       |
+| -------------- | ------------------------ | ---------------------- |
+| Go (`*.go`)    | `go-development`         | Self-Review Checklist  |
+| TypeScript/JS  | `typescript-development` | Self-Review Checklist  |
+| Shell (`*.sh`) | `shell-scripts`          | Verification Checklist |
+| Makefile       | `makefile-update`        | Verification Checklist |
+| SQL/HCL        | `db-migration`           | Verification Checklist |
 
 ### Step 3: Confirm Before Commit
 

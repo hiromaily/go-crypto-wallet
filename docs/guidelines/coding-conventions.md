@@ -20,7 +20,7 @@ For detailed rules, format commands, and verification commands, see the correspo
 
 ```bash
 # Go files
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 
 # Database schema (HCL)
 make atlas-fmt && make atlas-lint
@@ -43,7 +43,7 @@ After making code changes, use these commands to verify code correctness:
 
 - `make go-lint`: Fix linting issues automatically
 - `make check-build`: Verify that the code builds successfully
-- `make gotest`: Run Go tests to verify functionality
+- `make go-test`: Run Go tests to verify functionality
 - `make tidy`: Organize dependencies and clean up `go.mod`
 
 **Important**: After modifying Go code, run these commands to ensure code quality and correctness.

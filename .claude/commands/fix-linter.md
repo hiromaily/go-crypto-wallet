@@ -25,7 +25,7 @@ Fix linter errors by selecting appropriate skill based on language.
 ```bash
 make go-lint
 # Fix errors
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### TypeScript

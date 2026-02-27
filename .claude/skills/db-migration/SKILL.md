@@ -27,6 +27,7 @@ Workflow for database schema and migration changes.
 Edit HCL files in `tools/atlas/schemas/{db_dialect}/`.
 
 Dialect directories:
+
 - `tools/atlas/schemas/postgres/*.hcl`
 - `tools/atlas/schemas/mysql/*.hcl`
 
@@ -57,15 +58,15 @@ Each target handles: Atlas migrations → Docker DB reset → SQLC schema extrac
 
 After running the regenerate targets, confirm each DB dialect has exactly one migration SQL file:
 
-- `tools/atlas/migrations/postgres/{db-name}/*.sql`   ← one file, updated
-- `tools/atlas/migrations/mysql/{db-name}/*.sql`      ← one file, updated
+- `tools/atlas/migrations/postgres/{db-name}/*.sql` ← one file, updated
+- `tools/atlas/migrations/mysql/{db-name}/*.sql` ← one file, updated
 
 DB names: `keygen`, `sign`, `watch`
 
 ### 5. Verify Go Code
 
 ```bash
-make check-build && make gotest
+make check-build && make go-test
 ```
 
 ## Self-Review Checklist

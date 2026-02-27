@@ -31,7 +31,7 @@ make sqlc-sqlite # SQLite
 make sqlc-postgres # PostgreSQL
 
 # 7. Verify
-make go-lint && make check-build && make gotest
+make go-lint && make check-build && make go-test
 ```
 
 ### Add New Query
@@ -204,7 +204,7 @@ sslmode = "prefer"
 
 ```bash
 # Unit tests
-make gotest
+make go-test
 
 # Integration tests (MySQL)
 make integration-test

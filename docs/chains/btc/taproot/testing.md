@@ -22,7 +22,7 @@ tests/
 ### Run All Unit Tests
 
 ```bash
-make gotest
+make go-test
 ```
 
 ### Run Specific Taproot Tests

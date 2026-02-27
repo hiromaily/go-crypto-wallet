@@ -43,7 +43,7 @@ version: 1.0.0
 
 ```bash
 # Run all
-make gotest
+make go-test
 
 # Specific package
 go test ./internal/domain/...
@@ -56,7 +56,7 @@ go test ./internal/domain/...
 
 ```bash
 # Run
-make gotest-integration
+make go-test-integration
 ```
 
 ### E2E Tests
@@ -156,12 +156,12 @@ func TestUseCase(t *testing.T) {
 
 ```bash
 # Unit Tests
-make gotest              # Run all tests
+make go-test              # Run all tests
 go test -v ./path/to/... # Specific package
 go test -run TestName    # Specific test
 
 # Integration Tests
-make gotest-integration
+make go-test-integration
 
 # Coverage
 go test -coverprofile=coverage.out ./...
@@ -195,7 +195,7 @@ make btc-e2e-descriptor
 
 ```bash
 # Confirm tests pass
-make gotest
+make go-test
 
 # Check coverage (optional)
 go test -coverprofile=coverage.out ./...
@@ -239,7 +239,7 @@ Agent Actions:
 3. Review existing test patterns
 4. Design test cases
 5. Implement with table-driven tests
-6. Verify with make gotest
+6. Verify with make go-test
 ```
 
 ### Example 2: Adding Integration Tests
@@ -252,7 +252,7 @@ Agent Actions:
 2. Review existing patterns in test/integration/
 3. Identify required external dependencies
 4. Implement tests
-5. Verify with make gotest-integration
+5. Verify with make go-test-integration
 ```
 
 ### Example 3: Fixing Flaky Tests

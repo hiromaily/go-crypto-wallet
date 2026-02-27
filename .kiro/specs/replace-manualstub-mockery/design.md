@@ -87,6 +87,7 @@ graph TB
 ```
 
 **Key decisions**:
+
 - Selected pattern: Extend existing (Option A from gap analysis). No new directory structure outside of `infrastructure/api/eth/mocks/`.
 - `DescriptorFileWriter` appended to existing `ports/file` entry (same `dir`); minor naming imprecision accepted over import path breakage.
 - ETH: 15 leaf interfaces only; composed interfaces excluded.
@@ -188,6 +189,7 @@ graph TB
 **Changes to `.mockery.yaml`**:
 
 1. Append to existing `ports/api/xrp` entry — add interfaces:
+
    ```
    TransactionSubmitter:
    AccountInfoProvider:
@@ -195,11 +197,13 @@ graph TB
    ```
 
 2. Append to existing `ports/file` entry — add interface:
+
    ```
    DescriptorFileWriter:
    ```
 
 3. Add new package entry:
+
    ```yaml
    github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth:
      config:
@@ -288,7 +292,7 @@ graph TB
 **Implementation Notes**
 
 - Integration: Import aliases (`coldmocks`, `filemocks`) must not conflict with existing imports in each test file.
-- Validation: Run `make gotest` targeting the `keygen/btc` package after changes.
+- Validation: Run `make go-test` targeting the `keygen/btc` package after changes.
 - Risk: `EXPECT()` call argument matchers must exactly match what the production code passes — review actual call sites in `generate_descriptor.go` and `export_descriptor.go` before writing EXPECT() calls.
 
 ---
@@ -321,7 +325,7 @@ graph TB
 **Implementation Notes**
 
 - Integration: The `sendTestDependencies` struct in `send_transaction_test.go` must update its `submitter` field type from `*MockTransactionSubmitter` to `*xrpmocks.MockTransactionSubmitter`.
-- Validation: Run `make gotest` targeting `watch/xrp` after changes.
+- Validation: Run `make go-test` targeting `watch/xrp` after changes.
 - Risk: Return type assertion helpers (`args.Get(0).(*dtoxrp.SentTx)`) in manual mocks become unnecessary — the generated mock handles type assertions via the `EXPECT()` builder.
 
 ---
@@ -381,7 +385,7 @@ sequenceDiagram
 
     Dev->>Tests: Update imports and EXPECT() calls
     Dev->>Dev: make go-lint && make check-build
-    Dev->>Dev: make gotest (keygen/btc, watch/xrp)
+    Dev->>Dev: make go-test (keygen/btc, watch/xrp)
 ```
 
 ---
@@ -399,7 +403,7 @@ sequenceDiagram
 
 - `make go-lint` — must produce zero lint errors after all changes.
 - `make check-build` — must compile all packages successfully (confirms generated mock files compile correctly).
-- `make gotest` — run unit tests for modified packages.
+- `make go-test` — run unit tests for modified packages.
 
 ### Mockery Generation Verification
 
@@ -418,4 +422,4 @@ This feature is a pure refactoring — no behavior changes, no schema changes, n
 5. Update `create_transaction_test.go` (replace XRP account/preparer mocks).
 6. Create `.claude/skills/mockery/SKILL.md`.
 
-Each step is independently verifiable with `make go-lint && make check-build && make gotest`.
+Each step is independently verifiable with `make go-lint && make check-build && make go-test`.

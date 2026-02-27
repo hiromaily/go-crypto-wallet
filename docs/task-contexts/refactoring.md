@@ -109,7 +109,7 @@ version: 1.0.0
 make go-lint      # リンターチェック
 make tidy         # 依存関係の整理
 make check-build  # ビルド確認
-make gotest       # テスト実行
+make go-test       # テスト実行
 
 # モック再生成（インターフェース変更時）
 make mockery
@@ -135,11 +135,11 @@ make mockery
 ```
 Step A: 準備
   - 必要なテストを追加（カバレッジ向上）
-  - 検証: make gotest
+  - 検証: make go-test
 
 Step B: リファクタリング実行
   - 小さな単位で変更
-  - 検証: make go-lint && make gotest
+  - 検証: make go-lint && make go-test
 
 Step C: クリーンアップ
   - 不要なコードの削除
@@ -151,7 +151,7 @@ Step C: クリーンアップ
 
 ```bash
 # 全ての検証コマンドを実行
-make go-lint && make tidy && make check-build && make gotest
+make go-lint && make tidy && make check-build && make go-test
 ```
 
 ### Step 5: PRドラフト

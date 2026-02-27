@@ -191,7 +191,7 @@ make bch-e2e-reset P=1
 
 ```bash
 # 1. Lint, build, and test
-make go-lint && make check-build && make gotest
+make go-lint && make check-build && make go-test
 
 # 2. Run E2E test (build is automatic via dependency)
 make bch-e2e-reset P=N
