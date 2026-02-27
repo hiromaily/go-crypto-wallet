@@ -214,7 +214,7 @@ func CreateChecksum(prefix string, payload data) data {
 	// Determine what to XOR into those 8 zeroes.
 	mod := PolyMod(enc)
 	ret := make(data, 8)
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		// Convert the 5-bit groups in mod to checksum values.
 		ret[i] = byte((mod >> uint(5*(7-i))) & 0x1f)
 	}
@@ -300,7 +300,7 @@ func DecodeCashAddress(str string) (string, data, error) {
 	// Decode values.
 	valuesSize := len(str) - 1 - prefixSize
 	values := make(data, valuesSize)
-	for i := 0; i < valuesSize; i++ {
+	for i := range valuesSize {
 		c := str[i+prefixSize+1]
 		// We have an invalid char in there.
 		if c > 127 || CharsetRev[c] == -1 {

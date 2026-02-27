@@ -14,7 +14,6 @@ func NewXRPFromCoinType(
 	wsPublic *websocket.WS, wsAdmin *websocket.WS, api *XRPAPI, conf *config.Ripple,
 	coinTypeCode domainCoin.CoinTypeCode,
 ) (apixrp.XRPer, error) {
-	//nolint:exhaustive
 	switch coinTypeCode {
 	case domainCoin.XRP:
 		xrp, err := NewXRP(wsPublic, wsAdmin, api, coinTypeCode, conf)

@@ -627,9 +627,9 @@ func derivationPathToString(path []uint32) string {
 	for _, component := range path {
 		hardened := component >= 0x80000000
 		if hardened {
-			sb.WriteString(fmt.Sprintf("/%d'", component-0x80000000))
+			fmt.Fprintf(&sb, "/%d'", component-0x80000000)
 		} else {
-			sb.WriteString(fmt.Sprintf("/%d", component))
+			fmt.Fprintf(&sb, "/%d", component)
 		}
 	}
 	return sb.String()
@@ -655,7 +655,7 @@ func parseWitnessStack(witnessData []byte) ([]string, error) {
 	}
 
 	result := make([]string, 0, count)
-	for i := uint64(0); i < count; i++ {
+	for i := range count {
 		// Read length of this witness item
 		length, err := wire.ReadVarInt(reader, 0)
 		if err != nil {

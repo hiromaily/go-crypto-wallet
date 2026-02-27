@@ -117,6 +117,7 @@ Address:      20 bytes = Keccak256(pubkey)[12:]
 This system supports **EOA (Externally Owned Account)** addresses only. Smart contract wallets are not supported.
 
 EOA addresses:
+
 - Are 20 bytes (40 hex chars) with `0x` prefix
 - Example: `0x742d35Cc6634C0532925a3b8BC9e7595f0bEb123`
 - Validated via `common.IsHexAddress(addr)`
@@ -167,6 +168,7 @@ Account State = {
 ```
 
 **Key Concepts:**
+
 - Each transaction from an address must use the next sequential nonce
 - Transactions are identified by hash (not UTXO references)
 - Balance changes are atomic (no partial spending)
@@ -184,6 +186,7 @@ effectiveNonce = nonce + additionalNonce
 ```
 
 **Rules:**
+
 - Always use `pending` state to account for unconfirmed transactions
 - Nonces must be sequential — gaps cause transactions to be stuck
 - Increment `additionalNonce` when creating multiple transactions in the same batch
@@ -498,7 +501,7 @@ TxTypeSent ──(confirmations >= threshold)──> TxTypeDone ──(notified)
 
 | Library | Version | Purpose |
 |---------|---------|---------|
-| **go-ethereum** | v1.16.8 | Ethereum client library |
+| **go-ethereum** | v1.17.0 | Ethereum client library |
 | `ethclient` | — | HTTP/WS client |
 | `core/types` | — | Transaction types (LegacyTx, DynamicFeeTx) |
 | `crypto` | — | Keccak256, PubkeyToAddress |

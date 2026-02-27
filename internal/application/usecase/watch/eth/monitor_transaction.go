@@ -165,7 +165,7 @@ func (u *monitorTransactionUseCase) processTransaction(ctx context.Context, sent
 func (u *monitorTransactionUseCase) getReceiptWithRetry(
 	ctx context.Context, txHash string,
 ) (*domainETH.TransactionReceipt, error) {
-	for attempt := 0; attempt < maxReceiptRetries; attempt++ {
+	for attempt := range maxReceiptRetries {
 		receipt, err := u.ethClient.GetTxReceipt(ctx, txHash)
 		if err == nil {
 			return receipt, nil // nil means "not yet mined"

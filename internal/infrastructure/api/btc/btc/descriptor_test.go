@@ -4,17 +4,15 @@ package btc
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
 func TestNewDescriptorParser(t *testing.T) {
 	parser := NewDescriptorParser()
-	if parser == nil {
-		t.Fatal("NewDescriptorParser() returned nil")
-	}
-	if parser.keyRegex == nil {
-		t.Fatal("DescriptorParser.keyRegex is nil")
-	}
+	require.NotNil(t, parser, "NewDescriptorParser() returned nil")
+	require.NotNil(t, parser.keyRegex, "DescriptorParser.keyRegex is nil")
 }
 
 func TestDescriptorParser_Parse(t *testing.T) {

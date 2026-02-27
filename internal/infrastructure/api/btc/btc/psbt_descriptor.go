@@ -90,7 +90,7 @@ func (b *Bitcoin) deriveRedeemScriptForAddress(
 			"account_index", expectedAccountIndex)
 
 		// Try to find the address by deriving up to 1000 addresses (default range)
-		for i := uint32(0); i < 1000; i++ {
+		for i := range uint32(1000) {
 			redeemScript, err := b.DeriveRedeemScriptFromDescriptor(desc.Desc, address, i)
 			if err != nil {
 				// This index doesn't work, try next
@@ -146,7 +146,6 @@ func (b *Bitcoin) deriveP2SHAddressFromRedeemScript(redeemScript []byte) (string
 //   - Creates Bech32 address from 32-byte witness program
 //   - Format: bc1q<32-byte-hash> (62 chars mainnet), bcrt1q<32-byte-hash> (regtest)
 func (b *Bitcoin) deriveNativeSegWitAddress(parsed *domainWallet.Descriptor, addressIndex uint32) (string, error) {
-	//nolint:exhaustive // Only WPKH and WSH are native SegWit types
 	switch parsed.Type {
 	case domainWallet.DescriptorTypeWPKH:
 		// P2WPKH: single-sig Native SegWit

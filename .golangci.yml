@@ -1,5 +1,8 @@
 version: "2"
 
+# Active 46 linters, 65s
+# go tool golangci-lint run -v
+
 run:
   go: "1.25.6"
   timeout: 5m
@@ -29,6 +32,8 @@ formatters:
     generated: strict
 
 linters:
+  # when `default: fast` set, `enable:` ignored
+  # default: fast
   enable:
     - asasalint # Detects "[]any" used as argument for variadic "func(...any)".
     - bodyclose
@@ -54,6 +59,7 @@ linters:
     - makezero # Finds slice declarations with non-zero initial length.
     - mirror # Detects wrong mirror patterns of bytes/strings usage.
     - misspell # Detects commonly misspelled English words in comments.
+    - modernize # Suggests simplifications using modern Go language and library features.
     - nakedret # Detects uses of naked returns.
     - nilnesserr # Detects returning nil errors. It combines the features of nilness and nilerr,
     - nosprintfhostport # Detects misuse of Sprintf to construct a host with port in a URL.
@@ -81,6 +87,10 @@ linters:
           deny:
             - pkg: "nhooyr.io/websocket"
               desc: The containerd websocket package was migrated to a separate module. Use github.com/coder/websocket instead.
+
+    exhaustive:
+      default-signifies-exhaustive: true
+
     forbidigo:
       forbid:
         - pkg: ^regexp$
@@ -103,8 +113,10 @@ linters:
       excludes:
         - G104 # G104: Errors unhandled;
         - G115 # G115: integer overflow conversion;
+        - G117 # G117: Exported struct field matches secret pattern (false positive: intentionally named config/domain fields like Pass, Secret, PrivateKey)
         - G306 # G306: Expect WriteFile permissions to be 0600 or less (too restrictive; also flags "0o644" permissions)
         - G307 # G307: Deferring unsafe method
+        - G703 # G703: Path traversal via taint analysis (false positive: acceptable in test config utility and controlled internal paths)
         # G103: Use of unsafe calls should be audited (includes panic detection)
         # Note: panic is allowed only in instance construction phase (main.go and pkg/di)
 

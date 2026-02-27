@@ -99,7 +99,7 @@ func TestMuSig2ParallelNonceGeneration(t *testing.T) {
 	}
 
 	// Verify all nonces are unique (no two signers generated same nonce)
-	for i := 0; i < len(nonces); i++ {
+	for i := range nonces {
 		for j := i + 1; j < len(nonces); j++ {
 			assert.NotEqual(t, nonces[i], nonces[j], "Nonce %d and %d should be different", i, j)
 		}
@@ -145,20 +145,20 @@ func TestMuSig2NonceIndependence(t *testing.T) {
 	keygenNonces := make([][]byte, iterations)
 	sign1Nonces := make([][]byte, iterations)
 
-	for i := 0; i < iterations; i++ {
+	for i := range iterations {
 		// Generate nonce from keygen wallet
 		_ = keygen.NewKeygenGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// keygenNonces[i], err = keygenNonceUseCase.Generate(ctx, psbt)
 		// require.NoError(t, err, "Iteration %d: keygen nonce generation failed", i)
-		keygenNonces[i] = []byte(fmt.Sprintf("keygen_nonce_%-53d", i)) // Placeholder with variation
+		keygenNonces[i] = fmt.Appendf(nil, "keygen_nonce_%-53d", i) // Placeholder with variation
 
 		// Generate nonce from sign1 wallet
 		_ = sign1.NewSignGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// sign1Nonces[i], err = sign1NonceUseCase.Generate(ctx, psbt)
 		// require.NoError(t, err, "Iteration %d: sign1 nonce generation failed", i)
-		sign1Nonces[i] = []byte(fmt.Sprintf("sign1_nonce__%-53d", i)) // Placeholder with variation
+		sign1Nonces[i] = fmt.Appendf(nil, "sign1_nonce__%-53d", i) // Placeholder with variation
 	}
 
 	// Verify all keygen nonces are unique
@@ -178,8 +178,8 @@ func TestMuSig2NonceIndependence(t *testing.T) {
 	}
 
 	// Verify no overlap between keygen and sign1 nonces
-	for i := 0; i < iterations; i++ {
-		for j := 0; j < iterations; j++ {
+	for i := range iterations {
+		for j := range iterations {
 			assert.NotEqual(t, keygenNonces[i], sign1Nonces[j],
 				"Keygen nonce %d should not match sign1 nonce %d", i, j)
 		}
@@ -357,11 +357,11 @@ func TestMuSig2NonceGenerationPerformance(t *testing.T) {
 
 	// Measure sequential nonce generation
 	sequentialStart := time.Now()
-	for i := 0; i < iterations; i++ {
+	for range iterations {
 		nonceUseCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// _, err := nonceUseCase.Generate(ctx, psbt)
-		// require.NoError(t, err, "Nonce generation %d failed", i)
+		// require.NoError(t, err, "Nonce generation failed")
 		_ = nonceUseCase
 		_ = ctx
 		_ = psbt
@@ -429,12 +429,12 @@ func TestMuSig2NonceRaceConditions(t *testing.T) {
 
 	// Launch multiple concurrent nonce generation operations
 	var wg sync.WaitGroup
-	for i := 0; i < concurrency; i++ {
+	for i := range concurrency {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
 
-			for j := 0; j < iterations; j++ {
+			for j := range iterations {
 				// Generate nonce
 				nonceUseCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
 				// TODO: Implement actual nonce generation

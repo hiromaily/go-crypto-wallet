@@ -20,7 +20,7 @@ func TestAccountInfoProviderInterface(t *testing.T) {
 	var _ apixrp.AccountInfoProvider
 
 	// Verify interface has the correct methods using reflection
-	interfaceType := reflect.TypeOf((*apixrp.AccountInfoProvider)(nil)).Elem()
+	interfaceType := reflect.TypeFor[apixrp.AccountInfoProvider]()
 
 	// Should have exactly 2 methods: GetAccountInfo and GetBalance
 	assert.Equal(t, 2, interfaceType.NumMethod(), "AccountInfoProvider should have 2 methods")
@@ -47,7 +47,7 @@ func TestTransactionSignerInterface(t *testing.T) {
 	var _ apixrp.TransactionSigner
 
 	// Verify interface has the correct methods using reflection
-	interfaceType := reflect.TypeOf((*apixrp.TransactionSigner)(nil)).Elem()
+	interfaceType := reflect.TypeFor[apixrp.TransactionSigner]()
 
 	// Should have 2 methods: SignTransaction (legacy) and SignTransactionNative (new)
 	assert.Equal(t, 2, interfaceType.NumMethod(), "TransactionSigner should have 2 methods (legacy + native)")
@@ -86,7 +86,7 @@ func TestTransactionSubmitterInterface(t *testing.T) {
 	var _ apixrp.TransactionSubmitter
 
 	// Verify interface has the correct methods using reflection
-	interfaceType := reflect.TypeOf((*apixrp.TransactionSubmitter)(nil)).Elem()
+	interfaceType := reflect.TypeFor[apixrp.TransactionSubmitter]()
 
 	// Should have exactly 3 methods: SubmitTransaction, WaitValidation, GetTransaction
 	assert.Equal(t, 3, interfaceType.NumMethod(), "TransactionSubmitter should have 3 methods")
@@ -129,19 +129,19 @@ func TestInterfaceSegregationPrinciple(t *testing.T) {
 	}{
 		{
 			name:          "AccountInfoProvider",
-			interfaceType: reflect.TypeOf((*apixrp.AccountInfoProvider)(nil)).Elem(),
+			interfaceType: reflect.TypeFor[apixrp.AccountInfoProvider](),
 			maxMethods:    2,
 			description:   "Account info provider should only have account query methods",
 		},
 		{
 			name:          "TransactionSigner",
-			interfaceType: reflect.TypeOf((*apixrp.TransactionSigner)(nil)).Elem(),
+			interfaceType: reflect.TypeFor[apixrp.TransactionSigner](),
 			maxMethods:    2,
 			description:   "Transaction signer should only have signing methods (legacy + native)",
 		},
 		{
 			name:          "TransactionSubmitter",
-			interfaceType: reflect.TypeOf((*apixrp.TransactionSubmitter)(nil)).Elem(),
+			interfaceType: reflect.TypeFor[apixrp.TransactionSubmitter](),
 			maxMethods:    3,
 			description:   "Transaction submitter should only have submission-related methods",
 		},

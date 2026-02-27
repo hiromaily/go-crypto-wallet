@@ -39,6 +39,7 @@ CLI Layer (interface-adapters/wallet/eth/)
 ```
 
 **Current constraints** (as of PR #575):
+
 - ~~Port interfaces exist but the monolithic `Ethereumer` (80+ methods) violates ISP~~ — **Resolved (PR #575)**: ISP-compliant focused interfaces added; `Ethereumer` restricted to DI layer only
 - Keygen/sign use cases still import `apiethimpl` (infrastructure) for the hardcoded `Password` constant — resolved by Task 10.3
 - Sign wallet adapter has all methods as stubs
@@ -140,6 +141,7 @@ graph TB
 ```
 
 **Architecture Integration**:
+
 - Selected pattern: Clean Architecture with ISP-compliant port interfaces (mirrors BTC)
 - Domain boundaries: Watch (online, creates/broadcasts), Keygen (offline, key generation **and signing**)
 - Sign Wallet: not required for ETH single-sig — omitted from this diagram
@@ -152,8 +154,8 @@ graph TB
 
 | Layer | Choice / Version | Role in Feature | Notes |
 |-------|------------------|-----------------|-------|
-| Backend | Go 1.24+ | All wallet components | Matches existing |
-| Blockchain Client | go-ethereum v1.16.8 | RPC, types, signing | Already in go.mod |
+| Backend | Go 1.25+ | All wallet components | Matches existing |
+| Blockchain Client | go-ethereum v1.17.0 | RPC, types, signing | Already in go.mod |
 | Key Derivation | btcsuite/hdkeychain + go-bip39 | BIP-44 HD wallet | Already in go.mod |
 | Dev Node | Foundry Anvil | Local ETH testing | Replaces Geth devnet |
 | Data | PostgreSQL, MySQL, SQLite | Transaction/key storage | PostgreSQL is new addition |
@@ -314,6 +316,7 @@ flowchart TD
 ##### Service Interface
 
 > **Status (PR #575)**: Partial implementation complete. The following ISP interfaces have been added to `internal/application/ports/api/eth/interface.go`:
+>
 > - `ETHLifecycle` (`Close`, `CoinTypeCode`), `ETHKeyAccessor` (`GetKeyDir`, `ToECDSA`), `ETHTransactionSigner` (`SignOnRawTransaction`), `ETHTransactionSender` (`SendSignedRawTransaction`), `ETHRawKeyImporter` (`ImportRawKey`), `ETHNodeAPIClient` (`ClientVersion`, `NetVersion`, `NodeInfo`, `Syncing`)
 > - Composed: `ETHKeygenSignClient` (`ETHLifecycle` + `ETHRawKeyImporter`), `ETHWatchClient` (`ETHLifecycle` + `ETHNodeAPIClient`)
 >
@@ -733,6 +736,7 @@ services:
 | SignedTxHex | string | Binary-encoded signed tx |
 
 **Existing tables used** (no schema changes required):
+
 - `eth_detail_tx`: Transaction records with status tracking
 - `account_pubkey_table`: Public key and allocation tracking
 - `auth_account_key_table`: Extended private keys for signing
@@ -768,16 +772,19 @@ Errors follow the existing domain error patterns with typed errors for each fail
 ### Error Categories and Responses
 
 **User Errors**:
+
 - Invalid transaction file path → descriptive parse error (6.5)
 - Missing key for account index → error identifying missing index (1.3)
 - Unsupported network name → error listing supported networks (7.5)
 
 **System Errors**:
+
 - Node unreachable during monitoring → exponential backoff retry (8.5)
 - `SuggestGasTipCap` failure → fallback to config default (2.3)
 - EIP-1559 unsupported → fallback to legacy transaction (2.2)
 
 **Business Logic Errors**:
+
 - Insufficient entropy for key generation → error without partial key material (4.6)
 - Failed/reverted transaction → update status with revert reason (8.3)
 

@@ -1,64 +1,13 @@
 ###############################################################################
 # Linter and Code Quality Targets
 ###############################################################################
+
 ###############################################################################
-# Golang Linting
+# Lint Related Targets
 ###############################################################################
+# go-related targets
+include make/lint-go.mk
 
-# Note: Build tags (e.g., //go:build integration) are supported via .golangci.yml run.build-tags setting
-.PHONY: go-fmt
-go-fmt:
-	go tool golangci-lint fmt
-
-# format imports
-.PHONY: go-imports
-imports:
-	./scripts/lint/imports.sh
-
-# lint by golangci-lint
-.PHONY: go-lint-check
-go-lint-check:
-	go tool golangci-lint run
-
-# lint and fix
-.PHONY: go-lint
-go-lint:
-	go tool golangci-lint run --fix
-
-.PHONY: go-lint-deps
-go-lint-deps:
-	./scripts/lint/deps.sh
-
-.PHONY: go-lint-visibility
-go-lint-visibility:
-	./scripts/lint/visibility.sh
-
-
-# verify golangci-lint configuration
-# Note: run after modifying .golangci.yml
-.PHONY: go-lint-verify-config
-go-lint-verify-config:
-	go tool golangci-lint config verify
-
-# clean golangci-lint cache
-.PHONY: go-clean-lint-cache
-go-clean-lint-cache:
-	go tool golangci-lint cache clean
-
-# staticcheck
-.PHONY: go-staticcheck
-go-staticcheck:
-	go tool staticcheck ./...
-
-# check for upgrade
-.PHONY: go-check-upgrade
-go-check-upgrade:
-	go tool gomajor list
-
-# check for vulnerabilities
-.PHONY: go-check-vuln
-go-check-vuln:
-	go tool govulncheck ./...
 
 ###############################################################################
 # Shell Script Linting

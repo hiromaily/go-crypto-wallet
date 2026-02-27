@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/strategy"
 
 	"github.com/btcsuite/btcd/chaincfg"
@@ -210,9 +212,7 @@ func TestDescriptorGenerator_GenerateAccountDescriptor(t *testing.T) {
 
 			if !tt.wantErr {
 				// Verify descriptor structure
-				if descriptor == nil {
-					t.Fatal("GenerateAccountDescriptor() returned nil descriptor")
-				}
+				require.NotNil(t, descriptor, "GenerateAccountDescriptor() returned nil descriptor")
 
 				// Verify script is not empty
 				if descriptor.Script == "" {

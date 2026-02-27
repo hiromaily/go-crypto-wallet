@@ -158,8 +158,8 @@ func TestMuSig2Aggregation3of5(t *testing.T) {
 	nonces[1] = generateNonce(t, sign1, psbt)
 	nonces[2] = generateNonce(t, sign2, psbt)
 	// Nonces 3 and 4 would come from additional signers (not implemented in test)
-	nonces[3] = []byte(fmt.Sprintf("signer3_nonce_%-52d", 3)) // Placeholder (66 bytes)
-	nonces[4] = []byte(fmt.Sprintf("signer4_nonce_%-52d", 4)) // Placeholder (66 bytes)
+	nonces[3] = fmt.Appendf(nil, "signer3_nonce_%-52d", 3) // Placeholder (66 bytes)
+	nonces[4] = fmt.Appendf(nil, "signer4_nonce_%-52d", 4) // Placeholder (66 bytes)
 
 	// Round 2: Create partial signatures (only 3 out of 5)
 	signatures := make([][]byte, 3)
@@ -532,7 +532,7 @@ func TestMuSig2AggregationTableDriven(t *testing.T) {
 			}
 			// Fill remaining with placeholders (66 bytes for MuSig2 nonces)
 			for i := 3; i < tt.totalSigners; i++ {
-				nonces[i] = []byte(fmt.Sprintf("signer%d_nonce_%-52d", i, i))
+				nonces[i] = fmt.Appendf(nil, "signer%d_nonce_%-52d", i, i)
 			}
 
 			// Generate signatures (up to providedSigs)

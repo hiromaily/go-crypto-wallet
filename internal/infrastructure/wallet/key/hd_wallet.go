@@ -277,7 +277,7 @@ func (k *HDKey) createKeysWithIndex(
 
 	// Index
 	walletKeys := make([]domainKey.WalletKey, count)
-	for i := uint32(0); i < count; i++ {
+	for i := range count {
 		// Derive child key
 		child, err := change.Derive(idxFrom + i)
 		if err != nil {
