@@ -50,6 +50,7 @@
       "Bash(while:*)",
       "Bash(then)",
       "Bash(fi)",
+      "Bash(bash scripts/**/*.sh)",
       "Bash(python3:*)",
       "Bash(bun run lint:*)",
       "Bash(bun run build:*)",
