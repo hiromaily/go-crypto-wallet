@@ -87,50 +87,49 @@
 
 ---
 
-- [ ] 5. Update PR CI workflow with parallel Pattern A and Pattern B jobs
+- [ ] 5. Update PR CI workflow to use fast-only mode
 
-- [ ] 5.1 Replace the single `go-lint` job in `lint-test.yml` with two parallel lint jobs
-  - Rename the existing `go-lint` job to `go-lint-pattern-a`; point it at `.golangci-fast.yml` using the `args: --config .golangci-fast.yml` option in the action
-  - Add a new sibling job `go-lint-pattern-b` under the same `needs: changes` condition, pointing at `.golangci-lightweight.yml`
-  - Both jobs use `ubuntu-slim`, set `timeout-minutes: 5`, and `only-new-issues: true`
-  - Both jobs require `fetch-depth: 0` for the checkout step (required by `only-new-issues`)
-  - Both jobs include `permissions: contents: read`
-  - _Requirements: 4.3, 4.5, 5.3, 5.5, 7.1, 7.2, 7.6, 7.7, 8.1, 8.2_
+- [ ] 5.1 Update the `go-lint` job in `lint-test.yml` to use `--fast-only` and upgrade action to v9
+  - Upgrade `golangci/golangci-lint-action` from `@v8` to `@v9` (node24 runtime; node20 is being deprecated by GitHub)
+  - Add `args: --fast-only` to the action step
+  - Keep the single `.golangci.yml` config (no separate config file needed)
+  - Keep `only-new-issues: true` and `fetch-depth: 0` for the checkout step
+  - Verify the golangci-lint version pin is `v2.10.1`
+  - _Requirements: 4.3, 4.5, 7.1, 7.2, 7.6, 7.7, 8.1, 8.2_
 
-- [ ] 5.2 (P) Update the golangci-lint-action version pin to v2.10.1 across all CI workflows
-  - Update `version: v2.8.0` → `version: v2.10.1` in `lint-test.yml` (both `go-lint-pattern-a` and `go-lint-pattern-b` jobs)
-  - Search all other workflow files under `.github/workflows/` for any additional references to `golangci-lint-action` version and update them
-  - _Requirements: 1.1, 7.4, 7.5_
+- [ ] 5.2 Evaluate runner choice for the PR lint job
+  - `ubuntu-slim` has fewer CPU cores, which may degrade golangci-lint parallel analysis performance
+  - Run the PR lint job on both `ubuntu-slim` and `ubuntu-latest` (or a larger runner) and compare execution times
+  - If `ubuntu-slim` causes timeout or significant slowdown, switch the `go-lint` job to `ubuntu-latest`
+  - Document the chosen runner and rationale in the workflow comment
+  - _Requirements: 7.6, 8.1_
 
 ---
 
-- [ ] 6. Create nightly strict lint workflow
+- [ ] 6. Create nightly strict (full) lint workflow
 
-- [ ] 6.1 Create `.github/workflows/nightly-lint.yml` for the daily strict lint run
+- [ ] 6.1 Create `.github/workflows/nightly-lint.yml` for the daily full lint run
   - Set `on.schedule.cron: "0 2 * * *"` (02:00 UTC daily) and include `on.workflow_dispatch` for manual triggering
-  - Add a single job `strict-lint` that runs on `ubuntu-slim` with `timeout-minutes: 15`
+  - Add a single job `strict-lint` with `timeout-minutes: 15`
+  - Use `ubuntu-latest` (or the runner determined by task 5.2); full lint is CPU-intensive and `ubuntu-slim` cores may be insufficient
   - Include `permissions: contents: read`
   - Use `actions/checkout@v6` with default ref (checks out `main` when triggered by schedule)
   - Use `actions/setup-go@v6` with `go-version` matching the repo's Go version and `cache: true`
-  - Invoke `golangci/golangci-lint-action@v8` with `version: v2.10.1` and `args: --config .golangci-strict.yml` (no `only-new-issues`)
+  - Invoke `golangci/golangci-lint-action@v9` with `version: v2.10.1` (no `--fast-only`, no `only-new-issues`; runs all linters on the full codebase)
   - The workflow must be triggered via `workflow_dispatch` once manually to confirm it completes successfully before the first automated run
   - _Requirements: 6.3, 6.4, 6.5, 6.6, 7.3, 7.6, 7.7_
 
 ---
 
-- [ ] 7. Validate all profiles end-to-end
+- [ ] 7. Validate both execution modes end-to-end
 
-- [ ] 7.1 Verify all three new config files are valid and produce expected results
-  - Run `go tool golangci-lint config verify -c .golangci-fast.yml`
-  - Run `go tool golangci-lint config verify -c .golangci-lightweight.yml`
-  - Run `go tool golangci-lint config verify -c .golangci-strict.yml`
-  - Run `make go-lint-fast` and record completion time to confirm the 2-minute target
-  - Run `make go-lint-lightweight` and record completion time for the A vs B comparison baseline
-  - _Requirements: 4.2, 4.4, 5.2, 6.1, 7.4_
+- [ ] 7.1 Verify the single config and both execution modes produce expected results
+  - Run `go tool golangci-lint config verify` to confirm `.golangci.yml` is valid
+  - Run `make go-lint-fast` and record completion time to confirm it stays under 2 minutes
+  - Run `make go-lint` and record completion time for full (strict) mode baseline
+  - _Requirements: 4.2, 4.4, 6.1, 7.4_
 
-- [ ] 7.2 Open a test PR to verify the parallel CI jobs appear and run correctly
-  - Confirm `go-lint-pattern-a` and `go-lint-pattern-b` both appear in the PR checks
-  - Confirm both jobs complete within their respective timeout limits
-  - Confirm both jobs surface issue counts and elapsed time in the GitHub Actions job summary
-  - Manually trigger `nightly-lint.yml` via `workflow_dispatch` to validate the workflow runs without errors before the first scheduled execution
-  - _Requirements: 4.5, 4.6, 5.5, 5.6, 6.3, 6.4, 8.1, 8.2_
+- [ ] 7.2 Open a test PR to verify CI jobs run correctly
+  - Confirm `go-lint` job uses `--fast-only` and completes within the timeout
+  - Manually trigger `nightly-lint.yml` via `workflow_dispatch` to validate the full lint workflow runs without errors before the first scheduled execution
+  - _Requirements: 4.5, 4.6, 6.3, 6.4, 8.1, 8.2_
