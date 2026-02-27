@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 
 	_ "github.com/lib/pq"
 
@@ -18,15 +19,25 @@ func NewPostgres(conf *config.PostgreSQL) (*sql.DB, error) {
 
 	sslMode := conf.SSLMode
 	if sslMode == "" {
-		sslMode = "disable"
+		// Default to "prefer": use TLS when the server supports it, but allow
+		// unencrypted fallback. See pkg/config/wallet.go PostgreSQL.SSLMode docs.
+		sslMode = "prefer"
 	}
 
-	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		conf.Host, port, conf.User, conf.Pass, conf.DB, sslMode,
-	)
+	// Use URL-format DSN with url.URL to safely encode user, password, and
+	// database name, preventing DSN injection from values containing spaces
+	// or special characters.
+	u := &url.URL{
+		Scheme: "postgres",
+		User:   url.UserPassword(conf.User, conf.Pass),
+		Host:   fmt.Sprintf("%s:%d", conf.Host, port),
+		Path:   conf.DB,
+	}
+	q := u.Query()
+	q.Set("sslmode", sslMode)
+	u.RawQuery = q.Encode()
 
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("postgres", u.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open postgres connection: %w", err)
 	}
