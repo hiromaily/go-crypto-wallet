@@ -15,16 +15,6 @@ currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -
 GOLANGCI_VERSION=v2.8.0
 # Note: PROTOC_BIN is deprecated. Use 'buf' directly for Protocol Buffer operations.
 
-# ETH Variables
-GETH_HTTP_PORT=8546
-BEACON_HTTP_PORT=9596
-GETH_VERSION=v1.17.0
-LODESTAR_VERSION=v1.40.0
-#ETH_CHAIN_ID=11155111 # used in docker-compose.eth.yml.
-TARGET_NETWORK=sepolia
-# https://eth-clients.github.io/checkpoint-sync-endpoints/
-CHECKPOINT_SYNC_URL=https://beaconstate-${TARGET_NETWORK}.chainsafe.io
-
 # Timestamp calculation (OS-dependent)
 OS=$(shell uname -s)
 timestamp=""

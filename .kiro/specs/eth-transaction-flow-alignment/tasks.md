@@ -157,18 +157,18 @@
   - Depends on: Tasks 5, 6, 7, 8, 9
   - _Requirements: 9.5, 9.6_
 
-- [ ] 12. Unit and integration test coverage
-- [ ]* 12.1 Unit tests for Keygen offline signing use case
+- [x] 12. Unit and integration test coverage
+- [x] 12.1 Unit tests for Keygen offline signing use case
   - Test that signing an unsigned tx file produces a correctly signed output with a valid signature
   - Test that requesting a missing key index returns a clear, descriptive error
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ]* 12.2 Unit tests for JSON transaction file format
+- [x] 12.2 Unit tests for JSON transaction file format
   - Test write/read roundtrip for both legacy (Type 0) and EIP-1559 (Type 2) transaction files
   - Test that malformed files or missing required fields produce descriptive parse errors
   - _Requirements: 6.4, 6.5_
 
-- [ ]* 12.3 Integration tests for Watch → Keygen → Watch file exchange flow
+- [x] 12.3 Integration tests for Watch → Keygen → Watch file exchange flow
   - Create unsigned transaction file → sign offline → broadcast signed file → verify `TxTypeDone` status transition
   - Test EIP-1559 transaction creation against an Anvil node
   - Test legacy fallback path when `SupportsEIP1559` returns false
