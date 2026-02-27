@@ -1,0 +1,107 @@
+---
+paths:
+  - internal/application/usecase/keygen/eth/*.go
+  - internal/application/usecase/sign/eth/*.go
+  - internal/application/usecase/watch/eth/*.go
+  - internal/application/dto/eth/*.go
+  - internal/application/ports/api/eth/*.go
+  - internal/application/ports/repository/watch/eth_transaction.go
+  - internal/infrastructure/api/eth/connection.go
+  - internal/infrastructure/api/eth/eth/*.go
+  - internal/infrastructure/api/eth/ethtx/*.go
+  - internal/infrastructure/api/eth/erc20/erc20.go
+  - internal/interface-adapters/cli/keygen/api/eth/*.go
+  - internal/interface-adapters/cli/watch/api/eth/*.go
+  - internal/interface-adapters/wallet/eth/*.go
+---
+
+# Claude Rules - Ethereum (ETH) Development
+
+## Overview
+
+Rules for Claude Code when working on ETH-related code in go-crypto-wallet.
+Always consult the documentation under `docs/chains/eth/` for context before making changes.
+
+> **Key point:** ETH uses single-sig EOA only. Only Watch and Keygen wallets are required.
+> The Keygen Wallet performs transaction signing. The Sign Wallet is not used for ETH.
+
+## Documentation Map
+
+### Start Here
+
+| Task                                | Primary Doc                                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| Understand wallet architecture      | [docs/chains/eth/architecture.md](../../../docs/chains/eth/architecture.md)                 |
+| Ethereum protocol fundamentals      | [docs/chains/eth/README.md](../../../docs/chains/eth/README.md)                             |
+| Transaction patterns (ETH-specific) | [docs/chains/eth/transaction-patterns.md](../../../docs/chains/eth/transaction-patterns.md) |
+| JSON schema for transaction files   | [docs/chains/eth/json-schema.md](../../../docs/chains/eth/json-schema.md)                   |
+| Solidity / ERC-20 development       | [docs/chains/eth/solidity-development.md](../../../docs/chains/eth/solidity-development.md) |
+
+## Key Code Paths
+
+### Implementation
+
+```
+internal/application/usecase/keygen/eth/   # ETH keygen use cases
+internal/application/usecase/watch/eth/    # ETH watch use cases (create, send, monitor)
+internal/application/dto/eth/              # Transaction file DTO
+internal/application/ports/api/eth/        # Ethereumer interface
+internal/infrastructure/api/eth/eth/       # go-ethereum client implementation
+internal/infrastructure/api/eth/ethtx/     # Transaction building helpers
+internal/infrastructure/api/eth/erc20/     # ERC-20 transfer support
+```
+
+### CLI
+
+```
+internal/interface-adapters/cli/keygen/api/eth/   # Keygen CLI commands
+internal/interface-adapters/cli/watch/api/eth/    # Watch CLI commands
+internal/interface-adapters/wallet/eth/           # Wallet entry points
+```
+
+### E2E Scripts
+
+```
+scripts/operation/eth/e2e/   # E2E test shell scripts
+scripts/operation/eth/       # ETH operation scripts
+```
+
+## Critical Rules
+
+### Transaction Types
+
+- Default implementation uses **Legacy transactions** (`types.LegacyTx`)
+- EIP-1559 path (`CreateRawTransactionEIP1559`) exists in infrastructure but is not yet used by Watch use case
+- Always check `eth.SupportsEIP1559(ctx)` before switching fee models
+
+### Nonce Management
+
+- Always fetch nonce with `pending` tag to include in-flight transactions
+- Increment `additionalNonce` for each transaction in a batch
+- Gaps in nonces cause transactions to be stuck — never skip a nonce
+
+### Signing
+
+- Use `types.NewLondonSigner(chainID)` — supports both Legacy and EIP-1559
+- Chain ID: `netID 1 → chainID 1` (mainnet), otherwise `chainID 4`
+- After signing, always verify the recovered sender address matches the expected address
+
+### Key Storage
+
+- Keys stored in **go-ethereum keystore** (encrypted with scrypt)
+- Import uses local filesystem (`keystore.ImportECDSA`), NOT `personal_importRawKey` RPC
+- Anvil is detected by version string containing `"Anvil"` — key ops use local fs in that case
+
+### No Multisig
+
+- ETH uses **single-sig EOA only** — no native multisig at protocol level
+- No Sign Wallet is used for ETH transaction signing
+
+## Applicable Skills
+
+| Situation                   | Skill                  |
+| --------------------------- | ---------------------- |
+| Generating/updating mocks   | `mockery`              |
+| Writing Go code             | `go-development`       |
+| Running wallet CLI commands | `wallet-cli`           |
+| ERC-20 / Solidity work      | `solidity-development` |
