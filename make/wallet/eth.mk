@@ -118,4 +118,15 @@ deploy-hyt:
 		apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json \
 		| head -1 | grep -oE '0x[a-fA-F0-9]+'
 
+## update-hyt-abi: Extract HYT ABI from Foundry build artifact and regenerate Go binding.
+##   When to run: after modifying apps/eth-contracts/contracts/HYT.sol
+##   Procedure:   1. forge build (in apps/eth-contracts) to update out/HYT.sol/HYT.json
+##                2. make update-hyt-abi
+##   Outputs:     contracts/token.abi, internal/infrastructure/contract/token-abi.go
+.PHONY: update-hyt-abi
+update-hyt-abi:
+	jq '.abi' apps/eth-contracts/out/HYT.sol/HYT.json > contracts/token.abi
+	abigen --abi ./contracts/token.abi --pkg contract --type Token \
+		--out ./internal/infrastructure/contract/token-abi.go
+
 # E2E targets moved to make/wallet/eth_e2e.mk
