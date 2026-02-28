@@ -31,7 +31,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
 | Docker Compose | latest | Container orchestration |
-| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.8.0+ | Linter (for development) |
+| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.10.0+ | Linter (for development) |
 | [protoc](https://grpc.io/docs/protoc-installation/) | 33.0+ | Protocol buffer compiler (**Edition 2024**) |
 | [buf](https://buf.build/) | latest | Protocol buffer management (lint, format) |
 

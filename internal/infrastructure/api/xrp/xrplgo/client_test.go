@@ -6,7 +6,11 @@ import (
 	"time"
 
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
+
+// Ensure mockLogger satisfies logger.Logger at compile time.
+var _ logger.Logger = (*mockLogger)(nil)
 
 // TestClientImplementsInterfaces verifies that Client implements the required interfaces.
 func TestClientImplementsInterfaces(t *testing.T) {
@@ -291,7 +295,7 @@ func TestParseAmount(t *testing.T) {
 	}
 }
 
-// mockLogger implements Logger interface for testing.
+// mockLogger implements logger.Logger interface for testing.
 type mockLogger struct {
 	debugCalls []string
 	warnCalls  []string
@@ -299,40 +303,35 @@ type mockLogger struct {
 }
 
 func (m *mockLogger) Debug(msg string, _ ...any) { m.debugCalls = append(m.debugCalls, msg) }
+func (*mockLogger) Info(_ string, _ ...any)      {}
 func (m *mockLogger) Warn(msg string, _ ...any)  { m.warnCalls = append(m.warnCalls, msg) }
 func (m *mockLogger) Error(msg string, _ ...any) { m.errorCalls = append(m.errorCalls, msg) }
 
-func TestClientWithLogger(t *testing.T) {
+func TestClientWithGlobalLogger(t *testing.T) {
 	t.Parallel()
 
-	logger := &mockLogger{}
+	// Set a mock global logger and verify NewClient succeeds.
+	logger.SetGlobal(&mockLogger{})
+	t.Cleanup(func() { logger.SetGlobal(logger.NewNoopLogger()) })
+
 	config := ClientConfig{
 		WebSocketURL: "wss://s.altnet.rippletest.net:51233",
-		Logger:       logger,
 	}
-
 	client, err := NewClient(config)
 	if err != nil {
 		t.Fatalf("NewClient() error = %v", err)
 	}
-	defer func() {
-		_ = client.Close()
-	}()
-
-	// Verify logger was set
-	if client.logger == nil {
-		t.Error("client.logger should not be nil")
-	}
+	defer func() { _ = client.Close() }()
 }
 
 func TestNoopLogger(t *testing.T) {
 	t.Parallel()
 
-	// Ensure noopLogger doesn't panic
-	logger := noopLogger{}
-	logger.Debug("test")
-	logger.Warn("test")
-	logger.Error("test")
+	// Ensure NoopLogger doesn't panic
+	l := logger.NewNoopLogger()
+	l.Debug("test")
+	l.Warn("test")
+	l.Error("test")
 }
 
 func TestDropsInXRPConstant(t *testing.T) {

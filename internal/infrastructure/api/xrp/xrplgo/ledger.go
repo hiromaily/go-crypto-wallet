@@ -8,6 +8,8 @@ import (
 	"time"
 
 	xrpl "github.com/xrpscan/xrpl-go"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ledgerClosedMessage represents a ledger stream message.
@@ -100,7 +102,7 @@ func (c *Client) waitForLedger(ctx context.Context, targetLedgerVersion uint64) 
 			}
 			var msg ledgerClosedMessage
 			if err := json.Unmarshal(ledgerData, &msg); err != nil {
-				c.logger.Warn("failed to parse ledger stream message",
+				logger.Warn("failed to parse ledger stream message",
 					"error", err.Error(),
 					"data", string(ledgerData),
 				)
@@ -130,7 +132,6 @@ func (c *Client) waitForLedger(ctx context.Context, targetLedgerVersion uint64) 
 func (c *Client) SubscribeLedger(ctx context.Context) (<-chan uint64, error) {
 	c.mu.RLock()
 	client := c.client
-	logger := c.logger
 	c.mu.RUnlock()
 
 	if client == nil {

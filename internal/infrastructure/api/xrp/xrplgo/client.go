@@ -13,21 +13,6 @@ import (
 	xrpl "github.com/xrpscan/xrpl-go"
 )
 
-// Logger defines the logging interface used by this package.
-// This allows the caller to inject their own logger implementation.
-type Logger interface {
-	Debug(msg string, args ...any)
-	Warn(msg string, args ...any)
-	Error(msg string, args ...any)
-}
-
-// noopLogger is a no-op logger used when no logger is provided.
-type noopLogger struct{}
-
-func (noopLogger) Debug(_ string, _ ...any) {}
-func (noopLogger) Warn(_ string, _ ...any)  {}
-func (noopLogger) Error(_ string, _ ...any) {}
-
 // ClientConfig holds configuration for the XRPL client.
 type ClientConfig struct {
 	// WebSocketURL is the XRPL node WebSocket URL (e.g., "wss://s.altnet.rippletest.net:51233").
@@ -44,10 +29,6 @@ type ClientConfig struct {
 
 	// ValidationTimeout is the timeout for waiting ledger validation. Default: 5 minutes.
 	ValidationTimeout time.Duration
-
-	// Logger is an optional logger for debugging and error reporting.
-	// If nil, a no-op logger is used.
-	Logger Logger
 }
 
 // DefaultConfig returns a ClientConfig with default values.
@@ -65,7 +46,6 @@ func DefaultConfig(wsURL string) ClientConfig {
 type Client struct {
 	client *xrpl.Client
 	config ClientConfig
-	logger Logger
 	mu     sync.RWMutex
 }
 
@@ -94,18 +74,11 @@ func NewClient(config ClientConfig) (*Client, error) {
 		config.ValidationTimeout = 5 * time.Minute
 	}
 
-	// Use no-op logger if none provided
-	logger := config.Logger
-	if logger == nil {
-		logger = noopLogger{}
-	}
-
 	client := xrpl.NewClient(xrplConfig)
 
 	return &Client{
 		client: client,
 		config: config,
-		logger: logger,
 	}, nil
 }
 

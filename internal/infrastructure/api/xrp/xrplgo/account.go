@@ -9,6 +9,7 @@ import (
 	xrpl "github.com/xrpscan/xrpl-go"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // dropsInXRP is the number of drops in one XRP.
@@ -116,7 +117,7 @@ func (c *Client) GetTotalBalance(ctx context.Context, addrs []string) float64 {
 	var total float64
 	for result := range results {
 		if result.err != nil {
-			c.logger.Error("failed to get balance",
+			logger.Error("failed to get balance",
 				"address", result.address,
 				"error", result.err.Error(),
 			)
