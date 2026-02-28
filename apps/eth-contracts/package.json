@@ -1,0 +1,19 @@
+{
+  "name": "eth-contracts",
+  "version": "1.0.0",
+  "description": "HYC ERC-20 token smart contract",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "lint": "solhint 'contracts/**/*.sol'",
+    "fmt": "dprint fmt --allow-no-files",
+    "deploy:local": "forge script script/DeployHYC.s.sol --rpc-url http://localhost:8545 --broadcast"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1"
+  },
+  "devDependencies": {
+    "solhint": "^6.0.3",
+    "dprint": "^0.52.0"
+  }
+}

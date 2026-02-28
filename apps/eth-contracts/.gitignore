@@ -1,0 +1,12 @@
+# Foundry build artifacts
+out/
+cache/
+
+# Foundry libraries (installed via forge install)
+lib/
+
+# Node.js dependencies
+node_modules/
+
+# Environment variables (never commit private keys)
+.env

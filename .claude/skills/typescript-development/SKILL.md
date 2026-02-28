@@ -1,6 +1,6 @@
 ---
 name: typescript-development
-description: TypeScript/JavaScript development workflow for apps/ directory. Use when modifying TypeScript code in xrpl-grpc-server or JavaScript in erc20-token.
+description: TypeScript/JavaScript development workflow for apps/ directory. Use when modifying TypeScript code in xrpl-grpc-server or JavaScript in eth-contracts.
 ---
 
 # TypeScript/JavaScript Development Workflow
@@ -17,7 +17,7 @@ Workflow for TypeScript/JavaScript code changes in `apps/` directory.
 | App              | Language   | Runtime | Path                     | Status                     |
 | ---------------- | ---------- | ------- | ------------------------ | -------------------------- |
 | xrpl-grpc-server | TypeScript | **Bun** | `apps/xrpl-grpc-server/` | **Deprecated (READ-ONLY)** |
-| erc20-token      | JavaScript | Node.js | `apps/erc20-token/`      | Active                     |
+| eth-contracts    | JavaScript | Node.js | `apps/eth-contracts/`      | Active                     |
 
 ## Workflow
 
@@ -31,8 +31,8 @@ Edit TypeScript/JavaScript files following the rules in `.claude/rules/typescrip
 # xrpl-grpc-server (Bun)
 cd apps/xrpl-grpc-server && bun run lint && bun run typecheck
 
-# erc20-token (Node.js/npm)
-cd apps/erc20-token && npm run lint-js && npm run fmt
+# eth-contracts (Node.js/npm)
+cd apps/eth-contracts && npm run lint-js && npm run fmt
 ```
 
 ### 3. Self-Review Checklist
@@ -47,10 +47,10 @@ cd apps/erc20-token && npm run lint-js && npm run fmt
 | App              | Lint              | Format           | Type Check          |
 | ---------------- | ----------------- | ---------------- | ------------------- |
 | xrpl-grpc-server | `bun run lint`    | `bun run format` | `bun run typecheck` |
-| erc20-token      | `npm run lint-js` | `npm run fmt`    | -                   |
+| eth-contracts    | `npm run lint-js` | `npm run fmt`    | -                   |
 
 ## Related
 
 - `.claude/rules/typescript.md` - TypeScript rules (SSOT)
 - `git-workflow` - Branch, commit, PR workflow
-- `solidity-development` - For Solidity contracts in erc20-token
+- `solidity-development` - For Solidity contracts in eth-contracts
