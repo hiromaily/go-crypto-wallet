@@ -140,7 +140,7 @@ jobs:
         with:
           owner: ${{ github.repository_owner }}
           package-type: container
-          package-name: go-crypto-wallet/app
+          package-name: go-crypto-wallet
           min-versions-to-keep: 20
           ignore-versions: "^(main|latest|v.*)$"
           token: ${{ secrets.GITHUB_TOKEN }}
