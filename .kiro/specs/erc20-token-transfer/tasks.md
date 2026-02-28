@@ -10,9 +10,9 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
 
 ---
 
-- [ ] 1. Register HYC token and clean up generic ERC-20 type in the domain type system
+- [x] 1. Register HYC token and clean up generic ERC-20 type in the domain type system
 
-- [ ] 1.1 Add HYC constants to the domain type system
+- [x] 1.1 Add HYC constants to the domain type system
   - Add `CoinTypeERC20HYC CoinType = 9002` to the `CoinType` constant block (follows the existing HYT = 9001 pattern)
   - Add `HYC CoinTypeCode = "hyc"` to the `CoinTypeCode` constant block and register `HYC: CoinTypeERC20HYC` in `CoinTypeCodeValue` map
   - Add `TokenHYC ERC20Token = "hyc"` to the `ERC20Token` constant block and register `TokenHYC: true` in `ERC20Map`
@@ -20,7 +20,7 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Verify that `IsCoinTypeCode("hyc")`, `IsERC20Token("hyc")`, and `IsETHGroup("hyc")` all return `true`
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7_
 
-- [ ] 1.2 Remove the generic `CoinTypeERC20` and `ERC20 CoinTypeCode` constants
+- [x] 1.2 Remove the generic `CoinTypeERC20` and `ERC20 CoinTypeCode` constants
   - Remove `CoinTypeERC20 CoinType = 9000` from the `CoinType` constant block and remove its `ERC20: CoinTypeERC20` entry from `CoinTypeCodeValue`
   - Remove `ERC20 CoinTypeCode = "erc20"` from the `CoinTypeCode` constant block
   - Update `IsETHGroup` to remove the `val == ERC20` arm — the function becomes `val == ETH || IsERC20Token(val.String())`

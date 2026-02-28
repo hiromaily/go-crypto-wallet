@@ -273,20 +273,19 @@ func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domain
 			// No additional validation needed
 		default:
 		}
-	case domainCoin.ETH, domainCoin.ERC20:
-		if err := c.validateEthereum(); err != nil {
-			return err
-		}
-		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
-			return err
-		}
 	case domainCoin.XRP:
 		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
 			return err
 		}
-	case domainCoin.LTC, domainCoin.HYT:
-		// Not implemented yet
 	default:
+		if domainCoin.IsETHGroup(coinTypeCode) {
+			if err := c.validateEthereum(); err != nil {
+				return err
+			}
+			if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

@@ -243,7 +243,7 @@ func (u *importAddressUseCase) selectTargetAddress(addrFmt *appdto.AddressFormat
 			}
 		case domainCoin.BCH:
 			return addrFmt.P2PKHAddress, nil
-		case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
+		case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
 			return "", fmt.Errorf("unsupported coin type: %s", u.btcClient.CoinTypeCode().String())
 		default:
 			return "", fmt.Errorf("unknown coin type: %s", u.btcClient.CoinTypeCode().String())

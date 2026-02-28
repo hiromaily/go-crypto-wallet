@@ -32,7 +32,7 @@ func NewBitcoin(
 		}
 
 		return bitc, err
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
 		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
 	default:
 		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())

@@ -126,14 +126,14 @@ func validateConfig(t *testing.T, conf *WalletRoot, coinTypeCode domainCoin.Coin
 	switch coinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		validateBitcoinConfig(t, conf)
-	case domainCoin.ETH, domainCoin.ERC20:
-		validateEthereumConfig(t, conf)
 	case domainCoin.XRP:
 		validateRippleConfig(t, conf)
-	case domainCoin.LTC, domainCoin.HYT:
+	case domainCoin.LTC:
 		// Not implemented yet
 	default:
-		// Other coins
+		if domainCoin.IsETHGroup(coinTypeCode) {
+			validateEthereumConfig(t, conf)
+		}
 	}
 
 	// Verify common fields
