@@ -162,6 +162,50 @@ func validateCommonConfig(t *testing.T, conf *WalletRoot) {
 	assert.NotEmpty(t, conf.Database.MySQL.Host, "Database.MySQL.Host should not be empty")
 }
 
+// TestHasERC20Config_HYC verifies that the ETH watch, keygen and sign wallet configs
+// all include a valid HYC token entry that satisfies HasERC20Config.
+func TestHasERC20Config_HYC(t *testing.T) {
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		t.Skip("GOPATH not set, skipping config file test")
+	}
+	projPath := filepath.Join(gopath, "src/github.com/hiromaily/go-crypto-wallet")
+
+	tests := []struct {
+		name       string
+		configFile string
+		walletType domainWallet.WalletType
+	}{
+		{
+			name:       "watch",
+			configFile: filepath.Join(projPath, "config/wallet/eth/watch.yaml"),
+			walletType: domainWallet.WalletTypeWatchOnly,
+		},
+		{
+			name:       "keygen",
+			configFile: filepath.Join(projPath, "config/wallet/eth/keygen.yaml"),
+			walletType: domainWallet.WalletTypeKeyGen,
+		},
+		{
+			name:       "sign",
+			configFile: filepath.Join(projPath, "config/wallet/eth/sign.yaml"),
+			walletType: domainWallet.WalletTypeSign,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := os.Stat(tt.configFile); os.IsNotExist(err) {
+				t.Skipf("Config file not found: %s", tt.configFile)
+			}
+			conf, err := NewWallet(tt.configFile, tt.walletType, domainCoin.HYC)
+			require.NoError(t, err)
+			require.NoError(t, conf.HasERC20Config(domainCoin.TokenHYC),
+				"HYC ERC20 config entry must be present in %s", tt.configFile)
+		})
+	}
+}
+
 // TestNewWallet_YAML tests the NewWallet function with YAML configuration files.
 // This verifies that YAML configuration files are properly loaded and unmarshaled into WalletRoot structure.
 func TestNewWallet_YAML(t *testing.T) {

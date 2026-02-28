@@ -29,16 +29,16 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Run `make check-build` to verify no compilation errors after removal
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 2. Add HYC token entries to wallet configuration files
+- [x] 2. Add HYC token entries to wallet configuration files
 
-- [ ] 2.1 (P) Add HYC entry to watch wallet configuration
+- [x] 2.1 (P) Add HYC entry to watch wallet configuration
   - Add `hyc` block under `ethereum.erc20s` in `config/wallet/eth/watch.yaml`
   - Include `symbol: "hyc"`, `name: "HY Coin"`, `contract_address: "0x..."` (placeholder for deployed HYC contract), `master_address: "0x..."` (placeholder for fee-paying master account), `decimals: 18`
   - Note: placeholder addresses are replaced in Task 5.3 when `forge script` deploys HYC from `apps/eth-contracts/script/DeployHYC.s.sol` to Anvil; production operators replace them after a real deployment
   - Does not conflict with existing `hyt` entry; both coexist in the same map
   - _Requirements: 2.1, 2.4, 2.5_
 
-- [ ] 2.2 (P) Add HYC entries to keygen and sign wallet configurations
+- [x] 2.2 (P) Add HYC entries to keygen and sign wallet configurations
   - Add `erc20s.hyc` block to `config/wallet/eth/keygen.yaml` (currently has no `erc20s` section)
   - Add identical `erc20s.hyc` block to `config/wallet/eth/sign.yaml` (currently has no `erc20s` section)
   - Both entries use the same fields and placeholder values as Task 2.1
