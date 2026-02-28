@@ -106,9 +106,9 @@
 
 ---
 
-- [ ] 6. Create nightly strict (full) lint workflow
+- [x] 6. Create nightly strict (full) lint workflow
 
-- [ ] 6.1 Create `.github/workflows/nightly-lint.yml` for the daily full lint run
+- [x] 6.1 Create `.github/workflows/nightly-lint.yml` for the daily full lint run
   - Set `on.schedule.cron: "0 2 * * *"` (02:00 UTC daily) and include `on.workflow_dispatch` for manual triggering
   - Add a single job `strict-lint` with `timeout-minutes: 15`
   - Use `ubuntu-latest` (or the runner determined by task 5.2); full lint is CPU-intensive and `ubuntu-slim` cores may be insufficient
