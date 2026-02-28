@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/chains/bch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -47,24 +46,18 @@ func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult) in bch: %w", err)
 	}
 
-	// convert bch result to btc infrastructure type, then to application DTO
-	btcResult := &apibtcimpl.GetAddressInfoResult{
+	return &dtobtc.AddressInfo{
 		Address:      infoResult.Address,
 		ScriptPubKey: infoResult.ScriptPubKey,
-		Ismine:       infoResult.Ismine,
-		Solvable:     false,
-		Desc:         "",
-		Iswatchonly:  infoResult.Iswatchonly,
-		Isscript:     infoResult.Isscript,
-		Iswitness:    false,
-		Pubkey:       infoResult.Pubkey,
-		Iscompressed: infoResult.Iscompressed,
-		Ischange:     infoResult.Ischange,
+		IsMine:       infoResult.Ismine,
+		IsWatchOnly:  infoResult.Iswatchonly,
+		IsScript:     infoResult.Isscript,
+		PubKey:       infoResult.Pubkey,
+		IsCompressed: infoResult.Iscompressed,
+		IsChange:     infoResult.Ischange,
 		Timestamp:    infoResult.Timestamp,
 		Labels:       []string{infoResult.Label},
-	}
-
-	return apibtcimpl.ToAddressInfo(btcResult), nil
+	}, nil
 }
 
 // GetAddressesByLabel overrides Bitcoin's GetAddressesByLabel to use BCH address decoding
@@ -87,8 +80,8 @@ func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, 
 			labelName, err)
 	}
 
-	// unmarshal response
-	var labels map[string]apibtcimpl.Purpose
+	// unmarshal response - only keys (address strings) are needed
+	var labels map[string]json.RawMessage
 	err = json.Unmarshal(rawResult, &labels)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult) in bch: %w", err)

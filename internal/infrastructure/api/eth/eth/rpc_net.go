@@ -2,54 +2,26 @@ package eth
 
 import (
 	"context"
-	"fmt"
 	"math/big"
-	"strconv"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
 // NetVersion returns the current network id
 // "1": Ethereum Mainnet
-// "2": Morden Testnet (deprecated)
-// "3": Ropsten Testnet
-// "4": Rinkeby Testnet
 // "5": Goerli Testnet
-// "42": Kovan Testnet
 func (e *Ethereum) NetVersion(ctx context.Context) (uint16, error) {
-	var resNetVersion string
-	err := e.rpcClient.CallContext(ctx, &resNetVersion, "net_version")
-	if err != nil {
-		return 0, fmt.Errorf("fail to call client.CallContext(net_version): %w", err)
-	}
-	u, err := strconv.ParseUint(resNetVersion, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("fail to call strconv.ParseUint(%s): %w", resNetVersion, err)
-	}
-
-	return uint16(u), nil
+	return ethrpc.NetVersion(ctx, e.rpcClient)
 }
 
 // NetListening returns true if client is actively listening for network connections
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#net_listening
-// - if response is false, watch wallet should not be used
 func (e *Ethereum) NetListening(ctx context.Context) (bool, error) {
-	var isConnected bool
-	err := e.rpcClient.CallContext(ctx, &isConnected, "net_listening")
-	if err != nil {
-		return false, fmt.Errorf("fail to call rpc.CallContext(net_listening): %w", err)
-	}
-
-	return isConnected, nil
+	return ethrpc.NetListening(ctx, e.rpcClient)
 }
 
 // NetPeerCount returns number of peers currently connected to the client
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#net_peercount
 func (e *Ethereum) NetPeerCount(ctx context.Context) (*big.Int, error) {
-	var resPeerNumber string
-	err := e.rpcClient.CallContext(ctx, &resPeerNumber, "net_peerCount")
-	if err != nil {
-		return nil, fmt.Errorf("fail to call client.CallContext(net_peerCount): %w", err)
-	}
-	return hexutil.DecodeBig(resPeerNumber)
+	return ethrpc.NetPeerCount(ctx, e.rpcClient)
 }

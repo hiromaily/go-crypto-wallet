@@ -1,20 +1,13 @@
 package btc
 
 import (
-	"encoding/json"
 	"fmt"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
-
-// AddMultisigAddressResult is response type of PRC `addmultisigaddress`
-type AddMultisigAddressResult struct {
-	Address      string `json:"address"`
-	RedeemScript string `json:"redeemScript"`
-}
 
 // AddMultisigAddress create multisig address
 //   - requiredSigs: required number of signature for transaction
@@ -35,64 +28,23 @@ func (b *Bitcoin) AddMultisigAddress(
 			requiredSigs, len(addresses))
 	}
 
-	// requiredSigs
-	bRequiredSigs, err := json.Marshal(requiredSigs)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(requiredSigs): %w", err)
-	}
-
-	// addresses
-	bAddresses, err := json.Marshal(addresses)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(addresses): %w", err)
-	}
-
-	// accountName
-	bAccount, err := json.Marshal(accountName)
-	if err != nil {
-		logger.Warn(
-			"fail to json.Marshal(accountName)",
-			"accountName", accountName,
-			"error", err)
-		bAccount = nil
-	}
-
-	// addressType for only BTC
-	var jsonRawMsg []json.RawMessage
+	// addressType: BTC passes the type string; BCH passes "" to omit the parameter
+	var addrTypeStr string
 	switch b.coinTypeCode {
 	case domainCoin.BTC:
-		// Convert domain AddressType to infrastructure AddrType
-		infraAddrType := FromAddressType(addressType)
-		var bAddrType []byte
-		bAddrType, err = json.Marshal(infraAddrType.String())
-		if err != nil {
-			logger.Warn(
-				"fail to json.Marchal(addressType)",
-				"addressType", infraAddrType.String(),
-				"error", err)
-			bAddrType = nil
-		}
-
-		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddrType}
+		addrTypeStr = FromAddressType(addressType).String()
 	case domainCoin.BCH:
-		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount}
+		addrTypeStr = ""
 	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
 		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	default:
 		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	}
 
-	// call addmultisigaddress
-	rawResult, err := b.Client.RawRequest("addmultisigaddress", jsonRawMsg)
+	result, err := btcrpc.AddMultisigAddress(b.Client, requiredSigs, addresses, accountName, addrTypeStr)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call client.RawRequest(addmultisigaddress): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.AddMultisigAddress(): %w", err)
 	}
 
-	multisigAddrResult := AddMultisigAddressResult{}
-	err = json.Unmarshal(rawResult, &multisigAddrResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-
-	return ToMultisigAddress(&multisigAddrResult), nil
+	return ToMultisigAddressFromPkg(result), nil
 }

@@ -5,7 +5,8 @@ import (
 	"strconv"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
+	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
 )
 
 // ToInfraInstructions converts DTO Instructions to infrastructure Instructions.
@@ -218,14 +219,14 @@ func ToDTOResponseGenerateXAddress(infra *protogen.ResponseGenerateXAddress) *dt
 	}
 }
 
-// ToDTOResponseAccountChannels converts infrastructure ResponseAccountChannels to DTO.
-func ToDTOResponseAccountChannels(infra *ResponseAccountChannels) *dtoxrp.ResponseAccountChannels {
-	if infra == nil {
+// ToDTOResponseAccountChannelsFromPkg converts pkg ResponseAccountChannels to DTO.
+func ToDTOResponseAccountChannelsFromPkg(pkg *xrprpc.ResponseAccountChannels) *dtoxrp.ResponseAccountChannels {
+	if pkg == nil {
 		return nil
 	}
 
-	channels := make([]dtoxrp.AccountChannel, len(infra.Result.Channels))
-	for i, ch := range infra.Result.Channels {
+	channels := make([]dtoxrp.AccountChannel, len(pkg.Result.Channels))
+	for i, ch := range pkg.Result.Channels {
 		channels[i] = dtoxrp.AccountChannel{
 			ChannelID:      ch.ChannelID,
 			Account:        ch.Account,
@@ -241,89 +242,89 @@ func ToDTOResponseAccountChannels(infra *ResponseAccountChannels) *dtoxrp.Respon
 	}
 
 	return &dtoxrp.ResponseAccountChannels{
-		Account:   infra.Result.Account,
+		Account:   pkg.Result.Account,
 		Channels:  channels,
-		Validated: infra.Result.Validated,
+		Validated: pkg.Result.Validated,
 	}
 }
 
-// ToDTOResponseAccountInfo converts infrastructure ResponseAccountInfo to DTO.
-func ToDTOResponseAccountInfo(infra *ResponseAccountInfo) *dtoxrp.ResponseAccountInfo {
-	if infra == nil {
+// ToDTOResponseAccountInfoFromPkg converts pkg ResponseAccountInfo to DTO.
+func ToDTOResponseAccountInfoFromPkg(pkg *xrprpc.ResponseAccountInfo) *dtoxrp.ResponseAccountInfo {
+	if pkg == nil {
 		return nil
 	}
 	return &dtoxrp.ResponseAccountInfo{
-		Account:            infra.Result.AccountData.Account,
-		Balance:            infra.Result.AccountData.Balance,
-		Sequence:           uint64(infra.Result.AccountData.Sequence),
-		OwnerCount:         uint64(infra.Result.AccountData.OwnerCount),
-		Flags:              uint64(infra.Result.AccountData.Flags),
-		LedgerCurrentIndex: uint64(infra.Result.LedgerCurrentIndex),
-		Validated:          infra.Result.Validated,
+		Account:            pkg.Result.AccountData.Account,
+		Balance:            pkg.Result.AccountData.Balance,
+		Sequence:           uint64(pkg.Result.AccountData.Sequence),
+		OwnerCount:         uint64(pkg.Result.AccountData.OwnerCount),
+		Flags:              uint64(pkg.Result.AccountData.Flags),
+		LedgerCurrentIndex: uint64(pkg.Result.LedgerCurrentIndex),
+		Validated:          pkg.Result.Validated,
 	}
 }
 
-// ToDTOResponseServerInfo converts infrastructure ResponseServerInfo to DTO.
-func ToDTOResponseServerInfo(infra *ResponseServerInfo) *dtoxrp.ResponseServerInfo {
-	if infra == nil {
+// ToDTOResponseServerInfoFromPkg converts pkg ResponseServerInfo to DTO.
+func ToDTOResponseServerInfoFromPkg(pkg *xrprpc.ResponseServerInfo) *dtoxrp.ResponseServerInfo {
+	if pkg == nil {
 		return nil
 	}
 	return &dtoxrp.ResponseServerInfo{
-		BuildVersion:    infra.Result.Info.BuildVersion,
-		CompleteLedgers: infra.Result.Info.CompleteLedgers,
-		HostID:          infra.Result.Info.Hostid,
-		IOLatencyMS:     uint64(infra.Result.Info.IoLatencyMs),
+		BuildVersion:    pkg.Result.Info.BuildVersion,
+		CompleteLedgers: pkg.Result.Info.CompleteLedgers,
+		HostID:          pkg.Result.Info.Hostid,
+		IOLatencyMS:     uint64(pkg.Result.Info.IoLatencyMs),
 		LastClose: dtoxrp.ServerLastClose{
-			ConvergeTimeS: infra.Result.Info.LastClose.ConvergeTimeS,
-			Proposers:     uint64(infra.Result.Info.LastClose.Proposers),
+			ConvergeTimeS: pkg.Result.Info.LastClose.ConvergeTimeS,
+			Proposers:     uint64(pkg.Result.Info.LastClose.Proposers),
 		},
-		LoadFactor:  uint64(infra.Result.Info.LoadFactor),
-		Peers:       uint64(infra.Result.Info.Peers),
-		PubkeyNode:  infra.Result.Info.PubkeyNode,
-		ServerState: infra.Result.Info.ServerState,
+		LoadFactor:  uint64(pkg.Result.Info.LoadFactor),
+		Peers:       uint64(pkg.Result.Info.Peers),
+		PubkeyNode:  pkg.Result.Info.PubkeyNode,
+		ServerState: pkg.Result.Info.ServerState,
 		ValidatedLedger: dtoxrp.ValidatedLedger{
-			Age:            uint64(infra.Result.Info.ValidatedLedger.Age),
-			BaseFeeXRP:     fmt.Sprintf("%f", infra.Result.Info.ValidatedLedger.BaseFeeXrp),
-			Hash:           infra.Result.Info.ValidatedLedger.Hash,
-			ReserveBaseXRP: strconv.Itoa(infra.Result.Info.ValidatedLedger.ReserveBaseXrp),
-			ReserveIncXRP:  strconv.Itoa(infra.Result.Info.ValidatedLedger.ReserveIncXrp),
-			Seq:            uint64(infra.Result.Info.ValidatedLedger.Seq),
+			Age:            uint64(pkg.Result.Info.ValidatedLedger.Age),
+			BaseFeeXRP:     fmt.Sprintf("%f", pkg.Result.Info.ValidatedLedger.BaseFeeXrp),
+			Hash:           pkg.Result.Info.ValidatedLedger.Hash,
+			ReserveBaseXRP: strconv.Itoa(pkg.Result.Info.ValidatedLedger.ReserveBaseXrp),
+			ReserveIncXRP:  strconv.Itoa(pkg.Result.Info.ValidatedLedger.ReserveIncXrp),
+			Seq:            uint64(pkg.Result.Info.ValidatedLedger.Seq),
 		},
-		ValidationQuorum: uint64(infra.Result.Info.ValidationQuorum),
+		ValidationQuorum: uint64(pkg.Result.Info.ValidationQuorum),
 	}
 }
 
-// ToDTOResponseValidationCreate converts infrastructure ResponseValidationCreate to DTO.
-func ToDTOResponseValidationCreate(infra *ResponseValidationCreate) *dtoxrp.ResponseValidationCreate {
-	if infra == nil {
+// ToDTOResponseValidationCreateFromPkg converts pkg ResponseValidationCreate to DTO.
+func ToDTOResponseValidationCreateFromPkg(pkg *xrprpc.ResponseValidationCreate) *dtoxrp.ResponseValidationCreate {
+	if pkg == nil {
 		return nil
 	}
 	return &dtoxrp.ResponseValidationCreate{
-		ValidationPublicKey: infra.Result.ValidationPublicKey,
-		ValidationSeed:      infra.Result.ValidationSeed,
-		ValidationKey:       infra.Result.ValidationKey,
+		ValidationPublicKey: pkg.Result.ValidationPublicKey,
+		ValidationSeed:      pkg.Result.ValidationSeed,
+		ValidationKey:       pkg.Result.ValidationKey,
 	}
 }
 
-// ToDTOResponseWalletPropose converts infrastructure ResponseWalletPropose to DTO.
-func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoxrp.ResponseWalletPropose {
-	if infra == nil {
+// ToDTOResponseWalletProposeFromPkg converts pkg ResponseWalletPropose to DTO.
+func ToDTOResponseWalletProposeFromPkg(pkg *xrprpc.ResponseWalletPropose) *dtoxrp.ResponseWalletPropose {
+	if pkg == nil {
 		return nil
 	}
 
 	warning := ""
-	if infra.Status == StatusCodeError.String() {
-		warning = infra.Error
+	if pkg.Status == StatusCodeError.String() {
+		warning = pkg.Error
 	}
 
 	return &dtoxrp.ResponseWalletPropose{
-		MasterSeed:    infra.Result.MasterSeed,
-		MasterSeedHex: infra.Result.MasterSeedHex,
-		MasterKey:     infra.Result.MasterKey,
-		AccountID:     infra.Result.AccountID,
-		PublicKey:     infra.Result.PublicKey,
-		PublicKeyHex:  infra.Result.PublicKeyHex,
-		KeyType:       infra.Result.KeyType,
+		MasterSeed:    pkg.Result.MasterSeed,
+		MasterSeedHex: pkg.Result.MasterSeedHex,
+		MasterKey:     pkg.Result.MasterKey,
+		AccountID:     pkg.Result.AccountID,
+		PublicKey:     pkg.Result.PublicKey,
+		PublicKeyHex:  pkg.Result.PublicKeyHex,
+		KeyType:       pkg.Result.KeyType,
 		Warning:       warning,
 	}
 }

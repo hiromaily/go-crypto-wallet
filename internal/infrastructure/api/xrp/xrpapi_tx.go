@@ -15,7 +15,7 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

@@ -2,6 +2,7 @@ package eth
 
 import (
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
+	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
 // ToDomainUserAmount converts infrastructure UserAmount to domain UserAmount.
@@ -21,110 +22,121 @@ func ToDomainUserAmounts(infra []UserAmount) []domainETH.UserAmount {
 	return result
 }
 
-// FromDomainQuantityTag converts domain QuantityTag to infrastructure QuantityTag.
-func FromDomainQuantityTag(domain domainETH.QuantityTag) QuantityTag {
-	return QuantityTag(domain)
-}
-
-// ToDomainQuantityTag converts infrastructure QuantityTag to domain QuantityTag.
-func ToDomainQuantityTag(infra QuantityTag) domainETH.QuantityTag {
-	return domainETH.QuantityTag(infra)
-}
-
-// ToDomainBlockInfo converts infrastructure BlockInfo to domain BlockInfo.
-func ToDomainBlockInfo(infra *BlockInfo) *domainETH.BlockInfo {
-	if infra == nil {
-		return nil
-	}
-	return &domainETH.BlockInfo{
-		Number:           infra.Number,
-		Hash:             infra.Hash,
-		ParentHash:       infra.ParentHash,
-		Nonce:            infra.Nonce,
-		Sha3Uncles:       infra.Sha3Uncles,
-		LogsBloom:        infra.LogsBloom,
-		TransactionsRoot: infra.TransactionsRoot,
-		StateRoot:        infra.StateRoot,
-		Miner:            infra.Miner,
-		Difficulty:       infra.Difficulty,
-		TotalDifficulty:  infra.TotalDifficulty,
-		ExtraData:        infra.ExtraData,
-		Size:             infra.Size,
-		GasLimit:         infra.GasLimit,
-		GasUsed:          infra.GasUsed,
-		Timestamp:        infra.Timestamp,
-		Transactions:     infra.Transactions,
-		Uncles:           infra.Uncles,
-		BaseFeePerGas:    infra.BaseFeePerGas,
-	}
-}
-
-// ToDomainResponseGetTransaction converts infrastructure ResponseGetTransaction to domain.
-func ToDomainResponseGetTransaction(infra *ResponseGetTransaction) *domainETH.ResponseGetTransaction {
-	if infra == nil {
-		return nil
-	}
-	return &domainETH.ResponseGetTransaction{
-		BlockHash:        infra.BlockHash,
-		BlockNumber:      infra.BlockNumber,
-		From:             infra.From,
-		Gas:              infra.Gas,
-		GasPrice:         infra.GasPrice,
-		Hash:             infra.Hash,
-		Input:            infra.Input,
-		Nonce:            infra.Nonce,
-		To:               infra.To,
-		TransactionIndex: infra.TransactionIndex,
-		Value:            infra.Value,
-		V:                infra.V,
-		R:                infra.R,
-		S:                infra.S,
-	}
-}
-
-// ToDomainResponseGetTransactionReceipt converts infrastructure ResponseGetTransactionReceipt to domain.
-func ToDomainResponseGetTransactionReceipt(
-	infra *ResponseGetTransactionReceipt,
-) *domainETH.ResponseGetTransactionReceipt {
-	if infra == nil {
-		return nil
-	}
-	return &domainETH.ResponseGetTransactionReceipt{
-		TransactionHash:   infra.TransactionHash,
-		TransactionIndex:  infra.TransactionIndex,
-		BlockHash:         infra.BlockHash,
-		BlockNumber:       infra.BlockNumber,
-		From:              infra.From,
-		To:                infra.To,
-		CumulativeGasUsed: infra.CumulativeGasUsed,
-		GasUsed:           infra.GasUsed,
-		ContractAddress:   infra.ContractAddress,
-		Logs:              infra.Logs,
-		LogsBloom:         infra.LogsBloom,
-		Status:            infra.Status,
-	}
-}
-
-// ToDomainResponseSyncing converts infrastructure ResponseSyncing to domain.
-func ToDomainResponseSyncing(infra *ResponseSyncing) *domainETH.ResponseSyncing {
-	if infra == nil {
+// ToDomainResponseSyncingFromPkg converts pkg ResponseSyncing to domain ResponseSyncing.
+func ToDomainResponseSyncingFromPkg(pkg *ethrpc.ResponseSyncing) *domainETH.ResponseSyncing {
+	if pkg == nil {
 		return nil
 	}
 	return &domainETH.ResponseSyncing{
-		StartingBlock:       infra.StartingBlock,
-		HighestBlock:        infra.HighestBlock,
-		CurrentBlock:        infra.CurrentBlock,
-		SyncedAccounts:      infra.SyncedAccounts,
-		SyncedAccountBytes:  infra.SyncedAccountBytes,
-		SyncedBytecodes:     infra.SyncedBytecodes,
-		SyncedBytecodeBytes: infra.SyncedBytecodeBytes,
-		SyncedStorage:       infra.SyncedStorage,
-		SyncedStorageBytes:  infra.SyncedStorageBytes,
-		HealingBytecode:     infra.HealingBytecode,
-		HealedBytecodes:     infra.HealedBytecodes,
-		HealedBytecodeBytes: infra.HealedBytecodeBytes,
-		HealingTrienodes:    infra.HealingTrienodes,
-		HealedTrienodes:     infra.HealedTrienodes,
-		HealedTrienodeBytes: infra.HealedTrienodeBytes,
+		StartingBlock:       pkg.StartingBlock,
+		HighestBlock:        pkg.HighestBlock,
+		CurrentBlock:        pkg.CurrentBlock,
+		SyncedAccounts:      pkg.SyncedAccounts,
+		SyncedAccountBytes:  pkg.SyncedAccountBytes,
+		SyncedBytecodes:     pkg.SyncedBytecodes,
+		SyncedBytecodeBytes: pkg.SyncedBytecodeBytes,
+		SyncedStorage:       pkg.SyncedStorage,
+		SyncedStorageBytes:  pkg.SyncedStorageBytes,
+		HealingBytecode:     pkg.HealingBytecode,
+		HealedBytecodes:     pkg.HealedBytecodes,
+		HealedBytecodeBytes: pkg.HealedBytecodeBytes,
+		HealingTrienodes:    pkg.HealingTrienodes,
+		HealedTrienodes:     pkg.HealedTrienodes,
+		HealedTrienodeBytes: pkg.HealedTrienodeBytes,
+	}
+}
+
+// ToDomainBlockInfoFromPkg converts pkg BlockInfo to domain BlockInfo.
+func ToDomainBlockInfoFromPkg(pkg *ethrpc.BlockInfo) *domainETH.BlockInfo {
+	if pkg == nil {
+		return nil
+	}
+	return &domainETH.BlockInfo{
+		Number:           pkg.Number,
+		Hash:             pkg.Hash,
+		ParentHash:       pkg.ParentHash,
+		Nonce:            pkg.Nonce,
+		Sha3Uncles:       pkg.Sha3Uncles,
+		LogsBloom:        pkg.LogsBloom,
+		TransactionsRoot: pkg.TransactionsRoot,
+		StateRoot:        pkg.StateRoot,
+		Miner:            pkg.Miner,
+		Difficulty:       pkg.Difficulty,
+		TotalDifficulty:  pkg.TotalDifficulty,
+		ExtraData:        pkg.ExtraData,
+		Size:             pkg.Size,
+		GasLimit:         pkg.GasLimit,
+		GasUsed:          pkg.GasUsed,
+		Timestamp:        pkg.Timestamp,
+		Transactions:     pkg.Transactions,
+		Uncles:           pkg.Uncles,
+		BaseFeePerGas:    pkg.BaseFeePerGas,
+	}
+}
+
+// ToDomainResponseGetTransactionFromPkg converts pkg ResponseGetTransaction to domain.
+func ToDomainResponseGetTransactionFromPkg(
+	pkg *ethrpc.ResponseGetTransaction,
+) *domainETH.ResponseGetTransaction {
+	if pkg == nil {
+		return nil
+	}
+	return &domainETH.ResponseGetTransaction{
+		BlockHash:        pkg.BlockHash,
+		BlockNumber:      pkg.BlockNumber,
+		From:             pkg.From,
+		Gas:              pkg.Gas,
+		GasPrice:         pkg.GasPrice,
+		Hash:             pkg.Hash,
+		Input:            pkg.Input,
+		Nonce:            pkg.Nonce,
+		To:               pkg.To,
+		TransactionIndex: pkg.TransactionIndex,
+		Value:            pkg.Value,
+		V:                pkg.V,
+		R:                pkg.R,
+		S:                pkg.S,
+	}
+}
+
+// ToDomainResponseGetTransactionReceiptFromPkg converts pkg ResponseGetTransactionReceipt to domain.
+func ToDomainResponseGetTransactionReceiptFromPkg(
+	pkg *ethrpc.ResponseGetTransactionReceipt,
+) *domainETH.ResponseGetTransactionReceipt {
+	if pkg == nil {
+		return nil
+	}
+	return &domainETH.ResponseGetTransactionReceipt{
+		TransactionHash:   pkg.TransactionHash,
+		TransactionIndex:  pkg.TransactionIndex,
+		BlockHash:         pkg.BlockHash,
+		BlockNumber:       pkg.BlockNumber,
+		From:              pkg.From,
+		To:                pkg.To,
+		CumulativeGasUsed: pkg.CumulativeGasUsed,
+		GasUsed:           pkg.GasUsed,
+		ContractAddress:   pkg.ContractAddress,
+		Logs:              pkg.Logs,
+		LogsBloom:         pkg.LogsBloom,
+		Status:            pkg.Status,
+	}
+}
+
+// ToDomainTransactionReceiptFromPkg converts pkg TransactionReceipt to domain.
+func ToDomainTransactionReceiptFromPkg(pkg *ethrpc.TransactionReceipt) *domainETH.TransactionReceipt {
+	if pkg == nil {
+		return nil
+	}
+	return &domainETH.TransactionReceipt{
+		TransactionHash:   pkg.TransactionHash,
+		TransactionIndex:  pkg.TransactionIndex,
+		BlockHash:         pkg.BlockHash,
+		BlockNumber:       pkg.BlockNumber,
+		From:              pkg.From,
+		To:                pkg.To,
+		CumulativeGasUsed: pkg.CumulativeGasUsed,
+		GasUsed:           pkg.GasUsed,
+		ContractAddress:   pkg.ContractAddress,
+		Status:            pkg.Status,
 	}
 }

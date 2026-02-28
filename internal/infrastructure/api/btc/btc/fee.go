@@ -1,47 +1,26 @@
 package btc
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
-
-// EstimateSmartFeeResult is response type of PRC `estimatesmartfee`
-type EstimateSmartFeeResult struct {
-	FeeRate float64  `json:"feerate"`
-	Errors  []string `json:"errors"`
-	Blocks  uint64   `json:"blocks"`
-}
 
 // Making Sense of Bitcoin Transaction Fees
 // https://bitzuma.com/posts/making-sense-of-bitcoin-transaction-fees/
 
 // EstimateSmartFee calls RPC `estimatesmartfee` and returns BTC/kB(float64)
 func (b *Bitcoin) EstimateSmartFee() (float64, error) {
-	input, err := json.Marshal(b.confirmationBlock)
+	feeRate, err := btcrpc.EstimateSmartFee(b.Client, int(b.confirmationBlock))
 	if err != nil {
-		return 0, fmt.Errorf("fail to call json.Marchal(confirmationBlock): %w", err)
+		return 0, fmt.Errorf("fail to call btcrpc.EstimateSmartFee(): %w", err)
 	}
-	rawResult, err := b.Client.RawRequest("estimatesmartfee", []json.RawMessage{input})
-	if err != nil {
-		return 0, fmt.Errorf("fail to call json.RawRequest(estimatesmartfee): %w", err)
-	}
-
-	estimateResult := EstimateSmartFeeResult{}
-	err = json.Unmarshal(rawResult, &estimateResult)
-	if err != nil {
-		return 0, errors.New("fail to all json.Unmarshal(rawResult)")
-	}
-	if len(estimateResult.Errors) != 0 {
-		return 0, fmt.Errorf("response includes error: %s", estimateResult.Errors[0])
-	}
-
-	return estimateResult.FeeRate, nil
+	return feeRate, nil
 }
 
 // GetTransactionFee calculate fee from transaction size

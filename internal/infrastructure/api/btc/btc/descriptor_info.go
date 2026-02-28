@@ -4,10 +4,10 @@ package btc
 // See descriptor_service.go for full warning.
 
 import (
-	"encoding/json"
 	"fmt"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // GetDescriptorInfo calls Bitcoin Core's getdescriptorinfo RPC to analyze a descriptor
@@ -22,28 +22,12 @@ import (
 //
 // Returns the descriptor with checksum and analysis results.
 func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error) {
-	params := make([]json.RawMessage, 0, 1)
-
-	// Add descriptor parameter
-	bDescriptor, err := json.Marshal(descriptor)
+	result, err := btcrpc.GetDescriptorInfo(b.Client, descriptor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal descriptor: %w", err)
-	}
-	params = append(params, bDescriptor)
-
-	// Call RPC
-	rawResult, err := b.Client.RawRequest("getdescriptorinfo", params)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call getdescriptorinfo RPC: %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.GetDescriptorInfo(): %w", err)
 	}
 
-	// Parse result
-	var result dtobtc.DescriptorInfo
-	if err := json.Unmarshal(rawResult, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal getdescriptorinfo result: %w", err)
-	}
-
-	return &result, nil
+	return ToDescriptorInfoFromPkg(result), nil
 }
 
 // ListDescriptors calls Bitcoin Core's listdescriptors RPC to list all imported descriptors.
@@ -59,26 +43,10 @@ func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, 
 //
 // Returns the list of descriptors with their metadata.
 func (b *Bitcoin) ListDescriptors(privateDescriptors bool) (*dtobtc.ListDescriptorsResult, error) {
-	params := make([]json.RawMessage, 0, 1)
-
-	// Add private parameter
-	bPrivate, err := json.Marshal(privateDescriptors)
+	result, err := btcrpc.ListDescriptors(b.Client, privateDescriptors)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal private parameter: %w", err)
-	}
-	params = append(params, bPrivate)
-
-	// Call RPC
-	rawResult, err := b.Client.RawRequest("listdescriptors", params)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call listdescriptors RPC: %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.ListDescriptors(): %w", err)
 	}
 
-	// Parse result
-	var result dtobtc.ListDescriptorsResult
-	if err := json.Unmarshal(rawResult, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal listdescriptors result: %w", err)
-	}
-
-	return &result, nil
+	return ToListDescriptorsResultFromPkg(result), nil
 }

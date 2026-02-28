@@ -9,7 +9,7 @@ import "google/protobuf/empty.proto";
 option features.field_presence = IMPLICIT;
 // Allow existing camelCase field names without requiring snake_case
 option features.enforce_naming_style = STYLE_LEGACY;
-option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen";
+option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen";
 
 message ResponseGenerateAddress {
   string xAddress = 1;

@@ -82,10 +82,7 @@ func (b *Bitcoin) CreatePSBT(
 		"sender_account", senderAccount.String())
 
 	// Convert application DTOs to infrastructure types
-	infraPrevTxs, err := FromPreviousTx(prevTxs, b)
-	if err != nil {
-		return "", fmt.Errorf("failed to convert PreviousTx: %w", err)
-	}
+	infraPrevTxs := fromDTOPreviousTxToLocal(prevTxs)
 	// Create PSBT from unsigned transaction
 	packet, err := psbt.NewFromUnsignedTx(msgTx)
 	if err != nil {
