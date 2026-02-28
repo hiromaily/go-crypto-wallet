@@ -306,10 +306,9 @@ func (m *mockLogger) Warn(msg string, _ ...any)  { m.warnCalls = append(m.warnCa
 func (m *mockLogger) Error(msg string, _ ...any) { m.errorCalls = append(m.errorCalls, msg) }
 
 func TestClientWithGlobalLogger(t *testing.T) {
-	t.Parallel()
-
-	// Set a mock global logger and verify NewClient succeeds.
-	logger.SetGlobal(&mockLogger{})
+	// Do not use t.Parallel() — this test mutates global logger state.
+	mock := &mockLogger{}
+	logger.SetGlobal(mock)
 	t.Cleanup(func() { logger.SetGlobal(logger.NewNoopLogger()) })
 
 	config := ClientConfig{
@@ -319,7 +318,18 @@ func TestClientWithGlobalLogger(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewClient() error = %v", err)
 	}
-	defer func() { _ = client.Close() }()
+
+	// Close the client so that subsequent requests fail.
+	// GetTotalBalance logs logger.Error for each address whose balance lookup fails,
+	// which verifies the global logger is wired correctly.
+	if err := client.Close(); err != nil {
+		t.Fatalf("Close() error = %v", err)
+	}
+	_ = client.GetTotalBalance(context.Background(), []string{"rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"})
+
+	if len(mock.errorCalls) == 0 {
+		t.Error("expected global logger.Error to be called, but no error calls were recorded")
+	}
 }
 
 func TestNoopLogger(t *testing.T) {
