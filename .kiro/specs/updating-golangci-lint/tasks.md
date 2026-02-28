@@ -121,15 +121,15 @@
 
 ---
 
-- [ ] 7. Validate both execution modes end-to-end
+- [x] 7. Validate both execution modes end-to-end
 
-- [ ] 7.1 Verify the single config and both execution modes produce expected results
+- [x] 7.1 Verify the single config and both execution modes produce expected results
   - Run `go tool golangci-lint config verify` to confirm `.golangci.yml` is valid
   - Run `make go-lint-fast` and record completion time to confirm it stays under 2 minutes
   - Run `make go-lint` and record completion time for full (strict) mode baseline
   - _Requirements: 4.2, 4.4, 6.1, 7.4_
 
-- [ ] 7.2 Open a test PR to verify CI jobs run correctly
+- [x] 7.2 Open a test PR to verify CI jobs run correctly
   - Confirm `go-lint` job uses `--fast-only` and completes within the timeout
   - Manually trigger `nightly-lint.yml` via `workflow_dispatch` to validate the full lint workflow runs without errors before the first scheduled execution
   - _Requirements: 4.5, 4.6, 6.3, 6.4, 8.1, 8.2_
