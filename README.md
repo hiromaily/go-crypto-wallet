@@ -125,13 +125,15 @@ BCH supports P2PKH and P2SH patterns with CashAddr format. SegWit and Taproot ar
 
 ### Ethereum (ETH) Transaction Patterns
 
-ETH supports EIP-1559 (Type 2) transactions with EOA single-sig.
+ETH supports EIP-1559 (Type 2) transactions with EOA single-sig and ERC-20 token transfers.
 
 | Pattern | Type | Address Format | Transaction Type | Status |
 |---------|------|----------------|------------------|--------|
 | **P1** | Single-sig (EOA) | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
+| **P2** | ERC-20 HYT Token Transfer | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
 
 > **Note**: Supports both Anvil and Geth nodes. Database backend is configurable (SQLite/MySQL/PostgreSQL).
+> P2 deploys the HYT ERC-20 contract via Foundry (forge) onto the local Anvil node before running the transfer workflow.
 
 ### Quick Start
 
@@ -145,17 +147,25 @@ make bch-e2e P=1    # P2PKH Single-sig
 make bch-e2e P=2    # P2SH 2-of-3 Multisig
 make bch-e2e P=3    # P2SH 3-of-3 Multisig
 
-# ETH: Run pattern
+# ETH: Run individual patterns
 make eth-e2e-p1     # Single-sig EIP-1559
+make eth-e2e-p2     # ERC-20 HYT Token Transfer
+
+# ETH: Run all patterns in parallel
+make eth-e2e-parallel          # Run P1 and P2 in parallel
+make eth-e2e-ci-all            # CI mode (non-interactive)
 
 # Fresh start with full reset
 make btc-e2e-reset P=5
 make bch-e2e-reset P=3
 make eth-e2e-p1-reset
+make eth-e2e-p2-reset
 
 # CI/CD mode (non-interactive)
 make btc-e2e-ci P=3
 make bch-e2e-ci P=3
+make eth-e2e-p1-ci
+make eth-e2e-p2-ci
 ```
 
 ### Why This Matters
