@@ -643,6 +643,238 @@ Phase 2 steps per chain:
 
 ---
 
+## Target Directory Structure
+
+The trees below show the **before → after** state for all affected files. Markers: `[NEW]` created, `[THIN]` kept but simplified to a thin adapter, `[DEL]` removed, `[REDUCED]` file kept with fewer types, `[UPDATED]` method signatures changed. Unmarked files are unchanged.
+
+### `pkg/chains/` — After Refactoring
+
+```
+pkg/chains/
+├── btc.go                          (unchanged) NewBitcoinRPCClient factory
+├── eth.go                          (unchanged) NewEthereumRPCClient factory
+├── xrp.go                          (unchanged) NewWebSocketClient factory
+├── bch/
+│   └── bch.go                      (unchanged)
+├── btc/
+│   ├── derive.go                   (unchanged)
+│   ├── seed.go                     (unchanged)
+│   ├── multisig/                   (unchanged)
+│   └── rpc/                        [NEW] BTC RPC package
+│       ├── client.go               [NEW] RPCCaller interface
+│       ├── types.go                [NEW] FlexibleLabels, WarningsField custom unmarshalers
+│       ├── address.go              [NEW] getaddressinfo, validateaddress, getaddressesbylabel + types
+│       ├── balance.go              [NEW] getbalance
+│       ├── block.go                [NEW] getblockcount
+│       ├── descriptor.go           [NEW] getdescriptorinfo, listdescriptors + types
+│       ├── fee.go                  [NEW] estimatesmartfee
+│       ├── import.go               [NEW] importaddress, importprivkey, importdescriptors, importmulti + types
+│       ├── label.go                [NEW] setlabel
+│       ├── logging.go              [NEW] logging + types
+│       ├── multisig.go             [NEW] addmultisigaddress + types
+│       ├── networkinfo.go          [NEW] getnetworkinfo, getblockchaininfo + types
+│       ├── transaction.go          [NEW] gettransaction, gettxout, decoderawtransaction,
+│       │                                createrawtransaction, fundrawtransaction,
+│       │                                signrawtransactionwithwallet, sendrawtransaction + types
+│       ├── wallet.go               [NEW] createwallet, loadwallet, unloadwallet
+│       └── *_test.go               [NEW] unit tests (no live node required)
+├── eth/
+│   ├── eth.go                      (unchanged)
+│   ├── contract/                   [MOVED] from internal/infrastructure/contract/
+│   │   ├── contract.go             [MOVED] ERC20 contract factory (NewToken)
+│   │   └── token-abi.go            [MOVED] auto-generated ABI bindings (DO NOT EDIT)
+│   └── rpc/                        [NEW] ETH RPC package
+│       ├── client.go               [NEW] RPCCaller + EthCaller interfaces
+│       ├── types.go                [NEW] ResponseSyncing (moved from infrastructure)
+│       ├── eth.go                  [NEW] eth_blockNumber, eth_getBalance, eth_syncing,
+│       │                                eth_protocolVersion, eth_coinbase, eth_accounts,
+│       │                                eth_getTransactionCount, eth_getBlockByNumber,
+│       │                                eth_getBlockTransactionCountByNumber,
+│       │                                eth_getUncleCountByBlockNumber + types
+│       ├── gas.go                  [NEW] eth_gasPrice, eth_estimateGas
+│       ├── transaction.go          [NEW] eth_sign, eth_sendTransaction, eth_sendRawTransaction,
+│       │                                eth_getTransactionByHash, eth_getTransactionReceipt
+│       ├── admin.go                [NEW] admin_addPeer, admin_datadir, admin_nodeInfo, admin_peers
+│       ├── personal.go             [NEW] personal_importRawKey, personal_newAccount,
+│       │                                personal_listAccounts, personal_lockAccount,
+│       │                                personal_unlockAccount
+│       ├── miner.go                [NEW] miner_start, miner_stop, eth_mining, eth_hashrate
+│       ├── net.go                  [NEW] net_version, net_listening, net_peerCount
+│       ├── web3.go                 [NEW] web3_clientVersion, web3_sha3
+│       └── *_test.go               [NEW] unit tests (no live node required)
+└── xrp/
+    ├── address.go                  (unchanged)
+    ├── keygen.go                   (unchanged)
+    ├── sign.go                     (unchanged)
+    ├── serialize.go                (unchanged)
+    ├── util.go                     (unchanged)
+    ├── client/                     [MOVED Phase 2] from internal/infrastructure/api/xrp/xrplgo/
+    │   ├── client.go               [MOVED] xrpl-go client wrapper (no internal/ imports)
+    │   ├── account.go              [MOVED] account methods (internal/dto/xrp removed in task 7.2)
+    │   ├── transaction.go          [MOVED] transaction methods (internal/dto/xrp removed in task 7.2)
+    │   ├── ledger.go               [MOVED] ledger methods
+    │   └── client_test.go          [MOVED] unit tests
+    ├── protogen/                   [MOVED] from internal/infrastructure/api/xrp/protogen/
+    │   ├── account.pb.go           [MOVED] proto-generated (DO NOT EDIT)
+    │   ├── account_grpc.pb.go      [MOVED] proto-generated (DO NOT EDIT)
+    │   ├── address.pb.go           [MOVED] proto-generated (DO NOT EDIT)
+    │   ├── address_grpc.pb.go      [MOVED] proto-generated (DO NOT EDIT)
+    │   ├── transaction.pb.go       [MOVED] proto-generated (DO NOT EDIT)
+    │   └── transaction_grpc.pb.go  [MOVED] proto-generated (DO NOT EDIT)
+    └── rpc/                        [NEW] XRP RPC package
+        ├── client.go               [NEW] WSCaller interface
+        ├── account.go              [NEW] account_info, account_channels + types
+        ├── server.go               [NEW] server_info + types
+        ├── keygen.go               [NEW] wallet_propose, validation_create + types
+        └── *_test.go               [NEW] unit tests (no live node required)
+```
+
+### `internal/infrastructure/api/` — After Refactoring
+
+```
+internal/infrastructure/api/
+├── btc/
+│   ├── btc/
+│   │   ├── bitcoin.go              [THIN] constructor + lifecycle only
+│   │   ├── address.go              [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── balance.go              [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── block.go                [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── fee.go                  [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── import.go               [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── label.go                [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── logging.go              [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── multisig.go             [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── networkinfo.go          [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── transaction.go          [THIN] RPC calls delegate to pkg; non-RPC helpers (ToHex, ToMsgTx) kept
+│   │   ├── wallet.go               [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── descriptor_info.go      [THIN] delegates to pkg/chains/btc/rpc
+│   │   ├── mapper.go               [DEL]  pure-wire mappers removed (Phase 2);
+│   │   │                                  domain-enriched mappers kept or moved to application layer
+│   │   ├── account.go              (unchanged) GetAccount helper
+│   │   ├── amount.go               (unchanged) amount conversion helpers
+│   │   ├── descriptor.go           (unchanged) descriptor generation logic
+│   │   ├── descriptor_service.go   (unchanged)
+│   │   ├── descriptor_bip32.go     (unchanged)
+│   │   ├── descriptor_multisig.go  (unchanged)
+│   │   ├── descriptor_taproot*.go  (unchanged)
+│   │   ├── descriptor_p2*.go       (unchanged)
+│   │   ├── musig2.go               (unchanged)
+│   │   ├── psbt*.go                (unchanged) all PSBT files
+│   │   ├── unspent.go              (unchanged) UTXO listing with domain account type
+│   │   ├── types.go                (unchanged) BTCVersion, NetworkTypeBTC constants
+│   │   └── *_test.go               (unchanged)
+│   └── bch/                        (unchanged) BCH override files
+├── eth/
+│   └── eth/
+│       ├── ethereum.go             [THIN] constructor + lifecycle; RPC methods delegate to pkg
+│       ├── client.go               [THIN] SendRawTx, BalanceAt delegate to pkg
+│       ├── balance.go              [THIN] delegates to pkg/chains/eth/rpc
+│       ├── rpc_eth.go              [DEL]  moved to pkg/chains/eth/rpc/eth.go
+│       ├── rpc_eth_gas.go          [DEL]  moved to pkg/chains/eth/rpc/gas.go
+│       ├── rpc_eth_tx.go           [DEL]  moved to pkg/chains/eth/rpc/transaction.go
+│       ├── rpc_admin.go            [DEL]  moved to pkg/chains/eth/rpc/admin.go
+│       ├── rpc_personal.go         [DEL]  moved to pkg/chains/eth/rpc/personal.go
+│       ├── rpc_miner.go            [DEL]  moved to pkg/chains/eth/rpc/miner.go
+│       ├── rpc_net.go              [DEL]  moved to pkg/chains/eth/rpc/net.go
+│       ├── rpc_web3.go             [DEL]  moved to pkg/chains/eth/rpc/web3.go
+│       ├── transaction.go          (unchanged) raw transaction creation logic
+│       ├── key.go                  (unchanged) ECDSA key operations
+│       ├── util.go                 (unchanged)
+│       ├── types.go                (unchanged) NetworkTypeETH, ClientVersion, GasLimit constants
+│       ├── converters.go           (unchanged / reduced) domain type converters
+│       └── *_test.go               (updated) test imports point to pkg types
+└── xrp/
+    ├── xrp.go                      [THIN] constructor + lifecycle only
+    ├── protogen/                   [MOVED] entire directory moves to pkg/chains/xrp/protogen/;
+    │                                        importers update their import paths
+    ├── public_account.go           [DEL]  moved to pkg/chains/xrp/rpc/account.go
+    ├── public_server_info.go       [DEL]  moved to pkg/chains/xrp/rpc/server.go
+    ├── public_transaction.go       [DEL]  moved to pkg/chains/xrp/rpc/keygen.go (sign/submit parts)
+    ├── admin_keygen.go             [DEL]  moved to pkg/chains/xrp/rpc/keygen.go
+    ├── converter.go                [DEL/THIN] pure-wire converters removed (Phase 2);
+    │                                          orchestration converters kept
+    ├── xrpapi.go                   (unchanged) XRPAPI struct
+    ├── xrpapi_tx.go                (unchanged) orchestration layer stays in infra
+    ├── xrpapi_account.go           [THIN] delegates to pkg/chains/xrp/rpc
+    ├── xrpapi_address.go           (unchanged) address generation logic
+    ├── xrplgo/                     [MOVED Phase 2] entire directory moves to pkg/chains/xrp/client/
+    │                                            (after internal/application/dto/xrp imports removed in task 7.2)
+    ├── peersyst_signer.go          (unchanged) signing logic
+    ├── balance.go                  (unchanged)
+    ├── transaction.go              (unchanged)
+    ├── admin_*.go                  (unchanged) stub files
+    ├── public_*.go                 (unchanged) other stub files
+    ├── types.go                    (unchanged) NetworkTypeXRP, XRPKeyType constants
+    ├── request_response.go         (unchanged / reduced)
+    ├── errors.go                   (unchanged)
+    ├── util.go                     (unchanged)
+    ├── connection.go               (unchanged)
+    ├── amount.go                   (unchanged)
+    └── *_test.go                   (updated) test imports point to pkg types
+```
+
+### `internal/infrastructure/contract/` — After Refactoring
+
+```
+internal/infrastructure/contract/   [MOVED] entire directory moves to pkg/chains/eth/contract/
+```
+
+All files that import `internal/infrastructure/contract` must update their import path to `github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/contract`.
+
+### `make/codegen_proto.mk` — After Refactoring
+
+The proto code generation target must be updated to output into the new `pkg/` location:
+
+```diff
+- PROTO_GO_OUT_DIR := internal/infrastructure/api/xrp/protogen
++ PROTO_GO_OUT_DIR := pkg/chains/xrp/protogen
+```
+
+All five files in `internal/infrastructure/api/xrp/` that import `protogen` (`xrpapi.go`, `xrpapi_tx.go`, `xrpapi_account.go`, `xrpapi_address.go`, `converter.go`) must update their import path from:
+
+```
+internal/infrastructure/api/xrp/protogen
+```
+
+to:
+
+```
+github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen
+```
+
+### `internal/application/` — After Phase 2
+
+```
+internal/application/
+├── dto/
+│   ├── btc/
+│   │   └── dto.go          [REDUCED] domain-enriched types only:
+│   │                                  UnspentOutput, ParsedPSBT, ParsedPSBTTx,
+│   │                                  ParsedPSBTInput, ParsedPSBTOutput, ParsedPSBTUTXO,
+│   │                                  BIP32Derivation, PreviousTx
+│   │                        [DEL]    AddressInfo, ValidateAddressResult, NetworkInfo,
+│   │                                  BlockchainInfo, TransactionResult, RawTransaction,
+│   │                                  FundRawTransactionResult, DescriptorInfo,
+│   │                                  ListDescriptorsResult, Import*, MultisigAddress,
+│   │                                  LoggingResult → replaced by pkg/chains/btc/rpc/ types
+│   └── xrp/
+│       └── *.go             [REDUCED] orchestration-level types kept (TxInput and variants);
+│                                       pure-wire response types removed
+│                                       → replaced by pkg/chains/xrp/rpc/ types
+└── ports/
+    └── api/
+        ├── btc/
+        │   └── interface.go [UPDATED] return types changed from dtobtc.* to pkg/chains/btc/rpc/*
+        │                               for all pure-wire methods (Phase 2)
+        ├── eth/
+        │   └── interface.go [UPDATED] Syncing() return type → pkg/chains/eth/rpc.ResponseSyncing
+        └── xrp/
+            └── interface.go [UPDATED] AccountInfo, ServerInfo, ValidationCreate, WalletPropose
+                                        return types → pkg/chains/xrp/rpc/* types
+```
+
+---
+
 ## Supporting References
 
 See `research.md` for:

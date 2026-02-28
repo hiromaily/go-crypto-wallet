@@ -2,470 +2,86 @@ package eth
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"math/big"
-	"time"
-
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/mitchellh/mapstructure"
 
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
-
-// ResponseSyncing response of eth_syncing
-type ResponseSyncing struct {
-	StartingBlock       int64 `json:"startingBlock" mapstructure:"startingBlock"`
-	HighestBlock        int64 `json:"highestBlock" mapstructure:"highestBlock"`
-	CurrentBlock        int64 `json:"currentBlock" mapstructure:"currentBlock"`
-	SyncedAccounts      int64 `json:"syncedAccounts" mapstructure:"syncedAccounts"`
-	SyncedAccountBytes  int64 `json:"syncedAccountBytes" mapstructure:"syncedAccountBytes"`
-	SyncedBytecodes     int64 `json:"syncedBytecodes" mapstructure:"syncedBytecodes"`
-	SyncedBytecodeBytes int64 `json:"syncedBytecodeBytes" mapstructure:"syncedBytecodeBytes"`
-	SyncedStorage       int64 `json:"syncedStorage" mapstructure:"syncedStorage"`
-	SyncedStorageBytes  int64 `json:"syncedStorageBytes" mapstructure:"syncedStorageBytes"`
-
-	HealingBytecode     int64 `json:"healingBytecode" mapstructure:"healingBytecode"`
-	HealedBytecodes     int64 `json:"healedBytecodes" mapstructure:"healedBytecodes"`
-	HealedBytecodeBytes int64 `json:"healedBytecodeBytes" mapstructure:"healedBytecodeBytes"`
-
-	HealingTrienodes    int64 `json:"healingTrienodes" mapstructure:"healingTrienodes"`
-	HealedTrienodes     int64 `json:"healedTrienodes" mapstructure:"healedTrienodes"`
-	HealedTrienodeBytes int64 `json:"healedTrienodeBytes" mapstructure:"healedTrienodeBytes"`
-}
 
 // Syncing returns sync status or bool
 //   - return false if not syncing (it means syncing is done)
 //   - there seems 2 different responses
 func (e *Ethereum) Syncing(ctx context.Context) (*domainETH.ResponseSyncing, bool, error) {
-	var result any
-
-	err := e.rpcClient.CallContext(ctx, &result, "eth_syncing")
+	res, isSyncing, err := ethrpc.Syncing(ctx, e.rpcClient)
 	if err != nil {
-		return nil, false, fmt.Errorf("fail to call client.CallContext(eth_syncing): %w", err)
+		return nil, false, err
 	}
-
-	// try to cast to bool first
-	if v, ok := result.(bool); ok {
-		return nil, v, nil
-	} else if v2, ok2 := result.(map[string]any); ok2 {
-		anyMap := make(map[string]int64)
-		for key, val := range v2 {
-			if strVal, ok3 := val.(string); ok3 {
-				var decoded *big.Int
-				decoded, err = hexutil.DecodeBig(strVal)
-				if err != nil {
-					continue
-				}
-				anyMap[key] = decoded.Int64()
-			}
-		}
-
-		resSyncing := ResponseSyncing{}
-		if err = mapstructure.Decode(anyMap, &resSyncing); err != nil {
-			return nil, false, err
-		}
-		debug.Debug(resSyncing)
-		// Convert to domain type
-		return ToDomainResponseSyncing(&resSyncing), true, nil
-	}
-
-	return nil, false, errors.New("unexpected response, need to be implemented")
+	return ToDomainResponseSyncingFromPkg(res), isSyncing, nil
 }
 
 // ProtocolVersion returns the current ethereum protocol version
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_protocolversion
-// - returns like 65
 func (e *Ethereum) ProtocolVersion(ctx context.Context) (uint64, error) {
-	var resProtocolVer string
-	err := e.rpcClient.CallContext(ctx, &resProtocolVer, "eth_protocolVersion")
-	if err != nil {
-		return 0, fmt.Errorf("fail to call rpc.CallContext(eth_protocolVersion) error: %s: %w", err, err)
-	}
-	h, err := e.DecodeBig(resProtocolVer)
-	if err != nil {
-		return 0, err
-	}
-
-	return h.Uint64(), err
+	return ethrpc.ProtocolVersion(ctx, e.rpcClient)
 }
 
 // Coinbase returns the client coinbase address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_coinbase
-// Note:
-//   - any accounts can not be retrieved if no private key in keystore in node server.
-//   - when running geth command, keystore option should be used to specify directory
-//   - that means, this rpc can be called from cold wallet which has private key
 func (e *Ethereum) Coinbase(ctx context.Context) (string, error) {
-	var resAddr string
-	err := e.rpcClient.CallContext(ctx, &resAddr, "eth_coinbase")
-	if err != nil {
-		return "", fmt.Errorf("fail to call rpc.CallContext(eth_coinbase): %w", err)
-	}
-	return resAddr, err
+	return ethrpc.Coinbase(ctx, e.rpcClient)
 }
 
 // Accounts returns a list of addresses owned by client
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_accounts
-// https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts
-// Note:
-//   - any accounts can not be retrieved if no private key in keystore in node server.
-//   - when running geth command, keystore option should be used to specify directory
-//   - that means, this rpc can be called from cold wallet which has private key
-//
-// - private key is stored and read from node server
-// - result is same as ListAccounts()
 func (e *Ethereum) Accounts(ctx context.Context) ([]string, error) {
-	var accounts []string
-	err := e.rpcClient.CallContext(ctx, &accounts, "eth_accounts")
-	if err != nil {
-		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_accounts): %w", err)
-	}
-
-	return accounts, nil
+	return ethrpc.Accounts(ctx, e.rpcClient)
 }
 
 // BlockNumber returns the number of most recent block
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_blocknumber
-// - returns like `2706141`
-// - result may be a bit changeable, may be better to call several times.
 func (e *Ethereum) BlockNumber(ctx context.Context) (*big.Int, error) {
-	var resBlockNumber string
-	err := e.rpcClient.CallContext(ctx, &resBlockNumber, "eth_blockNumber")
-	if err != nil {
-		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_blockNumber): %w", err)
-	}
-	h, err := hexutil.DecodeBig(resBlockNumber)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-	}
-
-	return h, nil
+	return ethrpc.BlockNumber(ctx, e.rpcClient)
 }
 
 // EnsureBlockNumber calls BlockNumber() several times
 func (e *Ethereum) EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error) {
-	latestBlockNumber := new(big.Int)
-	for i := range loopCount {
-		if i != 0 {
-			time.Sleep(500 * time.Millisecond)
-		}
-		num, err := e.BlockNumber(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if latestBlockNumber.Uint64() < num.Uint64() {
-			latestBlockNumber = latestBlockNumber.SetUint64(num.Uint64())
-		}
-	}
-	return latestBlockNumber, nil
+	return ethrpc.EnsureBlockNumber(ctx, e.rpcClient, loopCount)
 }
 
 // GetBalance returns the balance of the account of given address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getbalance
-// - `QuantityTagEarliest` must NOT be used
-// - On goerli testnet, balance can be found just after sending coins
-// - TODO: which quantityTag should be used `QuantityTagLatest` or `QuantityTagPending`
 func (e *Ethereum) GetBalance(
 	ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag,
 ) (*big.Int, error) {
-	// Convert domain type to infrastructure type
-	infraQuantityTag := FromDomainQuantityTag(quantityTag)
-
-	var balance string
-	err := e.rpcClient.CallContext(ctx, &balance, "eth_getBalance", hexAddr, infraQuantityTag.String())
-	if err != nil {
-		return nil, fmt.Errorf(
-			"fail to call rpc.CallContext(eth_getBalance) quantityTag: %s: %w",
-			infraQuantityTag.String(), err)
-	}
-	h, err := hexutil.DecodeBig(balance)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-	}
-
-	return h, nil
+	return ethrpc.GetBalance(ctx, e.rpcClient, hexAddr, ethrpc.QuantityTag(quantityTag))
 }
-
-// GetStoreageAt returns the value from a storage position at a given address
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getstorageat
-// - `QuantityTagEarliest` must NOT be used
-// - always returns `0x0000000000000000000000000000000000000000000000000000000000000000`
-// - how this function can be used??
-// func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (string, error) {
-//
-//	var storagePosition string
-//	err := e.rpcClient.CallContext(e.ctx, &storagePosition, "eth_getStorageAt", hexAddr, "0x0", quantityTag.String())
-//	if err != nil {
-//		return "", fmt.Errorf("fail to call rpc.CallContext(eth_getStorageAt): %w", err)
-//	}
-//
-//	return storagePosition, nil
-//}
 
 // GetTransactionCount returns the number of transactions sent from an address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactioncount
-// - this is used as nonce
-// - `QuantityTagEarliest` must NOT be used
-// - after sending coin from this address, result is counted??
-// - generated new address is always 0
 func (e *Ethereum) GetTransactionCount(
 	ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag,
 ) (*big.Int, error) {
-	// Convert domain type to infrastructure type
-	infraQuantityTag := FromDomainQuantityTag(quantityTag)
-
-	var transactionCount string
-	err := e.rpcClient.CallContext(
-		ctx, &transactionCount, "eth_getTransactionCount", hexAddr, infraQuantityTag.String(),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionCount): %w", err)
-	}
-	h, err := hexutil.DecodeBig(transactionCount)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-	}
-
-	return h, nil
+	return ethrpc.GetTransactionCount(ctx, e.rpcClient, hexAddr, ethrpc.QuantityTag(quantityTag))
 }
-
-// GetBlockTransactionCountByHash returns the number of transactions in a block from a block matching
-// the given block hash
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbyhash
-// - block hash can be found from https://www.etherchain.org/block/2706436 by block number
-// - but how it is found for Goerli Testnet??
-// FIXME: this RPC doesn't return anything
-// func (e *Ethereum) GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error) {
-//
-//	var txCount string
-//	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByHash", blockHash)
-//	if err != nil {
-//		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByHash): %w", err)
-//	}
-//	if txCount == "" {
-//		logger.Debug("transactionCount is blank")
-//		return nil, errors.New("transactionCount is blank")
-//	}
-//
-//	h, err := hexutil.DecodeBig(txCount)
-//	if err != nil {
-//		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-//	}
-//
-//	return h, nil
-//}
 
 // GetBlockTransactionCountByNumber returns the number of transactions in a block matching the given block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbynumber
-// transaction count of block, it's possible transaction is 0
-// - this number is fixed
 func (e *Ethereum) GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error) {
-	// convert uint64 to hex
-	hexNum := hexutil.EncodeUint64(blockNumber)
-
-	var txCount string
-	err := e.rpcClient.CallContext(ctx, &txCount, "eth_getBlockTransactionCountByNumber", hexNum)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByNumber): %w", err)
-	}
-	if txCount == "" {
-		logger.Debug("transactionCount is blank")
-		return nil, nil
-	}
-
-	h, err := hexutil.DecodeBig(txCount)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-	}
-
-	return h, nil
+	return ethrpc.GetBlockTransactionCountByNumber(ctx, e.rpcClient, blockNumber)
 }
-
-// GetUncleCountByBlockHash eturns the number of uncles in a block from a block matching the given block hash
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblockhash
-// func (e *Ethereum) GetUncleCountByBlockHash(blockHash string) (*big.Int, error) {
-//
-//	var uncleCount string
-//	err := e.rpcClient.CallContext(e.ctx, &uncleCount, "eth_getUncleCountByBlockHash", blockHash)
-//	if err != nil {
-//		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockHash)")
-//	}
-//	if uncleCount == "" {
-//		logger.Debug("uncleCount is blank")
-//		return nil, errors.New("uncleCount is blank")
-//	}
-//
-//	h, err := e.DecodeBig(uncleCount)
-//	if err != nil {
-//		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-//	}
-//
-//	return h, nil
-//}
 
 // GetUncleCountByBlockNumber returns the number of uncles in a block from a block matching the given block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblocknumber
-// - this func would not be used anywhere
 func (e *Ethereum) GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error) {
-	// convert int64 to hex
-	blockHexNumber := hexutil.EncodeUint64(blockNumber)
-
-	var uncleCount string
-	err := e.rpcClient.CallContext(ctx, &uncleCount, "eth_getUncleCountByBlockNumber", blockHexNumber)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockNumber): %w", err)
-	}
-	if uncleCount == "" {
-		logger.Debug("uncleCount is blank")
-		return nil, errors.New("uncleCount is blank")
-	}
-
-	h, err := e.DecodeBig(uncleCount)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-	}
-
-	return h, nil
-}
-
-// GetCode returns code at a given address ???
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getcode
-// - always returns 0
-// func (e *Ethereum) GetCode(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
-//
-//	var code string
-//	err := e.rpcClient.CallContext(e.ctx, &code, "eth_getCode", hexAddr, quantityTag.String())
-//	if err != nil {
-//		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getCode): %w", err)
-//	}
-//	logger.Debug("code", "code", code)
-//	if code == "0x" {
-//		code = "0x0"
-//	}
-//
-//	h, err := hexutil.DecodeBig(code)
-//	if err != nil {
-//		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
-//	}
-//
-//	return h, nil
-//}
-
-// eth_getBlockByHash
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbyhash
-// - no need, use GetBlockByNumber()
-
-// BlockNumber response of eth_blockNumber
-type BlockNumber struct {
-	Number string
-}
-
-// BlockRawInfo is block raw info
-type BlockRawInfo struct {
-	Number           string   `json:"number"`
-	Hash             string   `json:"hash"`
-	ParentHash       string   `json:"parentHash"`
-	Nonce            string   `json:"nonce"`
-	Sha3Uncles       string   `json:"sha3Uncles"`
-	LogsBloom        string   `json:"logsBloom"`
-	TransactionsRoot string   `json:"transactionsRoot"`
-	StateRoot        string   `json:"stateRoot"`
-	Miner            string   `json:"miner"`
-	Difficulty       string   `json:"difficulty"`
-	TotalDifficulty  string   `json:"totalDifficulty"`
-	ExtraData        string   `json:"extraData"`
-	Size             string   `json:"size"`
-	GasLimit         string   `json:"gasLimit"`
-	GasUsed          string   `json:"gasUsed"`
-	Timestamp        string   `json:"timestamp"`
-	Transactions     []string `json:"transactions"`
-	Uncles           []string `json:"uncles"`
-	BaseFeePerGas    string   `json:"baseFeePerGas,omitempty"` // EIP-1559 (London hard fork)
-}
-
-// BlockInfo is block info
-type BlockInfo struct {
-	Number           *big.Int `json:"number"`
-	Hash             string   `json:"hash"`
-	ParentHash       string   `json:"parentHash"`
-	Nonce            *big.Int `json:"nonce"`
-	Sha3Uncles       string   `json:"sha3Uncles"`
-	LogsBloom        string   `json:"logsBloom"`
-	TransactionsRoot string   `json:"transactionsRoot"`
-	StateRoot        string   `json:"stateRoot"`
-	Miner            string   `json:"miner"`
-	Difficulty       *big.Int `json:"difficulty"`
-	TotalDifficulty  *big.Int `json:"totalDifficulty"`
-	ExtraData        string   `json:"extraData"`
-	Size             *big.Int `json:"size"`
-	GasLimit         *big.Int `json:"gasLimit"`
-	GasUsed          *big.Int `json:"gasUsed"`
-	Timestamp        *big.Int `json:"timestamp"`
-	Transactions     []string `json:"transactions"`
-	Uncles           []string `json:"uncles"`
-	BaseFeePerGas    *big.Int `json:"baseFeePerGas,omitempty"` // EIP-1559 (London hard fork)
+	return ethrpc.GetUncleCountByBlockNumber(ctx, e.rpcClient, blockNumber)
 }
 
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
 func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainETH.BlockInfo, error) {
-	// convert int64 to hex
-	blockHexNumber := hexutil.EncodeUint64(blockNumber)
-
-	// var lastBlock BlockNumber
-	var blockRawInfo BlockRawInfo
-
-	err := e.rpcClient.CallContext(ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)
+	result, err := ethrpc.GetBlockByNumber(ctx, e.rpcClient, blockNumber)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockByNumber): %w", err)
+		return nil, err
 	}
-
-	infraBlockInfo := convertBlockRawInfo(&blockRawInfo)
-	return ToDomainBlockInfo(infraBlockInfo), nil
+	return ToDomainBlockInfoFromPkg(result), nil
 }
-
-func convertBlockRawInfo(raw *BlockRawInfo) *BlockInfo {
-	var baseFeePerGas *big.Int
-	if raw.BaseFeePerGas != "" {
-		baseFeePerGas = decodeString(raw.BaseFeePerGas)
-	}
-
-	return &BlockInfo{
-		Number:           decodeString(raw.Number),
-		Hash:             raw.Hash,
-		ParentHash:       raw.ParentHash,
-		Nonce:            decodeString(raw.Nonce),
-		Sha3Uncles:       raw.Sha3Uncles,
-		LogsBloom:        raw.LogsBloom,
-		TransactionsRoot: raw.TransactionsRoot,
-		StateRoot:        raw.StateRoot,
-		Miner:            raw.Miner,
-		Difficulty:       decodeString(raw.Difficulty),
-		TotalDifficulty:  decodeString(raw.TotalDifficulty),
-		ExtraData:        raw.ExtraData,
-		Size:             decodeString(raw.Size),
-		GasLimit:         decodeString(raw.GasLimit),
-		GasUsed:          decodeString(raw.GasUsed),
-		Timestamp:        decodeString(raw.Timestamp),
-		Transactions:     raw.Transactions,
-		Uncles:           raw.Uncles,
-		BaseFeePerGas:    baseFeePerGas,
-	}
-}
-
-func decodeString(val string) *big.Int {
-	decoded, err := hexutil.DecodeBig(val)
-	if err != nil {
-		return new(big.Int).SetUint64(0)
-	}
-	return decoded
-}
-
-// eth_getUncleByBlockHashAndIndex
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclebyblockhashandindex
-
-// eth_getUncleByBlockNumberAndIndex
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclebyblocknumberandindex

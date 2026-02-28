@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
 )
 
 // Note: Admin commands are available only if you connect to rippled on a host and port that
@@ -16,72 +17,17 @@ import (
 // https://xrpl.org/assign-a-regular-key-pair.html
 // https://github.com/ripple/ripple-keypairs
 
-// ValidationCreate is request data for validation_create method
-type ValidationCreate struct {
-	ID      int    `json:"id"`
-	Command string `json:"command"`
-	Secret  string `json:"secret"`
-}
-
-// ResponseValidationCreate is response data for validation_create method
-type ResponseValidationCreate struct {
-	Result struct {
-		Status              string `json:"status"`
-		ValidationKey       string `json:"validation_key"`
-		ValidationPublicKey string `json:"validation_public_key"`
-		ValidationSeed      string `json:"validation_seed"`
-	} `json:"result"`
-	Error string `json:"error,omitempty"`
-}
-
 // ValidationCreate calls validation_create method
 func (r *XRP) ValidationCreate(ctx context.Context, secret string) (*dtoxrp.ResponseValidationCreate, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
-	req := ValidationCreate{
-		ID:      0,
-		Command: "validation_create",
-		Secret:  secret,
+	res, err := xrprpc.ValidationCreate(ctx, r.wsAdmin, secret)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call xrprpc.ValidationCreate: %w", err)
 	}
-	var res ResponseValidationCreate
-	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
-		return nil, fmt.Errorf("fail to call wsAdmin.Call(validation_create): %w", err)
-	}
-
-	// Convert infrastructure type to DTO
-	return ToDTOResponseValidationCreate(&res), nil
-}
-
-// WalletProposeWithKey is request data for wallet_propose method
-type WalletProposeWithKey struct {
-	Command string `json:"command"`
-	Seed    string `json:"seed"`
-	KeyType string `json:"key_type"`
-}
-
-// WalletPropose is request data for wallet_propose method
-type WalletPropose struct {
-	Command    string `json:"command"`
-	Passphrase string `json:"passphrase"`
-}
-
-// ResponseWalletPropose is response data for wallet_propose method
-type ResponseWalletPropose struct {
-	ID     int    `json:"id"`
-	Status string `json:"status"`
-	Type   string `json:"type"`
-	Result struct {
-		AccountID     string `json:"account_id"`
-		KeyType       string `json:"key_type"`
-		MasterKey     string `json:"master_key"` // DEPRECATED
-		MasterSeed    string `json:"master_seed"`
-		MasterSeedHex string `json:"master_seed_hex"`
-		PublicKey     string `json:"public_key"`
-		PublicKeyHex  string `json:"public_key_hex"`
-	} `json:"result"`
-	Error string `json:"error,omitempty"`
+	return ToDTOResponseValidationCreateFromPkg(res), nil
 }
 
 // WalletProposeWithKey calls wallet_propose method
@@ -92,21 +38,11 @@ func (r *XRP) WalletProposeWithKey(
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
-	// Convert DTO to infrastructure type
-	infraKeyType := ToInfraXRPKeyType(keyType)
-
-	req := WalletProposeWithKey{
-		Command: "wallet_propose",
-		Seed:    seed,
-		KeyType: infraKeyType.String(),
+	res, err := xrprpc.WalletProposeWithKey(ctx, r.wsAdmin, seed, xrprpc.KeyType(keyType))
+	if err != nil {
+		return nil, fmt.Errorf("fail to call xrprpc.WalletProposeWithKey: %w", err)
 	}
-	var res ResponseWalletPropose
-	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
-		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
-	}
-
-	// Convert infrastructure type to DTO
-	return ToDTOResponseWalletPropose(&res), nil
+	return ToDTOResponseWalletProposeFromPkg(res), nil
 }
 
 // WalletPropose calls wallet_propose method
@@ -116,15 +52,9 @@ func (r *XRP) WalletPropose(ctx context.Context, passphrase string) (*dtoxrp.Res
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
-	req := WalletPropose{
-		Command:    "wallet_propose",
-		Passphrase: passphrase,
+	res, err := xrprpc.WalletPropose(ctx, r.wsAdmin, passphrase)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call xrprpc.WalletPropose: %w", err)
 	}
-	var res ResponseWalletPropose
-	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
-		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
-	}
-
-	// Convert infrastructure type to DTO
-	return ToDTOResponseWalletPropose(&res), nil
+	return ToDTOResponseWalletProposeFromPkg(res), nil
 }

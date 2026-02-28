@@ -12,38 +12,37 @@ import (
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// ToAddressInfo converts infrastructure GetAddressInfoResult to application AddressInfo
-func ToAddressInfo(result *GetAddressInfoResult) *dtobtc.AddressInfo {
+// ToAddressInfoFromPkg converts pkg GetAddressInfoResult to application AddressInfo
+func ToAddressInfoFromPkg(result *btcrpc.GetAddressInfoResult) *dtobtc.AddressInfo {
 	if result == nil {
 		return nil
 	}
 
-	dto := &dtobtc.AddressInfo{
+	return &dtobtc.AddressInfo{
 		Address:             result.Address,
 		ScriptPubKey:        result.ScriptPubKey,
-		IsWitness:           result.Iswitness,
-		Labels:              result.Labels,
-		IsCompressed:        result.Iscompressed,
-		IsChange:            result.Ischange,
+		IsWitness:           result.IsWitness,
+		Labels:              []string(result.Labels),
+		IsCompressed:        result.IsCompressed,
+		IsChange:            result.IsChange,
 		Timestamp:           result.Timestamp,
 		HDKeyPath:           result.HDKeyPath,
 		HDMasterKeyID:       result.HDSeedID,
 		HDMasterFingerprint: result.HDMasterFingerprint,
-		IsMine:              result.Ismine,
-		IsWatchOnly:         result.Iswatchonly,
-		IsScript:            result.Isscript,
+		IsMine:              result.IsMine,
+		IsWatchOnly:         result.IsWatchOnly,
+		IsScript:            result.IsScript,
 		PubKey:              result.Pubkey,
 		Desc:                result.Desc,
 	}
-
-	return dto
 }
 
-// ToValidateAddressResult converts infrastructure to application DTO
-func ToValidateAddressResult(result *ValidateAddressResult) *dtobtc.ValidateAddressResult {
+// ToValidateAddressResultFromPkg converts pkg ValidateAddressResult to application DTO
+func ToValidateAddressResultFromPkg(result *btcrpc.ValidateAddressResult) *dtobtc.ValidateAddressResult {
 	if result == nil {
 		return nil
 	}
@@ -57,8 +56,8 @@ func ToValidateAddressResult(result *ValidateAddressResult) *dtobtc.ValidateAddr
 	}
 }
 
-// ToNetworkInfo converts infrastructure to application DTO
-func ToNetworkInfo(result *GetNetworkInfoResult) *dtobtc.NetworkInfo {
+// ToNetworkInfoFromPkg converts pkg GetNetworkInfoResult to application DTO
+func ToNetworkInfoFromPkg(result *btcrpc.GetNetworkInfoResult) *dtobtc.NetworkInfo {
 	if result == nil {
 		return nil
 	}
@@ -74,8 +73,8 @@ func ToNetworkInfo(result *GetNetworkInfoResult) *dtobtc.NetworkInfo {
 		}
 	}
 
-	localAddrs := make([]dtobtc.LocalAddress, len(result.Localaddresses))
-	for i, addr := range result.Localaddresses {
+	localAddrs := make([]dtobtc.LocalAddress, len(result.LocalAddresses))
+	for i, addr := range result.LocalAddresses {
 		localAddrs[i] = dtobtc.LocalAddress{
 			Address: addr.Address,
 			Port:    uint16(addr.Port),
@@ -84,30 +83,30 @@ func ToNetworkInfo(result *GetNetworkInfoResult) *dtobtc.NetworkInfo {
 	}
 
 	return &dtobtc.NetworkInfo{
-		Version:         int32(result.Version),
+		Version:         result.Version,
 		SubVersion:      result.Subversion,
-		ProtocolVersion: int32(result.Protocolversion),
-		LocalServices:   result.Localservices,
-		LocalRelay:      result.Localrelay,
-		TimeOffset:      result.Timeoffset,
-		NetworkActive:   result.Networkactive,
+		ProtocolVersion: int32(result.ProtocolVersion),
+		LocalServices:   result.LocalServices,
+		LocalRelay:      result.LocalRelay,
+		TimeOffset:      result.TimeOffset,
+		NetworkActive:   result.NetworkActive,
 		Connections:     int32(result.Connections),
 		Networks:        networks,
-		RelayFee:        result.Relayfee,
-		IncrementalFee:  result.Incrementalfee,
+		RelayFee:        result.RelayFee,
+		IncrementalFee:  result.IncrementalFee,
 		LocalAddresses:  localAddrs,
 		Warnings:        result.Warnings.String(),
 	}
 }
 
-// ToBlockchainInfo converts infrastructure to application DTO
-func ToBlockchainInfo(result *GetBlockchainInfoResult) *dtobtc.BlockchainInfo {
+// ToBlockchainInfoFromPkg converts pkg GetBlockchainInfoResult to application DTO
+func ToBlockchainInfoFromPkg(result *btcrpc.GetBlockchainInfoResult) *dtobtc.BlockchainInfo {
 	if result == nil {
 		return nil
 	}
 
 	softForks := make(map[string]any)
-	addFork := func(name string, fork Fork) {
+	addFork := func(name string, fork btcrpc.Fork) {
 		if fork.Type != "" {
 			softForks[name] = map[string]any{
 				"type":   fork.Type,
@@ -124,22 +123,22 @@ func ToBlockchainInfo(result *GetBlockchainInfoResult) *dtobtc.BlockchainInfo {
 	addFork("segwit", result.SoftForks.Segwit)
 
 	return &dtobtc.BlockchainInfo{
-		Chain:                result.Chain.String(),
+		Chain:                result.Chain,
 		Blocks:               int64(result.Blocks),
 		Headers:              int64(result.Headers),
-		BestBlockHash:        result.Bestblockhash,
+		BestBlockHash:        result.BestBlockHash,
 		Difficulty:           result.Difficulty,
-		MedianTime:           int64(result.Mediantime),
-		VerificationProgress: result.Verificationprogress,
-		InitialBlockDownload: result.Initialblockdownload,
+		MedianTime:           int64(result.MedianTime),
+		VerificationProgress: result.VerificationProgress,
+		InitialBlockDownload: result.InitialBlockDownload,
 		Pruned:               result.Pruned,
 		SoftForks:            softForks,
 		Warnings:             result.Warnings.String(),
 	}
 }
 
-// ToTransactionResult converts infrastructure GetTransactionResult to application DTO
-func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*dtobtc.TransactionResult, error) {
+// ToTransactionResultFromPkg converts pkg GetTransactionResult to application DTO
+func ToTransactionResultFromPkg(result *btcrpc.GetTransactionResult, btc *Bitcoin) (*dtobtc.TransactionResult, error) {
 	if result == nil {
 		return nil, nil
 	}
@@ -181,8 +180,8 @@ func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*dtobtc.Tr
 		}
 	}
 
-	walletConflicts := make([]string, len(result.Walletconflicts))
-	for i, conflict := range result.Walletconflicts {
+	walletConflicts := make([]string, len(result.WalletConflicts))
+	for i, conflict := range result.WalletConflicts {
 		str, ok := conflict.(string)
 		if !ok {
 			return nil, fmt.Errorf(
@@ -197,19 +196,20 @@ func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*dtobtc.Tr
 		Amount:          amount,
 		Fee:             fee,
 		Confirmations:   int64(result.Confirmations),
-		BlockHash:       result.Blockhash,
-		BlockIndex:      int64(result.Blockindex),
-		BlockTime:       int64(result.Blocktime),
+		BlockHash:       result.BlockHash,
+		BlockIndex:      int64(result.BlockIndex),
+		BlockTime:       int64(result.BlockTime),
 		TxID:            result.Txid,
 		WalletConflicts: walletConflicts,
 		Time:            result.Time,
-		TimeReceived:    result.Timereceived,
+		TimeReceived:    result.TimeReceived,
 		Details:         details,
 		Hex:             result.Hex,
 	}, nil
 }
 
-// ToRawTransaction converts infrastructure TxRawResult to application DTO
+// ToRawTransaction converts infrastructure TxRawResult to application DTO.
+// NOTE: Retained for use by ToParsedPSBT which builds local TxRawResult from btcutil types.
 func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction, error) {
 	if result == nil {
 		return nil, nil
@@ -272,28 +272,86 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction
 	}, nil
 }
 
-// ToFundRawTransactionResult converts infrastructure to application DTO
-func ToFundRawTransactionResult(
-	result *FundRawTransactionResult,
-) *dtobtc.FundRawTransactionResult {
+// ToRawTransactionFromPkg converts pkg TxRawResult to application DTO
+func ToRawTransactionFromPkg(result *btcrpc.TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction, error) {
+	if result == nil {
+		return nil, nil
+	}
+
+	vin := make([]dtobtc.RawTransactionInput, len(result.Vin))
+	for i, input := range result.Vin {
+		vin[i] = dtobtc.RawTransactionInput{
+			TxID: input.Txid,
+			Vout: input.Vout,
+			ScriptSig: dtobtc.ScriptSig{
+				Asm: input.ScriptSig.Asm,
+				Hex: input.ScriptSig.Hex,
+			},
+			Sequence: input.Sequence,
+			Witness:  nil,
+		}
+	}
+
+	vout := make([]dtobtc.RawTransactionOutput, len(result.Vout))
+	for i, output := range result.Vout {
+		value, err := btc.FloatToAmount(output.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		address := ""
+		if len(output.ScriptPubKey.Addresses) > 0 {
+			address = output.ScriptPubKey.Addresses[0]
+		}
+
+		vout[i] = dtobtc.RawTransactionOutput{
+			Value: value,
+			Index: output.N,
+			ScriptPubKey: dtobtc.ScriptPubKey{
+				Asm:     output.ScriptPubKey.Asm,
+				Hex:     output.ScriptPubKey.Hex,
+				ReqSigs: int32(output.ScriptPubKey.ReqSigs),
+				Type:    output.ScriptPubKey.Type,
+				Address: address,
+			},
+		}
+	}
+
+	return &dtobtc.RawTransaction{
+		Hex:           "", // Set by caller
+		TxID:          result.Txid,
+		Hash:          result.Hash,
+		Size:          result.Size,
+		VSize:         result.Vsize,
+		Weight:        result.Weight,
+		Version:       int32(result.Version),
+		LockTime:      result.LockTime,
+		Vin:           vin,
+		Vout:          vout,
+		BlockHash:     "",
+		Confirmations: 0,
+		Time:          0,
+		BlockTime:     0,
+	}, nil
+}
+
+// ToFundRawTransactionResultFromPkg converts pkg to application DTO
+func ToFundRawTransactionResultFromPkg(result *btcrpc.FundRawTransactionResult) *dtobtc.FundRawTransactionResult {
 	if result == nil {
 		return nil
 	}
 
-	// Fee is already in satoshis, convert directly to btcutil.Amount
-	fee := btcutil.Amount(result.Fee)
-
 	return &dtobtc.FundRawTransactionResult{
 		Hex:       result.Hex,
-		Fee:       fee,
+		Fee:       btcutil.Amount(result.Fee),
 		ChangePos: int32(result.Changepos),
 	}
 }
 
-// FromPreviousTx converts application PreviousTx to infrastructure PrevTx
-func FromPreviousTx(prevTxs []dtobtc.PreviousTx, btc *Bitcoin) ([]PrevTx, error) {
+// fromDTOPreviousTxToLocal converts application PreviousTx slice to infrastructure PrevTx slice
+func fromDTOPreviousTxToLocal(prevTxs []dtobtc.PreviousTx) []PrevTx {
 	if prevTxs == nil {
-		return nil, nil
+		return nil
 	}
 
 	result := make([]PrevTx, len(prevTxs))
@@ -309,7 +367,7 @@ func FromPreviousTx(prevTxs []dtobtc.PreviousTx, btc *Bitcoin) ([]PrevTx, error)
 			Amount:        amount,
 		}
 	}
-	return result, nil
+	return result
 }
 
 // ToPreviousTxList converts infrastructure PrevTx slice to application PreviousTx slice
@@ -678,20 +736,19 @@ func parseWitnessStack(witnessData []byte) ([]string, error) {
 	return result, nil
 }
 
-// ToLoggingResult converts infrastructure LoggingResult to application DTO
-func ToLoggingResult(result *LoggingResult) *dtobtc.LoggingResult {
+// ToLoggingResultFromPkg converts pkg LoggingResult to application DTO
+func ToLoggingResultFromPkg(result *btcrpc.LoggingResult) *dtobtc.LoggingResult {
 	if result == nil {
 		return nil
 	}
 
 	return &dtobtc.LoggingResult{
-		Net:         result.Net,
-		TorControl:  result.Tor,
-		MemPool:     result.Mempool,
-		RPC:         result.RPC,
-		EstimateFee: result.Estimatefee,
-		Bench:       result.Bench,
-		// Map Zmq to ZMQPubRawBlock and ZMQPubRawTx (both set to same value)
+		Net:            result.Net,
+		TorControl:     result.Tor,
+		MemPool:        result.Mempool,
+		RPC:            result.RPC,
+		EstimateFee:    result.Estimatefee,
+		Bench:          result.Bench,
 		ZMQPubRawBlock: result.Zmq,
 		ZMQPubRawTx:    result.Zmq,
 		Coindb:         result.Coindb,
@@ -699,8 +756,8 @@ func ToLoggingResult(result *LoggingResult) *dtobtc.LoggingResult {
 	}
 }
 
-// ToMultisigAddress converts infrastructure AddMultisigAddressResult to application DTO
-func ToMultisigAddress(result *AddMultisigAddressResult) *dtobtc.MultisigAddress {
+// ToMultisigAddressFromPkg converts pkg AddMultisigAddressResult to application DTO
+func ToMultisigAddressFromPkg(result *btcrpc.AddMultisigAddressResult) *dtobtc.MultisigAddress {
 	if result == nil {
 		return nil
 	}
@@ -710,6 +767,135 @@ func ToMultisigAddress(result *AddMultisigAddressResult) *dtobtc.MultisigAddress
 		RedeemScript: result.RedeemScript,
 		Descriptor:   "", // Not provided by infrastructure result
 	}
+}
+
+// ToDescriptorInfoFromPkg converts pkg DescriptorInfo to application DTO
+func ToDescriptorInfoFromPkg(result *btcrpc.DescriptorInfo) *dtobtc.DescriptorInfo {
+	if result == nil {
+		return nil
+	}
+
+	return &dtobtc.DescriptorInfo{
+		Descriptor:     result.Descriptor,
+		Checksum:       result.Checksum,
+		IsRange:        result.IsRange,
+		IsSolvable:     result.IsSolvable,
+		HasPrivateKeys: result.HasPrivateKeys,
+	}
+}
+
+// ToListDescriptorsResultFromPkg converts pkg ListDescriptorsResult to application DTO
+func ToListDescriptorsResultFromPkg(result *btcrpc.ListDescriptorsResult) *dtobtc.ListDescriptorsResult {
+	if result == nil {
+		return nil
+	}
+
+	descriptors := make([]dtobtc.DescriptorEntry, len(result.Descriptors))
+	for i, d := range result.Descriptors {
+		descriptors[i] = dtobtc.DescriptorEntry{
+			Desc:      d.Desc,
+			Timestamp: d.Timestamp,
+			Active:    d.Active,
+			Internal:  d.Internal,
+			Range:     d.Range,
+			Next:      d.Next,
+		}
+	}
+
+	return &dtobtc.ListDescriptorsResult{
+		WalletName:  result.WalletName,
+		Descriptors: descriptors,
+	}
+}
+
+// ToImportDescriptorsResponseFromPkg converts pkg responses to application DTOs
+func ToImportDescriptorsResponseFromPkg(
+	responses []btcrpc.ImportDescriptorsResponse,
+) []dtobtc.ImportDescriptorsResponse {
+	if responses == nil {
+		return nil
+	}
+
+	result := make([]dtobtc.ImportDescriptorsResponse, len(responses))
+	for i, r := range responses {
+		result[i] = dtobtc.ImportDescriptorsResponse{
+			Success:  r.Success,
+			Warnings: r.Warnings,
+		}
+		if r.Error != nil {
+			result[i].Error = &dtobtc.ImportDescriptorError{
+				Code:    r.Error.Code,
+				Message: r.Error.Message,
+			}
+		}
+	}
+	return result
+}
+
+// ToImportMultiResponseFromPkg converts pkg responses to application DTOs
+func ToImportMultiResponseFromPkg(responses []btcrpc.ImportMultiResponse) []dtobtc.ImportMultiResponse {
+	if responses == nil {
+		return nil
+	}
+
+	result := make([]dtobtc.ImportMultiResponse, len(responses))
+	for i, r := range responses {
+		result[i] = dtobtc.ImportMultiResponse{
+			Success:  r.Success,
+			Warnings: r.Warnings,
+		}
+		if r.Error != nil {
+			result[i].Error = &dtobtc.ImportMultiError{
+				Code:    r.Error.Code,
+				Message: r.Error.Message,
+			}
+		}
+	}
+	return result
+}
+
+// FromDTOImportDescriptorsRequests converts application DTOs to pkg types
+func FromDTOImportDescriptorsRequests(requests []dtobtc.ImportDescriptorsRequest) []btcrpc.ImportDescriptorsRequest {
+	if requests == nil {
+		return nil
+	}
+
+	result := make([]btcrpc.ImportDescriptorsRequest, len(requests))
+	for i, r := range requests {
+		result[i] = btcrpc.ImportDescriptorsRequest{
+			Descriptor: r.Descriptor,
+			Timestamp:  r.Timestamp,
+			Active:     r.Active,
+			Range:      r.Range,
+			NextIndex:  r.NextIndex,
+			Label:      r.Label,
+			Internal:   r.Internal,
+			Watchonly:  r.Watchonly,
+		}
+	}
+	return result
+}
+
+// FromDTOImportMultiRequests converts application DTOs to pkg types
+func FromDTOImportMultiRequests(requests []dtobtc.ImportMultiRequest) []btcrpc.ImportMultiRequest {
+	if requests == nil {
+		return nil
+	}
+
+	result := make([]btcrpc.ImportMultiRequest, len(requests))
+	for i, r := range requests {
+		result[i] = btcrpc.ImportMultiRequest{
+			ScriptPubKey: r.ScriptPubKey,
+			Timestamp:    r.Timestamp,
+			RedeemScript: r.RedeemScript,
+			PubKeys:      r.PubKeys,
+			Keys:         r.Keys,
+			Internal:     r.Internal,
+			WatchOnly:    r.WatchOnly,
+			Label:        r.Label,
+		}
+	}
+	return result
 }
 
 // FromAddressType converts Bitcoin Core RPC AddressType to user-facing AddrType

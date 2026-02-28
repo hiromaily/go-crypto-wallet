@@ -1,160 +1,28 @@
 package btc
 
 import (
-	"encoding/json"
 	"fmt"
-	"strings"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
-
-// GetNetworkInfoResult is response type of PRC `getnetworkinfo`
-type GetNetworkInfoResult struct {
-	Version            BTCVersion     `json:"version"`
-	Subversion         string         `json:"subversion"`
-	Protocolversion    uint32         `json:"protocolversion"`
-	Localservices      string         `json:"localservices"`
-	Localservicesnames []string       `json:"localservicesnames"`
-	Localrelay         bool           `json:"localrelay"`
-	Timeoffset         int64          `json:"timeoffset"`
-	Networkactive      bool           `json:"networkactive"`
-	Connections        uint32         `json:"connections"`
-	Networks           []Network      `json:"networks"`
-	Relayfee           float64        `json:"relayfee"`
-	Incrementalfee     float64        `json:"incrementalfee"`
-	Localaddresses     []LocalAddress `json:"localaddresses"`
-	Warnings           WarningsField  `json:"warnings"`
-}
-
-// BlockchainInfoChain is chain in GetBlockchainInfoResult
-type BlockchainInfoChain string
-
-// chain
-const (
-	BlockchainInfoChainMain    BlockchainInfoChain = "main"
-	BlockchainInfoChainTest    BlockchainInfoChain = "test"
-	BlockchainInfoChainRegtest BlockchainInfoChain = "regtest"
-	BlockchainInfoChainSignet  BlockchainInfoChain = "signet"
-)
-
-// String converter
-func (c BlockchainInfoChain) String() string {
-	return string(c)
-}
-
-// WarningsField handles both string (Bitcoin Core < 29.2) and array (Bitcoin Core >= 29.2) formats
-type WarningsField struct {
-	Value []string
-}
-
-// UnmarshalJSON implements custom unmarshaling for warnings field
-func (w *WarningsField) UnmarshalJSON(data []byte) error {
-	// Try to unmarshal as array first
-	var arr []string
-	if err := json.Unmarshal(data, &arr); err == nil {
-		w.Value = arr
-		return nil
-	}
-
-	// Fall back to string format
-	var str string
-	if err := json.Unmarshal(data, &str); err != nil {
-		return err
-	}
-
-	if str != "" {
-		w.Value = []string{str}
-	} else {
-		w.Value = []string{}
-	}
-	return nil
-}
-
-// String returns a concatenated string of all warnings
-func (w *WarningsField) String() string {
-	if len(w.Value) == 0 {
-		return ""
-	}
-	return strings.Join(w.Value, ", ")
-}
-
-// GetBlockchainInfoResult is response type of PRC `getblockchaininfo`
-type GetBlockchainInfoResult struct {
-	Chain                BlockchainInfoChain `json:"chain"` // main, test, regtest, signet
-	Blocks               uint32              `json:"blocks"`
-	Headers              uint32              `json:"headers"`
-	Bestblockhash        string              `json:"bestblockhash"`
-	Difficulty           float64             `json:"difficulty"`
-	Mediantime           uint32              `json:"mediantime"`
-	Verificationprogress float64             `json:"verificationprogress"`
-	Initialblockdownload bool                `json:"initialblockdownload"`
-	Chainwork            string              `json:"chainwork"`
-	SizeOnDisk           uint64              `json:"size_on_disk"`
-	Pruned               bool                `json:"pruned"`
-	SoftForks            SoftForks           `json:"softforks"`
-	Warnings             WarningsField       `json:"warnings"`
-}
-
-// SoftForks is soft fork list
-type SoftForks struct {
-	Bip34  Fork `json:"bip34"`
-	Bip66  Fork `json:"bip66"`
-	Bip65  Fork `json:"bip65"`
-	Csv    Fork `json:"csv"`
-	Segwit Fork `json:"segwit"`
-}
-
-// Fork is fork info
-type Fork struct {
-	Type   string `json:"type"`
-	Active bool   `json:"active"`
-	Height uint32 `json:"height"`
-}
-
-// Network network info
-type Network struct {
-	Name                      string `json:"name"`
-	Limited                   bool   `json:"limited"`
-	Reachable                 bool   `json:"reachable"`
-	Proxy                     string `json:"proxy"`
-	ProxyRandomizeCredentials bool   `json:"proxy_randomize_credentials"`
-}
-
-// LocalAddress local address
-type LocalAddress struct {
-	Address string `json:"address"`
-	Port    int    `json:"port"`
-	Score   int    `json:"score"`
-}
 
 // GetNetworkInfo call RPC `getnetworkinfo`
 func (b *Bitcoin) GetNetworkInfo() (*dtobtc.NetworkInfo, error) {
-	rawResult, err := b.Client.RawRequest("getnetworkinfo", []json.RawMessage{})
+	result, err := btcrpc.GetNetworkInfo(b.Client)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(getnetworkinfo): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.GetNetworkInfo(): %w", err)
 	}
 
-	networkInfoResult := GetNetworkInfoResult{}
-	err = json.Unmarshal(rawResult, &networkInfoResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
-	}
-
-	return ToNetworkInfo(&networkInfoResult), nil
+	return ToNetworkInfoFromPkg(result), nil
 }
 
 // GetBlockchainInfo call RPC `getblockchaininfo`
 func (b *Bitcoin) GetBlockchainInfo() (*dtobtc.BlockchainInfo, error) {
-	rawResult, err := b.Client.RawRequest("getblockchaininfo", []json.RawMessage{})
+	result, err := btcrpc.GetBlockchainInfo(b.Client)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(getblockchaininfo): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.GetBlockchainInfo(): %w", err)
 	}
 
-	blockchainInfoResult := GetBlockchainInfoResult{}
-	err = json.Unmarshal(rawResult, &blockchainInfoResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
-	}
-
-	return ToBlockchainInfo(&blockchainInfoResult), nil
+	return ToBlockchainInfoFromPkg(result), nil
 }

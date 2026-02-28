@@ -1,12 +1,12 @@
 package btc
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // GetBalance gets balance
@@ -14,24 +14,9 @@ import (
 //   - wallet does not have the "avoid reuse" feature enabled
 //   - `bitcoin-cli getbalance "*" 6 true true`
 func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
-	input1, err := json.Marshal("*")
+	amount, err := btcrpc.GetBalance(b.Client, int(b.confirmationBlock))
 	if err != nil {
-		return 0, fmt.Errorf("fail to call json.Marchal(dummy): %w", err)
-	}
-	input2, err := json.Marshal(b.confirmationBlock)
-	if err != nil {
-		return 0, fmt.Errorf("fail to call json.Marchal(%d): %w", b.confirmationBlock, err)
-	}
-
-	rawResult, err := b.Client.RawRequest("getbalance", []json.RawMessage{input1, input2})
-	if err != nil {
-		return 0, fmt.Errorf("fail to call json.RawRequest(getbalance): %w", err)
-	}
-
-	var amount float64
-	err = json.Unmarshal(rawResult, &amount)
-	if err != nil {
-		return 0, fmt.Errorf("fail to json.Unmarshal(rawResult): %w", err)
+		return 0, fmt.Errorf("fail to call btcrpc.GetBalance(): %w", err)
 	}
 
 	return b.FloatToAmount(amount)

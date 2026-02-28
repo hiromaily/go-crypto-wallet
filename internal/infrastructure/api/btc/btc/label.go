@@ -1,8 +1,9 @@
 package btc
 
 import (
-	"encoding/json"
 	"fmt"
+
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // listlabels
@@ -14,24 +15,8 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 		return fmt.Errorf("fail to call btc.DecodeAddress(%s): %w", addr, err)
 	}
 
-	input1, err := json.Marshal(addr)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(addr): %w", err)
-	}
-	input2, err := json.Marshal(label)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(label): %w", err)
-	}
-
-	rawResult, err := b.Client.RawRequest("setlabel", []json.RawMessage{input1, input2})
-	if err != nil {
-		return fmt.Errorf("fail to call json.RawRequest(setlabel): %w", err)
-	}
-
-	var tmp any
-	err = json.Unmarshal(rawResult, &tmp)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
+	if err := btcrpc.SetLabel(b.Client, addr, label); err != nil {
+		return fmt.Errorf("fail to call btcrpc.SetLabel(): %w", err)
 	}
 
 	return nil

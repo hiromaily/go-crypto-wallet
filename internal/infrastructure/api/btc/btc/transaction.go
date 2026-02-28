@@ -16,6 +16,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -131,13 +132,6 @@ type PrevTx struct {
 	Amount        float64 `json:"amount"`
 }
 
-// FundRawTransactionResult response of api `fundrawtransaction`
-type FundRawTransactionResult struct {
-	Hex       string `json:"hex"`
-	Fee       int64  `json:"fee"`
-	Changepos int64  `json:"changepos"`
-}
-
 // ToHex convert wire.MsgTx to string of Hexadecimal(16進数)
 func (*Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
@@ -184,17 +178,12 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 
 // GetTransactionByTxID get transaction result by txID
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error) {
-	// hashTx, err := chainhash.NewHashFromStr(txID)
-	// if err != nil {
-	//	return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
-	//}
-	// resTx, err := b.Client.GetTransaction(hashTx)
-	resTx, err := b.GetTransaction(txID)
+	result, err := btcrpc.GetTransaction(b.Client, txID)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call btc.GetTransaction(%s): %w", txID, err)
+		return nil, fmt.Errorf("fail to call btcrpc.GetTransaction(%s): %w", txID, err)
 	}
 
-	return ToTransactionResult(resTx, b)
+	return ToTransactionResultFromPkg(result, b)
 }
 
 // GetTxOutByTxID get txOut by txID and index
@@ -232,27 +221,12 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 
 // DecodeRawTransaction returns information about a transaction given its serialized byte
 func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*dtobtc.RawTransaction, error) {
-	// byteHex, err := hex.DecodeString(hexTx)
-	// if err != nil {
-	//	return nil, fmt.Errorf("fail to call hex.DecodeString(): %w", err)
-	//}
-	// resTx, err := b.Client.DecodeRawTransaction(byteHex)
-	input, err := json.Marshal(hexTx)
+	result, err := btcrpc.DecodeRawTransaction(b.Client, hexTx)
 	if err != nil {
-		return nil, fmt.Errorf("json.Marchal(txID): error: %s", err)
-	}
-	rawResult, err := b.Client.RawRequest("decoderawtransaction", []json.RawMessage{input})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(decoderawtransaction): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.DecodeRawTransaction(): %w", err)
 	}
 
-	result := TxRawResult{}
-	err = json.Unmarshal(rawResult, &result)
-	if err != nil {
-		return nil, fmt.Errorf("json.Unmarshal(rawResult): error: %s", err)
-	}
-
-	dto, err := ToRawTransaction(&result, b)
+	dto, err := ToRawTransactionFromPkg(result, b)
 	if err != nil {
 		return nil, err
 	}
@@ -316,16 +290,6 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 	hexTx string,
 	opts *FundRawTransactionOptions,
 ) (*dtobtc.FundRawTransactionResult, error) {
-	// fundrawtransaction
-	// https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
-
-	// hex
-	bHex, err := json.Marshal(hexTx)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(hex): %w", err)
-	}
-
-	// Prepare options
 	if opts == nil {
 		opts = &FundRawTransactionOptions{}
 	}
@@ -339,54 +303,67 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 		opts.FeeRate = feePerKb
 	}
 
-	bOptions, err := json.Marshal(opts)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marshal(options): %w", err)
+	pkgOpts := &btcrpc.FundRawTransactionOptions{
+		FeeRate:       opts.FeeRate,
+		MaxTxWeight:   opts.MaxTxWeight,
+		ChangeType:    opts.ChangeType,
+		IncludeUnsafe: opts.IncludeUnsafe,
 	}
 
-	rawResult, err := b.Client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bOptions})
+	result, err := btcrpc.FundRawTransaction(b.Client, hexTx, pkgOpts)
 	if err != nil {
 		// error: -4: Insufficient funds
-		return nil, fmt.Errorf("fail to call json.RawRequest(fundrawtransaction): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.FundRawTransaction(): %w", err)
 	}
 
-	fundRawTransactionResult := FundRawTransactionResult{}
-	err = json.Unmarshal(rawResult, &fundRawTransactionResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-
-	return ToFundRawTransactionResult(&fundRawTransactionResult), nil
+	return ToFundRawTransactionResultFromPkg(result), nil
 }
 
 // prepareSignRawTransactionInputs prepares common inputs for sign raw transaction operations
 func (b *Bitcoin) prepareSignRawTransactionInputs(
 	tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx,
-) (hexTx string, marshaledHex json.RawMessage, marshaledPrevTxs json.RawMessage, err error) {
-	// Convert application DTOs to infrastructure types
-	infraPrevTxs, err := FromPreviousTx(prevtxs, b)
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("fail to convert PreviousTx: %w", err)
-	}
+) (hexTx string, pkgPrevTxs []btcrpc.PrevTx, err error) {
+	// Convert application DTOs to local infrastructure types, then to pkg types
+	localPrevTxs := fromDTOPreviousTxToLocal(prevtxs)
 
 	// hex tx
 	hexTx, err = b.ToHex(tx)
 	if err != nil {
-		return "", nil, nil, fmt.Errorf("fail to call btc.ToHex(tx): %w", err)
+		return "", nil, fmt.Errorf("fail to call btc.ToHex(tx): %w", err)
 	}
 
-	marshaledHex, err = json.Marshal(hexTx)
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("fail to call json.Marshal(hexTx): %w", err)
+	// Convert local PrevTx to pkg PrevTx
+	pkgPrevTxs = make([]btcrpc.PrevTx, len(localPrevTxs))
+	for i, p := range localPrevTxs {
+		pkgPrevTxs[i] = btcrpc.PrevTx{
+			Txid:          p.Txid,
+			Vout:          p.Vout,
+			ScriptPubKey:  p.ScriptPubKey,
+			RedeemScript:  p.RedeemScript,
+			WitnessScript: p.WitnessScript,
+			Amount:        p.Amount,
+		}
 	}
 
-	// prevtxs
-	marshaledPrevTxs, err = json.Marshal(infraPrevTxs)
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("fail to call json.Marshal(prevtxs): %w", err)
-	}
+	return hexTx, pkgPrevTxs, nil
+}
 
-	return hexTx, marshaledHex, marshaledPrevTxs, nil
+// pkgSignResultToLocal converts a btcrpc.SignRawTransactionResult to a local SignRawTransactionResult.
+func pkgSignResultToLocal(r *btcrpc.SignRawTransactionResult) SignRawTransactionResult {
+	local := SignRawTransactionResult{
+		Hex:      r.Hex,
+		Complete: r.Complete,
+	}
+	for _, e := range r.Errors {
+		local.Errors = append(local.Errors, SignRawTransactionError{
+			Txid:      e.Txid,
+			Vout:      e.Vout,
+			ScriptSig: e.ScriptSig,
+			Sequence:  e.Sequence,
+			Error:     e.Error,
+		})
+	}
+	return local
 }
 
 // processSignRawTransactionResult processes the result from sign raw transaction operations
@@ -439,27 +416,17 @@ func (b *Bitcoin) processSignRawTransactionResult(
 // This would be used for deposit action (client -> deposit).
 // For multisig addresses, refer to SignRawTransactionWithKey().
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx) (*wire.MsgTx, bool, error) {
-	hexTx, marshaledHex, marshaledPrevTxs, err := b.prepareSignRawTransactionInputs(tx, prevtxs)
+	hexTx, pkgPrevTxs, err := b.prepareSignRawTransactionInputs(tx, prevtxs)
 	if err != nil {
 		return nil, false, err
 	}
 
-	// call api `signrawtransactionwithwallet`
-	rawResult, err := b.Client.RawRequest(
-		"signrawtransactionwithwallet",
-		[]json.RawMessage{marshaledHex, marshaledPrevTxs},
-	)
+	pkgResult, err := btcrpc.SignRawTransactionWithWallet(b.Client, hexTx, pkgPrevTxs)
 	if err != nil {
-		return nil, false, fmt.Errorf("fail to call json.RawRequest(signrawtransactionwithwallet): %w", err)
+		return nil, false, fmt.Errorf("fail to call btcrpc.SignRawTransactionWithWallet(): %w", err)
 	}
 
-	signRawTxResult := SignRawTransactionResult{}
-	err = json.Unmarshal(rawResult, &signRawTxResult)
-	if err != nil {
-		return nil, false, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-
-	return b.processSignRawTransactionResult(tx, hexTx, signRawTxResult, true)
+	return b.processSignRawTransactionResult(tx, hexTx, pkgSignResultToLocal(pkgResult), true)
 }
 
 // SignRawTransactionWithKey signs a raw unsigned transaction for multisig addresses.
@@ -479,34 +446,18 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx
 func (b *Bitcoin) SignRawTransactionWithKey(
 	tx *wire.MsgTx, privKeysWIF []string, prevtxs []dtobtc.PreviousTx,
 ) (*wire.MsgTx, bool, error) {
-	hexTx, marshaledHex, marshaledPrevTxs, err := b.prepareSignRawTransactionInputs(tx, prevtxs)
+	hexTx, pkgPrevTxs, err := b.prepareSignRawTransactionInputs(tx, prevtxs)
 	if err != nil {
 		return nil, false, err
 	}
 
-	// private keys
-	marshaledPrivKeys, err := json.Marshal(privKeysWIF)
+	pkgResult, err := btcrpc.SignRawTransactionWithKey(b.Client, hexTx, privKeysWIF, pkgPrevTxs)
 	if err != nil {
-		return nil, false, fmt.Errorf("fail to call json.Marshal(privKeysWIF): %w", err)
-	}
-
-	// call api `signrawtransactionwithkey`
-	rawResult, err := b.Client.RawRequest(
-		"signrawtransactionwithkey",
-		[]json.RawMessage{marshaledHex, marshaledPrivKeys, marshaledPrevTxs},
-	)
-	if err != nil {
-		return nil, false, fmt.Errorf("fail to call json.RawRequest(signrawtransactionwithkey): %w", err)
-	}
-
-	signRawTxResult := SignRawTransactionResult{}
-	err = json.Unmarshal(rawResult, &signRawTxResult)
-	if err != nil {
-		return nil, false, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
+		return nil, false, fmt.Errorf("fail to call btcrpc.SignRawTransactionWithKey(): %w", err)
 	}
 
 	// Note: For multisig, partial signatures are allowed
-	return b.processSignRawTransactionResult(tx, hexTx, signRawTxResult, false)
+	return b.processSignRawTransactionResult(tx, hexTx, pkgSignResultToLocal(pkgResult), false)
 }
 
 // SendTransactionByHex send raw transaction by hex string

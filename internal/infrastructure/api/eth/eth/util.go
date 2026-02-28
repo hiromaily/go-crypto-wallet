@@ -1,97 +1,20 @@
 package eth
 
 import (
-	"errors"
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/params"
 )
-
-func castToInt64(val any) (int64, error) {
-	v, err := castToString(val)
-	if err != nil {
-		return 0, err
-	}
-
-	v2, err := hexutil.DecodeBig(v)
-	if err != nil {
-		return 0, err
-	}
-	return v2.Int64(), nil
-}
-
-func castToString(val any) (string, error) {
-	v, ok := val.(string)
-	if !ok {
-		return "", errors.New("fail to cast to string")
-	}
-	return v, nil
-}
-
-func castToSliceString(val any) ([]string, error) {
-	data, ok := val.([]any)
-	if !ok {
-		return nil, errors.New("fail to cast to []string")
-	}
-	if len(data) == 0 {
-		return []string{}, nil
-	}
-
-	ret := make([]string, 0, len(data))
-	for _, v := range data {
-		sRet, err := castToString(v)
-		if err != nil {
-			return nil, err
-		}
-		ret = append(ret, sRet)
-	}
-	return ret, nil
-}
 
 // DecodeBig to handle different response of API between Geth and Parity
 func (*Ethereum) DecodeBig(input string) (*big.Int, error) {
 	if input == "" || input == "0x" {
 		input = "0x0"
 	}
-	// if e.isParity {
-	//	i, err := strconv.ParseInt(input, 10, 64)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	return big.NewInt(i), nil
-	//}
 	return hexutil.DecodeBig(input)
-}
-
-func setZeroHex(input string) string {
-	if input == "" || input == "0x" {
-		input = "0x0"
-	}
-	return input
-}
-
-func toCallArg(msg *ethereum.CallMsg) any {
-	arg := map[string]any{
-		"from": msg.From,
-		"to":   msg.To,
-	}
-	if len(msg.Data) > 0 {
-		arg["data"] = hexutil.Bytes(msg.Data)
-	}
-	if msg.Value != nil {
-		arg["value"] = (*hexutil.Big)(msg.Value)
-	}
-	if msg.Gas != 0 {
-		arg["gas"] = hexutil.Uint64(msg.Gas)
-	}
-	if msg.GasPrice != nil {
-		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
-	}
-	return arg
 }
 
 // ValidateAddr validates address

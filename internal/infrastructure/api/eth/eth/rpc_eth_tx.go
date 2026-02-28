@@ -2,56 +2,14 @@ package eth
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"time"
 
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
-
-// ResponseGetTransaction response of eth_getTransactionByHash
-type ResponseGetTransaction struct {
-	BlockHash        string `json:"blockHash"`
-	BlockNumber      int64  `json:"blockNumber"`
-	From             string `json:"from"`
-	Gas              int64  `json:"gas"`
-	GasPrice         int64  `json:"gasPrice"`
-	Hash             string `json:"hash"`
-	Input            string `json:"input"`
-	Nonce            int64  `json:"nonce"`
-	To               string `json:"to"`
-	TransactionIndex int64  `json:"transactionIndex"`
-	Value            int64  `json:"value"`
-	V                int64  `json:"v"`
-	R                string `json:"r"`
-	S                string `json:"s"`
-}
-
-// ResponseGetTransactionReceipt response of eth_getTransactionReceipt
-type ResponseGetTransactionReceipt struct {
-	TransactionHash   string   `json:"transactionHash"`
-	TransactionIndex  int64    `json:"transactionIndex"`
-	BlockHash         string   `json:"blockHash"`
-	BlockNumber       int64    `json:"blockNumber"`
-	From              string   `json:"from"`
-	To                string   `json:"to"`
-	CumulativeGasUsed int64    `json:"cumulativeGasUsed"`
-	GasUsed           int64    `json:"gasUsed"`
-	ContractAddress   string   `json:"contractAddress"`
-	Logs              []string `json:"logs"`
-	LogsBloom         string   `json:"logsBloom"`
-	Status            int64    `json:"status"`
-}
-
-// errReceiptNotFound is returned by GetTransactionReceipt when the node responds
-// with null (transaction not yet included in a block). GetTxReceipt treats this
-// as a non-error "pending" state rather than a failure.
-var errReceiptNotFound = errors.New("response is empty")
 
 // Sign calculates an Ethereum specific signature with:
 //
@@ -59,283 +17,59 @@ var errReceiptNotFound = errors.New("response is empty")
 //
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign
 func (e *Ethereum) Sign(ctx context.Context, hexAddr, message string) (string, error) {
-	var signature string
-	err := e.rpcClient.CallContext(ctx, &signature, "eth_sign", hexAddr, message)
-	if err != nil {
-		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sign): %w", err)
-	}
-
-	return signature, nil
+	return ethrpc.Sign(ctx, e.rpcClient, hexAddr, message)
 }
 
 // SendTransaction sends transaction and returns transaction hash
-// FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sendtransaction
 func (e *Ethereum) SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error) {
-	var txHash string
-	err := e.rpcClient.CallContext(ctx, &txHash, "eth_sendTransaction", toCallArg(msg))
-	if err != nil {
-		// FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
-		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sendTransaction): %w", err)
-	}
-
-	return txHash, nil
+	return ethrpc.SendTransaction(ctx, e.rpcClient, msg)
 }
 
 // SendRawTransaction creates new message call transaction or a contract creation for signed transactions
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sendrawtransaction
 func (e *Ethereum) SendRawTransaction(ctx context.Context, signedTx string) (string, error) {
-	var txHash string
-	err := e.rpcClient.CallContext(ctx, &txHash, "eth_sendRawTransaction", signedTx)
-	if err != nil {
-		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sendTransaction): %w", err)
-	}
-
-	return txHash, nil
+	return ethrpc.SendRawTransaction(ctx, e.rpcClient, signedTx)
 }
 
 // SendRawTransactionWithTypesTx call SendRawTransaction() by types.Transaction.
 // Uses EIP-2718 binary format (MarshalBinary) to correctly encode both legacy
 // and typed (EIP-1559) transactions for eth_sendRawTransaction.
 func (e *Ethereum) SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error) {
-	encodedTx, err := tx.MarshalBinary()
-	if err != nil {
-		return "", fmt.Errorf("fail to call tx.MarshalBinary(): %w", err)
-	}
-	return e.SendRawTransaction(ctx, hexutil.Encode(encodedTx))
+	return ethrpc.SendRawTransactionWithTypesTx(ctx, e.rpcClient, tx)
 }
-
-// Call executes a new message call immediately without creating a transaction on the block chain
-// FIXME: check is not done yet
-// func (e *Ethereum) Call(msg ethereum.CallMsg) (string, error) {
-//	var txHash string
-//	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_call", msg)
-//	if err != nil {
-//		return "", fmt.Errorf("fail to call rpc.CallContext(eth_call): %w", err)
-//	}
-//
-//	return txHash, nil
-//}
 
 // GetTransactionByHash returns the information about a transaction requested by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
 func (e *Ethereum) GetTransactionByHash(
 	ctx context.Context, hashTx string,
 ) (*domainETH.ResponseGetTransaction, error) {
-	var resMap map[string]string
-	err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionByHash", hashTx)
+	result, err := ethrpc.GetTransactionByHash(ctx, e.rpcClient, hashTx)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionByHash): %w", err)
+		return nil, err
 	}
-	if len(resMap) == 0 {
-		return nil, errors.New("response of eth_getTransactionByHash is empty")
-	}
-
-	blockNumber, err := hexutil.DecodeBig(setZeroHex(resMap["blockNumber"])) // blockNumber string = ""
-	if err != nil {
-		return nil, errors.New("response[blockNumber] is invalid")
-	}
-	gas, err := hexutil.DecodeBig(setZeroHex(resMap["gas"])) // gas string = "0x5208"
-	if err != nil {
-		return nil, errors.New("response[gas] is invalid")
-	}
-	gasPrice, err := hexutil.DecodeBig(setZeroHex(resMap["gasPrice"])) // gasPrice string = "0x0"
-	if err != nil {
-		return nil, errors.New("response[gasPrice] is invalid")
-	}
-	nonce, err := hexutil.DecodeBig(setZeroHex(resMap["nonce"])) // nonce string = "0x0"
-	if err != nil {
-		return nil, errors.New("response[nonce] is invalid")
-	}
-	transactionIndex, err := hexutil.DecodeBig(setZeroHex(resMap["transactionIndex"])) // transactionIndex string = ""
-	if err != nil {
-		return nil, errors.New("response[transactionIndex] is invalid")
-	}
-	value, err := hexutil.DecodeBig(setZeroHex(resMap["value"])) // value string = "0xde0b6b3a7640000"
-	if err != nil {
-		return nil, errors.New("response[value] is invalid")
-	}
-	v, err := hexutil.DecodeBig(setZeroHex(resMap["v"])) // v string = "0x2a"
-	if err != nil {
-		return nil, errors.New("response[v] is invalid")
-	}
-
-	infraResponse := &ResponseGetTransaction{
-		BlockHash:        resMap["blockHash"],
-		BlockNumber:      blockNumber.Int64(),
-		From:             resMap["from"],
-		Gas:              gas.Int64(),
-		GasPrice:         gasPrice.Int64(),
-		Hash:             resMap["hash"],
-		Input:            resMap["input"],
-		Nonce:            nonce.Int64(),
-		To:               resMap["to"],
-		TransactionIndex: transactionIndex.Int64(),
-		Value:            value.Int64(),
-		V:                v.Int64(),
-		R:                resMap["r"],
-		S:                resMap["s"],
-	}
-
-	return ToDomainResponseGetTransaction(infraResponse), nil
+	return ToDomainResponseGetTransactionFromPkg(result), nil
 }
-
-// eth_getTransactionByBlockHashAndIndex
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblockhashandindex
-
-// eth_getTransactionByBlockNumberAndIndex
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblocknumberandindex
 
 // GetTransactionReceipt returns the receipt of a transaction by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
-// Note, tis is not available for pending transactions
-//
-//nolint:gocyclo
 func (e *Ethereum) GetTransactionReceipt(
 	ctx context.Context, hashTx string,
 ) (*domainETH.ResponseGetTransactionReceipt, error) {
-	// timeout
-	ch := make(chan error, 1)
-	// FIXME: timeout configuration
-	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer func() {
-		cancel()
-	}()
-
-	// call
-	var resMap map[string]any
-	go func() {
-		err := e.rpcClient.CallContext(timeoutCtx, &resMap, "eth_getTransactionReceipt", hashTx)
-		if err != nil {
-			ch <- fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionReceipt): %w", err)
-		}
-		ch <- nil
-	}()
-
-	// wait by timeout
-	select {
-	case <-timeoutCtx.Done():
-		err := timeoutCtx.Err()
-		switch err {
-		case context.Canceled:
-			logger.Debug("context.Canceled for calling eth_getTransactionReceipt")
-		case context.DeadlineExceeded:
-			logger.Debug("context.DeadlineExceeded for calling eth_getTransactionReceipt")
-		case nil:
-			// no error
-		default:
-			logger.Debug(err.Error())
-			return nil, err
-		}
-	case retErr := <-ch:
-		if retErr != nil {
-			return nil, retErr
-		}
-	}
-
-	if len(resMap) == 0 {
-		return nil, errReceiptNotFound
-	}
-
-	transactionHash, err := castToString(resMap["transactionHash"])
+	result, err := ethrpc.GetTransactionReceipt(ctx, e.rpcClient, hashTx)
 	if err != nil {
-		return nil, errors.New("response[transactionHash] is invalid")
+		return nil, err
 	}
-	transactionIndex, err := castToInt64(resMap["transactionIndex"])
-	if err != nil {
-		return nil, errors.New("response[transactionIndex] is invalid")
-	}
-	blockHash, err := castToString(resMap["blockHash"])
-	if err != nil {
-		return nil, errors.New("response[blockHash] is invalid")
-	}
-	blockNumber, err := castToInt64(resMap["blockNumber"])
-	if err != nil {
-		return nil, errors.New("response[blockNumber] is invalid")
-	}
-	from, err := castToString(resMap["from"])
-	if err != nil {
-		return nil, errors.New("response[from] is invalid")
-	}
-	to, err := castToString(resMap["to"])
-	if err != nil {
-		return nil, errors.New("response[to] is invalid")
-	}
-	cumulativeGasUsed, err := castToInt64(resMap["cumulativeGasUsed"])
-	if err != nil {
-		return nil, errors.New("response[cumulativeGasUsed] is invalid")
-	}
-	gasUsed, err := castToInt64(resMap["gasUsed"])
-	if err != nil {
-		return nil, errors.New("response[gasUsed] is invalid")
-	}
-	// contractAddress would be nil sometimes
-	var contractAddress string
-	if resMap["contractAddress"] == nil {
-		contractAddress = ""
-	} else {
-		contractAddress, err = castToString(resMap["contractAddress"])
-		if err != nil {
-			return nil, errors.New("response[contractAddress] is invalid")
-		}
-	}
-	// logs would be empty any sometimes
-	logs, err := castToSliceString(resMap["logs"])
-	if err != nil {
-		return nil, errors.New("response[logs] is invalid")
-	}
-
-	logsBloom, err := castToString(resMap["logsBloom"])
-	if err != nil {
-		return nil, errors.New("response[logsBloom] is invalid")
-	}
-	status, err := castToInt64(resMap["status"])
-	if err != nil {
-		return nil, errors.New("response[status] is invalid")
-	}
-
-	infraResponse := &ResponseGetTransactionReceipt{
-		TransactionHash:   transactionHash,
-		TransactionIndex:  transactionIndex,
-		BlockHash:         blockHash,
-		BlockNumber:       blockNumber,
-		From:              from,
-		To:                to,
-		CumulativeGasUsed: cumulativeGasUsed,
-		GasUsed:           gasUsed,
-		ContractAddress:   contractAddress,
-		Logs:              logs,
-		LogsBloom:         logsBloom,
-		Status:            status,
-	}
-
-	return ToDomainResponseGetTransactionReceipt(infraResponse), nil
+	return ToDomainResponseGetTransactionReceiptFromPkg(result), nil
 }
 
 // GetTxReceipt retrieves a transaction receipt and converts it to the clean domain type.
 // Returns (nil, nil) when the transaction has not yet been included in a block.
 // Returns (nil, error) on node connectivity or parsing failures.
 func (e *Ethereum) GetTxReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error) {
-	resp, err := e.GetTransactionReceipt(ctx, txHash)
+	result, err := ethrpc.GetTxReceipt(ctx, e.rpcClient, txHash)
 	if err != nil {
-		if errors.Is(err, errReceiptNotFound) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("fail to call GetTransactionReceipt(): %w", err)
+		return nil, fmt.Errorf("fail to call GetTxReceipt(): %w", err)
 	}
-	return &domainETH.TransactionReceipt{
-		TransactionHash:   resp.TransactionHash,
-		TransactionIndex:  uint64(resp.TransactionIndex),
-		BlockHash:         resp.BlockHash,
-		BlockNumber:       uint64(resp.BlockNumber),
-		From:              resp.From,
-		To:                resp.To,
-		CumulativeGasUsed: uint64(resp.CumulativeGasUsed),
-		GasUsed:           uint64(resp.GasUsed),
-		ContractAddress:   resp.ContractAddress,
-		Status:            uint64(resp.Status),
-	}, nil
+	return ToDomainTransactionReceiptFromPkg(result), nil
 }
-
-// eth_pendingTransactions
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_pendingtransactions

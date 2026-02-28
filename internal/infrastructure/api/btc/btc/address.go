@@ -1,111 +1,23 @@
 package btc
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// FlexibleLabels handles both string arrays (BTC) and object arrays (BCH) for the labels field
-type FlexibleLabels []string
-
-// UnmarshalJSON implements custom unmarshaling for labels field
-// BTC format: ["label1", "label2"]
-// BCH format: [{"name": "label1", "purpose": "..."}, {"name": "label2", "purpose": "..."}]
-func (f *FlexibleLabels) UnmarshalJSON(data []byte) error {
-	// Try to unmarshal as string array (BTC format)
-	var stringLabels []string
-	if err := json.Unmarshal(data, &stringLabels); err == nil {
-		*f = FlexibleLabels(stringLabels)
-		return nil
-	}
-
-	// Try to unmarshal as object array (BCH format)
-	var objectLabels []struct {
-		Name    string `json:"name"`
-		Purpose string `json:"purpose"`
-	}
-	if err := json.Unmarshal(data, &objectLabels); err == nil {
-		// Extract just the name fields
-		labels := make([]string, len(objectLabels))
-		for i, obj := range objectLabels {
-			labels[i] = obj.Name
-		}
-		*f = FlexibleLabels(labels)
-		return nil
-	}
-
-	// If both fail, return empty (labels might be null or invalid)
-	*f = FlexibleLabels([]string{})
-	return nil
-}
-
-// GetAddressInfoResult is response type of RPC `getaddressinfo`
-type GetAddressInfoResult struct {
-	Address             string         `json:"address"`
-	ScriptPubKey        string         `json:"scriptPubKey"`
-	Ismine              bool           `json:"ismine"`
-	Solvable            bool           `json:"solvable,omitempty"`
-	Desc                string         `json:"desc,omitempty"`
-	Iswatchonly         bool           `json:"iswatchonly"`
-	Isscript            bool           `json:"isscript"`
-	Iswitness           bool           `json:"iswitness,omitempty"`
-	Pubkey              string         `json:"pubkey,omitempty"`
-	Iscompressed        bool           `json:"iscompressed,omitempty"`
-	Ischange            bool           `json:"ischange"`
-	Timestamp           int64          `json:"timestamp,omitempty"`
-	HDKeyPath           string         `json:"hdkeypath,omitempty"`
-	HDSeedID            string         `json:"hdseedid,omitempty"`
-	HDMasterFingerprint string         `json:"hdmasterfingerprint,omitempty"`
-	Labels              FlexibleLabels `json:"labels"`
-}
-
-// ValidateAddressResult is response type of RPC `validateaddress`
-type ValidateAddressResult struct {
-	IsValid           bool   `json:"isvalid"`
-	Address           string `json:"address"`
-	ScriptPubKey      string `json:"scriptPubKey"`
-	IsScript          bool   `json:"isscript"`
-	IsWitness         bool   `json:"iswitness"`
-	WitnessVersion    uint32 `json:"witness_version,omitempty"`
-	WitnessProgramHex string `json:"witness_program,omitempty"`
-}
-
-// GetLabelName returns label name
-func (a *GetAddressInfoResult) GetLabelName() string {
-	if len(a.Labels) != 0 {
-		return a.Labels[0]
-	}
-	return ""
-}
-
-// Purpose stores part of response of PRC `getaddressesbylabel`
-type Purpose struct {
-	Purpose string `json:"purpose"`
-}
-
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
 func (b *Bitcoin) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
-	input, err := json.Marshal(addr)
+	result, err := btcrpc.GetAddressInfo(b.Client, addr)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
-	}
-	rawResult, err := b.Client.RawRequest("getaddressinfo", []json.RawMessage{input})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressinfo) %s: %w", addr, err)
+		return nil, fmt.Errorf("fail to call btcrpc.GetAddressInfo(%s): %w", addr, err)
 	}
 
-	infoResult := GetAddressInfoResult{}
-	err = json.Unmarshal(rawResult, &infoResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-
-	return ToAddressInfo(&infoResult), nil
+	return ToAddressInfoFromPkg(result), nil
 }
 
 // GetAddressesByLabel returns addresses of account(label)
@@ -117,23 +29,10 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	logger.Debug("getting addresses by label", "label", labelName)
 
-	// input for rpc api
-	input, err := json.Marshal(labelName)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
-	}
-	// call getaddressesbylabel
-	rawResult, err := b.Client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
+	labels, err := btcrpc.GetAddressesByLabel(b.Client, labelName)
 	if err != nil {
 		logger.Debug("getaddressesbylabel RPC failed", "label", labelName, "error", err)
-		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressesbylabel) for label %s: %w", labelName, err)
-	}
-
-	// unmarshal response
-	var labels map[string]Purpose
-	err = json.Unmarshal(rawResult, &labels)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.GetAddressesByLabel(%s): %w", labelName, err)
 	}
 
 	if len(labels) == 0 {
@@ -149,8 +48,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 	resAddrs := make([]btcutil.Address, 0, len(labels))
 	for key := range labels {
 		// key is address string
-		var address btcutil.Address
-		address, err = b.DecodeAddress(key)
+		address, err := b.DecodeAddress(key)
 		if err != nil {
 			logger.Error(
 				"fail to call b.DecodeAddress()",
@@ -172,25 +70,15 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 
 // ValidateAddress validate address
 func (b *Bitcoin) ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error) {
-	input, err := json.Marshal(addr)
+	result, err := btcrpc.ValidateAddress(b.Client, addr)
 	if err != nil {
-		return nil, fmt.Errorf("json.Marchal(): error: %s", err)
-	}
-	rawResult, err := b.Client.RawRequest("validateaddress", []json.RawMessage{input})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(validateaddress): %w", err)
-	}
-
-	result := ValidateAddressResult{}
-	err = json.Unmarshal(rawResult, &result)
-	if err != nil {
-		return nil, fmt.Errorf("json.Unmarshal(): error: %s", err)
+		return nil, fmt.Errorf("fail to call btcrpc.ValidateAddress(%s): %w", addr, err)
 	}
 	if !result.IsValid {
 		return nil, fmt.Errorf("this address is invalid: %v", result)
 	}
 
-	return ToValidateAddressResult(&result), nil
+	return ToValidateAddressResultFromPkg(result), nil
 }
 
 // DecodeAddress decode string address to type Address

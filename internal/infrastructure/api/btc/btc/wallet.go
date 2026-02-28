@@ -2,8 +2,9 @@ package btc
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 //{
@@ -18,12 +19,6 @@ const (
 // WalletResult is response type of PRC `dumpwallet`/`dumpwallet`
 type WalletResult struct {
 	FileName string `json:"filename"`
-}
-
-// LoadWalletResult is response type of PRC `loadwallet`/`unloadwallet`
-type LoadWalletResult struct {
-	WalletName string `json:"name"`
-	Warning    string `json:"warning"`
 }
 
 // BackupWallet unload wallet.dat
@@ -115,24 +110,8 @@ func (b *Bitcoin) WalletPassphraseChange(old, newPass string) error {
 //	applied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).
 //	e.g. bitcoin-cli loadwallet "test.dat"
 func (b *Bitcoin) LoadWallet(fileName string) error {
-	// loadwallet "filename"
-	bFileName, err := json.Marshal(fileName)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(fileName): %w", err)
-	}
-	rawResult, err := b.Client.RawRequest("loadwallet", []json.RawMessage{bFileName})
-	if err != nil {
-		return fmt.Errorf("fail to call json.RawRequest(loadwallet): %w", err)
-	}
-
-	loadWalletResult := LoadWalletResult{}
-	err = json.Unmarshal(rawResult, &loadWalletResult)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-	if loadWalletResult.Warning != "" {
-		// TODO: how to handle this warning
-		return fmt.Errorf("detect warning: %s", loadWalletResult.Warning)
+	if err := btcrpc.LoadWallet(b.Client, fileName); err != nil {
+		return fmt.Errorf("fail to call btcrpc.LoadWallet(): %w", err)
 	}
 
 	return nil
@@ -144,14 +123,8 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 //	Specifying the wallet name on a wallet endpoint is invalid.
 //	e.g. bitcoin-cli unloadwallet wallet_name
 func (b *Bitcoin) UnLoadWallet(fileName string) error {
-	// unloadwallet ( "wallet_name" )
-	bFileName, err := json.Marshal(fileName)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(): %w", err)
-	}
-	_, err = b.Client.RawRequest("unloadwallet", []json.RawMessage{bFileName})
-	if err != nil {
-		return errors.New("fail to call json.RawRequest(unloadwallet)")
+	if err := btcrpc.UnloadWallet(b.Client, fileName); err != nil {
+		return fmt.Errorf("fail to call btcrpc.UnloadWallet(): %w", err)
 	}
 
 	return nil
@@ -184,71 +157,17 @@ func (b *Bitcoin) CreateWalletWithOptions(fileName string, opts *CreateWalletOpt
 		opts = &CreateWalletOptions{}
 	}
 
-	// Build parameters array
-	params := make([]json.RawMessage, 0, 7)
-
-	// 1. wallet_name (required)
-	bFileName, err := json.Marshal(fileName)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
-	}
-	params = append(params, bFileName)
-
-	// 2. disable_private_keys (optional, default: false)
-	bDisablePrivKey, err := json.Marshal(opts.DisablePrivateKeys)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marshal(disablePrivKey): %w", err)
-	}
-	params = append(params, bDisablePrivKey)
-
-	// 3. blank (optional, default: false)
-	bBlank, err := json.Marshal(opts.Blank)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marshal(blank): %w", err)
-	}
-	params = append(params, bBlank)
-
-	// 4. passphrase (optional, default: "")
-	bPassphrase, err := json.Marshal(opts.Passphrase)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marshal(passphrase): %w", err)
-	}
-	params = append(params, bPassphrase)
-
-	// 5. avoid_reuse (optional, default: false)
-	bAvoidReuse, err := json.Marshal(opts.AvoidReuse)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marshal(avoidReuse): %w", err)
-	}
-	params = append(params, bAvoidReuse)
-
-	// 6. descriptors (optional, default: false) - Bitcoin Core v0.21.0+
-	bDescriptors, err := json.Marshal(opts.Descriptors)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marshal(descriptors): %w", err)
-	}
-	params = append(params, bDescriptors)
-
-	// 7. load_on_startup (optional, default: null) - Bitcoin Core v0.21.0+
-	bLoadOnStartup, err := json.Marshal(opts.LoadOnStartup)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marshal(loadOnStartup): %w", err)
-	}
-	params = append(params, bLoadOnStartup)
-
-	rawResult, err := b.Client.RawRequest("createwallet", params)
-	if err != nil {
-		return fmt.Errorf("fail to call json.RawRequest(createwallet): %w", err)
+	pkgOpts := &btcrpc.CreateWalletOptions{
+		DisablePrivateKeys: opts.DisablePrivateKeys,
+		Blank:              opts.Blank,
+		Passphrase:         opts.Passphrase,
+		AvoidReuse:         opts.AvoidReuse,
+		Descriptors:        opts.Descriptors,
+		LoadOnStartup:      opts.LoadOnStartup,
 	}
 
-	loadWalletResult := LoadWalletResult{}
-	err = json.Unmarshal(rawResult, &loadWalletResult)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-	if loadWalletResult.Warning != "" {
-		// TODO: how to handle this warning
-		return fmt.Errorf("detect warning: %s", loadWalletResult.Warning)
+	if err := btcrpc.CreateWallet(b.Client, fileName, pkgOpts); err != nil {
+		return fmt.Errorf("fail to call btcrpc.CreateWallet(): %w", err)
 	}
 
 	return nil

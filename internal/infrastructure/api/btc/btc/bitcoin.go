@@ -51,28 +51,28 @@ func NewBitcoin(
 	switch NetworkTypeBTC(conf.NetworkType) {
 	case NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
-		if blockInfo.Chain != BlockchainInfoChainMain.String() {
+		if blockInfo.Chain != "main" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeMainNet)
 		}
 	case NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
-		if blockInfo.Chain != BlockchainInfoChainTest.String() {
+		if blockInfo.Chain != "test" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeTestNet3)
 		}
 	case NetworkTypeRegTestNet:
 		bit.chainConf = &chaincfg.RegressionNetParams
-		if blockInfo.Chain != BlockchainInfoChainRegtest.String() {
+		if blockInfo.Chain != "regtest" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeRegTestNet)
 		}
 	case NetworkTypeSigNet:
 		bit.chainConf = &chaincfg.SigNetParams
-		if blockInfo.Chain != BlockchainInfoChainSignet.String() {
+		if blockInfo.Chain != "signet" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeSigNet)

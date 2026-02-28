@@ -1,50 +1,18 @@
 package btc
 
 import (
-	"encoding/json"
 	"fmt"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
-
-// LoggingResult is response type of PRC `logging`
-type LoggingResult struct {
-	Net         bool `json:"net"`
-	Tor         bool `json:"tor"`
-	Mempool     bool `json:"mempool"`
-	HTTP        bool `json:"http"`
-	Bench       bool `json:"bench"`
-	Zmq         bool `json:"zmq"`
-	Walletdb    bool `json:"walletdb"`
-	RPC         bool `json:"rpc"`
-	Estimatefee bool `json:"estimatefee"`
-	Addrman     bool `json:"addrman"`
-	Selectcoins bool `json:"selectcoins"`
-	Reindex     bool `json:"reindex"`
-	Cmpctblock  bool `json:"cmpctblock"`
-	Rand        bool `json:"rand"`
-	Prune       bool `json:"prune"`
-	Proxy       bool `json:"proxy"`
-	Mempoolrej  bool `json:"mempoolrej"`
-	Libevent    bool `json:"libevent"`
-	Coindb      bool `json:"coindb"`
-	Qt          bool `json:"qt"`
-	Leveldb     bool `json:"leveldb"`
-	Validation  bool `json:"validation"`
-}
 
 // Logging calls RPC `logging`
 func (b *Bitcoin) Logging() (*dtobtc.LoggingResult, error) {
-	rawResult, err := b.Client.RawRequest("logging", []json.RawMessage{})
+	result, err := btcrpc.Logging(b.Client)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(logging): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.Logging(): %w", err)
 	}
 
-	loggingResult := LoggingResult{}
-	err = json.Unmarshal(rawResult, &loggingResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-
-	return ToLoggingResult(&loggingResult), nil
+	return ToLoggingResultFromPkg(result), nil
 }

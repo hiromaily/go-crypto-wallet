@@ -3,7 +3,7 @@ package xrp
 import (
 	"google.golang.org/grpc"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/protogen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 )
 
 // XRPAPI is the XRP API client

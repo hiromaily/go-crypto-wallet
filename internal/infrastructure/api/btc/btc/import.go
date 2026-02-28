@@ -1,13 +1,13 @@
 package btc
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // ImportPrivKey import privKey to wallet
@@ -56,41 +56,20 @@ func (b *Bitcoin) ImportAddress(pubkey string) error {
 
 // ImportAddressWithoutReScan import pubkey without rescan
 func (b *Bitcoin) ImportAddressWithoutReScan(pubkey string) error {
-	err := b.ImportAddressWithLabel(pubkey, "", false)
-	if err != nil {
+	if err := b.ImportAddressWithLabel(pubkey, "", false); err != nil {
 		return fmt.Errorf("fail to call ImportAddressWithoutReScan(): %w", err)
 	}
 
 	return nil
 }
 
-// ImportAddressWithLabel import geven address with label to wallet
+// ImportAddressWithLabel import given address with label to wallet
 // - rescan is adjustable
 // Note: This is a legacy wallet method. For descriptor wallets (Bitcoin Core v23.0+),
 // consider using importdescriptors instead for better functionality and future compatibility.
 func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) error {
-	bAddress, err := json.Marshal(address)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(address): %w", err)
-	}
-
-	// addresses
-	bLabel, err := json.Marshal(label)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(label): %w", err)
-	}
-
-	// rescan
-	bRescan, err := json.Marshal(rescan)
-	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(rescan): %w", err)
-	}
-	jsonRawMsg := []json.RawMessage{bAddress, bLabel, bRescan}
-
-	// call importaddress
-	_, err = b.Client.RawRequest("importaddress", jsonRawMsg)
-	if err != nil {
-		return fmt.Errorf("fail to call client.RawRequest(importaddress): %w", err)
+	if err := btcrpc.ImportAddress(b.Client, address, label, rescan); err != nil {
+		return fmt.Errorf("fail to call btcrpc.ImportAddress(): %w", err)
 	}
 
 	return nil
@@ -123,32 +102,20 @@ func (b *Bitcoin) ImportDescriptors(
 		return nil, errors.New("no descriptors to import")
 	}
 
-	// Marshal requests to JSON
-	bRequests, err := json.Marshal(requests)
+	pkgRequests := FromDTOImportDescriptorsRequests(requests)
+	responses, err := btcrpc.ImportDescriptors(b.Client, pkgRequests)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal import requests: %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.ImportDescriptors(): %w", err)
 	}
 
-	// Call importdescriptors RPC
-	jsonRawMsg := []json.RawMessage{bRequests}
-	rawResponse, err := b.Client.RawRequest("importdescriptors", jsonRawMsg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call client.RawRequest(importdescriptors): %w", err)
-	}
+	result := ToImportDescriptorsResponseFromPkg(responses)
 
-	// Parse response
-	var responses []dtobtc.ImportDescriptorsResponse
-	if err := json.Unmarshal(rawResponse, &responses); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal import responses: %w", err)
-	}
-
-	// Verify response count matches request count
-	if len(responses) != len(requests) {
+	if len(result) != len(requests) {
 		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
-			len(responses), len(requests))
+			len(result), len(requests))
 	}
 
-	return responses, nil
+	return result, nil
 }
 
 // ImportMulti imports addresses/scripts with optional redeem scripts (legacy wallets).
@@ -178,41 +145,23 @@ func (b *Bitcoin) ImportMulti(
 		return nil, errors.New("no addresses to import")
 	}
 
-	// Marshal requests to JSON
-	bRequests, err := json.Marshal(requests)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal import requests: %w", err)
-	}
-
-	// Prepare RPC parameters
-	jsonRawMsg := []json.RawMessage{bRequests}
-
-	// Add options if provided
+	pkgRequests := FromDTOImportMultiRequests(requests)
+	var pkgOpts *btcrpc.ImportMultiOptions
 	if options != nil {
-		bOptions, err := json.Marshal(options)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal import options: %w", err)
-		}
-		jsonRawMsg = append(jsonRawMsg, bOptions)
+		pkgOpts = &btcrpc.ImportMultiOptions{Rescan: options.Rescan}
 	}
 
-	// Call importmulti RPC
-	rawResponse, err := b.Client.RawRequest("importmulti", jsonRawMsg)
+	responses, err := btcrpc.ImportMulti(b.Client, pkgRequests, pkgOpts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call client.RawRequest(importmulti): %w", err)
+		return nil, fmt.Errorf("fail to call btcrpc.ImportMulti(): %w", err)
 	}
 
-	// Parse response
-	var responses []dtobtc.ImportMultiResponse
-	if err := json.Unmarshal(rawResponse, &responses); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal import responses: %w", err)
-	}
+	result := ToImportMultiResponseFromPkg(responses)
 
-	// Verify response count matches request count
-	if len(responses) != len(requests) {
+	if len(result) != len(requests) {
 		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
-			len(responses), len(requests))
+			len(result), len(requests))
 	}
 
-	return responses, nil
+	return result, nil
 }
