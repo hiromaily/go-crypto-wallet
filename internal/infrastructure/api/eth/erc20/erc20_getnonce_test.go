@@ -14,7 +14,7 @@ import (
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 )
 
-// nonceStub is a minimal ethNodeAPI test double for nonce tests.
+// nonceStub is a minimal apieth.ERC20NodeAPI test double for nonce tests.
 // Only GetTransactionCount needs a real implementation; the remaining methods
 // are present solely to satisfy the interface and panic if called unexpectedly.
 type nonceStub struct {

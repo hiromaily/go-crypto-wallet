@@ -24,23 +24,11 @@ import (
 // Compile-time check to ensure ERC20 implements the ERC20er interface
 var _ apieth.ERC20er = (*ERC20)(nil)
 
-// ethNodeAPI is the minimal interface ERC20 needs from the Ethereum node.
-// apieth.Ethereumer satisfies this interface, so the DI layer can inject it
-// without any type assertion.
-type ethNodeAPI interface {
-	SupportsEIP1559(ctx context.Context) bool
-	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
-	BlockNumber(ctx context.Context) (*big.Int, error)
-	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainETH.BlockInfo, error)
-	// GetTransactionCount retrieves the pending nonce for an address (task 3.4).
-	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
-}
-
 // ERC20 struct holds both a named Ethereum field (for EIP-1559 support) and the
 // raw ethclient.Client (retained for balance, gas estimation, and nonce calls that
 // use it directly until Tasks 3.3–3.4 delegate them through the eth field).
 type ERC20 struct {
-	eth             ethNodeAPI
+	eth             apieth.ERC20NodeAPI
 	client          *ethclient.Client
 	tokenClient     *contract.Token
 	token           domainCoin.ERC20Token
@@ -52,7 +40,7 @@ type ERC20 struct {
 }
 
 func NewERC20(
-	eth ethNodeAPI,
+	eth apieth.ERC20NodeAPI,
 	client *ethclient.Client,
 	tokenClient *contract.Token,
 	token domainCoin.ERC20Token,
@@ -289,8 +277,8 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 	}
 
 	// maxFeePerGas = (baseFee × 2) + tip — same formula as Ethereum.CreateRawTransactionEIP1559
-	maxFeePerGas := new(big.Int).Mul(blockInfo.BaseFeePerGas, big.NewInt(2))
-	maxFeePerGas.Add(maxFeePerGas, maxPriorityFeePerGas)
+	baseFeeTimesTwo := new(big.Int).Mul(blockInfo.BaseFeePerGas, big.NewInt(2))
+	maxFeePerGas := new(big.Int).Add(baseFeeTimesTwo, maxPriorityFeePerGas)
 
 	// ── Chain ID ─────────────────────────────────────────────────────────────
 	chainID, err := e.client.ChainID(ctx)
@@ -299,8 +287,11 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 	}
 
 	// ── Address validation ───────────────────────────────────────────────────
-	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
-		return nil, nil, errors.New("address validation error")
+	if err := e.ValidateAddr(fromAddr); err != nil {
+		return nil, nil, fmt.Errorf("invalid fromAddr: %w", err)
+	}
+	if err := e.ValidateAddr(toAddr); err != nil {
+		return nil, nil, fmt.Errorf("invalid toAddr: %w", err)
 	}
 
 	// ── Token balance ────────────────────────────────────────────────────────
@@ -308,13 +299,12 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
-	logger.Info("token balance", "balance", balance.Int64())
-	if balance.Uint64() < amount {
-		return nil, nil, errors.New("balance is short to send token")
-	}
-	tokenAmount := big.NewInt(int64(amount))
+	logger.Info("token balance", "balance", balance.String())
+	tokenAmount := new(big.Int).SetUint64(amount)
 	if amount == 0 {
-		tokenAmount = balance
+		tokenAmount = new(big.Int).Set(balance)
+	} else if balance.Cmp(tokenAmount) < 0 {
+		return nil, nil, errors.New("balance is short to send token")
 	}
 
 	// ── Calldata & gas ───────────────────────────────────────────────────────
