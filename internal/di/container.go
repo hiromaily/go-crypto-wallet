@@ -513,6 +513,7 @@ func (c *container) newERC20() apieth.ERC20er {
 			panic(err)
 		}
 		c.erc20 = apierc20impl.NewERC20(
+			c.newETH(),
 			client,
 			tokenClient,
 			conf.ERC20Token,

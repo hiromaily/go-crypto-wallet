@@ -47,20 +47,20 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
 
 - [ ] 3. (P) Upgrade ERC-20 infrastructure to support EIP-1559 transactions
 
-- [ ] 3.1 (P) Add Ethereum named field to ERC20 struct and update constructor
+- [x] 3.1 (P) Add Ethereum named field to ERC20 struct and update constructor
   - Add `eth *eth.Ethereum` as a private named field in the `ERC20` struct (not Go anonymous embedding — avoids promoting all Ethereum methods)
   - Add `eth *eth.Ethereum` as the first parameter of `NewERC20`
   - Remove the now-redundant direct `*ethclient.Client` field from `ERC20` if the client can be accessed via `e.eth` — or retain it for the existing balance and token contract calls that use it directly (assess during implementation; retain `client *ethclient.Client` if removing it causes too many cascading changes)
   - Confirm the compile-time check `var _ apieth.ERC20er = (*ERC20)(nil)` still passes
   - _Requirements: 3.5_
 
-- [ ] 3.2 Replace hardcoded SupportsEIP1559 with real detection
+- [x] 3.2 Replace hardcoded SupportsEIP1559 with real detection
   - Replace the `return false` body of `ERC20.SupportsEIP1559` with a delegation to `e.eth.SupportsEIP1559(ctx)`
   - This reuses the existing Anvil detection and `baseFeePerGas` block-header check already implemented in `Ethereum.SupportsEIP1559`
   - Depends on Task 3.1 (the `eth` field must exist)
   - _Requirements: 3.2, 3.4_
 
-- [ ] 3.3 Implement EIP-1559 transaction creation for ERC-20 transfers
+- [x] 3.3 Implement EIP-1559 transaction creation for ERC-20 transfers
   - Replace the `CreateRawTransactionEIP1559` delegation to `CreateRawTransaction` with a real EIP-1559 implementation
   - Build a `types.DynamicFeeTx` with the ABI-encoded `transfer(address,uint256)` calldata in the `Data` field (method selector `0xa9059cbb`) — same calldata as the existing legacy path
   - Set `GasTipCap` from `e.eth.SuggestGasTipCap(ctx)` and `GasFeeCap` from `(baseFee × 2) + tip` — same fee formula as `Ethereum.CreateRawTransactionEIP1559`
@@ -71,22 +71,22 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Depends on Task 3.1 and 3.2
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 3.4 Resolve nonce duplication by delegating to Ethereum field
+- [x] 3.4 Resolve nonce duplication by delegating to Ethereum field
   - Replace the body of `ERC20.getNonce` with a call to `e.eth`'s nonce retrieval (the existing FIXME on line 279 of `erc20.go`)
   - This removes the duplicate `client.PendingNonceAt` logic
   - Depends on Task 3.1
   - _Requirements: 3.5_
 
-- [ ] 4. Update DI container to wire Ethereum instance into ERC-20 constructor
+- [x] 4. Update DI container to wire Ethereum instance into ERC-20 constructor
 
-- [ ] 4.1 Pass cached Ethereum instance to NewERC20 in the DI container
+- [x] 4.1 Pass cached Ethereum instance to NewERC20 in the DI container
   - In `container.go`, update `newERC20()` to call `c.newETH()` and pass the returned `*eth.Ethereum` as the first argument to `NewERC20`
   - `c.newETH()` is already lazy-cached, so no duplicate connections are created
   - Confirm no circular initialization: `newETH()` must not call `newERC20()` in any code path
   - Depends on Tasks 1 and 3 (HYC registered and new constructor signature ready)
   - _Requirements: 3.5, 4.1_
 
-- [ ] 4.2 Verify build and routing for HYC and existing ERC-20 tokens
+- [x] 4.2 Verify build and routing for HYC and existing ERC-20 tokens
   - Run `make check-build` to confirm the updated constructor compiles cleanly across all wallet binaries (watch, keygen, sign)
   - Confirm that existing `hyt` token routing is unaffected by tracing `IsERC20Token("hyt")` through the DI dispatch
   - Confirm that `IsETHGroup("hyc")` now routes through `newETHWatchCreateTransactionUseCase` → `newERC20()` path when `erc20_token: "hyc"` is set in config
