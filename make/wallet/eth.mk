@@ -111,8 +111,9 @@ deploy-hyt:
 			--broadcast
 	@echo ""
 	@echo "Contract address:"
-	@cat apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json \
-		| python3 -c "import json,sys; print(json.load(sys.stdin)['transactions'][0]['contractAddress'])"
+	@grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' \
+		apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json \
+		| head -1 | grep -oE '0x[a-fA-F0-9]+'
 
 ###############################################################################
 # E2E Tests

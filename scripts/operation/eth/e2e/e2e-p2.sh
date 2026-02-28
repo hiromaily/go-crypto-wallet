@@ -108,7 +108,8 @@ _detect_hyt_contract_address() {
 	project_root="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 	local broadcast="${project_root}/apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json"
 	if [ -f "${broadcast}" ]; then
-		python3 -c "import json,sys; print(json.load(open('${broadcast}'))['transactions'][0]['contractAddress'])" 2>/dev/null || true
+		grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' "${broadcast}" 2>/dev/null \
+			| head -1 | grep -oE '0x[a-fA-F0-9]+' || true
 	fi
 }
 
