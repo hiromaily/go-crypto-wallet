@@ -87,20 +87,22 @@
 
 ---
 
-- [ ] 5. Update PR CI workflow with parallel Pattern A and Pattern B jobs
+- [x] 5. Update PR CI workflow to use fast-only mode
 
-- [ ] 5.1 Replace the single `go-lint` job in `lint-test.yml` with two parallel lint jobs
-  - Rename the existing `go-lint` job to `go-lint-pattern-a`; point it at `.golangci-fast.yml` using the `args: --config .golangci-fast.yml` option in the action
-  - Add a new sibling job `go-lint-pattern-b` under the same `needs: changes` condition, pointing at `.golangci-lightweight.yml`
-  - Both jobs use `ubuntu-slim`, set `timeout-minutes: 5`, and `only-new-issues: true`
-  - Both jobs require `fetch-depth: 0` for the checkout step (required by `only-new-issues`)
-  - Both jobs include `permissions: contents: read`
-  - _Requirements: 4.3, 4.5, 5.3, 5.5, 7.1, 7.2, 7.6, 7.7, 8.1, 8.2_
+- [x] 5.1 Update the `go-lint` job in `lint-test.yml` to use `--fast-only` and upgrade action to v9
+  - Upgrade `golangci/golangci-lint-action` from `@v8` to `@v9` (node24 runtime; node20 is being deprecated by GitHub)
+  - Add `args: --fast-only` to the action step
+  - Keep the single `.golangci.yml` config (no separate config file needed)
+  - Keep `only-new-issues: true` and `fetch-depth: 0` for the checkout step
+  - Verify the golangci-lint version pin is `v2.10.1`
+  - _Requirements: 4.3, 4.5, 7.1, 7.2, 7.6, 7.7, 8.1, 8.2_
 
-- [ ] 5.2 (P) Update the golangci-lint-action version pin to v2.10.1 across all CI workflows
-  - Update `version: v2.8.0` → `version: v2.10.1` in `lint-test.yml` (both `go-lint-pattern-a` and `go-lint-pattern-b` jobs)
-  - Search all other workflow files under `.github/workflows/` for any additional references to `golangci-lint-action` version and update them
-  - _Requirements: 1.1, 7.4, 7.5_
+- [x] 5.2 Evaluate runner choice for the PR lint job
+  - `ubuntu-slim` has fewer CPU cores, which may degrade golangci-lint parallel analysis performance
+  - Run the PR lint job on both `ubuntu-slim` and `ubuntu-latest` (or a larger runner) and compare execution times
+  - If `ubuntu-slim` causes timeout or significant slowdown, switch the `go-lint` job to `ubuntu-latest`
+  - Document the chosen runner and rationale in the workflow comment
+  - _Requirements: 7.6, 8.1_
 
 ---
 
