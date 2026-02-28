@@ -115,20 +115,20 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Depends on Task 3
   - _Requirements: 8.1, 8.2, 8.4, 8.5_
 
-- [ ] 5.3 Deploy HYC contract to local Anvil node for integration testing
+- [ ] 5.3 Deploy HYT contract to local Anvil node for integration testing
   - Ensure an Anvil node is running locally (`anvil` from the Foundry toolchain)
-  - From `apps/eth-contracts/`, run `forge script script/DeployHYC.s.sol --rpc-url http://localhost:8545 --broadcast` with a funded test private key set in `PRIVATE_KEY`
-  - Capture the deployed HYC contract address from the script output or `broadcast/` directory artifacts
+  - From `apps/eth-contracts/`, run `forge script script/DeployHYT.s.sol --rpc-url http://localhost:8545 --broadcast` with a funded test private key set in `PRIVATE_KEY`
+  - Capture the deployed HYT contract address from the script output or `broadcast/` directory artifacts
   - Update `config/wallet/eth/watch.yaml` (and test config) with the real deployed `contract_address` and a funded `master_address` from Anvil's pre-funded accounts
-  - Verify the deployed contract by calling `balanceOf` on the deployer address; expect `1_000_000 ether` total supply (as defined in `DeployHYC.s.sol`)
+  - Verify the deployed contract by calling `balanceOf` on the deployer address; expect `1_000_000 ether` total supply (as defined in `DeployHYT.s.sol`)
   - Depends on Task 2 (config structure must exist to update)
   - _Requirements: 2.1, 2.4, 2.5_
 
-- [ ] 5.4 Integration test: Go wallet ERC-20 transfer against deployed HYC contract
-  - Using the Anvil node and deployed HYC contract from Task 5.3, add an integration test scenario in `internal/application/usecase/watch/eth/` (alongside `eth_file_exchange_test.go`)
-  - Configure the test with `erc20_token: "hyc"`, the deployed contract address, and Anvil pre-funded account addresses
-  - Run the full create-unsigned-tx → sign-tx → send-tx flow for a HYC token transfer:
-    - `CreateTransactionUseCase` with coin type `hyc` — verify unsigned JSON contains `EthTxType = 2` (EIP-1559) and `Data` starting with `0xa9059cbb`
+- [ ] 5.4 Integration test: Go wallet ERC-20 transfer against deployed HYT contract
+  - Using the Anvil node and deployed HYT contract from Task 5.3, add an integration test scenario in `internal/application/usecase/watch/eth/` (alongside `eth_file_exchange_test.go`)
+  - Configure the test with `erc20_token: "hyt"`, the deployed contract address, and Anvil pre-funded account addresses
+  - Run the full create-unsigned-tx → sign-tx → send-tx flow for a HYT token transfer:
+    - `CreateTransactionUseCase` with coin type `hyt` — verify unsigned JSON contains `EthTxType = 2` (EIP-1559) and `Data` starting with `0xa9059cbb`
     - `SignTransactionUseCase` — verify signed JSON is produced without network calls
     - `SendTransactionUseCase` — broadcast the signed transaction to Anvil
   - After send, call `GetBalance` on the recipient address to confirm the token balance increased by the transferred amount
