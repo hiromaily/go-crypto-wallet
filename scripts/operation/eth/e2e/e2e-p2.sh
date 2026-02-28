@@ -105,8 +105,9 @@ FUNDING_AMOUNT_ETH=1        # ETH for gas fees (small amount is sufficient)
 HYT_TRANSFER_AMOUNT=100     # HYT tokens to seed the payment account with
 TRANSFER_AMOUNT_HYT=10      # HYT tokens to transfer in the wallet transaction
 
-# Foundry toolchain — cast binary path
+# Foundry toolchain binary paths
 CAST="${HOME}/.foundry/bin/cast"
+FORGE="${HOME}/.foundry/bin/forge"
 
 # Deployer private key (Anvil account 0 from project mnemonic).
 # Override with HYT_DEPLOYER_KEY=0x... to use a different account.
@@ -119,7 +120,7 @@ HYT_MASTER_ADDRESS="${HYT_MASTER_ADDRESS:-0x328F371a76dfAc47b89Cc007bb048ec446c2
 # HYT contract address: use env var override, or auto-detect from broadcast artifacts
 _detect_hyt_contract_address() {
 	local project_root
-	project_root="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+	project_root="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 	local broadcast="${project_root}/apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json"
 	if [ -f "${broadcast}" ]; then
 		grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' "${broadcast}" 2>/dev/null \
@@ -198,6 +199,86 @@ while [[ $# -gt 0 ]]; do
 done
 
 ###############################################################################
+# HYT-specific address query
+# eth_get_payment_address queries coin='eth'; for HYT we need coin='hyt'.
+###############################################################################
+
+hyt_get_payment_address() {
+	local account="${1:-payment}"
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		sqlite3 "${SQLITE_WATCH_DB_PATH}" \
+			"SELECT wallet_address FROM address WHERE coin='hyt' AND account='${account}' AND is_allocated=0 LIMIT 1" \
+			2>/dev/null || true
+	fi
+}
+
+###############################################################################
+# Phase 0: Deploy HYT Contract
+# Runs after Anvil starts. On --reset the contract must be redeployed because
+# Anvil is wiped clean. Sets HYT_CONTRACT_ADDRESS for all subsequent phases.
+###############################################################################
+
+deploy_hyt_phase() {
+	log_step "Deploy HYT Contract Phase"
+
+	local project_root
+	project_root="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+
+	log_substep "Deploying HYT to Anvil (${ETH_RPC_HOST}:${ETH_RPC_PORT})"
+	(
+		cd "${project_root}/apps/eth-contracts"
+		PRIVATE_KEY="${HYT_DEPLOYER_KEY}" \
+			"${FORGE}" script script/DeployHYT.s.sol \
+			--rpc-url "http://${ETH_RPC_HOST}:${ETH_RPC_PORT}" \
+			--broadcast \
+			2>&1 | grep -v "^Warning:" || true
+	)
+
+	# Read deployed address from broadcast artifacts
+	local broadcast="${project_root}/apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json"
+	HYT_CONTRACT_ADDRESS=$(grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' "${broadcast}" 2>/dev/null \
+		| head -1 | grep -oE '0x[a-fA-F0-9]+' || true)
+
+	if [ -z "${HYT_CONTRACT_ADDRESS}" ]; then
+		log_error "Failed to deploy HYT or read contract address from broadcast artifacts"
+		return 1
+	fi
+
+	log_info "HYT deployed at: ${HYT_CONTRACT_ADDRESS}"
+
+	# Update the config overrides with the freshly deployed address
+	_apply_hyt_config_overrides
+}
+
+###############################################################################
+# HYT-specific address CSV export
+# eth_export_watch_address_csv hardcodes 'eth' as the coin type code, but
+# watch import address validates that the CSV coin matches --coin hyt.
+# This override emits 'hyt' as the coin type code in the CSV.
+###############################################################################
+
+hyt_export_watch_address_csv() {
+	local account="$1"
+	local project_root
+	project_root="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+	local addr_dir="${project_root}/data/address/eth"
+	mkdir -p "${addr_dir}"
+
+	local tmp_file
+	tmp_file="${addr_dir}/${account}_hyt_$(date +%s%N 2>/dev/null || date +%s).csv"
+
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		sqlite3 "${SQLITE_KEYGEN_DB_PATH}" \
+			"SELECT 'hyt'||','||account||','||address||',,,,,'||idx FROM eth_account_key WHERE account='${account}'" \
+			>"${tmp_file}" 2>/dev/null || true
+	else
+		log_warn "hyt_export_watch_address_csv: MySQL support not yet implemented"
+	fi
+
+	echo "${tmp_file}"
+}
+
+###############################################################################
 # Phase 1: Key Generation (Keygen wallet — offline)
 ###############################################################################
 
@@ -232,7 +313,7 @@ address_setup_phase() {
 	for account in "${PAYMENT_ACCOUNT}" "${CLIENT_ACCOUNT}"; do
 		log_substep "Exporting '${account}' addresses from keygen DB"
 		local csv_file
-		csv_file=$(eth_export_watch_address_csv "${account}")
+		csv_file=$(hyt_export_watch_address_csv "${account}")
 
 		if [ -z "${csv_file}" ] || [ ! -f "${csv_file}" ] || [ ! -s "${csv_file}" ]; then
 			log_error "Failed to create address CSV for '${account}'"
@@ -262,7 +343,7 @@ funding_phase() {
 	log_info "HYT contract: ${HYT_CONTRACT_ADDRESS}"
 
 	local payment_addr
-	payment_addr=$(eth_get_payment_address "${PAYMENT_ACCOUNT}")
+	payment_addr=$(hyt_get_payment_address "${PAYMENT_ACCOUNT}")
 	if [ -z "${payment_addr}" ]; then
 		log_error "No '${PAYMENT_ACCOUNT}' address found in watch DB"
 		return 1
@@ -448,15 +529,14 @@ e2e_full_workflow() {
 	log_info "Node type:    ${NODE_TYPE}"
 	log_info "DB type:      ${DB_TYPE}"
 	log_info "RPC:          ${ETH_RPC_HOST}:${ETH_RPC_PORT}"
-	log_info "HYT contract: ${HYT_CONTRACT_ADDRESS:-<not set — run make deploy-hyt first>}"
 	echo ""
 
 	eth_check_prerequisites
 	eth_setup_infrastructure
 	eth_init_sqlite_db
 
-	# Apply runtime config overrides — must run after HYT_CONTRACT_ADDRESS is resolved
-	_apply_hyt_config_overrides
+	# Deploy HYT contract to the fresh Anvil node, then apply config overrides
+	deploy_hyt_phase
 	log_info "HYT contract (config override): ${WALLET_ETHEREUM_ERC20S_HYT_CONTRACT_ADDRESS}"
 	log_info "HYT master   (config override): ${WALLET_ETHEREUM_ERC20S_HYT_MASTER_ADDRESS}"
 

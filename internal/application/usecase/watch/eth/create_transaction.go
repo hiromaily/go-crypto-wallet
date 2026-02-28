@@ -233,7 +233,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	requiredValue := u.ethClient.FloatToBigInt(floatValue)
-	if floatValue != 0 && (senderBalance.Uint64() <= requiredValue.Uint64()) {
+	if floatValue != 0 && senderBalance.Cmp(requiredValue) <= 0 {
 		return "", errors.New("sender balance is insufficient to send")
 	}
 	logger.Debug("amount",
@@ -427,7 +427,7 @@ func (u *createTransactionUseCase) validateAmount(
 		return fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
 
-	if senderBalance.Uint64() <= totalAmount.Uint64() {
+	if senderBalance.Cmp(totalAmount) <= 0 {
 		return errors.New("sender balance is insufficient to send")
 	}
 	return nil
