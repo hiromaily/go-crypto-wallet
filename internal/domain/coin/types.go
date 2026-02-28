@@ -137,7 +137,7 @@ const (
 	TokenHYT ERC20Token = "hyt"
 
 	// TokenBAT represents Basic Attention Token
-	TokenBAT ERC20Token = "bat"
+	// TokenBAT ERC20Token = "bat"
 )
 
 // String returns the string representation of the ERC20 token.
@@ -148,7 +148,7 @@ func (e ERC20Token) String() string {
 // ERC20Map maps known ERC20 tokens for validation.
 var ERC20Map = map[ERC20Token]bool{
 	TokenHYT: true,
-	TokenBAT: true,
+	// TokenBAT: true,
 }
 
 // IsERC20Token validates whether the given string is a known ERC20 token.
