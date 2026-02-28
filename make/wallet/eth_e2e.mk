@@ -12,23 +12,23 @@
 
 .PHONY: eth-e2e-p1-reset
 eth-e2e-p1-reset: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --reset
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p1.sh --reset
 
 .PHONY: eth-e2e-p1
 eth-e2e-p1: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p1.sh
 
 .PHONY: eth-e2e-p1-verbose
 eth-e2e-p1-verbose: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --verbose
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p1.sh --verbose
 
 .PHONY: eth-e2e-p1-ci
 eth-e2e-p1-ci: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --non-interactive
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p1.sh --non-interactive
 
 .PHONY: eth-e2e-p1-cleanup
 eth-e2e-p1-cleanup:
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --cleanup
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p1.sh --cleanup
 
 ###############################################################################
 # E2E Tests
@@ -48,23 +48,23 @@ eth-e2e-p1-cleanup:
 
 .PHONY: eth-e2e-p2-reset
 eth-e2e-p2-reset: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --reset
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p2.sh --reset
 
 .PHONY: eth-e2e-p2
 eth-e2e-p2: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p2.sh
 
 .PHONY: eth-e2e-p2-verbose
 eth-e2e-p2-verbose: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --verbose
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p2.sh --verbose
 
 .PHONY: eth-e2e-p2-ci
 eth-e2e-p2-ci: build-all
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --non-interactive
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p2.sh --non-interactive
 
 .PHONY: eth-e2e-p2-cleanup
 eth-e2e-p2-cleanup:
-	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --cleanup
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p2.sh --cleanup
 
 ###############################################################################
 # Parallel E2E Testing - Run Multiple Patterns Concurrently
@@ -109,11 +109,11 @@ endif
 # Usage: make eth-e2e-parallel [PATTERNS=1-2] [MAX_PARALLEL=2] [VERBOSE=true]
 .PHONY: eth-e2e-parallel
 eth-e2e-parallel: build-all
-	NODE_TYPE=$(NODE_TYPE) $(E2E_ETH_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(ETH_VERBOSE_FLAG)
+	NODE_TYPE="$(NODE_TYPE)" $(E2E_ETH_PARALLEL_SCRIPT) --patterns "$(PATTERNS)" --max-parallel "$(MAX_PARALLEL)" $(ETH_VERBOSE_FLAG)
 
 # Run all E2E tests in parallel for CI (non-interactive mode)
 # Note: build-all uses incremental build - only rebuilds when Go sources change
 # Usage: make eth-e2e-ci-all [PATTERNS=1-2] [MAX_PARALLEL=2] [VERBOSE=true]
 .PHONY: eth-e2e-ci-all
 eth-e2e-ci-all: build-all
-	NODE_TYPE=$(NODE_TYPE) $(E2E_ETH_PARALLEL_SCRIPT) --patterns $(PATTERNS) --max-parallel $(MAX_PARALLEL) $(ETH_VERBOSE_FLAG) --ci
+	NODE_TYPE="$(NODE_TYPE)" $(E2E_ETH_PARALLEL_SCRIPT) --patterns "$(PATTERNS)" --max-parallel "$(MAX_PARALLEL)" $(ETH_VERBOSE_FLAG) --ci

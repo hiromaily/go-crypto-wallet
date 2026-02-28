@@ -123,8 +123,7 @@ _detect_hyt_contract_address() {
 	project_root="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 	local broadcast="${project_root}/apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json"
 	if [ -f "${broadcast}" ]; then
-		grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' "${broadcast}" 2>/dev/null |
-			head -1 | grep -oE '0x[a-fA-F0-9]+' || true
+		jq -r '.transactions[0].contractAddress' "${broadcast}" 2>/dev/null || true
 	fi
 }
 
@@ -236,8 +235,7 @@ deploy_hyt_phase() {
 
 	# Read deployed address from broadcast artifacts
 	local broadcast="${project_root}/apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json"
-	HYT_CONTRACT_ADDRESS=$(grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' "${broadcast}" 2>/dev/null |
-		head -1 | grep -oE '0x[a-fA-F0-9]+' || true)
+	HYT_CONTRACT_ADDRESS=$(jq -r '.transactions[0].contractAddress' "${broadcast}" 2>/dev/null || true)
 
 	if [ -z "${HYT_CONTRACT_ADDRESS}" ]; then
 		log_error "Failed to deploy HYT or read contract address from broadcast artifacts"

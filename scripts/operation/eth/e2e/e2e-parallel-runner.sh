@@ -133,7 +133,9 @@ parse_patterns() {
 validate_pattern() {
 	local pattern="$1"
 	if [[ ! "${PATTERN_SCRIPTS[$pattern]+_}" ]]; then
-		log_error "Invalid pattern: P=$pattern. Valid patterns are 1-2."
+		local valid_patterns
+		valid_patterns=$(printf "%s\n" "${!PATTERN_SCRIPTS[@]}" | sort -n | tr '\n' ',' | sed 's/,$//')
+		log_error "Invalid pattern: P=$pattern. Valid patterns are ${valid_patterns}."
 		return 1
 	fi
 	return 0
@@ -252,15 +254,23 @@ run_patterns_parallel() {
 	for pattern in "${patterns[@]}"; do
 		# Wait if we've reached max parallel processes
 		while [[ $running -ge $MAX_PARALLEL ]]; do
-			# Check for completed processes
+			local new_pids=()
+			local finished_one=false
+			# Rebuild running PID list, collecting only still-running processes
 			for pid in "${pids[@]}"; do
-				if [[ -n "$pid" ]] && ! kill -0 "$pid" 2>/dev/null; then
+				if kill -0 "$pid" 2>/dev/null; then
+					new_pids+=("$pid")
+				else
 					wait "$pid" 2>/dev/null || true
-					running=$((running - 1))
-					pids=("${pids[@]/$pid/}")
+					finished_one=true
 				fi
 			done
-			sleep 0.5
+			pids=("${new_pids[@]}")
+			running=${#pids[@]}
+			# Only sleep if no process finished yet (avoid busy-waiting)
+			if ! $finished_one; then
+				sleep 0.5
+			fi
 		done
 
 		# Start new pattern

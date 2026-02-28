@@ -269,7 +269,8 @@ eth_full_reset() {
 		log_info "Using shared infrastructure (skipping full reset)"
 		if [ "${DB_TYPE}" = "sqlite" ]; then
 			log_info "Cleaning SQLite databases for pattern: ${E2E_PATTERN}"
-			rm -f "${PROJECT_ROOT:-./}"/data/sqlite/eth/*"-e2e-${E2E_PATTERN}.db" 2>/dev/null || true
+			rm -f "${PROJECT_ROOT:-./}/data/sqlite/eth/watch-e2e-${E2E_PATTERN}.db" \
+				"${PROJECT_ROOT:-./}/data/sqlite/eth/keygen-e2e-${E2E_PATTERN}.db" 2>/dev/null || true
 			eth_init_sqlite_db
 		fi
 		return 0
