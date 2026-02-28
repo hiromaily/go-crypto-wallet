@@ -87,9 +87,9 @@
 
 ---
 
-- [ ] 5. Update PR CI workflow to use fast-only mode
+- [x] 5. Update PR CI workflow to use fast-only mode
 
-- [ ] 5.1 Update the `go-lint` job in `lint-test.yml` to use `--fast-only` and upgrade action to v9
+- [x] 5.1 Update the `go-lint` job in `lint-test.yml` to use `--fast-only` and upgrade action to v9
   - Upgrade `golangci/golangci-lint-action` from `@v8` to `@v9` (node24 runtime; node20 is being deprecated by GitHub)
   - Add `args: --fast-only` to the action step
   - Keep the single `.golangci.yml` config (no separate config file needed)
@@ -97,7 +97,7 @@
   - Verify the golangci-lint version pin is `v2.10.1`
   - _Requirements: 4.3, 4.5, 7.1, 7.2, 7.6, 7.7, 8.1, 8.2_
 
-- [ ] 5.2 Evaluate runner choice for the PR lint job
+- [x] 5.2 Evaluate runner choice for the PR lint job
   - `ubuntu-slim` has fewer CPU cores, which may degrade golangci-lint parallel analysis performance
   - Run the PR lint job on both `ubuntu-slim` and `ubuntu-latest` (or a larger runner) and compare execution times
   - If `ubuntu-slim` causes timeout or significant slowdown, switch the `go-lint` job to `ubuntu-latest`
