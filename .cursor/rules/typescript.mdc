@@ -16,7 +16,7 @@ Rules for modifying TypeScript (`*.ts`, `*.tsx`) and JavaScript (`*.js`, `*.jsx`
 | App              | Language              | Runtime | Path                     | Status                     |
 | ---------------- | --------------------- | ------- | ------------------------ | -------------------------- |
 | xrpl-grpc-server | TypeScript            | **Bun** | `apps/xrpl-grpc-server/` | **READ-ONLY** (deprecated) |
-| erc20-token      | JavaScript/TypeScript | Node.js | `apps/erc20-token/`      | Active                     |
+| eth-contracts    | JavaScript/TypeScript | Node.js | `apps/eth-contracts/`      | Active                     |
 
 ## Verification Commands
 
@@ -38,10 +38,10 @@ bun run proto         # Generate protobuf code
 > **Important**: See @.claude/rules/apps/bun.md for Bun runtime rules.
 > **DO NOT** use `npm`/`npx` commands - always use `bun`/`bunx` instead.
 
-### erc20-token (JavaScript/Solidity)
+### eth-contracts (JavaScript/Solidity)
 
 ```bash
-cd apps/erc20-token
+cd apps/eth-contracts
 npm install           # Install dependencies (if needed)
 npm run lint          # Lint Solidity files
 npm run lint-js       # Lint JavaScript/TypeScript files
@@ -55,7 +55,7 @@ npm run test-all      # Run all tests
 | App              | Lint              | Format           | Build           | Test                |
 | ---------------- | ----------------- | ---------------- | --------------- | ------------------- |
 | xrpl-grpc-server | `bun run lint`    | `bun run format` | `bun run build` | `bun run typecheck` |
-| erc20-token      | `npm run lint-js` | `npm run fmt`    | `npm run build` | `npm run test-all`  |
+| eth-contracts    | `npm run lint-js` | `npm run fmt`    | `npm run build` | `npm run test-all`  |
 
 ## Code Style
 
@@ -128,7 +128,7 @@ import { createConnectRouter } from "@connectrpc/connect";
 import { AccountService } from "./services/account";
 ```
 
-#### erc20-token
+#### eth-contracts
 
 ```typescript
 import * as path from "path";
@@ -145,7 +145,7 @@ import { TokenService } from "./services/token";
 | App              | Generated Files                                                  |
 | ---------------- | ---------------------------------------------------------------- |
 | xrpl-grpc-server | `apps/xrpl-grpc-server/src/protogen/` (Buf/ConnectRPC generated) |
-| erc20-token      | `apps/erc20-token/build/` (Truffle build artifacts)              |
+| eth-contracts    | `apps/eth-contracts/build/` (Truffle build artifacts)              |
 
 ## Security
 
@@ -165,7 +165,7 @@ import { TokenService } from "./services/token";
 - [ ] No `any` types (unless documented reason)
 - [ ] Async errors properly handled
 
-### erc20-token
+### eth-contracts
 
 - [ ] `npm run lint-js` passes
 - [ ] `npm run fmt` applied
@@ -177,12 +177,12 @@ import { TokenService } from "./services/token";
 - @apps/xrpl-grpc-server/README.md - xrpl-grpc-server documentation
 - @apps/xrpl-grpc-server/docs/MIGRATION-GUIDE.md - Migration guide from ripple-lib
 - @apps/xrpl-grpc-server/package.json - xrpl-grpc-server scripts
-- @apps/erc20-token/package.json - erc20-token scripts
+- @apps/eth-contracts/package.json - eth-contracts scripts
 
 ## Related Skills
 
 - `typescript-development` - Full TypeScript workflow
-- `solidity-development` - For Solidity contracts in erc20-token
+- `solidity-development` - For Solidity contracts in eth-contracts
 
 ## Related Rules
 

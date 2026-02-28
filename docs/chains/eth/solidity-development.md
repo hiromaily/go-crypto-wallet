@@ -10,6 +10,8 @@ The goal of this task is **only**:
 2. Compile and deploy using Foundry
 3. Enable ERC-20 transfer calls from the CLI
 
+The latest tech stack in 2026
+
 ---
 
 ## 2. Target Network
@@ -123,7 +125,7 @@ Solidity implementation:
 
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.34;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -168,7 +170,7 @@ src = "contracts"
 out = "out"
 libs = ["node_modules"]
 
-solc_version = "0.8.24"
+solc_version = "0.8.34"
 optimizer = true
 optimizer_runs = 200
 ```
@@ -189,7 +191,7 @@ Example script:
 
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.34;
 
 import "forge-std/Script.sol";
 import "../contracts/HYC.sol";

@@ -266,7 +266,7 @@ The codebase is organized into `internal/` (new architecture) and `pkg/` (shared
 - `scripts/` ... Operation and setup scripts
 - `tools/` ... Development tools (sqlc configuration)
 - `apps/` ... Web-related projects
-  - `erc20-token/` ... ERC-20 token contract
+  - `eth-contracts/` ... Ethereum smart contracts
   - `xrpl-grpc-server/` ... XRP Ledger (Ripple) gRPC server [Deprecated]
 
 ### `internal/` Directory Structure (New Architecture)
@@ -354,8 +354,8 @@ The `pkg/` directory contains shared utilities and legacy/transitional code:
 
 - xrpl-grpc-server [Deprecated]
   - ./apps/xrpl-grpc-server
-- erc20-token
-  - ./apps/erc20-token
+- eth-contracts
+  - ./apps/eth-contracts
 
 ## Development Environment
 

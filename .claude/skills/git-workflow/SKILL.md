@@ -336,7 +336,7 @@ Execute verification commands for the modified file types:
 | File Type           | Required Commands                                                                  |
 | ------------------- | ---------------------------------------------------------------------------------- |
 | Go (`*.go`)         | `make go-lint && make tidy && make check-build && make go-test`                    |
-| TypeScript (`*.ts`) | See `typescript-development` skill (Bun for xrpl-grpc-server, npm for erc20-token) |
+| TypeScript (`*.ts`) | See `typescript-development` skill (Bun for xrpl-grpc-server, npm for eth-contracts) |
 | Shell (`*.sh`)      | `make shfmt`                                                                       |
 | Makefile            | `make mk-lint`                                                                     |
 | SQL/HCL             | `make atlas-fmt && make atlas-lint`                                                |

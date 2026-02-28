@@ -33,7 +33,7 @@ Central mapping from GitHub labels to Skills and Context documents.
 | Label             | Skill                    | Verification                                                                        |
 | ----------------- | ------------------------ | ----------------------------------------------------------------------------------- |
 | `lang:go`         | `go-development`         | `make go-lint && make tidy && make check-build && make go-test`                     |
-| `lang:typescript` | `typescript-development` | See skill for app-specific commands (Bun for xrpl-grpc-server, npm for erc20-token) |
+| `lang:typescript` | `typescript-development` | See skill for app-specific commands (Bun for xrpl-grpc-server, npm for eth-contracts) |
 | `lang:solidity`   | `solidity-development`   | `truffle compile && truffle test`                                                   |
 
 ### Scope Labels → Skills

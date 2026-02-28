@@ -40,7 +40,7 @@ bun run lint && bun run build && bun test
 ### Solidity
 
 ```bash
-cd apps/erc20-token
+cd apps/eth-contracts
 npm run lint
 # Fix errors
 truffle compile && truffle test
