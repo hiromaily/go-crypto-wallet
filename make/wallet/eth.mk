@@ -79,6 +79,17 @@ generate-eth-key-local:
 ###############################################################################
 # Anvil (Foundry Local Node)
 ###############################################################################
+
+# Anvil RPC port (host-side; container always listens on 8545)
+ANVIL_RPC_PORT ?= 8546
+
+# forge binary — use Foundry toolchain installation path
+FORGE ?= $(HOME)/.foundry/bin/forge
+
+# Private key for Anvil account 0, derived from the project mnemonic.
+# Override via environment variable for a different deployer account.
+ANVIL_PRIVATE_KEY ?= 0xd3f1327df33c2a67ac03877f37410f33ed3a37085a84c739a7f5a137e5152bf2
+
 .PHONY: up-docker-anvil
 up-docker-anvil:
 	docker compose -f compose.eth.yaml --profile anvil up -d anvil
@@ -86,6 +97,23 @@ up-docker-anvil:
 .PHONY: stop-docker-anvil
 stop-docker-anvil:
 	docker compose -f compose.eth.yaml --profile anvil stop anvil
+
+## deploy-hyt: Deploy HYT ERC-20 contract to the local Anvil node.
+##   Requires: Anvil running (make up-docker-anvil)
+##   Outputs:  Contract address printed and saved to broadcast/ artifacts.
+##   Override: ANVIL_RPC_PORT=8546 ANVIL_PRIVATE_KEY=0x... make deploy-hyt
+.PHONY: deploy-hyt
+deploy-hyt:
+	cd apps/eth-contracts && \
+		PRIVATE_KEY=$(ANVIL_PRIVATE_KEY) \
+		$(FORGE) script script/DeployHYT.s.sol \
+			--rpc-url http://localhost:$(ANVIL_RPC_PORT) \
+			--broadcast
+	@echo ""
+	@echo "Contract address:"
+	@grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' \
+		apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json \
+		| head -1 | grep -oE '0x[a-fA-F0-9]+'
 
 ###############################################################################
 # E2E Tests
@@ -118,3 +146,39 @@ eth-e2e-p1-ci: build-all
 .PHONY: eth-e2e-p1-cleanup
 eth-e2e-p1-cleanup:
 	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p1.sh --cleanup
+
+###############################################################################
+# E2E Tests
+#
+# Pattern 2: ERC-20 HYT token transfer (EIP-1559)
+#   NODE_TYPE: anvil (default) or geth
+#   DB:        sqlite (default) or mysql
+#
+# Requires the HYT contract to be deployed first:
+#   make deploy-hyt
+#
+# Usage:
+#   make eth-e2e-p2-reset             # Run with Anvil + SQLite (full reset)
+#   make eth-e2e-p2                   # Run without reset
+#   make eth-e2e-p2-reset HYT_CONTRACT_ADDRESS=0x...  # Override contract address
+###############################################################################
+
+.PHONY: eth-e2e-p2-reset
+eth-e2e-p2-reset: build-all
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --reset
+
+.PHONY: eth-e2e-p2
+eth-e2e-p2: build-all
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh
+
+.PHONY: eth-e2e-p2-verbose
+eth-e2e-p2-verbose: build-all
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --verbose
+
+.PHONY: eth-e2e-p2-ci
+eth-e2e-p2-ci: build-all
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --non-interactive
+
+.PHONY: eth-e2e-p2-cleanup
+eth-e2e-p2-cleanup:
+	NODE_TYPE=$(NODE_TYPE) DB_TYPE=$(DB) ./scripts/operation/eth/e2e/e2e-p2.sh --cleanup

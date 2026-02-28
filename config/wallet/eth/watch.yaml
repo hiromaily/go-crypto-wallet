@@ -24,7 +24,7 @@ ethereum:
     hyt:
       symbol: "hyt"
       name: "HY Token"
-      contract_address: "0x66524a37Cb94A3092DC78cb15A9a21de5877656a"
+      contract_address: "0x536EF276c4264548bC13652ADF35b638d5519C83"
       master_address: "0x328F371a76dfAc47b89Cc007bb048ec446c21494"
       decimals: 18 # default
 logger:
