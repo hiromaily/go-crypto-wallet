@@ -36,6 +36,7 @@ jobs:
               - 'go.mod'
               - 'go.sum'
               - '.golangci.yml'
+              - '.github/workflows/lint-test.yml'
             proto:
               - 'proto/**/*.proto'
               - 'buf.yaml'
