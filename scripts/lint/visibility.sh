@@ -19,7 +19,7 @@ set -euo pipefail
 VIOLATIONS=0
 
 is_generated() {
-  grep -qE "(Code generated|DO NOT EDIT)" "$1"
+	grep -qE "(Code generated|DO NOT EDIT)" "$1"
 }
 
 # ---------------------------------------------------------------------------
@@ -32,18 +32,18 @@ echo "=== [1] Checking for exported struct definitions inside infrastructure ===
 
 header_shown=0
 while IFS= read -r file; do
-  is_generated "$file" && continue
-  if grep -qE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+struct[[:space:]]*\{" "$file"; then
-    if [ "$header_shown" -eq 0 ]; then
-      echo "WARNING: Exported struct in infrastructure (should be unexported; callers must use ports interfaces):" >&2
-      echo ""
-      header_shown=1
-    fi
-    VIOLATIONS=$((VIOLATIONS + 1))
-    echo "  $file"
-    grep -nE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+struct[[:space:]]*\{" "$file" | sed 's/^/       /'
-    echo ""
-  fi
+	is_generated "$file" && continue
+	if grep -qE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+struct[[:space:]]*\{" "$file"; then
+		if [ "$header_shown" -eq 0 ]; then
+			echo "WARNING: Exported struct in infrastructure (should be unexported; callers must use ports interfaces):" >&2
+			echo ""
+			header_shown=1
+		fi
+		VIOLATIONS=$((VIOLATIONS + 1))
+		echo "  $file"
+		grep -nE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+struct[[:space:]]*\{" "$file" | sed 's/^/       /'
+		echo ""
+	fi
 done < <(find "internal/infrastructure" -name "*.go" ! -name "*_test.go" ! -path "*/testutil/*")
 
 # ---------------------------------------------------------------------------
@@ -54,31 +54,31 @@ echo "=== [2] Checking interface file placement in pkg/ ==="
 
 header_shown=0
 while IFS= read -r file; do
-  is_generated "$file" && continue
-  if grep -qE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+interface[[:space:]]*\{" "$file"; then
-    filename=$(basename "$file")
-    pkg_dir=$(basename "$(dirname "$file")")
-    if [[ "$filename" != "interface.go" && "$filename" != "${pkg_dir}.go" ]]; then
-      if [ "$header_shown" -eq 0 ]; then
-        echo "WARNING: Interface defined in unexpected file in pkg/ (move to interface.go or ${pkg_dir}.go):" >&2
-        echo ""
-        header_shown=1
-      fi
-      VIOLATIONS=$((VIOLATIONS + 1))
-      echo "  $file"
-      grep -nE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+interface[[:space:]]*\{" "$file" | sed 's/^/       /'
-      echo ""
-    fi
-  fi
+	is_generated "$file" && continue
+	if grep -qE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+interface[[:space:]]*\{" "$file"; then
+		filename=$(basename "$file")
+		pkg_dir=$(basename "$(dirname "$file")")
+		if [[ "$filename" != "interface.go" && "$filename" != "${pkg_dir}.go" ]]; then
+			if [ "$header_shown" -eq 0 ]; then
+				echo "WARNING: Interface defined in unexpected file in pkg/ (move to interface.go or ${pkg_dir}.go):" >&2
+				echo ""
+				header_shown=1
+			fi
+			VIOLATIONS=$((VIOLATIONS + 1))
+			echo "  $file"
+			grep -nE "^[[:space:]]*type[[:space:]]+[A-Z][A-Za-z0-9_]*[[:space:]]+interface[[:space:]]*\{" "$file" | sed 's/^/       /'
+			echo ""
+		fi
+	fi
 done < <(find "pkg" -name "*.go" ! -name "*_test.go")
 
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 if [ "$VIOLATIONS" -eq 0 ]; then
-  echo "No visibility violations found."
-  exit 0
+	echo "No visibility violations found."
+	exit 0
 else
-  echo "Found $VIOLATIONS violation(s). See warnings above." >&2
-  exit 1
+	echo "Found $VIOLATIONS violation(s). See warnings above." >&2
+	exit 1
 fi

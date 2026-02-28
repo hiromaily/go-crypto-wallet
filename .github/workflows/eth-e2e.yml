@@ -11,6 +11,8 @@ on:
       - "scripts/operation/common.sh"
       - "config/wallet/eth/**"
       - "make/wallet/eth.mk"
+      - "make/wallet/eth_e2e.mk"
+      - "apps/eth-contracts/**"
       - "compose.eth.yaml"
       - ".github/workflows/eth-e2e.yml"
   push:
@@ -24,6 +26,8 @@ on:
       - "scripts/operation/common.sh"
       - "config/wallet/eth/**"
       - "make/wallet/eth.mk"
+      - "make/wallet/eth_e2e.mk"
+      - "apps/eth-contracts/**"
       - "compose.eth.yaml"
       - ".github/workflows/eth-e2e.yml"
   workflow_dispatch:
@@ -36,6 +40,14 @@ on:
         options:
           - anvil
           - geth
+      patterns:
+        description: "Patterns to run (e.g., 1-2 or 1,2)"
+        required: false
+        default: "1-2"
+      max_parallel:
+        description: "Max parallel processes"
+        required: false
+        default: "2"
 
 env:
   GO_VERSION: "1.25.6"
@@ -47,11 +59,11 @@ permissions:
   contents: read
 
 jobs:
-  eth-e2e:
-    name: ETH E2E (Pattern 1 - Single-sig EIP-1559)
+  eth-e2e-parallel:
+    name: ETH E2E (Parallel)
     # ubuntu-latest required: Docker is pre-installed (ubuntu-slim lacks Docker)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -76,6 +88,20 @@ jobs:
       - name: Build project
         run: make build-all
 
+      - name: Install Foundry (forge + cast)
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install smart contract dependencies
+        working-directory: apps/eth-contracts
+        run: |
+          # Install npm packages (@openzeppelin/contracts, solhint, etc.)
+          bun install
+          # Install forge libraries (forge-std) pinned by foundry.lock
+          forge install
+
       - name: Pull Docker images
         run: |
           # ghcr.io can be slow on CI runners; retry up to 3 times
@@ -85,17 +111,22 @@ jobs:
             sleep 10
           done
 
-      - name: Run ETH E2E Pattern 1
+      - name: Run ETH E2E tests in parallel
         run: |
+          PATTERNS="${{ github.event.inputs.patterns || '1-2' }}"
+          MAX_PARALLEL="${{ github.event.inputs.max_parallel || '2' }}"
           NODE_TYPE="${{ github.event.inputs.node_type || 'anvil' }}" \
-            make eth-e2e-p1-ci
+            ./scripts/operation/eth/e2e/e2e-parallel-runner.sh \
+              --patterns "${PATTERNS}" \
+              --max-parallel "${MAX_PARALLEL}" \
+              --ci
 
-      - name: Upload E2E transaction files on failure
+      - name: Upload E2E logs on failure
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: eth-e2e-tx-files
-          path: data/tx/eth/
+          name: eth-e2e-logs
+          path: data/logs/e2e-parallel-eth/
           retention-days: 7
 
       - name: Upload E2E SQLite databases on failure

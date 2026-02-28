@@ -189,6 +189,14 @@ eth_check_prerequisites() {
 eth_setup_infrastructure() {
 	log_step "Setting Up Infrastructure (NODE_TYPE=${NODE_TYPE})"
 
+	# Skip container management when using shared infrastructure (parallel E2E)
+	if [ "${E2E_SHARED_INFRASTRUCTURE:-false}" = "true" ]; then
+		log_info "Using shared infrastructure (skipping Docker container management)"
+		log_substep "Initializing SQLite databases for pattern: ${E2E_PATTERN}"
+		eth_init_sqlite_db
+		return 0
+	fi
+
 	case "${NODE_TYPE}" in
 	geth)
 		# Use geth-dev profile: local PoA dev chain (geth --dev), no sync required.
@@ -228,6 +236,12 @@ eth_setup_infrastructure() {
 eth_cleanup() {
 	log_step "Cleaning Up"
 
+	# Skip container management when using shared infrastructure (parallel E2E)
+	if [ "${E2E_SHARED_INFRASTRUCTURE:-false}" = "true" ]; then
+		log_info "Using shared infrastructure (skipping cleanup)"
+		return 0
+	fi
+
 	case "${NODE_TYPE}" in
 	geth)
 		log_substep "Stopping Geth dev node"
@@ -249,6 +263,18 @@ eth_cleanup() {
 
 eth_full_reset() {
 	log_step "Performing Full Reset"
+
+	# Skip container management when using shared infrastructure (parallel E2E)
+	if [ "${E2E_SHARED_INFRASTRUCTURE:-false}" = "true" ]; then
+		log_info "Using shared infrastructure (skipping full reset)"
+		if [ "${DB_TYPE}" = "sqlite" ]; then
+			log_info "Cleaning SQLite databases for pattern: ${E2E_PATTERN}"
+			rm -f "${PROJECT_ROOT:-./}/data/sqlite/eth/watch-e2e-${E2E_PATTERN}.db" \
+				"${PROJECT_ROOT:-./}/data/sqlite/eth/keygen-e2e-${E2E_PATTERN}.db" 2>/dev/null || true
+			eth_init_sqlite_db
+		fi
+		return 0
+	fi
 
 	eth_cleanup
 

@@ -12,7 +12,7 @@ internal/infrastructure/contract/token-abi.go
 
 # Apps project generated files
 #apps/xrpl-grpc-server/src/protogen/
-apps/erc20-token/build/
+apps/eth-contracts/broadcast/
 
 # Dependency lock files
 go.sum

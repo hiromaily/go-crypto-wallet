@@ -101,9 +101,9 @@ PAYMENT_ACCOUNT="payment"
 CLIENT_ACCOUNT="deposit"
 
 # Funding amounts
-FUNDING_AMOUNT_ETH=1        # ETH for gas fees (small amount is sufficient)
-HYT_TRANSFER_AMOUNT=100     # HYT tokens to seed the payment account with
-TRANSFER_AMOUNT_HYT=10      # HYT tokens to transfer in the wallet transaction
+FUNDING_AMOUNT_ETH=1    # ETH for gas fees (small amount is sufficient)
+HYT_TRANSFER_AMOUNT=100 # HYT tokens to seed the payment account with
+TRANSFER_AMOUNT_HYT=10  # HYT tokens to transfer in the wallet transaction
 
 # Foundry toolchain binary paths
 CAST="${HOME}/.foundry/bin/cast"
@@ -123,8 +123,7 @@ _detect_hyt_contract_address() {
 	project_root="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 	local broadcast="${project_root}/apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json"
 	if [ -f "${broadcast}" ]; then
-		grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' "${broadcast}" 2>/dev/null \
-			| head -1 | grep -oE '0x[a-fA-F0-9]+' || true
+		jq -r '.transactions[0].contractAddress' "${broadcast}" 2>/dev/null || true
 	fi
 }
 
@@ -236,8 +235,7 @@ deploy_hyt_phase() {
 
 	# Read deployed address from broadcast artifacts
 	local broadcast="${project_root}/apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json"
-	HYT_CONTRACT_ADDRESS=$(grep -oE '"contractAddress"\s*:\s*"0x[a-fA-F0-9]+"' "${broadcast}" 2>/dev/null \
-		| head -1 | grep -oE '0x[a-fA-F0-9]+' || true)
+	HYT_CONTRACT_ADDRESS=$(jq -r '.transactions[0].contractAddress' "${broadcast}" 2>/dev/null || true)
 
 	if [ -z "${HYT_CONTRACT_ADDRESS}" ]; then
 		log_error "Failed to deploy HYT or read contract address from broadcast artifacts"
