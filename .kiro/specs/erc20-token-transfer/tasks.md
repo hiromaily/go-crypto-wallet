@@ -135,3 +135,15 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Verify token balance decreased on the sender address by the same amount
   - Depends on Tasks 1, 2, 3, 4, 5.1, 5.2, 5.3
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.1, 5.2, 5.3, 6.1, 6.2, 7.1, 8.4_
+
+- [x] 5.5 Create E2E shell script for HYT ERC-20 token transfer workflow
+  - Create `scripts/operation/eth/e2e/e2e-p2.sh` modeled on `e2e-p1.sh` for Pattern 2: ERC-20 HYT token transfer
+  - Set `ETH_COIN="hyt"` and export `WALLET_ETHEREUM_ERC20_TOKEN=hyt` so the wallet selects the HYT ERC-20 config entry
+  - Reuse the same keygen/address-import phases as Pattern 1 (ETH HD keys work for both ETH and ERC-20)
+  - Add an HYT funding step: transfer HYT tokens from the Anvil deployer (master_address) to the payment address using `cast send` before creating the wallet transaction
+  - Fund the payment address with ETH (for gas) using `anvil_setBalance` as in Pattern 1
+  - Run the same create-unsigned-tx → keygen-sign → watch-send → monitor phases, all with `--coin hyt`
+  - Add a post-send HYT balance check: query the HYT contract `balanceOf` via `cast call` and verify the recipient balance increased
+  - Add `make eth-e2e-p2` and `make eth-e2e-p2-reset` targets to `make/wallet/eth.mk` matching the Pattern 1 target style
+  - Depends on Tasks 5.3
+  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.1, 5.3, 6.1, 6.2, 7.1_
