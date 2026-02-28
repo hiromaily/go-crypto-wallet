@@ -91,6 +91,17 @@ jobs:
       - name: Install Foundry (forge + cast)
         uses: foundry-rs/foundry-toolchain@v1
 
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install smart contract dependencies
+        working-directory: apps/eth-contracts
+        run: |
+          # Install npm packages (@openzeppelin/contracts, solhint, etc.)
+          bun install
+          # Install forge libraries (forge-std) pinned by foundry.lock
+          forge install
+
       - name: Pull Docker images
         run: |
           # ghcr.io can be slow on CI runners; retry up to 3 times
