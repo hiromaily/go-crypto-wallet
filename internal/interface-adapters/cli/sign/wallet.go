@@ -8,14 +8,12 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/btc"
-	ethapi "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/create"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/export"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/sign"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
-	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
 )
 
 // AddCommands adds all sign subcommands to the root command
@@ -65,8 +63,6 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Signer, containerGetter
 			switch v := (*wallet).(type) {
 			case *btcwallet.BTCSign:
 				btc.AddCommands(cmd, v.BTC)
-			case *ethwallet.ETHSign:
-				ethapi.AddCommands(cmd, v.ETH)
 			default:
 				fmt.Printf("[WARN] api command is not supported for this coin type\n")
 			}

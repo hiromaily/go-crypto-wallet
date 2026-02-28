@@ -273,22 +273,6 @@ type TransactionCombiner interface {
 	CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error)
 }
 
-// LedgerWaiter waits for ledger validation.
-//
-// Deprecated: Use TransactionSubmitter.WaitValidation instead.
-// This interface is kept for backward compatibility.
-type LedgerWaiter interface {
-	WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error)
-}
-
-// TransactionGetter retrieves transaction information.
-//
-// Deprecated: Use TransactionSubmitter.GetTransaction instead.
-// This interface is kept for backward compatibility.
-type TransactionGetter interface {
-	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoxrp.TxInfo, error)
-}
-
 // RegularKeyPreparer prepares SetRegularKey transactions.
 type RegularKeyPreparer interface {
 	PrepareSetRegularKeyTransaction(

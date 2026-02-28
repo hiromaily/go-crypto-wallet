@@ -212,14 +212,6 @@ type ETHTransactionSigner interface {
 	SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase string) (*domainETH.RawTx, error)
 }
 
-// ETHTransactionSender broadcasts signed Ethereum transactions to the network.
-// Used by watch wallet send-transaction use case.
-//
-// Deprecated: Use TxSender instead (defined in the EIP-1559 Transaction Flow
-// Interfaces section below). ETHTransactionSender is retained only for backward
-// compatibility; new code should depend on TxSender.
-type ETHTransactionSender = TxSender
-
 // ETHRawKeyImporter imports raw private keys via the Ethereum RPC.
 // Used by keygen API CLI commands.
 type ETHRawKeyImporter interface {
@@ -237,14 +229,6 @@ type ETHNodeAPIClient interface {
 // =============================================================================
 // Composed Interfaces for Wallet Adapters
 // =============================================================================
-
-// ETHKeygenSignClient combines lifecycle and raw key import for keygen/sign wallet adapters.
-// Used by ETHKeygen and ETHSign wallet adapters, which need both lifecycle management
-// and the ability to expose the importrawkey CLI command.
-type ETHKeygenSignClient interface {
-	ETHLifecycle
-	ETHRawKeyImporter
-}
 
 // ETHWatchClient combines lifecycle and node API operations for the watch wallet adapter.
 // Used by ETHWatch wallet adapter, which needs lifecycle management and watch node CLI commands.

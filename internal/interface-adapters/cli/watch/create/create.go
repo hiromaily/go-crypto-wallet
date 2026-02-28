@@ -53,17 +53,4 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGet
 		&transferAmount, "amount", 0, "amount to send coin. if amount=0, all coin is sent")
 	transferCmd.Flags().Float64Var(&transferFee, "fee", 0, "adjustment fee")
 	parentCmd.AddCommand(transferCmd)
-
-	// db command
-	var dbTable string
-	dbCmd := &cobra.Command{
-		Use:        "db",
-		Short:      "create payment_request table with dummy data for development use",
-		Deprecated: "Use query with shell script instead of go code",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDB(containerGetter(), dbTable)
-		},
-	}
-	dbCmd.Flags().StringVar(&dbTable, "table", "", "target table name")
-	parentCmd.AddCommand(dbCmd)
 }

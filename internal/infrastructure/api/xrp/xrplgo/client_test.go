@@ -20,8 +20,6 @@ func TestClientImplementsInterfaces(t *testing.T) {
 	// If the interfaces are not implemented, this test will fail to compile.
 	var _ apixrp.AccountInfoProvider = (*Client)(nil)
 	var _ apixrp.TransactionSubmitter = (*Client)(nil)
-	var _ apixrp.TransactionGetter = (*Client)(nil)
-	var _ apixrp.LedgerWaiter = (*Client)(nil)
 	var _ apixrp.BalanceChecker = (*Client)(nil)
 	var _ apixrp.Closer = (*Client)(nil)
 }

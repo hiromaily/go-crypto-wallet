@@ -22,9 +22,7 @@
 //   - ETHLifecycle: Client lifecycle (Close, CoinTypeCode)
 //   - ETHKeyAccessor: Keystore access for private key import
 //   - ETHTransactionSigner: Sign raw transactions via keystore passphrase
-//   - ETHRawKeyImporter: Import raw keys via RPC
 //   - ETHNodeAPIClient: Node API operations (clientVersion, netVersion, etc.)
-//   - ETHKeygenSignClient: Composed — ETHLifecycle + ETHRawKeyImporter
 //   - ETHWatchClient: Composed — ETHLifecycle + ETHNodeAPIClient
 //
 // ## ISP-Compliant EIP-1559 Transaction Flow Interfaces (Task 2.1b)

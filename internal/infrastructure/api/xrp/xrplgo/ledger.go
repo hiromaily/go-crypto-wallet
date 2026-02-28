@@ -30,7 +30,7 @@ type ledgerResponse struct {
 }
 
 // WaitValidation waits until the specified ledger version is validated.
-// Implements LedgerWaiter interface.
+// Implements TransactionSubmitter.WaitValidation.
 func (c *Client) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error) {
 	// First, check current validated ledger
 	currentLedger, err := c.getCurrentLedger(ctx)

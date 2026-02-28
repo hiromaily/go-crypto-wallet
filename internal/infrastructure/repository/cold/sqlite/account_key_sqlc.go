@@ -469,12 +469,3 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddrs(
 
 	return totalAffected, nil
 }
-
-// NewAccountKeyRepositorySqlc is kept for backward compatibility.
-//
-// Deprecated: Use NewBTCAccountKeyRepositorySqlc instead.
-func NewAccountKeyRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
-) *BTCAccountKeyRepositorySqlc {
-	return NewBTCAccountKeyRepositorySqlc(dbConn, coinTypeCode)
-}

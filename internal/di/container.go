@@ -185,7 +185,7 @@ func (c *container) NewKeygener() wallets.Keygener {
 	logger.SetGlobal(logger.NewSlogLogger(c.conf.Logger.Format, c.conf.Logger.Level, c.conf.Logger.Service, ""))
 
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCCompatible(c.conf.CoinTypeCode):
 		return c.newBTCKeygener()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHKeygener()
@@ -253,7 +253,7 @@ func (c *container) NewWalleter() wallets.Watcher {
 	logger.SetGlobal(logger.NewSlogLogger(c.conf.Logger.Format, c.conf.Logger.Level, c.conf.Logger.Service, ""))
 
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCCompatible(c.conf.CoinTypeCode):
 		return c.newBTCWalleter()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHWalleter()
@@ -854,7 +854,7 @@ func (c *container) newETHHdWalletRepo() repocold.HDWalletRepo {
 func (c *container) newKeyGenerator() portsWallet.Generator {
 	var chainConf *chaincfg.Params
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCCompatible(c.conf.CoinTypeCode):
 		chainConf = c.newBTC().GetChainConf()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		chainConf = c.newETH().GetChainConf()
@@ -1119,7 +1119,7 @@ func (c *container) NewWatchCreateTransactionUseCase() any {
 
 func (c *container) NewWatchMonitorTransactionUseCase() any {
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCCompatible(c.conf.CoinTypeCode):
 		return c.newBTCWatchMonitorTransactionUseCase()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHWatchMonitorTransactionUseCase()
@@ -1262,7 +1262,7 @@ func (c *container) NewKeygenExportFullPubkeyUseCase() keygenusecase.ExportFullP
 
 func (c *container) NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
 	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCCompatible(c.conf.CoinTypeCode):
 		return c.newBTCKeygenImportPrivateKeyUseCase()
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHKeygenImportPrivateKeyUseCase()

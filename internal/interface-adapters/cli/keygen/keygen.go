@@ -8,14 +8,12 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	btcapi "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/create"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/export"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/sign"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
-	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
 )
 
 // AddCommands adds all keygen subcommands to the root command
@@ -67,8 +65,6 @@ func AddCommands(
 			switch v := (*wallet).(type) {
 			case *btcwallet.BTCKeygen:
 				btcapi.AddCommands(cmd, v.BTC)
-			case *ethwallet.ETHKeygen:
-				eth.AddCommands(cmd, v.ETH)
 			default:
 				fmt.Printf("[WARN] api command is not supported for this coin type\n")
 			}
