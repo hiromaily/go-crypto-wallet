@@ -17,10 +17,9 @@ import (
 
 // xrpSendTxClient defines the interface for XRP operations needed by sendTransactionUseCase.
 // This follows the Interface Segregation Principle - depend only on what you need.
+// TransactionSubmitter already includes SubmitTransaction, WaitValidation, and GetTransaction.
 type xrpSendTxClient interface {
 	apixrp.TransactionSubmitter
-	apixrp.LedgerWaiter
-	apixrp.TransactionGetter
 }
 
 type sendTransactionUseCase struct {
@@ -30,9 +29,7 @@ type sendTransactionUseCase struct {
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase.
-// The xrper parameter accepts any type that implements xrpSendTxClient
-// (TransactionSubmitter + LedgerWaiter + TransactionGetter).
-// Typically, apixrp.XRPer is passed which implements all required methods.
+// The xrper parameter accepts any type that implements TransactionSubmitter.
 func NewSendTransactionUseCase(
 	xrper xrpSendTxClient,
 	txDetailRepo repowatch.XRPDetailTXRepositorier,

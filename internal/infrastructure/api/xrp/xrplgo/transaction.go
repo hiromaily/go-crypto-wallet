@@ -144,7 +144,7 @@ func (c *Client) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxr
 }
 
 // GetTransaction retrieves transaction information from the XRPL.
-// Implements TransactionGetter interface.
+// Implements TransactionSubmitter.GetTransaction.
 func (c *Client) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoxrp.TxInfo, error) {
 	req := xrpl.BaseRequest{
 		"command":     "tx",

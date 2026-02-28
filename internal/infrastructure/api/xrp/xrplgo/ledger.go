@@ -8,6 +8,8 @@ import (
 	"time"
 
 	xrpl "github.com/xrpscan/xrpl-go"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ledgerClosedMessage represents a ledger stream message.
@@ -28,7 +30,7 @@ type ledgerResponse struct {
 }
 
 // WaitValidation waits until the specified ledger version is validated.
-// Implements LedgerWaiter interface.
+// Implements TransactionSubmitter.WaitValidation.
 func (c *Client) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error) {
 	// First, check current validated ledger
 	currentLedger, err := c.getCurrentLedger(ctx)
@@ -100,7 +102,7 @@ func (c *Client) waitForLedger(ctx context.Context, targetLedgerVersion uint64) 
 			}
 			var msg ledgerClosedMessage
 			if err := json.Unmarshal(ledgerData, &msg); err != nil {
-				c.logger.Warn("failed to parse ledger stream message",
+				logger.Warn("failed to parse ledger stream message",
 					"error", err.Error(),
 					"data", string(ledgerData),
 				)
@@ -130,7 +132,6 @@ func (c *Client) waitForLedger(ctx context.Context, targetLedgerVersion uint64) 
 func (c *Client) SubscribeLedger(ctx context.Context) (<-chan uint64, error) {
 	c.mu.RLock()
 	client := c.client
-	logger := c.logger
 	c.mu.RUnlock()
 
 	if client == nil {

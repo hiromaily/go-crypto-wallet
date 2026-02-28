@@ -11,14 +11,14 @@ import (
 
 // ETHSign keygen wallet object
 type ETHSign struct {
-	ETH    apieth.ETHKeygenSignClient
+	ETH    apieth.ETHLifecycle
 	dbConn *sql.DB
 	wtype  domainWallet.WalletType
 }
 
 // NewETHSign returns ETHSign object
 func NewETHSign(
-	eth apieth.ETHKeygenSignClient,
+	eth apieth.ETHLifecycle,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 ) *ETHSign {

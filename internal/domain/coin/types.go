@@ -88,13 +88,6 @@ func IsCoinTypeCode(val string) bool {
 	return ok
 }
 
-// IsBTCGroup returns true if the coin is part of the Bitcoin group (BTC, BCH).
-//
-// Deprecated: Use IsBTCCompatible for clarity. This function is kept for backward compatibility.
-func IsBTCGroup(val CoinTypeCode) bool {
-	return IsBTCCompatible(val)
-}
-
 // IsBTCOnly returns true only for BTC.
 // Use this to guard BTC-specific features that BCH does not support:
 //   - PSBT (BIP174)
