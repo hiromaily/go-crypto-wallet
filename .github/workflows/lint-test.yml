@@ -36,6 +36,7 @@ jobs:
               - 'go.mod'
               - 'go.sum'
               - '.golangci.yml'
+              - '.github/workflows/lint-test.yml'
             proto:
               - 'proto/**/*.proto'
               - 'buf.yaml'
@@ -56,6 +57,8 @@ jobs:
   # Go linting
   # PR: only-new-issues=true checks only changed code (faster)
   # Push to main: full check for post-merge quality assurance
+  # Runner: ubuntu-slim chosen over ubuntu-latest; --fast-only limits analysis scope
+  # enough that slim's reduced core count does not cause timeouts within 5m.
   go-lint:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}
@@ -73,10 +76,13 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        # v9 uses node24 runtime (node20 deprecated by GitHub)
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v2.10.1
           working-directory: ./
+          # --fast-only: run only fast linters on PR for quick feedback
+          args: --fast-only
           # PR: Report only new issues introduced in the PR (uses --new-from-rev internally)
           # Push: Report all issues (default behavior when not a PR)
           only-new-issues: true
