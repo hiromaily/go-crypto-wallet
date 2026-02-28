@@ -7,7 +7,7 @@ This feature adds full ERC-20 token transfer support for the **HYC token** to th
 The watch wallet's create/send/monitor flows already route any `IsETHGroup` coin to the ETH use cases. Adding HYC to the domain registries is therefore sufficient to activate all three watch wallet flows without any new CLI commands, use cases, or adapters.
 
 **Users**: Watch-wallet operators, keygen/sign-wallet operators.
-**Impact**: HYC token transfers will use EIP-1559 transactions on supporting networks (Anvil, post-London Ethereum), falling back to legacy on unsupporting nodes.
+**Impact**: HYC token transfers will use EIP-1559 transactions on supporting networks (Anvil, post-London Ethereum), falling back to legacy on unsupported nodes.
 
 ### Goals
 
