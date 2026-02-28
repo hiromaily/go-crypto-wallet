@@ -288,7 +288,7 @@ func (c *container) NewSigner(authName string) (wallets.Signer, error) {
 	switch c.conf.CoinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		return c.newBTCSigner(authType), nil
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
 		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
 	default:
 		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
@@ -513,6 +513,7 @@ func (c *container) newERC20() apieth.ERC20er {
 			panic(err)
 		}
 		c.erc20 = apierc20impl.NewERC20(
+			c.newETH(),
 			client,
 			tokenClient,
 			conf.ERC20Token,
@@ -1151,7 +1152,7 @@ func (c *container) NewWatchImportAddressUseCase() watchusecase.ImportAddressUse
 		return c.newBTCWatchImportAddressUseCase()
 	case domainCoin.BCH:
 		return c.newBCHWatchImportAddressUseCase()
-	case domainCoin.ETH, domainCoin.XRP, domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
+	case domainCoin.ETH, domainCoin.XRP, domainCoin.LTC, domainCoin.HYT:
 		// Use shared implementation for other coins
 		return c.newWatchImportAddressUseCase()
 	default:

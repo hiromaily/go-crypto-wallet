@@ -19,13 +19,16 @@ func CreateCoinKeyStrategy(
 		return NewBTCKeyStrategy(conf), nil
 	case domainCoin.BCH:
 		return NewBCHKeyStrategy(conf), nil
-	case domainCoin.ETH, domainCoin.ERC20:
+	case domainCoin.ETH:
 		return NewETHKeyStrategy(), nil
 	case domainCoin.XRP:
 		return NewXRPKeyStrategy(), nil
-	case domainCoin.LTC, domainCoin.HYT:
+	case domainCoin.LTC:
 		return nil, fmt.Errorf("coin type %s is not implemented yet", coinTypeCode.String())
 	default:
+		if domainCoin.IsERC20Token(coinTypeCode.String()) {
+			return NewETHKeyStrategy(), nil
+		}
 		return nil, fmt.Errorf("unsupported coin type: %s", coinTypeCode.String())
 	}
 }

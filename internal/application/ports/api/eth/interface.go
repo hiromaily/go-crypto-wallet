@@ -333,6 +333,17 @@ type AddressValidator interface {
 	ValidateAddr(addr string) error
 }
 
+// ERC20NodeAPI defines the minimal Ethereum node operations needed by the ERC20
+// infrastructure implementation. apieth.Ethereumer satisfies this interface, so
+// the DI layer can inject it without any type assertion.
+type ERC20NodeAPI interface {
+	SupportsEIP1559(ctx context.Context) bool
+	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
+	BlockNumber(ctx context.Context) (*big.Int, error)
+	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainETH.BlockInfo, error)
+	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
+}
+
 // =============================================================================
 // Composed Interfaces for EIP-1559 Transaction Flow Use Cases
 // =============================================================================

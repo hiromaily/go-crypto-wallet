@@ -39,9 +39,6 @@ const (
 	// ERC20 tokens (temporary values, not part of SLIP-0044)
 	// TODO: Review these temporary values
 
-	// CoinTypeERC20 represents generic ERC20 tokens
-	CoinTypeERC20 CoinType = 9000
-
 	// CoinTypeERC20HYT represents HYT ERC20 token
 	CoinTypeERC20HYT CoinType = 9001
 )
@@ -66,9 +63,6 @@ const (
 	// XRP represents Ripple
 	XRP CoinTypeCode = "xrp"
 
-	// ERC20 represents generic ERC20 tokens
-	ERC20 CoinTypeCode = "erc20"
-
 	// HYT represents HYT token (custom ERC20)
 	HYT CoinTypeCode = "hyt"
 )
@@ -80,13 +74,12 @@ func (c CoinTypeCode) String() string {
 
 // CoinTypeCodeValue maps coin type codes to their SLIP-0044 coin types.
 var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
-	BTC:   CoinTypeBitcoin,
-	BCH:   CoinTypeBitcoinCash,
-	LTC:   CoinTypeLitecoin,
-	ETH:   CoinTypeEther,
-	XRP:   CoinTypeRipple,
-	ERC20: CoinTypeERC20,
-	HYT:   CoinTypeERC20HYT,
+	BTC: CoinTypeBitcoin,
+	BCH: CoinTypeBitcoinCash,
+	LTC: CoinTypeLitecoin,
+	ETH: CoinTypeEther,
+	XRP: CoinTypeRipple,
+	HYT: CoinTypeERC20HYT,
 }
 
 // IsCoinTypeCode validates whether the given string is a valid coin type code.
@@ -125,7 +118,7 @@ func IsBTCCompatible(val CoinTypeCode) bool {
 
 // IsETHGroup returns true if the coin is part of the Ethereum group (ETH, ERC20 tokens).
 func IsETHGroup(val CoinTypeCode) bool {
-	return val == ETH || val == ERC20 || IsERC20Token(val.String())
+	return val == ETH || IsERC20Token(val.String())
 }
 
 // ERC20Token represents ERC20 token identifiers.

@@ -24,10 +24,11 @@ import (
 // Compile-time check to ensure ERC20 implements the ERC20er interface
 var _ apieth.ERC20er = (*ERC20)(nil)
 
-// ERC20 struct
-// TODO: Ethereum struct in internal/infrastructure/api/eth/eth/ethereum.go must be embedded to use common funcs
-// Then proper interface limits functionalities
+// ERC20 struct holds both a named Ethereum field (for EIP-1559 support) and the
+// raw ethclient.Client (retained for balance, gas estimation, and nonce calls that
+// use it directly until Tasks 3.3–3.4 delegate them through the eth field).
 type ERC20 struct {
+	eth             apieth.ERC20NodeAPI
 	client          *ethclient.Client
 	tokenClient     *contract.Token
 	token           domainCoin.ERC20Token
@@ -39,6 +40,7 @@ type ERC20 struct {
 }
 
 func NewERC20(
+	eth apieth.ERC20NodeAPI,
 	client *ethclient.Client,
 	tokenClient *contract.Token,
 	token domainCoin.ERC20Token,
@@ -49,6 +51,7 @@ func NewERC20(
 	decimals int,
 ) *ERC20 {
 	return &ERC20{
+		eth:             eth,
 		client:          client,
 		tokenClient:     tokenClient,
 		token:           token,
@@ -225,18 +228,158 @@ func (e *ERC20) CreateRawTransaction(
 	return ethtx.ToDomainRawTx(infraRawTx), txParams, nil
 }
 
-// SupportsEIP1559 always returns false for ERC-20 tokens.
-// ERC-20 token transfers use legacy transactions.
-func (*ERC20) SupportsEIP1559(_ context.Context) bool {
-	return false
+// SupportsEIP1559 delegates to the underlying Ethereum node to detect EIP-1559 support.
+// Returns true when the connected node supports EIP-1559 (e.g., Anvil, post-London geth).
+func (e *ERC20) SupportsEIP1559(ctx context.Context) bool {
+	return e.eth.SupportsEIP1559(ctx)
 }
 
-// CreateRawTransactionEIP1559 delegates to CreateRawTransaction for ERC-20 tokens.
-// ERC-20 token transfers use legacy transactions, so this is a fallback.
+// CreateRawTransactionEIP1559 creates an EIP-1559 (Type 2) transaction for an
+// ERC-20 token transfer.
+//
+// When the connected node does not support EIP-1559 (e.g., pre-London private
+// chains), the method falls back to a legacy Type 0 transaction via
+// CreateRawTransaction.
+//
+// Fee formula (identical to Ethereum.CreateRawTransactionEIP1559):
+//
+//	maxPriorityFeePerGas = SuggestGasTipCap()
+//	maxFeePerGas         = (baseFeePerGas × 2) + maxPriorityFeePerGas
+//
+// The calldata is ABI-encoded transfer(address,uint256) with method selector
+// 0xa9059cbb, same as the legacy path.
 func (e *ERC20) CreateRawTransactionEIP1559(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
-	return e.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
+	// Fall back to legacy when the node does not support EIP-1559.
+	if !e.SupportsEIP1559(ctx) {
+		return e.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
+	}
+
+	// ── EIP-1559 fee parameters ──────────────────────────────────────────────
+	maxPriorityFeePerGas, err := e.eth.SuggestGasTipCap(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call eth.SuggestGasTipCap(): %w", err)
+	}
+
+	currentBlockNum, err := e.eth.BlockNumber(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call eth.BlockNumber(): %w", err)
+	}
+
+	blockInfo, err := e.eth.GetBlockByNumber(ctx, currentBlockNum.Uint64())
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call eth.GetBlockByNumber(): %w", err)
+	}
+
+	if blockInfo.BaseFeePerGas == nil {
+		return nil, nil, errors.New("baseFeePerGas not found in block (EIP-1559 not activated)")
+	}
+
+	// maxFeePerGas = (baseFee × 2) + tip — same formula as Ethereum.CreateRawTransactionEIP1559
+	baseFeeTimesTwo := new(big.Int).Mul(blockInfo.BaseFeePerGas, big.NewInt(2))
+	maxFeePerGas := new(big.Int).Add(baseFeeTimesTwo, maxPriorityFeePerGas)
+
+	// ── Chain ID ─────────────────────────────────────────────────────────────
+	chainID, err := e.client.ChainID(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call client.ChainID(): %w", err)
+	}
+
+	// ── Address validation ───────────────────────────────────────────────────
+	if err := e.ValidateAddr(fromAddr); err != nil {
+		return nil, nil, fmt.Errorf("invalid fromAddr: %w", err)
+	}
+	if err := e.ValidateAddr(toAddr); err != nil {
+		return nil, nil, fmt.Errorf("invalid toAddr: %w", err)
+	}
+
+	// ── Token balance ────────────────────────────────────────────────────────
+	balance, err := e.GetBalance(ctx, fromAddr, "")
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
+	}
+	logger.Info("token balance", "balance", balance.String())
+	tokenAmount := new(big.Int).SetUint64(amount)
+	if amount == 0 {
+		tokenAmount = new(big.Int).Set(balance)
+	} else if balance.Cmp(tokenAmount) < 0 {
+		return nil, nil, errors.New("balance is short to send token")
+	}
+
+	// ── Calldata & gas ───────────────────────────────────────────────────────
+	data := e.createTransferData(toAddr, tokenAmount)
+	gasLimit, err := e.estimateGas(data)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call estimateGas(): %w", err)
+	}
+
+	// ── Nonce ────────────────────────────────────────────────────────────────
+	nonce, err := e.getNonce(ctx, fromAddr, additionalNonce)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
+	}
+
+	logger.Debug("EIP-1559 ERC-20 tx parameters",
+		"nonce", nonce,
+		"tokenAmount", tokenAmount.Uint64(),
+		"gasLimit", gasLimit,
+		"maxPriorityFeePerGas", maxPriorityFeePerGas.Uint64(),
+		"maxFeePerGas", maxFeePerGas.Uint64(),
+		"chainID", chainID.Uint64(),
+	)
+
+	// ── Build DynamicFeeTx ────────────────────────────────────────────────────
+	contractAddr := common.HexToAddress(e.contractAddress)
+	tx := types.NewTx(&types.DynamicFeeTx{
+		ChainID:   chainID,
+		Nonce:     nonce,
+		GasTipCap: maxPriorityFeePerGas,
+		GasFeeCap: maxFeePerGas,
+		Gas:       gasLimit,
+		To:        &contractAddr,
+		Value:     new(big.Int), // ERC-20 transfers send 0 ETH
+		Data:      data,
+	})
+
+	txHash := tx.Hash().Hex()
+	rawTxHex, err := ethtx.EncodeTx(tx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
+	}
+
+	uid, err := e.uuidHandler.GenerateV7()
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
+	}
+
+	txFee := new(big.Int).Mul(maxFeePerGas, new(big.Int).SetUint64(gasLimit))
+
+	infraRawTx := &ethtx.RawTx{
+		UUID:  uid.String(),
+		From:  fromAddr,
+		To:    toAddr,
+		Value: *tokenAmount,
+		Nonce: nonce,
+		TxHex: *rawTxHex,
+		Hash:  txHash,
+	}
+
+	txParams := &apieth.TxCreateParams{
+		UUID:                 uid.String(),
+		FromAddress:          fromAddr,
+		ToAddress:            toAddr,
+		Amount:               tokenAmount.Uint64(),
+		Fee:                  txFee.Uint64(),
+		GasLimit:             uint32(gasLimit),
+		Nonce:                nonce,
+		EthTxType:            2, // EIP-1559 Type 2
+		ChainID:              chainID.Uint64(),
+		MaxFeePerGas:         maxFeePerGas.Uint64(),
+		MaxPriorityFeePerGas: maxPriorityFeePerGas.Uint64(),
+	}
+
+	return ethtx.ToDomainRawTx(infraRawTx), txParams, nil
 }
 
 func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
@@ -276,16 +419,19 @@ func (e *ERC20) estimateGas(data []byte) (uint64, error) {
 	return gasLimit, nil
 }
 
-// FIXME: this logic is almost same to where getNonce() in ethgrp/eth/transaction.go
+// getNonce retrieves the pending nonce for fromAddr by delegating to e.eth.GetTransactionCount.
+// It mirrors the nonce retrieval in Ethereum.getNonce, removing the previous duplication
+// that called e.client.PendingNonceAt directly (resolves task 3.4 FIXME).
 func (e *ERC20) getNonce(ctx context.Context, fromAddr string, additionalNonce int) (uint64, error) {
-	nonce, err := e.client.PendingNonceAt(ctx, common.HexToAddress(fromAddr))
+	nonce, err := e.eth.GetTransactionCount(ctx, fromAddr, domainETH.QuantityTagPending)
 	if err != nil {
-		return 0, fmt.Errorf("fail to call ethClient.PendingNonceAt(): %w", err)
+		return 0, fmt.Errorf("fail to call eth.GetTransactionCount(): %w", err)
 	}
-	nonce += uint64(additionalNonce)
-
+	if additionalNonce != 0 {
+		nonce = nonce.Add(nonce, new(big.Int).SetUint64(uint64(additionalNonce)))
+	}
 	logger.Debug("nonce",
-		"client.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce,
+		"eth.GetTransactionCount(fromAddr, QuantityTagPending)", nonce.Uint64(),
 	)
-	return nonce, nil
+	return nonce.Uint64(), nil
 }

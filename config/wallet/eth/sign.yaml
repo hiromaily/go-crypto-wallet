@@ -19,6 +19,13 @@ ethereum:
   network_type: "anvil" # mainnet, sepolia, holesky, anvil, local
   node_type: "anvil" # anvil, geth
   keydir: "./data/keystore"
+  erc20s:
+    hyt:
+      symbol: "hyt"
+      name: "HY Token"
+      contract_address: "0x66524a37Cb94A3092DC78cb15A9a21de5877656a"
+      master_address: "0x328F371a76dfAc47b89Cc007bb048ec446c21494"
+      decimals: 18 # default
 logger:
   service: "eth-sign"
   format: "json" # json, console

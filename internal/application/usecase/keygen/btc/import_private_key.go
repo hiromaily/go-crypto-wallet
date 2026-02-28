@@ -109,7 +109,7 @@ func (u *importPrivateKeyUseCase) checkImportedAddress(walletAddress, p2shSegwit
 	case domainCoin.BCH:
 		targetAddr = walletAddress
 		addrType = domainAddress.AddrTypeBCHCashAddr
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
 		logger.Warn("this coin type is not implemented in checkImportedAddress()",
 			"coin_type_code", u.btc.CoinTypeCode().String())
 		return

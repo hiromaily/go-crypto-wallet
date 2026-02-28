@@ -2,17 +2,17 @@
 pragma solidity ^0.8.34;
 
 import "forge-std/Test.sol";
-import "../contracts/HYC.sol";
+import "../contracts/HYT.sol";
 
-contract HYCTest is Test {
-    HYC token;
+contract HYTTest is Test {
+    HYT token;
     address deployer = address(this);
     address recipient = address(0xBEEF);
 
     uint256 constant INITIAL_SUPPLY = 1_000_000 ether;
 
     function setUp() public {
-        token = new HYC(INITIAL_SUPPLY);
+        token = new HYT(INITIAL_SUPPLY);
     }
 
     function test_InitialSupplyMintedToDeployer() public view {
@@ -24,11 +24,11 @@ contract HYCTest is Test {
     }
 
     function test_Name() public view {
-        assertEq(token.name(), "hiromaily Coin");
+        assertEq(token.name(), "hiromaily Token");
     }
 
     function test_Symbol() public view {
-        assertEq(token.symbol(), "HYC");
+        assertEq(token.symbol(), "HYT");
     }
 
     function test_Decimals() public view {

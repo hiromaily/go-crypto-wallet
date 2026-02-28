@@ -126,14 +126,14 @@ func validateConfig(t *testing.T, conf *WalletRoot, coinTypeCode domainCoin.Coin
 	switch coinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		validateBitcoinConfig(t, conf)
-	case domainCoin.ETH, domainCoin.ERC20:
-		validateEthereumConfig(t, conf)
 	case domainCoin.XRP:
 		validateRippleConfig(t, conf)
-	case domainCoin.LTC, domainCoin.HYT:
+	case domainCoin.LTC:
 		// Not implemented yet
 	default:
-		// Other coins
+		if domainCoin.IsETHGroup(coinTypeCode) {
+			validateEthereumConfig(t, conf)
+		}
 	}
 
 	// Verify common fields
@@ -160,6 +160,50 @@ func validateCommonConfig(t *testing.T, conf *WalletRoot) {
 	t.Helper()
 	assert.NotEmpty(t, conf.Logger.Service, "Logger.Service should not be empty")
 	assert.NotEmpty(t, conf.Database.MySQL.Host, "Database.MySQL.Host should not be empty")
+}
+
+// TestHasERC20Config_HYT verifies that the ETH watch, keygen and sign wallet configs
+// all include a valid HYT token entry that satisfies HasERC20Config.
+func TestHasERC20Config_HYT(t *testing.T) {
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		t.Skip("GOPATH not set, skipping config file test")
+	}
+	projPath := filepath.Join(gopath, "src/github.com/hiromaily/go-crypto-wallet")
+
+	tests := []struct {
+		name       string
+		configFile string
+		walletType domainWallet.WalletType
+	}{
+		{
+			name:       "watch",
+			configFile: filepath.Join(projPath, "config/wallet/eth/watch.yaml"),
+			walletType: domainWallet.WalletTypeWatchOnly,
+		},
+		{
+			name:       "keygen",
+			configFile: filepath.Join(projPath, "config/wallet/eth/keygen.yaml"),
+			walletType: domainWallet.WalletTypeKeyGen,
+		},
+		{
+			name:       "sign",
+			configFile: filepath.Join(projPath, "config/wallet/eth/sign.yaml"),
+			walletType: domainWallet.WalletTypeSign,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := os.Stat(tt.configFile); os.IsNotExist(err) {
+				t.Skipf("Config file not found: %s", tt.configFile)
+			}
+			conf, err := NewWallet(tt.configFile, tt.walletType, domainCoin.HYT)
+			require.NoError(t, err)
+			require.NoError(t, conf.HasERC20Config(domainCoin.TokenHYT),
+				"HYT ERC20 config entry must be present in %s", tt.configFile)
+		})
+	}
 }
 
 // TestNewWallet_YAML tests the NewWallet function with YAML configuration files.
