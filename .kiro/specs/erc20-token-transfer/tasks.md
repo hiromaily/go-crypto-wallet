@@ -94,9 +94,9 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Depends on Task 4.1
   - _Requirements: 4.1, 5.1, 6.1, 7.1_
 
-- [ ] 5. Write unit tests for domain registration and EIP-1559 ERC-20 infrastructure
+- [x] 5. Write unit tests for domain registration and EIP-1559 ERC-20 infrastructure
 
-- [ ] 5.1 Write domain registration unit tests
+- [x] 5.1 Write domain registration unit tests
   - Add tests to `internal/domain/coin/` verifying that `IsCoinTypeCode("hyc")` returns `true`
   - Add test verifying `IsERC20Token("hyc")` returns `true`
   - Add test verifying `IsETHGroup("hyc")` returns `true`
@@ -105,7 +105,7 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Depends on Task 1
   - _Requirements: 8.3, 8.4, 8.5_
 
-- [ ] 5.2 Write ERC-20 EIP-1559 infrastructure unit tests
+- [x] 5.2 Write ERC-20 EIP-1559 infrastructure unit tests
   - Add tests to `internal/infrastructure/api/eth/erc20/` using a mock `*eth.Ethereum` or a test double
   - Test `SupportsEIP1559`: when the Ethereum field returns `true`, `ERC20.SupportsEIP1559` returns `true`
   - Test `SupportsEIP1559`: when the Ethereum field returns `false`, `ERC20.SupportsEIP1559` returns `false`
