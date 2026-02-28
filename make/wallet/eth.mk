@@ -79,6 +79,17 @@ generate-eth-key-local:
 ###############################################################################
 # Anvil (Foundry Local Node)
 ###############################################################################
+
+# Anvil RPC port (host-side; container always listens on 8545)
+ANVIL_RPC_PORT ?= 8546
+
+# forge binary — use Foundry toolchain installation path
+FORGE ?= $(HOME)/.foundry/bin/forge
+
+# Private key for Anvil account 0, derived from the project mnemonic.
+# Override via environment variable for a different deployer account.
+ANVIL_PRIVATE_KEY ?= 0xd3f1327df33c2a67ac03877f37410f33ed3a37085a84c739a7f5a137e5152bf2
+
 .PHONY: up-docker-anvil
 up-docker-anvil:
 	docker compose -f compose.eth.yaml --profile anvil up -d anvil
@@ -86,6 +97,22 @@ up-docker-anvil:
 .PHONY: stop-docker-anvil
 stop-docker-anvil:
 	docker compose -f compose.eth.yaml --profile anvil stop anvil
+
+## deploy-hyt: Deploy HYT ERC-20 contract to the local Anvil node.
+##   Requires: Anvil running (make up-docker-anvil)
+##   Outputs:  Contract address printed and saved to broadcast/ artifacts.
+##   Override: ANVIL_RPC_PORT=8546 ANVIL_PRIVATE_KEY=0x... make deploy-hyt
+.PHONY: deploy-hyt
+deploy-hyt:
+	cd apps/eth-contracts && \
+		PRIVATE_KEY=$(ANVIL_PRIVATE_KEY) \
+		$(FORGE) script script/DeployHYT.s.sol \
+			--rpc-url http://localhost:$(ANVIL_RPC_PORT) \
+			--broadcast
+	@echo ""
+	@echo "Contract address:"
+	@cat apps/eth-contracts/broadcast/DeployHYT.s.sol/31337/run-latest.json \
+		| python3 -c "import json,sys; print(json.load(sys.stdin)['transactions'][0]['contractAddress'])"
 
 ###############################################################################
 # E2E Tests

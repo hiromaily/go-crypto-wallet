@@ -115,7 +115,7 @@ Task 5.4 runs a Go wallet integration test against the live deployed contract.
   - Depends on Task 3
   - _Requirements: 8.1, 8.2, 8.4, 8.5_
 
-- [ ] 5.3 Deploy HYT contract to local Anvil node for integration testing
+- [x] 5.3 Deploy HYT contract to local Anvil node for integration testing
   - Ensure an Anvil node is running locally (`anvil` from the Foundry toolchain)
   - From `apps/eth-contracts/`, run `forge script script/DeployHYT.s.sol --rpc-url http://localhost:8545 --broadcast` with a funded test private key set in `PRIVATE_KEY`
   - Capture the deployed HYT contract address from the script output or `broadcast/` directory artifacts
