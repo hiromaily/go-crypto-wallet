@@ -74,6 +74,16 @@ export WALLET_ETHEREUM_PORT="${ETH_RPC_PORT}"
 # Tell the watch wallet which ERC-20 token to use from the erc20s config map
 export WALLET_ETHEREUM_ERC20_TOKEN="hyt"
 
+# Override HYT contract and master addresses in watch.yaml at runtime.
+# These env vars take precedence over any static values in the config file,
+# allowing the same yaml to work regardless of which Anvil run deployed HYT.
+# Values are resolved later (after argument parsing) once HYT_CONTRACT_ADDRESS
+# and HYT_MASTER_ADDRESS are fully determined — see _apply_hyt_config_overrides.
+_apply_hyt_config_overrides() {
+	export WALLET_ETHEREUM_ERC20S_HYT_CONTRACT_ADDRESS="${HYT_CONTRACT_ADDRESS}"
+	export WALLET_ETHEREUM_ERC20S_HYT_MASTER_ADDRESS="${HYT_MASTER_ADDRESS}"
+}
+
 ###############################################################################
 # Configuration
 ###############################################################################
@@ -101,6 +111,10 @@ CAST="${HOME}/.foundry/bin/cast"
 # Deployer private key (Anvil account 0 from project mnemonic).
 # Override with HYT_DEPLOYER_KEY=0x... to use a different account.
 HYT_DEPLOYER_KEY="${HYT_DEPLOYER_KEY:-0xd3f1327df33c2a67ac03877f37410f33ed3a37085a84c739a7f5a137e5152bf2}"
+
+# Deployer/master address corresponding to HYT_DEPLOYER_KEY (Anvil account 0).
+# Override with HYT_MASTER_ADDRESS=0x... when using a different deployer.
+HYT_MASTER_ADDRESS="${HYT_MASTER_ADDRESS:-0x328F371a76dfAc47b89Cc007bb048ec446c21494}"
 
 # HYT contract address: use env var override, or auto-detect from broadcast artifacts
 _detect_hyt_contract_address() {
@@ -440,6 +454,11 @@ e2e_full_workflow() {
 	eth_check_prerequisites
 	eth_setup_infrastructure
 	eth_init_sqlite_db
+
+	# Apply runtime config overrides — must run after HYT_CONTRACT_ADDRESS is resolved
+	_apply_hyt_config_overrides
+	log_info "HYT contract (config override): ${WALLET_ETHEREUM_ERC20S_HYT_CONTRACT_ADDRESS}"
+	log_info "HYT master   (config override): ${WALLET_ETHEREUM_ERC20S_HYT_MASTER_ADDRESS}"
 
 	keygen_phase
 	address_setup_phase
