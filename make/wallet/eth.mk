@@ -2,6 +2,9 @@
 # Ethereum Targets
 ###############################################################################
 
+# E2E Testing
+include make/wallet/eth_e2e.mk
+
 # E2E defaults (can be overridden on the command line, e.g. NODE_TYPE=geth DB=mysql)
 NODE_TYPE ?= anvil # anvil, geth
 DB ?= sqlite

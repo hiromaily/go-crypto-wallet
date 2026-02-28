@@ -107,6 +107,7 @@ endif
 # Run E2E tests in parallel
 # Note: build-all uses incremental build - only rebuilds when Go sources change
 # Usage: make eth-e2e-parallel [PATTERNS=1-2] [MAX_PARALLEL=2] [VERBOSE=true]
+#  e.g. make eth-e2e-parallel PATTERNS=1-2 MAX_PARALLEL=2
 .PHONY: eth-e2e-parallel
 eth-e2e-parallel: build-all
 	NODE_TYPE="$(NODE_TYPE)" $(E2E_ETH_PARALLEL_SCRIPT) --patterns "$(PATTERNS)" --max-parallel "$(MAX_PARALLEL)" $(ETH_VERBOSE_FLAG)
