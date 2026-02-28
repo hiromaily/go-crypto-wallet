@@ -162,9 +162,9 @@ func validateCommonConfig(t *testing.T, conf *WalletRoot) {
 	assert.NotEmpty(t, conf.Database.MySQL.Host, "Database.MySQL.Host should not be empty")
 }
 
-// TestHasERC20Config_HYC verifies that the ETH watch, keygen and sign wallet configs
-// all include a valid HYC token entry that satisfies HasERC20Config.
-func TestHasERC20Config_HYC(t *testing.T) {
+// TestHasERC20Config_HYT verifies that the ETH watch, keygen and sign wallet configs
+// all include a valid HYT token entry that satisfies HasERC20Config.
+func TestHasERC20Config_HYT(t *testing.T) {
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
 		t.Skip("GOPATH not set, skipping config file test")
@@ -198,10 +198,10 @@ func TestHasERC20Config_HYC(t *testing.T) {
 			if _, err := os.Stat(tt.configFile); os.IsNotExist(err) {
 				t.Skipf("Config file not found: %s", tt.configFile)
 			}
-			conf, err := NewWallet(tt.configFile, tt.walletType, domainCoin.HYC)
+			conf, err := NewWallet(tt.configFile, tt.walletType, domainCoin.HYT)
 			require.NoError(t, err)
-			require.NoError(t, conf.HasERC20Config(domainCoin.TokenHYC),
-				"HYC ERC20 config entry must be present in %s", tt.configFile)
+			require.NoError(t, conf.HasERC20Config(domainCoin.TokenHYT),
+				"HYT ERC20 config entry must be present in %s", tt.configFile)
 		})
 	}
 }

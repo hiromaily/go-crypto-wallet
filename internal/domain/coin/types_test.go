@@ -16,7 +16,6 @@ func TestIsCoinTypeCode(t *testing.T) {
 		code string
 		want bool
 	}{
-		{"HYC", "hyc", true},
 		{"HYT", "hyt", true},
 		{"ETH", "eth", true},
 		{"BTC", "btc", true},
@@ -38,7 +37,6 @@ func TestIsERC20Token(t *testing.T) {
 		code string
 		want bool
 	}{
-		{"HYC", "hyc", true},
 		{"HYT", "hyt", true},
 		{"ETH_not_erc20", "eth", false},
 		{"BTC_not_erc20", "btc", false},
@@ -59,7 +57,6 @@ func TestIsETHGroup(t *testing.T) {
 		code coin.CoinTypeCode
 		want bool
 	}{
-		{"HYC", coin.HYC, true},
 		{"HYT", coin.HYT, true},
 		{"ETH", coin.ETH, true},
 		{"BTC", coin.BTC, false},
@@ -73,7 +70,7 @@ func TestIsETHGroup(t *testing.T) {
 	}
 }
 
-func TestBIP44AccountPath_HYC(t *testing.T) {
+func TestBIP44AccountPath_HYT(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, "m/44'/9002'/0'", coin.BIP44AccountPath(coin.HYC, 0))
+	assert.Equal(t, "m/44'/9001'/0'", coin.BIP44AccountPath(coin.HYT, 0))
 }

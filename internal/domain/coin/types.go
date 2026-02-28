@@ -41,9 +41,6 @@ const (
 
 	// CoinTypeERC20HYT represents HYT ERC20 token
 	CoinTypeERC20HYT CoinType = 9001
-
-	// CoinTypeERC20HYC represents HYC ERC20 token
-	CoinTypeERC20HYC CoinType = 9002
 )
 
 // CoinTypeCode represents human-readable coin identifiers.
@@ -68,9 +65,6 @@ const (
 
 	// HYT represents HYT token (custom ERC20)
 	HYT CoinTypeCode = "hyt"
-
-	// HYC represents HYC token (custom ERC20)
-	HYC CoinTypeCode = "hyc"
 )
 
 // String returns the string representation of the coin type code.
@@ -86,7 +80,6 @@ var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
 	ETH: CoinTypeEther,
 	XRP: CoinTypeRipple,
 	HYT: CoinTypeERC20HYT,
-	HYC: CoinTypeERC20HYC,
 }
 
 // IsCoinTypeCode validates whether the given string is a valid coin type code.
@@ -136,9 +129,6 @@ const (
 	// TokenHYT represents HYT token
 	TokenHYT ERC20Token = "hyt"
 
-	// TokenHYC represents HYC token
-	TokenHYC ERC20Token = "hyc"
-
 	// TokenBAT represents Basic Attention Token
 	// TokenBAT ERC20Token = "bat"
 )
@@ -151,7 +141,6 @@ func (e ERC20Token) String() string {
 // ERC20Map maps known ERC20 tokens for validation.
 var ERC20Map = map[ERC20Token]bool{
 	TokenHYT: true,
-	TokenHYC: true,
 	// TokenBAT: true,
 }
 

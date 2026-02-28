@@ -26,14 +26,6 @@ ethereum:
       contract_address: "0x66524a37Cb94A3092DC78cb15A9a21de5877656a"
       master_address: "0x328F371a76dfAc47b89Cc007bb048ec446c21494"
       decimals: 18 # default
-    hyc:
-      symbol: "hyc"
-      name: "HY Coin"
-      # Placeholder: replace with actual deployed HYC contract address after running Task 5.3
-      contract_address: "0x0000000000000000000000000000000000000000"
-      # Placeholder: replace with funded Anvil account (master/fee-payer) after Task 5.3
-      master_address: "0x0000000000000000000000000000000000000000"
-      decimals: 18
 
 logger:
   service: "eth-keygen"
