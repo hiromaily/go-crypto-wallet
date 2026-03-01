@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
 )
 
@@ -14,19 +13,19 @@ import (
 // AccountChannels calls account_channels method
 func (r *XRP) AccountChannels(
 	ctx context.Context, sender, receiver string,
-) (*dtoxrp.ResponseAccountChannels, error) {
+) (*xrprpc.ResponseAccountChannels, error) {
 	res, err := xrprpc.AccountChannels(ctx, r.wsPublic, sender, receiver)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.AccountChannels: %w", err)
 	}
-	return ToDTOResponseAccountChannelsFromPkg(res), nil
+	return res, nil
 }
 
 // AccountInfo calls account_info method
-func (r *XRP) AccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseAccountInfo, error) {
+func (r *XRP) AccountInfo(ctx context.Context, address string) (*xrprpc.ResponseAccountInfo, error) {
 	res, err := xrprpc.AccountInfo(ctx, r.wsPublic, address)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.AccountInfo: %w", err)
 	}
-	return ToDTOResponseAccountInfoFromPkg(res), nil
+	return res, nil
 }

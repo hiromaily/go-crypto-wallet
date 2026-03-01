@@ -57,7 +57,7 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 		"address", addressStr,
 		"hd_key_path", addressInfo.HDKeyPath,
 		"hd_fingerprint", addressInfo.HDMasterFingerprint,
-		"pubkey_len", len(addressInfo.PubKey),
+		"pubkey_len", len(addressInfo.Pubkey),
 		"is_watch_only", addressInfo.IsWatchOnly,
 		"is_script", addressInfo.IsScript)
 
@@ -108,10 +108,10 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 	}
 
 	// Parse the public key for non-Taproot addresses
-	if addressInfo.PubKey == "" {
+	if addressInfo.Pubkey == "" {
 		return errors.New("address has no public key")
 	}
-	pubKeyBytes, err := hex.DecodeString(addressInfo.PubKey)
+	pubKeyBytes, err := hex.DecodeString(addressInfo.Pubkey)
 	if err != nil {
 		return fmt.Errorf("failed to decode public key: %w", err)
 	}

@@ -16,6 +16,7 @@ import (
 	xrpapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
+	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 )
 
 const (
@@ -258,7 +259,7 @@ func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
 	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
 		Return(txFile, nil)
 	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob).
-		Return((*dtoxrp.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
+		Return((*xrpclient.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
 
 	input := watchusecase.SendTransactionInput{
 		FilePath: "signed.json",
@@ -297,18 +298,18 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 		},
 	}
 
-	sentTx := &dtoxrp.SentTx{
+	sentTx := &xrpclient.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        signedBlob,
-		TxJSON: dtoxrp.TxInput{
+		TxJSON: xrpclient.TxInput{
 			Hash:               txHash,
 			LastLedgerSequence: 12345,
 		},
 	}
 
-	txInfo := &dtoxrp.TxInfo{
-		Outcome: dtoxrp.TxOutcome{
+	txInfo := &xrpclient.TxInfo{
+		Outcome: xrpclient.TxOutcome{
 			Result: "tesSUCCESS",
 		},
 	}
@@ -379,31 +380,31 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 		},
 	}
 
-	sentTx1 := &dtoxrp.SentTx{
+	sentTx1 := &xrpclient.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        signedBlob1,
-		TxJSON: dtoxrp.TxInput{
+		TxJSON: xrpclient.TxInput{
 			Hash:               txHash1,
 			LastLedgerSequence: 12345,
 		},
 	}
 
-	sentTx2 := &dtoxrp.SentTx{
+	sentTx2 := &xrpclient.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        signedBlob2,
-		TxJSON: dtoxrp.TxInput{
+		TxJSON: xrpclient.TxInput{
 			Hash:               txHash2,
 			LastLedgerSequence: 12346,
 		},
 	}
 
-	txInfo1 := &dtoxrp.TxInfo{
-		Outcome: dtoxrp.TxOutcome{Result: "tesSUCCESS"},
+	txInfo1 := &xrpclient.TxInfo{
+		Outcome: xrpclient.TxOutcome{Result: "tesSUCCESS"},
 	}
-	txInfo2 := &dtoxrp.TxInfo{
-		Outcome: dtoxrp.TxOutcome{Result: "tesSUCCESS"},
+	txInfo2 := &xrpclient.TxInfo{
+		Outcome: xrpclient.TxOutcome{Result: "tesSUCCESS"},
 	}
 
 	// Setup mocks

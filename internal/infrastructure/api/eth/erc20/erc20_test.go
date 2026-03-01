@@ -13,6 +13,7 @@ import (
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
+	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
 // stubEthNode is a minimal test double for the eth node provider (ethNodeAPI).
@@ -23,7 +24,7 @@ type stubEthNode struct {
 	tipCapErr       error
 	blockNumber     *big.Int
 	blockNumberErr  error
-	blockInfo       *domainETH.BlockInfo
+	blockInfo       *ethrpc.BlockInfo
 	blockInfoErr    error
 	txCount         *big.Int
 	txCountErr      error
@@ -46,7 +47,7 @@ func (s *stubEthNode) BlockNumber(_ context.Context) (*big.Int, error) {
 	return s.blockNumber, s.blockNumberErr
 }
 
-func (s *stubEthNode) GetBlockByNumber(_ context.Context, _ uint64) (*domainETH.BlockInfo, error) {
+func (s *stubEthNode) GetBlockByNumber(_ context.Context, _ uint64) (*ethrpc.BlockInfo, error) {
 	s.getBlockByNumberCalled = true
 	return s.blockInfo, s.blockInfoErr
 }
@@ -170,7 +171,7 @@ func TestCreateRawTransactionEIP1559_ErrorWhenBaseFeeAbsent(t *testing.T) {
 		supportsEIP1559: true,
 		tipCap:          big.NewInt(1_000_000_000),
 		blockNumber:     big.NewInt(100),
-		blockInfo:       &domainETH.BlockInfo{BaseFeePerGas: nil},
+		blockInfo:       &ethrpc.BlockInfo{BaseFeePerGas: nil},
 	}
 	erc20 := apierc20impl.NewERC20(stub, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
 	_, _, err := erc20.CreateRawTransactionEIP1559(context.Background(), "", "", 0, 0)

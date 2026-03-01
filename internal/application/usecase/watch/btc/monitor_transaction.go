@@ -195,7 +195,7 @@ func (u *monitorTransactionUseCase) checkTransactionConfirmation(
 		"required", u.btcClient.ConfirmationBlock())
 
 	// Check if confirmations meet threshold
-	if uint64(tx.Confirmations) >= u.btcClient.ConfirmationBlock() {
+	if tx.Confirmations >= u.btcClient.ConfirmationBlock() {
 		return true, nil
 	}
 

@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +40,23 @@ func (_m *MockXRPAdminer) EXPECT() *MockXRPAdminer_Expecter {
 }
 
 // ValidationCreate provides a mock function for the type MockXRPAdminer
-func (_mock *MockXRPAdminer) ValidationCreate(ctx context.Context, secret string) (*xrp.ResponseValidationCreate, error) {
+func (_mock *MockXRPAdminer) ValidationCreate(ctx context.Context, secret string) (*rpc.ResponseValidationCreate, error) {
 	ret := _mock.Called(ctx, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ValidationCreate")
 	}
 
-	var r0 *xrp.ResponseValidationCreate
+	var r0 *rpc.ResponseValidationCreate
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrp.ResponseValidationCreate, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*rpc.ResponseValidationCreate, error)); ok {
 		return returnFunc(ctx, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrp.ResponseValidationCreate); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *rpc.ResponseValidationCreate); ok {
 		r0 = returnFunc(ctx, secret)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.ResponseValidationCreate)
+			r0 = ret.Get(0).(*rpc.ResponseValidationCreate)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -96,34 +97,34 @@ func (_c *MockXRPAdminer_ValidationCreate_Call) Run(run func(ctx context.Context
 	return _c
 }
 
-func (_c *MockXRPAdminer_ValidationCreate_Call) Return(responseValidationCreate *xrp.ResponseValidationCreate, err error) *MockXRPAdminer_ValidationCreate_Call {
+func (_c *MockXRPAdminer_ValidationCreate_Call) Return(responseValidationCreate *rpc.ResponseValidationCreate, err error) *MockXRPAdminer_ValidationCreate_Call {
 	_c.Call.Return(responseValidationCreate, err)
 	return _c
 }
 
-func (_c *MockXRPAdminer_ValidationCreate_Call) RunAndReturn(run func(ctx context.Context, secret string) (*xrp.ResponseValidationCreate, error)) *MockXRPAdminer_ValidationCreate_Call {
+func (_c *MockXRPAdminer_ValidationCreate_Call) RunAndReturn(run func(ctx context.Context, secret string) (*rpc.ResponseValidationCreate, error)) *MockXRPAdminer_ValidationCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // WalletPropose provides a mock function for the type MockXRPAdminer
-func (_mock *MockXRPAdminer) WalletPropose(ctx context.Context, passphrase string) (*xrp.ResponseWalletPropose, error) {
+func (_mock *MockXRPAdminer) WalletPropose(ctx context.Context, passphrase string) (*rpc.ResponseWalletPropose, error) {
 	ret := _mock.Called(ctx, passphrase)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WalletPropose")
 	}
 
-	var r0 *xrp.ResponseWalletPropose
+	var r0 *rpc.ResponseWalletPropose
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrp.ResponseWalletPropose, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*rpc.ResponseWalletPropose, error)); ok {
 		return returnFunc(ctx, passphrase)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrp.ResponseWalletPropose); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *rpc.ResponseWalletPropose); ok {
 		r0 = returnFunc(ctx, passphrase)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.ResponseWalletPropose)
+			r0 = ret.Get(0).(*rpc.ResponseWalletPropose)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -164,34 +165,34 @@ func (_c *MockXRPAdminer_WalletPropose_Call) Run(run func(ctx context.Context, p
 	return _c
 }
 
-func (_c *MockXRPAdminer_WalletPropose_Call) Return(responseWalletPropose *xrp.ResponseWalletPropose, err error) *MockXRPAdminer_WalletPropose_Call {
+func (_c *MockXRPAdminer_WalletPropose_Call) Return(responseWalletPropose *rpc.ResponseWalletPropose, err error) *MockXRPAdminer_WalletPropose_Call {
 	_c.Call.Return(responseWalletPropose, err)
 	return _c
 }
 
-func (_c *MockXRPAdminer_WalletPropose_Call) RunAndReturn(run func(ctx context.Context, passphrase string) (*xrp.ResponseWalletPropose, error)) *MockXRPAdminer_WalletPropose_Call {
+func (_c *MockXRPAdminer_WalletPropose_Call) RunAndReturn(run func(ctx context.Context, passphrase string) (*rpc.ResponseWalletPropose, error)) *MockXRPAdminer_WalletPropose_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // WalletProposeWithKey provides a mock function for the type MockXRPAdminer
-func (_mock *MockXRPAdminer) WalletProposeWithKey(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error) {
+func (_mock *MockXRPAdminer) WalletProposeWithKey(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*rpc.ResponseWalletPropose, error) {
 	ret := _mock.Called(ctx, seed, keyType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WalletProposeWithKey")
 	}
 
-	var r0 *xrp.ResponseWalletPropose
+	var r0 *rpc.ResponseWalletPropose
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) (*rpc.ResponseWalletPropose, error)); ok {
 		return returnFunc(ctx, seed, keyType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) *xrp.ResponseWalletPropose); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) *rpc.ResponseWalletPropose); ok {
 		r0 = returnFunc(ctx, seed, keyType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.ResponseWalletPropose)
+			r0 = ret.Get(0).(*rpc.ResponseWalletPropose)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, xrp.XRPKeyType) error); ok {
@@ -238,12 +239,12 @@ func (_c *MockXRPAdminer_WalletProposeWithKey_Call) Run(run func(ctx context.Con
 	return _c
 }
 
-func (_c *MockXRPAdminer_WalletProposeWithKey_Call) Return(responseWalletPropose *xrp.ResponseWalletPropose, err error) *MockXRPAdminer_WalletProposeWithKey_Call {
+func (_c *MockXRPAdminer_WalletProposeWithKey_Call) Return(responseWalletPropose *rpc.ResponseWalletPropose, err error) *MockXRPAdminer_WalletProposeWithKey_Call {
 	_c.Call.Return(responseWalletPropose, err)
 	return _c
 }
 
-func (_c *MockXRPAdminer_WalletProposeWithKey_Call) RunAndReturn(run func(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)) *MockXRPAdminer_WalletProposeWithKey_Call {
+func (_c *MockXRPAdminer_WalletProposeWithKey_Call) RunAndReturn(run func(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*rpc.ResponseWalletPropose, error)) *MockXRPAdminer_WalletProposeWithKey_Call {
 	_c.Call.Return(run)
 	return _c
 }

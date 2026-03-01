@@ -18,7 +18,7 @@ import (
 // https://github.com/ripple/ripple-keypairs
 
 // ValidationCreate calls validation_create method
-func (r *XRP) ValidationCreate(ctx context.Context, secret string) (*dtoxrp.ResponseValidationCreate, error) {
+func (r *XRP) ValidationCreate(ctx context.Context, secret string) (*xrprpc.ResponseValidationCreate, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -27,13 +27,13 @@ func (r *XRP) ValidationCreate(ctx context.Context, secret string) (*dtoxrp.Resp
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.ValidationCreate: %w", err)
 	}
-	return ToDTOResponseValidationCreateFromPkg(res), nil
+	return res, nil
 }
 
 // WalletProposeWithKey calls wallet_propose method
 func (r *XRP) WalletProposeWithKey(
 	ctx context.Context, seed string, keyType dtoxrp.XRPKeyType,
-) (*dtoxrp.ResponseWalletPropose, error) {
+) (*xrprpc.ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -42,12 +42,12 @@ func (r *XRP) WalletProposeWithKey(
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.WalletProposeWithKey: %w", err)
 	}
-	return ToDTOResponseWalletProposeFromPkg(res), nil
+	return res, nil
 }
 
 // WalletPropose calls wallet_propose method
 // - result is same as long as using same passphrase
-func (r *XRP) WalletPropose(ctx context.Context, passphrase string) (*dtoxrp.ResponseWalletPropose, error) {
+func (r *XRP) WalletPropose(ctx context.Context, passphrase string) (*xrprpc.ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -56,5 +56,5 @@ func (r *XRP) WalletPropose(ctx context.Context, passphrase string) (*dtoxrp.Res
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.WalletPropose: %w", err)
 	}
-	return ToDTOResponseWalletProposeFromPkg(res), nil
+	return res, nil
 }

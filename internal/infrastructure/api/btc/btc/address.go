@@ -5,19 +5,18 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
-func (b *Bitcoin) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
+func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
 	result, err := btcrpc.GetAddressInfo(b.Client, addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetAddressInfo(%s): %w", addr, err)
 	}
 
-	return ToAddressInfoFromPkg(result), nil
+	return result, nil
 }
 
 // GetAddressesByLabel returns addresses of account(label)
@@ -69,7 +68,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 }
 
 // ValidateAddress validate address
-func (b *Bitcoin) ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error) {
+func (b *Bitcoin) ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error) {
 	result, err := btcrpc.ValidateAddress(b.Client, addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ValidateAddress(%s): %w", addr, err)
@@ -78,7 +77,7 @@ func (b *Bitcoin) ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, e
 		return nil, fmt.Errorf("this address is invalid: %v", result)
 	}
 
-	return ToValidateAddressResultFromPkg(result), nil
+	return result, nil
 }
 
 // DecodeAddress decode string address to type Address

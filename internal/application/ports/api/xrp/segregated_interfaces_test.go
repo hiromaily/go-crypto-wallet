@@ -9,6 +9,7 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 )
 
 // TestAccountInfoProviderInterface verifies that AccountInfoProvider interface
@@ -185,7 +186,7 @@ type mockAccountInfoProvider struct{}
 func (*mockAccountInfoProvider) GetAccountInfo(
 	ctx context.Context,
 	address string,
-) (*dtoxrp.ResponseGetAccountInfo, error) {
+) (*xrpclient.AccountInfo, error) {
 	return nil, nil
 }
 
@@ -218,7 +219,7 @@ type mockTransactionSubmitter struct{}
 func (*mockTransactionSubmitter) SubmitTransaction(
 	ctx context.Context,
 	signedTx string,
-) (*dtoxrp.SentTx, uint64, error) {
+) (*xrpclient.SentTx, uint64, error) {
 	return nil, 0, nil
 }
 
@@ -233,7 +234,7 @@ func (*mockTransactionSubmitter) GetTransaction(
 	ctx context.Context,
 	txID string,
 	targetLedgerVersion uint64,
-) (*dtoxrp.TxInfo, error) {
+) (*xrpclient.TxInfo, error) {
 	return nil, nil
 }
 

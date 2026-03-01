@@ -12,6 +12,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // ErrBCHUnsupported is the base error for unsupported BCH operations.
@@ -93,17 +94,17 @@ func (*BitcoinCash) GetPSBTFee(_ string) (int64, error) {
 // ImportDescriptors is not supported by BCH.
 // BCH should use ImportAddress or ImportAddressWithLabel instead.
 func (*BitcoinCash) ImportDescriptors(
-	_ []dtobtc.ImportDescriptorsRequest,
-) ([]dtobtc.ImportDescriptorsResponse, error) {
+	_ []btcrpc.ImportDescriptorsRequest,
+) ([]btcrpc.ImportDescriptorsResponse, error) {
 	return nil, errDescriptorNotSupported
 }
 
 // GetDescriptorInfo is not supported by BCH.
-func (*BitcoinCash) GetDescriptorInfo(_ string) (*dtobtc.DescriptorInfo, error) {
+func (*BitcoinCash) GetDescriptorInfo(_ string) (*btcrpc.DescriptorInfo, error) {
 	return nil, errDescriptorNotSupported
 }
 
 // ListDescriptors is not supported by BCH.
-func (*BitcoinCash) ListDescriptors(_ bool) (*dtobtc.ListDescriptorsResult, error) {
+func (*BitcoinCash) ListDescriptors(_ bool) (*btcrpc.ListDescriptorsResult, error) {
 	return nil, errDescriptorNotSupported
 }
