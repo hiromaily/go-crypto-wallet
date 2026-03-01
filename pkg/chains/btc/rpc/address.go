@@ -42,12 +42,12 @@ type Purpose struct {
 }
 
 // GetAddressInfo calls the getaddressinfo RPC and returns the raw wire response.
-func GetAddressInfo(caller RPCCaller, addr string) (*GetAddressInfoResult, error) {
+func (c *Client) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(addr): %w", err)
 	}
-	rawResult, err := caller.RawRequest("getaddressinfo", []json.RawMessage{input})
+	rawResult, err := c.client.RawRequest("getaddressinfo", []json.RawMessage{input})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(getaddressinfo) %s: %w", addr, err)
 	}
@@ -59,12 +59,12 @@ func GetAddressInfo(caller RPCCaller, addr string) (*GetAddressInfoResult, error
 }
 
 // ValidateAddress calls the validateaddress RPC and returns the raw wire response.
-func ValidateAddress(caller RPCCaller, addr string) (*ValidateAddressResult, error) {
+func (c *Client) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(addr): %w", err)
 	}
-	rawResult, err := caller.RawRequest("validateaddress", []json.RawMessage{input})
+	rawResult, err := c.client.RawRequest("validateaddress", []json.RawMessage{input})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(validateaddress): %w", err)
 	}
@@ -76,12 +76,12 @@ func ValidateAddress(caller RPCCaller, addr string) (*ValidateAddressResult, err
 }
 
 // GetAddressesByLabel calls getaddressesbylabel and returns the raw wire map.
-func GetAddressesByLabel(caller RPCCaller, labelName string) (map[string]Purpose, error) {
+func (c *Client) GetAddressesByLabel(labelName string) (map[string]Purpose, error) {
 	input, err := json.Marshal(labelName)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(labelName): %w", err)
 	}
-	rawResult, err := caller.RawRequest("getaddressesbylabel", []json.RawMessage{input})
+	rawResult, err := c.client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(getaddressesbylabel) %s: %w", labelName, err)
 	}

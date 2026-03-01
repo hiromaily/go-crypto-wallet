@@ -68,7 +68,6 @@ type BitcoinCompatible interface {
 	CoinTypeCode() domainCoin.CoinTypeCode
 
 	// fee.go
-	EstimateSmartFee() (float64, error)
 	GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error)
 	GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error)
 

@@ -1,19 +1,6 @@
 package btc
 
-import (
-	"fmt"
-
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
-)
-
-// GetBlockCount gets block count
-//
-//	e.g. 1383526
+// GetBlockCount returns the number of blocks in the longest blockchain
 func (b *Bitcoin) GetBlockCount() (int64, error) {
-	blockCnt, err := btcrpc.GetBlockCount(b.Client)
-	if err != nil {
-		return 0, fmt.Errorf("fail to call btcrpc.GetBlockCount(): %w", err)
-	}
-
-	return blockCnt, nil
+	return b.pkgrpc.GetBlockCount()
 }

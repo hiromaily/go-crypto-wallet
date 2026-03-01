@@ -1,27 +1,15 @@
 package btc
 
 import (
-	"fmt"
-
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
-// GetNetworkInfo call RPC `getnetworkinfo`
+// GetNetworkInfo returns information about the node's connection to the network
 func (b *Bitcoin) GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error) {
-	result, err := btcrpc.GetNetworkInfo(b.Client)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call btcrpc.GetNetworkInfo(): %w", err)
-	}
-
-	return result, nil
+	return b.pkgrpc.GetNetworkInfo()
 }
 
-// GetBlockchainInfo call RPC `getblockchaininfo`
+// GetBlockchainInfo returns an object containing various state info regarding blockchain processing
 func (b *Bitcoin) GetBlockchainInfo() (*btcrpc.GetBlockchainInfoResult, error) {
-	result, err := btcrpc.GetBlockchainInfo(b.Client)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call btcrpc.GetBlockchainInfo(): %w", err)
-	}
-
-	return result, nil
+	return b.pkgrpc.GetBlockchainInfo()
 }

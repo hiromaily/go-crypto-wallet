@@ -17,7 +17,7 @@ type feeTest struct {
 // TestEstimateSmartFee is test for EstimateSmartFee
 func (ft *feeTest) TestEstimateSmartFee() {
 	// EstimateSmartFee
-	res, err := ft.BTC.EstimateSmartFee()
+	res, err := ft.BTC.GetPkgRPC().EstimateSmartFee(int(ft.BTC.ConfirmationBlock()))
 	ft.NoError(err)
 	if err == nil {
 		ft.T().Logf("%f", res)

@@ -94,6 +94,14 @@ packages:
       UnitOfWork:
       Transaction:
 
+  # Bitcoin RPC client interface in pkg layer
+  github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc:
+    config:
+      dir: "pkg/chains/btc/rpc/mocks"
+      pkgname: "mocks"
+    interfaces:
+      BTCRPC:
+
   # Cold wallet persistence interfaces
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold:
     config:

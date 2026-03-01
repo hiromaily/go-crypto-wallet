@@ -103,18 +103,9 @@ func (b *Bitcoin) WalletPassphraseChange(old, newPass string) error {
 	return b.Client.WalletPassphraseChange(old, newPass)
 }
 
-// LoadWallet import wallet dat
-//
-//	Loads a wallet from a wallet file or directory.
-//	Note that all wallet command-line options used when starting bitcoind will be
-//	applied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).
-//	e.g. bitcoin-cli loadwallet "test.dat"
+// LoadWallet loads a wallet from a wallet file or directory
 func (b *Bitcoin) LoadWallet(fileName string) error {
-	if err := btcrpc.LoadWallet(b.Client, fileName); err != nil {
-		return fmt.Errorf("fail to call btcrpc.LoadWallet(): %w", err)
-	}
-
-	return nil
+	return b.pkgrpc.LoadWallet(fileName)
 }
 
 // UnLoadWallet unload wallet dat
@@ -123,7 +114,7 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 //	Specifying the wallet name on a wallet endpoint is invalid.
 //	e.g. bitcoin-cli unloadwallet wallet_name
 func (b *Bitcoin) UnLoadWallet(fileName string) error {
-	if err := btcrpc.UnloadWallet(b.Client, fileName); err != nil {
+	if err := b.pkgrpc.UnloadWallet(fileName); err != nil {
 		return fmt.Errorf("fail to call btcrpc.UnloadWallet(): %w", err)
 	}
 
@@ -166,7 +157,7 @@ func (b *Bitcoin) CreateWalletWithOptions(fileName string, opts *CreateWalletOpt
 		LoadOnStartup:      opts.LoadOnStartup,
 	}
 
-	if err := btcrpc.CreateWallet(b.Client, fileName, pkgOpts); err != nil {
+	if err := b.pkgrpc.CreateWallet(fileName, pkgOpts); err != nil {
 		return fmt.Errorf("fail to call btcrpc.CreateWallet(): %w", err)
 	}
 

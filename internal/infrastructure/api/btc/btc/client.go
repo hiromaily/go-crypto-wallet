@@ -10,16 +10,19 @@ import (
 
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // Bitcoin includes client to call Json-RPC
 type Bitcoin struct {
+	pkgrpc            btcrpc.BTCRPC
 	Client            *rpcclient.Client
 	chainConf         *chaincfg.Params
 	coinTypeCode      domainCoin.CoinTypeCode // btc
-	version           BTCVersion              // 179900
+	version           btcpkg.NodeVersion      // 280000
 	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
 }
@@ -37,61 +40,62 @@ func NewBitcoin(
 	coinTypeCode domainCoin.CoinTypeCode,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
+		pkgrpc: btcrpc.New(client),
 		Client: client,
 	}
 
 	bit.coinTypeCode = coinTypeCode
 
 	// check network consistency between config and bitcoind
-	blockInfo, err := bit.GetBlockchainInfo()
+	blockInfo, err := bit.pkgrpc.GetBlockchainInfo()
 	if err != nil {
 		return nil, fmt.Errorf("fail to call bit.GetBlockchainInfo(): %w", err)
 	}
 
-	switch NetworkTypeBTC(conf.NetworkType) {
-	case NetworkTypeMainNet:
+	switch btcpkg.NetworkType(conf.NetworkType) {
+	case btcpkg.NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
 		if blockInfo.Chain != "main" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
-				blockInfo.Chain, NetworkTypeMainNet)
+				blockInfo.Chain, btcpkg.NetworkTypeMainNet)
 		}
-	case NetworkTypeTestNet3:
+	case btcpkg.NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
 		if blockInfo.Chain != "test" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
-				blockInfo.Chain, NetworkTypeTestNet3)
+				blockInfo.Chain, btcpkg.NetworkTypeTestNet3)
 		}
-	case NetworkTypeRegTestNet:
+	case btcpkg.NetworkTypeRegTest:
 		bit.chainConf = &chaincfg.RegressionNetParams
 		if blockInfo.Chain != "regtest" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
-				blockInfo.Chain, NetworkTypeRegTestNet)
+				blockInfo.Chain, btcpkg.NetworkTypeRegTest)
 		}
-	case NetworkTypeSigNet:
+	case btcpkg.NetworkTypeSigNet:
 		bit.chainConf = &chaincfg.SigNetParams
 		if blockInfo.Chain != "signet" {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
-				blockInfo.Chain, NetworkTypeSigNet)
+				blockInfo.Chain, btcpkg.NetworkTypeSigNet)
 		}
 	default:
 		return nil, errors.New("bitcoin network type is invalid in config")
 	}
 
 	// set bitcoin version
-	netInfo, err := bit.GetNetworkInfo()
+	netInfo, err := bit.pkgrpc.GetNetworkInfo()
 	if err != nil {
 		return nil, fmt.Errorf("fail to call bit.GetNetworkInfo(): %w", err)
 	}
-	if RequiredVersion > BTCVersion(netInfo.Version) {
+	if btcpkg.RequiredNodeVersion > btcpkg.NodeVersion(netInfo.Version) {
 		return nil, fmt.Errorf(
 			"bitcoin core version should be %d +, but version %d is detected",
-			RequiredVersion, netInfo.Version)
+			btcpkg.RequiredNodeVersion, netInfo.Version)
 	}
-	bit.version = BTCVersion(netInfo.Version)
+	bit.version = btcpkg.NodeVersion(netInfo.Version)
 	logger.Info("bitcoin rpc server", "version", netInfo.Version)
 
 	// set other information from config
@@ -141,10 +145,15 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 
 // Version returns core version
 func (b *Bitcoin) Version() domainBTC.Version {
-	return ToBTCVersion(b.version)
+	return domainBTC.Version(b.version)
 }
 
 // CoinTypeCode returns CoinTypeCode
 func (b *Bitcoin) CoinTypeCode() domainCoin.CoinTypeCode {
 	return b.coinTypeCode
+}
+
+// GetPkgRPC returns the underlying btcrpc.BTCRPC client for direct RPC access
+func (b *Bitcoin) GetPkgRPC() btcrpc.BTCRPC {
+	return b.pkgrpc
 }

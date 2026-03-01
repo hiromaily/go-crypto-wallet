@@ -80,9 +80,9 @@ type Bitcoiner interface {
 	FeeRangeMin() float64
 	Version() domainBTC.Version
 	CoinTypeCode() domainCoin.CoinTypeCode
+	GetPkgRPC() btcrpc.BTCRPC
 
 	// fee.go
-	EstimateSmartFee() (float64, error)
 	GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error)
 	GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error)
 
@@ -441,9 +441,9 @@ type NodeBalanceChecker interface {
 	GetBalance() (btcutil.Amount, error)
 }
 
-// FeeEstimator estimates transaction fees.
+// FeeEstimator provides access to the underlying RPC client for fee estimation.
 type FeeEstimator interface {
-	EstimateSmartFee() (float64, error)
+	GetPkgRPC() btcrpc.BTCRPC
 }
 
 // NetworkInformer provides network and blockchain information.
@@ -507,7 +507,7 @@ type BTCLifecycle interface {
 type WatchAPIClient interface {
 	NodeBalanceChecker // GetBalance
 	BalanceChecker     // GetBalanceByAccount
-	FeeEstimator       // EstimateSmartFee
+	FeeEstimator       // GetPkgRPC
 	FullUTXOLister     // ListUnspent
 	UTXOProvider       // ListUnspentByAccount, GetUnspentListAddrs
 	NodeLogger         // Logging
