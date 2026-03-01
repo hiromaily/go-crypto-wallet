@@ -6,8 +6,8 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/chains/bch"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -30,7 +30,7 @@ type GetAddressInfoResult struct {
 }
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
-func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
+func (b *BitcoinCash) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marchal() in bch: %w", err)
@@ -46,17 +46,17 @@ func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult) in bch: %w", err)
 	}
 
-	return &dtobtc.AddressInfo{
+	return &btcrpc.GetAddressInfoResult{
 		Address:      infoResult.Address,
 		ScriptPubKey: infoResult.ScriptPubKey,
 		IsMine:       infoResult.Ismine,
 		IsWatchOnly:  infoResult.Iswatchonly,
 		IsScript:     infoResult.Isscript,
-		PubKey:       infoResult.Pubkey,
+		Pubkey:       infoResult.Pubkey,
 		IsCompressed: infoResult.Iscompressed,
 		IsChange:     infoResult.Ischange,
 		Timestamp:    infoResult.Timestamp,
-		Labels:       []string{infoResult.Label},
+		Labels:       btcrpc.FlexibleLabels{infoResult.Label},
 	}, nil
 }
 

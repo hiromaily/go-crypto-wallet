@@ -6,7 +6,6 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
@@ -96,26 +95,23 @@ func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) err
 //
 // Reference: Bitcoin Core RPC documentation - importdescriptors
 func (b *Bitcoin) ImportDescriptors(
-	requests []dtobtc.ImportDescriptorsRequest,
-) ([]dtobtc.ImportDescriptorsResponse, error) {
+	requests []btcrpc.ImportDescriptorsRequest,
+) ([]btcrpc.ImportDescriptorsResponse, error) {
 	if len(requests) == 0 {
 		return nil, errors.New("no descriptors to import")
 	}
 
-	pkgRequests := FromDTOImportDescriptorsRequests(requests)
-	responses, err := btcrpc.ImportDescriptors(b.Client, pkgRequests)
+	responses, err := btcrpc.ImportDescriptors(b.Client, requests)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ImportDescriptors(): %w", err)
 	}
 
-	result := ToImportDescriptorsResponseFromPkg(responses)
-
-	if len(result) != len(requests) {
+	if len(responses) != len(requests) {
 		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
-			len(result), len(requests))
+			len(responses), len(requests))
 	}
 
-	return result, nil
+	return responses, nil
 }
 
 // ImportMulti imports addresses/scripts with optional redeem scripts (legacy wallets).
@@ -138,30 +134,22 @@ func (b *Bitcoin) ImportDescriptors(
 //
 // Reference: Bitcoin Core RPC documentation - importmulti
 func (b *Bitcoin) ImportMulti(
-	requests []dtobtc.ImportMultiRequest,
-	options *dtobtc.ImportMultiOptions,
-) ([]dtobtc.ImportMultiResponse, error) {
+	requests []btcrpc.ImportMultiRequest,
+	options *btcrpc.ImportMultiOptions,
+) ([]btcrpc.ImportMultiResponse, error) {
 	if len(requests) == 0 {
 		return nil, errors.New("no addresses to import")
 	}
 
-	pkgRequests := FromDTOImportMultiRequests(requests)
-	var pkgOpts *btcrpc.ImportMultiOptions
-	if options != nil {
-		pkgOpts = &btcrpc.ImportMultiOptions{Rescan: options.Rescan}
-	}
-
-	responses, err := btcrpc.ImportMulti(b.Client, pkgRequests, pkgOpts)
+	responses, err := btcrpc.ImportMulti(b.Client, requests, options)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ImportMulti(): %w", err)
 	}
 
-	result := ToImportMultiResponseFromPkg(responses)
-
-	if len(result) != len(requests) {
+	if len(responses) != len(requests) {
 		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
-			len(result), len(requests))
+			len(responses), len(requests))
 	}
 
-	return result, nil
+	return responses, nil
 }

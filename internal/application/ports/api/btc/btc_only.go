@@ -5,6 +5,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // BTCOnly defines methods specific to Bitcoin (BTC) that are NOT supported by BCH.
@@ -30,15 +31,15 @@ import (
 //	For BCH use cases, use BitcoinCompatible or BCHer interface instead.
 type BTCOnly interface {
 	// import.go (Descriptor-based imports - BTC only)
-	ImportDescriptors(requests []dtobtc.ImportDescriptorsRequest) ([]dtobtc.ImportDescriptorsResponse, error)
+	ImportDescriptors(requests []btcrpc.ImportDescriptorsRequest) ([]btcrpc.ImportDescriptorsResponse, error)
 	ImportMulti(
-		requests []dtobtc.ImportMultiRequest,
-		options *dtobtc.ImportMultiOptions,
-	) ([]dtobtc.ImportMultiResponse, error)
+		requests []btcrpc.ImportMultiRequest,
+		options *btcrpc.ImportMultiOptions,
+	) ([]btcrpc.ImportMultiResponse, error)
 
 	// descriptor_info.go (Descriptor operations - BTC only)
-	GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error)
-	ListDescriptors(privateDescriptors bool) (*dtobtc.ListDescriptorsResult, error)
+	GetDescriptorInfo(descriptor string) (*btcrpc.DescriptorInfo, error)
+	ListDescriptors(privateDescriptors bool) (*btcrpc.ListDescriptorsResult, error)
 
 	// psbt.go (BIP174 Partially Signed Bitcoin Transaction - BTC only)
 	// PSBT provides a standard format for partially signed transactions,

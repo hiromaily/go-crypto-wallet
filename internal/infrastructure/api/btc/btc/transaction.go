@@ -177,13 +177,13 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 }
 
 // GetTransactionByTxID get transaction result by txID
-func (b *Bitcoin) GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error) {
+func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcrpc.GetTransactionResult, error) {
 	result, err := btcrpc.GetTransaction(b.Client, txID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetTransaction(%s): %w", txID, err)
 	}
 
-	return ToTransactionResultFromPkg(result, b)
+	return result, nil
 }
 
 // GetTxOutByTxID get txOut by txID and index
@@ -220,18 +220,13 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 }
 
 // DecodeRawTransaction returns information about a transaction given its serialized byte
-func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*dtobtc.RawTransaction, error) {
+func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcrpc.TxRawResult, error) {
 	result, err := btcrpc.DecodeRawTransaction(b.Client, hexTx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.DecodeRawTransaction(): %w", err)
 	}
 
-	dto, err := ToRawTransactionFromPkg(result, b)
-	if err != nil {
-		return nil, err
-	}
-	dto.Hex = hexTx // Set the hex field that mapper left empty
-	return dto, nil
+	return result, nil
 }
 
 // GetRawTransactionByHex get tx from hex string
@@ -280,7 +275,7 @@ type FundRawTransactionOptions struct {
 
 // FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
 // TODO: unused for now, but it looks useful
-func (b *Bitcoin) FundRawTransaction(hexTx string) (*dtobtc.FundRawTransactionResult, error) {
+func (b *Bitcoin) FundRawTransaction(hexTx string) (*btcrpc.FundRawTransactionResult, error) {
 	return b.FundRawTransactionWithOptions(hexTx, nil)
 }
 
@@ -289,7 +284,7 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*dtobtc.FundRawTransactionRe
 func (b *Bitcoin) FundRawTransactionWithOptions(
 	hexTx string,
 	opts *FundRawTransactionOptions,
-) (*dtobtc.FundRawTransactionResult, error) {
+) (*btcrpc.FundRawTransactionResult, error) {
 	if opts == nil {
 		opts = &FundRawTransactionOptions{}
 	}
@@ -316,7 +311,7 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 		return nil, fmt.Errorf("fail to call btcrpc.FundRawTransaction(): %w", err)
 	}
 
-	return ToFundRawTransactionResultFromPkg(result), nil
+	return result, nil
 }
 
 // prepareSignRawTransactionInputs prepares common inputs for sign raw transaction operations

@@ -129,42 +129,42 @@
   - _Requirements: 8.1, 8.4, 8.5_
 
 - [ ] 5. Phase 2 - Update ETH port interface signatures and eliminate infrastructure types
-- [ ] 5.1 Update ETH port interface method signatures to return pkg types
+- [x] 5.1 Update ETH port interface method signatures to return pkg types
   - Change the `Syncing` method return type from the infrastructure-defined `ResponseSyncing` to the type now living in the ETH RPC package
   - For any other ETH port methods whose return types reference infrastructure-defined structs rather than domain or standard library types, update those signatures to reference the pkg types
   - Verify that the focused ETH port interfaces (`EthNodeAPIClient`, `TxMonitor`, etc.) remain syntactically valid and that all their method names are preserved
   - _Requirements: 3.1, 5.1, 5.2, 5.4_
 
-- [ ] 5.2 Update ETH adapter and use cases after interface signature change
+- [x] 5.2 Update ETH adapter and use cases after interface signature change
   - Update the ETH infrastructure adapter so that the affected methods return the pkg type directly without any intermediate conversion
   - Update any ETH use case files that reference the infrastructure-defined `ResponseSyncing` type to import from the ETH RPC package instead
   - _Requirements: 3.2, 3.3, 4.1, 4.4_
 
-- [ ] 5.3 Regenerate ETH mocks and verify ETH tests
+- [x] 5.3 Regenerate ETH mocks and verify ETH tests
   - Run mock generation for all ETH port interfaces affected by signature changes
   - Run the ETH-specific test suite and confirm all tests pass
   - _Requirements: 8.4, 8.5_
 
-- [ ] 6. Phase 2 - Eliminate pure-wire BTC DTOs and update port interface signatures
-- [ ] 6.1 Identify and update BTC port interface method signatures for pure-wire DTOs
+- [x] 6. Phase 2 - Eliminate pure-wire BTC DTOs and update port interface signatures
+- [x] 6.1 Identify and update BTC port interface method signatures for pure-wire DTOs
   - For each BTC port interface method that currently returns a pure-wire DTO (address info, validate address, network info, blockchain info, transaction result, raw transaction, fund raw transaction, descriptor info, list descriptors, import descriptor response, multisig address, logging result), update the return type to reference the corresponding type now in the BTC RPC package
   - Preserve all interface names (`Bitcoiner`, `AddressOperator`, `NetworkInformer`, etc.) and all method names without change
   - Leave PSBT-related and UTXO-with-domain-fields methods unchanged (those DTOs are domain-enriched and are not being eliminated)
   - _Requirements: 3.1, 5.1, 5.2, 5.4_
 
-- [ ] 6.2 Update BTC use cases to import from pkg instead of application DTO package
+- [x] 6.2 Update BTC use cases to import from pkg instead of application DTO package
   - For each BTC use case file that imports address info, network info, transaction result, or other eliminated DTOs, replace the import with the corresponding type from the BTC RPC package
   - Where a use case needs to access a field of what was previously a DTO, confirm the pkg type exposes the same field under the same idiomatic name
   - For the `UnspentOutput` type (domain-enriched, contains account type), create an application-layer converter function that maps the RPC unspent list result plus domain account type into the retained domain type
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 6.3 Remove obsolete BTC mapper functions and DTO type definitions
+- [x] 6.3 Remove obsolete BTC mapper functions and DTO type definitions
   - Delete all mapper functions in the BTC infrastructure layer that previously converted RPC response structs to DTOs for the pure-wire cases now handled by the pkg types
   - Delete the corresponding DTO type definitions from the application DTO package for types that have been fully replaced by pkg types
   - Confirm that the remaining DTO types (PSBT-related, `UnspentOutput`, `PreviousTx`) are intact and still referenced correctly
   - _Requirements: 3.2, 3.3_
 
-- [ ] 6.4 Regenerate BTC mocks and verify BTC tests
+- [x] 6.4 Regenerate BTC mocks and verify BTC tests
   - Run mock generation for all BTC port interfaces affected by signature changes
   - Run the BTC and BCH test suites and confirm all tests pass
   - _Requirements: 8.4, 8.5_

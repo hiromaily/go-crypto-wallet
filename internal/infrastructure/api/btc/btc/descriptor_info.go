@@ -6,7 +6,6 @@ package btc
 import (
 	"fmt"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
@@ -21,13 +20,13 @@ import (
 //   - Check if the descriptor is solvable
 //
 // Returns the descriptor with checksum and analysis results.
-func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error) {
+func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*btcrpc.DescriptorInfo, error) {
 	result, err := btcrpc.GetDescriptorInfo(b.Client, descriptor)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetDescriptorInfo(): %w", err)
 	}
 
-	return ToDescriptorInfoFromPkg(result), nil
+	return result, nil
 }
 
 // ListDescriptors calls Bitcoin Core's listdescriptors RPC to list all imported descriptors.
@@ -42,11 +41,11 @@ func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, 
 //     For watch-only wallets, this must be false.
 //
 // Returns the list of descriptors with their metadata.
-func (b *Bitcoin) ListDescriptors(privateDescriptors bool) (*dtobtc.ListDescriptorsResult, error) {
+func (b *Bitcoin) ListDescriptors(privateDescriptors bool) (*btcrpc.ListDescriptorsResult, error) {
 	result, err := btcrpc.ListDescriptors(b.Client, privateDescriptors)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ListDescriptors(): %w", err)
 	}
 
-	return ToListDescriptorsResultFromPkg(result), nil
+	return result, nil
 }

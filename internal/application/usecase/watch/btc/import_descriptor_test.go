@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -20,6 +19,7 @@ import (
 	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 const (
@@ -48,7 +48,7 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 	btcClient := btcmocks.NewMockBitcoiner(t)
 	// Mock GetDescriptorInfo to return descriptor with checksum
 	btcClient.On("GetDescriptorInfo", mock.Anything).
-		Return(&dtobtc.DescriptorInfo{
+		Return(&btcrpc.DescriptorInfo{
 			Descriptor:     desc + "#abcd1234",
 			Checksum:       "abcd1234",
 			IsRange:        true,
@@ -56,10 +56,10 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 			HasPrivateKeys: false,
 		}, nil).
 		Once()
-	btcClient.On("ImportDescriptors", mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+	btcClient.On("ImportDescriptors", mock.MatchedBy(func(reqs []btcrpc.ImportDescriptorsRequest) bool {
 		return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
 	})).
-		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Return([]btcrpc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
 	// Mock SetLabel for each address (2 addresses)
 	btcClient.On("SetLabel", mock.AnythingOfType("string"), "deposit").
@@ -67,9 +67,9 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 		Times(2)
 	// Mock GetAddressInfo for label verification (2 addresses)
 	btcClient.On("GetAddressInfo", mock.AnythingOfType("string")).
-		Return(&dtobtc.AddressInfo{
+		Return(&btcrpc.GetAddressInfoResult{
 			Address: "mock-address",
-			Labels:  []string{"deposit"},
+			Labels:  btcrpc.FlexibleLabels{"deposit"},
 		}, nil).
 		Times(2)
 
@@ -158,7 +158,7 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 	btcClient := btcmocks.NewMockBitcoiner(t)
 	// Mock GetDescriptorInfo to return descriptor with checksum
 	btcClient.On("GetDescriptorInfo", mock.Anything).
-		Return(&dtobtc.DescriptorInfo{
+		Return(&btcrpc.DescriptorInfo{
 			Descriptor:     desc + "#abcd1234",
 			Checksum:       "abcd1234",
 			IsRange:        true,
@@ -166,10 +166,10 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 			HasPrivateKeys: false,
 		}, nil).
 		Once()
-	btcClient.On("ImportDescriptors", mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+	btcClient.On("ImportDescriptors", mock.MatchedBy(func(reqs []btcrpc.ImportDescriptorsRequest) bool {
 		return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
 	})).
-		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Return([]btcrpc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
 	// Mock SetLabel for each address (1 address)
 	btcClient.On("SetLabel", mock.AnythingOfType("string"), "deposit").
@@ -177,9 +177,9 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 		Once()
 	// Mock GetAddressInfo for label verification (1 address)
 	btcClient.On("GetAddressInfo", mock.AnythingOfType("string")).
-		Return(&dtobtc.AddressInfo{
+		Return(&btcrpc.GetAddressInfoResult{
 			Address: "mock-address",
-			Labels:  []string{"deposit"},
+			Labels:  btcrpc.FlexibleLabels{"deposit"},
 		}, nil).
 		Once()
 
