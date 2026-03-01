@@ -18,8 +18,8 @@ import (
 
 // Bitcoin includes client to call Json-RPC
 type Bitcoin struct {
+	pkgrpc            btcrpc.BTCRPC
 	Client            *rpcclient.Client
-	RPC               *btcrpc.Client
 	chainConf         *chaincfg.Params
 	coinTypeCode      domainCoin.CoinTypeCode // btc
 	version           BTCVersion              // 179900
@@ -40,14 +40,14 @@ func NewBitcoin(
 	coinTypeCode domainCoin.CoinTypeCode,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
+		pkgrpc: btcrpc.New(client),
 		Client: client,
-		RPC:    btcrpc.New(client),
 	}
 
 	bit.coinTypeCode = coinTypeCode
 
 	// check network consistency between config and bitcoind
-	blockInfo, err := bit.GetBlockchainInfo()
+	blockInfo, err := bit.pkgrpc.GetBlockchainInfo()
 	if err != nil {
 		return nil, fmt.Errorf("fail to call bit.GetBlockchainInfo(): %w", err)
 	}
@@ -86,7 +86,7 @@ func NewBitcoin(
 	}
 
 	// set bitcoin version
-	netInfo, err := bit.GetNetworkInfo()
+	netInfo, err := bit.pkgrpc.GetNetworkInfo()
 	if err != nil {
 		return nil, fmt.Errorf("fail to call bit.GetNetworkInfo(): %w", err)
 	}
@@ -151,4 +151,9 @@ func (b *Bitcoin) Version() domainBTC.Version {
 // CoinTypeCode returns CoinTypeCode
 func (b *Bitcoin) CoinTypeCode() domainCoin.CoinTypeCode {
 	return b.coinTypeCode
+}
+
+// GetPkgRPC returns the underlying btcrpc.BTCRPC client for direct RPC access
+func (b *Bitcoin) GetPkgRPC() btcrpc.BTCRPC {
+	return b.pkgrpc
 }

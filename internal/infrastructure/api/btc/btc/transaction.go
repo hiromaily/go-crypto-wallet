@@ -176,9 +176,14 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 	return &result, nil
 }
 
+// DecodeRawTransaction decodes a serialized transaction hex string back into a JSON object
+func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcrpc.TxRawResult, error) {
+	return b.pkgrpc.DecodeRawTransaction(hexTx)
+}
+
 // GetTransactionByTxID get transaction result by txID
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcrpc.GetTransactionResult, error) {
-	result, err := b.RPC.GetTransaction(txID)
+	result, err := b.pkgrpc.GetTransaction(txID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetTransaction(%s): %w", txID, err)
 	}
@@ -217,16 +222,6 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	//	}
 	//	Coinbase bool = false
 	//}
-}
-
-// DecodeRawTransaction returns information about a transaction given its serialized byte
-func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcrpc.TxRawResult, error) {
-	result, err := b.RPC.DecodeRawTransaction(hexTx)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call btcrpc.DecodeRawTransaction(): %w", err)
-	}
-
-	return result, nil
 }
 
 // GetRawTransactionByHex get tx from hex string
@@ -291,7 +286,7 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 
 	// Set fee rate if not specified
 	if opts.FeeRate == 0 {
-		feePerKb, err := b.EstimateSmartFee()
+		feePerKb, err := b.pkgrpc.EstimateSmartFee(int(b.confirmationBlock))
 		if err != nil {
 			return nil, fmt.Errorf("fail to call btc.EstimateSmartFee(): %w", err)
 		}
@@ -305,7 +300,7 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 		IncludeUnsafe: opts.IncludeUnsafe,
 	}
 
-	result, err := b.RPC.FundRawTransaction(hexTx, pkgOpts)
+	result, err := b.pkgrpc.FundRawTransaction(hexTx, pkgOpts)
 	if err != nil {
 		// error: -4: Insufficient funds
 		return nil, fmt.Errorf("fail to call btcrpc.FundRawTransaction(): %w", err)
@@ -416,7 +411,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx
 		return nil, false, err
 	}
 
-	pkgResult, err := b.RPC.SignRawTransactionWithWallet(hexTx, pkgPrevTxs)
+	pkgResult, err := b.pkgrpc.SignRawTransactionWithWallet(hexTx, pkgPrevTxs)
 	if err != nil {
 		return nil, false, fmt.Errorf("fail to call btcrpc.SignRawTransactionWithWallet(): %w", err)
 	}
@@ -446,7 +441,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 		return nil, false, err
 	}
 
-	pkgResult, err := b.RPC.SignRawTransactionWithKey(hexTx, privKeysWIF, pkgPrevTxs)
+	pkgResult, err := b.pkgrpc.SignRawTransactionWithKey(hexTx, privKeysWIF, pkgPrevTxs)
 	if err != nil {
 		return nil, false, fmt.Errorf("fail to call btcrpc.SignRawTransactionWithKey(): %w", err)
 	}

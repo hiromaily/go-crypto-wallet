@@ -8,7 +8,7 @@ import (
 
 func runEstimateFee(btc apibtc.WatchAPIClient) error {
 	// estimate fee
-	feePerKb, err := btc.EstimateSmartFee()
+	feePerKb, err := btc.GetPkgRPC().EstimateSmartFee(int(btc.ConfirmationBlock()))
 	if err != nil {
 		return fmt.Errorf("fail to call BTC.EstimateSmartFee() %w", err)
 	}

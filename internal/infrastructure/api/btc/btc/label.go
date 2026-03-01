@@ -13,7 +13,7 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 		return fmt.Errorf("fail to call btc.DecodeAddress(%s): %w", addr, err)
 	}
 
-	if err := b.RPC.SetLabel(addr, label); err != nil {
+	if err := b.pkgrpc.SetLabel(addr, label); err != nil {
 		return fmt.Errorf("fail to call btcrpc.SetLabel(): %w", err)
 	}
 

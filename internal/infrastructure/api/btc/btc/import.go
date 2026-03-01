@@ -67,7 +67,7 @@ func (b *Bitcoin) ImportAddressWithoutReScan(pubkey string) error {
 // Note: This is a legacy wallet method. For descriptor wallets (Bitcoin Core v23.0+),
 // consider using importdescriptors instead for better functionality and future compatibility.
 func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) error {
-	if err := b.RPC.ImportAddress(address, label, rescan); err != nil {
+	if err := b.pkgrpc.ImportAddress(address, label, rescan); err != nil {
 		return fmt.Errorf("fail to call btcrpc.ImportAddress(): %w", err)
 	}
 
@@ -101,7 +101,7 @@ func (b *Bitcoin) ImportDescriptors(
 		return nil, errors.New("no descriptors to import")
 	}
 
-	responses, err := b.RPC.ImportDescriptors(requests)
+	responses, err := b.pkgrpc.ImportDescriptors(requests)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ImportDescriptors(): %w", err)
 	}
@@ -141,7 +141,7 @@ func (b *Bitcoin) ImportMulti(
 		return nil, errors.New("no addresses to import")
 	}
 
-	responses, err := b.RPC.ImportMulti(requests, options)
+	responses, err := b.pkgrpc.ImportMulti(requests, options)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ImportMulti(): %w", err)
 	}

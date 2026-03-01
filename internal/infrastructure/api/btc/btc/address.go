@@ -9,16 +9,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
-func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
-	result, err := b.RPC.GetAddressInfo(addr)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call btcrpc.GetAddressInfo(%s): %w", addr, err)
-	}
-
-	return result, nil
-}
-
 // GetAddressesByLabel returns addresses of account(label)
 // Note: even if client has 5 addresses, it returns 15 addresses
 //
@@ -28,7 +18,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, err
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	logger.Debug("getting addresses by label", "label", labelName)
 
-	labels, err := b.RPC.GetAddressesByLabel(labelName)
+	labels, err := b.pkgrpc.GetAddressesByLabel(labelName)
 	if err != nil {
 		logger.Debug("getaddressesbylabel RPC failed", "label", labelName, "error", err)
 		return nil, fmt.Errorf("fail to call btcrpc.GetAddressesByLabel(%s): %w", labelName, err)
@@ -69,7 +59,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 
 // ValidateAddress validate address
 func (b *Bitcoin) ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error) {
-	result, err := b.RPC.ValidateAddress(addr)
+	result, err := b.pkgrpc.ValidateAddress(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ValidateAddress(%s): %w", addr, err)
 	}
@@ -78,6 +68,11 @@ func (b *Bitcoin) ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, e
 	}
 
 	return result, nil
+}
+
+// GetAddressInfo returns information about the given bitcoin address
+func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
+	return b.pkgrpc.GetAddressInfo(addr)
 }
 
 // DecodeAddress decode string address to type Address

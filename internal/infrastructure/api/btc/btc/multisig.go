@@ -40,7 +40,7 @@ func (b *Bitcoin) AddMultisigAddress(
 		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	}
 
-	result, err := b.RPC.AddMultisigAddress(requiredSigs, addresses, accountName, addrTypeStr)
+	result, err := b.pkgrpc.AddMultisigAddress(requiredSigs, addresses, accountName, addrTypeStr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.AddMultisigAddress(): %w", err)
 	}

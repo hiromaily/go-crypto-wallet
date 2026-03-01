@@ -8,7 +8,7 @@ import (
 // `getaccount` should be called because getaccount RPC is gone from version 0.18
 func (b *Bitcoin) GetAccount(addr string) (string, error) {
 	// actually `getaddressinfo` is called
-	res, err := b.GetAddressInfo(addr)
+	res, err := b.pkgrpc.GetAddressInfo(addr)
 	if err != nil {
 		return "", fmt.Errorf("fail to call btc.GetAddressInfo(): %w", err)
 	}

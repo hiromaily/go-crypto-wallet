@@ -13,18 +13,9 @@ import (
 // Making Sense of Bitcoin Transaction Fees
 // https://bitzuma.com/posts/making-sense-of-bitcoin-transaction-fees/
 
-// EstimateSmartFee calls RPC `estimatesmartfee` and returns BTC/kB(float64)
-func (b *Bitcoin) EstimateSmartFee() (float64, error) {
-	feeRate, err := b.RPC.EstimateSmartFee(int(b.confirmationBlock))
-	if err != nil {
-		return 0, fmt.Errorf("fail to call btcrpc.EstimateSmartFee(): %w", err)
-	}
-	return feeRate, nil
-}
-
 // GetTransactionFee calculate fee from transaction size
 func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
-	feePerKB, err := b.EstimateSmartFee()
+	feePerKB, err := b.pkgrpc.EstimateSmartFee(int(b.confirmationBlock))
 	if err != nil {
 		return 0, fmt.Errorf("fail to call btc.EstimateSmartFee(): %w", err)
 	}

@@ -13,7 +13,7 @@ import (
 //   - wallet does not have the "avoid reuse" feature enabled
 //   - `bitcoin-cli getbalance "*" 6 true true`
 func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
-	amount, err := b.RPC.GetBalance(int(b.confirmationBlock))
+	amount, err := b.pkgrpc.GetBalance(int(b.confirmationBlock))
 	if err != nil {
 		return 0, fmt.Errorf("fail to call btcrpc.GetBalance(): %w", err)
 	}
