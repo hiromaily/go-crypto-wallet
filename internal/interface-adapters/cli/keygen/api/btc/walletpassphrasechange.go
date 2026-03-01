@@ -20,7 +20,7 @@ func runWalletPassphraseChange(btc apibtc.PKGRPCProvider, old, newPass string) e
 
 	err := btc.GetPkgRPC().WalletPassphraseChange(old, newPass)
 	if err != nil {
-		return fmt.Errorf("fail to call btc.WalletPassphraseChange() %w", err)
+		return fmt.Errorf("fail to call btc.GetPkgRPC().WalletPassphraseChange(): %w", err)
 	}
 
 	fmt.Println("wallet passphrase was changed!")

@@ -11,7 +11,7 @@ func runWalletLock(btc apibtc.PKGRPCProvider) error {
 
 	err := btc.GetPkgRPC().WalletLock()
 	if err != nil {
-		return fmt.Errorf("fail to call WalletLock() %w", err)
+		return fmt.Errorf("fail to call btc.GetPkgRPC().WalletLock(): %w", err)
 	}
 
 	fmt.Println("wallet is locked!")

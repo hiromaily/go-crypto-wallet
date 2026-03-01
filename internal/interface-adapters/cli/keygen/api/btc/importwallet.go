@@ -17,7 +17,7 @@ func runImportWallet(btc apibtc.PKGRPCProvider, fileName string) error {
 
 	err := btc.GetPkgRPC().ImportWallet(fileName)
 	if err != nil {
-		return fmt.Errorf("fail to call btc.ImportWallet() %w", err)
+		return fmt.Errorf("fail to call btc.GetPkgRPC().ImportWallet(): %w", err)
 	}
 
 	fmt.Println("wallet file is imported!")

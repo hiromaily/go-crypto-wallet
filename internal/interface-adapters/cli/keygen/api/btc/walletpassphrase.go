@@ -17,7 +17,7 @@ func runWalletPassphrase(btc apibtc.PKGRPCProvider, passphrase string) error {
 
 	err := btc.GetPkgRPC().WalletPassphrase(passphrase, 10)
 	if err != nil {
-		return fmt.Errorf("fail to call btc.WalletPassphrase() %w", err)
+		return fmt.Errorf("fail to call btc.GetPkgRPC().WalletPassphrase(): %w", err)
 	}
 
 	fmt.Println("wallet encryption is unlocked for 10s!")

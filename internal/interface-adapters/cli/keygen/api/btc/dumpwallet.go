@@ -17,7 +17,7 @@ func runDumpWallet(btc apibtc.PKGRPCProvider, fileName string) error {
 
 	err := btc.GetPkgRPC().DumpWallet(fileName)
 	if err != nil {
-		return fmt.Errorf("fail to call btc.DumpWallet() %w", err)
+		return fmt.Errorf("fail to call btc.GetPkgRPC().DumpWallet(): %w", err)
 	}
 
 	fmt.Println("wallet file is dumped!")

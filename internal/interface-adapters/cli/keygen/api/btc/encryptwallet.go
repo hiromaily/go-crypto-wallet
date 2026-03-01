@@ -17,7 +17,7 @@ func runEncryptWallet(btc apibtc.PKGRPCProvider, passphrase string) error {
 
 	err := btc.GetPkgRPC().EncryptWallet(passphrase)
 	if err != nil {
-		return fmt.Errorf("fail to call btc.EncryptWallet() %w", err)
+		return fmt.Errorf("fail to call btc.GetPkgRPC().EncryptWallet(): %w", err)
 	}
 
 	fmt.Println("wallet is encrypted!")

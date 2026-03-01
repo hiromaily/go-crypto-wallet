@@ -143,7 +143,7 @@ func (c *Client) dumpImportWallet(fileName, method string) error {
 	}
 	var result walletResult
 	if err := json.Unmarshal(rawResult, &result); err != nil {
-		return fmt.Errorf("fail to call json.Unmarshal(%s): %w", method, err)
+		return fmt.Errorf("fail to call json.Unmarshal for %s response: %w", method, err)
 	}
 	return nil
 }
