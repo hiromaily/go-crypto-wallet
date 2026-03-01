@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GetAccountInfo calls GetAccountInfo API
-func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseGetAccountInfo, error) {
+func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*xrpclient.AccountInfo, error) {
 	// validation
 	if address == "" {
 		return nil, errors.New("address is empty")

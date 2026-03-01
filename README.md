@@ -6,7 +6,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
 [![Test](https://github.com/hiromaily/go-crypto-wallet/actions/workflows/lint-test.yml/badge.svg)](https://github.com/hiromaily/go-crypto-wallet/actions/workflows/lint-test.yml)
-[![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
+[![GitHub release](https://img.shields.io/badge/release-v6.2.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Wallet functionalities to create raw transaction, to sign on unsigned transaction,
@@ -18,7 +18,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 - Bitcoin Cash
 - Ethereum
 - ERC-20 Token
-- Ripple
+- XRP Ledger (Ripple)
 
 ## Requirements
 
@@ -27,7 +27,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 | Tool | Version | Description |
 |------|---------|-------------|
 | Go | 1.25.6 | Programming language |
-| Atlas | 1.0.0 | Database schema migration |
+| Atlas | 1.1.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
 | Docker Compose | latest | Container orchestration |

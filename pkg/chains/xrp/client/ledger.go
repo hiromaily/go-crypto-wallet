@@ -1,4 +1,4 @@
-package xrplgo
+package client
 
 import (
 	"context"

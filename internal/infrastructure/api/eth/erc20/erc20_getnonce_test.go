@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
+	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
 // nonceStub is a minimal apieth.ERC20NodeAPI test double for nonce tests.
@@ -28,7 +29,7 @@ func (*nonceStub) SuggestGasTipCap(_ context.Context) (*big.Int, error) {
 	panic("unexpected call")
 }
 func (*nonceStub) BlockNumber(_ context.Context) (*big.Int, error) { panic("unexpected call") }
-func (*nonceStub) GetBlockByNumber(_ context.Context, _ uint64) (*domainETH.BlockInfo, error) {
+func (*nonceStub) GetBlockByNumber(_ context.Context, _ uint64) (*ethrpc.BlockInfo, error) {
 	panic("unexpected call")
 }
 

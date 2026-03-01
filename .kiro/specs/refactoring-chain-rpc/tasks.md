@@ -169,25 +169,25 @@
   - Run the BTC and BCH test suites and confirm all tests pass
   - _Requirements: 8.4, 8.5_
 
-- [ ] 7. Phase 2 - Eliminate pure-wire XRP DTOs and update port interface signatures
-- [ ] 7.1 Update XRP port interface method signatures for pure-wire DTOs
+- [x] 7. Phase 2 - Eliminate pure-wire XRP DTOs and update port interface signatures
+- [x] 7.1 Update XRP port interface method signatures for pure-wire DTOs
   - For each XRP port interface method that returns a pure-wire DTO (account info, account channels, server info, validation create response, wallet propose response), update the return type to reference the corresponding type now in the XRP RPC package
   - Preserve all XRP interface names (`XRPer`, `XRPAdminer`, `XRPPublicer`, etc.) and all method names
   - Leave methods returning XRP transaction input types unchanged (those are orchestration-level types, not pure wire)
   - _Requirements: 3.1, 5.1, 5.2, 5.4_
 
-- [ ] 7.2 Update XRP adapter and use cases, remove obsolete XRP converter functions
+- [x] 7.2 Update XRP adapter and use cases, remove obsolete XRP converter functions
   - Update the XRP infrastructure adapter so that the affected methods return the pkg type directly without conversion
   - Update XRP use case files that import the eliminated XRP DTO types to import from the XRP RPC package instead
   - Remove the converter functions in the XRP infrastructure layer that converted WebSocket response types into eliminated application DTOs
   - _Requirements: 3.2, 3.3, 4.1, 4.2, 4.4_
 
-- [ ] 7.3 Regenerate XRP mocks and verify XRP tests
+- [x] 7.3 Regenerate XRP mocks and verify XRP tests
   - Run mock generation for all XRP port interfaces affected by signature changes
   - Run the XRP test suite and confirm all tests pass
   - _Requirements: 8.4, 8.5_
 
-- [ ] 7.4 Move XRP xrplgo client wrapper to pkg/chains/xrp/client/
+- [x] 7.4 Move XRP xrplgo client wrapper to pkg/chains/xrp/client/
   - Move `internal/infrastructure/api/xrp/xrplgo/` (`client.go`, `account.go`, `transaction.go`, `ledger.go`) to `pkg/chains/xrp/client/`
   - At this point `account.go` and `transaction.go` no longer import `internal/application/dto/xrp` (those DTO types were eliminated in task 7.2), so the move is clean
   - Update the package declaration from `xrplgo` to `client`
@@ -196,14 +196,14 @@
   - Confirm the project builds with zero compilation errors after the move
   - _Requirements: 1.4, 1.5, 7.3, 8.1_
 
-- [ ] 8. Final integration validation and cleanup
-- [ ] 8.1 Remove any remaining obsolete infrastructure type definitions and empty DTO packages
+- [x] 8. Final integration validation and cleanup
+- [x] 8.1 Remove any remaining obsolete infrastructure type definitions and empty DTO packages
   - Remove RPC response struct definitions that were previously defined inline in infrastructure files and have now been fully replaced by types in the pkg packages
   - Remove or consolidate any DTO package files that are now empty or contain only domain-enriched types that have been moved elsewhere
   - Confirm no infrastructure file imports from `pkg/chains/*/rpc/` is duplicating a type that already lives in pkg
   - _Requirements: 2.4, 3.3_
 
-- [ ] 8.2 Full project build and test verification
+- [x] 8.2 Full project build and test verification
   - Build the complete project and confirm zero compilation errors
   - Run the full test suite across all chains and confirm all tests that passed before the refactoring still pass
   - Confirm that use case files contain no imports from `internal/infrastructure/api/` (the architectural boundary rule is now structurally enforced)

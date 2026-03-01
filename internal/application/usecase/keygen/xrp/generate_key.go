@@ -63,20 +63,20 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		if err != nil {
 			return fmt.Errorf("fail to call xrp.WalletPropose(): %w", err)
 		}
-		if generatedKey.Warning != "" {
-			return fmt.Errorf("fail to call xrp.WalletPropose(): %s", generatedKey.Warning)
+		if generatedKey.Error != "" {
+			return fmt.Errorf("fail to call xrp.WalletPropose(): %s", generatedKey.Error)
 		}
 
 		// TODO: passphrase or related ID should be stored in table??
 		xrpKey, err := domainXRP.NewXRPAccountKey(
 			u.coinTypeCode,
 			input.AccountType,
-			generatedKey.AccountID,
-			domainXRP.ParseXRPKeyType(generatedKey.KeyType),
-			generatedKey.MasterSeed,
-			generatedKey.MasterSeedHex,
-			generatedKey.PublicKey,
-			generatedKey.PublicKeyHex,
+			generatedKey.Result.AccountID,
+			domainXRP.ParseXRPKeyType(generatedKey.Result.KeyType),
+			generatedKey.Result.MasterSeed,
+			generatedKey.Result.MasterSeedHex,
+			generatedKey.Result.PublicKey,
+			generatedKey.Result.PublicKeyHex,
 			input.IsKeyPair,
 			0,
 		)
@@ -85,8 +85,8 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		}
 
 		// Set deprecated MasterKey field if present
-		if generatedKey.MasterKey != "" {
-			xrpKey.MasterKey = generatedKey.MasterKey
+		if generatedKey.Result.MasterKey != "" {
+			xrpKey.MasterKey = generatedKey.Result.MasterKey
 		}
 
 		items = append(items, xrpKey)

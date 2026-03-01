@@ -1,28 +1,15 @@
-package xrplgo
+package client
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // Ensure mockLogger satisfies logger.Logger at compile time.
 var _ logger.Logger = (*mockLogger)(nil)
-
-// TestClientImplementsInterfaces verifies that Client implements the required interfaces.
-func TestClientImplementsInterfaces(t *testing.T) {
-	t.Parallel()
-
-	// This test verifies at compile time that Client implements the required interfaces.
-	// If the interfaces are not implemented, this test will fail to compile.
-	var _ apixrp.AccountInfoProvider = (*Client)(nil)
-	var _ apixrp.TransactionSubmitter = (*Client)(nil)
-	var _ apixrp.BalanceChecker = (*Client)(nil)
-	var _ apixrp.Closer = (*Client)(nil)
-}
 
 func TestNewClient(t *testing.T) {
 	t.Parallel()

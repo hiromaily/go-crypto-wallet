@@ -43,24 +43,16 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(ctx context.Context, tx *types.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
 func (e *Ethereum) GetTransactionByHash(
 	ctx context.Context, hashTx string,
-) (*domainETH.ResponseGetTransaction, error) {
-	result, err := ethrpc.GetTransactionByHash(ctx, e.rpcClient, hashTx)
-	if err != nil {
-		return nil, err
-	}
-	return ToDomainResponseGetTransactionFromPkg(result), nil
+) (*ethrpc.ResponseGetTransaction, error) {
+	return ethrpc.GetTransactionByHash(ctx, e.rpcClient, hashTx)
 }
 
 // GetTransactionReceipt returns the receipt of a transaction by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
 func (e *Ethereum) GetTransactionReceipt(
 	ctx context.Context, hashTx string,
-) (*domainETH.ResponseGetTransactionReceipt, error) {
-	result, err := ethrpc.GetTransactionReceipt(ctx, e.rpcClient, hashTx)
-	if err != nil {
-		return nil, err
-	}
-	return ToDomainResponseGetTransactionReceiptFromPkg(result), nil
+) (*ethrpc.ResponseGetTransactionReceipt, error) {
+	return ethrpc.GetTransactionReceipt(ctx, e.rpcClient, hashTx)
 }
 
 // GetTxReceipt retrieves a transaction receipt and converts it to the clean domain type.

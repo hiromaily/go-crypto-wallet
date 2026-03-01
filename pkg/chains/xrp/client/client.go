@@ -1,6 +1,4 @@
-// Package xrplgo provides a wrapper around the xrpl-go library for direct XRPL node communication.
-// This package implements the small interfaces defined in application/ports/api/xrp.
-package xrplgo
+package client
 
 import (
 	"context"

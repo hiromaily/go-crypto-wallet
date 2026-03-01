@@ -1,12 +1,10 @@
-package xrplgo
+package client
 
 import (
 	"context"
 	"fmt"
 
 	xrpl "github.com/xrpscan/xrpl-go"
-
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 )
 
 // submitResponse represents the response from submit command.
@@ -95,7 +93,7 @@ func parseAmount(amount any) amountInfo {
 
 // SubmitTransaction submits a signed transaction to the XRPL network.
 // Implements TransactionSubmitter interface.
-func (c *Client) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error) {
+func (c *Client) SubmitTransaction(ctx context.Context, signedTx string) (*SentTx, uint64, error) {
 	req := xrpl.BaseRequest{
 		"command": "submit",
 		"tx_blob": signedTx,
@@ -117,14 +115,14 @@ func (c *Client) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxr
 		amountStr = strAmount
 	}
 
-	sentTx := &dtoxrp.SentTx{
+	sentTx := &SentTx{
 		ResultCode:          result.EngineResult,
 		ResultMessage:       result.EngineResultMessage,
 		EngineResult:        result.EngineResult,
 		EngineResultCode:    result.EngineResultCode,
 		EngineResultMessage: result.EngineResultMessage,
 		TxBlob:              result.TxBlob,
-		TxJSON: dtoxrp.TxInput{
+		TxJSON: TxInput{
 			TransactionType:    result.TxJSON.TransactionType,
 			Account:            result.TxJSON.Account,
 			Amount:             amountStr,
@@ -145,7 +143,7 @@ func (c *Client) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxr
 
 // GetTransaction retrieves transaction information from the XRPL.
 // Implements TransactionSubmitter.GetTransaction.
-func (c *Client) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoxrp.TxInfo, error) {
+func (c *Client) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*TxInfo, error) {
 	req := xrpl.BaseRequest{
 		"command":     "tx",
 		"transaction": txID,
@@ -176,29 +174,29 @@ func (c *Client) GetTransaction(ctx context.Context, txID string, targetLedgerVe
 	sourceAmount := parseAmount(result.Amount)
 	deliveredAmount := parseAmount(result.Meta.DeliveredAmount)
 
-	txInfo := &dtoxrp.TxInfo{
+	txInfo := &TxInfo{
 		Type:     result.TransactionType,
 		Address:  result.Account,
 		Sequence: int(result.Sequence),
 		ID:       result.Hash,
-		Specification: dtoxrp.TxSpecification{
-			Source: dtoxrp.TxSpecSource{
+		Specification: TxSpecification{
+			Source: TxSpecSource{
 				Address: result.Account,
-				MaxAmount: dtoxrp.TxAmount{
+				MaxAmount: TxAmount{
 					Currency: sourceAmount.Currency,
 					Value:    sourceAmount.Value,
 				},
 			},
-			Destination: dtoxrp.TxSpecDestination{
+			Destination: TxSpecDestination{
 				Address: result.Destination,
 			},
 		},
-		Outcome: dtoxrp.TxOutcome{
+		Outcome: TxOutcome{
 			Result:        result.Meta.TransactionResult,
 			Fee:           dropsToXRP(result.Fee),
 			LedgerVersion: result.LedgerIndex,
 			IndexInLedger: result.Meta.TransactionIndex,
-			DeliveredAmount: dtoxrp.TxAmount{
+			DeliveredAmount: TxAmount{
 				Currency: deliveredAmount.Currency,
 				Value:    deliveredAmount.Value,
 			},

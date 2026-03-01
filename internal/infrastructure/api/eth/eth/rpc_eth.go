@@ -11,12 +11,8 @@ import (
 // Syncing returns sync status or bool
 //   - return false if not syncing (it means syncing is done)
 //   - there seems 2 different responses
-func (e *Ethereum) Syncing(ctx context.Context) (*domainETH.ResponseSyncing, bool, error) {
-	res, isSyncing, err := ethrpc.Syncing(ctx, e.rpcClient)
-	if err != nil {
-		return nil, false, err
-	}
-	return ToDomainResponseSyncingFromPkg(res), isSyncing, nil
+func (e *Ethereum) Syncing(ctx context.Context) (*ethrpc.ResponseSyncing, bool, error) {
+	return ethrpc.Syncing(ctx, e.rpcClient)
 }
 
 // ProtocolVersion returns the current ethereum protocol version
@@ -78,10 +74,6 @@ func (e *Ethereum) GetUncleCountByBlockNumber(ctx context.Context, blockNumber u
 
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
-func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainETH.BlockInfo, error) {
-	result, err := ethrpc.GetBlockByNumber(ctx, e.rpcClient, blockNumber)
-	if err != nil {
-		return nil, err
-	}
-	return ToDomainBlockInfoFromPkg(result), nil
+func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*ethrpc.BlockInfo, error) {
+	return ethrpc.GetBlockByNumber(ctx, e.rpcClient, blockNumber)
 }

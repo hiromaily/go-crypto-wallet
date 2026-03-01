@@ -1,4 +1,4 @@
-package xrplgo
+package client
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	xrpl "github.com/xrpscan/xrpl-go"
 
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -32,7 +31,7 @@ type accountInfoResponse struct {
 
 // GetAccountInfo retrieves account information from the XRPL.
 // Implements AccountInfoProvider interface.
-func (c *Client) GetAccountInfo(ctx context.Context, address string) (*dtoxrp.ResponseGetAccountInfo, error) {
+func (c *Client) GetAccountInfo(ctx context.Context, address string) (*AccountInfo, error) {
 	req := xrpl.BaseRequest{
 		"command":      "account_info",
 		"account":      address,
@@ -49,7 +48,7 @@ func (c *Client) GetAccountInfo(ctx context.Context, address string) (*dtoxrp.Re
 		return nil, fmt.Errorf("failed to parse account info response: %w", err)
 	}
 
-	return &dtoxrp.ResponseGetAccountInfo{
+	return &AccountInfo{
 		Sequence:                       result.AccountData.Sequence,
 		XrpBalance:                     dropsToXRP(result.AccountData.Balance),
 		OwnerCount:                     result.AccountData.OwnerCount,

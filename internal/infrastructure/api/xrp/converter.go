@@ -1,12 +1,9 @@
 package xrp
 
 import (
-	"fmt"
-	"strconv"
-
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
-	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
 )
 
 // ToInfraInstructions converts DTO Instructions to infrastructure Instructions.
@@ -79,98 +76,6 @@ func ToDTOTxInput(infra *TxInput) *dtoxrp.TxInput {
 	}
 }
 
-// ToDTOSentTx converts infrastructure SentTx to DTO SentTx.
-func ToDTOSentTx(infra *SentTx) *dtoxrp.SentTx {
-	if infra == nil {
-		return nil
-	}
-	return &dtoxrp.SentTx{
-		ResultCode:          infra.ResultCode,
-		ResultMessage:       infra.ResultMessage,
-		EngineResult:        infra.EngineResult,
-		EngineResultCode:    infra.EngineResultCode,
-		EngineResultMessage: infra.EngineResultMessage,
-		TxBlob:              infra.TxBlob,
-		TxJSON:              *ToDTOTxInput(&infra.TxJSON),
-	}
-}
-
-// ToDTOTxInfo converts infrastructure TxInfo to DTO TxInfo.
-func ToDTOTxInfo(infra *TxInfo) *dtoxrp.TxInfo {
-	if infra == nil {
-		return nil
-	}
-
-	// Convert balance changes
-	balanceChanges := make(map[string][]dtoxrp.TxAmount)
-	for key, amounts := range infra.Outcome.BalanceChanges {
-		dtoAmounts := make([]dtoxrp.TxAmount, len(amounts))
-		for i, amt := range amounts {
-			dtoAmounts[i] = dtoxrp.TxAmount{
-				Currency: amt.Currency,
-				Value:    amt.Value,
-			}
-		}
-		balanceChanges[key] = dtoAmounts
-	}
-
-	// Convert orderbook changes
-	orderbookChanges := make(map[string][]dtoxrp.TxOrderbookChange)
-	for key, changes := range infra.Outcome.OrderbookChanges {
-		dtoChanges := make([]dtoxrp.TxOrderbookChange, len(changes))
-		for i, change := range changes {
-			dtoChanges[i] = dtoxrp.TxOrderbookChange{
-				Direction: change.Direction,
-				Quantity: dtoxrp.TxAmount{
-					Currency: change.Quantity.Currency,
-					Value:    change.Quantity.Value,
-				},
-				TotalPrice: dtoxrp.TxTotalPrice{
-					Currency:     change.TotalPrice.Currency,
-					Counterparty: change.TotalPrice.Counterparty,
-					Value:        change.TotalPrice.Value,
-				},
-				Sequence:          change.Sequence,
-				Status:            change.Status,
-				MakerExchangeRate: change.MakerExchangeRate,
-			}
-		}
-		orderbookChanges[key] = dtoChanges
-	}
-
-	return &dtoxrp.TxInfo{
-		Type:     infra.Type,
-		Address:  infra.Address,
-		Sequence: infra.Sequence,
-		ID:       infra.ID,
-		Specification: dtoxrp.TxSpecification{
-			Source: dtoxrp.TxSpecSource{
-				Address: infra.Specification.Source.Address,
-				MaxAmount: dtoxrp.TxAmount{
-					Currency: infra.Specification.Source.MaxAmount.Currency,
-					Value:    infra.Specification.Source.MaxAmount.Value,
-				},
-			},
-			Destination: dtoxrp.TxSpecDestination{
-				Address: infra.Specification.Destination.Address,
-			},
-		},
-		Outcome: dtoxrp.TxOutcome{
-			Result:           infra.Outcome.Result,
-			Timestamp:        infra.Outcome.Timestamp.Format("2006-01-02T15:04:05Z"),
-			Fee:              infra.Outcome.Fee,
-			BalanceChanges:   balanceChanges,
-			OrderbookChanges: orderbookChanges,
-			LedgerVersion:    infra.Outcome.LedgerVersion,
-			IndexInLedger:    infra.Outcome.IndexInLedger,
-			DeliveredAmount: dtoxrp.TxAmount{
-				Currency: infra.Outcome.DeliveredAmount.Currency,
-				Value:    infra.Outcome.DeliveredAmount.Value,
-			},
-		},
-	}
-}
-
 // ToInfraXRPKeyType converts DTO XRPKeyType to infrastructure XRPKeyType.
 func ToInfraXRPKeyType(dto dtoxrp.XRPKeyType) XRPKeyType {
 	return XRPKeyType(dto)
@@ -181,12 +86,12 @@ func ToDTOXRPKeyType(infra XRPKeyType) dtoxrp.XRPKeyType {
 	return dtoxrp.XRPKeyType(infra)
 }
 
-// ToDTOResponseGetAccountInfo converts infrastructure ResponseGetAccountInfo to DTO.
-func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *dtoxrp.ResponseGetAccountInfo {
+// ToDTOResponseGetAccountInfo converts infrastructure ResponseGetAccountInfo to pkg client type.
+func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *xrpclient.AccountInfo {
 	if infra == nil {
 		return nil
 	}
-	return &dtoxrp.ResponseGetAccountInfo{
+	return &xrpclient.AccountInfo{
 		Sequence:                       infra.GetSequence(),
 		XrpBalance:                     infra.GetXrpBalance(),
 		OwnerCount:                     infra.GetOwnerCount(),
@@ -216,116 +121,6 @@ func ToDTOResponseGenerateXAddress(infra *protogen.ResponseGenerateXAddress) *dt
 	return &dtoxrp.ResponseGenerateXAddress{
 		XAddress: infra.GetXAddress(),
 		Secret:   infra.GetSecret(),
-	}
-}
-
-// ToDTOResponseAccountChannelsFromPkg converts pkg ResponseAccountChannels to DTO.
-func ToDTOResponseAccountChannelsFromPkg(pkg *xrprpc.ResponseAccountChannels) *dtoxrp.ResponseAccountChannels {
-	if pkg == nil {
-		return nil
-	}
-
-	channels := make([]dtoxrp.AccountChannel, len(pkg.Result.Channels))
-	for i, ch := range pkg.Result.Channels {
-		channels[i] = dtoxrp.AccountChannel{
-			ChannelID:      ch.ChannelID,
-			Account:        ch.Account,
-			Destination:    ch.DestinationAccount,
-			Amount:         ch.Amount,
-			Balance:        ch.Balance,
-			SettleDelay:    uint64(ch.SettleDelay),
-			PublicKey:      ch.PublicKey,
-			DestinationTag: uint32(ch.DestinationTag),
-			CancelAfter:    uint64(ch.CancelAfter),
-			Expiration:     uint64(ch.Expiration),
-		}
-	}
-
-	return &dtoxrp.ResponseAccountChannels{
-		Account:   pkg.Result.Account,
-		Channels:  channels,
-		Validated: pkg.Result.Validated,
-	}
-}
-
-// ToDTOResponseAccountInfoFromPkg converts pkg ResponseAccountInfo to DTO.
-func ToDTOResponseAccountInfoFromPkg(pkg *xrprpc.ResponseAccountInfo) *dtoxrp.ResponseAccountInfo {
-	if pkg == nil {
-		return nil
-	}
-	return &dtoxrp.ResponseAccountInfo{
-		Account:            pkg.Result.AccountData.Account,
-		Balance:            pkg.Result.AccountData.Balance,
-		Sequence:           uint64(pkg.Result.AccountData.Sequence),
-		OwnerCount:         uint64(pkg.Result.AccountData.OwnerCount),
-		Flags:              uint64(pkg.Result.AccountData.Flags),
-		LedgerCurrentIndex: uint64(pkg.Result.LedgerCurrentIndex),
-		Validated:          pkg.Result.Validated,
-	}
-}
-
-// ToDTOResponseServerInfoFromPkg converts pkg ResponseServerInfo to DTO.
-func ToDTOResponseServerInfoFromPkg(pkg *xrprpc.ResponseServerInfo) *dtoxrp.ResponseServerInfo {
-	if pkg == nil {
-		return nil
-	}
-	return &dtoxrp.ResponseServerInfo{
-		BuildVersion:    pkg.Result.Info.BuildVersion,
-		CompleteLedgers: pkg.Result.Info.CompleteLedgers,
-		HostID:          pkg.Result.Info.Hostid,
-		IOLatencyMS:     uint64(pkg.Result.Info.IoLatencyMs),
-		LastClose: dtoxrp.ServerLastClose{
-			ConvergeTimeS: pkg.Result.Info.LastClose.ConvergeTimeS,
-			Proposers:     uint64(pkg.Result.Info.LastClose.Proposers),
-		},
-		LoadFactor:  uint64(pkg.Result.Info.LoadFactor),
-		Peers:       uint64(pkg.Result.Info.Peers),
-		PubkeyNode:  pkg.Result.Info.PubkeyNode,
-		ServerState: pkg.Result.Info.ServerState,
-		ValidatedLedger: dtoxrp.ValidatedLedger{
-			Age:            uint64(pkg.Result.Info.ValidatedLedger.Age),
-			BaseFeeXRP:     fmt.Sprintf("%f", pkg.Result.Info.ValidatedLedger.BaseFeeXrp),
-			Hash:           pkg.Result.Info.ValidatedLedger.Hash,
-			ReserveBaseXRP: strconv.Itoa(pkg.Result.Info.ValidatedLedger.ReserveBaseXrp),
-			ReserveIncXRP:  strconv.Itoa(pkg.Result.Info.ValidatedLedger.ReserveIncXrp),
-			Seq:            uint64(pkg.Result.Info.ValidatedLedger.Seq),
-		},
-		ValidationQuorum: uint64(pkg.Result.Info.ValidationQuorum),
-	}
-}
-
-// ToDTOResponseValidationCreateFromPkg converts pkg ResponseValidationCreate to DTO.
-func ToDTOResponseValidationCreateFromPkg(pkg *xrprpc.ResponseValidationCreate) *dtoxrp.ResponseValidationCreate {
-	if pkg == nil {
-		return nil
-	}
-	return &dtoxrp.ResponseValidationCreate{
-		ValidationPublicKey: pkg.Result.ValidationPublicKey,
-		ValidationSeed:      pkg.Result.ValidationSeed,
-		ValidationKey:       pkg.Result.ValidationKey,
-	}
-}
-
-// ToDTOResponseWalletProposeFromPkg converts pkg ResponseWalletPropose to DTO.
-func ToDTOResponseWalletProposeFromPkg(pkg *xrprpc.ResponseWalletPropose) *dtoxrp.ResponseWalletPropose {
-	if pkg == nil {
-		return nil
-	}
-
-	warning := ""
-	if pkg.Status == StatusCodeError.String() {
-		warning = pkg.Error
-	}
-
-	return &dtoxrp.ResponseWalletPropose{
-		MasterSeed:    pkg.Result.MasterSeed,
-		MasterSeedHex: pkg.Result.MasterSeedHex,
-		MasterKey:     pkg.Result.MasterKey,
-		AccountID:     pkg.Result.AccountID,
-		PublicKey:     pkg.Result.PublicKey,
-		PublicKeyHex:  pkg.Result.PublicKeyHex,
-		KeyType:       pkg.Result.KeyType,
-		Warning:       warning,
 	}
 }
 

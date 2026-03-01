@@ -15,6 +15,7 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -1395,9 +1396,109 @@ func (r *XRP) CombineTransaction(ctx context.Context, signedTxs []string) (strin
 	return res.GetTxID(), res.GetSignedTransaction(), nil
 }
 
+// toXRPClientSentTx converts local SentTx to xrpclient.SentTx.
+func toXRPClientSentTx(local *SentTx) *xrpclient.SentTx {
+	return &xrpclient.SentTx{
+		ResultCode:          local.ResultCode,
+		ResultMessage:       local.ResultMessage,
+		EngineResult:        local.EngineResult,
+		EngineResultCode:    local.EngineResultCode,
+		EngineResultMessage: local.EngineResultMessage,
+		TxBlob:              local.TxBlob,
+		TxJSON: xrpclient.TxInput{
+			TransactionType:    local.TxJSON.TransactionType,
+			Account:            local.TxJSON.Account,
+			Amount:             local.TxJSON.Amount,
+			Destination:        local.TxJSON.Destination,
+			Fee:                local.TxJSON.Fee,
+			Flags:              local.TxJSON.Flags,
+			LastLedgerSequence: local.TxJSON.LastLedgerSequence,
+			Sequence:           local.TxJSON.Sequence,
+			SigningPubKey:      local.TxJSON.SigningPubKey,
+			TxnSignature:       local.TxJSON.TxnSignature,
+			Hash:               local.TxJSON.Hash,
+		},
+	}
+}
+
+// toXRPClientTxInfo converts local TxInfo to xrpclient.TxInfo.
+func toXRPClientTxInfo(local *TxInfo) *xrpclient.TxInfo {
+	balanceChanges := make(map[string][]xrpclient.TxAmount)
+	for key, amounts := range local.Outcome.BalanceChanges {
+		xrpAmounts := make([]xrpclient.TxAmount, len(amounts))
+		for i, amt := range amounts {
+			xrpAmounts[i] = xrpclient.TxAmount{
+				Currency: amt.Currency,
+				Value:    amt.Value,
+			}
+		}
+		balanceChanges[key] = xrpAmounts
+	}
+
+	orderbookChanges := make(map[string][]xrpclient.TxOrderbookChange)
+	for key, changes := range local.Outcome.OrderbookChanges {
+		xrpChanges := make([]xrpclient.TxOrderbookChange, len(changes))
+		for i, change := range changes {
+			xrpChanges[i] = xrpclient.TxOrderbookChange{
+				Direction: change.Direction,
+				Quantity: xrpclient.TxAmount{
+					Currency: change.Quantity.Currency,
+					Value:    change.Quantity.Value,
+				},
+				TotalPrice: xrpclient.TxTotalPrice{
+					Currency:     change.TotalPrice.Currency,
+					Counterparty: change.TotalPrice.Counterparty,
+					Value:        change.TotalPrice.Value,
+				},
+				Sequence:          change.Sequence,
+				Status:            change.Status,
+				MakerExchangeRate: change.MakerExchangeRate,
+			}
+		}
+		orderbookChanges[key] = xrpChanges
+	}
+
+	timestamp := ""
+	if !local.Outcome.Timestamp.IsZero() {
+		timestamp = local.Outcome.Timestamp.Format("2006-01-02T15:04:05Z")
+	}
+
+	return &xrpclient.TxInfo{
+		Type:     local.Type,
+		Address:  local.Address,
+		Sequence: local.Sequence,
+		ID:       local.ID,
+		Specification: xrpclient.TxSpecification{
+			Source: xrpclient.TxSpecSource{
+				Address: local.Specification.Source.Address,
+				MaxAmount: xrpclient.TxAmount{
+					Currency: local.Specification.Source.MaxAmount.Currency,
+					Value:    local.Specification.Source.MaxAmount.Value,
+				},
+			},
+			Destination: xrpclient.TxSpecDestination{
+				Address: local.Specification.Destination.Address,
+			},
+		},
+		Outcome: xrpclient.TxOutcome{
+			Result:           local.Outcome.Result,
+			Timestamp:        timestamp,
+			Fee:              local.Outcome.Fee,
+			BalanceChanges:   balanceChanges,
+			OrderbookChanges: orderbookChanges,
+			LedgerVersion:    local.Outcome.LedgerVersion,
+			IndexInLedger:    local.Outcome.IndexInLedger,
+			DeliveredAmount: xrpclient.TxAmount{
+				Currency: local.Outcome.DeliveredAmount.Currency,
+				Value:    local.Outcome.DeliveredAmount.Value,
+			},
+		},
+	}
+}
+
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
-func (r *XRP) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error) {
+func (r *XRP) SubmitTransaction(ctx context.Context, signedTx string) (*xrpclient.SentTx, uint64, error) {
 	req := protogen.RequestSubmitTransaction_builder{
 		TxBlob: signedTx,
 	}.Build()
@@ -1421,9 +1522,8 @@ func (r *XRP) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.S
 	// res.EarliestLedgerVersion => for when calling GetTransaction()
 	// sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
 
-	// Convert infrastructure type to DTO
-	return ToDTOSentTx(&sentTxJSON), res.GetEarliestLedgerVersion(), nil
-	// return ToDTOSentTx(&sentTxJSON), sentTxJSON.TxJSON.LastLedgerSequence, nil
+	return toXRPClientSentTx(&sentTxJSON), res.GetEarliestLedgerVersion(), nil
+	// return toXRPClientSentTx(&sentTxJSON), sentTxJSON.TxJSON.LastLedgerSequence, nil
 }
 
 // WaitValidation calls WaitValidation API
@@ -1488,7 +1588,7 @@ func (r *XRP) WaitValidation(ctx context.Context, targetledgerVarsion uint64) (u
 // GetTransaction calls GetTransaction API
 func (r *XRP) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
-) (*dtoxrp.TxInfo, error) {
+) (*xrpclient.TxInfo, error) {
 	req := protogen.RequestGetTransaction_builder{
 		TxID:             txID,
 		MinLedgerVersion: targetLedgerVersion,
@@ -1513,6 +1613,5 @@ func (r *XRP) GetTransaction(
 	// TODO: check
 	// txInfo.Outcome.Result : tesSUCCESS
 
-	// Convert infrastructure type to DTO
-	return ToDTOTxInfo(&txInfo), nil
+	return toXRPClientTxInfo(&txInfo), nil
 }
