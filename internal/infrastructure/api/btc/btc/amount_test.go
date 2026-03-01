@@ -7,13 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	. "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 )
 
-// TestAmountString is test for FloatToAmount
+// TestAmountString is test for AmountString
 func TestAmountString(t *testing.T) {
-	btc := Bitcoin{}
-
 	tests := []struct {
 		amt  btcutil.Amount
 		want string
@@ -24,15 +22,13 @@ func TestAmountString(t *testing.T) {
 		{1000, "0.00001"},
 	}
 	for _, val := range tests {
-		res := btc.AmountString(val.amt)
+		res := btcpkg.AmountString(val.amt)
 		assert.Equal(t, val.want, res, "AmountString() result mismatch")
 	}
 }
 
 // TestAmountToDecimal is test for AmountToDecimal
 func TestAmountToDecimal(t *testing.T) {
-	btc := Bitcoin{}
-
 	tests := []struct {
 		amt  btcutil.Amount
 		want string
@@ -43,7 +39,7 @@ func TestAmountToDecimal(t *testing.T) {
 		{1000, "0.00001"},
 	}
 	for _, val := range tests {
-		res, err := btc.AmountToDecimal(val.amt)
+		res, err := btcpkg.AmountToDecimal(val.amt)
 		require.NoError(t, err, "AmountToDecimal() should not return error")
 		assert.Equal(t, val.want, res.String(), "AmountString() result mismatch")
 	}
@@ -51,8 +47,6 @@ func TestAmountToDecimal(t *testing.T) {
 
 // TestFloatToAmount is test for FloatToAmount
 func TestFloatToAmount(t *testing.T) {
-	btc := Bitcoin{}
-
 	tests := []struct {
 		bit  float64
 		want btcutil.Amount
@@ -63,10 +57,9 @@ func TestFloatToAmount(t *testing.T) {
 		{0.000010, 1000},
 	}
 	for _, val := range tests {
-		amt, err := btc.FloatToAmount(val.bit)
+		amt, err := btcpkg.FloatToAmount(val.bit)
 		require.NoError(t, err, "FloatToAmount() should not return error")
 		assert.Equal(t, val.want, amt, "FloatToAmount() result mismatch")
-		// amt.ToBTC() //float64
 
 		t.Logf("satoshi: %d, %v", amt, amt)
 		// satoshi: 54000000, 0.54 BTC
@@ -74,10 +67,8 @@ func TestFloatToAmount(t *testing.T) {
 	}
 }
 
-// TestStrSatoshiToAmount is test for StrToAmount
+// TestStrToAmount is test for StrToAmount
 func TestStrToAmount(t *testing.T) {
-	btc := Bitcoin{}
-
 	tests := []struct {
 		bit  string
 		want btcutil.Amount
@@ -90,7 +81,7 @@ func TestStrToAmount(t *testing.T) {
 		{"0.000010", 1000},
 	}
 	for _, val := range tests {
-		amt, err := btc.StrToAmount(val.bit)
+		amt, err := btcpkg.StrToAmount(val.bit)
 		require.NoError(t, err, "StrToAmount() should not return error")
 		assert.Equal(t, val.want, amt, "StrToAmount() result mismatch")
 
@@ -102,8 +93,6 @@ func TestStrToAmount(t *testing.T) {
 
 // TestStrSatoshiToAmount is test for StrSatoshiToAmount
 func TestStrSatoshiToAmount(t *testing.T) {
-	btc := Bitcoin{}
-
 	tests := []struct {
 		satoshi string
 		want    float64
@@ -114,7 +103,7 @@ func TestStrSatoshiToAmount(t *testing.T) {
 		{"250000", 0.0025},
 	}
 	for _, val := range tests {
-		amt, err := btc.StrSatoshiToAmount(val.satoshi)
+		amt, err := btcpkg.StrSatoshiToAmount(val.satoshi)
 		require.NoError(t, err, "StrSatoshiToAmount() should not return error")
 		assert.Equal(t, val.want, amt.ToBTC(), "StrToAmount() result mismatch")
 
@@ -124,7 +113,7 @@ func TestStrSatoshiToAmount(t *testing.T) {
 	}
 }
 
-// Caluculation is test for calculation of amount
+// TestCalculation is test for calculation of amount
 func TestCalculation(t *testing.T) {
 	tests := []struct {
 		val1 float64

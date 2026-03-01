@@ -6,7 +6,7 @@ import (
 )
 
 // ImportAddress calls importaddress to import an address or script.
-func (c *Client) ImportAddress(address, label string, rescan bool) error {
+func (c *rpcClient) ImportAddress(address, label string, rescan bool) error {
 	bAddress, err := json.Marshal(address)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(address): %w", err)
@@ -27,7 +27,7 @@ func (c *Client) ImportAddress(address, label string, rescan bool) error {
 }
 
 // ImportPrivKey calls importprivkey to import a WIF-encoded private key.
-func (c *Client) ImportPrivKey(wifKey, label string, rescan bool) error {
+func (c *rpcClient) ImportPrivKey(wifKey, label string, rescan bool) error {
 	bKey, err := json.Marshal(wifKey)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(wifKey): %w", err)

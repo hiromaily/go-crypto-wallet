@@ -40,7 +40,7 @@ func NewBitcoin(
 	coinTypeCode domainCoin.CoinTypeCode,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
-		pkgrpc: btcrpc.New(client),
+		pkgrpc: btcrpc.NewRPCClient(client),
 		Client: client,
 	}
 

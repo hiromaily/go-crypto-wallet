@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 )
 
 // GetBalance gets balance
@@ -18,7 +19,7 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 		return 0, fmt.Errorf("fail to call btcrpc.GetBalance(): %w", err)
 	}
 
-	return b.FloatToAmount(amount)
+	return btcpkg.FloatToAmount(amount)
 }
 
 // GetBalanceByListUnspent gets balance by rpc `listunspent`

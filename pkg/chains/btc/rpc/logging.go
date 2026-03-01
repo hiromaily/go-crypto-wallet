@@ -32,7 +32,7 @@ type LoggingResult struct {
 }
 
 // Logging calls the logging RPC and returns the current logging configuration.
-func (c *Client) Logging() (*LoggingResult, error) {
+func (c *rpcClient) Logging() (*LoggingResult, error) {
 	rawResult, err := c.client.RawRequest("logging", []json.RawMessage{})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(logging): %w", err)

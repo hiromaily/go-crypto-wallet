@@ -73,7 +73,7 @@ type Fork struct {
 }
 
 // GetNetworkInfo calls getnetworkinfo and returns the raw wire response.
-func (c *Client) GetNetworkInfo() (*GetNetworkInfoResult, error) {
+func (c *rpcClient) GetNetworkInfo() (*GetNetworkInfoResult, error) {
 	rawResult, err := c.client.RawRequest("getnetworkinfo", []json.RawMessage{})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(getnetworkinfo): %w", err)
@@ -86,7 +86,7 @@ func (c *Client) GetNetworkInfo() (*GetNetworkInfoResult, error) {
 }
 
 // GetBlockchainInfo calls getblockchaininfo and returns the raw wire response.
-func (c *Client) GetBlockchainInfo() (*GetBlockchainInfoResult, error) {
+func (c *rpcClient) GetBlockchainInfo() (*GetBlockchainInfoResult, error) {
 	rawResult, err := c.client.RawRequest("getblockchaininfo", []json.RawMessage{})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(getblockchaininfo): %w", err)
@@ -99,7 +99,7 @@ func (c *Client) GetBlockchainInfo() (*GetBlockchainInfoResult, error) {
 }
 
 // GetBlockCount calls getblockcount and returns the current block height.
-func (c *Client) GetBlockCount() (int64, error) {
+func (c *rpcClient) GetBlockCount() (int64, error) {
 	rawResult, err := c.client.RawRequest("getblockcount", []json.RawMessage{})
 	if err != nil {
 		return 0, fmt.Errorf("fail to call RawRequest(getblockcount): %w", err)

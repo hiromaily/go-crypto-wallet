@@ -3,18 +3,12 @@ package shared
 import (
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/quagmt/udecimal"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
-
-// AmountConverter provides methods for amount conversion.
-// This interface allows decoupling from the full Bitcoiner interface.
-type AmountConverter interface {
-	FloatToDecimal(f float64) (udecimal.Decimal, error)
-}
 
 // ParseListUnspentTx parses the result of listUnspent and creates transaction inputs.
 // This function is shared between BTC and BCH use cases.
@@ -22,7 +16,6 @@ type AmountConverter interface {
 // Parameters:
 //   - unspentList: List of unspent outputs from listunspent RPC
 //   - amount: Required amount (0 means collect all UTXOs)
-//   - converter: Amount converter for decimal conversion
 //
 // Returns:
 //   - parsedTx: Parsed transaction data
@@ -31,7 +24,6 @@ type AmountConverter interface {
 func ParseListUnspentTx(
 	unspentList []dtobtc.UnspentOutput,
 	amount btcutil.Amount,
-	converter AmountConverter,
 ) (*ParsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
@@ -54,7 +46,7 @@ func ParseListUnspentTx(
 		})
 
 		// Convert btcutil.Amount to float64 for decimal conversion
-		inputAmount, err := converter.FloatToDecimal(txItem.Amount.ToBTC())
+		inputAmount, err := btcpkg.FloatToDecimal(txItem.Amount.ToBTC())
 		if err != nil {
 			logger.Error("fail to convert input amount to decimal", "error", err)
 			continue

@@ -6,7 +6,7 @@ import (
 )
 
 // SetLabel calls setlabel to assign a label to an address.
-func (c *Client) SetLabel(addr, label string) error {
+func (c *rpcClient) SetLabel(addr, label string) error {
 	bAddr, err := json.Marshal(addr)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(addr): %w", err)

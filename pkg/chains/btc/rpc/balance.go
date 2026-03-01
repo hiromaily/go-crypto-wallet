@@ -7,7 +7,7 @@ import (
 
 // GetBalance calls getbalance with wildcard account and the given minimum confirmations.
 // Returns the balance in BTC as a float64.
-func (c *Client) GetBalance(confirmationBlock int) (float64, error) {
+func (c *rpcClient) GetBalance(confirmationBlock int) (float64, error) {
 	bWildcard, err := json.Marshal("*")
 	if err != nil {
 		return 0, fmt.Errorf("fail to call json.Marshal(wildcard): %w", err)
