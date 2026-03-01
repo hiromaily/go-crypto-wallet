@@ -1,6 +1,8 @@
 .DS_Store
 .idea/
 
+.claude/settings.local.json
+
 # temporary documents
 docs/issues/*
 !docs/issues/CURRENT_ISSUES.md
