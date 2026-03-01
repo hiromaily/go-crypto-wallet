@@ -511,13 +511,3 @@ func ToAddressType(addrType domainAddress.AddrType) domainBTC.AddressType {
 		return domainBTC.AddressTypeLegacy
 	}
 }
-
-// ToBTCVersion converts infrastructure BTCVersion to domain Version
-func ToBTCVersion(ver BTCVersion) domainBTC.Version {
-	return domainBTC.Version(ver)
-}
-
-// FromBTCVersion converts domain Version to infrastructure BTCVersion
-func FromBTCVersion(ver domainBTC.Version) BTCVersion {
-	return BTCVersion(ver)
-}
