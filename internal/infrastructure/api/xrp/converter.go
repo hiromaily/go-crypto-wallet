@@ -86,8 +86,8 @@ func ToDTOXRPKeyType(infra XRPKeyType) dtoxrp.XRPKeyType {
 	return dtoxrp.XRPKeyType(infra)
 }
 
-// ToDTOResponseGetAccountInfo converts infrastructure ResponseGetAccountInfo to pkg client type.
-func ToDTOResponseGetAccountInfo(infra *protogen.ResponseGetAccountInfo) *xrpclient.AccountInfo {
+// fromProtoAccountInfo converts protogen ResponseGetAccountInfo to pkg client AccountInfo type.
+func fromProtoAccountInfo(infra *protogen.ResponseGetAccountInfo) *xrpclient.AccountInfo {
 	if infra == nil {
 		return nil
 	}

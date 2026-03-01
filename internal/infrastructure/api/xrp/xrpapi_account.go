@@ -36,6 +36,6 @@ func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*xrpclient.Ac
 		"PreviousAffectingTransactionLedgerVersion", res.GetPreviousAffectingTransactionLedgerVersion(),
 	)
 
-	// Convert infrastructure type to DTO
-	return ToDTOResponseGetAccountInfo(res), nil
+	// Convert protogen type to pkg client type
+	return fromProtoAccountInfo(res), nil
 }
