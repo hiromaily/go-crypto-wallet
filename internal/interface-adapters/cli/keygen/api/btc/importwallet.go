@@ -7,7 +7,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runImportWallet(btc apibtc.WalletSecurityManager, fileName string) error {
+func runImportWallet(btc apibtc.PKGRPCProvider, fileName string) error {
 	fmt.Println("Imports keys from a wallet dump file")
 
 	// validator
@@ -15,7 +15,7 @@ func runImportWallet(btc apibtc.WalletSecurityManager, fileName string) error {
 		return errors.New("filename option [-file] is required")
 	}
 
-	err := btc.ImportWallet(fileName)
+	err := btc.GetPkgRPC().ImportWallet(fileName)
 	if err != nil {
 		return fmt.Errorf("fail to call btc.ImportWallet() %w", err)
 	}

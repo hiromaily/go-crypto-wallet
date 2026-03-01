@@ -19,7 +19,7 @@
 //   - PSBT support (CreatePSBT, SignPSBTWithKey, FinalizePSBT) - BIP174
 //   - Descriptor wallet support (ImportDescriptors, ListDescriptors)
 //   - Multisig operations (AddMultisigAddress)
-//   - Wallet management (BackupWallet, LoadWallet, CreateWallet)
+//   - Wallet management (via GetPkgRPC() for direct RPC access)
 //
 // # Usage
 //
