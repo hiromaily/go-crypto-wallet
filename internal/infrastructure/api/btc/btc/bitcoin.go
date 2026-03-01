@@ -12,11 +12,14 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // Bitcoin includes client to call Json-RPC
 type Bitcoin struct {
 	Client            *rpcclient.Client
+	RPC               *btcrpc.Client
 	chainConf         *chaincfg.Params
 	coinTypeCode      domainCoin.CoinTypeCode // btc
 	version           BTCVersion              // 179900
@@ -38,6 +41,7 @@ func NewBitcoin(
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
 		Client: client,
+		RPC:    btcrpc.New(client),
 	}
 
 	bit.coinTypeCode = coinTypeCode

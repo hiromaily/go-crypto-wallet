@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -16,7 +15,7 @@ import (
 
 // EstimateSmartFee calls RPC `estimatesmartfee` and returns BTC/kB(float64)
 func (b *Bitcoin) EstimateSmartFee() (float64, error) {
-	feeRate, err := btcrpc.EstimateSmartFee(b.Client, int(b.confirmationBlock))
+	feeRate, err := b.RPC.EstimateSmartFee(int(b.confirmationBlock))
 	if err != nil {
 		return 0, fmt.Errorf("fail to call btcrpc.EstimateSmartFee(): %w", err)
 	}

@@ -178,7 +178,7 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 
 // GetTransactionByTxID get transaction result by txID
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcrpc.GetTransactionResult, error) {
-	result, err := btcrpc.GetTransaction(b.Client, txID)
+	result, err := b.RPC.GetTransaction(txID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetTransaction(%s): %w", txID, err)
 	}
@@ -221,7 +221,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 
 // DecodeRawTransaction returns information about a transaction given its serialized byte
 func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcrpc.TxRawResult, error) {
-	result, err := btcrpc.DecodeRawTransaction(b.Client, hexTx)
+	result, err := b.RPC.DecodeRawTransaction(hexTx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.DecodeRawTransaction(): %w", err)
 	}
@@ -305,7 +305,7 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 		IncludeUnsafe: opts.IncludeUnsafe,
 	}
 
-	result, err := btcrpc.FundRawTransaction(b.Client, hexTx, pkgOpts)
+	result, err := b.RPC.FundRawTransaction(hexTx, pkgOpts)
 	if err != nil {
 		// error: -4: Insufficient funds
 		return nil, fmt.Errorf("fail to call btcrpc.FundRawTransaction(): %w", err)
@@ -416,7 +416,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx
 		return nil, false, err
 	}
 
-	pkgResult, err := btcrpc.SignRawTransactionWithWallet(b.Client, hexTx, pkgPrevTxs)
+	pkgResult, err := b.RPC.SignRawTransactionWithWallet(hexTx, pkgPrevTxs)
 	if err != nil {
 		return nil, false, fmt.Errorf("fail to call btcrpc.SignRawTransactionWithWallet(): %w", err)
 	}
@@ -446,7 +446,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 		return nil, false, err
 	}
 
-	pkgResult, err := btcrpc.SignRawTransactionWithKey(b.Client, hexTx, privKeysWIF, pkgPrevTxs)
+	pkgResult, err := b.RPC.SignRawTransactionWithKey(hexTx, privKeysWIF, pkgPrevTxs)
 	if err != nil {
 		return nil, false, fmt.Errorf("fail to call btcrpc.SignRawTransactionWithKey(): %w", err)
 	}

@@ -21,7 +21,7 @@ import (
 //
 // Returns the descriptor with checksum and analysis results.
 func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*btcrpc.DescriptorInfo, error) {
-	result, err := btcrpc.GetDescriptorInfo(b.Client, descriptor)
+	result, err := b.RPC.GetDescriptorInfo(descriptor)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetDescriptorInfo(): %w", err)
 	}
@@ -42,7 +42,7 @@ func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*btcrpc.DescriptorInfo, 
 //
 // Returns the list of descriptors with their metadata.
 func (b *Bitcoin) ListDescriptors(privateDescriptors bool) (*btcrpc.ListDescriptorsResult, error) {
-	result, err := btcrpc.ListDescriptors(b.Client, privateDescriptors)
+	result, err := b.RPC.ListDescriptors(privateDescriptors)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ListDescriptors(): %w", err)
 	}

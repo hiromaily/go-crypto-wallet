@@ -11,7 +11,7 @@ import (
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
 func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
-	result, err := btcrpc.GetAddressInfo(b.Client, addr)
+	result, err := b.RPC.GetAddressInfo(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetAddressInfo(%s): %w", addr, err)
 	}
@@ -28,7 +28,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, err
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	logger.Debug("getting addresses by label", "label", labelName)
 
-	labels, err := btcrpc.GetAddressesByLabel(b.Client, labelName)
+	labels, err := b.RPC.GetAddressesByLabel(labelName)
 	if err != nil {
 		logger.Debug("getaddressesbylabel RPC failed", "label", labelName, "error", err)
 		return nil, fmt.Errorf("fail to call btcrpc.GetAddressesByLabel(%s): %w", labelName, err)
@@ -69,7 +69,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 
 // ValidateAddress validate address
 func (b *Bitcoin) ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error) {
-	result, err := btcrpc.ValidateAddress(b.Client, addr)
+	result, err := b.RPC.ValidateAddress(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ValidateAddress(%s): %w", addr, err)
 	}

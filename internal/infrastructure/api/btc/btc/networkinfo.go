@@ -8,7 +8,7 @@ import (
 
 // GetNetworkInfo call RPC `getnetworkinfo`
 func (b *Bitcoin) GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error) {
-	result, err := btcrpc.GetNetworkInfo(b.Client)
+	result, err := b.RPC.GetNetworkInfo()
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetNetworkInfo(): %w", err)
 	}
@@ -18,7 +18,7 @@ func (b *Bitcoin) GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error) {
 
 // GetBlockchainInfo call RPC `getblockchaininfo`
 func (b *Bitcoin) GetBlockchainInfo() (*btcrpc.GetBlockchainInfoResult, error) {
-	result, err := btcrpc.GetBlockchainInfo(b.Client)
+	result, err := b.RPC.GetBlockchainInfo()
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetBlockchainInfo(): %w", err)
 	}

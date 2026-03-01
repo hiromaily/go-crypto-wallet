@@ -110,7 +110,7 @@ func (b *Bitcoin) WalletPassphraseChange(old, newPass string) error {
 //	applied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).
 //	e.g. bitcoin-cli loadwallet "test.dat"
 func (b *Bitcoin) LoadWallet(fileName string) error {
-	if err := btcrpc.LoadWallet(b.Client, fileName); err != nil {
+	if err := b.RPC.LoadWallet(fileName); err != nil {
 		return fmt.Errorf("fail to call btcrpc.LoadWallet(): %w", err)
 	}
 
@@ -123,7 +123,7 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 //	Specifying the wallet name on a wallet endpoint is invalid.
 //	e.g. bitcoin-cli unloadwallet wallet_name
 func (b *Bitcoin) UnLoadWallet(fileName string) error {
-	if err := btcrpc.UnloadWallet(b.Client, fileName); err != nil {
+	if err := b.RPC.UnloadWallet(fileName); err != nil {
 		return fmt.Errorf("fail to call btcrpc.UnloadWallet(): %w", err)
 	}
 
@@ -166,7 +166,7 @@ func (b *Bitcoin) CreateWalletWithOptions(fileName string, opts *CreateWalletOpt
 		LoadOnStartup:      opts.LoadOnStartup,
 	}
 
-	if err := btcrpc.CreateWallet(b.Client, fileName, pkgOpts); err != nil {
+	if err := b.RPC.CreateWallet(fileName, pkgOpts); err != nil {
 		return fmt.Errorf("fail to call btcrpc.CreateWallet(): %w", err)
 	}
 
