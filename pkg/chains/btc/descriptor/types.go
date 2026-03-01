@@ -1,4 +1,21 @@
-package wallet
+// Package descriptor provides Bitcoin output descriptor types, parsing, and generation.
+//
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │ WARNING: DO NOT USE THIS PACKAGE FOR BCH (Bitcoin Cash) IMPLEMENTATIONS     │
+// │                                                                             │
+// │ BCH does NOT support output descriptors (BIP380).                           │
+// │ BCH uses legacy wallet with address export/import workflow instead.         │
+// │                                                                             │
+// │ For BCH address management:                                                 │
+// │   - Export addresses from keygen wallet                                     │
+// │   - Import addresses to watch wallet                                        │
+// │   - Do NOT use importdescriptors RPC                                        │
+// │                                                                             │
+// │ For BCH implementations, see:                                               │
+// │   - internal/infrastructure/api/btc/bch/                                    │
+// │   - docs/chains/bch/README.md                                               │
+// └─────────────────────────────────────────────────────────────────────────────┘
+package descriptor
 
 import (
 	"errors"

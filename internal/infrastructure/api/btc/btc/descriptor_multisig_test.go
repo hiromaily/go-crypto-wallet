@@ -11,8 +11,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/require"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	wallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	btcdescriptor "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/descriptor"
 )
 
 const testDerivationMultisig = "/48'/0'/0'/2'"
@@ -20,7 +19,7 @@ const testDerivationMultisig = "/48'/0'/0'/2'"
 func TestGenerateMultisigDescriptor(t *testing.T) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)
 
-	signers := []dtobtc.MultisigSigner{
+	signers := []btcdescriptor.MultisigSigner{
 		{
 			Fingerprint:    "a1b2c3d4",
 			DerivationPath: testDerivationMultisig,
@@ -39,7 +38,7 @@ func TestGenerateMultisigDescriptor(t *testing.T) {
 	}
 
 	t.Run("receive 2-of-3 descriptor with deterministic ordering", func(t *testing.T) {
-		descriptor, err := service.GenerateMultisigDescriptor(2, signers, false, wallet.DescriptorTypeWSH)
+		descriptor, err := service.GenerateMultisigDescriptor(2, signers, false, btcdescriptor.DescriptorTypeWSH)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
@@ -54,7 +53,7 @@ func TestGenerateMultisigDescriptor(t *testing.T) {
 	})
 
 	t.Run("change descriptor uses /1/*", func(t *testing.T) {
-		descriptor, err := service.GenerateMultisigDescriptor(2, signers, true, wallet.DescriptorTypeWSH)
+		descriptor, err := service.GenerateMultisigDescriptor(2, signers, true, btcdescriptor.DescriptorTypeWSH)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
@@ -72,7 +71,7 @@ func TestGenerateMultisigDescriptor(t *testing.T) {
 func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)
 
-	validSigner := dtobtc.MultisigSigner{
+	validSigner := btcdescriptor.MultisigSigner{
 		Fingerprint:    "a1b2c3d4",
 		DerivationPath: testDerivationMultisig,
 		ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
@@ -81,7 +80,7 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 	tests := []struct {
 		name         string
 		requiredSigs int
-		signers      []dtobtc.MultisigSigner
+		signers      []btcdescriptor.MultisigSigner
 		wantErr      string
 	}{
 		{
@@ -93,13 +92,13 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 		{
 			name:         "required greater than signers",
 			requiredSigs: 2,
-			signers:      []dtobtc.MultisigSigner{validSigner},
+			signers:      []btcdescriptor.MultisigSigner{validSigner},
 			wantErr:      "invalid required signatures",
 		},
 		{
 			name:         "nil extended key",
 			requiredSigs: 1,
-			signers: []dtobtc.MultisigSigner{
+			signers: []btcdescriptor.MultisigSigner{
 				{
 					Fingerprint:    "a1b2c3d4",
 					DerivationPath: testDerivationMultisig,
@@ -111,7 +110,7 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 		{
 			name:         "network mismatch",
 			requiredSigs: 1,
-			signers: []dtobtc.MultisigSigner{
+			signers: []btcdescriptor.MultisigSigner{
 				{
 					Fingerprint:    "a1b2c3d4",
 					DerivationPath: testDerivationMultisig,
@@ -123,7 +122,7 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 		{
 			name:         "invalid derivation path",
 			requiredSigs: 1,
-			signers: []dtobtc.MultisigSigner{
+			signers: []btcdescriptor.MultisigSigner{
 				{
 					Fingerprint:    "a1b2c3d4",
 					DerivationPath: "48'/0'/0'/2'", // missing leading slash
@@ -136,7 +135,9 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := service.GenerateMultisigDescriptor(tt.requiredSigs, tt.signers, false, wallet.DescriptorTypeWSH)
+			_, err := service.GenerateMultisigDescriptor(
+				tt.requiredSigs, tt.signers, false, btcdescriptor.DescriptorTypeWSH,
+			)
 			require.ErrorContains(t, err, tt.wantErr)
 		})
 	}
@@ -145,13 +146,15 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 func TestGenerateMultisigDescriptor_NormalizesInputs(t *testing.T) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)
 
-	signer := dtobtc.MultisigSigner{
+	signer := btcdescriptor.MultisigSigner{
 		Fingerprint:    "A1B2C3D4",
 		DerivationPath: " m/48'/0'/0'/2' ",
 		ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
 	}
 
-	desc, err := service.GenerateMultisigDescriptor(1, []dtobtc.MultisigSigner{signer}, false, wallet.DescriptorTypeWSH)
+	desc, err := service.GenerateMultisigDescriptor(
+		1, []btcdescriptor.MultisigSigner{signer}, false, btcdescriptor.DescriptorTypeWSH,
+	)
 	require.NoError(t, err)
 
 	require.Equal(

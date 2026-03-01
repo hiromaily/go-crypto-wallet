@@ -8,7 +8,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/require"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	btcdescriptor "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/descriptor"
 )
 
 const testDerivationTaprootMultiKey = "/86'/0'/0'"
@@ -16,7 +16,7 @@ const testDerivationTaprootMultiKey = "/86'/0'/0'"
 func TestGenerateTaprootScriptPathDescriptor(t *testing.T) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)
 
-	signers := []dtobtc.MultisigSigner{
+	signers := []btcdescriptor.MultisigSigner{
 		{
 			Fingerprint:    "a1b2c3d4",
 			DerivationPath: testDerivationTaprootMultiKey,
@@ -62,7 +62,7 @@ func TestGenerateTaprootScriptPathDescriptor(t *testing.T) {
 	})
 
 	t.Run("three signers use script tree with braces", func(t *testing.T) {
-		threeSigners := []dtobtc.MultisigSigner{
+		threeSigners := []btcdescriptor.MultisigSigner{
 			{
 				Fingerprint:    "a1b2c3d4",
 				DerivationPath: testDerivationTaprootMultiKey,
@@ -100,7 +100,7 @@ func TestGenerateTaprootScriptPathDescriptor(t *testing.T) {
 func TestGenerateTaprootScriptPathDescriptor_Validation(t *testing.T) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)
 
-	validSigner := dtobtc.MultisigSigner{
+	validSigner := btcdescriptor.MultisigSigner{
 		Fingerprint:    "a1b2c3d4",
 		DerivationPath: testDerivationTaprootMultiKey,
 		ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
@@ -108,17 +108,17 @@ func TestGenerateTaprootScriptPathDescriptor_Validation(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		signers []dtobtc.MultisigSigner
+		signers []btcdescriptor.MultisigSigner
 		wantErr string
 	}{
 		{
 			name:    "not enough signers",
-			signers: []dtobtc.MultisigSigner{validSigner},
+			signers: []btcdescriptor.MultisigSigner{validSigner},
 			wantErr: "at least 2 signers",
 		},
 		{
 			name: "network mismatch",
-			signers: []dtobtc.MultisigSigner{
+			signers: []btcdescriptor.MultisigSigner{
 				{
 					Fingerprint:    "a1b2c3d4",
 					DerivationPath: testDerivationTaprootMultiKey,
@@ -130,7 +130,7 @@ func TestGenerateTaprootScriptPathDescriptor_Validation(t *testing.T) {
 		},
 		{
 			name: "invalid derivation path",
-			signers: []dtobtc.MultisigSigner{
+			signers: []btcdescriptor.MultisigSigner{
 				{
 					Fingerprint:    "a1b2c3d4",
 					DerivationPath: "86'/0'/0'", // missing leading slash

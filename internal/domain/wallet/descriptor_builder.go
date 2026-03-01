@@ -4,6 +4,36 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	btcdescriptor "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/descriptor"
+)
+
+// Type aliases so existing callers within the wallet package still compile.
+type (
+	DescriptorType = btcdescriptor.DescriptorType
+	DescriptorKey  = btcdescriptor.DescriptorKey
+	Descriptor     = btcdescriptor.Descriptor
+)
+
+// Re-exported constants for backward compatibility.
+const (
+	DescriptorTypePKH     = btcdescriptor.DescriptorTypePKH
+	DescriptorTypeSHWPKH  = btcdescriptor.DescriptorTypeSHWPKH
+	DescriptorTypeWPKH    = btcdescriptor.DescriptorTypeWPKH
+	DescriptorTypeTR      = btcdescriptor.DescriptorTypeTR
+	DescriptorTypeWSH     = btcdescriptor.DescriptorTypeWSH
+	DescriptorTypeSHWSH   = btcdescriptor.DescriptorTypeSHWSH
+	DescriptorTypeSH      = btcdescriptor.DescriptorTypeSH
+	DescriptorTypeUnknown = btcdescriptor.DescriptorTypeUnknown
+)
+
+// Re-exported validation functions for backward compatibility.
+var (
+	ValidateDescriptor     = btcdescriptor.ValidateDescriptor
+	ValidateDescriptorKey  = btcdescriptor.ValidateDescriptorKey
+	ValidateFingerprint    = btcdescriptor.ValidateFingerprint
+	ValidateDerivationPath = btcdescriptor.ValidateDerivationPath
+	ValidateExtendedPubKey = btcdescriptor.ValidateExtendedPubKey
 )
 
 // inputCharset defines the valid characters for descriptor strings.

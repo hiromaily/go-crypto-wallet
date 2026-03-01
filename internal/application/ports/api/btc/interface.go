@@ -16,7 +16,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	btcdescriptor "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/descriptor"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
@@ -543,7 +543,7 @@ type MuSig2Servicer interface {
 // DescriptorParserr parses descriptor strings into domain descriptor objects.
 // Note: double 'r' to avoid conflict with descriptorParser local variable.
 type DescriptorParserr interface {
-	Parse(descriptorStr string) (*domainWallet.Descriptor, error)
+	Parse(descriptorStr string) (*btcdescriptor.Descriptor, error)
 }
 
 // DescriptorServicer generates output descriptors for various address types.
@@ -561,9 +561,12 @@ type DescriptorServicer interface {
 	GenerateP2PKHDescriptor(
 		fingerprint, derivationPath string, xpub *hdkeychain.ExtendedKey, isChange bool,
 	) (string, error)
-	GenerateTaprootScriptPathDescriptor(signers []dtobtc.MultisigSigner, isChange bool) (string, error)
+	GenerateTaprootScriptPathDescriptor(signers []btcdescriptor.MultisigSigner, isChange bool) (string, error)
 	GenerateMultisigDescriptor(
-		requiredSigs int, signers []dtobtc.MultisigSigner, isChange bool, descriptorType domainWallet.DescriptorType,
+		requiredSigs int,
+		signers []btcdescriptor.MultisigSigner,
+		isChange bool,
+		descriptorType btcdescriptor.DescriptorType,
 	) (string, error)
 }
 
