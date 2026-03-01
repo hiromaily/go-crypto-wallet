@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 0. (P) Move ERC20 contract ABI bindings to pkg/
+- [x] 0. (P) Move ERC20 contract ABI bindings to pkg/
 - [x] 0.1 (P) Move internal/infrastructure/contract/ to pkg/chains/eth/contract/
   - Move `contract.go` (ERC20 contract factory) and `token-abi.go` (auto-generated DO NOT EDIT ABI bindings) into the new `pkg/chains/eth/contract/` directory
   - Neither file imports from `internal/` so no import cleanup is required inside the moved files
@@ -8,7 +8,7 @@
   - Confirm the project builds with zero compilation errors after the move
   - _Requirements: 1.4, 1.5, 8.1_
 
-- [ ] 1. (P) Create the Ethereum RPC package in pkg/
+- [x] 1. (P) Create the Ethereum RPC package in pkg/
 - [x] 1.1 (P) Set up the ETH RPC package foundation with client interfaces
   - Define a minimal interface that abstracts the raw JSON-RPC transport so that the concrete Ethereum client satisfies it without modification
   - Define a separate interface for the higher-level typed Ethereum client (used by gas tip cap and raw transaction sending)
@@ -33,7 +33,7 @@
   - Cover happy-path JSON parsing, hex decoding, and error propagation for each function group
   - _Requirements: 8.4_
 
-- [ ] 2. (P) Create the XRP RPC package in pkg/
+- [x] 2. (P) Create the XRP RPC package in pkg/
 - [x] 2.0 Move XRP proto-generated code to pkg/chains/xrp/protogen/
   - Move all six generated files (`account.pb.go`, `account_grpc.pb.go`, `address.pb.go`, `address_grpc.pb.go`, `transaction.pb.go`, `transaction_grpc.pb.go`) from `internal/infrastructure/api/xrp/protogen/` to `pkg/chains/xrp/protogen/`
   - Update `PROTO_GO_OUT_DIR` in `make/codegen_proto.mk` from `internal/infrastructure/api/xrp/protogen` to `pkg/chains/xrp/protogen`
@@ -62,7 +62,7 @@
   - Cover JSON marshaling of request payloads and unmarshaling of response types for each function
   - _Requirements: 8.4_
 
-- [ ] 3. Create the Bitcoin RPC package in pkg/
+- [x] 3. Create the Bitcoin RPC package in pkg/
 - [x] 3.1 Set up the BTC RPC package foundation with client interface
   - Define a minimal interface that abstracts the raw JSON-RPC call method so the existing Bitcoin RPC client satisfies it without modification
   - Establish the package directory with no imports from `internal/`
@@ -101,7 +101,7 @@
   - Cover JSON unmarshaling for the BTC and BCH label format variations (FlexibleLabels), the warnings field format variations (WarningsField), and all wire response types
   - _Requirements: 8.4_
 
-- [ ] 4. Update infrastructure adapters to delegate to the new pkg/ RPC packages
+- [x] 4. Update infrastructure adapters to delegate to the new pkg/ RPC packages
 - [x] 4.1 (P) Thin out the ETH infrastructure adapter
   - Replace each ETH adapter method body that contains a raw RPC call with a one-line delegation to the corresponding function in the ETH RPC package
   - Keep the fallback gas tip cap logic (which depends on configuration) in the infrastructure adapter; it calls the pkg function internally
@@ -128,7 +128,7 @@
   - Confirm that no `internal/` imports have been introduced in any `pkg/chains/*/rpc/` file
   - _Requirements: 8.1, 8.4, 8.5_
 
-- [ ] 5. Phase 2 - Update ETH port interface signatures and eliminate infrastructure types
+- [x] 5. Phase 2 - Update ETH port interface signatures and eliminate infrastructure types
 - [x] 5.1 Update ETH port interface method signatures to return pkg types
   - Change the `Syncing` method return type from the infrastructure-defined `ResponseSyncing` to the type now living in the ETH RPC package
   - For any other ETH port methods whose return types reference infrastructure-defined structs rather than domain or standard library types, update those signatures to reference the pkg types
