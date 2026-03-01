@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -22,7 +23,7 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	fee := fmt.Sprintf("%f", feePerKB*float64(tx.SerializeSize())/1000)
 
 	// To Amount
-	feeAsBit, err := b.StrToAmount(fee)
+	feeAsBit, err := btcpkg.StrToAmount(fee)
 	if err != nil {
 		return 0, err
 	}
@@ -53,7 +54,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 			// This is conservative and works for regtest/signet
 			fallbackFeePerKB := 0.00001 // BTC/kB
 			fallbackFee := fmt.Sprintf("%f", fallbackFeePerKB*float64(tx.SerializeSize())/1000)
-			fee, err = b.StrToAmount(fallbackFee)
+			fee, err = btcpkg.StrToAmount(fallbackFee)
 			if err != nil {
 				return 0, fmt.Errorf("failed to calculate fallback fee: %w", err)
 			}
@@ -97,8 +98,8 @@ func (b *Bitcoin) validateAdjustmentFee(fee float64) bool {
 }
 
 // CalculateNewFee adjust fee by adjustment fee
-func (b *Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
-	newFee, err := b.FloatToAmount(fee.ToBTC() * adjustmentFee)
+func (*Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
+	newFee, err := btcpkg.FloatToAmount(fee.ToBTC() * adjustmentFee)
 	if err != nil {
 		return 0, err
 	}
@@ -113,7 +114,7 @@ func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {
 	if res.RelayFee == 0 {
 		return 0, errors.New("RelayFee can not be retrieved by `getnetworkinfo`")
 	}
-	fee, err := b.FloatToAmount(res.RelayFee)
+	fee, err := btcpkg.FloatToAmount(res.RelayFee)
 	if err != nil {
 		return 0, err
 	}

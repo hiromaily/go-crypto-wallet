@@ -31,6 +31,7 @@ import (
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -38,7 +39,6 @@ import (
 // This follows the Interface Segregation Principle - depend only on methods actually used.
 type createTxBTCClient interface {
 	apibtc.ChainConfigProvider
-	apibtc.AmountConverter
 	apibtc.UTXOProvider
 	apibtc.RawTransactionCreator
 	apibtc.AddressOperator
@@ -141,7 +141,7 @@ func (u *createTransactionUseCase) createDepositTx(adjustmentFee float64) (strin
 		"receiver", receiver.String(),
 	)
 
-	requiredAmount, err := u.btcClient.FloatToAmount(0)
+	requiredAmount, err := btcpkg.FloatToAmount(0)
 	if err != nil {
 		return "", "", err
 	}
@@ -216,7 +216,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// amount btcutil.Amount
-	requiredAmount, err := u.btcClient.FloatToAmount(floatAmount)
+	requiredAmount, err := btcpkg.FloatToAmount(floatAmount)
 	if err != nil {
 		return "", "", err
 	}
@@ -409,7 +409,7 @@ func (u *createTransactionUseCase) getUnspentList(
 
 // parse result of listUnspent
 // returned *parsedTx could be nil
-func (u *createTransactionUseCase) parseListUnspentTx(
+func (*createTransactionUseCase) parseListUnspentTx(
 	unspentList []dtobtc.UnspentOutput, amount btcutil.Amount,
 ) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
@@ -433,7 +433,7 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 		})
 
 		// Convert btcutil.Amount to float64 for decimal conversion
-		inputAmount, err := u.btcClient.FloatToDecimal(txItem.Amount.ToBTC())
+		inputAmount, err := btcpkg.FloatToDecimal(txItem.Amount.ToBTC())
 		if err != nil {
 			logger.Error("fail to convert input amount to decimal", "error", err)
 			continue
@@ -617,7 +617,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 		if len(txPrevOutputs) == 1 {
 			// Only one output - subtract fee from it
 			txPrevOutputs[addr] -= fee
-			outputAmount, err := u.btcClient.AmountToDecimal(amt - fee)
+			outputAmount, err := btcpkg.AmountToDecimal(amt - fee)
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
@@ -640,7 +640,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			logger.Debug("detect change address in calculateOutputTotal", "address", addr.String())
 			// address is used for change - subtract fee from it
 			txPrevOutputs[addr] -= fee
-			outputAmount, err := u.btcClient.AmountToDecimal(amt - fee)
+			outputAmount, err := btcpkg.AmountToDecimal(amt - fee)
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert change amount to decimal: %w", err)
 			}
@@ -657,7 +657,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			txRepoOutputs = append(txRepoOutputs, output)
 		} else {
 			// Not change address - don't subtract fee
-			outputAmount, err := u.btcClient.AmountToDecimal(amt)
+			outputAmount, err := btcpkg.AmountToDecimal(amt)
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
@@ -717,15 +717,15 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	}
 
 	// TxReceipt table
-	totalInputAmt, err := u.btcClient.AmountToDecimal(inputTotal)
+	totalInputAmt, err := btcpkg.AmountToDecimal(inputTotal)
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert total input amount to decimal: %w", err)
 	}
-	totalOutputAmt, err := u.btcClient.AmountToDecimal(outputTotal)
+	totalOutputAmt, err := btcpkg.AmountToDecimal(outputTotal)
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert total output amount to decimal: %w", err)
 	}
-	feeAmt, err := u.btcClient.AmountToDecimal(fee)
+	feeAmt, err := btcpkg.AmountToDecimal(fee)
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert fee amount to decimal: %w", err)
 	}
@@ -874,7 +874,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, []int64, 
 		}
 
 		// amount
-		userPayments[idx].validAmount, err = u.btcClient.FloatToAmount(userPayments[idx].amount)
+		userPayments[idx].validAmount, err = btcpkg.FloatToAmount(userPayments[idx].amount)
 		if err != nil {
 			// fatal error
 			logger.Error("unexpected error occurred converting amount from float64 type to Amount type")

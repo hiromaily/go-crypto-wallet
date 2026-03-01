@@ -6,7 +6,6 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/quagmt/udecimal"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -39,14 +38,6 @@ type BitcoinCompatible interface {
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
 	ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
-
-	// amount.go
-	AmountString(amt btcutil.Amount) string
-	AmountToDecimal(amt btcutil.Amount) (udecimal.Decimal, error)
-	FloatToDecimal(f float64) (udecimal.Decimal, error)
-	FloatToAmount(f float64) (btcutil.Amount, error)
-	StrToAmount(s string) (btcutil.Amount, error)
-	StrSatoshiToAmount(s string) (btcutil.Amount, error)
 
 	// balance.go
 	GetBalance() (btcutil.Amount, error)

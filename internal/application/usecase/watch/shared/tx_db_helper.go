@@ -5,17 +5,16 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/quagmt/udecimal"
 
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 )
 
-// TxAmountConverter provides methods for amount conversion needed for DB operations.
+// TxAmountConverter provides the coin type needed for DB operations.
 type TxAmountConverter interface {
-	AmountToDecimal(amt btcutil.Amount) (udecimal.Decimal, error)
 	CoinTypeCode() domainCoin.CoinTypeCode
 }
 
@@ -76,15 +75,15 @@ func (h *TxDBHelper) InsertTxTableForUnsigned(
 	}
 
 	// TxReceipt table
-	totalInputAmt, err := h.converter.AmountToDecimal(inputTotal)
+	totalInputAmt, err := btcpkg.AmountToDecimal(inputTotal)
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert total input amount to decimal: %w", err)
 	}
-	totalOutputAmt, err := h.converter.AmountToDecimal(outputTotal)
+	totalOutputAmt, err := btcpkg.AmountToDecimal(outputTotal)
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert total output amount to decimal: %w", err)
 	}
-	feeAmt, err := h.converter.AmountToDecimal(fee)
+	feeAmt, err := btcpkg.AmountToDecimal(fee)
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert fee amount to decimal: %w", err)
 	}

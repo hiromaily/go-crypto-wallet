@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -91,7 +92,7 @@ func (b *BitcoinCash) getMinRelayFeeBCH() (btcutil.Amount, error) {
 		logger.Debug("BCH relay fee is 0 from getnetworkinfo, using default minimum")
 		return btcutil.Amount(minTxFeeSats), nil
 	}
-	fee, err := b.FloatToAmount(res.RelayFee)
+	fee, err := btcpkg.FloatToAmount(res.RelayFee)
 	if err != nil {
 		return 0, err
 	}
@@ -112,8 +113,8 @@ func (b *BitcoinCash) validateAdjustmentFee(fee float64) bool {
 
 // calculateNewFee adjusts fee by adjustment fee multiplier.
 // Uses inherited BTC implementation.
-func (b *BitcoinCash) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
-	newFee, err := b.FloatToAmount(fee.ToBTC() * adjustmentFee)
+func (*BitcoinCash) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
+	newFee, err := btcpkg.FloatToAmount(fee.ToBTC() * adjustmentFee)
 	if err != nil {
 		return 0, err
 	}

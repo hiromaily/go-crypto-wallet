@@ -12,6 +12,7 @@ import (
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
+	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -38,7 +39,7 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction
 
 	vout := make([]dtobtc.RawTransactionOutput, len(result.Vout))
 	for i, output := range result.Vout {
-		value, err := btc.FloatToAmount(output.Value)
+		value, err := btcpkg.FloatToAmount(output.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +110,7 @@ func ToPreviousTxList(prevTxs []PrevTx, btc *Bitcoin) ([]dtobtc.PreviousTx, erro
 
 	result := make([]dtobtc.PreviousTx, len(prevTxs))
 	for i, tx := range prevTxs {
-		amount, err := btc.FloatToAmount(tx.Amount)
+		amount, err := btcpkg.FloatToAmount(tx.Amount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert amount for prevTx %d: %w", i, err)
 		}
@@ -133,7 +134,7 @@ func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*dtobtc.UnspentOu
 	}
 
 	// Convert float64 amount to btcutil.Amount
-	amount, err := btc.FloatToAmount(result.Amount)
+	amount, err := btcpkg.FloatToAmount(result.Amount)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert amount: %w", err)
 	}

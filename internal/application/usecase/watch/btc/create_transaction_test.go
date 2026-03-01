@@ -138,7 +138,6 @@ func TestExecute_DepositTransaction(t *testing.T) {
 		useCase := createUseCase(deps)
 
 		// Setup mocks
-		deps.btcClient.EXPECT().FloatToAmount(float64(0)).Return(btcutil.Amount(0), nil)
 		deps.btcClient.EXPECT().ConfirmationBlock().Return(uint64(6))
 		deps.btcClient.EXPECT().ListUnspentByAccount(
 			domainAccount.AccountTypeClient,
@@ -161,33 +160,11 @@ func TestExecute_DepositTransaction(t *testing.T) {
 		assert.Empty(t, output.FileName)
 	})
 
-	t.Run("returns error when FloatToAmount fails", func(t *testing.T) {
-		deps := newTestDependencies(t)
-		useCase := createUseCase(deps)
-
-		// Setup mocks
-		deps.btcClient.EXPECT().FloatToAmount(float64(0)).Return(
-			btcutil.Amount(0),
-			errors.New("amount conversion error"),
-		)
-
-		input := watchusecase.CreateTransactionInput{
-			ActionType: domainTx.ActionTypeDeposit.String(),
-		}
-
-		output, err := useCase.Execute(context.Background(), input)
-
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to create transaction")
-		assert.Empty(t, output.TransactionHex)
-	})
-
 	t.Run("returns error when ListUnspentByAccount fails", func(t *testing.T) {
 		deps := newTestDependencies(t)
 		useCase := createUseCase(deps)
 
 		// Setup mocks
-		deps.btcClient.EXPECT().FloatToAmount(float64(0)).Return(btcutil.Amount(0), nil)
 		deps.btcClient.EXPECT().ConfirmationBlock().Return(uint64(6))
 		deps.btcClient.EXPECT().ListUnspentByAccount(
 			domainAccount.AccountTypeClient,
@@ -300,34 +277,10 @@ func TestExecute_TransferTransaction(t *testing.T) {
 		assert.Empty(t, output.TransactionHex)
 	})
 
-	t.Run("returns error when FloatToAmount fails", func(t *testing.T) {
-		deps := newTestDependencies(t)
-		useCase := createUseCase(deps)
-
-		deps.btcClient.EXPECT().FloatToAmount(0.01).Return(
-			btcutil.Amount(0),
-			errors.New("conversion error"),
-		)
-
-		input := watchusecase.CreateTransactionInput{
-			ActionType:      domainTx.ActionTypeTransfer.String(),
-			SenderAccount:   domainAccount.AccountTypeDeposit,
-			ReceiverAccount: domainAccount.AccountTypePayment,
-			Amount:          0.01,
-		}
-
-		output, err := useCase.Execute(context.Background(), input)
-
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to create transaction")
-		assert.Empty(t, output.TransactionHex)
-	})
-
 	t.Run("returns error when GetBalanceByAccount fails", func(t *testing.T) {
 		deps := newTestDependencies(t)
 		useCase := createUseCase(deps)
 
-		deps.btcClient.EXPECT().FloatToAmount(0.01).Return(btcutil.Amount(1000000), nil)
 		deps.btcClient.EXPECT().ConfirmationBlock().Return(uint64(6))
 		deps.btcClient.EXPECT().GetBalanceByAccount(
 			domainAccount.AccountTypeDeposit,
@@ -353,7 +306,6 @@ func TestExecute_TransferTransaction(t *testing.T) {
 		useCase := createUseCase(deps)
 
 		// Setup mocks
-		deps.btcClient.EXPECT().FloatToAmount(0.01).Return(btcutil.Amount(1000000), nil)
 		deps.btcClient.EXPECT().ConfirmationBlock().Return(uint64(6))
 		deps.btcClient.EXPECT().GetBalanceByAccount(
 			domainAccount.AccountTypeDeposit,
@@ -399,7 +351,6 @@ func TestMockExpectations(t *testing.T) {
 		useCase := createUseCase(deps)
 
 		// Setup minimal mocks
-		deps.btcClient.EXPECT().FloatToAmount(float64(0)).Return(btcutil.Amount(0), nil)
 		deps.btcClient.EXPECT().ConfirmationBlock().Return(uint64(6))
 		deps.btcClient.EXPECT().ListUnspentByAccount(
 			domainAccount.AccountTypeClient,
