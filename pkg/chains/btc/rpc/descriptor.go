@@ -87,7 +87,7 @@ type DescriptorEntry struct {
 }
 
 // ImportDescriptors calls importdescriptors (Bitcoin Core v0.21.0+).
-func (c *Client) ImportDescriptors(
+func (c *rpcClient) ImportDescriptors(
 	requests []ImportDescriptorsRequest,
 ) ([]ImportDescriptorsResponse, error) {
 	if len(requests) == 0 {
@@ -109,7 +109,7 @@ func (c *Client) ImportDescriptors(
 }
 
 // ImportMulti calls importmulti (legacy wallet method).
-func (c *Client) ImportMulti(
+func (c *rpcClient) ImportMulti(
 	requests []ImportMultiRequest, options *ImportMultiOptions,
 ) ([]ImportMultiResponse, error) {
 	if len(requests) == 0 {
@@ -139,7 +139,7 @@ func (c *Client) ImportMulti(
 }
 
 // GetDescriptorInfo calls getdescriptorinfo to analyze a descriptor and calculate its checksum.
-func (c *Client) GetDescriptorInfo(descriptor string) (*DescriptorInfo, error) {
+func (c *rpcClient) GetDescriptorInfo(descriptor string) (*DescriptorInfo, error) {
 	bDescriptor, err := json.Marshal(descriptor)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(descriptor): %w", err)
@@ -156,7 +156,7 @@ func (c *Client) GetDescriptorInfo(descriptor string) (*DescriptorInfo, error) {
 }
 
 // ListDescriptors calls listdescriptors to list all imported descriptors.
-func (c *Client) ListDescriptors(privateDescriptors bool) (*ListDescriptorsResult, error) {
+func (c *rpcClient) ListDescriptors(privateDescriptors bool) (*ListDescriptorsResult, error) {
 	bPrivate, err := json.Marshal(privateDescriptors)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(privateDescriptors): %w", err)

@@ -14,7 +14,7 @@ type EstimateSmartFeeResult struct {
 
 // EstimateSmartFee calls estimatesmartfee with the given confirmation target
 // and returns the fee rate in BTC/kB.
-func (c *Client) EstimateSmartFee(confirmationBlock int) (float64, error) {
+func (c *rpcClient) EstimateSmartFee(confirmationBlock int) (float64, error) {
 	input, err := json.Marshal(confirmationBlock)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call json.Marshal(confirmationBlock): %w", err)

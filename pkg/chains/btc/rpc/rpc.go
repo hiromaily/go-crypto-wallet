@@ -2,12 +2,12 @@ package rpc
 
 import "github.com/btcsuite/btcd/rpcclient"
 
-// Client wraps *rpcclient.Client and exposes Bitcoin RPC operations as methods.
-type Client struct {
+// rpcClient wraps *rpcclient.Client and exposes Bitcoin RPC operations as methods.
+type rpcClient struct {
 	client *rpcclient.Client
 }
 
-// New creates a new Client wrapping the given rpcclient.Client.
-func New(client *rpcclient.Client) *Client {
-	return &Client{client: client}
+// NewRPCClient creates a new client wrapping the given rpcclient.Client.
+func NewRPCClient(client *rpcclient.Client) *rpcClient {
+	return &rpcClient{client: client}
 }

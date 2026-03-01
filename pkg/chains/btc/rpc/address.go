@@ -42,7 +42,7 @@ type Purpose struct {
 }
 
 // GetAddressInfo calls the getaddressinfo RPC and returns the raw wire response.
-func (c *Client) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
+func (c *rpcClient) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(addr): %w", err)
@@ -59,7 +59,7 @@ func (c *Client) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 }
 
 // ValidateAddress calls the validateaddress RPC and returns the raw wire response.
-func (c *Client) ValidateAddress(addr string) (*ValidateAddressResult, error) {
+func (c *rpcClient) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(addr): %w", err)
@@ -76,7 +76,7 @@ func (c *Client) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 }
 
 // GetAddressesByLabel calls getaddressesbylabel and returns the raw wire map.
-func (c *Client) GetAddressesByLabel(labelName string) (map[string]Purpose, error) {
+func (c *rpcClient) GetAddressesByLabel(labelName string) (map[string]Purpose, error) {
 	input, err := json.Marshal(labelName)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(labelName): %w", err)

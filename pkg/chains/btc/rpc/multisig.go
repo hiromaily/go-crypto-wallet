@@ -13,7 +13,7 @@ type AddMultisigAddressResult struct {
 
 // AddMultisigAddress calls addmultisigaddress.
 // addressType is optional (pass "" to omit the parameter, which is required for BCH).
-func (c *Client) AddMultisigAddress(
+func (c *rpcClient) AddMultisigAddress(
 	requiredSigs int, addresses []string, accountName, addressType string,
 ) (*AddMultisigAddressResult, error) {
 	bReqSigs, err := json.Marshal(requiredSigs)

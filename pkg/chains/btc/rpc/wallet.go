@@ -22,7 +22,7 @@ type CreateWalletOptions struct {
 }
 
 // CreateWallet calls createwallet.
-func (c *Client) CreateWallet(fileName string, opts *CreateWalletOptions) error {
+func (c *rpcClient) CreateWallet(fileName string, opts *CreateWalletOptions) error {
 	if opts == nil {
 		opts = &CreateWalletOptions{}
 	}
@@ -52,7 +52,7 @@ func (c *Client) CreateWallet(fileName string, opts *CreateWalletOptions) error 
 }
 
 // LoadWallet calls loadwallet.
-func (c *Client) LoadWallet(fileName string) error {
+func (c *rpcClient) LoadWallet(fileName string) error {
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
@@ -72,7 +72,7 @@ func (c *Client) LoadWallet(fileName string) error {
 }
 
 // UnloadWallet calls unloadwallet.
-func (c *Client) UnloadWallet(fileName string) error {
+func (c *rpcClient) UnloadWallet(fileName string) error {
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
@@ -110,7 +110,7 @@ const (
 )
 
 // BackupWallet calls backupwallet.
-func (c *Client) BackupWallet(fileName string) error {
+func (c *rpcClient) BackupWallet(fileName string) error {
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
@@ -123,16 +123,16 @@ func (c *Client) BackupWallet(fileName string) error {
 }
 
 // DumpWallet calls dumpwallet.
-func (c *Client) DumpWallet(fileName string) error {
+func (c *rpcClient) DumpWallet(fileName string) error {
 	return c.dumpImportWallet(fileName, "dumpwallet")
 }
 
 // ImportWallet calls importwallet.
-func (c *Client) ImportWallet(fileName string) error {
+func (c *rpcClient) ImportWallet(fileName string) error {
 	return c.dumpImportWallet(fileName, "importwallet")
 }
 
-func (c *Client) dumpImportWallet(fileName, method string) error {
+func (c *rpcClient) dumpImportWallet(fileName, method string) error {
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
@@ -149,7 +149,7 @@ func (c *Client) dumpImportWallet(fileName, method string) error {
 }
 
 // EncryptWallet calls encryptwallet.
-func (c *Client) EncryptWallet(passphrase string) error {
+func (c *rpcClient) EncryptWallet(passphrase string) error {
 	bPassphrase, err := json.Marshal(passphrase)
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(passphrase): %w", err)
@@ -162,22 +162,22 @@ func (c *Client) EncryptWallet(passphrase string) error {
 }
 
 // WalletLock calls walletlock.
-func (c *Client) WalletLock() error {
+func (c *rpcClient) WalletLock() error {
 	return c.client.WalletLock()
 }
 
 // WalletPassphrase calls walletpassphrase.
-func (c *Client) WalletPassphrase(passphrase string, timeoutSecs int64) error {
+func (c *rpcClient) WalletPassphrase(passphrase string, timeoutSecs int64) error {
 	return c.client.WalletPassphrase(passphrase, timeoutSecs)
 }
 
 // WalletPassphraseChange calls walletpassphrasechange.
-func (c *Client) WalletPassphraseChange(old, newPass string) error {
+func (c *rpcClient) WalletPassphraseChange(old, newPass string) error {
 	return c.client.WalletPassphraseChange(old, newPass)
 }
 
 // GetHDKeys calls gethdkeys (Bitcoin Core v28.0+).
-func (c *Client) GetHDKeys(active *bool) ([]HDKeyResult, error) {
+func (c *rpcClient) GetHDKeys(active *bool) ([]HDKeyResult, error) {
 	var params []json.RawMessage
 	if active != nil {
 		bActive, err := json.Marshal(map[string]bool{"active": *active})
@@ -198,7 +198,7 @@ func (c *Client) GetHDKeys(active *bool) ([]HDKeyResult, error) {
 }
 
 // CreateWalletDescriptor calls createwalletdescriptor (Bitcoin Core v28.0+).
-func (c *Client) CreateWalletDescriptor(outputType WalletOutputType) (*CreateWalletDescriptorResult, error) {
+func (c *rpcClient) CreateWalletDescriptor(outputType WalletOutputType) (*CreateWalletDescriptorResult, error) {
 	if outputType != WalletOutputTypeBech32 && outputType != WalletOutputTypeBech32m {
 		return nil, fmt.Errorf("invalid output type: %s (must be 'bech32' or 'bech32m')", outputType)
 	}

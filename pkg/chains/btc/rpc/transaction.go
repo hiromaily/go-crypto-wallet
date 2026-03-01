@@ -136,7 +136,7 @@ type GetTxOutResult struct {
 }
 
 // GetTransaction calls gettransaction and returns the raw wire response.
-func (c *Client) GetTransaction(txID string) (*GetTransactionResult, error) {
+func (c *rpcClient) GetTransaction(txID string) (*GetTransactionResult, error) {
 	input, err := json.Marshal(txID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(txID): %w", err)
@@ -153,7 +153,7 @@ func (c *Client) GetTransaction(txID string) (*GetTransactionResult, error) {
 }
 
 // DecodeRawTransaction calls decoderawtransaction and returns the raw wire response.
-func (c *Client) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
+func (c *rpcClient) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 	input, err := json.Marshal(hexTx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(hexTx): %w", err)
@@ -171,7 +171,7 @@ func (c *Client) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 
 // FundRawTransaction calls fundrawtransaction with the given options.
 // If opts is nil, an empty options object is sent.
-func (c *Client) FundRawTransaction(
+func (c *rpcClient) FundRawTransaction(
 	hexTx string, opts *FundRawTransactionOptions,
 ) (*FundRawTransactionResult, error) {
 	bHex, err := json.Marshal(hexTx)
@@ -197,7 +197,7 @@ func (c *Client) FundRawTransaction(
 }
 
 // SignRawTransactionWithWallet calls signrawtransactionwithwallet.
-func (c *Client) SignRawTransactionWithWallet(
+func (c *rpcClient) SignRawTransactionWithWallet(
 	hexTx string, prevTxs []PrevTx,
 ) (*SignRawTransactionResult, error) {
 	bHex, err := json.Marshal(hexTx)
@@ -220,7 +220,7 @@ func (c *Client) SignRawTransactionWithWallet(
 }
 
 // SignRawTransactionWithKey calls signrawtransactionwithkey.
-func (c *Client) SignRawTransactionWithKey(
+func (c *rpcClient) SignRawTransactionWithKey(
 	hexTx string, privKeys []string, prevTxs []PrevTx,
 ) (*SignRawTransactionResult, error) {
 	bHex, err := json.Marshal(hexTx)
@@ -249,7 +249,7 @@ func (c *Client) SignRawTransactionWithKey(
 // CreateRawTransaction calls createrawtransaction.
 // inputs is the list of UTXOs to spend; outputs maps recipient address to BTC amount.
 // Returns the hex-encoded unsigned transaction.
-func (c *Client) CreateRawTransaction(inputs []TxInput, outputs map[string]float64) (string, error) {
+func (c *rpcClient) CreateRawTransaction(inputs []TxInput, outputs map[string]float64) (string, error) {
 	bInputs, err := json.Marshal(inputs)
 	if err != nil {
 		return "", fmt.Errorf("fail to call json.Marshal(inputs): %w", err)
@@ -270,7 +270,7 @@ func (c *Client) CreateRawTransaction(inputs []TxInput, outputs map[string]float
 }
 
 // SendRawTransaction calls sendrawtransaction and returns the transaction ID.
-func (c *Client) SendRawTransaction(hexTx string) (string, error) {
+func (c *rpcClient) SendRawTransaction(hexTx string) (string, error) {
 	bHex, err := json.Marshal(hexTx)
 	if err != nil {
 		return "", fmt.Errorf("fail to call json.Marshal(hexTx): %w", err)
@@ -287,7 +287,7 @@ func (c *Client) SendRawTransaction(hexTx string) (string, error) {
 }
 
 // GetTxOut calls gettxout and returns the unspent transaction output info.
-func (c *Client) GetTxOut(txID string, index uint32, mempool bool) (*GetTxOutResult, error) {
+func (c *rpcClient) GetTxOut(txID string, index uint32, mempool bool) (*GetTxOutResult, error) {
 	bTxID, err := json.Marshal(txID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(txID): %w", err)
