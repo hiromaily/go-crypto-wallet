@@ -123,16 +123,4 @@ type BitcoinCompatible interface {
 	) []string
 	LockUnspent(tx *dtobtc.UnspentOutput) error
 	UnlockUnspent() error
-
-	// wallet.go
-	BackupWallet(fileName string) error
-	DumpWallet(fileName string) error
-	ImportWallet(fileName string) error
-	EncryptWallet(passphrase string) error
-	WalletLock() error
-	WalletPassphrase(passphrase string, timeoutSecs int64) error
-	WalletPassphraseChange(old, newPass string) error
-	LoadWallet(fileName string) error
-	UnLoadWallet(fileName string) error
-	CreateWallet(fileName string, disablePrivKey bool) error
 }

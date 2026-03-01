@@ -159,18 +159,6 @@ type Bitcoiner interface {
 	) []string
 	LockUnspent(tx *dtobtc.UnspentOutput) error
 	UnlockUnspent() error
-
-	// wallet.go
-	BackupWallet(fileName string) error
-	DumpWallet(fileName string) error
-	ImportWallet(fileName string) error
-	EncryptWallet(passphrase string) error
-	WalletLock() error
-	WalletPassphrase(passphrase string, timeoutSecs int64) error
-	WalletPassphraseChange(old, newPass string) error
-	LoadWallet(fileName string) error
-	UnLoadWallet(fileName string) error
-	CreateWallet(fileName string, disablePrivKey bool) error
 }
 
 // =============================================================================
@@ -441,8 +429,10 @@ type NodeBalanceChecker interface {
 	GetBalance() (btcutil.Amount, error)
 }
 
-// FeeEstimator provides access to the underlying RPC client for fee estimation.
-type FeeEstimator interface {
+// PKGRPCProvider provides direct access to the underlying RPC client.
+// Used by callers that need raw RPC operations (fee estimation, wallet security, etc.)
+// without going through delegation wrappers.
+type PKGRPCProvider interface {
 	GetPkgRPC() btcrpc.BTCRPC
 }
 
@@ -473,26 +463,6 @@ type UTXOLocker interface {
 	UnlockUnspent() error
 }
 
-// WalletSecurityManager manages wallet encryption, passphrase, and key backup/restore.
-// Used by keygen and sign wallet adapters, and by the keygen API CLI commands.
-type WalletSecurityManager interface {
-	EncryptWallet(passphrase string) error
-	WalletPassphrase(passphrase string, timeoutSecs int64) error
-	WalletPassphraseChange(old, newPass string) error
-	WalletLock() error
-	DumpWallet(fileName string) error
-	ImportWallet(fileName string) error
-}
-
-// WalletManager manages wallet-level operations (encryption, backup, etc.).
-type WalletManager interface {
-	WalletSecurityManager
-	BackupWallet(fileName string) error
-	LoadWallet(fileName string) error
-	UnLoadWallet(fileName string) error
-	CreateWallet(fileName string, disablePrivKey bool) error
-}
-
 // BTCLifecycle manages the Bitcoin client lifecycle.
 type BTCLifecycle interface {
 	Close()
@@ -507,7 +477,7 @@ type BTCLifecycle interface {
 type WatchAPIClient interface {
 	NodeBalanceChecker // GetBalance
 	BalanceChecker     // GetBalanceByAccount
-	FeeEstimator       // GetPkgRPC
+	PKGRPCProvider     // GetPkgRPC
 	FullUTXOLister     // ListUnspent
 	UTXOProvider       // ListUnspentByAccount, GetUnspentListAddrs
 	NodeLogger         // Logging

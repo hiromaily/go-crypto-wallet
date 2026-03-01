@@ -116,6 +116,57 @@ func (_c *MockBTCRPC_AddMultisigAddress_Call) RunAndReturn(run func(requiredSigs
 	return _c
 }
 
+// BackupWallet provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) BackupWallet(fileName string) error {
+	ret := _mock.Called(fileName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for BackupWallet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
+		r0 = returnFunc(fileName)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBTCRPC_BackupWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'BackupWallet'
+type MockBTCRPC_BackupWallet_Call struct {
+	*mock.Call
+}
+
+// BackupWallet is a helper method to define mock.On call
+//   - fileName string
+func (_e *MockBTCRPC_Expecter) BackupWallet(fileName interface{}) *MockBTCRPC_BackupWallet_Call {
+	return &MockBTCRPC_BackupWallet_Call{Call: _e.mock.On("BackupWallet", fileName)}
+}
+
+func (_c *MockBTCRPC_BackupWallet_Call) Run(run func(fileName string)) *MockBTCRPC_BackupWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_BackupWallet_Call) Return(err error) *MockBTCRPC_BackupWallet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBTCRPC_BackupWallet_Call) RunAndReturn(run func(fileName string) error) *MockBTCRPC_BackupWallet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateRawTransaction provides a mock function for the type MockBTCRPC
 func (_mock *MockBTCRPC) CreateRawTransaction(inputs []rpc.TxInput, outputs map[string]float64) (string, error) {
 	ret := _mock.Called(inputs, outputs)
@@ -239,6 +290,68 @@ func (_c *MockBTCRPC_CreateWallet_Call) RunAndReturn(run func(fileName string, o
 	return _c
 }
 
+// CreateWalletDescriptor provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) CreateWalletDescriptor(outputType rpc.WalletOutputType) (*rpc.CreateWalletDescriptorResult, error) {
+	ret := _mock.Called(outputType)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateWalletDescriptor")
+	}
+
+	var r0 *rpc.CreateWalletDescriptorResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(rpc.WalletOutputType) (*rpc.CreateWalletDescriptorResult, error)); ok {
+		return returnFunc(outputType)
+	}
+	if returnFunc, ok := ret.Get(0).(func(rpc.WalletOutputType) *rpc.CreateWalletDescriptorResult); ok {
+		r0 = returnFunc(outputType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*rpc.CreateWalletDescriptorResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(rpc.WalletOutputType) error); ok {
+		r1 = returnFunc(outputType)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBTCRPC_CreateWalletDescriptor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateWalletDescriptor'
+type MockBTCRPC_CreateWalletDescriptor_Call struct {
+	*mock.Call
+}
+
+// CreateWalletDescriptor is a helper method to define mock.On call
+//   - outputType rpc.WalletOutputType
+func (_e *MockBTCRPC_Expecter) CreateWalletDescriptor(outputType interface{}) *MockBTCRPC_CreateWalletDescriptor_Call {
+	return &MockBTCRPC_CreateWalletDescriptor_Call{Call: _e.mock.On("CreateWalletDescriptor", outputType)}
+}
+
+func (_c *MockBTCRPC_CreateWalletDescriptor_Call) Run(run func(outputType rpc.WalletOutputType)) *MockBTCRPC_CreateWalletDescriptor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 rpc.WalletOutputType
+		if args[0] != nil {
+			arg0 = args[0].(rpc.WalletOutputType)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_CreateWalletDescriptor_Call) Return(createWalletDescriptorResult *rpc.CreateWalletDescriptorResult, err error) *MockBTCRPC_CreateWalletDescriptor_Call {
+	_c.Call.Return(createWalletDescriptorResult, err)
+	return _c
+}
+
+func (_c *MockBTCRPC_CreateWalletDescriptor_Call) RunAndReturn(run func(outputType rpc.WalletOutputType) (*rpc.CreateWalletDescriptorResult, error)) *MockBTCRPC_CreateWalletDescriptor_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DecodeRawTransaction provides a mock function for the type MockBTCRPC
 func (_mock *MockBTCRPC) DecodeRawTransaction(hexTx string) (*rpc.TxRawResult, error) {
 	ret := _mock.Called(hexTx)
@@ -297,6 +410,108 @@ func (_c *MockBTCRPC_DecodeRawTransaction_Call) Return(txRawResult *rpc.TxRawRes
 }
 
 func (_c *MockBTCRPC_DecodeRawTransaction_Call) RunAndReturn(run func(hexTx string) (*rpc.TxRawResult, error)) *MockBTCRPC_DecodeRawTransaction_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DumpWallet provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) DumpWallet(fileName string) error {
+	ret := _mock.Called(fileName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DumpWallet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
+		r0 = returnFunc(fileName)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBTCRPC_DumpWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DumpWallet'
+type MockBTCRPC_DumpWallet_Call struct {
+	*mock.Call
+}
+
+// DumpWallet is a helper method to define mock.On call
+//   - fileName string
+func (_e *MockBTCRPC_Expecter) DumpWallet(fileName interface{}) *MockBTCRPC_DumpWallet_Call {
+	return &MockBTCRPC_DumpWallet_Call{Call: _e.mock.On("DumpWallet", fileName)}
+}
+
+func (_c *MockBTCRPC_DumpWallet_Call) Run(run func(fileName string)) *MockBTCRPC_DumpWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_DumpWallet_Call) Return(err error) *MockBTCRPC_DumpWallet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBTCRPC_DumpWallet_Call) RunAndReturn(run func(fileName string) error) *MockBTCRPC_DumpWallet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// EncryptWallet provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) EncryptWallet(passphrase string) error {
+	ret := _mock.Called(passphrase)
+
+	if len(ret) == 0 {
+		panic("no return value specified for EncryptWallet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
+		r0 = returnFunc(passphrase)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBTCRPC_EncryptWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EncryptWallet'
+type MockBTCRPC_EncryptWallet_Call struct {
+	*mock.Call
+}
+
+// EncryptWallet is a helper method to define mock.On call
+//   - passphrase string
+func (_e *MockBTCRPC_Expecter) EncryptWallet(passphrase interface{}) *MockBTCRPC_EncryptWallet_Call {
+	return &MockBTCRPC_EncryptWallet_Call{Call: _e.mock.On("EncryptWallet", passphrase)}
+}
+
+func (_c *MockBTCRPC_EncryptWallet_Call) Run(run func(passphrase string)) *MockBTCRPC_EncryptWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_EncryptWallet_Call) Return(err error) *MockBTCRPC_EncryptWallet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBTCRPC_EncryptWallet_Call) RunAndReturn(run func(passphrase string) error) *MockBTCRPC_EncryptWallet_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -783,6 +998,68 @@ func (_c *MockBTCRPC_GetDescriptorInfo_Call) RunAndReturn(run func(descriptor st
 	return _c
 }
 
+// GetHDKeys provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) GetHDKeys(active *bool) ([]rpc.HDKeyResult, error) {
+	ret := _mock.Called(active)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetHDKeys")
+	}
+
+	var r0 []rpc.HDKeyResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*bool) ([]rpc.HDKeyResult, error)); ok {
+		return returnFunc(active)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*bool) []rpc.HDKeyResult); ok {
+		r0 = returnFunc(active)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]rpc.HDKeyResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*bool) error); ok {
+		r1 = returnFunc(active)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBTCRPC_GetHDKeys_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetHDKeys'
+type MockBTCRPC_GetHDKeys_Call struct {
+	*mock.Call
+}
+
+// GetHDKeys is a helper method to define mock.On call
+//   - active *bool
+func (_e *MockBTCRPC_Expecter) GetHDKeys(active interface{}) *MockBTCRPC_GetHDKeys_Call {
+	return &MockBTCRPC_GetHDKeys_Call{Call: _e.mock.On("GetHDKeys", active)}
+}
+
+func (_c *MockBTCRPC_GetHDKeys_Call) Run(run func(active *bool)) *MockBTCRPC_GetHDKeys_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *bool
+		if args[0] != nil {
+			arg0 = args[0].(*bool)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_GetHDKeys_Call) Return(hDKeyResults []rpc.HDKeyResult, err error) *MockBTCRPC_GetHDKeys_Call {
+	_c.Call.Return(hDKeyResults, err)
+	return _c
+}
+
+func (_c *MockBTCRPC_GetHDKeys_Call) RunAndReturn(run func(active *bool) ([]rpc.HDKeyResult, error)) *MockBTCRPC_GetHDKeys_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetNetworkInfo provides a mock function for the type MockBTCRPC
 func (_mock *MockBTCRPC) GetNetworkInfo() (*rpc.GetNetworkInfoResult, error) {
 	ret := _mock.Called()
@@ -1226,6 +1503,57 @@ func (_c *MockBTCRPC_ImportPrivKey_Call) Return(err error) *MockBTCRPC_ImportPri
 }
 
 func (_c *MockBTCRPC_ImportPrivKey_Call) RunAndReturn(run func(wifKey string, label string, rescan bool) error) *MockBTCRPC_ImportPrivKey_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ImportWallet provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) ImportWallet(fileName string) error {
+	ret := _mock.Called(fileName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ImportWallet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
+		r0 = returnFunc(fileName)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBTCRPC_ImportWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ImportWallet'
+type MockBTCRPC_ImportWallet_Call struct {
+	*mock.Call
+}
+
+// ImportWallet is a helper method to define mock.On call
+//   - fileName string
+func (_e *MockBTCRPC_Expecter) ImportWallet(fileName interface{}) *MockBTCRPC_ImportWallet_Call {
+	return &MockBTCRPC_ImportWallet_Call{Call: _e.mock.On("ImportWallet", fileName)}
+}
+
+func (_c *MockBTCRPC_ImportWallet_Call) Run(run func(fileName string)) *MockBTCRPC_ImportWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_ImportWallet_Call) Return(err error) *MockBTCRPC_ImportWallet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBTCRPC_ImportWallet_Call) RunAndReturn(run func(fileName string) error) *MockBTCRPC_ImportWallet_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1766,6 +2094,164 @@ func (_c *MockBTCRPC_ValidateAddress_Call) Return(validateAddressResult *rpc.Val
 }
 
 func (_c *MockBTCRPC_ValidateAddress_Call) RunAndReturn(run func(addr string) (*rpc.ValidateAddressResult, error)) *MockBTCRPC_ValidateAddress_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WalletLock provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) WalletLock() error {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for WalletLock")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func() error); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBTCRPC_WalletLock_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WalletLock'
+type MockBTCRPC_WalletLock_Call struct {
+	*mock.Call
+}
+
+// WalletLock is a helper method to define mock.On call
+func (_e *MockBTCRPC_Expecter) WalletLock() *MockBTCRPC_WalletLock_Call {
+	return &MockBTCRPC_WalletLock_Call{Call: _e.mock.On("WalletLock")}
+}
+
+func (_c *MockBTCRPC_WalletLock_Call) Run(run func()) *MockBTCRPC_WalletLock_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_WalletLock_Call) Return(err error) *MockBTCRPC_WalletLock_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBTCRPC_WalletLock_Call) RunAndReturn(run func() error) *MockBTCRPC_WalletLock_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WalletPassphrase provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) WalletPassphrase(passphrase string, timeoutSecs int64) error {
+	ret := _mock.Called(passphrase, timeoutSecs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WalletPassphrase")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string, int64) error); ok {
+		r0 = returnFunc(passphrase, timeoutSecs)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBTCRPC_WalletPassphrase_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WalletPassphrase'
+type MockBTCRPC_WalletPassphrase_Call struct {
+	*mock.Call
+}
+
+// WalletPassphrase is a helper method to define mock.On call
+//   - passphrase string
+//   - timeoutSecs int64
+func (_e *MockBTCRPC_Expecter) WalletPassphrase(passphrase interface{}, timeoutSecs interface{}) *MockBTCRPC_WalletPassphrase_Call {
+	return &MockBTCRPC_WalletPassphrase_Call{Call: _e.mock.On("WalletPassphrase", passphrase, timeoutSecs)}
+}
+
+func (_c *MockBTCRPC_WalletPassphrase_Call) Run(run func(passphrase string, timeoutSecs int64)) *MockBTCRPC_WalletPassphrase_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_WalletPassphrase_Call) Return(err error) *MockBTCRPC_WalletPassphrase_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBTCRPC_WalletPassphrase_Call) RunAndReturn(run func(passphrase string, timeoutSecs int64) error) *MockBTCRPC_WalletPassphrase_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WalletPassphraseChange provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) WalletPassphraseChange(old string, newPass string) error {
+	ret := _mock.Called(old, newPass)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WalletPassphraseChange")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = returnFunc(old, newPass)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBTCRPC_WalletPassphraseChange_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WalletPassphraseChange'
+type MockBTCRPC_WalletPassphraseChange_Call struct {
+	*mock.Call
+}
+
+// WalletPassphraseChange is a helper method to define mock.On call
+//   - old string
+//   - newPass string
+func (_e *MockBTCRPC_Expecter) WalletPassphraseChange(old interface{}, newPass interface{}) *MockBTCRPC_WalletPassphraseChange_Call {
+	return &MockBTCRPC_WalletPassphraseChange_Call{Call: _e.mock.On("WalletPassphraseChange", old, newPass)}
+}
+
+func (_c *MockBTCRPC_WalletPassphraseChange_Call) Run(run func(old string, newPass string)) *MockBTCRPC_WalletPassphraseChange_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_WalletPassphraseChange_Call) Return(err error) *MockBTCRPC_WalletPassphraseChange_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBTCRPC_WalletPassphraseChange_Call) RunAndReturn(run func(old string, newPass string) error) *MockBTCRPC_WalletPassphraseChange_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -7,7 +7,7 @@ import (
 )
 
 // AddCommands adds all Bitcoin API subcommands
-func AddCommands(parentCmd *cobra.Command, btc apibtc.WalletSecurityManager) {
+func AddCommands(parentCmd *cobra.Command, btc apibtc.PKGRPCProvider) {
 	// encryptwallet command
 	var encryptwalletPassphrase string
 	encryptwalletCmd := &cobra.Command{

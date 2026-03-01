@@ -50,7 +50,16 @@ type BTCRPC interface {
 	GetTxOut(txID string, index uint32, mempool bool) (*GetTxOutResult, error)
 
 	// wallet.go
+	BackupWallet(fileName string) error
+	DumpWallet(fileName string) error
+	ImportWallet(fileName string) error
+	EncryptWallet(passphrase string) error
+	WalletLock() error
+	WalletPassphrase(passphrase string, timeoutSecs int64) error
+	WalletPassphraseChange(old, newPass string) error
 	CreateWallet(fileName string, opts *CreateWalletOptions) error
 	LoadWallet(fileName string) error
 	UnloadWallet(fileName string) error
+	GetHDKeys(active *bool) ([]HDKeyResult, error)
+	CreateWalletDescriptor(outputType WalletOutputType) (*CreateWalletDescriptorResult, error)
 }
