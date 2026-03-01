@@ -77,13 +77,13 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	// if adjustmentFee param is given
 	if b.validateAdjustmentFee(adjustmentFee) {
 		var newFee btcutil.Amount
-		newFee, err = b.calculateNewFee(fee, adjustmentFee)
+		newFee, err = btcpkg.CalculateNewFee(fee, adjustmentFee)
 		if err != nil {
-			logger.Warn("fail to call btc.calculateNewFee() but continue", "error", err)
+			logger.Warn("fail to call btcpkg.CalculateNewFee() but continue", "error", err)
 		} else {
 			fee = newFee
 		}
-		logger.Debug("called btc.calculateNewFee()", "adjusted newFee", newFee)
+		logger.Debug("called btcpkg.CalculateNewFee()", "adjusted newFee", newFee)
 	}
 
 	return fee, nil
@@ -95,15 +95,6 @@ func (b *Bitcoin) validateAdjustmentFee(fee float64) bool {
 		return true
 	}
 	return false
-}
-
-// CalculateNewFee adjust fee by adjustment fee
-func (*Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
-	newFee, err := btcpkg.FloatToAmount(fee.ToBTC() * adjustmentFee)
-	if err != nil {
-		return 0, err
-	}
-	return newFee, nil
 }
 
 func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {

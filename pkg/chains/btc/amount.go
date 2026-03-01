@@ -75,3 +75,9 @@ func StrSatoshiToAmount(s string) (btcutil.Amount, error) {
 	}
 	return val, nil
 }
+
+// CalculateNewFee adjusts a fee by multiplying it by adjustmentFee.
+// Used by both BTC and BCH fee calculation logic.
+func CalculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
+	return FloatToAmount(fee.ToBTC() * adjustmentFee)
+}

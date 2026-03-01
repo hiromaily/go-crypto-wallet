@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
@@ -27,6 +26,7 @@ import (
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	watchshared "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/shared"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -235,13 +235,6 @@ func (u *createTransactionUseCase) createTransferTx(
 	return u.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee, nil, nil)
 }
 
-type parsedTx struct {
-	txInputs       []btcjson.TransactionInput
-	txRepoTxInputs []*domainBTC.BTCTxInput
-	prevTxs        []dtobtc.PreviousTx
-	addresses      []string // input, sender's address
-}
-
 // userPayment represents user's payment address and amount
 type userPayment struct {
 	senderAddr   string          // sender address for just checking
@@ -282,8 +275,8 @@ func (u *createTransactionUseCase) createTx(
 	}
 
 	// parse listUnspent
-	parsedTx, inputTotal, isDone := u.parseListUnspentTx(unspentList, requiredAmount)
-	if len(parsedTx.txInputs) == 0 {
+	parsed, inputTotal, isDone := watchshared.ParseListUnspentTx(unspentList, requiredAmount)
+	if len(parsed.TxInputs) == 0 {
 		logger.Info("no input tx in listUnspent")
 		return "", "", nil
 	}
@@ -321,7 +314,7 @@ func (u *createTransactionUseCase) createTx(
 
 	// create raw transaction as temporary use
 	//  - later calculate by tx size
-	msgTx, err := u.btcClient.CreateRawTransaction(parsedTx.txInputs, txPrevOutputs)
+	msgTx, err := u.btcClient.CreateRawTransaction(parsed.TxInputs, txPrevOutputs)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call btc.CreateRawTransaction(): %w", err)
 	}
@@ -338,7 +331,7 @@ func (u *createTransactionUseCase) createTx(
 	}
 
 	// re call CreateRawTransaction
-	msgTx, err = u.btcClient.CreateRawTransaction(parsedTx.txInputs, txOutputs)
+	msgTx, err = u.btcClient.CreateRawTransaction(parsed.TxInputs, txOutputs)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call btc.CreateRawTransaction(): %w", err)
 	}
@@ -357,7 +350,7 @@ func (u *createTransactionUseCase) createTx(
 		inputTotal,
 		outputTotal,
 		fee,
-		parsedTx.txRepoTxInputs,
+		parsed.TxRepoTxInputs,
 		txRepoTxOutputs,
 		paymentRequestIds)
 	if err != nil {
@@ -369,7 +362,7 @@ func (u *createTransactionUseCase) createTx(
 	// - inserted data in database must be deleted to generate PSBT file
 	var generatedFileName string
 	if txID != 0 {
-		generatedFileName, err = u.generatePSBTFile(targetAction, msgTx, parsedTx.prevTxs, sender, txID)
+		generatedFileName, err = u.generatePSBTFile(targetAction, msgTx, parsed.PrevTxs, sender, txID)
 		if err != nil {
 			return "", "", fmt.Errorf("fail to call generatePSBTFile(): %w", err)
 		}
@@ -380,8 +373,8 @@ func (u *createTransactionUseCase) createTx(
 		"unspentAddrs", unspentAddrs,
 		"requiredAmount", requiredAmount,
 		"input_total", inputTotal,
-		"len(inputs)", len(parsedTx.txInputs),
-		"len(prevTxs)", len(parsedTx.prevTxs),
+		"len(inputs)", len(parsed.TxInputs),
+		"len(prevTxs)", len(parsed.PrevTxs),
 		"len(txPrevOutputs)", len(txPrevOutputs),
 		"len(txOutputs)", len(txOutputs),
 		"len(txRepoTxOutputs)", len(txRepoTxOutputs),
@@ -405,82 +398,6 @@ func (u *createTransactionUseCase) getUnspentList(
 	unspentAddrs := u.btcClient.GetUnspentListAddrs(unspentList, accountType)
 
 	return unspentList, unspentAddrs, nil
-}
-
-// parse result of listUnspent
-// returned *parsedTx could be nil
-func (*createTransactionUseCase) parseListUnspentTx(
-	unspentList []dtobtc.UnspentOutput, amount btcutil.Amount,
-) (*parsedTx, btcutil.Amount, bool) {
-	var inputTotal btcutil.Amount
-	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
-	txRepoTxInputs := make([]*domainBTC.BTCTxInput, 0, len(unspentList))
-	prevTxs := make([]dtobtc.PreviousTx, 0, len(unspentList))
-	addresses := make([]string, 0, len(unspentList))
-
-	var isDone bool // if isDone is false, sender can't meet amount
-	if amount == 0 {
-		isDone = true
-	}
-
-	for _, txItem := range unspentList {
-		// Amount (already btcutil.Amount, no conversion needed)
-		inputTotal += txItem.Amount
-
-		txInputs = append(txInputs, btcjson.TransactionInput{
-			Txid: txItem.TxID,
-			Vout: txItem.Vout,
-		})
-
-		// Convert btcutil.Amount to float64 for decimal conversion
-		inputAmount, err := btcpkg.FloatToDecimal(txItem.Amount.ToBTC())
-		if err != nil {
-			logger.Error("fail to convert input amount to decimal", "error", err)
-			continue
-		}
-		input, err := domainBTC.NewBTCTxInput(
-			0, // TxID will be set later
-			txItem.TxID,
-			txItem.Vout,
-			txItem.Address,
-			txItem.Label,
-			inputAmount.String(),
-			uint64(txItem.Confirmations),
-		)
-		if err != nil {
-			logger.Error("fail to create BtcTxInput", "error", err)
-			continue
-		}
-		txRepoTxInputs = append(txRepoTxInputs, input)
-
-		// TODO: if sender is client account (non-multisig address), RedeemScript is blank
-		prevTxs = append(prevTxs, dtobtc.PreviousTx{
-			TxID:          txItem.TxID,
-			Vout:          txItem.Vout,
-			ScriptPubKey:  txItem.ScriptPubKey,
-			RedeemScript:  txItem.RedeemScript,  // required if target account is multisig address
-			WitnessScript: txItem.WitnessScript, // for SegWit addresses
-			Amount:        txItem.Amount,        // Keep as btcutil.Amount
-		})
-
-		addresses = append(addresses, txItem.Address)
-
-		// check total if amount is set as parameter
-		if amount == 0 {
-			continue
-		}
-		if inputTotal > amount {
-			isDone = true
-			break
-		}
-	}
-
-	return &parsedTx{
-		txInputs:       txInputs,
-		txRepoTxInputs: txRepoTxInputs,
-		prevTxs:        prevTxs,
-		addresses:      addresses,
-	}, inputTotal, isDone
 }
 
 // createTxOutputs creates transaction outputs for ActionTypeDeposit and ActionTypeTransfer.
