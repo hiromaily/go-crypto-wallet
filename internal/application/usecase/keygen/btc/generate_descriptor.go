@@ -9,15 +9,14 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
+	btcdescriptor "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/descriptor"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -238,17 +237,17 @@ func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 	}
 
 	// Map address type to descriptor type for multisig
-	var descriptorType domainWallet.DescriptorType
+	var descriptorType btcdescriptor.DescriptorType
 	switch input.AddressType {
 	case domainAddress.AddrTypeLegacy:
 		// BIP44 Legacy: P2SH multisig - sh(multi(...))
-		descriptorType = domainWallet.DescriptorTypeSH
+		descriptorType = btcdescriptor.DescriptorTypeSH
 	case domainAddress.AddrTypeP2shSegwit:
 		// BIP49 P2SH-SegWit: P2SH-P2WSH multisig - sh(wsh(sortedmulti(...)))
-		descriptorType = domainWallet.DescriptorTypeSHWSH
+		descriptorType = btcdescriptor.DescriptorTypeSHWSH
 	case domainAddress.AddrTypeBech32:
 		// BIP48/84 Native SegWit: P2WSH multisig - wsh(sortedmulti(...))
-		descriptorType = domainWallet.DescriptorTypeWSH
+		descriptorType = btcdescriptor.DescriptorTypeWSH
 	case domainAddress.AddrTypeTaproot:
 		// Already handled above
 		return "", errors.New("taproot should be handled before this switch")
@@ -267,7 +266,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	authTypes []domainAccount.AuthType,
 	addressType domainAddress.AddrType,
 	accountType domainAccount.AccountType,
-) ([]dtobtc.MultisigSigner, error) {
+) ([]btcdescriptor.MultisigSigner, error) {
 	derivationPath, err := derivationPathForAddress(addressType, true, accountType, u.chainConfig)
 	if err != nil {
 		return nil, err
@@ -280,7 +279,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	}
 
 	// Reserve space for keygen key + auth keys
-	signers := make([]dtobtc.MultisigSigner, 0, len(authTypes)+1)
+	signers := make([]btcdescriptor.MultisigSigner, 0, len(authTypes)+1)
 
 	// CRITICAL FIX: Include keygen wallet's own key in multisig
 	// Without this, descriptors only contain auth keys, resulting in (N-1)-of-(N-1) instead of N-of-N
@@ -346,7 +345,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 			fp = finger
 		}
 
-		signers = append(signers, dtobtc.MultisigSigner{
+		signers = append(signers, btcdescriptor.MultisigSigner{
 			Fingerprint:    fp,
 			DerivationPath: derivationPath,
 			ExtendedKey:    xpub,
@@ -363,26 +362,26 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 	accountType domainAccount.AccountType,
 	addressType domainAddress.AddrType,
 	derivationPath string,
-) (dtobtc.MultisigSigner, error) {
+) (btcdescriptor.MultisigSigner, error) {
 	// Get seed from repository
 	seedData, err := u.seedRepo.GetOne(ctx)
 	if err != nil {
-		return dtobtc.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
+		return btcdescriptor.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
 	}
 	if seedData == nil {
-		return dtobtc.MultisigSigner{}, errors.New("seed not found - run 'keygen seed' first")
+		return btcdescriptor.MultisigSigner{}, errors.New("seed not found - run 'keygen seed' first")
 	}
 
 	// Convert seed string to bytes
 	seedBytes, err := btcpkg.SeedToByte(seedData.Seed)
 	if err != nil {
-		return dtobtc.MultisigSigner{}, fmt.Errorf("decode seed: %w", err)
+		return btcdescriptor.MultisigSigner{}, fmt.Errorf("decode seed: %w", err)
 	}
 
 	// Determine BIP purpose from address type
 	purpose, err := domainAuth.PurposeForAddressType(addressType.String())
 	if err != nil {
-		return dtobtc.MultisigSigner{}, fmt.Errorf(
+		return btcdescriptor.MultisigSigner{}, fmt.Errorf(
 			"determine purpose for address type %s: %w", addressType.String(), err)
 	}
 
@@ -398,33 +397,33 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 	case domainAuth.PurposeBIP86:
 		purposeVal = 86
 	default:
-		return dtobtc.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
+		return btcdescriptor.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
 	}
 
 	// Generate account-level extended public key from seed using HDKeyOperator
 	accountXPub, err := u.hdKeyOp.GetAccountXPub(seedBytes, purposeVal, accountType)
 	if err != nil {
-		return dtobtc.MultisigSigner{}, fmt.Errorf("generate account xpub: %w", err)
+		return btcdescriptor.MultisigSigner{}, fmt.Errorf("generate account xpub: %w", err)
 	}
 
 	// Parse extended public key
 	xpub, err := hdkeychain.NewKeyFromString(accountXPub)
 	if err != nil {
-		return dtobtc.MultisigSigner{}, fmt.Errorf("parse keygen extended key: %w", err)
+		return btcdescriptor.MultisigSigner{}, fmt.Errorf("parse keygen extended key: %w", err)
 	}
 
 	// Verify network match
 	if u.chainConfig != nil && !xpub.IsForNet(u.chainConfig) {
-		return dtobtc.MultisigSigner{}, errors.New("keygen extended key network mismatch")
+		return btcdescriptor.MultisigSigner{}, errors.New("keygen extended key network mismatch")
 	}
 
 	// Get master fingerprint
 	fingerprint, err := u.hdKeyOp.GetMasterFingerprintHex(seedBytes)
 	if err != nil {
-		return dtobtc.MultisigSigner{}, fmt.Errorf("calculate keygen fingerprint: %w", err)
+		return btcdescriptor.MultisigSigner{}, fmt.Errorf("calculate keygen fingerprint: %w", err)
 	}
 
-	return dtobtc.MultisigSigner{
+	return btcdescriptor.MultisigSigner{
 		Fingerprint:    fingerprint,
 		DerivationPath: derivationPath,
 		ExtendedKey:    xpub,

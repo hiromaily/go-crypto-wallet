@@ -1,7 +1,7 @@
-package btc
+package descriptor
 
 // Descriptor Multisig - BTC ONLY (BCH does NOT support descriptors)
-// See descriptor_service.go for full warning.
+// See types.go for full warning.
 // BCH uses traditional P2SH multisig without descriptors.
 
 import (
@@ -9,9 +9,15 @@ import (
 	"fmt"
 	"strings"
 
-	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 )
+
+// MultisigSigner represents a signer in a multisig descriptor.
+type MultisigSigner struct {
+	Fingerprint    string
+	DerivationPath string
+	ExtendedKey    *hdkeychain.ExtendedKey
+}
 
 // GenerateMultisigDescriptor generates a traditional multisig descriptor.
 //
@@ -21,9 +27,9 @@ import (
 //   - P2SH (Legacy): sh(multi(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...))
 func (d *DescriptorService) GenerateMultisigDescriptor(
 	requiredSigs int,
-	signers []dtobtc.MultisigSigner,
+	signers []MultisigSigner,
 	isChange bool,
-	descriptorType domainWallet.DescriptorType,
+	descriptorType DescriptorType,
 ) (string, error) {
 	if len(signers) == 0 {
 		return "", errors.New("no multisig signers provided")
@@ -35,17 +41,17 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 
 	// For P2SH multi(), keys should NOT be sorted (preserve original order).
 	// For P2WSH/P2SH-P2WSH sortedmulti(), keys MUST be sorted.
-	shouldSortKeys := descriptorType == domainWallet.DescriptorTypeWSH ||
-		descriptorType == domainWallet.DescriptorTypeSHWSH
+	shouldSortKeys := descriptorType == DescriptorTypeWSH ||
+		descriptorType == DescriptorTypeSHWSH
 
 	keyStrings, err := d.formatAndSortMultisigKeys(signers, isChange, shouldSortKeys)
 	if err != nil {
 		return "", err
 	}
 
-	var descriptor string
+	var desc string
 	switch descriptorType {
-	case domainWallet.DescriptorTypeSH:
+	case DescriptorTypeSH:
 		// P2SH (Legacy): sh(multi(...))
 		// Note: For BIP44 Legacy multisig, we use multi() not sortedmulti()
 		// to match Bitcoin Core's standard behavior for non-witness scripts.
@@ -55,9 +61,9 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 			requiredSigs,
 			strings.Join(keyStrings, ","),
 		)
-		descriptor = fmt.Sprintf("sh(%s)", multisigPart)
+		desc = fmt.Sprintf("sh(%s)", multisigPart)
 
-	case domainWallet.DescriptorTypeSHWSH, domainWallet.DescriptorTypeWSH:
+	case DescriptorTypeSHWSH, DescriptorTypeWSH:
 		// Both P2SH-P2WSH (BIP49) and P2WSH (BIP48) use sortedmulti
 		// Keys are sorted lexicographically
 		// Generate common sortedmulti part
@@ -67,17 +73,17 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 			strings.Join(keyStrings, ","),
 		)
 		// Apply appropriate wrapper based on descriptor type
-		if descriptorType == domainWallet.DescriptorTypeSHWSH {
+		if descriptorType == DescriptorTypeSHWSH {
 			// P2SH-P2WSH (BIP49): sh(wsh(sortedmulti(...)))
-			descriptor = fmt.Sprintf("sh(wsh(%s))", multisigPart)
+			desc = fmt.Sprintf("sh(wsh(%s))", multisigPart)
 		} else {
 			// P2WSH (BIP48): wsh(sortedmulti(...))
-			descriptor = fmt.Sprintf("wsh(%s)", multisigPart)
+			desc = fmt.Sprintf("wsh(%s)", multisigPart)
 		}
 
-	case domainWallet.DescriptorTypePKH, domainWallet.DescriptorTypeSHWPKH,
-		domainWallet.DescriptorTypeWPKH, domainWallet.DescriptorTypeTR,
-		domainWallet.DescriptorTypeUnknown:
+	case DescriptorTypePKH, DescriptorTypeSHWPKH,
+		DescriptorTypeWPKH, DescriptorTypeTR,
+		DescriptorTypeUnknown:
 		// These descriptor types are not for traditional multisig
 		return "", fmt.Errorf("descriptor type %s is not supported for traditional multisig", descriptorType.String())
 
@@ -91,10 +97,10 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 	// This allows keygen to remain offline while ensuring correct checksums.
 	// TODO: Fix BIP380 checksum implementation in internal/domain/wallet/descriptor_builder.go
 
-	return descriptor, nil
+	return desc, nil
 }
 
-func (d *DescriptorService) formatMultisigKey(signer dtobtc.MultisigSigner, changeIndex int) (string, error) {
+func (d *DescriptorService) formatMultisigKey(signer MultisigSigner, changeIndex int) (string, error) {
 	if signer.ExtendedKey == nil {
 		return "", errors.New("extended public key is nil")
 	}
@@ -110,13 +116,68 @@ func (d *DescriptorService) formatMultisigKey(signer dtobtc.MultisigSigner, chan
 	fp := strings.ToLower(strings.TrimSpace(signer.Fingerprint))
 	path := normalizeDerivationPath(signer.DerivationPath)
 
-	if err := domainWallet.ValidateFingerprint(fp); err != nil {
+	if err := ValidateFingerprint(fp); err != nil {
 		return "", fmt.Errorf("invalid fingerprint: %w", err)
 	}
 
-	if err := domainWallet.ValidateDerivationPath(path); err != nil {
+	if err := ValidateDerivationPath(path); err != nil {
 		return "", fmt.Errorf("invalid derivation path: %w", err)
 	}
 
 	return fmt.Sprintf("[%s%s]%s/%d/*", fp, path, signer.ExtendedKey.String(), changeIndex), nil
+}
+
+// GenerateTaprootScriptPathDescriptor generates a Taproot descriptor with multiple script-path pubkeys.
+//
+// SECURITY NOTE: This is NOT MuSig2. The first key is used as the internal key (key-path spending),
+// and remaining keys form script paths (script-path spending). This results in a 1-of-N spend policy
+// where any listed key can spend (first key via key path, others via script path).
+// For MuSig2 key-path spends, aggregate keys first and use tr(<agg_key>).
+//
+// Format: tr(internal_key,{pk(key1),pk(key2),...})
+// - internal_key: First signer's key (can spend via key path - most efficient)
+// - Script tree: Remaining signers' keys wrapped in pk() (can spend via script path)
+func (d *DescriptorService) GenerateTaprootScriptPathDescriptor(
+	signers []MultisigSigner,
+	isChange bool,
+) (string, error) {
+	if len(signers) < 2 {
+		return "", errors.New("at least 2 signers are required for taproot script-path multi-key descriptors")
+	}
+
+	// For Taproot script-path descriptors, keys should be sorted for deterministic output
+	keyStrings, err := d.formatAndSortMultisigKeys(signers, isChange, true)
+	if err != nil {
+		return "", err
+	}
+
+	// First key becomes the internal key (key-path spending)
+	internalKey := keyStrings[0]
+
+	// Remaining keys become script paths (script-path spending)
+	scriptKeys := keyStrings[1:]
+
+	// Wrap each script key in pk() for Tapscript
+	pkScripts := make([]string, len(scriptKeys))
+	for i, key := range scriptKeys {
+		pkScripts[i] = fmt.Sprintf("pk(%s)", key)
+	}
+
+	// Build descriptor based on number of script keys
+	var desc string
+	if len(pkScripts) == 1 {
+		// Single script: tr(internal_key,pk(script_key))
+		desc = fmt.Sprintf("tr(%s,%s)", internalKey, pkScripts[0])
+	} else {
+		// Multiple scripts: tr(internal_key,{pk(key1),pk(key2),...})
+		desc = fmt.Sprintf("tr(%s,{%s})", internalKey, strings.Join(pkScripts, ","))
+	}
+
+	// Note: Checksum is NOT added here because the domain layer's BIP380 implementation
+	// produces incorrect checksums. Instead, the watch wallet will add checksums using
+	// Bitcoin Core's getdescriptorinfo RPC before importing (which guarantees correctness).
+	// This allows keygen to remain offline while ensuring correct checksums.
+	// TODO: Fix BIP380 checksum implementation in internal/domain/wallet/descriptor_builder.go
+
+	return desc, nil
 }

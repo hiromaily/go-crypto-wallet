@@ -33,211 +33,18 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/txscript"
 
-	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	btcdescriptor "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/descriptor"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// DescriptorParser parses Bitcoin output descriptors according to BIP380.
-//
-// The parser extracts:
-//   - Descriptor type (pkh, sh(wpkh), wpkh, tr, wsh)
-//   - Keys with fingerprints and derivation paths
-//   - Checksum (if present)
-//
-// Example descriptors:
-//   - P2PKH: pkh([a1b2c3d4/44'/0'/0']xpub.../0/*)
-//   - Bech32: wpkh([a1b2c3d4/84'/0'/0']xpub.../0/*)
-//   - Taproot: tr([a1b2c3d4/86'/0'/0']xpub.../0/*)
-type DescriptorParser struct {
-	// keyRegex matches key patterns in descriptors with full metadata
-	// Format: [fingerprint/derivation/path]xpub.../path/*
-	keyRegex *regexp.Regexp
-
-	// simpleKeyRegex matches keys without fingerprint/path metadata
-	// Format: xpub... or xpub.../path
-	simpleKeyRegex *regexp.Regexp
+// NewDescriptorParser creates a new descriptor parser (delegates to pkg).
+func NewDescriptorParser() *btcdescriptor.DescriptorParser {
+	return btcdescriptor.NewDescriptorParser()
 }
 
-// NewDescriptorParser creates a new descriptor parser.
-func NewDescriptorParser() *DescriptorParser {
-	// Regex to match descriptor keys with full metadata
-	// Captures:
-	// 1. Optional [fingerprint/path]
-	// 2. Extended public key (xpub/tpub/etc.)
-	// 3. Optional /remaining/path
-	//nolint:revive // Regex pattern necessarily long for descriptor parsing
-	keyRegex := regexp.MustCompile(`\[([0-9a-fA-F]{8})((?:/\d+['h]?)*)\]([xyztYZ]pub[1-9A-HJ-NP-Za-km-z]+)((?:/\d+['h]?|/\*)*)`)
-
-	// Regex to match simple keys without metadata
-	simpleKeyRegex := regexp.MustCompile(`([xyztYZ]pub[1-9A-HJ-NP-Za-km-z]+)`)
-
-	return &DescriptorParser{
-		keyRegex:       keyRegex,
-		simpleKeyRegex: simpleKeyRegex,
-	}
-}
-
-// Parse parses a descriptor string into a Descriptor object.
-//
-// The parser:
-//  1. Determines the descriptor type
-//  2. Extracts keys with their metadata
-//  3. Extracts checksum if present
-//  4. Validates the extracted data
-//
-// Returns an error if the descriptor is malformed or unsupported.
-func (p *DescriptorParser) Parse(descriptorStr string) (*domainWallet.Descriptor, error) {
-	if strings.TrimSpace(descriptorStr) == "" {
-		return nil, errors.New("descriptor string is empty")
-	}
-
-	// Strip whitespace
-	descriptorStr = strings.TrimSpace(descriptorStr)
-
-	// Extract checksum if present (format: descriptor#checksum)
-	var checksum string
-	if idx := strings.LastIndex(descriptorStr, "#"); idx != -1 {
-		checksum = descriptorStr[idx+1:]
-		descriptorStr = descriptorStr[:idx]
-	}
-
-	// Determine descriptor type
-	descType, err := determineType(descriptorStr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to determine descriptor type: %w", err)
-	}
-
-	// Extract keys
-	keys, err := p.extractKeys(descriptorStr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to extract keys: %w", err)
-	}
-
-	if len(keys) == 0 {
-		return nil, errors.New("no keys found in descriptor")
-	}
-
-	descriptor := &domainWallet.Descriptor{
-		Type:     descType,
-		Script:   descriptorStr,
-		Keys:     keys,
-		Checksum: checksum,
-	}
-
-	// Validate the parsed descriptor
-	if err := domainWallet.ValidateDescriptor(descriptor); err != nil {
-		return nil, fmt.Errorf("invalid descriptor: %w", err)
-	}
-
-	return descriptor, nil
-}
-
-// determineType determines the descriptor type from the descriptor string.
-func determineType(descriptorStr string) (domainWallet.DescriptorType, error) {
-	// Check for different descriptor types based on prefix
-	// Note: Order matters - check more specific patterns first (sh(wsh) before sh(wpkh))
-	switch {
-	case strings.HasPrefix(descriptorStr, "pkh("):
-		return domainWallet.DescriptorTypePKH, nil
-	case strings.HasPrefix(descriptorStr, "sh(wsh("):
-		return domainWallet.DescriptorTypeSHWSH, nil
-	case strings.HasPrefix(descriptorStr, "sh(wpkh("):
-		return domainWallet.DescriptorTypeSHWPKH, nil
-	case strings.HasPrefix(descriptorStr, "sh(multi("), strings.HasPrefix(descriptorStr, "sh(sortedmulti("):
-		return domainWallet.DescriptorTypeSH, nil
-	case strings.HasPrefix(descriptorStr, "wpkh("):
-		return domainWallet.DescriptorTypeWPKH, nil
-	case strings.HasPrefix(descriptorStr, "tr("):
-		return domainWallet.DescriptorTypeTR, nil
-	case strings.HasPrefix(descriptorStr, "wsh("):
-		return domainWallet.DescriptorTypeWSH, nil
-	default:
-		return domainWallet.DescriptorTypeUnknown, fmt.Errorf("unknown descriptor type: %s", descriptorStr)
-	}
-}
-
-// extractKeys extracts keys from the descriptor string.
-//
-// Keys in descriptors have the format:
-//
-//	[fingerprint/derivation/path]xpub.../remaining/path
-//
-// Example:
-//
-//	[a1b2c3d4/44'/0'/0']xpub6ERApfZw.../0/*
-func (p *DescriptorParser) extractKeys(descriptorStr string) ([]domainWallet.DescriptorKey, error) {
-	matches := p.keyRegex.FindAllStringSubmatch(descriptorStr, -1)
-
-	if len(matches) == 0 {
-		// Try to find keys without fingerprint/path metadata
-		// Format: just xpub... or xpub.../path
-		simpleMatches := p.simpleKeyRegex.FindAllString(descriptorStr, -1)
-
-		if len(simpleMatches) == 0 {
-			return nil, errors.New("no keys found")
-		}
-
-		// Create keys without fingerprint/path metadata
-		var keys []domainWallet.DescriptorKey
-		for _, xpub := range simpleMatches {
-			keys = append(keys, domainWallet.DescriptorKey{
-				Fingerprint:    "",
-				DerivationPath: "",
-				ExtendedPubKey: xpub,
-			})
-		}
-		return keys, nil
-	}
-
-	keys := make([]domainWallet.DescriptorKey, 0, len(matches))
-	for _, match := range matches {
-		if len(match) < 5 {
-			continue
-		}
-
-		fingerprint := match[1]
-		originPath := match[2]    // Origin path (e.g., "/44'/1'/1'")
-		xpub := match[3]          // Extended public key
-		remainingPath := match[4] // Path after xpub (derivation path FROM xpub)
-
-		// Store both origin and remaining paths separately:
-		// - OriginPath: Used for PSBT BIP32 derivation metadata (full path from master)
-		// - DerivationPath: Used for key derivation from xpub (xpub is already at origin level)
-		// Example: [4a91842f/84'/1'/1']tpubDDed.../0/*
-		//   OriginPath = "/84'/1'/1'" (where xpub was derived from master)
-		//   DerivationPath = "/0/*" (what to derive from xpub)
-		//   For PSBT: combine both = "/84'/1'/1'/0/0" (after replacing wildcard)
-
-		key := domainWallet.DescriptorKey{
-			Fingerprint:    fingerprint,
-			OriginPath:     originPath,
-			DerivationPath: remainingPath,
-			ExtendedPubKey: xpub,
-		}
-
-		keys = append(keys, key)
-	}
-
-	return keys, nil
-}
-
-// FormatDescriptor formats a Descriptor object into a descriptor string.
-//
-// This is the inverse operation of Parse().
-func FormatDescriptor(desc *domainWallet.Descriptor) (string, error) {
-	if err := domainWallet.ValidateDescriptor(desc); err != nil {
-		return "", fmt.Errorf("invalid descriptor: %w", err)
-	}
-
-	// For now, return the original script
-	// In a full implementation, we would reconstruct the descriptor from components
-	result := desc.Script
-
-	if desc.Checksum != "" {
-		result += "#" + desc.Checksum
-	}
-
-	return result, nil
+// FormatDescriptor formats a Descriptor object into a descriptor string (delegates to pkg).
+func FormatDescriptor(desc *btcdescriptor.Descriptor) (string, error) {
+	return btcdescriptor.FormatDescriptor(desc)
 }
 
 // DeriveRedeemScriptFromDescriptor derives a P2SH redeemScript from a descriptor at a specific index.
@@ -275,7 +82,7 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 	// Route to appropriate handler based on descriptor type
 	var redeemScript []byte
 	switch parsed.Type {
-	case domainWallet.DescriptorTypeSH:
+	case btcdescriptor.DescriptorTypeSH:
 		// Legacy P2SH multisig
 		redeemScript, err = b.deriveMultisigRedeemScript(parsed, addressIndex)
 		if err != nil {
@@ -283,7 +90,7 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 				address, addressIndex, err)
 		}
 
-	case domainWallet.DescriptorTypeSHWPKH:
+	case btcdescriptor.DescriptorTypeSHWPKH:
 		// P2SH-wrapped P2WPKH (BIP49 Nested SegWit)
 		redeemScript, err = b.deriveP2WPKHRedeemScript(parsed, addressIndex)
 		if err != nil {
@@ -291,7 +98,7 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 				address, addressIndex, err)
 		}
 
-	case domainWallet.DescriptorTypeSHWSH:
+	case btcdescriptor.DescriptorTypeSHWSH:
 		// P2SH-wrapped P2WSH multisig (BIP49)
 		// For sh(wsh(sortedmulti(...))), the redeemScript is OP_0 <witnessScript hash>
 		// The witnessScript is the inner multisig script
@@ -301,11 +108,11 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 				address, addressIndex, err)
 		}
 
-	case domainWallet.DescriptorTypePKH,
-		domainWallet.DescriptorTypeWPKH,
-		domainWallet.DescriptorTypeTR,
-		domainWallet.DescriptorTypeWSH,
-		domainWallet.DescriptorTypeUnknown:
+	case btcdescriptor.DescriptorTypePKH,
+		btcdescriptor.DescriptorTypeWPKH,
+		btcdescriptor.DescriptorTypeTR,
+		btcdescriptor.DescriptorTypeWSH,
+		btcdescriptor.DescriptorTypeUnknown:
 		// These descriptor types don't require redeemScript derivation:
 		// - PKH: P2PKH addresses don't use redeemScript
 		// - WPKH: Native SegWit (bech32) addresses don't use redeemScript
@@ -349,7 +156,7 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 //
 
 func (b *Bitcoin) deriveMultisigRedeemScript(
-	parsed *domainWallet.Descriptor, addressIndex uint32,
+	parsed *btcdescriptor.Descriptor, addressIndex uint32,
 ) ([]byte, error) {
 	// Extract multisig parameters from the descriptor
 	requiredSigs, totalSigs, err := b.extractMultisigParams(parsed.Script)
@@ -404,7 +211,7 @@ func (b *Bitcoin) deriveMultisigRedeemScript(
 //
 
 func (b *Bitcoin) deriveP2WPKHRedeemScript(
-	parsed *domainWallet.Descriptor, addressIndex uint32,
+	parsed *btcdescriptor.Descriptor, addressIndex uint32,
 ) ([]byte, error) {
 	if len(parsed.Keys) != 1 {
 		return nil, fmt.Errorf("sh(wpkh) descriptor must have exactly 1 key, got %d", len(parsed.Keys))
@@ -455,7 +262,7 @@ func (b *Bitcoin) deriveP2WPKHRedeemScript(
 //
 // This is used for P2SH-wrapped P2WSH multisig (BIP49).
 func (b *Bitcoin) deriveP2WSHRedeemScript(
-	parsed *domainWallet.Descriptor, addressIndex uint32,
+	parsed *btcdescriptor.Descriptor, addressIndex uint32,
 ) ([]byte, error) {
 	logger.Debug("Deriving P2WSH redeemScript",
 		"descriptor_type", parsed.Type,
@@ -579,7 +386,7 @@ func (b *Bitcoin) extractMultisigParams(descriptorScript string) (requiredSigs, 
 //
 //nolint:revive // receiver unused but method belongs to Bitcoin type
 func (b *Bitcoin) derivePublicKeyFromDescriptorKey(
-	keyInfo domainWallet.DescriptorKey, addressIndex uint32,
+	keyInfo btcdescriptor.DescriptorKey, addressIndex uint32,
 ) ([]byte, error) {
 	// Parse the derivation path
 	// Format: "/0/*" or "/1/*" or "/*"
