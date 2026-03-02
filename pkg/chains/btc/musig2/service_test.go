@@ -1,4 +1,4 @@
-package btc
+package musig2
 
 import (
 	"crypto/sha256"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
-	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
+	btcmusig2 "github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
 )
 
 func TestNewMuSig2Service(t *testing.T) {
@@ -222,7 +222,7 @@ func TestMuSig2Service_CreateSession(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		ctx         *musig2.Context
+		ctx         *btcmusig2.Context
 		wantErr     bool
 		errContains string
 	}{
@@ -274,7 +274,7 @@ func testSetupSigner(
 	privKey *btcec.PrivateKey,
 	allPubKeys []*btcec.PublicKey,
 	signerNum int,
-) (*musig2.Context, *musig2.Session) {
+) (*btcmusig2.Context, *btcmusig2.Session) {
 	t.Helper()
 
 	ctx, err := service.CreateContext(privKey, allPubKeys, true)
@@ -291,7 +291,7 @@ func testSetupSigner(
 }
 
 // testExchangeNonces performs Round 1: nonce generation and exchange between two sessions.
-func testExchangeNonces(t *testing.T, service *MuSig2Service, session1, session2 *musig2.Session) {
+func testExchangeNonces(t *testing.T, service *MuSig2Service, session1, session2 *btcmusig2.Session) {
 	t.Helper()
 
 	nonce1 := service.GetPublicNonce(session1)
@@ -320,7 +320,7 @@ func testExchangeNonces(t *testing.T, service *MuSig2Service, session1, session2
 func testSignAndAggregate(
 	t *testing.T,
 	service *MuSig2Service,
-	session1, session2 *musig2.Session,
+	session1, session2 *btcmusig2.Session,
 	message [32]byte,
 ) *schnorr.Signature {
 	t.Helper()
@@ -422,7 +422,7 @@ func TestMuSig2Service_RegisterPubNonce(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		session     *musig2.Session
+		session     *btcmusig2.Session
 		nonce       [66]byte
 		wantErr     bool
 		errContains string
@@ -501,7 +501,7 @@ func TestMuSig2Service_Sign(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		session     *musig2.Session
+		session     *btcmusig2.Session
 		messageHash [32]byte
 		wantErr     bool
 		errContains string
@@ -564,7 +564,7 @@ func TestMuSig2Service_GetCombinedKey(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		ctx         *musig2.Context
+		ctx         *btcmusig2.Context
 		wantErr     bool
 		errContains string
 	}{

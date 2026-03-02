@@ -50,6 +50,7 @@ import (
 	xrpwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/xrp"
 	cryptocurrency "github.com/hiromaily/go-crypto-wallet/pkg/chains"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
+	btcmusig2 "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/musig2"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/contract"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -481,7 +482,7 @@ func (c *container) newBTC() apibtc.Bitcoiner {
 }
 
 func (*container) newMuSig2Service() apibtc.MuSig2Servicer {
-	return apibtcimpl.NewMuSig2Service()
+	return btcmusig2.NewMuSig2Service()
 }
 
 func (c *container) newETH() apieth.Ethereumer {

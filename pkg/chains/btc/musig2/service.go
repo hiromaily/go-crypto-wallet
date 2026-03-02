@@ -1,4 +1,4 @@
-package btc
+package musig2
 
 // MuSig2 (Schnorr Multi-Signature) - BTC ONLY
 //
@@ -24,7 +24,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
-	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
+	btcmusig2 "github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -75,22 +75,22 @@ func validateContextInputs(privKey *btcec.PrivateKey, allPubKeys []*btcec.Public
 //   - sortKeys: Whether to sort keys for deterministic aggregation (should be true)
 //
 // Returns:
-//   - *musig2.Context: The created context
+//   - *btcmusig2.Context: The created context
 //   - error: Any error that occurred during context creation
 func (*MuSig2Service) CreateContext(
 	privKey *btcec.PrivateKey,
 	allPubKeys []*btcec.PublicKey,
 	sortKeys bool,
-) (*musig2.Context, error) {
+) (*btcmusig2.Context, error) {
 	if err := validateContextInputs(privKey, allPubKeys); err != nil {
 		return nil, err
 	}
 
 	// Create context with known signers
-	ctx, err := musig2.NewContext(
+	ctx, err := btcmusig2.NewContext(
 		privKey,
 		sortKeys,
-		musig2.WithKnownSigners(allPubKeys),
+		btcmusig2.WithKnownSigners(allPubKeys),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create MuSig2 context: %w", err)
@@ -113,23 +113,23 @@ func (*MuSig2Service) CreateContext(
 //   - sortKeys: Whether to sort keys for deterministic aggregation (should be true)
 //
 // Returns:
-//   - *musig2.Context: The created context with Taproot tweak
+//   - *btcmusig2.Context: The created context with Taproot tweak
 //   - error: Any error that occurred during context creation
 func (*MuSig2Service) CreateContextWithTaproot(
 	privKey *btcec.PrivateKey,
 	allPubKeys []*btcec.PublicKey,
 	sortKeys bool,
-) (*musig2.Context, error) {
+) (*btcmusig2.Context, error) {
 	if err := validateContextInputs(privKey, allPubKeys); err != nil {
 		return nil, err
 	}
 
 	// Create context with Taproot BIP 86 tweak (key-path spending only)
-	ctx, err := musig2.NewContext(
+	ctx, err := btcmusig2.NewContext(
 		privKey,
 		sortKeys,
-		musig2.WithKnownSigners(allPubKeys),
-		musig2.WithBip86TweakCtx(),
+		btcmusig2.WithKnownSigners(allPubKeys),
+		btcmusig2.WithBip86TweakCtx(),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create MuSig2 context with Taproot: %w", err)
@@ -153,9 +153,9 @@ func (*MuSig2Service) CreateContextWithTaproot(
 //   - ctx: The MuSig2 context
 //
 // Returns:
-//   - *musig2.Session: The created session
+//   - *btcmusig2.Session: The created session
 //   - error: Any error that occurred during session creation
-func (*MuSig2Service) CreateSession(ctx *musig2.Context) (*musig2.Session, error) {
+func (*MuSig2Service) CreateSession(ctx *btcmusig2.Context) (*btcmusig2.Session, error) {
 	if ctx == nil {
 		return nil, errors.New("context cannot be nil")
 	}
@@ -180,7 +180,7 @@ func (*MuSig2Service) CreateSession(ctx *musig2.Context) (*musig2.Session, error
 //
 // Returns:
 //   - [66]byte: The public nonce (two 33-byte compressed EC points)
-func (*MuSig2Service) GetPublicNonce(session *musig2.Session) [66]byte {
+func (*MuSig2Service) GetPublicNonce(session *btcmusig2.Session) [66]byte {
 	return session.PublicNonce()
 }
 
@@ -195,7 +195,7 @@ func (*MuSig2Service) GetPublicNonce(session *musig2.Session) [66]byte {
 //   - bool: Whether all nonces have been received
 //   - error: Any error that occurred during nonce registration
 func (*MuSig2Service) RegisterPubNonce(
-	session *musig2.Session,
+	session *btcmusig2.Session,
 	pubNonce [66]byte,
 ) (bool, error) {
 	if session == nil {
@@ -228,12 +228,12 @@ func (*MuSig2Service) RegisterPubNonce(
 //   - messageHash: The 32-byte message hash to sign (e.g., transaction hash)
 //
 // Returns:
-//   - *musig2.PartialSignature: The partial signature
+//   - *btcmusig2.PartialSignature: The partial signature
 //   - error: Any error that occurred during signing
 func (*MuSig2Service) Sign(
-	session *musig2.Session,
+	session *btcmusig2.Session,
 	messageHash [32]byte,
-) (*musig2.PartialSignature, error) {
+) (*btcmusig2.PartialSignature, error) {
 	if session == nil {
 		return nil, errors.New("session cannot be nil")
 	}
@@ -259,8 +259,8 @@ func (*MuSig2Service) Sign(
 //   - bool: Whether all partial signatures have been received
 //   - error: Any error that occurred during signature combination
 func (*MuSig2Service) CombineSig(
-	session *musig2.Session,
-	partialSig *musig2.PartialSignature,
+	session *btcmusig2.Session,
+	partialSig *btcmusig2.PartialSignature,
 ) (bool, error) {
 	if session == nil {
 		return false, errors.New("session cannot be nil")
@@ -291,7 +291,7 @@ func (*MuSig2Service) CombineSig(
 // Returns:
 //   - *schnorr.Signature: The final aggregated signature (64 bytes)
 //   - error: Any error that occurred
-func (*MuSig2Service) FinalSig(session *musig2.Session) (*schnorr.Signature, error) {
+func (*MuSig2Service) FinalSig(session *btcmusig2.Session) (*schnorr.Signature, error) {
 	if session == nil {
 		return nil, errors.New("session cannot be nil")
 	}
@@ -315,7 +315,7 @@ func (*MuSig2Service) FinalSig(session *musig2.Session) (*schnorr.Signature, err
 // Returns:
 //   - *btcec.PublicKey: The aggregated public key
 //   - error: Any error that occurred
-func (*MuSig2Service) GetCombinedKey(ctx *musig2.Context) (*btcec.PublicKey, error) {
+func (*MuSig2Service) GetCombinedKey(ctx *btcmusig2.Context) (*btcec.PublicKey, error) {
 	if ctx == nil {
 		return nil, errors.New("context cannot be nil")
 	}
