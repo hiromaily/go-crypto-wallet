@@ -97,7 +97,7 @@ func (c *rpcClient) ImportDescriptors(
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(requests): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("importdescriptors", []json.RawMessage{bRequests})
+	rawResult, err := c.btcdClient.RawRequest("importdescriptors", []json.RawMessage{bRequests})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(importdescriptors): %w", err)
 	}
@@ -127,7 +127,7 @@ func (c *rpcClient) ImportMulti(
 		}
 		params = append(params, bOptions)
 	}
-	rawResult, err := c.client.RawRequest("importmulti", params)
+	rawResult, err := c.btcdClient.RawRequest("importmulti", params)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(importmulti): %w", err)
 	}
@@ -144,7 +144,7 @@ func (c *rpcClient) GetDescriptorInfo(descriptor string) (*DescriptorInfo, error
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(descriptor): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("getdescriptorinfo", []json.RawMessage{bDescriptor})
+	rawResult, err := c.btcdClient.RawRequest("getdescriptorinfo", []json.RawMessage{bDescriptor})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(getdescriptorinfo): %w", err)
 	}
@@ -162,7 +162,7 @@ func (c *rpcClient) DeriveAddresses(descriptor string, startIdx, endIdx uint32) 
 		json.RawMessage(fmt.Sprintf(`"%s"`, descriptor)),
 		json.RawMessage(rangeParam),
 	}
-	rawResult, err := c.client.RawRequest("deriveaddresses", params)
+	rawResult, err := c.btcdClient.RawRequest("deriveaddresses", params)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(deriveaddresses): %w", err)
 	}
@@ -179,7 +179,7 @@ func (c *rpcClient) ListDescriptors(privateDescriptors bool) (*ListDescriptorsRe
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(privateDescriptors): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("listdescriptors", []json.RawMessage{bPrivate})
+	rawResult, err := c.btcdClient.RawRequest("listdescriptors", []json.RawMessage{bPrivate})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(listdescriptors): %w", err)
 	}

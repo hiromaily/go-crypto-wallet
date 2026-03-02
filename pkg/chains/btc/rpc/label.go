@@ -15,7 +15,7 @@ func (c *rpcClient) SetLabel(addr, label string) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(label): %w", err)
 	}
-	_, err = c.client.RawRequest("setlabel", []json.RawMessage{bAddr, bLabel})
+	_, err = c.btcdClient.RawRequest("setlabel", []json.RawMessage{bAddr, bLabel})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(setlabel): %w", err)
 	}

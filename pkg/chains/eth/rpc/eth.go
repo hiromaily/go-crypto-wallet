@@ -10,7 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -47,7 +46,6 @@ func (c *rpcClient) Syncing(ctx context.Context) (*ResponseSyncing, bool, error)
 		if err = mapstructure.Decode(anyMap, &resSyncing); err != nil {
 			return nil, false, err
 		}
-		debug.Debug(resSyncing)
 		return &resSyncing, true, nil
 	}
 

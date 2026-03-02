@@ -38,7 +38,7 @@ func (c *rpcClient) AddMultisigAddress(
 		params = append(params, bAddrType)
 	}
 
-	rawResult, err := c.client.RawRequest("addmultisigaddress", params)
+	rawResult, err := c.btcdClient.RawRequest("addmultisigaddress", params)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(addmultisigaddress): %w", err)
 	}

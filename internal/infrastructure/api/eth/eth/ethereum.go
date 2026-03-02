@@ -29,7 +29,6 @@ var _ apieth.TxSigner = (*Ethereum)(nil)
 // Ethereum includes client to call JSON-RPC
 type Ethereum struct {
 	ethClient    *ethclient.Client
-	rpcClient    *ethrpc.Client
 	pkgrpc       pkgrpc.ETHRPC
 	chainConf    *chaincfg.Params
 	coinTypeCode domainCoin.CoinTypeCode
@@ -53,7 +52,6 @@ func NewEthereum(
 ) (*Ethereum, error) {
 	eth := &Ethereum{
 		ethClient:    ethClient,
-		rpcClient:    rpcClient,
 		pkgrpc:       pkgrpc.NewRPCClient(rpcClient),
 		coinTypeCode: coinTypeCode,
 		uuidHandler:  uuidHandler,
@@ -128,9 +126,7 @@ func NewEthereum(
 
 // Close disconnect to server
 func (e *Ethereum) Close() {
-	if e.rpcClient != nil {
-		e.rpcClient.Close()
-	}
+	e.pkgrpc.Close()
 }
 
 // CoinTypeCode returns coinTypeCode

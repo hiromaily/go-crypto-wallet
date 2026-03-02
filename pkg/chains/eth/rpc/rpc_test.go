@@ -21,6 +21,8 @@ func (m *mockRPCCaller) CallContext(ctx context.Context, result any, method stri
 	return m.callContextFn(ctx, result, method, args...)
 }
 
+func (*mockRPCCaller) Close() {}
+
 // setString is a helper that assigns a string value through the result pointer.
 func setString(result any, value string) {
 	if p, ok := result.(*string); ok {

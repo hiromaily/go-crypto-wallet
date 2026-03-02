@@ -51,7 +51,7 @@ func (c *rpcClient) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(addr): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("getaddressinfo", []json.RawMessage{input})
+	rawResult, err := c.btcdClient.RawRequest("getaddressinfo", []json.RawMessage{input})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(getaddressinfo) %s: %w", addr, err)
 	}
@@ -68,7 +68,7 @@ func (c *rpcClient) ValidateAddress(addr string) (*ValidateAddressResult, error)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(addr): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("validateaddress", []json.RawMessage{input})
+	rawResult, err := c.btcdClient.RawRequest("validateaddress", []json.RawMessage{input})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(validateaddress): %w", err)
 	}
@@ -85,7 +85,7 @@ func (c *rpcClient) GetAddressesByLabel(labelName string) (map[string]Purpose, e
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(labelName): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
+	rawResult, err := c.btcdClient.RawRequest("getaddressesbylabel", []json.RawMessage{input})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(getaddressesbylabel) %s: %w", labelName, err)
 	}

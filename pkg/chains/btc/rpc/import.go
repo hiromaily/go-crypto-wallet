@@ -19,7 +19,7 @@ func (c *rpcClient) ImportAddress(address, label string, rescan bool) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(rescan): %w", err)
 	}
-	_, err = c.client.RawRequest("importaddress", []json.RawMessage{bAddress, bLabel, bRescan})
+	_, err = c.btcdClient.RawRequest("importaddress", []json.RawMessage{bAddress, bLabel, bRescan})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(importaddress): %w", err)
 	}
@@ -40,7 +40,7 @@ func (c *rpcClient) ImportPrivKey(wifKey, label string, rescan bool) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(rescan): %w", err)
 	}
-	_, err = c.client.RawRequest("importprivkey", []json.RawMessage{bKey, bLabel, bRescan})
+	_, err = c.btcdClient.RawRequest("importprivkey", []json.RawMessage{bKey, bLabel, bRescan})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(importprivkey): %w", err)
 	}

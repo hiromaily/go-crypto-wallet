@@ -64,4 +64,7 @@ type ETHRPC interface {
 	// web3.go
 	ClientVersion(ctx context.Context) (string, error)
 	SHA3(ctx context.Context, data string) (string, error)
+
+	// rpc.go
+	Close()
 }
