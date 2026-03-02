@@ -1,6 +1,7 @@
 package btc
 
 import (
+	"errors"
 	"fmt"
 
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
@@ -34,10 +35,10 @@ func (b *Bitcoin) AddMultisigAddress(
 		addrTypeStr = FromAddressType(addressType).String()
 	case domainCoin.BCH:
 		addrTypeStr = ""
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
-		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
+	case domainCoin.LTC:
+		return nil, errors.New("AddMultisigAddress() is not implemented for LTC")
 	default:
-		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
+		return nil, fmt.Errorf("unexpected coin type %s in AddMultisigAddress()", b.coinTypeCode.String())
 	}
 
 	result, err := b.pkgrpc.AddMultisigAddress(requiredSigs, addresses, accountName, addrTypeStr)

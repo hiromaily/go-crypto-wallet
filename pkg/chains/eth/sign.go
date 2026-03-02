@@ -1,4 +1,4 @@
-package ethtx
+package eth
 
 import (
 	"crypto/ecdsa"
@@ -7,8 +7,6 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/core/types"
-
-	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 )
 
 // SignTxOffline signs a raw transaction using a private key directly, without requiring
@@ -17,10 +15,10 @@ import (
 // Uses types.LatestSignerForChainID for forward compatibility with future transaction
 // types beyond EIP-1559 (London).
 func SignTxOffline(
-	rawTx *domainETH.RawTx,
+	rawTx *RawTx,
 	privKey *ecdsa.PrivateKey,
 	chainID *big.Int,
-) (*domainETH.RawTx, error) {
+) (*RawTx, error) {
 	if rawTx == nil {
 		return nil, errors.New("rawTx must not be nil")
 	}
@@ -58,7 +56,7 @@ func SignTxOffline(
 		toAddr = signedTx.To().Hex()
 	}
 
-	return &domainETH.RawTx{
+	return &RawTx{
 		UUID:  rawTx.UUID,
 		From:  fromAddr.Hex(),
 		To:    toAddr,

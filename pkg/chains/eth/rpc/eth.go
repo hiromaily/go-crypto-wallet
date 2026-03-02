@@ -10,7 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -19,10 +18,10 @@ import (
 //   - Returns (*ResponseSyncing, true, nil) when the node is still syncing.
 //
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_syncing
-func Syncing(ctx context.Context, caller RPCCaller) (*ResponseSyncing, bool, error) {
+func (c *rpcClient) Syncing(ctx context.Context) (*ResponseSyncing, bool, error) {
 	var result any
 
-	err := caller.CallContext(ctx, &result, "eth_syncing")
+	err := c.caller.CallContext(ctx, &result, "eth_syncing")
 	if err != nil {
 		return nil, false, fmt.Errorf("fail to call client.CallContext(eth_syncing): %w", err)
 	}
@@ -47,7 +46,6 @@ func Syncing(ctx context.Context, caller RPCCaller) (*ResponseSyncing, bool, err
 		if err = mapstructure.Decode(anyMap, &resSyncing); err != nil {
 			return nil, false, err
 		}
-		debug.Debug(resSyncing)
 		return &resSyncing, true, nil
 	}
 
@@ -56,9 +54,9 @@ func Syncing(ctx context.Context, caller RPCCaller) (*ResponseSyncing, bool, err
 
 // ProtocolVersion returns the current Ethereum protocol version.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_protocolversion
-func ProtocolVersion(ctx context.Context, caller RPCCaller) (uint64, error) {
+func (c *rpcClient) ProtocolVersion(ctx context.Context) (uint64, error) {
 	var resProtocolVer string
-	err := caller.CallContext(ctx, &resProtocolVer, "eth_protocolVersion")
+	err := c.caller.CallContext(ctx, &resProtocolVer, "eth_protocolVersion")
 	if err != nil {
 		return 0, fmt.Errorf("fail to call rpc.CallContext(eth_protocolVersion) error: %s: %w", err, err)
 	}
@@ -72,9 +70,9 @@ func ProtocolVersion(ctx context.Context, caller RPCCaller) (uint64, error) {
 
 // Coinbase returns the client coinbase address.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_coinbase
-func Coinbase(ctx context.Context, caller RPCCaller) (string, error) {
+func (c *rpcClient) Coinbase(ctx context.Context) (string, error) {
 	var resAddr string
-	err := caller.CallContext(ctx, &resAddr, "eth_coinbase")
+	err := c.caller.CallContext(ctx, &resAddr, "eth_coinbase")
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(eth_coinbase): %w", err)
 	}
@@ -83,9 +81,9 @@ func Coinbase(ctx context.Context, caller RPCCaller) (string, error) {
 
 // Accounts returns a list of addresses owned by the client.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_accounts
-func Accounts(ctx context.Context, caller RPCCaller) ([]string, error) {
+func (c *rpcClient) Accounts(ctx context.Context) ([]string, error) {
 	var accounts []string
-	err := caller.CallContext(ctx, &accounts, "eth_accounts")
+	err := c.caller.CallContext(ctx, &accounts, "eth_accounts")
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_accounts): %w", err)
 	}
@@ -95,9 +93,9 @@ func Accounts(ctx context.Context, caller RPCCaller) ([]string, error) {
 
 // BlockNumber returns the number of the most recent block.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_blocknumber
-func BlockNumber(ctx context.Context, caller RPCCaller) (*big.Int, error) {
+func (c *rpcClient) BlockNumber(ctx context.Context) (*big.Int, error) {
 	var resBlockNumber string
-	err := caller.CallContext(ctx, &resBlockNumber, "eth_blockNumber")
+	err := c.caller.CallContext(ctx, &resBlockNumber, "eth_blockNumber")
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_blockNumber): %w", err)
 	}
@@ -111,13 +109,13 @@ func BlockNumber(ctx context.Context, caller RPCCaller) (*big.Int, error) {
 
 // EnsureBlockNumber calls BlockNumber loopCount times (with 500 ms between calls) and
 // returns the highest observed block number.
-func EnsureBlockNumber(ctx context.Context, caller RPCCaller, loopCount int) (*big.Int, error) {
+func (c *rpcClient) EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error) {
 	latestBlockNumber := new(big.Int)
 	for i := range loopCount {
 		if i != 0 {
 			time.Sleep(500 * time.Millisecond)
 		}
-		num, err := BlockNumber(ctx, caller)
+		num, err := c.BlockNumber(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -130,9 +128,9 @@ func EnsureBlockNumber(ctx context.Context, caller RPCCaller, loopCount int) (*b
 
 // GetBalance returns the balance of the given address.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getbalance
-func GetBalance(ctx context.Context, caller RPCCaller, hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
+func (c *rpcClient) GetBalance(ctx context.Context, hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
 	var balance string
-	err := caller.CallContext(ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
+	err := c.caller.CallContext(ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
 	if err != nil {
 		return nil, fmt.Errorf(
 			"fail to call rpc.CallContext(eth_getBalance) quantityTag: %s: %w",
@@ -148,11 +146,11 @@ func GetBalance(ctx context.Context, caller RPCCaller, hexAddr string, quantityT
 
 // GetTransactionCount returns the number of transactions sent from an address (nonce).
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactioncount
-func GetTransactionCount(
-	ctx context.Context, caller RPCCaller, hexAddr string, quantityTag QuantityTag,
+func (c *rpcClient) GetTransactionCount(
+	ctx context.Context, hexAddr string, quantityTag QuantityTag,
 ) (*big.Int, error) {
 	var transactionCount string
-	err := caller.CallContext(
+	err := c.caller.CallContext(
 		ctx, &transactionCount, "eth_getTransactionCount", hexAddr, quantityTag.String(),
 	)
 	if err != nil {
@@ -168,11 +166,11 @@ func GetTransactionCount(
 
 // GetBlockTransactionCountByNumber returns the number of transactions in a block by block number.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbynumber
-func GetBlockTransactionCountByNumber(ctx context.Context, caller RPCCaller, blockNumber uint64) (*big.Int, error) {
+func (c *rpcClient) GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error) {
 	hexNum := hexutil.EncodeUint64(blockNumber)
 
 	var txCount string
-	err := caller.CallContext(ctx, &txCount, "eth_getBlockTransactionCountByNumber", hexNum)
+	err := c.caller.CallContext(ctx, &txCount, "eth_getBlockTransactionCountByNumber", hexNum)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByNumber): %w", err)
 	}
@@ -191,11 +189,11 @@ func GetBlockTransactionCountByNumber(ctx context.Context, caller RPCCaller, blo
 
 // GetUncleCountByBlockNumber returns the number of uncles in a block by block number.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblocknumber
-func GetUncleCountByBlockNumber(ctx context.Context, caller RPCCaller, blockNumber uint64) (*big.Int, error) {
+func (c *rpcClient) GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error) {
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
 	var uncleCount string
-	err := caller.CallContext(ctx, &uncleCount, "eth_getUncleCountByBlockNumber", blockHexNumber)
+	err := c.caller.CallContext(ctx, &uncleCount, "eth_getUncleCountByBlockNumber", blockHexNumber)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockNumber): %w", err)
 	}
@@ -214,11 +212,11 @@ func GetUncleCountByBlockNumber(ctx context.Context, caller RPCCaller, blockNumb
 
 // GetBlockByNumber returns information about a block by block number.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
-func GetBlockByNumber(ctx context.Context, caller RPCCaller, blockNumber uint64) (*BlockInfo, error) {
+func (c *rpcClient) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*BlockInfo, error) {
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
 	var blockRawInfo BlockRawInfo
-	err := caller.CallContext(ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)
+	err := c.caller.CallContext(ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockByNumber): %w", err)
 	}

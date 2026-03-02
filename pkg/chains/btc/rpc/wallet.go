@@ -37,7 +37,7 @@ func (c *rpcClient) CreateWallet(fileName string, opts *CreateWalletOptions) err
 		}
 		params = append(params, b)
 	}
-	rawResult, err := c.client.RawRequest("createwallet", params)
+	rawResult, err := c.btcdClient.RawRequest("createwallet", params)
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(createwallet): %w", err)
 	}
@@ -57,7 +57,7 @@ func (c *rpcClient) LoadWallet(fileName string) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("loadwallet", []json.RawMessage{bFileName})
+	rawResult, err := c.btcdClient.RawRequest("loadwallet", []json.RawMessage{bFileName})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(loadwallet): %w", err)
 	}
@@ -77,7 +77,7 @@ func (c *rpcClient) UnloadWallet(fileName string) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
 	}
-	_, err = c.client.RawRequest("unloadwallet", []json.RawMessage{bFileName})
+	_, err = c.btcdClient.RawRequest("unloadwallet", []json.RawMessage{bFileName})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(unloadwallet): %w", err)
 	}
@@ -115,7 +115,7 @@ func (c *rpcClient) BackupWallet(fileName string) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
 	}
-	_, err = c.client.RawRequest("backupwallet", []json.RawMessage{bFileName})
+	_, err = c.btcdClient.RawRequest("backupwallet", []json.RawMessage{bFileName})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(backupwallet): %w", err)
 	}
@@ -137,7 +137,7 @@ func (c *rpcClient) dumpImportWallet(fileName, method string) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
 	}
-	rawResult, err := c.client.RawRequest(method, []json.RawMessage{bFileName})
+	rawResult, err := c.btcdClient.RawRequest(method, []json.RawMessage{bFileName})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(%s): %w", method, err)
 	}
@@ -154,7 +154,7 @@ func (c *rpcClient) EncryptWallet(passphrase string) error {
 	if err != nil {
 		return fmt.Errorf("fail to call json.Marshal(passphrase): %w", err)
 	}
-	_, err = c.client.RawRequest("encryptwallet", []json.RawMessage{bPassphrase})
+	_, err = c.btcdClient.RawRequest("encryptwallet", []json.RawMessage{bPassphrase})
 	if err != nil {
 		return fmt.Errorf("fail to call RawRequest(encryptwallet): %w", err)
 	}
@@ -163,17 +163,17 @@ func (c *rpcClient) EncryptWallet(passphrase string) error {
 
 // WalletLock calls walletlock.
 func (c *rpcClient) WalletLock() error {
-	return c.client.WalletLock()
+	return c.btcdClient.WalletLock()
 }
 
 // WalletPassphrase calls walletpassphrase.
 func (c *rpcClient) WalletPassphrase(passphrase string, timeoutSecs int64) error {
-	return c.client.WalletPassphrase(passphrase, timeoutSecs)
+	return c.btcdClient.WalletPassphrase(passphrase, timeoutSecs)
 }
 
 // WalletPassphraseChange calls walletpassphrasechange.
 func (c *rpcClient) WalletPassphraseChange(old, newPass string) error {
-	return c.client.WalletPassphraseChange(old, newPass)
+	return c.btcdClient.WalletPassphraseChange(old, newPass)
 }
 
 // GetHDKeys calls gethdkeys (Bitcoin Core v28.0+).
@@ -186,7 +186,7 @@ func (c *rpcClient) GetHDKeys(active *bool) ([]HDKeyResult, error) {
 		}
 		params = append(params, bActive)
 	}
-	rawResult, err := c.client.RawRequest("gethdkeys", params)
+	rawResult, err := c.btcdClient.RawRequest("gethdkeys", params)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(gethdkeys): %w", err)
 	}
@@ -206,7 +206,7 @@ func (c *rpcClient) CreateWalletDescriptor(outputType WalletOutputType) (*Create
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(type): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("createwalletdescriptor", []json.RawMessage{bType})
+	rawResult, err := c.btcdClient.RawRequest("createwalletdescriptor", []json.RawMessage{bType})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(createwalletdescriptor): %w", err)
 	}

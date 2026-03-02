@@ -16,7 +16,7 @@ func (c *rpcClient) GetBalance(confirmationBlock int) (float64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("fail to call json.Marshal(confirmationBlock): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("getbalance", []json.RawMessage{bWildcard, bConf})
+	rawResult, err := c.btcdClient.RawRequest("getbalance", []json.RawMessage{bWildcard, bConf})
 	if err != nil {
 		return 0, fmt.Errorf("fail to call RawRequest(getbalance): %w", err)
 	}

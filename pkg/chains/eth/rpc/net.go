@@ -12,9 +12,9 @@ import (
 // NetVersion returns the current network ID.
 // "1" = Ethereum Mainnet, "5" = Goerli Testnet, etc.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#net_version
-func NetVersion(ctx context.Context, caller RPCCaller) (uint16, error) {
+func (c *rpcClient) NetVersion(ctx context.Context) (uint16, error) {
 	var resNetVersion string
-	err := caller.CallContext(ctx, &resNetVersion, "net_version")
+	err := c.caller.CallContext(ctx, &resNetVersion, "net_version")
 	if err != nil {
 		return 0, fmt.Errorf("fail to call client.CallContext(net_version): %w", err)
 	}
@@ -28,9 +28,9 @@ func NetVersion(ctx context.Context, caller RPCCaller) (uint16, error) {
 
 // NetListening returns true if the client is actively listening for network connections.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#net_listening
-func NetListening(ctx context.Context, caller RPCCaller) (bool, error) {
+func (c *rpcClient) NetListening(ctx context.Context) (bool, error) {
 	var isConnected bool
-	err := caller.CallContext(ctx, &isConnected, "net_listening")
+	err := c.caller.CallContext(ctx, &isConnected, "net_listening")
 	if err != nil {
 		return false, fmt.Errorf("fail to call rpc.CallContext(net_listening): %w", err)
 	}
@@ -40,9 +40,9 @@ func NetListening(ctx context.Context, caller RPCCaller) (bool, error) {
 
 // NetPeerCount returns the number of peers currently connected to the client.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#net_peercount
-func NetPeerCount(ctx context.Context, caller RPCCaller) (*big.Int, error) {
+func (c *rpcClient) NetPeerCount(ctx context.Context) (*big.Int, error) {
 	var resPeerNumber string
-	err := caller.CallContext(ctx, &resPeerNumber, "net_peerCount")
+	err := c.caller.CallContext(ctx, &resPeerNumber, "net_peerCount")
 	if err != nil {
 		return nil, fmt.Errorf("fail to call client.CallContext(net_peerCount): %w", err)
 	}

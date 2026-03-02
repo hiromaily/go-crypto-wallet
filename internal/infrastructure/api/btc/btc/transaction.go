@@ -73,7 +73,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 
 	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
 	//  client.GetTxOut is not outdated yet (at bitcoin core 0.19)
-	txOutResult, err := b.Client.GetTxOut(hash, index, false)
+	txOutResult, err := b.btcdClient.GetTxOut(hash, index, false)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btc.client.GetTxOut(%s, %d, false): %w", hash, index, err)
 	}
@@ -104,7 +104,7 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 		return nil, fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", strHashTx, err)
 	}
 
-	tx, err := b.Client.GetRawTransaction(hashTx)
+	tx, err := b.btcdClient.GetRawTransaction(hashTx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btc.client.GetRawTransaction(hash): %w", err)
 	}
@@ -122,7 +122,7 @@ func (b *Bitcoin) CreateRawTransaction(
 	lockTime := int64(0) // TODO:Raw locktime what value is exactly required??
 
 	// CreateRawTransaction
-	msgTx, err := b.Client.CreateRawTransaction(inputs, outputs, &lockTime)
+	msgTx, err := b.btcdClient.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcutil.CreateRawTransaction(): %w", err)
 	}
@@ -314,7 +314,7 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 // sendRawTransaction send raw transaction
 func (b *Bitcoin) sendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	// send
-	hash, err := b.Client.SendRawTransaction(tx, true)
+	hash, err := b.btcdClient.SendRawTransaction(tx, true)
 	if err != nil {
 		// error occurred when trying to send tx with minimum fee(1Satoshi)
 		//  -26: 66: min relay fee not met

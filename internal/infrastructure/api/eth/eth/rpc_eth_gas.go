@@ -6,14 +6,13 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 
-	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GasPrice returns the current price per gas in wei
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice
 func (e *Ethereum) GasPrice(ctx context.Context) (*big.Int, error) {
-	return ethrpc.GasPrice(ctx, e.rpcClient)
+	return e.pkgrpc.GasPrice(ctx)
 }
 
 // SuggestGasTipCap returns a suggested gas tip cap (max priority fee per gas) for EIP-1559 transactions.
@@ -38,5 +37,5 @@ func (e *Ethereum) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
 // EstimateGas generates and returns an estimate of how much gas is necessary to allow the transaction to complete
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_estimategas
 func (e *Ethereum) EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error) {
-	return ethrpc.EstimateGas(ctx, e.rpcClient, msg)
+	return e.pkgrpc.EstimateGas(ctx, msg)
 }

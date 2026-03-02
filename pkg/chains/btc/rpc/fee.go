@@ -19,7 +19,7 @@ func (c *rpcClient) EstimateSmartFee(confirmationBlock int) (float64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("fail to call json.Marshal(confirmationBlock): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("estimatesmartfee", []json.RawMessage{input})
+	rawResult, err := c.btcdClient.RawRequest("estimatesmartfee", []json.RawMessage{input})
 	if err != nil {
 		return 0, fmt.Errorf("fail to call RawRequest(estimatesmartfee): %w", err)
 	}

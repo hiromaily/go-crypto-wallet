@@ -28,7 +28,7 @@ func (c *rpcClient) ListUnspent(minConf uint64) ([]ListUnspentResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(minConf): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("listunspent", []json.RawMessage{input})
+	rawResult, err := c.btcdClient.RawRequest("listunspent", []json.RawMessage{input})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(listunspent): %w", err)
 	}
@@ -53,7 +53,7 @@ func (c *rpcClient) ListUnspentByAddresses(minConf, maxConf uint64, addresses []
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marshal(addresses): %w", err)
 	}
-	rawResult, err := c.client.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
+	rawResult, err := c.btcdClient.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call RawRequest(listunspent): %w", err)
 	}

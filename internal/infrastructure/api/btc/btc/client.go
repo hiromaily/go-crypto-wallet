@@ -16,10 +16,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// Bitcoin includes client to call Json-RPC
+// Bitcoin includes btcdClient to call Json-RPC
 type Bitcoin struct {
 	pkgrpc            btcrpc.BTCRPC
-	Client            *rpcclient.Client
+	btcdClient        *rpcclient.Client
 	chainConf         *chaincfg.Params
 	coinTypeCode      domainCoin.CoinTypeCode // btc
 	version           btcpkg.NodeVersion      // 280000
@@ -35,13 +35,13 @@ type FeeAdjustmentRate struct {
 
 // NewBitcoin creates bitcoin object
 func NewBitcoin(
-	client *rpcclient.Client,
+	btcdClient *rpcclient.Client,
 	conf *config.Bitcoin,
 	coinTypeCode domainCoin.CoinTypeCode,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
-		pkgrpc: btcrpc.NewRPCClient(client),
-		Client: client,
+		pkgrpc:     btcrpc.NewRPCClient(btcdClient),
+		btcdClient: btcdClient,
 	}
 
 	bit.coinTypeCode = coinTypeCode
@@ -108,8 +108,8 @@ func NewBitcoin(
 
 // Close disconnect from bitcoin core server
 func (b *Bitcoin) Close() {
-	if b.Client != nil {
-		b.Client.Shutdown()
+	if b.btcdClient != nil {
+		b.btcdClient.Shutdown()
 	}
 }
 
@@ -153,7 +153,7 @@ func (b *Bitcoin) CoinTypeCode() domainCoin.CoinTypeCode {
 	return b.coinTypeCode
 }
 
-// GetPkgRPC returns the underlying btcrpc.BTCRPC client for direct RPC access
+// GetPkgRPC returns the underlying btcrpc.BTCRPC btcdClient for direct RPC access
 func (b *Bitcoin) GetPkgRPC() btcrpc.BTCRPC {
 	return b.pkgrpc
 }
