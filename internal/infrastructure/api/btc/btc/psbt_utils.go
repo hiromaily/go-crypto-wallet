@@ -131,7 +131,7 @@ func (b *Bitcoin) WalletProcessPsbt(psbtBase64 string, sign bool) (string, bool,
 	// Call Bitcoin Core RPC
 	signPtr := &sign
 	// Use SigHashAll as default sighash type
-	result, err := b.Client.WalletProcessPsbt(psbtBase64, signPtr, "ALL", nil)
+	result, err := b.btcdClient.WalletProcessPsbt(psbtBase64, signPtr, "ALL", nil)
 	if err != nil {
 		return "", false, fmt.Errorf("failed to call walletprocesspsbt RPC: %w", err)
 	}

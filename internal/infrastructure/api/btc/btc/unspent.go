@@ -438,7 +438,7 @@ func (b *Bitcoin) LockUnspent(tx *dtobtc.UnspentOutput) error {
 		return fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", tx.TxID, err)
 	}
 	outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
-	err = b.Client.LockUnspent(false, []*wire.OutPoint{outpoint})
+	err = b.btcdClient.LockUnspent(false, []*wire.OutPoint{outpoint})
 	if err != nil {
 		return err
 	}
@@ -448,13 +448,13 @@ func (b *Bitcoin) LockUnspent(tx *dtobtc.UnspentOutput) error {
 // UnlockUnspent unlock locked unspent tx
 // 1st param unlock (true)
 func (b *Bitcoin) UnlockUnspent() error {
-	list, err := b.Client.ListLockUnspent() // []*wire.OutPoint
+	list, err := b.btcdClient.ListLockUnspent() // []*wire.OutPoint
 	if err != nil {
 		return fmt.Errorf("fail to call client.ListLockUnspent(): %w", err)
 	}
 
 	if len(list) != 0 {
-		err = b.Client.LockUnspent(true, list)
+		err = b.btcdClient.LockUnspent(true, list)
 		if err != nil {
 			return fmt.Errorf("fail to call client.LockUnspent(): %w", err)
 		}

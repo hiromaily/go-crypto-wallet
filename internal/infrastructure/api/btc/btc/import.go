@@ -12,7 +12,7 @@ import (
 // ImportPrivKey import privKey to wallet
 // - Rescan  *bool `jsonrpcdefault:"true"`
 func (b *Bitcoin) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
-	err := b.Client.ImportPrivKey(privKeyWIF)
+	err := b.btcdClient.ImportPrivKey(privKeyWIF)
 	if err != nil {
 		return fmt.Errorf("fail to call client.ImportPrivKey(): %w", err)
 	}
@@ -23,7 +23,7 @@ func (b *Bitcoin) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
 // ImportPrivKeyLabel import privKey with label to wallet
 // - Rescan  *bool `jsonrpcdefault:"true"`
 func (b *Bitcoin) ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) error {
-	err := b.Client.ImportPrivKeyLabel(privKeyWIF, label)
+	err := b.btcdClient.ImportPrivKeyLabel(privKeyWIF, label)
 	if err != nil {
 		return fmt.Errorf("fail to call client.ImportPrivKeyLabel(): %w", err)
 	}
@@ -33,7 +33,7 @@ func (b *Bitcoin) ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) erro
 
 // ImportPrivKeyWithoutReScan import privKey without rescan to wallet
 func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error {
-	err := b.Client.ImportPrivKeyRescan(privKeyWIF, label, false)
+	err := b.btcdClient.ImportPrivKeyRescan(privKeyWIF, label, false)
 	if err != nil {
 		return fmt.Errorf("fail to call ImportPrivKeyRescan(): %w", err)
 	}
@@ -45,7 +45,7 @@ func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label stri
 // Note: This is a legacy wallet method. For descriptor wallets (Bitcoin Core v23.0+),
 // consider using importdescriptors instead for better functionality and future compatibility.
 func (b *Bitcoin) ImportAddress(pubkey string) error {
-	err := b.Client.ImportAddress(pubkey)
+	err := b.btcdClient.ImportAddress(pubkey)
 	if err != nil {
 		return fmt.Errorf("fail to call ImportAddress(): %w", err)
 	}
