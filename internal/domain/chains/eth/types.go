@@ -5,7 +5,11 @@
 // and their infrastructure-specific representations.
 package eth
 
-import "math/big"
+import (
+	"math/big"
+
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
+)
 
 // UserAmount represents a user address and their balance amount.
 type UserAmount struct {
@@ -108,15 +112,8 @@ type ResponseSyncing struct {
 }
 
 // RawTx represents a raw Ethereum transaction before being submitted to the network.
-type RawTx struct {
-	UUID  string
-	From  string
-	To    string
-	Value big.Int
-	Nonce uint64
-	TxHex string
-	Hash  string
-}
+// It is a type alias for pkg/chains/eth.RawTx to share one definition across all layers.
+type RawTx = pkgeth.RawTx
 
 // TransactionReceipt represents the receipt of a processed Ethereum transaction.
 // Returned by GetTransactionReceipt after a transaction has been mined.

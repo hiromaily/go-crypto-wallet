@@ -13,7 +13,7 @@ import (
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/ethtx"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -150,7 +150,7 @@ func (e *Ethereum) CreateRawTransaction(
 		GasPrice: gasPrice,
 	})
 	txHash := tx.Hash().Hex()
-	rawTxHex, err := ethtx.EncodeTx(tx)
+	rawTxHex, err := pkgeth.EncodeTx(tx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
@@ -192,12 +192,9 @@ func (e *Ethereum) CreateRawTransaction(
 // - https://ethereum.stackexchange.com/questions/16472/signing-a-raw-transaction-in-go
 // - Note: this requires private key on this machine, if node is working remotely, it would not work.
 func (e *Ethereum) SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase string) (*domainETH.RawTx, error) {
-	// Convert domain type to infrastructure type
-	infraRawTx := ethtx.FromDomainRawTx(rawTx)
-
-	txHex := infraRawTx.TxHex
-	fromAddr := infraRawTx.From
-	tx, err := ethtx.DecodeTx(txHex)
+	txHex := rawTx.TxHex
+	fromAddr := rawTx.From
+	tx, err := pkgeth.DecodeTx(txHex)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call decodeTx(txHex): %w", err)
 	}
@@ -233,30 +230,27 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase strin
 		return nil, fmt.Errorf("fail to cll signedTX.AsMessage(): %w", err)
 	}
 
-	encodedTx, err := ethtx.EncodeTx(signedTX)
+	encodedTx, err := pkgeth.EncodeTx(signedTX)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
 
-	infraResTx := &ethtx.RawTx{
-		UUID:  infraRawTx.UUID,
+	return &domainETH.RawTx{
+		UUID:  rawTx.UUID,
 		From:  fromSignedAddr.Hex(),
 		To:    signedTX.To().Hex(),
 		Value: *signedTX.Value(),
 		Nonce: signedTX.Nonce(),
 		TxHex: *encodedTx,
 		Hash:  signedTX.Hash().Hex(),
-	}
-
-	// Convert to domain type
-	return ethtx.ToDomainRawTx(infraResTx), nil
+	}, nil
 }
 
 // SendSignedRawTransaction sends signed raw transaction
 // - SendRawTransaction in rpc_eth_tx.go
 // - SendRawTx in client.go
 func (e *Ethereum) SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error) {
-	decodedTx, err := ethtx.DecodeTx(signedTxHex)
+	decodedTx, err := pkgeth.DecodeTx(signedTxHex)
 	if err != nil {
 		return "", fmt.Errorf("fail to call decodeTx(signedTxHex): %w", err)
 	}
@@ -455,7 +449,7 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	})
 
 	txHash := tx.Hash().Hex()
-	rawTxHex, err := ethtx.EncodeTx(tx)
+	rawTxHex, err := pkgeth.EncodeTx(tx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
@@ -501,5 +495,5 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 func (*Ethereum) SignTxWithPrivateKey(
 	rawTx *domainETH.RawTx, privKey *ecdsa.PrivateKey, chainID *big.Int,
 ) (*domainETH.RawTx, error) {
-	return ethtx.SignTxOffline(rawTx, privKey, chainID)
+	return pkgeth.SignTxOffline(rawTx, privKey, chainID)
 }

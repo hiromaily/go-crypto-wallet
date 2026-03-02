@@ -1,4 +1,4 @@
-package ethtx_test
+package eth_test
 
 import (
 	"math/big"
@@ -10,19 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/ethtx"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 )
 
-func newTestRawTx(t *testing.T, tx *types.Transaction, fromHex string) *domainETH.RawTx {
+func newTestRawTx(t *testing.T, tx *types.Transaction, fromHex string) *pkgeth.RawTx {
 	t.Helper()
-	txHex, err := ethtx.EncodeTx(tx)
+	txHex, err := pkgeth.EncodeTx(tx)
 	require.NoError(t, err)
 	toHex := ""
 	if tx.To() != nil {
 		toHex = tx.To().Hex()
 	}
-	return &domainETH.RawTx{
+	return &pkgeth.RawTx{
 		UUID:  "test-uuid",
 		From:  fromHex,
 		To:    toHex,
@@ -49,12 +48,12 @@ func TestSignTxOffline_Legacy(t *testing.T) {
 	chainID := big.NewInt(1337)
 	rawTx := newTestRawTx(t, tx, fromAddr.Hex())
 
-	signed, err := ethtx.SignTxOffline(rawTx, privKey, chainID)
+	signed, err := pkgeth.SignTxOffline(rawTx, privKey, chainID)
 	require.NoError(t, err)
 	require.NotNil(t, signed)
 
 	// Decode and verify the signed transaction
-	decoded, err := ethtx.DecodeTx(signed.TxHex)
+	decoded, err := pkgeth.DecodeTx(signed.TxHex)
 	require.NoError(t, err)
 
 	signer := types.LatestSignerForChainID(chainID)
@@ -82,12 +81,12 @@ func TestSignTxOffline_EIP1559(t *testing.T) {
 	})
 	rawTx := newTestRawTx(t, tx, fromAddr.Hex())
 
-	signed, err := ethtx.SignTxOffline(rawTx, privKey, chainID)
+	signed, err := pkgeth.SignTxOffline(rawTx, privKey, chainID)
 	require.NoError(t, err)
 	require.NotNil(t, signed)
 
 	// Verify the signed transaction preserves the type and is properly signed
-	decoded, err := ethtx.DecodeTx(signed.TxHex)
+	decoded, err := pkgeth.DecodeTx(signed.TxHex)
 	require.NoError(t, err)
 	assert.Equal(t, types.DynamicFeeTxType, int(decoded.Type()))
 
@@ -106,7 +105,7 @@ func TestSignTxOffline_NilPrivKey(t *testing.T) {
 	})
 	rawTx := newTestRawTx(t, tx, "0xdeadbeef")
 
-	_, err := ethtx.SignTxOffline(rawTx, nil, big.NewInt(1337))
+	_, err := pkgeth.SignTxOffline(rawTx, nil, big.NewInt(1337))
 	assert.Error(t, err)
 }
 
@@ -131,13 +130,13 @@ func TestSignTxOffline_ContractCreation(t *testing.T) {
 	})
 	rawTx := newTestRawTx(t, tx, fromAddr.Hex())
 
-	signed, err := ethtx.SignTxOffline(rawTx, privKey, chainID)
+	signed, err := pkgeth.SignTxOffline(rawTx, privKey, chainID)
 	require.NoError(t, err)
 	require.NotNil(t, signed)
 	assert.Empty(t, signed.To, "To must be empty string for contract creation")
 
 	// Verify signature recovers the correct sender
-	decoded, err := ethtx.DecodeTx(signed.TxHex)
+	decoded, err := pkgeth.DecodeTx(signed.TxHex)
 	require.NoError(t, err)
 	signer := types.LatestSignerForChainID(chainID)
 	sender, err := types.Sender(signer, decoded)
@@ -149,7 +148,7 @@ func TestSignTxOffline_ContractCreation(t *testing.T) {
 func TestSignTxOffline_NilRawTx(t *testing.T) {
 	privKey, err := crypto.GenerateKey()
 	require.NoError(t, err)
-	_, err = ethtx.SignTxOffline(nil, privKey, big.NewInt(1337))
+	_, err = pkgeth.SignTxOffline(nil, privKey, big.NewInt(1337))
 	assert.Error(t, err)
 }
 
@@ -163,6 +162,6 @@ func TestSignTxOffline_NegativeChainID(t *testing.T) {
 		GasPrice: big.NewInt(1_000_000_000),
 	})
 	rawTx := newTestRawTx(t, tx, crypto.PubkeyToAddress(privKey.PublicKey).Hex())
-	_, err = ethtx.SignTxOffline(rawTx, privKey, big.NewInt(-1))
+	_, err = pkgeth.SignTxOffline(rawTx, privKey, big.NewInt(-1))
 	assert.Error(t, err)
 }

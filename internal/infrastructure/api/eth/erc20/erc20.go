@@ -15,7 +15,7 @@ import (
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/ethtx"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
@@ -186,7 +186,7 @@ func (e *ERC20) CreateRawTransaction(
 	})
 	// From here, same as CreateRawTransaction() in ethgrop/eth/transaction.go
 	txHash := tx.Hash().Hex()
-	rawTxHex, err := ethtx.EncodeTx(tx)
+	rawTxHex, err := pkgeth.EncodeTx(tx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
@@ -197,8 +197,7 @@ func (e *ERC20) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 	}
 
-	// create domain RawTx (infrastructure type)
-	infraRawTx := &ethtx.RawTx{
+	rawTx := &domainETH.RawTx{
 		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
@@ -224,8 +223,7 @@ func (e *ERC20) CreateRawTransaction(
 		GasPrice:    gasPrice.Uint64(),
 	}
 
-	// Convert infrastructure RawTx to domain RawTx
-	return ethtx.ToDomainRawTx(infraRawTx), txParams, nil
+	return rawTx, txParams, nil
 }
 
 // SupportsEIP1559 delegates to the underlying Ethereum node to detect EIP-1559 support.
@@ -343,7 +341,7 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 	})
 
 	txHash := tx.Hash().Hex()
-	rawTxHex, err := ethtx.EncodeTx(tx)
+	rawTxHex, err := pkgeth.EncodeTx(tx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
@@ -355,7 +353,7 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 
 	txFee := new(big.Int).Mul(maxFeePerGas, new(big.Int).SetUint64(gasLimit))
 
-	infraRawTx := &ethtx.RawTx{
+	rawTx := &domainETH.RawTx{
 		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
@@ -379,7 +377,7 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 		MaxPriorityFeePerGas: maxPriorityFeePerGas.Uint64(),
 	}
 
-	return ethtx.ToDomainRawTx(infraRawTx), txParams, nil
+	return rawTx, txParams, nil
 }
 
 func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {

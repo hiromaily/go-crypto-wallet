@@ -1,23 +1,11 @@
-package ethtx
+package eth
 
 import (
 	"fmt"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 )
-
-// RawTx is raw transaction
-type RawTx struct {
-	UUID  string  `json:"uuid"`
-	From  string  `json:"from"`
-	To    string  `json:"to"`
-	Value big.Int `json:"value"`
-	Nonce uint64  `json:"nonce"`
-	TxHex string  `json:"txhex"`
-	Hash  string  `json:"hash"`
-}
 
 // EncodeTx encodes a transaction to hex using EIP-2718 binary format.
 // This correctly handles both legacy (Type 0) and typed (Type 2 EIP-1559) transactions.

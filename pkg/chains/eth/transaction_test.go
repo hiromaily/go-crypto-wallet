@@ -1,4 +1,4 @@
-package ethtx_test
+package eth_test
 
 import (
 	"math/big"
@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/ethtx"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 )
 
 // TestEncodeTxDecodeTx_LegacyRoundtrip verifies that a legacy (Type 0) transaction
@@ -24,12 +24,12 @@ func TestEncodeTxDecodeTx_LegacyRoundtrip(t *testing.T) {
 		GasPrice: big.NewInt(20_000_000_000), // 20 Gwei
 	})
 
-	txHex, err := ethtx.EncodeTx(tx)
+	txHex, err := pkgeth.EncodeTx(tx)
 	require.NoError(t, err)
 	require.NotNil(t, txHex)
 	assert.NotEmpty(t, *txHex)
 
-	decoded, err := ethtx.DecodeTx(*txHex)
+	decoded, err := pkgeth.DecodeTx(*txHex)
 	require.NoError(t, err)
 	require.NotNil(t, decoded)
 
@@ -56,12 +56,12 @@ func TestEncodeTxDecodeTx_EIP1559Roundtrip(t *testing.T) {
 		GasFeeCap: big.NewInt(30_000_000_000), // 30 Gwei max fee
 	})
 
-	txHex, err := ethtx.EncodeTx(tx)
+	txHex, err := pkgeth.EncodeTx(tx)
 	require.NoError(t, err)
 	require.NotNil(t, txHex)
 	assert.NotEmpty(t, *txHex)
 
-	decoded, err := ethtx.DecodeTx(*txHex)
+	decoded, err := pkgeth.DecodeTx(*txHex)
 	require.NoError(t, err)
 	require.NotNil(t, decoded)
 
@@ -90,7 +90,7 @@ func TestEncodeTx_EIP1559StartsWithTypeByte(t *testing.T) {
 		GasFeeCap: big.NewInt(30_000_000_000),
 	})
 
-	txHex, err := ethtx.EncodeTx(tx)
+	txHex, err := pkgeth.EncodeTx(tx)
 	require.NoError(t, err)
 	require.NotNil(t, txHex)
 
@@ -102,6 +102,6 @@ func TestEncodeTx_EIP1559StartsWithTypeByte(t *testing.T) {
 
 // TestDecodeTx_InvalidHex verifies that an invalid hex string returns an error.
 func TestDecodeTx_InvalidHex(t *testing.T) {
-	_, err := ethtx.DecodeTx("not-valid-hex")
+	_, err := pkgeth.DecodeTx("not-valid-hex")
 	assert.Error(t, err)
 }
