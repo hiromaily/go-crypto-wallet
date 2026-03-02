@@ -10,7 +10,7 @@ import (
 
 func runGetNetworkInfo(btc apibtc.WatchAPIClient) error {
 	// call getnetworkinfo
-	infoData, err := btc.GetNetworkInfo()
+	infoData, err := btc.GetPkgRPC().GetNetworkInfo()
 	if err != nil {
 		return fmt.Errorf("fail to call BTC.GetNetworkInfo() %w", err)
 	}

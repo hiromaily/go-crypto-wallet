@@ -7,7 +7,6 @@ package btc
 import (
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -439,21 +438,10 @@ func splitPath(path string) []string {
 func (b *Bitcoin) getDescriptorInfoForAddress(
 	address, fullPath string, senderAccount domainAccount.AccountType,
 ) (uint32, string, error) {
-	// Call listdescriptors RPC with false to get public descriptors
-	rawResult, err := b.Client.RawRequest("listdescriptors", []json.RawMessage{json.RawMessage("false")})
+	// Call listdescriptors to get public descriptors
+	result, err := b.ListDescriptors(false)
 	if err != nil {
 		return 0, "", fmt.Errorf("failed to call listdescriptors: %w", err)
-	}
-
-	var result struct {
-		Descriptors []struct {
-			Desc     string `json:"desc"`
-			Active   bool   `json:"active"`
-			Internal *bool  `json:"internal"`
-		} `json:"descriptors"`
-	}
-	if err := json.Unmarshal(rawResult, &result); err != nil {
-		return 0, "", fmt.Errorf("failed to unmarshal listdescriptors result: %w", err)
 	}
 
 	// Extract account path from full path

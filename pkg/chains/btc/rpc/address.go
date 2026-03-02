@@ -23,6 +23,10 @@ type GetAddressInfoResult struct {
 	HDSeedID            string         `json:"hdseedid,omitempty"`
 	HDMasterFingerprint string         `json:"hdmasterfingerprint,omitempty"`
 	Labels              FlexibleLabels `json:"labels"`
+	// Label is a legacy single-string field used by older Bitcoin Cash nodes.
+	// Callers should prefer Labels; this field is only populated by BCH nodes
+	// that return "label" instead of "labels".
+	Label string `json:"label,omitempty"`
 }
 
 // ValidateAddressResult is the wire-format response of the validateaddress command.

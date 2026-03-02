@@ -15,6 +15,7 @@ type BTCRPC interface {
 	ImportMulti(requests []ImportMultiRequest, options *ImportMultiOptions) ([]ImportMultiResponse, error)
 	GetDescriptorInfo(descriptor string) (*DescriptorInfo, error)
 	ListDescriptors(privateDescriptors bool) (*ListDescriptorsResult, error)
+	DeriveAddresses(descriptor string, startIdx, endIdx uint32) ([]string, error)
 
 	// fee.go
 	EstimateSmartFee(confirmationBlock int) (float64, error)
@@ -38,6 +39,10 @@ type BTCRPC interface {
 	GetNetworkInfo() (*GetNetworkInfoResult, error)
 	GetBlockchainInfo() (*GetBlockchainInfoResult, error)
 	GetBlockCount() (int64, error)
+
+	// unspent.go
+	ListUnspent(minConf uint64) ([]ListUnspentResult, error)
+	ListUnspentByAddresses(minConf, maxConf uint64, addresses []string) ([]ListUnspentResult, error)
 
 	// transaction.go
 	GetTransaction(txID string) (*GetTransactionResult, error)

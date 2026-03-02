@@ -7,7 +7,6 @@ package btc
 import (
 	"bytes"
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"sort"
@@ -306,28 +305,11 @@ func (b *Bitcoin) findAddressIndexInDescriptor(descriptor string, targetAddress 
 	return 0, fmt.Errorf("address %s not found in descriptor range [0,%d]", targetAddress, maxSearchRange)
 }
 
-// deriveAddressesFromDescriptor calls Bitcoin Core's deriveaddresses RPC.
-// It derives addresses from a descriptor within the specified range.
+// deriveAddressesFromDescriptor derives addresses from a descriptor within the specified range.
 func (b *Bitcoin) deriveAddressesFromDescriptor(descriptor string, startIdx, endIdx uint32) ([]string, error) {
-	// Build the RPC parameters
-	// Format: deriveaddresses "descriptor" [start, end]
-	rangeParam := fmt.Sprintf("[%d,%d]", startIdx, endIdx)
-
-	// Call RPC
-	params := []json.RawMessage{
-		json.RawMessage(fmt.Sprintf(`"%s"`, descriptor)),
-		json.RawMessage(rangeParam),
-	}
-
-	rawResult, err := b.Client.RawRequest("deriveaddresses", params)
+	addresses, err := b.GetPkgRPC().DeriveAddresses(descriptor, startIdx, endIdx)
 	if err != nil {
 		return nil, fmt.Errorf("deriveaddresses RPC failed: %w", err)
-	}
-
-	// Parse result
-	var addresses []string
-	if err := json.Unmarshal(rawResult, &addresses); err != nil {
-		return nil, fmt.Errorf("failed to parse deriveaddresses result: %w", err)
 	}
 
 	logger.Debug("Derived addresses from descriptor",

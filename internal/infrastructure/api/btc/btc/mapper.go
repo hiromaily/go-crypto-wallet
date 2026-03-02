@@ -13,12 +13,12 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// ToRawTransaction converts infrastructure TxRawResult to application DTO.
-// NOTE: Retained for use by ToParsedPSBT which builds local TxRawResult from btcutil types.
-func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction, error) {
+// ToRawTransaction converts pkg TxRawResult to application DTO.
+func ToRawTransaction(result *btcrpc.TxRawResult) (*dtobtc.RawTransaction, error) {
 	if result == nil {
 		return nil, nil
 	}
@@ -70,7 +70,7 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction
 		VSize:         result.Vsize,
 		Weight:        result.Weight,
 		Version:       int32(result.Version),
-		LockTime:      result.Locktime,
+		LockTime:      result.LockTime,
 		Vin:           vin,
 		Vout:          vout,
 		BlockHash:     "", // TxRawResult doesn't have block info
@@ -80,17 +80,17 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction
 	}, nil
 }
 
-// fromDTOPreviousTxToLocal converts application PreviousTx slice to infrastructure PrevTx slice
-func fromDTOPreviousTxToLocal(prevTxs []dtobtc.PreviousTx) []PrevTx {
+// fromDTOPreviousTxToLocal converts application PreviousTx slice to pkg PrevTx slice
+func fromDTOPreviousTxToLocal(prevTxs []dtobtc.PreviousTx) []btcrpc.PrevTx {
 	if prevTxs == nil {
 		return nil
 	}
 
-	result := make([]PrevTx, len(prevTxs))
+	result := make([]btcrpc.PrevTx, len(prevTxs))
 	for i, tx := range prevTxs {
 		amount := float64(tx.Amount) / 1e8 // Convert satoshis to BTC
 
-		result[i] = PrevTx{
+		result[i] = btcrpc.PrevTx{
 			Txid:          tx.TxID,
 			Vout:          tx.Vout,
 			ScriptPubKey:  tx.ScriptPubKey,
@@ -102,8 +102,8 @@ func fromDTOPreviousTxToLocal(prevTxs []dtobtc.PreviousTx) []PrevTx {
 	return result
 }
 
-// ToPreviousTxList converts infrastructure PrevTx slice to application PreviousTx slice
-func ToPreviousTxList(prevTxs []PrevTx, btc *Bitcoin) ([]dtobtc.PreviousTx, error) {
+// ToPreviousTxList converts pkg PrevTx slice to application PreviousTx slice
+func ToPreviousTxList(prevTxs []btcrpc.PrevTx) ([]dtobtc.PreviousTx, error) {
 	if prevTxs == nil {
 		return nil, nil
 	}
@@ -120,15 +120,15 @@ func ToPreviousTxList(prevTxs []PrevTx, btc *Bitcoin) ([]dtobtc.PreviousTx, erro
 			Vout:          tx.Vout,
 			ScriptPubKey:  tx.ScriptPubKey,
 			RedeemScript:  tx.RedeemScript,
-			WitnessScript: "", // Not available in PrevTx
+			WitnessScript: tx.WitnessScript,
 			Amount:        amount,
 		}
 	}
 	return result, nil
 }
 
-// ToUnspentOutput converts infrastructure ListUnspentResult to application DTO
-func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*dtobtc.UnspentOutput, error) {
+// ToUnspentOutput converts pkg ListUnspentResult to application DTO
+func ToUnspentOutput(result *btcrpc.ListUnspentResult) (*dtobtc.UnspentOutput, error) {
 	if result == nil {
 		return nil, nil
 	}
@@ -156,15 +156,15 @@ func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*dtobtc.UnspentOu
 	}, nil
 }
 
-// ToUnspentOutputList converts slice of infrastructure results to DTOs
-func ToUnspentOutputList(results []ListUnspentResult, btc *Bitcoin) ([]dtobtc.UnspentOutput, error) {
+// ToUnspentOutputList converts slice of pkg results to DTOs
+func ToUnspentOutputList(results []btcrpc.ListUnspentResult) ([]dtobtc.UnspentOutput, error) {
 	if results == nil {
 		return nil, nil
 	}
 
 	outputs := make([]dtobtc.UnspentOutput, 0, len(results))
 	for _, result := range results {
-		dto, err := ToUnspentOutput(&result, btc)
+		dto, err := ToUnspentOutput(&result)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert unspent output: %w", err)
 		}
@@ -175,35 +175,10 @@ func ToUnspentOutputList(results []ListUnspentResult, btc *Bitcoin) ([]dtobtc.Un
 	return outputs, nil
 }
 
-// FromUnspentOutput converts application UnspentOutput to infrastructure type
-func FromUnspentOutput(output *dtobtc.UnspentOutput) *ListUnspentResult {
-	if output == nil {
-		return nil
-	}
-
-	// Convert btcutil.Amount to float64 BTC
-	amount := output.Amount.ToBTC()
-
-	return &ListUnspentResult{
-		TxID:          output.TxID,
-		Vout:          output.Vout,
-		Address:       output.Address,
-		Label:         output.Label,
-		RedeemScript:  output.RedeemScript,
-		WitnessScript: output.WitnessScript,
-		ScriptPubKey:  output.ScriptPubKey,
-		Amount:        amount,
-		Confirmations: output.Confirmations,
-		Spendable:     output.Spendable,
-		Solvable:      output.Solvable,
-		Safe:          output.Safe,
-	}
-}
-
 // ToParsedPSBT converts infrastructure ParsedPSBT to application DTO
 //
 //nolint:gocyclo // Complex mapping function with many fields
-func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*dtobtc.ParsedPSBT, error) {
+func ToParsedPSBT(infraPSBT *ParsedPSBT) (*dtobtc.ParsedPSBT, error) {
 	if infraPSBT == nil || infraPSBT.Packet == nil {
 		return nil, nil
 	}
@@ -277,24 +252,24 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*dtobtc.ParsedPSBT, erro
 
 		// Map non-witness UTXO
 		if input.NonWitnessUtxo != nil {
-			rawTx := &TxRawResult{
+			rawTx := &btcrpc.TxRawResult{
 				Txid:     input.NonWitnessUtxo.TxHash().String(),
 				Hash:     input.NonWitnessUtxo.WitnessHash().String(),
 				Size:     int32(input.NonWitnessUtxo.SerializeSize()),
 				Vsize:    int32(input.NonWitnessUtxo.SerializeSize()),
 				Weight:   int32(input.NonWitnessUtxo.SerializeSize() * 4),
 				Version:  uint32(input.NonWitnessUtxo.Version),
-				Locktime: input.NonWitnessUtxo.LockTime,
-				Vin:      make([]TxRawVin, len(input.NonWitnessUtxo.TxIn)),
-				Vout:     make([]TxRawVout, len(input.NonWitnessUtxo.TxOut)),
+				LockTime: input.NonWitnessUtxo.LockTime,
+				Vin:      make([]btcrpc.TxRawVin, len(input.NonWitnessUtxo.TxIn)),
+				Vout:     make([]btcrpc.TxRawVout, len(input.NonWitnessUtxo.TxOut)),
 			}
 
 			// Map vin
 			for j, txIn := range input.NonWitnessUtxo.TxIn {
-				rawTx.Vin[j] = TxRawVin{
+				rawTx.Vin[j] = btcrpc.TxRawVin{
 					Txid: txIn.PreviousOutPoint.Hash.String(),
 					Vout: txIn.PreviousOutPoint.Index,
-					ScriptSig: ScriptSig{
+					ScriptSig: btcrpc.ScriptSig{
 						Hex: hex.EncodeToString(txIn.SignatureScript),
 					},
 					Sequence: txIn.Sequence,
@@ -303,16 +278,16 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*dtobtc.ParsedPSBT, erro
 
 			// Map vout
 			for j, txOut := range input.NonWitnessUtxo.TxOut {
-				rawTx.Vout[j] = TxRawVout{
+				rawTx.Vout[j] = btcrpc.TxRawVout{
 					Value: float64(txOut.Value) / 1e8,
 					N:     uint32(j),
-					ScriptPubKey: ScriptPubKey{
+					ScriptPubKey: btcrpc.ScriptPubKey{
 						Hex: hex.EncodeToString(txOut.PkScript),
 					},
 				}
 			}
 
-			nonWitnessTx, err := ToRawTransaction(rawTx, btc)
+			nonWitnessTx, err := ToRawTransaction(rawTx)
 			if err != nil {
 				return nil, fmt.Errorf("failed to convert non-witness UTXO: %w", err)
 			}

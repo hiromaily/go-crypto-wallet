@@ -69,3 +69,7 @@ go-lint-deps:
 .PHONY: go-lint-visibility
 go-lint-visibility:
 	./scripts/lint/visibility.sh
+
+.PHONY: go-lint-btc-rpc-layer
+go-lint-btc-rpc-layer:
+	./scripts/lint/btc-rpc-layer.sh

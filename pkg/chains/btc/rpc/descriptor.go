@@ -155,6 +155,24 @@ func (c *rpcClient) GetDescriptorInfo(descriptor string) (*DescriptorInfo, error
 	return &result, nil
 }
 
+// DeriveAddresses calls the deriveaddresses RPC to derive addresses from a descriptor range.
+func (c *rpcClient) DeriveAddresses(descriptor string, startIdx, endIdx uint32) ([]string, error) {
+	rangeParam := fmt.Sprintf("[%d,%d]", startIdx, endIdx)
+	params := []json.RawMessage{
+		json.RawMessage(fmt.Sprintf(`"%s"`, descriptor)),
+		json.RawMessage(rangeParam),
+	}
+	rawResult, err := c.client.RawRequest("deriveaddresses", params)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call RawRequest(deriveaddresses): %w", err)
+	}
+	var addresses []string
+	if err := json.Unmarshal(rawResult, &addresses); err != nil {
+		return nil, fmt.Errorf("fail to call json.Unmarshal(deriveaddresses): %w", err)
+	}
+	return addresses, nil
+}
+
 // ListDescriptors calls listdescriptors to list all imported descriptors.
 func (c *rpcClient) ListDescriptors(privateDescriptors bool) (*ListDescriptorsResult, error) {
 	bPrivate, err := json.Marshal(privateDescriptors)

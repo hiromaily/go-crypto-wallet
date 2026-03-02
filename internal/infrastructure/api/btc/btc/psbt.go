@@ -300,7 +300,7 @@ func (b *Bitcoin) ParsePSBT(psbtBase64 string) (*dtobtc.ParsedPSBT, error) {
 		return nil, err
 	}
 
-	return ToParsedPSBT(infraParsed, b)
+	return ToParsedPSBT(infraParsed)
 }
 
 // ValidatePSBT validates a PSBT structure and checks BIP174 compliance.
