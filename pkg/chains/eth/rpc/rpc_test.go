@@ -60,7 +60,8 @@ func TestSyncing_NotSyncing(t *testing.T) {
 			return nil
 		},
 	}
-	syncing, isSyncing, err := Syncing(context.Background(), caller)
+	c := NewRPCClient(caller)
+	syncing, isSyncing, err := c.Syncing(context.Background())
 	require.NoError(t, err)
 	assert.Nil(t, syncing)
 	assert.False(t, isSyncing)
@@ -79,7 +80,8 @@ func TestSyncing_IsSyncing(t *testing.T) {
 			return nil
 		},
 	}
-	syncing, isSyncing, err := Syncing(context.Background(), caller)
+	c := NewRPCClient(caller)
+	syncing, isSyncing, err := c.Syncing(context.Background())
 	require.NoError(t, err)
 	require.NotNil(t, syncing)
 	assert.True(t, isSyncing)
@@ -94,7 +96,8 @@ func TestSyncing_Error(t *testing.T) {
 			return errors.New("connection refused")
 		},
 	}
-	_, _, err := Syncing(context.Background(), caller)
+	c := NewRPCClient(caller)
+	_, _, err := c.Syncing(context.Background())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "eth_syncing")
 }
@@ -110,7 +113,8 @@ func TestBlockNumber_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	num, err := BlockNumber(context.Background(), caller)
+	c := NewRPCClient(caller)
+	num, err := c.BlockNumber(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, big.NewInt(0x4b7), num)
 }
@@ -122,7 +126,8 @@ func TestBlockNumber_Error(t *testing.T) {
 			return errors.New("rpc error")
 		},
 	}
-	_, err := BlockNumber(context.Background(), caller)
+	c := NewRPCClient(caller)
+	_, err := c.BlockNumber(context.Background())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "eth_blockNumber")
 }
@@ -135,7 +140,8 @@ func TestBlockNumber_InvalidHex(t *testing.T) {
 			return nil
 		},
 	}
-	_, err := BlockNumber(context.Background(), caller)
+	c := NewRPCClient(caller)
+	_, err := c.BlockNumber(context.Background())
 	require.Error(t, err)
 }
 
@@ -153,7 +159,8 @@ func TestGetBalance_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	balance, err := GetBalance(context.Background(), caller, addr, QuantityTagLatest)
+	c := NewRPCClient(caller)
+	balance, err := c.GetBalance(context.Background(), addr, QuantityTagLatest)
 	require.NoError(t, err)
 	expected, _ := new(big.Int).SetString("de0b6b3a7640000", 16)
 	assert.Equal(t, expected, balance)
@@ -166,7 +173,8 @@ func TestGetBalance_Error(t *testing.T) {
 			return errors.New("node unavailable")
 		},
 	}
-	_, err := GetBalance(context.Background(), caller, "0x0", QuantityTagLatest)
+	c := NewRPCClient(caller)
+	_, err := c.GetBalance(context.Background(), "0x0", QuantityTagLatest)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "eth_getBalance")
 }
@@ -182,7 +190,8 @@ func TestGetTransactionCount_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	count, err := GetTransactionCount(context.Background(), caller, "0x1234", QuantityTagPending)
+	c := NewRPCClient(caller)
+	count, err := c.GetTransactionCount(context.Background(), "0x1234", QuantityTagPending)
 	require.NoError(t, err)
 	assert.Equal(t, big.NewInt(5), count)
 }
@@ -198,7 +207,8 @@ func TestGasPrice_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	price, err := GasPrice(context.Background(), caller)
+	c := NewRPCClient(caller)
+	price, err := c.GasPrice(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, big.NewInt(1_000_000_000), price)
 }
@@ -210,7 +220,8 @@ func TestGasPrice_Error(t *testing.T) {
 			return errors.New("rpc error")
 		},
 	}
-	_, err := GasPrice(context.Background(), caller)
+	c := NewRPCClient(caller)
+	_, err := c.GasPrice(context.Background())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "eth_gasPrice")
 }
@@ -245,7 +256,8 @@ func TestGetTransactionByHash_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	tx, err := GetTransactionByHash(context.Background(), caller, txHash)
+	c := NewRPCClient(caller)
+	tx, err := c.GetTransactionByHash(context.Background(), txHash)
 	require.NoError(t, err)
 	require.NotNil(t, tx)
 	assert.Equal(t, txHash, tx.Hash)
@@ -260,7 +272,8 @@ func TestGetTransactionByHash_EmptyResponse(t *testing.T) {
 			return nil // result stays zero-value (empty map)
 		},
 	}
-	_, err := GetTransactionByHash(context.Background(), caller, "0xhash")
+	c := NewRPCClient(caller)
+	_, err := c.GetTransactionByHash(context.Background(), "0xhash")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "empty")
 }
@@ -272,7 +285,8 @@ func TestGetTransactionByHash_Error(t *testing.T) {
 			return errors.New("network error")
 		},
 	}
-	_, err := GetTransactionByHash(context.Background(), caller, "0xhash")
+	c := NewRPCClient(caller)
+	_, err := c.GetTransactionByHash(context.Background(), "0xhash")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "eth_getTransactionByHash")
 }
@@ -286,7 +300,8 @@ func TestGetTxReceipt_NotFound(t *testing.T) {
 			return nil // empty resMap → errReceiptNotFound inside GetTransactionReceipt
 		},
 	}
-	receipt, err := GetTxReceipt(context.Background(), caller, "0xhash")
+	c := NewRPCClient(caller)
+	receipt, err := c.GetTxReceipt(context.Background(), "0xhash")
 	require.NoError(t, err)
 	assert.Nil(t, receipt)
 }
@@ -298,7 +313,8 @@ func TestGetTxReceipt_Error(t *testing.T) {
 			return errors.New("connection reset")
 		},
 	}
-	_, err := GetTxReceipt(context.Background(), caller, "0xhash")
+	c := NewRPCClient(caller)
+	_, err := c.GetTxReceipt(context.Background(), "0xhash")
 	require.Error(t, err)
 }
 
@@ -313,7 +329,8 @@ func TestNetVersion_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	v, err := NetVersion(context.Background(), caller)
+	c := NewRPCClient(caller)
+	v, err := c.NetVersion(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, uint16(1), v)
 }
@@ -325,7 +342,8 @@ func TestNetVersion_Error(t *testing.T) {
 			return errors.New("rpc error")
 		},
 	}
-	_, err := NetVersion(context.Background(), caller)
+	c := NewRPCClient(caller)
+	_, err := c.NetVersion(context.Background())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "net_version")
 }
@@ -341,7 +359,8 @@ func TestNetListening_True(t *testing.T) {
 			return nil
 		},
 	}
-	listening, err := NetListening(context.Background(), caller)
+	c := NewRPCClient(caller)
+	listening, err := c.NetListening(context.Background())
 	require.NoError(t, err)
 	assert.True(t, listening)
 }
@@ -355,7 +374,8 @@ func TestNetPeerCount_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	count, err := NetPeerCount(context.Background(), caller)
+	c := NewRPCClient(caller)
+	count, err := c.NetPeerCount(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, big.NewInt(3), count)
 }
@@ -371,7 +391,8 @@ func TestClientVersion_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	v, err := ClientVersion(context.Background(), caller)
+	c := NewRPCClient(caller)
+	v, err := c.ClientVersion(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, "Geth/v1.13.0-stable", v)
 }
@@ -383,7 +404,8 @@ func TestClientVersion_Error(t *testing.T) {
 			return errors.New("rpc error")
 		},
 	}
-	_, err := ClientVersion(context.Background(), caller)
+	c := NewRPCClient(caller)
+	_, err := c.ClientVersion(context.Background())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "web3_clientVersion")
 }
@@ -400,7 +422,8 @@ func TestSHA3_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	hash, err := SHA3(context.Background(), caller, input)
+	c := NewRPCClient(caller)
+	hash, err := c.SHA3(context.Background(), input)
 	require.NoError(t, err)
 	assert.Equal(t, expected, hash)
 }
@@ -417,7 +440,8 @@ func TestCoinbase_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	got, err := Coinbase(context.Background(), caller)
+	c := NewRPCClient(caller)
+	got, err := c.Coinbase(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, addr, got)
 }
@@ -432,7 +456,8 @@ func TestAccounts_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	got, err := Accounts(context.Background(), caller)
+	c := NewRPCClient(caller)
+	got, err := c.Accounts(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, want, got)
 }
@@ -448,7 +473,8 @@ func TestProtocolVersion_HappyPath(t *testing.T) {
 			return nil
 		},
 	}
-	v, err := ProtocolVersion(context.Background(), caller)
+	c := NewRPCClient(caller)
+	v, err := c.ProtocolVersion(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, uint64(0x41), v)
 }

@@ -20,3 +20,13 @@ type ETHCaller interface {
 	SendTransaction(ctx context.Context, tx *types.Transaction) error
 	TransactionReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error)
 }
+
+// rpcClient wraps RPCCaller and exposes Ethereum JSON-RPC operations as methods.
+type rpcClient struct {
+	caller RPCCaller
+}
+
+// NewRPCClient creates a new client wrapping the given RPCCaller.
+func NewRPCClient(caller RPCCaller) *rpcClient {
+	return &rpcClient{caller: caller}
+}

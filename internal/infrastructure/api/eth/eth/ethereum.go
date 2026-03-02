@@ -11,6 +11,7 @@ import (
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	pkgrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
@@ -29,6 +30,7 @@ var _ apieth.TxSigner = (*Ethereum)(nil)
 type Ethereum struct {
 	ethClient    *ethclient.Client
 	rpcClient    *ethrpc.Client
+	pkgrpc       pkgrpc.ETHRPC
 	chainConf    *chaincfg.Params
 	coinTypeCode domainCoin.CoinTypeCode
 	uuidHandler  uuid.UUIDHandler
@@ -52,6 +54,7 @@ func NewEthereum(
 	eth := &Ethereum{
 		ethClient:    ethClient,
 		rpcClient:    rpcClient,
+		pkgrpc:       pkgrpc.NewRPCClient(rpcClient),
 		coinTypeCode: coinTypeCode,
 		uuidHandler:  uuidHandler,
 		conf:         conf,

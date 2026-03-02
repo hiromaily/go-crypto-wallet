@@ -4,20 +4,19 @@ import (
 	"context"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
 // ImportRawKey Imports the given unencrypted private key (hex string) into the key store,
 // encrypting it with the passphrase
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_importrawkey
 func (e *Ethereum) ImportRawKey(ctx context.Context, hexKey, passPhrase string) (string, error) {
-	return ethrpc.ImportRawKey(ctx, e.rpcClient, hexKey, passPhrase)
+	return e.pkgrpc.ImportRawKey(ctx, hexKey, passPhrase)
 }
 
 // ListAccounts returns all the Ethereum account addresses of all keys in the key store
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_listaccounts
 func (e *Ethereum) ListAccounts(ctx context.Context) ([]string, error) {
-	return ethrpc.ListAccounts(ctx, e.rpcClient)
+	return e.pkgrpc.ListAccounts(ctx)
 }
 
 // NewAccount generates a new private key and stores it in the key store directory
@@ -25,13 +24,13 @@ func (e *Ethereum) ListAccounts(ctx context.Context) ([]string, error) {
 func (e *Ethereum) NewAccount(
 	ctx context.Context, passphrase string, _ domainAccount.AccountType,
 ) (string, error) {
-	return ethrpc.NewAccount(ctx, e.rpcClient, passphrase)
+	return e.pkgrpc.NewAccount(ctx, passphrase)
 }
 
 // LockAccount removes the private key with given address from memory
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_lockaccount
 func (e *Ethereum) LockAccount(ctx context.Context, hexAddr string) error {
-	return ethrpc.LockAccount(ctx, e.rpcClient, hexAddr)
+	return e.pkgrpc.LockAccount(ctx, hexAddr)
 }
 
 // UnlockAccount decrypts the key with the given address from the key store.
@@ -40,5 +39,5 @@ func (e *Ethereum) LockAccount(ctx context.Context, hexAddr string) error {
 //
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_unlockaccount
 func (e *Ethereum) UnlockAccount(ctx context.Context, hexAddr, passphrase string, duration uint64) (bool, error) {
-	return ethrpc.UnlockAccount(ctx, e.rpcClient, hexAddr, passphrase, duration)
+	return e.pkgrpc.UnlockAccount(ctx, hexAddr, passphrase, duration)
 }

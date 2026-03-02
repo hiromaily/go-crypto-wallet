@@ -9,9 +9,9 @@ import (
 
 // AddPeer requests adding a new remote node to the list of tracked static nodes.
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#admin_addpeer
-func AddPeer(ctx context.Context, caller RPCCaller, nodeURL string) error {
+func (c *rpcClient) AddPeer(ctx context.Context, nodeURL string) error {
 	var bRet bool
-	err := caller.CallContext(ctx, &bRet, "admin_addPeer", nodeURL)
+	err := c.caller.CallContext(ctx, &bRet, "admin_addPeer", nodeURL)
 	if err != nil {
 		return err
 	}
@@ -19,9 +19,9 @@ func AddPeer(ctx context.Context, caller RPCCaller, nodeURL string) error {
 }
 
 // AdminDataDir returns the absolute path the running Geth node uses to store its databases.
-func AdminDataDir(ctx context.Context, caller RPCCaller) (string, error) {
+func (c *rpcClient) AdminDataDir(ctx context.Context) (string, error) {
 	var dataDir string
-	err := caller.CallContext(ctx, &dataDir, "admin_datadir")
+	err := c.caller.CallContext(ctx, &dataDir, "admin_datadir")
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(admin_datadir): %w", err)
 	}
@@ -29,9 +29,9 @@ func AdminDataDir(ctx context.Context, caller RPCCaller) (string, error) {
 }
 
 // NodeInfo gathers and returns metadata about the host.
-func NodeInfo(ctx context.Context, caller RPCCaller) (*p2p.NodeInfo, error) {
+func (c *rpcClient) NodeInfo(ctx context.Context) (*p2p.NodeInfo, error) {
 	var r *p2p.NodeInfo
-	err := caller.CallContext(ctx, &r, "admin_nodeInfo")
+	err := c.caller.CallContext(ctx, &r, "admin_nodeInfo")
 	if err != nil {
 		return nil, err
 	}
@@ -39,9 +39,9 @@ func NodeInfo(ctx context.Context, caller RPCCaller) (*p2p.NodeInfo, error) {
 }
 
 // AdminPeers returns information about all connected remote nodes.
-func AdminPeers(ctx context.Context, caller RPCCaller) ([]*p2p.PeerInfo, error) {
+func (c *rpcClient) AdminPeers(ctx context.Context) ([]*p2p.PeerInfo, error) {
 	var peerInfo []*p2p.PeerInfo
-	err := caller.CallContext(ctx, &peerInfo, "admin_peers")
+	err := c.caller.CallContext(ctx, &peerInfo, "admin_peers")
 	if err != nil {
 		return nil, err
 	}
