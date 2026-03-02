@@ -83,7 +83,7 @@ func (b *BitcoinCash) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amo
 // getMinRelayFeeBCH gets the minimum relay fee from BCH network.
 // This is BCH-specific and may return different values than BTC.
 func (b *BitcoinCash) getMinRelayFeeBCH() (btcutil.Amount, error) {
-	res, err := b.GetNetworkInfo()
+	res, err := b.GetPkgRPC().GetNetworkInfo()
 	if err != nil {
 		return 0, fmt.Errorf("fail to call bch.GetNetworkInfo(): %w", err)
 	}

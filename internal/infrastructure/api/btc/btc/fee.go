@@ -98,7 +98,7 @@ func (b *Bitcoin) validateAdjustmentFee(fee float64) bool {
 }
 
 func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {
-	res, err := b.GetNetworkInfo()
+	res, err := b.pkgrpc.GetNetworkInfo()
 	if err != nil {
 		return 0, fmt.Errorf("fail to call btc.GetNetworkInfo(): %w", err)
 	}

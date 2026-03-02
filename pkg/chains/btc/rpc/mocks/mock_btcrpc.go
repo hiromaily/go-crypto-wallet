@@ -414,6 +414,76 @@ func (_c *MockBTCRPC_DecodeRawTransaction_Call) RunAndReturn(run func(hexTx stri
 	return _c
 }
 
+// DeriveAddresses provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) DeriveAddresses(descriptor string, startIdx uint32, endIdx uint32) ([]string, error) {
+	ret := _mock.Called(descriptor, startIdx, endIdx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeriveAddresses")
+	}
+
+	var r0 []string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string, uint32, uint32) ([]string, error)); ok {
+		return returnFunc(descriptor, startIdx, endIdx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string, uint32, uint32) []string); ok {
+		r0 = returnFunc(descriptor, startIdx, endIdx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string, uint32, uint32) error); ok {
+		r1 = returnFunc(descriptor, startIdx, endIdx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBTCRPC_DeriveAddresses_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeriveAddresses'
+type MockBTCRPC_DeriveAddresses_Call struct {
+	*mock.Call
+}
+
+// DeriveAddresses is a helper method to define mock.On call
+//   - descriptor string
+//   - startIdx uint32
+//   - endIdx uint32
+func (_e *MockBTCRPC_Expecter) DeriveAddresses(descriptor interface{}, startIdx interface{}, endIdx interface{}) *MockBTCRPC_DeriveAddresses_Call {
+	return &MockBTCRPC_DeriveAddresses_Call{Call: _e.mock.On("DeriveAddresses", descriptor, startIdx, endIdx)}
+}
+
+func (_c *MockBTCRPC_DeriveAddresses_Call) Run(run func(descriptor string, startIdx uint32, endIdx uint32)) *MockBTCRPC_DeriveAddresses_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 uint32
+		if args[1] != nil {
+			arg1 = args[1].(uint32)
+		}
+		var arg2 uint32
+		if args[2] != nil {
+			arg2 = args[2].(uint32)
+		}
+		run(arg0, arg1, arg2)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_DeriveAddresses_Call) Return(addresses []string, err error) *MockBTCRPC_DeriveAddresses_Call {
+	_c.Call.Return(addresses, err)
+	return _c
+}
+
+func (_c *MockBTCRPC_DeriveAddresses_Call) RunAndReturn(run func(string, uint32, uint32) ([]string, error)) *MockBTCRPC_DeriveAddresses_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DumpWallet provides a mock function for the type MockBTCRPC
 func (_mock *MockBTCRPC) DumpWallet(fileName string) error {
 	ret := _mock.Called(fileName)

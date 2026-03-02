@@ -1,7 +1,6 @@
 package bch
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
@@ -11,80 +10,33 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// GetAddressInfoResult is response type of RPC `getaddressinfo`
-type GetAddressInfoResult struct {
-	Address      string `json:"address"`
-	ScriptPubKey string `json:"scriptPubKey"`
-	Ismine       bool   `json:"ismine"`
-	Iswatchonly  bool   `json:"iswatchonly"`
-	Isscript     bool   `json:"isscript"`
-	Pubkey       string `json:"pubkey,omitempty"`
-	Iscompressed bool   `json:"iscompressed,omitempty"`
-	Label        string `json:"label,omitempty"`
-	Ischange     bool   `json:"ischange"`
-	Timestamp    int64  `json:"timestamp,omitempty"`
-	Labels       []struct {
-		Name    string `json:"name"`
-		Purpose string `json:"purpose"`
-	} `json:"labels"`
-}
-
-// GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
+// GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`.
+// This override handles BCH nodes that return a legacy "label" string field instead
+// of the "labels" array used by BTC nodes.
 func (b *BitcoinCash) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
-	input, err := json.Marshal(addr)
+	result, err := b.GetPkgRPC().GetAddressInfo(addr)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal() in bch: %w", err)
+		return nil, fmt.Errorf("fail to call pkgrpc.GetAddressInfo() in bch: %w", err)
 	}
-	rawResult, err := b.Client.RawRequest("getaddressinfo", []json.RawMessage{input})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressinfo) %s in bch: %w", addr, err)
+	// BCH nodes may return a legacy single "label" field instead of a "labels" array.
+	if len(result.Labels) == 0 && result.Label != "" {
+		result.Labels = btcrpc.FlexibleLabels{result.Label}
 	}
-
-	infoResult := GetAddressInfoResult{}
-	err = json.Unmarshal(rawResult, &infoResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult) in bch: %w", err)
-	}
-
-	return &btcrpc.GetAddressInfoResult{
-		Address:      infoResult.Address,
-		ScriptPubKey: infoResult.ScriptPubKey,
-		IsMine:       infoResult.Ismine,
-		IsWatchOnly:  infoResult.Iswatchonly,
-		IsScript:     infoResult.Isscript,
-		Pubkey:       infoResult.Pubkey,
-		IsCompressed: infoResult.Iscompressed,
-		IsChange:     infoResult.Ischange,
-		Timestamp:    infoResult.Timestamp,
-		Labels:       btcrpc.FlexibleLabels{infoResult.Label},
-	}, nil
+	return result, nil
 }
 
-// GetAddressesByLabel overrides Bitcoin's GetAddressesByLabel to use BCH address decoding
+// GetAddressesByLabel overrides Bitcoin's GetAddressesByLabel to use BCH address decoding.
+// This override is necessary because the parent Bitcoin.GetAddressesByLabel calls
+// Bitcoin.DecodeAddress internally, which doesn't understand BCH CashAddr format.
 func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
-	// This override is necessary because the parent Bitcoin.GetAddressesByLabel calls
-	// Bitcoin.DecodeAddress internally, which doesn't understand BCH CashAddr format.
 	logger.Debug("BCH GetAddressesByLabel called", "label", labelName)
 
-	// input for rpc api
-	input, err := json.Marshal(labelName)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal() in bch: %w", err)
-	}
-	// call getaddressesbylabel
-	rawResult, err := b.Client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
+	labels, err := b.GetPkgRPC().GetAddressesByLabel(labelName)
 	if err != nil {
 		logger.Debug("getaddressesbylabel RPC failed", "label", labelName, "error", err)
 		return nil, fmt.Errorf(
-			"fail to call json.RawRequest(getaddressesbylabel) for label %s in bch: %w",
+			"fail to call pkgrpc.GetAddressesByLabel() for label %s in bch: %w",
 			labelName, err)
-	}
-
-	// unmarshal response - only keys (address strings) are needed
-	var labels map[string]json.RawMessage
-	err = json.Unmarshal(rawResult, &labels)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult) in bch: %w", err)
 	}
 
 	if len(labels) == 0 {
@@ -96,11 +48,9 @@ func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, 
 		"label", labelName,
 		"raw_count", len(labels))
 
-	// retrieve - use BCH DecodeAddress for proper CashAddr handling
-	// With GetBalanceByAccount override, b is *BitcoinCash so b.DecodeAddress calls BCH version
+	// Decode each address key using BCH CashAddr format.
 	resAddrs := make([]btcutil.Address, 0, len(labels))
 	for key := range labels {
-		// key is address string
 		address, err := b.DecodeAddress(key)
 		if err != nil {
 			logger.Error(
@@ -110,7 +60,6 @@ func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, 
 				"error", err)
 			continue
 		}
-
 		resAddrs = append(resAddrs, address)
 	}
 

@@ -3,7 +3,6 @@ package btc
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -15,7 +14,6 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -25,112 +23,6 @@ import (
 // naming regulation for transaction
 //  - as example, *wire.MsgTx is that tx is used as suffix
 //  - so tx should be named like hexTx, hashTx
-
-// GetTransactionResult is result of RPC `gettransaction`
-type GetTransactionResult struct {
-	Amount            float64                `json:"amount"`
-	Fee               float64                `json:"fee"`
-	Confirmations     uint64                 `json:"confirmations"`
-	Blockhash         string                 `json:"blockhash"`
-	Blockheight       uint64                 `json:"blockheight"`
-	Blockindex        uint64                 `json:"blockindex"`
-	Blocktime         uint64                 `json:"blocktime"`
-	Txid              string                 `json:"txid"`
-	Walletconflicts   []any                  `json:"walletconflicts"`
-	Mempoolconflicts  []string               `json:"mempoolconflicts,omitempty"` // Bitcoin Core v28.0+
-	Time              int64                  `json:"time"`
-	Timereceived      int64                  `json:"timereceived"`
-	Bip125Replaceable string                 `json:"bip125-replaceable"`
-	Details           []GetTransactionDetail `json:"details"`
-	Hex               string                 `json:"hex"`
-}
-
-// GetTransactionDetail is parts of GetTransactionResult
-type GetTransactionDetail struct {
-	Address   string  `json:"address"`
-	Category  string  `json:"category"`
-	Amount    float64 `json:"amount"`
-	Label     string  `json:"label"`
-	Vout      uint32  `json:"vout"`
-	Fee       float64 `json:"fee,omitempty"`
-	Abandoned bool    `json:"abandoned,omitempty"`
-}
-
-// TxRawResult is result of RPC `decoderawtransaction`
-type TxRawResult struct {
-	Txid     string      `json:"txid"`
-	Hash     string      `json:"hash"`
-	Version  uint32      `json:"version"`
-	Size     int32       `json:"size"`
-	Vsize    int32       `json:"vsize"`
-	Weight   int32       `json:"weight"`
-	Locktime uint32      `json:"locktime"`
-	Vin      []TxRawVin  `json:"vin"`
-	Vout     []TxRawVout `json:"vout"`
-}
-
-// TxRawVin is parts of TxRawResult
-type TxRawVin struct {
-	Txid      string    `json:"txid"`
-	Vout      uint32    `json:"vout"`
-	ScriptSig ScriptSig `json:"scriptSig"`
-	Sequence  uint32    `json:"sequence"`
-}
-
-// ScriptSig is parts of TxRawVin
-type ScriptSig struct {
-	Asm string `json:"asm"`
-	Hex string `json:"hex"`
-}
-
-// TxRawVout is parts of TxRawResult
-type TxRawVout struct {
-	Value        float64      `json:"value"`
-	N            uint32       `json:"n"`
-	ScriptPubKey ScriptPubKey `json:"scriptPubKey"`
-}
-
-// ScriptPubKey is parts of TxRawVout
-type ScriptPubKey struct {
-	Asm       string   `json:"asm"`
-	Hex       string   `json:"hex"`
-	ReqSigs   uint32   `json:"reqSigs"`
-	Type      string   `json:"type"`
-	Addresses []string `json:"addresses"`
-}
-
-// SignRawTransactionResult is response type of PRC `signrawtransactionwithwallet`
-type SignRawTransactionResult struct {
-	Hex      string                    `json:"hex"`
-	Complete bool                      `json:"complete"`
-	Errors   []SignRawTransactionError `json:"errors"`
-}
-
-// SignRawTransactionError error object in SignRawTransactionResult
-type SignRawTransactionError struct {
-	Txid      string `json:"txid"`
-	Vout      uint32 `json:"vout"`
-	ScriptSig string `json:"scriptSig"`
-	Sequence  uint32 `json:"sequence"`
-	Error     string `json:"error"`
-}
-
-// PreviousTxs is used when creating tx for multisig address
-type PreviousTxs struct {
-	SenderAccount domainAccount.AccountType
-	PrevTxs       []PrevTx
-	Addrs         []string
-}
-
-// PrevTx is required parameters for api `signrawtransaction` for multisig address
-type PrevTx struct {
-	Txid          string  `json:"txid"`
-	Vout          uint32  `json:"vout"`
-	ScriptPubKey  string  `json:"scriptPubKey"`
-	RedeemScript  string  `json:"redeemScript"`
-	WitnessScript string  `json:"witnessScript"`
-	Amount        float64 `json:"amount"`
-}
 
 // ToHex convert wire.MsgTx to string of Hexadecimal(16進数)
 func (*Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
@@ -154,26 +46,6 @@ func (*Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	}
 
 	return &msgTx, nil
-}
-
-// GetTransaction returns GetTransactionResult by gettransaction RPC
-func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
-	input, err := json.Marshal(txID)
-	if err != nil {
-		return nil, fmt.Errorf("json.Marchal(txID): error: %s", err)
-	}
-	rawResult, err := b.Client.RawRequest("gettransaction", []json.RawMessage{input})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(gettransaction): %w", err)
-	}
-
-	result := GetTransactionResult{}
-	err = json.Unmarshal(rawResult, &result)
-	if err != nil {
-		return nil, fmt.Errorf("json.Unmarshal(rawResult): error: %s", err)
-	}
-
-	return &result, nil
 }
 
 // DecodeRawTransaction decodes a serialized transaction hex string back into a JSON object
@@ -258,16 +130,6 @@ func (b *Bitcoin) CreateRawTransaction(
 	return msgTx, nil
 }
 
-// FundRawTransactionOptions options for fundrawtransaction RPC
-// Bitcoin Core v28.0+ supports max_tx_weight parameter
-type FundRawTransactionOptions struct {
-	FeeRate     float64 `json:"feeRate,omitempty"`       // Fee rate in BTC/kvB
-	MaxTxWeight *int    `json:"max_tx_weight,omitempty"` // Max transaction weight (v28.0+, default: 4000000 WU)
-	// Output type for change (legacy, p2sh-segwit, bech32, bech32m)
-	ChangeType    string `json:"changeType,omitempty"`
-	IncludeUnsafe bool   `json:"includeUnsafe,omitempty"` // Include unsafe inputs
-}
-
 // FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
 // TODO: unused for now, but it looks useful
 func (b *Bitcoin) FundRawTransaction(hexTx string) (*btcrpc.FundRawTransactionResult, error) {
@@ -278,10 +140,10 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*btcrpc.FundRawTransactionRe
 // Bitcoin Core v28.0+ supports max_tx_weight parameter to limit transaction size.
 func (b *Bitcoin) FundRawTransactionWithOptions(
 	hexTx string,
-	opts *FundRawTransactionOptions,
+	opts *btcrpc.FundRawTransactionOptions,
 ) (*btcrpc.FundRawTransactionResult, error) {
 	if opts == nil {
-		opts = &FundRawTransactionOptions{}
+		opts = &btcrpc.FundRawTransactionOptions{}
 	}
 
 	// Set fee rate if not specified
@@ -293,14 +155,7 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 		opts.FeeRate = feePerKb
 	}
 
-	pkgOpts := &btcrpc.FundRawTransactionOptions{
-		FeeRate:       opts.FeeRate,
-		MaxTxWeight:   opts.MaxTxWeight,
-		ChangeType:    opts.ChangeType,
-		IncludeUnsafe: opts.IncludeUnsafe,
-	}
-
-	result, err := b.pkgrpc.FundRawTransaction(hexTx, pkgOpts)
+	result, err := b.pkgrpc.FundRawTransaction(hexTx, opts)
 	if err != nil {
 		// error: -4: Insufficient funds
 		return nil, fmt.Errorf("fail to call btcrpc.FundRawTransaction(): %w", err)
@@ -313,52 +168,19 @@ func (b *Bitcoin) FundRawTransactionWithOptions(
 func (b *Bitcoin) prepareSignRawTransactionInputs(
 	tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx,
 ) (hexTx string, pkgPrevTxs []btcrpc.PrevTx, err error) {
-	// Convert application DTOs to local infrastructure types, then to pkg types
-	localPrevTxs := fromDTOPreviousTxToLocal(prevtxs)
+	pkgPrevTxs = fromDTOPreviousTxToLocal(prevtxs)
 
-	// hex tx
 	hexTx, err = b.ToHex(tx)
 	if err != nil {
 		return "", nil, fmt.Errorf("fail to call btc.ToHex(tx): %w", err)
 	}
 
-	// Convert local PrevTx to pkg PrevTx
-	pkgPrevTxs = make([]btcrpc.PrevTx, len(localPrevTxs))
-	for i, p := range localPrevTxs {
-		pkgPrevTxs[i] = btcrpc.PrevTx{
-			Txid:          p.Txid,
-			Vout:          p.Vout,
-			ScriptPubKey:  p.ScriptPubKey,
-			RedeemScript:  p.RedeemScript,
-			WitnessScript: p.WitnessScript,
-			Amount:        p.Amount,
-		}
-	}
-
 	return hexTx, pkgPrevTxs, nil
-}
-
-// pkgSignResultToLocal converts a btcrpc.SignRawTransactionResult to a local SignRawTransactionResult.
-func pkgSignResultToLocal(r *btcrpc.SignRawTransactionResult) SignRawTransactionResult {
-	local := SignRawTransactionResult{
-		Hex:      r.Hex,
-		Complete: r.Complete,
-	}
-	for _, e := range r.Errors {
-		local.Errors = append(local.Errors, SignRawTransactionError{
-			Txid:      e.Txid,
-			Vout:      e.Vout,
-			ScriptSig: e.ScriptSig,
-			Sequence:  e.Sequence,
-			Error:     e.Error,
-		})
-	}
-	return local
 }
 
 // processSignRawTransactionResult processes the result from sign raw transaction operations
 func (b *Bitcoin) processSignRawTransactionResult(
-	tx *wire.MsgTx, hexTx string, result SignRawTransactionResult, strictErrorCheck bool,
+	tx *wire.MsgTx, hexTx string, result *btcrpc.SignRawTransactionResult, strictErrorCheck bool,
 ) (*wire.MsgTx, bool, error) {
 	if len(result.Errors) != 0 {
 		if strictErrorCheck {
@@ -416,7 +238,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx
 		return nil, false, fmt.Errorf("fail to call btcrpc.SignRawTransactionWithWallet(): %w", err)
 	}
 
-	return b.processSignRawTransactionResult(tx, hexTx, pkgSignResultToLocal(pkgResult), true)
+	return b.processSignRawTransactionResult(tx, hexTx, pkgResult, true)
 }
 
 // SignRawTransactionWithKey signs a raw unsigned transaction for multisig addresses.
@@ -447,7 +269,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 	}
 
 	// Note: For multisig, partial signatures are allowed
-	return b.processSignRawTransactionResult(tx, hexTx, pkgSignResultToLocal(pkgResult), false)
+	return b.processSignRawTransactionResult(tx, hexTx, pkgResult, false)
 }
 
 // SendTransactionByHex send raw transaction by hex string

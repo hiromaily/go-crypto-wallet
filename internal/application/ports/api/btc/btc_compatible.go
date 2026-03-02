@@ -44,9 +44,6 @@ type BitcoinCompatible interface {
 	GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amount, error)
 	GetBalanceByAccount(accountType domainAccount.AccountType, confirmationNum uint64) (btcutil.Amount, error)
 
-	// block.go
-	GetBlockCount() (int64, error)
-
 	// bitcoin.go
 	Close()
 	GetChainConf() *chaincfg.Params
@@ -73,17 +70,10 @@ type BitcoinCompatible interface {
 	// label.go
 	SetLabel(addr, label string) error
 
-	// logging.go
-	Logging() (*btcrpc.LoggingResult, error)
-
 	// multisig.go (P2SH works for both, but BCH should not use P2WSH or P2TR address types)
 	AddMultisigAddress(
 		requiredSigs int, addresses []string, accountName string, addressType domainBTC.AddressType,
 	) (*btcrpc.AddMultisigAddressResult, error)
-
-	// network.go
-	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
-	GetBlockchainInfo() (*btcrpc.GetBlockchainInfoResult, error)
 
 	// transaction.go (Raw TX operations - works for both BTC and BCH)
 	ToHex(tx *wire.MsgTx) (string, error)

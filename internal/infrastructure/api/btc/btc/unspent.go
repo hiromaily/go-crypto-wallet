@@ -1,7 +1,6 @@
 package btc
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -12,45 +11,14 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// ListUnspentResult is response type of PRC `listunspent`
-type ListUnspentResult struct {
-	TxID          string  `json:"txid"`
-	Vout          uint32  `json:"vout"`
-	Address       string  `json:"address"`
-	Label         string  `json:"label"`
-	RedeemScript  string  `json:"redeemScript"`
-	WitnessScript string  `json:"witnessScript"`
-	ScriptPubKey  string  `json:"scriptPubKey"`
-	Amount        float64 `json:"amount"`
-	Confirmations int64   `json:"confirmations"`
-	Spendable     bool    `json:"spendable"`
-	Solvable      bool    `json:"solvable"`
-	Desc          string  `json:"desc"`
-	Safe          bool    `json:"safe"`
-}
-
-// listUnspentRaw calls RPC `listunspent` and returns raw ListUnspentResult without conversion to DTO.
+// listUnspentRaw calls RPC `listunspent` and returns raw results without conversion to DTO.
 // This is used internally to avoid redundant data conversions.
-func (b *Bitcoin) listUnspentRaw(confirmationNum uint64) ([]ListUnspentResult, error) {
-	input, err := json.Marshal(confirmationNum)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
-	}
-	rawResult, err := b.Client.RawRequest("listunspent", []json.RawMessage{input})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(listunspent): %w", err)
-	}
-
-	var listunspentResult []ListUnspentResult
-	err = json.Unmarshal(rawResult, &listunspentResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
-	}
-
-	return listunspentResult, nil
+func (b *Bitcoin) listUnspentRaw(confirmationNum uint64) ([]btcrpc.ListUnspentResult, error) {
+	return b.pkgrpc.ListUnspent(confirmationNum)
 }
 
 // ListUnspent call RPC `listunspent`
@@ -66,7 +34,7 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, e
 		return nil, nil
 	}
 
-	return ToUnspentOutputList(listunspentResult, b)
+	return ToUnspentOutputList(listunspentResult)
 }
 
 // ListUnspentByAccount gets listunspent by account.
@@ -108,7 +76,7 @@ func (b *Bitcoin) ListUnspentByAccount(
 				return unspentList[i].Amount < unspentList[j].Amount
 			})
 
-			return ToUnspentOutputList(unspentList, b)
+			return ToUnspentOutputList(unspentList)
 		}
 
 		// Labeled addresses exist but have no UTXOs - fall back to descriptor matching
@@ -152,7 +120,7 @@ func (b *Bitcoin) ListUnspentByAccount(
 		return unspentList[i].Amount < unspentList[j].Amount
 	})
 
-	return ToUnspentOutputList(unspentList, b)
+	return ToUnspentOutputList(unspentList)
 }
 
 // GetUnspentListAddrs returns address from unspentList
@@ -171,44 +139,22 @@ func (*Bitcoin) GetUnspentListAddrs(
 	return addrs
 }
 
-func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum uint64) ([]ListUnspentResult, error) {
-	input1, err := json.Marshal(confirmationNum)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(confirmationBlock): %w", err)
-	}
-
-	input2, err := json.Marshal(uint64(9999999))
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(9999999): %w", err)
-	}
-
-	// address
+func (b *Bitcoin) listUnspentByAccount(
+	addrs []btcutil.Address, confirmationNum uint64,
+) ([]btcrpc.ListUnspentResult, error) {
 	strAddrs := make([]string, len(addrs))
 	for idx, addr := range addrs {
 		strAddrs[idx] = addr.String()
 	}
 
-	input3, err := json.Marshal(strAddrs)
+	result, err := b.pkgrpc.ListUnspentByAddresses(confirmationNum, 9999999, strAddrs)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(addresses): %w", err)
+		return nil, fmt.Errorf("fail to call pkgrpc.ListUnspentByAddresses(): %w", err)
 	}
-
-	rawResult, err := b.Client.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(listunspent): %w", err)
-	}
-
-	var listunspentResult []ListUnspentResult
-	err = json.Unmarshal(rawResult, &listunspentResult)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
-	}
-
-	if len(listunspentResult) == 0 {
+	if len(result) == 0 {
 		return nil, nil
 	}
-
-	return listunspentResult, nil
+	return result, nil
 }
 
 // listUnspentByDescriptorMatching finds unspent outputs for an account by matching descriptors.
@@ -241,7 +187,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 func (b *Bitcoin) listUnspentByDescriptorMatching(
 	accountType domainAccount.AccountType,
 	confirmationNum uint64,
-) ([]ListUnspentResult, error) {
+) ([]btcrpc.ListUnspentResult, error) {
 	// Get all unspent outputs (no address filter) - use raw result to avoid conversion
 	allUnspent, err := b.listUnspentRaw(confirmationNum)
 	if err != nil {
@@ -299,7 +245,7 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 
 	// Filter unspent outputs by checking if they belong to this account
 	// We do this by getting address info for each unspent and checking the account
-	matchingUnspent := make([]ListUnspentResult, 0)
+	matchingUnspent := make([]btcrpc.ListUnspentResult, 0)
 	for _, unspent := range allUnspent {
 		// Check if this address belongs to the account
 		// Since we've filtered descriptors by account index, any address in our wallet

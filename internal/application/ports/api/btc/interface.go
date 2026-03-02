@@ -58,9 +58,6 @@ type Bitcoiner interface {
 	GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amount, error)
 	GetBalanceByAccount(accountType domainAccount.AccountType, confirmationNum uint64) (btcutil.Amount, error)
 
-	// block.go
-	GetBlockCount() (int64, error)
-
 	// bitcoin.go
 	Close()
 	GetChainConf() *chaincfg.Params
@@ -98,17 +95,10 @@ type Bitcoiner interface {
 	SetLabel(addr, label string) error
 	// GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
-	// logging.go
-	Logging() (*btcrpc.LoggingResult, error)
-
 	// multisig.go
 	AddMultisigAddress(
 		requiredSigs int, addresses []string, accountName string, addressType domainBTC.AddressType,
 	) (*btcrpc.AddMultisigAddressResult, error)
-
-	// network.go
-	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
-	GetBlockchainInfo() (*btcrpc.GetBlockchainInfoResult, error)
 
 	// transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)
@@ -418,20 +408,9 @@ type PKGRPCProvider interface {
 	GetPkgRPC() btcrpc.BTCRPC
 }
 
-// NetworkInformer provides network and blockchain information.
-type NetworkInformer interface {
-	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
-	GetBlockchainInfo() (*btcrpc.GetBlockchainInfoResult, error)
-}
-
 // FullUTXOLister lists all unspent outputs without account filter.
 type FullUTXOLister interface {
 	ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error)
-}
-
-// NodeLogger provides node-level logging operations.
-type NodeLogger interface {
-	Logging() (*btcrpc.LoggingResult, error)
 }
 
 // AddressValidator validates Bitcoin addresses.
@@ -462,12 +441,10 @@ type WatchAPIClient interface {
 	PKGRPCProvider     // GetPkgRPC
 	FullUTXOLister     // ListUnspent
 	UTXOProvider       // ListUnspentByAccount, GetUnspentListAddrs
-	NodeLogger         // Logging
 	AddressValidator   // ValidateAddress
 	// Inline: partial overlaps with larger interfaces to avoid importing extra methods
 	ConfirmationBlock() uint64
 	GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error)
-	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
 	UnlockUnspent() error
 }
 

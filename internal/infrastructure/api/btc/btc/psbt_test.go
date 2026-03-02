@@ -17,6 +17,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/testutil"
+	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // testValidPSBT is a valid PSBT from Bitcoin Core testnet (simplified for testing)
@@ -51,7 +52,7 @@ func TestCreatePSBT(t *testing.T) {
 	msgTx.AddTxOut(txOut)
 
 	// Create prevTxs metadata
-	prevTxs := []apibtcimpl.PrevTx{
+	prevTxs := []btcrpc.PrevTx{
 		{
 			Txid:         prevHash.String(),
 			Vout:         0,
@@ -61,7 +62,7 @@ func TestCreatePSBT(t *testing.T) {
 	}
 
 	// Convert to DTO
-	prevTxsDTO, err := apibtcimpl.ToPreviousTxList(prevTxs, bitcoin.(*apibtcimpl.Bitcoin))
+	prevTxsDTO, err := apibtcimpl.ToPreviousTxList(prevTxs)
 	require.NoError(t, err)
 
 	// Create PSBT
@@ -360,7 +361,7 @@ func TestPSBTWorkflow_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	// 2. Create PSBT from transaction
-	prevTxs := []apibtcimpl.PrevTx{
+	prevTxs := []btcrpc.PrevTx{
 		{
 			Txid:         prevHash.String(),
 			Vout:         0,
@@ -370,7 +371,7 @@ func TestPSBTWorkflow_Integration(t *testing.T) {
 	}
 
 	// Convert to DTO
-	prevTxsDTO, err := apibtcimpl.ToPreviousTxList(prevTxs, bitcoin.(*apibtcimpl.Bitcoin))
+	prevTxsDTO, err := apibtcimpl.ToPreviousTxList(prevTxs)
 	require.NoError(t, err)
 
 	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO, domainAccount.AccountTypePayment)
@@ -410,18 +411,18 @@ func TestCreatePSBT_ErrorCases(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		prevTxs []apibtcimpl.PrevTx
+		prevTxs []btcrpc.PrevTx
 		wantErr bool
 		errMsg  string
 	}{
 		{
 			name:    "empty prevTxs",
-			prevTxs: []apibtcimpl.PrevTx{},
+			prevTxs: []btcrpc.PrevTx{},
 			wantErr: false, // Empty prevTxs is valid, PSBT will be created without metadata
 		},
 		{
 			name: "invalid scriptPubKey",
-			prevTxs: []apibtcimpl.PrevTx{
+			prevTxs: []btcrpc.PrevTx{
 				{
 					Txid:         prevHash.String(),
 					Vout:         0,
@@ -434,7 +435,7 @@ func TestCreatePSBT_ErrorCases(t *testing.T) {
 		},
 		{
 			name: "prevTxs count exceeds inputs",
-			prevTxs: []apibtcimpl.PrevTx{
+			prevTxs: []btcrpc.PrevTx{
 				{
 					Txid:         prevHash.String(),
 					Vout:         0,
@@ -456,7 +457,7 @@ func TestCreatePSBT_ErrorCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Convert to DTO
-			prevTxsDTO, convErr := apibtcimpl.ToPreviousTxList(tt.prevTxs, bitcoin.(*apibtcimpl.Bitcoin))
+			prevTxsDTO, convErr := apibtcimpl.ToPreviousTxList(tt.prevTxs)
 			if convErr != nil && tt.wantErr {
 				// Conversion error is expected for invalid test cases
 				t.Logf("Conversion error (expected): %v", convErr)
