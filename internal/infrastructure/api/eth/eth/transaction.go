@@ -89,7 +89,7 @@ func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
-	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
+	if pkgeth.ValidateAddr(fromAddr) != nil || pkgeth.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
 	}
 	logger.Debug("eth.CreateRawTransaction()",
@@ -335,7 +335,7 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
-	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
+	if pkgeth.ValidateAddr(fromAddr) != nil || pkgeth.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
 	}
 	logger.Debug("eth.CreateRawTransactionEIP1559()",

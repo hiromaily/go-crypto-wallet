@@ -63,5 +63,24 @@ func (e *Ethereum) GetTxReceipt(ctx context.Context, txHash string) (*domainETH.
 	if err != nil {
 		return nil, fmt.Errorf("fail to call GetTxReceipt(): %w", err)
 	}
-	return ToDomainTransactionReceiptFromPkg(result), nil
+	return toDomainTransactionReceiptFromPkg(result), nil
+}
+
+// toDomainTransactionReceiptFromPkg converts pkg TransactionReceipt to domain.
+func toDomainTransactionReceiptFromPkg(pkg *ethrpc.TransactionReceipt) *domainETH.TransactionReceipt {
+	if pkg == nil {
+		return nil
+	}
+	return &domainETH.TransactionReceipt{
+		TransactionHash:   pkg.TransactionHash,
+		TransactionIndex:  pkg.TransactionIndex,
+		BlockHash:         pkg.BlockHash,
+		BlockNumber:       pkg.BlockNumber,
+		From:              pkg.From,
+		To:                pkg.To,
+		CumulativeGasUsed: pkg.CumulativeGasUsed,
+		GasUsed:           pkg.GasUsed,
+		ContractAddress:   pkg.ContractAddress,
+		Status:            pkg.Status,
+	}
 }

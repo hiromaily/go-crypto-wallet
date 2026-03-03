@@ -137,12 +137,6 @@ type Ethereumer interface {
 	) (*domainETH.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
-	// util
-	DecodeBig(input string) (*big.Int, error)
-	ValidateAddr(addr string) error
-	FromWei(v int64) *big.Int
-	FromGWei(v int64) *big.Int
-	FromFloatEther(v float64) *big.Int
 	FloatToBigInt(v float64) *big.Int
 }
 
@@ -150,7 +144,6 @@ type Ethereumer interface {
 // Used by the Watch wallet create-transaction use case for both native ETH and ERC-20 tokens.
 // Implementations handle token contract interactions, balance queries, and EIP-1559 support detection.
 type ERC20er interface {
-	ValidateAddr(addr string) error
 	FloatToBigInt(v float64) *big.Int
 	GetBalance(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
@@ -310,12 +303,6 @@ type TxMonitor interface {
 	GetConfirmation(ctx context.Context, txHash string) (uint64, error)
 }
 
-// AddressValidator validates Ethereum addresses.
-// Used by watch wallet create-transaction use case.
-type AddressValidator interface {
-	ValidateAddr(addr string) error
-}
-
 // ERC20NodeAPI defines the minimal Ethereum node operations needed by the ERC20
 // infrastructure implementation. apieth.Ethereumer satisfies this interface, so
 // the DI layer can inject it without any type assertion.
@@ -338,7 +325,6 @@ type WatchTxCreationDeps interface {
 	ChainConfigProvider
 	TxCreator
 	GasEstimator
-	AddressValidator
 }
 
 // KeygenSignTxDeps is the composed interface for the Keygen wallet's

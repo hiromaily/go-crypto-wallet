@@ -81,14 +81,6 @@ func NewERC20(
 //	return &opts
 //}
 
-func (*ERC20) ValidateAddr(addr string) error {
-	// validation check
-	if !common.IsHexAddress(addr) {
-		return fmt.Errorf("address:%s is invalid", addr)
-	}
-	return nil
-}
-
 // FloatToBigInt converts float64 to *big.Int
 // FIXME: Is it correct to handle decimal??
 func (e *ERC20) FloatToBigInt(v float64) *big.Int {
@@ -128,7 +120,7 @@ func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
-	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
+	if pkgeth.ValidateAddr(fromAddr) != nil || pkgeth.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
 	}
 	logger.Debug("eth.CreateRawTransaction()",
@@ -285,10 +277,10 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 	}
 
 	// ── Address validation ───────────────────────────────────────────────────
-	if err := e.ValidateAddr(fromAddr); err != nil {
+	if err := pkgeth.ValidateAddr(fromAddr); err != nil {
 		return nil, nil, fmt.Errorf("invalid fromAddr: %w", err)
 	}
-	if err := e.ValidateAddr(toAddr); err != nil {
+	if err := pkgeth.ValidateAddr(toAddr); err != nil {
 		return nil, nil, fmt.Errorf("invalid toAddr: %w", err)
 	}
 

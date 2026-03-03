@@ -83,7 +83,6 @@ packages:
       TxSigner:
       TxSender:
       TxMonitor:
-      AddressValidator:
 
   # Persistence (UnitOfWork / Transaction) - used by watch wallet use cases
   github.com/hiromaily/go-crypto-wallet/pkg/db/tx:
