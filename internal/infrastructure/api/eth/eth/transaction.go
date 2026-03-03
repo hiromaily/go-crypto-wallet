@@ -246,6 +246,11 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *domainETH.RawTx, passphrase strin
 	}, nil
 }
 
+// SendRawTx sends raw transaction
+func (e *Ethereum) SendRawTx(ctx context.Context, tx *types.Transaction) error {
+	return e.ethClient.SendTransaction(ctx, tx)
+}
+
 // SendSignedRawTransaction sends signed raw transaction
 // - SendRawTransaction in rpc_eth_tx.go
 // - SendRawTx in client.go

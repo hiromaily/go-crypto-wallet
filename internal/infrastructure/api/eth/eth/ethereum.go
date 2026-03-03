@@ -3,7 +3,6 @@ package eth
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -37,7 +36,6 @@ type Ethereum struct {
 	netID        uint16
 	version      string
 	keyDir       string
-	isParity     bool
 	clientType   ClientVersion
 }
 
@@ -92,7 +90,6 @@ func NewEthereum(
 	}
 	eth.version = clientVer
 
-	eth.isParity = isParity(clientVer)
 	eth.clientType = DetectClientType(clientVer)
 	logger.Debug("detected client type", "clientType", eth.clientType)
 
@@ -137,8 +134,4 @@ func (e *Ethereum) CoinTypeCode() domainCoin.CoinTypeCode {
 // GetChainConf returns chain conf
 func (e *Ethereum) GetChainConf() *chaincfg.Params {
 	return e.chainConf
-}
-
-func isParity(target string) bool {
-	return strings.Contains(target, ClientVersionParity.String())
 }
