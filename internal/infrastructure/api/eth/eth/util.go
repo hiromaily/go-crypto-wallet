@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 )
 
-// DecodeBig to handle different response of API between Geth and Parity
+// DecodeBig decodes a hex-encoded big.Int, treating empty or "0x" as zero.
 func (*Ethereum) DecodeBig(input string) (*big.Int, error) {
 	if input == "" || input == "0x" {
 		input = "0x0"

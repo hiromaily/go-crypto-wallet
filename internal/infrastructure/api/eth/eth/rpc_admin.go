@@ -15,9 +15,6 @@ func (e *Ethereum) AddPeer(ctx context.Context, nodeURL string) error {
 // AdminDataDir returns the absolute path the running Geth node currently uses to store all its databases
 // returns like ${HOME}/Library/Ethereum/goerli
 func (e *Ethereum) AdminDataDir(ctx context.Context) (string, error) {
-	if e.isParity {
-		return "", nil
-	}
 	return e.pkgrpc.AdminDataDir(ctx)
 }
 
@@ -28,8 +25,5 @@ func (e *Ethereum) NodeInfo(ctx context.Context) (*p2p.NodeInfo, error) {
 
 // AdminPeers returns all the information known about the connected remote nodes at the networking granularity.
 func (e *Ethereum) AdminPeers(ctx context.Context) ([]*p2p.PeerInfo, error) {
-	if e.isParity {
-		return nil, nil
-	}
 	return e.pkgrpc.AdminPeers(ctx)
 }

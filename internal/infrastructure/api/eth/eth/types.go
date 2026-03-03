@@ -69,9 +69,8 @@ type ClientVersion string
 
 // client-version
 const (
-	ClientVersionGeth   ClientVersion = "Geth"
-	ClientVersionParity ClientVersion = "Parity-Ethereum"
-	ClientVersionAnvil  ClientVersion = "Anvil"
+	ClientVersionGeth  ClientVersion = "Geth"
+	ClientVersionAnvil ClientVersion = "Anvil"
 )
 
 // String converter
@@ -84,9 +83,6 @@ func DetectClientType(version string) ClientVersion {
 	versionLower := strings.ToLower(version)
 	if strings.Contains(versionLower, "anvil") {
 		return ClientVersionAnvil
-	}
-	if strings.Contains(versionLower, "parity") {
-		return ClientVersionParity
 	}
 	// Default to Geth (most common)
 	return ClientVersionGeth

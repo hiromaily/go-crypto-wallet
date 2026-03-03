@@ -27,8 +27,6 @@ func TestDetectClientType(t *testing.T) {
 		{"Anvil v0.2.0", ClientVersionAnvil},
 		{"anvil/v0.1.0", ClientVersionAnvil},
 		{"ANVIL", ClientVersionAnvil},
-		{"Parity-Ethereum//v2.7.2", ClientVersionParity},
-		{"parity/v1.0.0", ClientVersionParity},
 		{"Geth/v1.13.0", ClientVersionGeth},
 		{"go-ethereum/v1.12.0", ClientVersionGeth},
 		{"", ClientVersionGeth}, // empty defaults to Geth

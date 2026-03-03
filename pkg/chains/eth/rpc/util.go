@@ -10,7 +10,6 @@ import (
 )
 
 // decodeBig decodes a hex-encoded big.Int, treating empty or "0x" as zero.
-// Handles different response formats between Geth and Parity.
 func decodeBig(input string) (*big.Int, error) {
 	if input == "" || input == "0x" {
 		input = "0x0"

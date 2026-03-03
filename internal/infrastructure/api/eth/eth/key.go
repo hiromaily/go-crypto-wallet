@@ -27,21 +27,6 @@ import (
 // The actual key import is done via keystore.ImportECDSA() in import_private_key.go,
 // which also uses local filesystem operations instead of personal_importRawKey RPC.
 
-// Note: key filename is different between Geth and Parity
-// Geth
-// - 0x71678cd07cfac46c2dc427f999abf46aae115925
-// - UTC--2018-10-11T06-58-43.857846090Z--71678cd07cfac46c2dc427f999abf46aae115925
-
-// Parity, filename includes just UUID
-// - "0xcf9583c3c10cf895af95a2810243765c4fe7c038",
-// - UTC--2018-10-11T06-59-28Z--2bd02735-84ec-593e-f2b2-73cce1b1862c
-
-// File names for Parity keys
-// https://ethereum.stackexchange.com/questions/13951/file-names-of-parity-keys
-
-// So Parity key filename should be renamed to same format as Geth
-// e.g. UTC--2018-10-12T01-53-58Z--fff7e98d-b3b7-08f4-65cd-3fe82416cebf--45783b86c2aa1ce81632ac2db26a91acc3ea6226
-
 // ToECDSA converts privKey to ECDSA
 func (*Ethereum) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
 	bytePrivKey, err := hexutil.Decode(privKey)
