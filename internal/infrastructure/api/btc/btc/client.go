@@ -152,8 +152,3 @@ func (b *Bitcoin) Version() domainBTC.Version {
 func (b *Bitcoin) CoinTypeCode() domainCoin.CoinTypeCode {
 	return b.coinTypeCode
 }
-
-// GetPkgRPC returns the underlying btcrpc.BTCRPC btcdClient for direct RPC access
-func (b *Bitcoin) GetPkgRPC() btcrpc.BTCRPC {
-	return b.pkgrpc
-}

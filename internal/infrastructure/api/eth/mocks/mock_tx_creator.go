@@ -123,8 +123,8 @@ func (_c *MockTxCreator_CreateRawTransaction_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *MockTxCreator_CreateRawTransaction_Call) Return(rawTx *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockTxCreator_CreateRawTransaction_Call {
-	_c.Call.Return(rawTx, txCreateParams, err)
+func (_c *MockTxCreator_CreateRawTransaction_Call) Return(v *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockTxCreator_CreateRawTransaction_Call {
+	_c.Call.Return(v, txCreateParams, err)
 	return _c
 }
 
@@ -217,8 +217,8 @@ func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) Run(run func(ctx conte
 	return _c
 }
 
-func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) Return(rawTx *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockTxCreator_CreateRawTransactionEIP1559_Call {
-	_c.Call.Return(rawTx, txCreateParams, err)
+func (_c *MockTxCreator_CreateRawTransactionEIP1559_Call) Return(v *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockTxCreator_CreateRawTransactionEIP1559_Call {
+	_c.Call.Return(v, txCreateParams, err)
 	return _c
 }
 

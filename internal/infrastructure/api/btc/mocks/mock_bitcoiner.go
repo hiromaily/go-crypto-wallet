@@ -510,6 +510,168 @@ func (_c *MockBitcoiner_DecodeRawTransaction_Call) RunAndReturn(run func(hexTx s
 	return _c
 }
 
+// DumpWallet provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) DumpWallet(fileName string) error {
+	ret := _mock.Called(fileName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DumpWallet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
+		r0 = returnFunc(fileName)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBitcoiner_DumpWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DumpWallet'
+type MockBitcoiner_DumpWallet_Call struct {
+	*mock.Call
+}
+
+// DumpWallet is a helper method to define mock.On call
+//   - fileName string
+func (_e *MockBitcoiner_Expecter) DumpWallet(fileName interface{}) *MockBitcoiner_DumpWallet_Call {
+	return &MockBitcoiner_DumpWallet_Call{Call: _e.mock.On("DumpWallet", fileName)}
+}
+
+func (_c *MockBitcoiner_DumpWallet_Call) Run(run func(fileName string)) *MockBitcoiner_DumpWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_DumpWallet_Call) Return(err error) *MockBitcoiner_DumpWallet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBitcoiner_DumpWallet_Call) RunAndReturn(run func(fileName string) error) *MockBitcoiner_DumpWallet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// EncryptWallet provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) EncryptWallet(passphrase string) error {
+	ret := _mock.Called(passphrase)
+
+	if len(ret) == 0 {
+		panic("no return value specified for EncryptWallet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
+		r0 = returnFunc(passphrase)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBitcoiner_EncryptWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EncryptWallet'
+type MockBitcoiner_EncryptWallet_Call struct {
+	*mock.Call
+}
+
+// EncryptWallet is a helper method to define mock.On call
+//   - passphrase string
+func (_e *MockBitcoiner_Expecter) EncryptWallet(passphrase interface{}) *MockBitcoiner_EncryptWallet_Call {
+	return &MockBitcoiner_EncryptWallet_Call{Call: _e.mock.On("EncryptWallet", passphrase)}
+}
+
+func (_c *MockBitcoiner_EncryptWallet_Call) Run(run func(passphrase string)) *MockBitcoiner_EncryptWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_EncryptWallet_Call) Return(err error) *MockBitcoiner_EncryptWallet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBitcoiner_EncryptWallet_Call) RunAndReturn(run func(passphrase string) error) *MockBitcoiner_EncryptWallet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// EstimateSmartFee provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) EstimateSmartFee(confirmationBlock int) (float64, error) {
+	ret := _mock.Called(confirmationBlock)
+
+	if len(ret) == 0 {
+		panic("no return value specified for EstimateSmartFee")
+	}
+
+	var r0 float64
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int) (float64, error)); ok {
+		return returnFunc(confirmationBlock)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int) float64); ok {
+		r0 = returnFunc(confirmationBlock)
+	} else {
+		r0 = ret.Get(0).(float64)
+	}
+	if returnFunc, ok := ret.Get(1).(func(int) error); ok {
+		r1 = returnFunc(confirmationBlock)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBitcoiner_EstimateSmartFee_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EstimateSmartFee'
+type MockBitcoiner_EstimateSmartFee_Call struct {
+	*mock.Call
+}
+
+// EstimateSmartFee is a helper method to define mock.On call
+//   - confirmationBlock int
+func (_e *MockBitcoiner_Expecter) EstimateSmartFee(confirmationBlock interface{}) *MockBitcoiner_EstimateSmartFee_Call {
+	return &MockBitcoiner_EstimateSmartFee_Call{Call: _e.mock.On("EstimateSmartFee", confirmationBlock)}
+}
+
+func (_c *MockBitcoiner_EstimateSmartFee_Call) Run(run func(confirmationBlock int)) *MockBitcoiner_EstimateSmartFee_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_EstimateSmartFee_Call) Return(f float64, err error) *MockBitcoiner_EstimateSmartFee_Call {
+	_c.Call.Return(f, err)
+	return _c
+}
+
+func (_c *MockBitcoiner_EstimateSmartFee_Call) RunAndReturn(run func(confirmationBlock int) (float64, error)) *MockBitcoiner_EstimateSmartFee_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ExtractTransaction provides a mock function for the type MockBitcoiner
 func (_mock *MockBitcoiner) ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error) {
 	ret := _mock.Called(psbtBase64)
@@ -1319,6 +1481,61 @@ func (_c *MockBitcoiner_GetFee_Call) RunAndReturn(run func(tx *wire.MsgTx, adjus
 	return _c
 }
 
+// GetNetworkInfo provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) GetNetworkInfo() (*rpc.GetNetworkInfoResult, error) {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNetworkInfo")
+	}
+
+	var r0 *rpc.GetNetworkInfoResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func() (*rpc.GetNetworkInfoResult, error)); ok {
+		return returnFunc()
+	}
+	if returnFunc, ok := ret.Get(0).(func() *rpc.GetNetworkInfoResult); ok {
+		r0 = returnFunc()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*rpc.GetNetworkInfoResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func() error); ok {
+		r1 = returnFunc()
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBitcoiner_GetNetworkInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNetworkInfo'
+type MockBitcoiner_GetNetworkInfo_Call struct {
+	*mock.Call
+}
+
+// GetNetworkInfo is a helper method to define mock.On call
+func (_e *MockBitcoiner_Expecter) GetNetworkInfo() *MockBitcoiner_GetNetworkInfo_Call {
+	return &MockBitcoiner_GetNetworkInfo_Call{Call: _e.mock.On("GetNetworkInfo")}
+}
+
+func (_c *MockBitcoiner_GetNetworkInfo_Call) Run(run func()) *MockBitcoiner_GetNetworkInfo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_GetNetworkInfo_Call) Return(getNetworkInfoResult *rpc.GetNetworkInfoResult, err error) *MockBitcoiner_GetNetworkInfo_Call {
+	_c.Call.Return(getNetworkInfoResult, err)
+	return _c
+}
+
+func (_c *MockBitcoiner_GetNetworkInfo_Call) RunAndReturn(run func() (*rpc.GetNetworkInfoResult, error)) *MockBitcoiner_GetNetworkInfo_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetPSBTFee provides a mock function for the type MockBitcoiner
 func (_mock *MockBitcoiner) GetPSBTFee(psbtBase64 string) (int64, error) {
 	ret := _mock.Called(psbtBase64)
@@ -1375,52 +1592,6 @@ func (_c *MockBitcoiner_GetPSBTFee_Call) Return(n int64, err error) *MockBitcoin
 }
 
 func (_c *MockBitcoiner_GetPSBTFee_Call) RunAndReturn(run func(psbtBase64 string) (int64, error)) *MockBitcoiner_GetPSBTFee_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetPkgRPC provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetPkgRPC() rpc.BTCRPC {
-	ret := _mock.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetPkgRPC")
-	}
-
-	var r0 rpc.BTCRPC
-	if returnFunc, ok := ret.Get(0).(func() rpc.BTCRPC); ok {
-		r0 = returnFunc()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(rpc.BTCRPC)
-		}
-	}
-	return r0
-}
-
-// MockBitcoiner_GetPkgRPC_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPkgRPC'
-type MockBitcoiner_GetPkgRPC_Call struct {
-	*mock.Call
-}
-
-// GetPkgRPC is a helper method to define mock.On call
-func (_e *MockBitcoiner_Expecter) GetPkgRPC() *MockBitcoiner_GetPkgRPC_Call {
-	return &MockBitcoiner_GetPkgRPC_Call{Call: _e.mock.On("GetPkgRPC")}
-}
-
-func (_c *MockBitcoiner_GetPkgRPC_Call) Run(run func()) *MockBitcoiner_GetPkgRPC_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockBitcoiner_GetPkgRPC_Call) Return(bTCRPC rpc.BTCRPC) *MockBitcoiner_GetPkgRPC_Call {
-	_c.Call.Return(bTCRPC)
-	return _c
-}
-
-func (_c *MockBitcoiner_GetPkgRPC_Call) RunAndReturn(run func() rpc.BTCRPC) *MockBitcoiner_GetPkgRPC_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2196,6 +2367,57 @@ func (_c *MockBitcoiner_ImportPrivKeyWithoutReScan_Call) RunAndReturn(run func(p
 	return _c
 }
 
+// ImportWallet provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) ImportWallet(fileName string) error {
+	ret := _mock.Called(fileName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ImportWallet")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
+		r0 = returnFunc(fileName)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBitcoiner_ImportWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ImportWallet'
+type MockBitcoiner_ImportWallet_Call struct {
+	*mock.Call
+}
+
+// ImportWallet is a helper method to define mock.On call
+//   - fileName string
+func (_e *MockBitcoiner_Expecter) ImportWallet(fileName interface{}) *MockBitcoiner_ImportWallet_Call {
+	return &MockBitcoiner_ImportWallet_Call{Call: _e.mock.On("ImportWallet", fileName)}
+}
+
+func (_c *MockBitcoiner_ImportWallet_Call) Run(run func(fileName string)) *MockBitcoiner_ImportWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_ImportWallet_Call) Return(err error) *MockBitcoiner_ImportWallet_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBitcoiner_ImportWallet_Call) RunAndReturn(run func(fileName string) error) *MockBitcoiner_ImportWallet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsPSBTComplete provides a mock function for the type MockBitcoiner
 func (_mock *MockBitcoiner) IsPSBTComplete(psbtBase64 string) (bool, error) {
 	ret := _mock.Called(psbtBase64)
@@ -2495,6 +2717,61 @@ func (_c *MockBitcoiner_LockUnspent_Call) Return(err error) *MockBitcoiner_LockU
 }
 
 func (_c *MockBitcoiner_LockUnspent_Call) RunAndReturn(run func(tx *btc0.UnspentOutput) error) *MockBitcoiner_LockUnspent_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Logging provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) Logging() (*rpc.LoggingResult, error) {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Logging")
+	}
+
+	var r0 *rpc.LoggingResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func() (*rpc.LoggingResult, error)); ok {
+		return returnFunc()
+	}
+	if returnFunc, ok := ret.Get(0).(func() *rpc.LoggingResult); ok {
+		r0 = returnFunc()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*rpc.LoggingResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func() error); ok {
+		r1 = returnFunc()
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBitcoiner_Logging_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Logging'
+type MockBitcoiner_Logging_Call struct {
+	*mock.Call
+}
+
+// Logging is a helper method to define mock.On call
+func (_e *MockBitcoiner_Expecter) Logging() *MockBitcoiner_Logging_Call {
+	return &MockBitcoiner_Logging_Call{Call: _e.mock.On("Logging")}
+}
+
+func (_c *MockBitcoiner_Logging_Call) Run(run func()) *MockBitcoiner_Logging_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_Logging_Call) Return(loggingResult *rpc.LoggingResult, err error) *MockBitcoiner_Logging_Call {
+	_c.Call.Return(loggingResult, err)
+	return _c
+}
+
+func (_c *MockBitcoiner_Logging_Call) RunAndReturn(run func() (*rpc.LoggingResult, error)) *MockBitcoiner_Logging_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3433,6 +3710,164 @@ func (_c *MockBitcoiner_Version_Call) Return(version btc.Version) *MockBitcoiner
 }
 
 func (_c *MockBitcoiner_Version_Call) RunAndReturn(run func() btc.Version) *MockBitcoiner_Version_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WalletLock provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) WalletLock() error {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for WalletLock")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func() error); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBitcoiner_WalletLock_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WalletLock'
+type MockBitcoiner_WalletLock_Call struct {
+	*mock.Call
+}
+
+// WalletLock is a helper method to define mock.On call
+func (_e *MockBitcoiner_Expecter) WalletLock() *MockBitcoiner_WalletLock_Call {
+	return &MockBitcoiner_WalletLock_Call{Call: _e.mock.On("WalletLock")}
+}
+
+func (_c *MockBitcoiner_WalletLock_Call) Run(run func()) *MockBitcoiner_WalletLock_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletLock_Call) Return(err error) *MockBitcoiner_WalletLock_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletLock_Call) RunAndReturn(run func() error) *MockBitcoiner_WalletLock_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WalletPassphrase provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) WalletPassphrase(passphrase string, timeoutSecs int64) error {
+	ret := _mock.Called(passphrase, timeoutSecs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WalletPassphrase")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string, int64) error); ok {
+		r0 = returnFunc(passphrase, timeoutSecs)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBitcoiner_WalletPassphrase_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WalletPassphrase'
+type MockBitcoiner_WalletPassphrase_Call struct {
+	*mock.Call
+}
+
+// WalletPassphrase is a helper method to define mock.On call
+//   - passphrase string
+//   - timeoutSecs int64
+func (_e *MockBitcoiner_Expecter) WalletPassphrase(passphrase interface{}, timeoutSecs interface{}) *MockBitcoiner_WalletPassphrase_Call {
+	return &MockBitcoiner_WalletPassphrase_Call{Call: _e.mock.On("WalletPassphrase", passphrase, timeoutSecs)}
+}
+
+func (_c *MockBitcoiner_WalletPassphrase_Call) Run(run func(passphrase string, timeoutSecs int64)) *MockBitcoiner_WalletPassphrase_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletPassphrase_Call) Return(err error) *MockBitcoiner_WalletPassphrase_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletPassphrase_Call) RunAndReturn(run func(passphrase string, timeoutSecs int64) error) *MockBitcoiner_WalletPassphrase_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WalletPassphraseChange provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) WalletPassphraseChange(old string, newPass string) error {
+	ret := _mock.Called(old, newPass)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WalletPassphraseChange")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = returnFunc(old, newPass)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBitcoiner_WalletPassphraseChange_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WalletPassphraseChange'
+type MockBitcoiner_WalletPassphraseChange_Call struct {
+	*mock.Call
+}
+
+// WalletPassphraseChange is a helper method to define mock.On call
+//   - old string
+//   - newPass string
+func (_e *MockBitcoiner_Expecter) WalletPassphraseChange(old interface{}, newPass interface{}) *MockBitcoiner_WalletPassphraseChange_Call {
+	return &MockBitcoiner_WalletPassphraseChange_Call{Call: _e.mock.On("WalletPassphraseChange", old, newPass)}
+}
+
+func (_c *MockBitcoiner_WalletPassphraseChange_Call) Run(run func(old string, newPass string)) *MockBitcoiner_WalletPassphraseChange_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletPassphraseChange_Call) Return(err error) *MockBitcoiner_WalletPassphraseChange_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletPassphraseChange_Call) RunAndReturn(run func(old string, newPass string) error) *MockBitcoiner_WalletPassphraseChange_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -14,7 +14,7 @@ import (
 // This override handles BCH nodes that return a legacy "label" string field instead
 // of the "labels" array used by BTC nodes.
 func (b *BitcoinCash) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
-	result, err := b.GetPkgRPC().GetAddressInfo(addr)
+	result, err := b.Bitcoin.GetAddressInfo(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call pkgrpc.GetAddressInfo() in bch: %w", err)
 	}
@@ -31,7 +31,7 @@ func (b *BitcoinCash) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult,
 func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	logger.Debug("BCH GetAddressesByLabel called", "label", labelName)
 
-	labels, err := b.GetPkgRPC().GetAddressesByLabel(labelName)
+	labels, err := b.GetAddressesByLabelMap(labelName)
 	if err != nil {
 		logger.Debug("getaddressesbylabel RPC failed", "label", labelName, "error", err)
 		return nil, fmt.Errorf(

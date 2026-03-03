@@ -68,7 +68,17 @@ type Bitcoiner interface {
 	FeeRangeMin() float64
 	Version() domainBTC.Version
 	CoinTypeCode() domainCoin.CoinTypeCode
-	GetPkgRPC() btcrpc.BTCRPC
+
+	// rpc.go
+	EstimateSmartFee(confirmationBlock int) (float64, error)
+	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
+	Logging() (*btcrpc.LoggingResult, error)
+	EncryptWallet(passphrase string) error
+	WalletLock() error
+	WalletPassphrase(passphrase string, timeoutSecs int64) error
+	WalletPassphraseChange(old, newPass string) error
+	DumpWallet(fileName string) error
+	ImportWallet(fileName string) error
 
 	// fee.go
 	GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error)
@@ -401,11 +411,30 @@ type NodeBalanceChecker interface {
 	GetBalance() (btcutil.Amount, error)
 }
 
-// PKGRPCProvider provides direct access to the underlying RPC client.
-// Used by callers that need raw RPC operations (fee estimation, wallet security, etc.)
-// without going through delegation wrappers.
-type PKGRPCProvider interface {
-	GetPkgRPC() btcrpc.BTCRPC
+// FeeEstimator estimates transaction fees from the network.
+type FeeEstimator interface {
+	EstimateSmartFee(confirmationBlock int) (float64, error)
+}
+
+// NetworkInfoProvider provides network information from the connected node.
+type NetworkInfoProvider interface {
+	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
+}
+
+// LoggingController controls and retrieves node logging information.
+type LoggingController interface {
+	Logging() (*btcrpc.LoggingResult, error)
+}
+
+// WalletSecurityManager manages wallet encryption and passphrase operations.
+// Used by keygen wallet CLI commands.
+type WalletSecurityManager interface {
+	EncryptWallet(passphrase string) error
+	WalletLock() error
+	WalletPassphrase(passphrase string, timeoutSecs int64) error
+	WalletPassphraseChange(old, newPass string) error
+	DumpWallet(fileName string) error
+	ImportWallet(fileName string) error
 }
 
 // FullUTXOLister lists all unspent outputs without account filter.
@@ -436,12 +465,14 @@ type BTCLifecycle interface {
 // WatchAPIClient combines interfaces needed for the watch wallet API CLI commands.
 // Used by the btcWatchAPICmds adapter and btcWatchClient wallet interface.
 type WatchAPIClient interface {
-	NodeBalanceChecker // GetBalance
-	BalanceChecker     // GetBalanceByAccount
-	PKGRPCProvider     // GetPkgRPC
-	FullUTXOLister     // ListUnspent
-	UTXOProvider       // ListUnspentByAccount, GetUnspentListAddrs
-	AddressValidator   // ValidateAddress
+	NodeBalanceChecker  // GetBalance
+	BalanceChecker      // GetBalanceByAccount
+	FeeEstimator        // EstimateSmartFee
+	NetworkInfoProvider // GetNetworkInfo
+	LoggingController   // Logging
+	FullUTXOLister      // ListUnspent
+	UTXOProvider        // ListUnspentByAccount, GetUnspentListAddrs
+	AddressValidator    // ValidateAddress
 	// Inline: partial overlaps with larger interfaces to avoid importing extra methods
 	ConfirmationBlock() uint64
 	GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error)

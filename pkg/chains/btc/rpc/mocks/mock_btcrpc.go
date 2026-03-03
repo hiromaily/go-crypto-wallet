@@ -469,17 +469,21 @@ func (_c *MockBTCRPC_DeriveAddresses_Call) Run(run func(descriptor string, start
 		if args[2] != nil {
 			arg2 = args[2].(uint32)
 		}
-		run(arg0, arg1, arg2)
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
 
-func (_c *MockBTCRPC_DeriveAddresses_Call) Return(addresses []string, err error) *MockBTCRPC_DeriveAddresses_Call {
-	_c.Call.Return(addresses, err)
+func (_c *MockBTCRPC_DeriveAddresses_Call) Return(strings []string, err error) *MockBTCRPC_DeriveAddresses_Call {
+	_c.Call.Return(strings, err)
 	return _c
 }
 
-func (_c *MockBTCRPC_DeriveAddresses_Call) RunAndReturn(run func(string, uint32, uint32) ([]string, error)) *MockBTCRPC_DeriveAddresses_Call {
+func (_c *MockBTCRPC_DeriveAddresses_Call) RunAndReturn(run func(descriptor string, startIdx uint32, endIdx uint32) ([]string, error)) *MockBTCRPC_DeriveAddresses_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1686,6 +1690,142 @@ func (_c *MockBTCRPC_ListDescriptors_Call) Return(listDescriptorsResult *rpc.Lis
 }
 
 func (_c *MockBTCRPC_ListDescriptors_Call) RunAndReturn(run func(privateDescriptors bool) (*rpc.ListDescriptorsResult, error)) *MockBTCRPC_ListDescriptors_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListUnspent provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) ListUnspent(minConf uint64) ([]rpc.ListUnspentResult, error) {
+	ret := _mock.Called(minConf)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListUnspent")
+	}
+
+	var r0 []rpc.ListUnspentResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(uint64) ([]rpc.ListUnspentResult, error)); ok {
+		return returnFunc(minConf)
+	}
+	if returnFunc, ok := ret.Get(0).(func(uint64) []rpc.ListUnspentResult); ok {
+		r0 = returnFunc(minConf)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]rpc.ListUnspentResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(uint64) error); ok {
+		r1 = returnFunc(minConf)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBTCRPC_ListUnspent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListUnspent'
+type MockBTCRPC_ListUnspent_Call struct {
+	*mock.Call
+}
+
+// ListUnspent is a helper method to define mock.On call
+//   - minConf uint64
+func (_e *MockBTCRPC_Expecter) ListUnspent(minConf interface{}) *MockBTCRPC_ListUnspent_Call {
+	return &MockBTCRPC_ListUnspent_Call{Call: _e.mock.On("ListUnspent", minConf)}
+}
+
+func (_c *MockBTCRPC_ListUnspent_Call) Run(run func(minConf uint64)) *MockBTCRPC_ListUnspent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 uint64
+		if args[0] != nil {
+			arg0 = args[0].(uint64)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_ListUnspent_Call) Return(listUnspentResults []rpc.ListUnspentResult, err error) *MockBTCRPC_ListUnspent_Call {
+	_c.Call.Return(listUnspentResults, err)
+	return _c
+}
+
+func (_c *MockBTCRPC_ListUnspent_Call) RunAndReturn(run func(minConf uint64) ([]rpc.ListUnspentResult, error)) *MockBTCRPC_ListUnspent_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListUnspentByAddresses provides a mock function for the type MockBTCRPC
+func (_mock *MockBTCRPC) ListUnspentByAddresses(minConf uint64, maxConf uint64, addresses []string) ([]rpc.ListUnspentResult, error) {
+	ret := _mock.Called(minConf, maxConf, addresses)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListUnspentByAddresses")
+	}
+
+	var r0 []rpc.ListUnspentResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(uint64, uint64, []string) ([]rpc.ListUnspentResult, error)); ok {
+		return returnFunc(minConf, maxConf, addresses)
+	}
+	if returnFunc, ok := ret.Get(0).(func(uint64, uint64, []string) []rpc.ListUnspentResult); ok {
+		r0 = returnFunc(minConf, maxConf, addresses)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]rpc.ListUnspentResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(uint64, uint64, []string) error); ok {
+		r1 = returnFunc(minConf, maxConf, addresses)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBTCRPC_ListUnspentByAddresses_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListUnspentByAddresses'
+type MockBTCRPC_ListUnspentByAddresses_Call struct {
+	*mock.Call
+}
+
+// ListUnspentByAddresses is a helper method to define mock.On call
+//   - minConf uint64
+//   - maxConf uint64
+//   - addresses []string
+func (_e *MockBTCRPC_Expecter) ListUnspentByAddresses(minConf interface{}, maxConf interface{}, addresses interface{}) *MockBTCRPC_ListUnspentByAddresses_Call {
+	return &MockBTCRPC_ListUnspentByAddresses_Call{Call: _e.mock.On("ListUnspentByAddresses", minConf, maxConf, addresses)}
+}
+
+func (_c *MockBTCRPC_ListUnspentByAddresses_Call) Run(run func(minConf uint64, maxConf uint64, addresses []string)) *MockBTCRPC_ListUnspentByAddresses_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 uint64
+		if args[0] != nil {
+			arg0 = args[0].(uint64)
+		}
+		var arg1 uint64
+		if args[1] != nil {
+			arg1 = args[1].(uint64)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBTCRPC_ListUnspentByAddresses_Call) Return(listUnspentResults []rpc.ListUnspentResult, err error) *MockBTCRPC_ListUnspentByAddresses_Call {
+	_c.Call.Return(listUnspentResults, err)
+	return _c
+}
+
+func (_c *MockBTCRPC_ListUnspentByAddresses_Call) RunAndReturn(run func(minConf uint64, maxConf uint64, addresses []string) ([]rpc.ListUnspentResult, error)) *MockBTCRPC_ListUnspentByAddresses_Call {
 	_c.Call.Return(run)
 	return _c
 }

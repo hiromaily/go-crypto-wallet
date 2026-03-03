@@ -10,7 +10,7 @@ import (
 
 func runLogging(btc apibtc.WatchAPIClient) error {
 	// logging
-	logData, err := btc.GetPkgRPC().Logging()
+	logData, err := btc.Logging()
 	if err != nil {
 		return fmt.Errorf("fail to call BTC.Logging() %w", err)
 	}

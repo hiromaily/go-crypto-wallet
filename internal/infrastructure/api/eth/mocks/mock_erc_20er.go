@@ -124,8 +124,8 @@ func (_c *MockERC20er_CreateRawTransaction_Call) Run(run func(ctx context.Contex
 	return _c
 }
 
-func (_c *MockERC20er_CreateRawTransaction_Call) Return(rawTx *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockERC20er_CreateRawTransaction_Call {
-	_c.Call.Return(rawTx, txCreateParams, err)
+func (_c *MockERC20er_CreateRawTransaction_Call) Return(v *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockERC20er_CreateRawTransaction_Call {
+	_c.Call.Return(v, txCreateParams, err)
 	return _c
 }
 
@@ -218,8 +218,8 @@ func (_c *MockERC20er_CreateRawTransactionEIP1559_Call) Run(run func(ctx context
 	return _c
 }
 
-func (_c *MockERC20er_CreateRawTransactionEIP1559_Call) Return(rawTx *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockERC20er_CreateRawTransactionEIP1559_Call {
-	_c.Call.Return(rawTx, txCreateParams, err)
+func (_c *MockERC20er_CreateRawTransactionEIP1559_Call) Return(v *eth.RawTx, txCreateParams *eth0.TxCreateParams, err error) *MockERC20er_CreateRawTransactionEIP1559_Call {
+	_c.Call.Return(v, txCreateParams, err)
 	return _c
 }
 
