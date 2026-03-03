@@ -136,7 +136,7 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	logger.Debug("tx parameter",
-		"GasLimit", GasLimit,
+		"GasLimit", pkgeth.GasLimit,
 		"estimatedGas", estimatedGas.Uint64(),
 		"txFee", txFee.Uint64())
 
@@ -146,7 +146,7 @@ func (e *Ethereum) CreateRawTransaction(
 		Nonce:    nonce,
 		To:       &tmpToAddr,
 		Value:    newValue,
-		Gas:      GasLimit,
+		Gas:      pkgeth.GasLimit,
 		GasPrice: gasPrice,
 	})
 	txHash := tx.Hash().Hex()
@@ -296,7 +296,7 @@ func (e *Ethereum) GetConfirmation(ctx context.Context, hashTx string) (uint64, 
 // Returns true if EIP-1559 is supported, false otherwise.
 func (e *Ethereum) SupportsEIP1559(ctx context.Context) bool {
 	// Anvil always supports EIP-1559
-	if e.clientType == ClientVersionAnvil {
+	if e.clientType == pkgeth.ClientVersionAnvil {
 		return true
 	}
 

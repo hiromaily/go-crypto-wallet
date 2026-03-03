@@ -2,34 +2,9 @@ package eth
 
 import "strings"
 
-//----------------------------------------------------
-// QuantityTag
-//----------------------------------------------------
-
-// QuantityTag quantity tag
-type QuantityTag string
-
-// quantity-tag
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
-const (
-	QuantityTagLatest  QuantityTag = "latest"  // for the latest mined block
-	QuantityTagPending QuantityTag = "pending" // for the pending state/transactions
-	// QuantityTagEarliest QuantityTag = "earliest" // for the earliest/genesis block
-)
-
-// String converter
-func (q QuantityTag) String() string {
-	return string(q)
-}
-
-//----------------------------------------------------
-// NetworkTypeETH
-//----------------------------------------------------
-
-// NetworkTypeETH network type
+// NetworkTypeETH identifies the Ethereum network.
 type NetworkTypeETH string
 
-// network type
 const (
 	NetworkTypeETHMainNet NetworkTypeETH = "mainnet"
 	NetworkTypeETHSepolia NetworkTypeETH = "sepolia"
@@ -60,14 +35,9 @@ func ChainIDForNetwork(network NetworkTypeETH) uint64 {
 	}
 }
 
-//----------------------------------------------------
-// ClientVersion
-//----------------------------------------------------
-
-// ClientVersion returns client version
+// ClientVersion identifies the Ethereum client implementation.
 type ClientVersion string
 
-// client-version
 const (
 	ClientVersionGeth  ClientVersion = "Geth"
 	ClientVersionAnvil ClientVersion = "Anvil"
@@ -78,7 +48,7 @@ func (c ClientVersion) String() string {
 	return string(c)
 }
 
-// DetectClientType detects the Ethereum client type from version string
+// DetectClientType detects the Ethereum client type from a version string.
 func DetectClientType(version string) ClientVersion {
 	versionLower := strings.ToLower(version)
 	if strings.Contains(versionLower, "anvil") {
@@ -88,12 +58,8 @@ func DetectClientType(version string) ClientVersion {
 	return ClientVersionGeth
 }
 
-// GasLimit fixed GasLimit
+// GasLimit is the fixed gas limit for standard ETH transfers (EIP-21000).
 const GasLimit uint64 = 21000
-
-//----------------------------------------------------
-// EthNodeType
-//----------------------------------------------------
 
 // ETHNodeType identifies the Ethereum node implementation.
 type ETHNodeType string
