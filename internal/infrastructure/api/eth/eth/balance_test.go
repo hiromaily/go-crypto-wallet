@@ -57,8 +57,7 @@ func (bt *balanceTest) TestBalanceAt() {
 		addr string
 	}
 	type want struct {
-		balance uint64
-		isErr   bool
+		isErr bool
 	}
 	tests := []struct {
 		name string
@@ -66,49 +65,44 @@ func (bt *balanceTest) TestBalanceAt() {
 		want want
 	}{
 		{
-			name: "happy path",
+			name: "valid address 1",
 			args: args{"0x967B50a5E4d1D35Fa9aAf7DB8A391b0546209fD2"},
-			want: want{100, false},
+			want: want{false},
 		},
 		{
-			name: "happy path",
+			name: "valid address 2",
 			args: args{"0x16e486ED0148A59C58400232D5b4AF6bE4dC1ef0"},
-			want: want{100, false},
+			want: want{false},
 		},
 		{
-			name: "happy path",
+			name: "valid address 3",
 			args: args{"0x57033fC5434F3271e83B4695dAd726F348b854c2"},
-			want: want{100, false},
+			want: want{false},
 		},
 		{
-			name: "happy path",
+			name: "valid address 4",
 			args: args{"0x3727eE9FA88B21a0703946f9afEE3930f5980c15"},
-			want: want{100, false},
+			want: want{false},
 		},
 		{
-			name: "happy path",
+			name: "valid address 5",
 			args: args{"0xe933a3318C3f5D94c2A3B2BEAEF772F67a45311c"},
-			want: want{100, false},
-		},
-		{
-			name: "happy path",
-			args: args{"0xe933a3318C3f5D94c2A3B2BEAEF772F67a45311c"},
-			want: want{100, false},
+			want: want{false},
 		},
 		{
 			name: "address is random string",
 			args: args{"0xe933a3318C3f5D94c2A3B2BEAEF772F67a45314d"},
-			want: want{100, false},
+			want: want{false},
 		},
 		{
 			name: "address has no 0x",
 			args: args{"e933a3318C3f5D94c2A3B2BEAEF772F67a45311c"},
-			want: want{100, false},
+			want: want{false},
 		},
 		{
 			name: "address is btc address",
 			args: args{"2N4TcHSCteXwiF2dj8SQijj3w2HieR4x6r5"},
-			want: want{100, true},
+			want: want{true},
 		},
 	}
 
