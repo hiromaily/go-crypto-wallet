@@ -307,7 +307,7 @@ func (b *Bitcoin) findAddressIndexInDescriptor(descriptor string, targetAddress 
 
 // deriveAddressesFromDescriptor derives addresses from a descriptor within the specified range.
 func (b *Bitcoin) deriveAddressesFromDescriptor(descriptor string, startIdx, endIdx uint32) ([]string, error) {
-	addresses, err := b.GetPkgRPC().DeriveAddresses(descriptor, startIdx, endIdx)
+	addresses, err := b.pkgrpc.DeriveAddresses(descriptor, startIdx, endIdx)
 	if err != nil {
 		return nil, fmt.Errorf("deriveaddresses RPC failed: %w", err)
 	}

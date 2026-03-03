@@ -45,21 +45,21 @@ func (b *Bitcoin) EstimateSmartFee(confirmationBlock int) (float64, error) {
 
 ### Anti-Pattern: Redundant Delegation Wrappers
 
-Do NOT create methods in `internal/` that simply delegate to `pkg/` when callers can already
-reach `pkgrpc` directly. These add indirection with no value.
+Do NOT create methods in `internal/` that simply delegate to `pkg/` when the method is
+not part of the `Bitcoiner` interface and provides no value as a facade.
 
 ```go
-// Bad: wraps a method that callers could access through GetPkgRPC() anyway
+// Bad: pure pass-through with no callers
 func (b *Bitcoin) SomeRPCMethod() error {
     return b.pkgrpc.SomeRPCMethod()
 }
 ```
 
-### Facade Pattern: Replacing `GetPkgRPC()` Exposure
+### Facade Pattern: The Only Entrypoint to `pkgrpc`
 
-The `Bitcoin` struct exposes all `pkgrpc` operations needed by callers as its own methods.
-`GetPkgRPC()` is NOT part of the `Bitcoiner` interface — it is a struct-level method for
-infrastructure-internal use only (e.g., BCH overrides, internal btc package code).
+The `Bitcoin` struct exposes all `pkgrpc` operations as its own facade methods.
+`pkgrpc` is a private field — it is NOT accessible outside the `btc` package.
+`GetPkgRPC()` does NOT exist. BCH overrides use promoted facade methods from `Bitcoin`.
 
 Callers outside the infrastructure layer use methods directly on the `Bitcoiner` interface:
 
@@ -80,11 +80,12 @@ func runEncryptWallet(btc apibtc.WalletSecurityManager, passphrase string) error
 
 Within `internal/infrastructure/api/btc/btc/` (same package): use `b.pkgrpc` directly.
 
-BCH overrides in `internal/infrastructure/api/btc/bch/` use the promoted `GetPkgRPC()`:
+BCH overrides in `internal/infrastructure/api/btc/bch/` call promoted facade methods:
 
 ```go
-// bch/address.go: calls pkgrpc directly via promoted Bitcoin method
-result, err := b.GetPkgRPC().GetAddressInfo(addr)
+// bch/address.go: calls Bitcoin facade method (not pkgrpc directly)
+result, err := b.Bitcoin.GetAddressInfo(addr)
+labels, err := b.GetAddressesByLabelMap(labelName)
 ```
 
 ## Decision Checklist
@@ -95,4 +96,4 @@ result, err := b.GetPkgRPC().GetAddressInfo(addr)
 | Is it a standalone function with no `internal/` deps? | `pkg/chains/btc/` | ↓ |
 | Does it depend on `Bitcoin` struct or `internal/` packages? | `internal/infrastructure/api/btc/btc/` | ↓ |
 | Is it a facade hiding pkgrpc from callers (no bypass via interface)? | **OK** — add to `Bitcoin` struct and `Bitcoiner` interface | ↓ |
-| Is it a pure wrapper when callers already have `GetPkgRPC()` bypass? | **Remove it** — use facade pattern instead | — |
+| Is it a pure wrapper with no callers and no interface entry? | **Remove it** — use facade pattern instead | — |

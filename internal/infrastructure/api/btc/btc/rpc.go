@@ -48,3 +48,11 @@ func (b *Bitcoin) DumpWallet(fileName string) error {
 func (b *Bitcoin) ImportWallet(fileName string) error {
 	return b.pkgrpc.ImportWallet(fileName)
 }
+
+// GetAddressesByLabelMap returns the raw RPC label-to-purpose map without address decoding.
+// Bitcoin.GetAddressesByLabel decodes results into btcutil.Address using BTC chain config,
+// which BCH cannot use. BCH's GetAddressesByLabel override calls this to get the raw
+// address strings and apply BCH-specific decoding.
+func (b *Bitcoin) GetAddressesByLabelMap(labelName string) (map[string]btcrpc.Purpose, error) {
+	return b.pkgrpc.GetAddressesByLabel(labelName)
+}
