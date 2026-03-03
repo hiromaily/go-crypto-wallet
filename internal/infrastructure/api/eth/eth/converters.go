@@ -5,23 +5,6 @@ import (
 	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
-// ToDomainUserAmount converts infrastructure UserAmount to domain UserAmount.
-func ToDomainUserAmount(infra UserAmount) domainETH.UserAmount {
-	return domainETH.UserAmount{
-		Address: infra.Address,
-		Amount:  infra.Amount,
-	}
-}
-
-// ToDomainUserAmounts converts a slice of infrastructure UserAmount to domain UserAmount.
-func ToDomainUserAmounts(infra []UserAmount) []domainETH.UserAmount {
-	result := make([]domainETH.UserAmount, len(infra))
-	for i, ua := range infra {
-		result[i] = ToDomainUserAmount(ua)
-	}
-	return result
-}
-
 // ToDomainTransactionReceiptFromPkg converts pkg TransactionReceipt to domain.
 func ToDomainTransactionReceiptFromPkg(pkg *ethrpc.TransactionReceipt) *domainETH.TransactionReceipt {
 	if pkg == nil {
