@@ -153,7 +153,10 @@ func (b *Bitcoin) CoinTypeCode() domainCoin.CoinTypeCode {
 	return b.coinTypeCode
 }
 
-// GetPkgRPC returns the underlying btcrpc.BTCRPC btcdClient for direct RPC access
+// GetPkgRPC returns the underlying btcrpc.BTCRPC client.
+// This method exists for infrastructure-internal use only (e.g., BCH overrides).
+// It is intentionally NOT part of the Bitcoiner interface — callers outside the
+// infrastructure layer must use the facade methods on this struct instead.
 func (b *Bitcoin) GetPkgRPC() btcrpc.BTCRPC {
 	return b.pkgrpc
 }

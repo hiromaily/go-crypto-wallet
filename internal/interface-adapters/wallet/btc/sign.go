@@ -15,8 +15,8 @@ import (
 // btcSignClient is the interface for sign wallet BTC operations.
 // It covers the wallet adapter's own needs plus methods passed through to CLI commands.
 type btcSignClient interface {
-	apibtc.BTCLifecycle   // Close()
-	apibtc.PKGRPCProvider // GetPkgRPC() for wallet security operations (encrypt, passphrase, dump, etc.)
+	apibtc.BTCLifecycle          // Close()
+	apibtc.WalletSecurityManager // wallet security operations (encrypt, passphrase, dump, etc.)
 }
 
 // BTCSign is sign wallet object

@@ -7,7 +7,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runDumpWallet(btc apibtc.PKGRPCProvider, fileName string) error {
+func runDumpWallet(btc apibtc.WalletSecurityManager, fileName string) error {
 	fmt.Println("dumps all wallet keys in a human-readable format to a server-side file")
 
 	// validator
@@ -15,9 +15,9 @@ func runDumpWallet(btc apibtc.PKGRPCProvider, fileName string) error {
 		return errors.New("filename option [-file] is required")
 	}
 
-	err := btc.GetPkgRPC().DumpWallet(fileName)
+	err := btc.DumpWallet(fileName)
 	if err != nil {
-		return fmt.Errorf("fail to call btc.GetPkgRPC().DumpWallet(): %w", err)
+		return fmt.Errorf("fail to call btc.DumpWallet(): %w", err)
 	}
 
 	fmt.Println("wallet file is dumped!")

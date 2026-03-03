@@ -28,41 +28,63 @@ rawResult, err := c.client.RawRequest("getaddressinfo", []json.RawMessage{input}
 - Code that depends on `internal/` packages (domain, application, other infrastructure)
 - Code that requires `Bitcoin` struct properties (`chainConf`, `coinTypeCode`, `version`, `feeRange`, etc.)
 - Business logic that orchestrates multiple RPC calls or combines RPC results with domain logic
+- **Facade methods** that delegate to `pkgrpc` but hide the `pkgrpc` layer from callers
 
 ```go
 // Good: uses Bitcoin struct properties for business logic
 func (b *Bitcoin) AdjustFee(fee float64) float64 {
     return fee * b.feeRange.Max
 }
-```
 
-### Anti-Pattern: Pure Delegation Wrappers
-
-Do NOT create methods in `internal/` that simply delegate to `pkg/` without adding any logic. These add indirection with no value.
-
-```go
-// Bad: pure wrapper that adds nothing
-func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
-    return b.pkgrpc.GetAddressInfo(addr)
+// Good: facade method — callers use this instead of b.pkgrpc.EstimateSmartFee()
+//       pkgrpc is NOT exposed through the Bitcoiner interface
+func (b *Bitcoin) EstimateSmartFee(confirmationBlock int) (float64, error) {
+    return b.pkgrpc.EstimateSmartFee(confirmationBlock)
 }
 ```
 
-If a caller needs an RPC result, it should call `pkgrpc` directly instead of going through a wrapper.
+### Anti-Pattern: Redundant Delegation Wrappers
 
-### How Callers Access `pkgrpc`
-
-Callers outside `internal/infrastructure/` access RPC via the `PKGRPCProvider` interface (`internal/application/ports/api/btc`):
+Do NOT create methods in `internal/` that simply delegate to `pkg/` when callers can already
+reach `pkgrpc` directly. These add indirection with no value.
 
 ```go
-// Interface with GetPkgRPC() accessor
-type PKGRPCProvider interface {
-    GetPkgRPC() btcrpc.BTCRPC
+// Bad: wraps a method that callers could access through GetPkgRPC() anyway
+func (b *Bitcoin) SomeRPCMethod() error {
+    return b.pkgrpc.SomeRPCMethod()
+}
+```
+
+### Facade Pattern: Replacing `GetPkgRPC()` Exposure
+
+The `Bitcoin` struct exposes all `pkgrpc` operations needed by callers as its own methods.
+`GetPkgRPC()` is NOT part of the `Bitcoiner` interface — it is a struct-level method for
+infrastructure-internal use only (e.g., BCH overrides, internal btc package code).
+
+Callers outside the infrastructure layer use methods directly on the `Bitcoiner` interface:
+
+```go
+// Good: caller uses direct method — no knowledge of pkgrpc needed
+func runEstimateFee(btc apibtc.FeeEstimator) error {
+    fee, err := btc.EstimateSmartFee(confirmations)
+    ...
 }
 
-// Caller uses GetPkgRPC() directly
-func runEncryptWallet(btc apibtc.PKGRPCProvider, passphrase string) error {
-    return btc.GetPkgRPC().EncryptWallet(passphrase)
+// Good: caller uses WalletSecurityManager interface
+func runEncryptWallet(btc apibtc.WalletSecurityManager, passphrase string) error {
+    return btc.EncryptWallet(passphrase)
 }
+```
+
+### How Internal Infrastructure Accesses `pkgrpc`
+
+Within `internal/infrastructure/api/btc/btc/` (same package): use `b.pkgrpc` directly.
+
+BCH overrides in `internal/infrastructure/api/btc/bch/` use the promoted `GetPkgRPC()`:
+
+```go
+// bch/address.go: calls pkgrpc directly via promoted Bitcoin method
+result, err := b.GetPkgRPC().GetAddressInfo(addr)
 ```
 
 ## Decision Checklist
@@ -72,4 +94,5 @@ func runEncryptWallet(btc apibtc.PKGRPCProvider, passphrase string) error {
 | Does it use `RawRequest` for a single RPC call? | `pkg/chains/btc/rpc/` | ↓ |
 | Is it a standalone function with no `internal/` deps? | `pkg/chains/btc/` | ↓ |
 | Does it depend on `Bitcoin` struct or `internal/` packages? | `internal/infrastructure/api/btc/btc/` | ↓ |
-| Is it just a delegation wrapper to `pkgrpc`? | **Remove it** — call `pkgrpc` directly | — |
+| Is it a facade hiding pkgrpc from callers (no bypass via interface)? | **OK** — add to `Bitcoin` struct and `Bitcoiner` interface | ↓ |
+| Is it a pure wrapper when callers already have `GetPkgRPC()` bypass? | **Remove it** — use facade pattern instead | — |

@@ -94,8 +94,8 @@ func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Run(run func(rawTx
 	return _c
 }
 
-func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Return(rawTx1 *eth.RawTx, err error) *MockETHTransactionSigner_SignOnRawTransaction_Call {
-	_c.Call.Return(rawTx1, err)
+func (_c *MockETHTransactionSigner_SignOnRawTransaction_Call) Return(v *eth.RawTx, err error) *MockETHTransactionSigner_SignOnRawTransaction_Call {
+	_c.Call.Return(v, err)
 	return _c
 }
 

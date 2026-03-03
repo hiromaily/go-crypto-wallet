@@ -7,7 +7,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runWalletPassphraseChange(btc apibtc.PKGRPCProvider, old, newPass string) error {
+func runWalletPassphraseChange(btc apibtc.WalletSecurityManager, old, newPass string) error {
 	fmt.Println("changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'")
 
 	// validator
@@ -18,9 +18,9 @@ func runWalletPassphraseChange(btc apibtc.PKGRPCProvider, old, newPass string) e
 		return errors.New("new passphrase option [-new] is required")
 	}
 
-	err := btc.GetPkgRPC().WalletPassphraseChange(old, newPass)
+	err := btc.WalletPassphraseChange(old, newPass)
 	if err != nil {
-		return fmt.Errorf("fail to call btc.GetPkgRPC().WalletPassphraseChange(): %w", err)
+		return fmt.Errorf("fail to call btc.WalletPassphraseChange(): %w", err)
 	}
 
 	fmt.Println("wallet passphrase was changed!")

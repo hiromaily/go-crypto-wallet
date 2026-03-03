@@ -16,9 +16,9 @@ import (
 // btcKeygenClient is the interface for keygen wallet BTC operations.
 // It covers the wallet adapter's own needs plus methods passed through to CLI commands.
 type btcKeygenClient interface {
-	apibtc.BTCLifecycle        // Close()
-	apibtc.ChainConfigProvider // GetChainConf(), CoinTypeCode(), ConfirmationBlock()
-	apibtc.PKGRPCProvider      // GetPkgRPC() for wallet security operations (encrypt, passphrase, dump, etc.)
+	apibtc.BTCLifecycle          // Close()
+	apibtc.ChainConfigProvider   // GetChainConf(), CoinTypeCode(), ConfirmationBlock()
+	apibtc.WalletSecurityManager // wallet security operations (encrypt, passphrase, dump, etc.)
 }
 
 // BTCKeygen is keygen wallet object

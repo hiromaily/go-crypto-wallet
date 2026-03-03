@@ -103,8 +103,8 @@ func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Run(run func(rawTx *eth.RawTx,
 	return _c
 }
 
-func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Return(rawTx1 *eth.RawTx, err error) *MockTxSigner_SignTxWithPrivateKey_Call {
-	_c.Call.Return(rawTx1, err)
+func (_c *MockTxSigner_SignTxWithPrivateKey_Call) Return(v *eth.RawTx, err error) *MockTxSigner_SignTxWithPrivateKey_Call {
+	_c.Call.Return(v, err)
 	return _c
 }
 
