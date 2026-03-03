@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 )
 
