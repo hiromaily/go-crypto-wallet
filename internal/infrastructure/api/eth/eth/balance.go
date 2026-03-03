@@ -27,21 +27,12 @@ func (e *Ethereum) GetTotalBalance(ctx context.Context, addrs []string) (*big.In
 	return total, userAmounts
 }
 
-// invalidAddressBalanceSentinel is the specific balance value returned by some ETH nodes
-// when querying the balance of an invalidly formatted address.
-const invalidAddressBalanceSentinel uint64 = 416778046407207737
-
 // BalanceAt returns balance of address
-// if wrong address is given, response of balance would be strange like `416778046407207737`
 func (e *Ethereum) BalanceAt(ctx context.Context, hexAddr string) (*big.Int, error) {
 	account := common.HexToAddress(hexAddr)
 	balance, err := e.ethClient.BalanceAt(ctx, account, nil)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call ethClient.BalanceAt(): %w", err)
-	}
-	if balance.Uint64() == invalidAddressBalanceSentinel {
-		return nil, fmt.Errorf("received invalid address sentinel balance %d: possibly invalid address",
-			invalidAddressBalanceSentinel)
 	}
 	return balance, nil
 }
