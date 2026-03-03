@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 )
 
 // GetTotalBalance returns total amount and addresses
@@ -25,6 +26,13 @@ func (e *Ethereum) GetTotalBalance(ctx context.Context, addrs []string) (*big.In
 		}
 	}
 	return total, userAmounts
+}
+
+// FloatToBigInt converts Ether(float64) to Wei(*big.Int).
+// Kept as a method to satisfy the ERC20er interface, which ERC20 implements
+// using decimal-aware conversion. For Ethereum, this always assumes 18 decimals.
+func (*Ethereum) FloatToBigInt(v float64) *big.Int {
+	return pkgeth.FromFloatEther(v)
 }
 
 // BalanceAt returns balance of address
