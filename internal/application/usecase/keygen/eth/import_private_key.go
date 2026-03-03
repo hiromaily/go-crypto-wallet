@@ -11,6 +11,7 @@ import (
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -64,13 +65,13 @@ func (u *importPrivateKeyUseCase) Import(
 			"private key", record.PrivateKey)
 
 		// Convert private key to ECDSA
-		ecdsaKey, convertErr := u.eth.ToECDSA(record.PrivateKey)
+		ecdsaKey, convertErr := pkgeth.ToECDSA(record.PrivateKey)
 		if convertErr != nil {
 			logger.Warn(
-				"fail to call eth.ToECDSA()",
+				"fail to call pkgeth.ToECDSA()",
 				"private key", record.PrivateKey,
 				"error", convertErr)
-			return fmt.Errorf("fail to call eth.ToECDSA(): %w", convertErr)
+			return fmt.Errorf("fail to call pkgeth.ToECDSA(): %w", convertErr)
 		}
 
 		// Import ECDSA key into keystore

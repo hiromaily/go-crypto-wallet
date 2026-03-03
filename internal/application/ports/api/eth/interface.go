@@ -73,7 +73,6 @@ type Ethereumer interface {
 	CoinTypeCode() domainCoin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
 	// key
-	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
 	GetKeyDir() string
 	GetPrivKey(hexAddr, password string) (*keystore.Key, error)
 	// rpc_admin
@@ -204,7 +203,6 @@ type ETHLifecycle interface {
 // Used by keygen import-private-key use case.
 type ETHKeyAccessor interface {
 	GetKeyDir() string
-	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
 }
 
 // ETHTransactionSigner signs raw Ethereum transactions using the local keystore.

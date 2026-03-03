@@ -1,7 +1,6 @@
 package eth
 
 import (
-	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"os"
@@ -9,8 +8,6 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -20,21 +17,11 @@ import (
 // All key operations in this file use LOCAL FILESYSTEM operations, not RPCs.
 // This makes them fully compatible with Anvil (Foundry's local Ethereum node).
 //
-// - ToECDSA: Converts hex string to ECDSA key (no RPC)
 // - GetPrivKey: Reads key from local keystore directory (no RPC)
 // - readPrivKey: Searches filesystem for key files (no RPC)
 //
 // The actual key import is done via keystore.ImportECDSA() in import_private_key.go,
 // which also uses local filesystem operations instead of personal_importRawKey RPC.
-
-// ToECDSA converts privKey to ECDSA
-func (*Ethereum) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
-	bytePrivKey, err := hexutil.Decode(privKey)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call hexutil.Decode(): %w", err)
-	}
-	return crypto.ToECDSA(bytePrivKey)
-}
 
 // GetKeyDir returns keystore directory
 func (e *Ethereum) GetKeyDir() string {
