@@ -9,6 +9,7 @@ import (
 	"time"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	xrpsigner "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/signer"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
@@ -203,8 +204,8 @@ func (r *XRP) signTransactionJSON(
 func (*XRP) SignTransaction(
 	ctx context.Context, txInput *dtoxrp.TxInput, secret string,
 ) (string, string, error) {
-	signer := NewPeersystSigner()
-	return signer.SignTransactionNative(ctx, txInput, secret, false, nil)
+	s := xrpsigner.NewPeersystSigner()
+	return s.SignTransactionNative(ctx, txInput, secret, false, nil)
 }
 
 // SignTransactionNative signs a transaction using native Go implementation (Peersyst/xrpl-go).

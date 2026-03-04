@@ -1,4 +1,4 @@
-package xrp
+package signer
 
 import (
 	"context"

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
+	xrpsigner "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/signer"
 )
 
 // TestPeersystSigner_SignTransactionNative_SingleSignature tests single-signature
@@ -17,7 +17,7 @@ func TestPeersystSigner_SignTransactionNative_SingleSignature(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 
 	// Test seed from XRP Ledger documentation
@@ -52,7 +52,7 @@ func TestPeersystSigner_SignTransactionNative_DeterministicSigning(t *testing.T)
 	t.Parallel()
 
 	// Setup
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
 
@@ -83,7 +83,7 @@ func TestPeersystSigner_SignTransactionNative_InvalidSeed(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 
 	txInput := &dtoxrp.TxInput{
@@ -154,7 +154,7 @@ func TestPeersystSigner_SignTransactionNative_MissingRequiredFields(t *testing.T
 		},
 	}
 
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
 
@@ -182,7 +182,7 @@ func TestPeersystSigner_SignTransactionNative_OfflineCapability(t *testing.T) {
 	// without any network dependencies by using a context that
 	// has no network access configured.
 
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 
 	// Use background context with no network configuration
 	ctx := context.Background()
