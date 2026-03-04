@@ -39,11 +39,10 @@ type TxCreateParams struct {
 	Nonce       uint64 // Transaction nonce
 
 	// Transaction type and fee fields for JSON file construction
-	EthTxType            uint8  // 0=legacy (LegacyTx), 2=EIP-1559 (DynamicFeeTx)
-	ChainID              uint64 // EIP-155 chain identifier (EIP-1559 only)
-	GasPrice             uint64 // Wei (legacy Type 0 only)
-	MaxFeePerGas         uint64 // Wei (EIP-1559 Type 2 only)
-	MaxPriorityFeePerGas uint64 // Wei (EIP-1559 Type 2 only)
+	EthTxType            uint8  // Always 2 (EIP-1559 DynamicFeeTx)
+	ChainID              uint64 // EIP-155 chain identifier
+	MaxFeePerGas         uint64 // Wei (EIP-1559 Type 2)
+	MaxPriorityFeePerGas uint64 // Wei (EIP-1559 Type 2)
 }
 
 // Ethereumer is the full Ethereum interface.
@@ -124,9 +123,6 @@ type Ethereumer interface {
 	ClientVersion(ctx context.Context) (string, error)
 	SHA3(ctx context.Context, data string) (string, error)
 	// transaction
-	CreateRawTransaction(
-		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainETH.RawTx, *TxCreateParams, error)
 	CreateRawTransactionEIP1559(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 	) (*domainETH.RawTx, *TxCreateParams, error)
@@ -142,18 +138,11 @@ type Ethereumer interface {
 
 // ERC20er defines the interface for ERC-20 token and native ETH transaction creation.
 // Used by the Watch wallet create-transaction use case for both native ETH and ERC-20 tokens.
-// Implementations handle token contract interactions, balance queries, and EIP-1559 support detection.
+// Implementations handle token contract interactions and balance queries.
 type ERC20er interface {
 	FloatToBigInt(v float64) *big.Int
 	GetBalance(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
-	CreateRawTransaction(
-		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainETH.RawTx, *TxCreateParams, error)
-	// SupportsEIP1559 detects whether the connected node supports EIP-1559 transactions.
-	// Returns false for ERC-20 tokens (which use legacy transactions).
-	SupportsEIP1559(ctx context.Context) bool
 	// CreateRawTransactionEIP1559 creates an EIP-1559 (Type 2) transaction.
-	// For ERC-20 tokens, this delegates to CreateRawTransaction (legacy fallback).
 	CreateRawTransactionEIP1559(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 	) (*domainETH.RawTx, *TxCreateParams, error)
@@ -257,16 +246,12 @@ type BalanceChecker interface {
 	BalanceAt(ctx context.Context, addr string) (*big.Int, error)
 }
 
-// TxCreator creates unsigned transactions for both legacy and EIP-1559 formats.
+// TxCreator creates EIP-1559 (Type 2) unsigned transactions.
 // Used by watch wallet create-transaction use case.
 type TxCreator interface {
-	CreateRawTransaction(
-		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainETH.RawTx, *TxCreateParams, error)
 	CreateRawTransactionEIP1559(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 	) (*domainETH.RawTx, *TxCreateParams, error)
-	SupportsEIP1559(ctx context.Context) bool
 }
 
 // GasEstimator estimates gas and fees for transaction creation.
@@ -307,7 +292,6 @@ type TxMonitor interface {
 // infrastructure implementation. apieth.Ethereumer satisfies this interface, so
 // the DI layer can inject it without any type assertion.
 type ERC20Operator interface {
-	SupportsEIP1559(ctx context.Context) bool
 	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
 	BlockNumber(ctx context.Context) (*big.Int, error)
 	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*ethrpc.BlockInfo, error)

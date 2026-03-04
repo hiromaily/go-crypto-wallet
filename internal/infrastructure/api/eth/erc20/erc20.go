@@ -139,87 +139,6 @@ func buildRawTx(
 	}, nil
 }
 
-// CreateRawTransaction creates a legacy (Type 0) raw transaction for an ERC-20 token transfer.
-//
-// Note:
-//   - master address takes fee
-//   - sender account delegates transfer to master address
-func (e *erc20) CreateRawTransaction(
-	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
-	if err := validateAddresses(fromAddr, toAddr); err != nil {
-		return nil, nil, err
-	}
-	logger.Debug("erc20.CreateRawTransaction()", "fromAddr", fromAddr, "toAddr", toAddr, "amount", amount)
-
-	tokenAmount, err := e.resolveTokenAmount(ctx, fromAddr, amount)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	data := e.createTransferData(toAddr, tokenAmount)
-
-	gasLimit, err := e.estimateGas(data)
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call estimateGas(data): %w", err)
-	}
-
-	gasPrice, err := e.ethClient.SuggestGasPrice(ctx)
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call client.SuggestGasPrice(): %w", err)
-	}
-
-	nonce, err := e.getNonce(ctx, fromAddr, additionalNonce)
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
-	}
-
-	contractAddr := common.HexToAddress(e.contractAddress)
-	tx := types.NewTx(&types.LegacyTx{
-		Nonce:    nonce,
-		To:       &contractAddr,
-		Value:    new(big.Int), // value must be 0 for ERC-20
-		Gas:      gasLimit,
-		GasPrice: gasPrice,
-		Data:     data,
-	})
-
-	uid, err := e.uuidHandler.GenerateV7()
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
-	}
-
-	rawTx, err := buildRawTx(uid.String(), fromAddr, toAddr, tokenAmount, nonce, tx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	txFee := new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gasLimit))
-	if err := e.checkETHBalanceForGas(ctx, fromAddr, txFee); err != nil {
-		return nil, nil, err
-	}
-
-	txParams := &apieth.TxCreateParams{
-		UUID:        uid.String(),
-		FromAddress: fromAddr,
-		ToAddress:   toAddr,
-		Amount:      tokenAmount.Uint64(),
-		Fee:         txFee.Uint64(),
-		GasLimit:    uint32(gasLimit),
-		Nonce:       nonce,
-		EthTxType:   0, // legacy transaction
-		GasPrice:    gasPrice.Uint64(),
-	}
-
-	return rawTx, txParams, nil
-}
-
-// SupportsEIP1559 delegates to the underlying Ethereum node to detect EIP-1559 support.
-// Returns true when the connected node supports EIP-1559 (e.g., Anvil, post-London geth).
-func (e *erc20) SupportsEIP1559(ctx context.Context) bool {
-	return e.eth.SupportsEIP1559(ctx)
-}
-
 // resolveEIP1559Fees fetches EIP-1559 fee parameters from the connected node.
 // Returns maxPriorityFeePerGas and maxFeePerGas computed as (baseFee × 2) + tip.
 func (e *erc20) resolveEIP1559Fees(ctx context.Context) (maxPriorityFeePerGas, maxFeePerGas *big.Int, err error) {
@@ -252,9 +171,6 @@ func (e *erc20) resolveEIP1559Fees(ctx context.Context) (maxPriorityFeePerGas, m
 // CreateRawTransactionEIP1559 creates an EIP-1559 (Type 2) transaction for an
 // ERC-20 token transfer.
 //
-// When the connected node does not support EIP-1559, falls back to a legacy
-// Type 0 transaction via CreateRawTransaction.
-//
 // Fee formula:
 //
 //	maxPriorityFeePerGas = SuggestGasTipCap()
@@ -262,10 +178,6 @@ func (e *erc20) resolveEIP1559Fees(ctx context.Context) (maxPriorityFeePerGas, m
 func (e *erc20) CreateRawTransactionEIP1559(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
-	if !e.SupportsEIP1559(ctx) {
-		return e.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
-	}
-
 	maxPriorityFeePerGas, maxFeePerGas, err := e.resolveEIP1559Fees(ctx)
 	if err != nil {
 		return nil, nil, err

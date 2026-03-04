@@ -16,26 +16,23 @@ import (
 	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
-// stubEthNode is a minimal test double for the eth node provider (ethNodeAPI).
+// stubEthNode is a minimal test double for the eth node provider (ERC20Operator).
 // It records method calls for verification in TDD tests.
 type stubEthNode struct {
-	supportsEIP1559 bool
-	tipCap          *big.Int
-	tipCapErr       error
-	blockNumber     *big.Int
-	blockNumberErr  error
-	blockInfo       *ethrpc.BlockInfo
-	blockInfoErr    error
-	txCount         *big.Int
-	txCountErr      error
+	tipCap         *big.Int
+	tipCapErr      error
+	blockNumber    *big.Int
+	blockNumberErr error
+	blockInfo      *ethrpc.BlockInfo
+	blockInfoErr   error
+	txCount        *big.Int
+	txCountErr     error
 
 	// call trackers
 	suggestGasTipCapCalled bool
 	blockNumberCalled      bool
 	getBlockByNumberCalled bool
 }
-
-func (s *stubEthNode) SupportsEIP1559(_ context.Context) bool { return s.supportsEIP1559 }
 
 func (s *stubEthNode) SuggestGasTipCap(_ context.Context) (*big.Int, error) {
 	s.suggestGasTipCapCalled = true
@@ -78,70 +75,28 @@ func TestNewERC20_AcceptsEthereumer(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// Task 3.2 – SupportsEIP1559 delegation
+// Task 3.3 – CreateRawTransactionEIP1559
 // ---------------------------------------------------------------------------
 
-// TestERC20_SupportsEIP1559 verifies that ERC20.SupportsEIP1559 delegates to the
-// eth field, returning its result directly (task 3.2).
-func TestERC20_SupportsEIP1559(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		name            string
-		supportsEIP1559 bool
-		want            bool
-	}{
-		{"returns true when eth supports EIP-1559", true, true},
-		{"returns false when eth does not support EIP-1559", false, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			stub := &stubEthNode{supportsEIP1559: tt.supportsEIP1559}
-			erc20 := apierc20impl.NewERC20(stub, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
-			got := erc20.SupportsEIP1559(context.Background())
-			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Task 3.3 – CreateRawTransactionEIP1559 EIP-1559 path
-// ---------------------------------------------------------------------------
-
-// TestCreateRawTransactionEIP1559_CallsSuggestGasTipCapWhenEIP1559Supported verifies
-// that when the node supports EIP-1559, the method calls SuggestGasTipCap on the
-// eth field (task 3.3 RED: current stub delegation never calls SuggestGasTipCap).
-func TestCreateRawTransactionEIP1559_CallsSuggestGasTipCapWhenEIP1559Supported(t *testing.T) {
+// TestCreateRawTransactionEIP1559_CallsSuggestGasTipCap verifies that
+// CreateRawTransactionEIP1559 calls SuggestGasTipCap on the eth field.
+func TestCreateRawTransactionEIP1559_CallsSuggestGasTipCap(t *testing.T) {
 	t.Parallel()
 	stub := &stubEthNode{
-		supportsEIP1559: true,
-		tipCapErr:       errors.New("tip cap unavailable"), // cause early return after the call
+		tipCapErr: errors.New("tip cap unavailable"), // cause early return after the call
 	}
 	erc20 := apierc20impl.NewERC20(stub, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
 	//nolint:dogsled // only the side-effect (call tracking) matters here
 	_, _, _ = erc20.CreateRawTransactionEIP1559(context.Background(), "", "", 0, 0)
-	assert.True(t, stub.suggestGasTipCapCalled, "SuggestGasTipCap must be called when EIP-1559 is supported")
-}
-
-// TestCreateRawTransactionEIP1559_DoesNotCallSuggestGasTipCapWhenEIP1559NotSupported
-// verifies that the fallback path (EIP-1559 not supported) does NOT call
-// SuggestGasTipCap — it should fall straight through to CreateRawTransaction.
-func TestCreateRawTransactionEIP1559_DoesNotCallSuggestGasTipCapWhenEIP1559NotSupported(t *testing.T) {
-	t.Parallel()
-	stub := &stubEthNode{supportsEIP1559: false}
-	erc20 := apierc20impl.NewERC20(stub, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
-	//nolint:dogsled // only the side-effect (call tracking) matters here
-	_, _, _ = erc20.CreateRawTransactionEIP1559(context.Background(), "", "", 0, 0)
-	assert.False(t, stub.suggestGasTipCapCalled, "SuggestGasTipCap must NOT be called on the legacy fallback path")
+	assert.True(t, stub.suggestGasTipCapCalled, "SuggestGasTipCap must be called")
 }
 
 // TestCreateRawTransactionEIP1559_ErrorWhenTipCapFails verifies error propagation
-// when SuggestGasTipCap fails (task 3.3).
+// when SuggestGasTipCap fails.
 func TestCreateRawTransactionEIP1559_ErrorWhenTipCapFails(t *testing.T) {
 	t.Parallel()
 	stub := &stubEthNode{
-		supportsEIP1559: true,
-		tipCapErr:       errors.New("tip cap unavailable"),
+		tipCapErr: errors.New("tip cap unavailable"),
 	}
 	erc20 := apierc20impl.NewERC20(stub, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
 	_, _, err := erc20.CreateRawTransactionEIP1559(context.Background(), "", "", 0, 0)
@@ -153,9 +108,8 @@ func TestCreateRawTransactionEIP1559_ErrorWhenTipCapFails(t *testing.T) {
 func TestCreateRawTransactionEIP1559_ErrorWhenBlockNumberFails(t *testing.T) {
 	t.Parallel()
 	stub := &stubEthNode{
-		supportsEIP1559: true,
-		tipCap:          big.NewInt(1_000_000_000), // 1 Gwei
-		blockNumberErr:  errors.New("block number unavailable"),
+		tipCap:         big.NewInt(1_000_000_000), // 1 Gwei
+		blockNumberErr: errors.New("block number unavailable"),
 	}
 	erc20 := apierc20impl.NewERC20(stub, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
 	_, _, err := erc20.CreateRawTransactionEIP1559(context.Background(), "", "", 0, 0)
@@ -163,15 +117,13 @@ func TestCreateRawTransactionEIP1559_ErrorWhenBlockNumberFails(t *testing.T) {
 }
 
 // TestCreateRawTransactionEIP1559_ErrorWhenBaseFeeAbsent verifies that when the
-// block header does not contain BaseFeePerGas (pre-London network), an error is
-// returned even though SupportsEIP1559 returned true (task 3.3).
+// block header does not contain BaseFeePerGas (pre-London network), an error is returned.
 func TestCreateRawTransactionEIP1559_ErrorWhenBaseFeeAbsent(t *testing.T) {
 	t.Parallel()
 	stub := &stubEthNode{
-		supportsEIP1559: true,
-		tipCap:          big.NewInt(1_000_000_000),
-		blockNumber:     big.NewInt(100),
-		blockInfo:       &ethrpc.BlockInfo{BaseFeePerGas: nil},
+		tipCap:      big.NewInt(1_000_000_000),
+		blockNumber: big.NewInt(100),
+		blockInfo:   &ethrpc.BlockInfo{BaseFeePerGas: nil},
 	}
 	erc20 := apierc20impl.NewERC20(stub, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
 	_, _, err := erc20.CreateRawTransactionEIP1559(context.Background(), "", "", 0, 0)
