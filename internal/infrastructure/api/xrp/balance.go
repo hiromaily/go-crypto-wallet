@@ -1,6 +1,10 @@
 package xrp
 
-import "context"
+import (
+	"context"
+
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
+)
 
 // GetBalance returns amount of address
 func (r *XRP) GetBalance(ctx context.Context, addr string) (float64, error) {
@@ -8,7 +12,7 @@ func (r *XRP) GetBalance(ctx context.Context, addr string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return ToFloat64(accountInfo.XrpBalance), nil
+	return xrpkg.ToFloat64(accountInfo.XrpBalance), nil
 }
 
 // GetTotalBalance returns total amount in address list
