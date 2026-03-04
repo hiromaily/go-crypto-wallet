@@ -28,7 +28,7 @@ var _ apieth.ERC20er = (*erc20)(nil)
 // raw ethclient.Client (retained for balance, gas estimation, and nonce calls).
 type erc20 struct {
 	eth             apieth.ERC20Operator
-	client          *ethclient.Client
+	ethClient       *ethclient.Client
 	tokenClient     *contract.Token
 	token           domainCoin.ERC20Token
 	uuidHandler     uuid.UUIDHandler
@@ -51,7 +51,7 @@ func NewERC20(
 ) *erc20 {
 	return &erc20{
 		eth:             eth,
-		client:          client,
+		ethClient:       client,
 		tokenClient:     tokenClient,
 		token:           token,
 		uuidHandler:     uuidHandler,
@@ -153,7 +153,7 @@ func (e *erc20) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call estimateGas(data): %w", err)
 	}
 
-	gasPrice, err := e.client.SuggestGasPrice(ctx)
+	gasPrice, err := e.ethClient.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call client.SuggestGasPrice(): %w", err)
 	}
@@ -256,7 +256,7 @@ func (e *erc20) CreateRawTransactionEIP1559(
 		return nil, nil, err
 	}
 
-	chainID, err := e.client.ChainID(ctx)
+	chainID, err := e.ethClient.ChainID(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call client.ChainID(): %w", err)
 	}
@@ -357,7 +357,7 @@ func (*erc20) createTransferData(toAddr string, amount *big.Int) []byte {
 func (e *erc20) estimateGas(data []byte) (uint64, error) {
 	contractAddr := common.HexToAddress(e.contractAddress)
 	masterAddr := common.HexToAddress(e.masterAddress)
-	gasLimit, err := e.client.EstimateGas(context.Background(), ethereum.CallMsg{
+	gasLimit, err := e.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{
 		From: masterAddr,
 		To:   &contractAddr,
 		Data: data,
