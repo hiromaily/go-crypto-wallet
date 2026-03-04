@@ -10,8 +10,8 @@ import (
 // https://xrpl.org/server-info-methods.html
 
 // ServerInfo calls server_info method
-func (r *XRP) ServerInfo(ctx context.Context) (*xrprpc.ResponseServerInfo, error) {
-	res, err := xrprpc.ServerInfo(ctx, r.wsPublic)
+func (w *WSClient) ServerInfo(ctx context.Context) (*xrprpc.ResponseServerInfo, error) {
+	res, err := xrprpc.ServerInfo(ctx, w.public)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.ServerInfo: %w", err)
 	}

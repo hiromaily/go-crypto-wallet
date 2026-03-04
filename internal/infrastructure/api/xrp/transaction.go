@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 // CreateRawTransaction creates raw transaction
@@ -24,7 +25,6 @@ func (r *XRP) CreateRawTransaction(
 	}
 
 	// get balance
-	// xrp.MinimumReserve
 	accountInfo, err := r.GetAccountInfo(ctx, senderAccount)
 	if err != nil {
 		errStatus, _ := status.FromError(err)
@@ -32,7 +32,7 @@ func (r *XRP) CreateRawTransaction(
 			"fail to call GetAccountInfo() code: %d, message: %s",
 			errStatus.Code(), errStatus.Message())
 	}
-	if amount != 0 && (ToFloat64(accountInfo.XrpBalance)-MinimumReserve) <= amount {
+	if amount != 0 && (xrpkg.ToFloat64(accountInfo.XrpBalance)-xrpkg.MinimumReserve) <= amount {
 		return nil, "", fmt.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 	}
 
@@ -41,7 +41,8 @@ func (r *XRP) CreateRawTransaction(
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call PrepareTransaction(): %w", err)
 	}
-	calculatedAmount := ToFloat64(accountInfo.XrpBalance) - MinimumReserve - XRPToDrops(ToFloat64(txJSON.Fee))
+	feeDrops := xrpkg.XRPToDrops(xrpkg.ToFloat64(txJSON.Fee))
+	calculatedAmount := xrpkg.ToFloat64(accountInfo.XrpBalance) - xrpkg.MinimumReserve - feeDrops
 	if amount == 0 {
 		// send all, but fee should be calculated first
 		if calculatedAmount <= 0 {

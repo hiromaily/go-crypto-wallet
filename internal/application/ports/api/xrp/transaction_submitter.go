@@ -3,7 +3,7 @@ package xrp
 import (
 	"context"
 
-	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
 // TransactionSubmitter defines an interface for submitting and tracking XRP transactions.
@@ -73,7 +73,7 @@ type TransactionSubmitter interface {
 	//       return fmt.Errorf("failed to submit transaction: %w", err)
 	//   }
 	//   log.Infof("Transaction submitted: hash=%s, ledger=%d", sentTx.Hash, ledgerVersion)
-	SubmitTransaction(ctx context.Context, signedTx string) (*xrpclient.SentTx, uint64, error)
+	SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error)
 
 	// WaitValidation waits for the XRP Ledger to reach a target ledger version.
 	//
@@ -156,5 +156,5 @@ type TransactionSubmitter interface {
 	//       return fmt.Errorf("transaction failed with status: %s", txInfo.Status)
 	//   }
 	//   log.Infof("Transaction confirmed: %+v", txInfo.Meta)
-	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrpclient.TxInfo, error)
+	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error)
 }

@@ -18,12 +18,12 @@ import (
 // https://github.com/ripple/ripple-keypairs
 
 // ValidationCreate calls validation_create method
-func (r *XRP) ValidationCreate(ctx context.Context, secret string) (*xrprpc.ResponseValidationCreate, error) {
-	if r.wsAdmin == nil {
+func (w *WSClient) ValidationCreate(ctx context.Context, secret string) (*xrprpc.ResponseValidationCreate, error) {
+	if w.admin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
-	res, err := xrprpc.ValidationCreate(ctx, r.wsAdmin, secret)
+	res, err := xrprpc.ValidationCreate(ctx, w.admin, secret)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.ValidationCreate: %w", err)
 	}
@@ -31,14 +31,14 @@ func (r *XRP) ValidationCreate(ctx context.Context, secret string) (*xrprpc.Resp
 }
 
 // WalletProposeWithKey calls wallet_propose method
-func (r *XRP) WalletProposeWithKey(
+func (w *WSClient) WalletProposeWithKey(
 	ctx context.Context, seed string, keyType dtoxrp.XRPKeyType,
 ) (*xrprpc.ResponseWalletPropose, error) {
-	if r.wsAdmin == nil {
+	if w.admin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
-	res, err := xrprpc.WalletProposeWithKey(ctx, r.wsAdmin, seed, xrprpc.KeyType(keyType))
+	res, err := xrprpc.WalletProposeWithKey(ctx, w.admin, seed, xrprpc.KeyType(keyType))
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.WalletProposeWithKey: %w", err)
 	}
@@ -47,12 +47,12 @@ func (r *XRP) WalletProposeWithKey(
 
 // WalletPropose calls wallet_propose method
 // - result is same as long as using same passphrase
-func (r *XRP) WalletPropose(ctx context.Context, passphrase string) (*xrprpc.ResponseWalletPropose, error) {
-	if r.wsAdmin == nil {
+func (w *WSClient) WalletPropose(ctx context.Context, passphrase string) (*xrprpc.ResponseWalletPropose, error) {
+	if w.admin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
-	res, err := xrprpc.WalletPropose(ctx, r.wsAdmin, passphrase)
+	res, err := xrprpc.WalletPropose(ctx, w.admin, passphrase)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.WalletPropose: %w", err)
 	}

@@ -15,7 +15,7 @@ import (
 	xrpapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
-	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
 const (
@@ -179,7 +179,7 @@ func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
 	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
 		Return([]string{"01234567-89ab-cdef-0123-456789abcdef,txhash," + testSignedBlob1}, nil)
 	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob1).
-		Return((*xrpclient.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
+		Return((*xrplgo.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
 
 	input := watchusecase.SendTransactionInput{
 		FilePath: "signed.csv",
@@ -201,18 +201,18 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 	txHash := "1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF"
 	csvLine := uuid + ",txhash," + testSignedBlob1
 
-	sentTx := &xrpclient.SentTx{
+	sentTx := &xrplgo.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        testSignedBlob1,
-		TxJSON: xrpclient.TxInput{
+		TxJSON: xrplgo.TxInput{
 			Hash:               txHash,
 			LastLedgerSequence: 12345,
 		},
 	}
 
-	txInfo := &xrpclient.TxInfo{
-		Outcome: xrpclient.TxOutcome{
+	txInfo := &xrplgo.TxInfo{
+		Outcome: xrplgo.TxOutcome{
 			Result: "tesSUCCESS",
 		},
 	}
@@ -256,31 +256,31 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 	csvLine1 := "uuid-1,txhash1," + testSignedBlob1
 	csvLine2 := "uuid-2,txhash2," + testSignedBlob2
 
-	sentTx1 := &xrpclient.SentTx{
+	sentTx1 := &xrplgo.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        testSignedBlob1,
-		TxJSON: xrpclient.TxInput{
+		TxJSON: xrplgo.TxInput{
 			Hash:               txHash1,
 			LastLedgerSequence: 12345,
 		},
 	}
 
-	sentTx2 := &xrpclient.SentTx{
+	sentTx2 := &xrplgo.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        testSignedBlob2,
-		TxJSON: xrpclient.TxInput{
+		TxJSON: xrplgo.TxInput{
 			Hash:               txHash2,
 			LastLedgerSequence: 12346,
 		},
 	}
 
-	txInfo1 := &xrpclient.TxInfo{
-		Outcome: xrpclient.TxOutcome{Result: "tesSUCCESS"},
+	txInfo1 := &xrplgo.TxInfo{
+		Outcome: xrplgo.TxOutcome{Result: "tesSUCCESS"},
 	}
-	txInfo2 := &xrpclient.TxInfo{
-		Outcome: xrpclient.TxOutcome{Result: "tesSUCCESS"},
+	txInfo2 := &xrplgo.TxInfo{
+		Outcome: xrplgo.TxOutcome{Result: "tesSUCCESS"},
 	}
 
 	// Setup mocks

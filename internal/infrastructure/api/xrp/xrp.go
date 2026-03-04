@@ -11,9 +11,8 @@ import (
 // XRP includes client to call JSON-RPC
 // This type implements the interfaces defined in internal/application/ports/api/xrp
 type XRP struct {
-	wsPublic     *websocket.WS
-	wsAdmin      *websocket.WS
-	API          *XRPAPI
+	*WSClient            // WebSocket operations (public + admin)
+	API          *XRPAPI // gRPC operations (legacy, being phased out)
 	chainConf    *chaincfg.Params
 	coinTypeCode domainCoin.CoinTypeCode
 }
@@ -27,8 +26,7 @@ func NewXRP(
 	conf *config.Ripple,
 ) (*XRP, error) {
 	xrp := &XRP{
-		wsPublic:     wsPublic,
-		wsAdmin:      wsAdmin,
+		WSClient:     newWSClient(wsPublic, wsAdmin),
 		API:          api,
 		coinTypeCode: coinTypeCode,
 	}
@@ -42,13 +40,11 @@ func NewXRP(
 	return xrp, nil
 }
 
-// Close disconnect to server
+// Close disconnects all connections (WebSocket and gRPC).
+// This overrides the promoted Close from *WSClient.
 func (r *XRP) Close() error {
-	if r.wsPublic != nil {
-		_ = r.wsPublic.Close() // Best effort cleanup
-	}
-	if r.wsAdmin != nil {
-		_ = r.wsAdmin.Close() // Best effort cleanup
+	if r.WSClient != nil {
+		_ = r.WSClient.Close()
 	}
 	if r.API != nil {
 		r.API.Close()

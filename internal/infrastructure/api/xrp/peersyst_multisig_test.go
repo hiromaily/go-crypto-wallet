@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
+	xrpsigner "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/signer"
 )
 
 // TestPeersystSigner_MultiSignature_EmptySigningPubKey tests that transactions
@@ -16,7 +16,7 @@ import (
 func TestPeersystSigner_MultiSignature_EmptySigningPubKey(t *testing.T) {
 	t.Parallel()
 
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
 
@@ -50,7 +50,7 @@ func TestPeersystSigner_MultiSignature_EmptySigningPubKey(t *testing.T) {
 func TestPeersystSigner_MultiSignature_VsSingleSignature(t *testing.T) {
 	t.Parallel()
 
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
 
@@ -125,7 +125,7 @@ func TestPeersystSigner_MultiSignature_FeeValidation(t *testing.T) {
 		},
 	}
 
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
 
@@ -158,7 +158,7 @@ func TestPeersystSigner_MultiSignature_FeeValidation(t *testing.T) {
 func TestPeersystSigner_MultiSignature_SequentialSigning(t *testing.T) {
 	t.Parallel()
 
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 
 	// Two different seeds for two different signers
@@ -200,7 +200,7 @@ func TestPeersystSigner_MultiSignature_SequentialSigning(t *testing.T) {
 func TestPeersystSigner_MultiSignature_DeterministicSigning(t *testing.T) {
 	t.Parallel()
 
-	signer := apixrpimpl.NewPeersystSigner()
+	signer := xrpsigner.NewPeersystSigner()
 	ctx := context.Background()
 	testSeed := "sEdTM1uX8pu2do5XvTnutH6HsouMaM2"
 

@@ -3,7 +3,7 @@ package xrp
 import (
 	"context"
 
-	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
 // AccountInfoProvider defines a minimal interface for querying XRP account information.
@@ -60,7 +60,7 @@ type AccountInfoProvider interface {
 	//       return fmt.Errorf("failed to get account info: %w", err)
 	//   }
 	//   sequence := accountInfo.AccountData.Sequence
-	GetAccountInfo(ctx context.Context, address string) (*xrpclient.AccountInfo, error)
+	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
 
 	// GetBalance retrieves the current XRP balance for a given account.
 	//

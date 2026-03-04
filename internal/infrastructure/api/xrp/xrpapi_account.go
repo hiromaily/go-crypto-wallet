@@ -6,20 +6,20 @@ import (
 	"fmt"
 	"strconv"
 
-	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 const dropsPerXRP = 1_000_000
 
 // GetAccountInfo retrieves account information via WebSocket.
-func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*xrpclient.AccountInfo, error) {
+func (w *WSClient) GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error) {
 	if address == "" {
 		return nil, errors.New("address is empty")
 	}
 
-	res, err := xrprpc.AccountInfo(ctx, r.wsPublic, address)
+	res, err := xrprpc.AccountInfo(ctx, w.public, address)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call accountClient.GetAccountInfo(): %w", err)
 	}
@@ -44,13 +44,13 @@ func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*xrpclient.Ac
 
 // fromWSAccountInfo converts a WebSocket ResponseAccountInfo to the pkg client AccountInfo type.
 // The Balance field in the WebSocket response is in drops; this converts it to XRP.
-func fromWSAccountInfo(res *xrprpc.ResponseAccountInfo) (*xrpclient.AccountInfo, error) {
+func fromWSAccountInfo(res *xrprpc.ResponseAccountInfo) (*xrplgo.AccountInfo, error) {
 	drops, err := strconv.ParseInt(res.Result.AccountData.Balance, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse account balance %q: %w", res.Result.AccountData.Balance, err)
 	}
 	xrpBalance := strconv.FormatFloat(float64(drops)/dropsPerXRP, 'f', -1, 64)
-	return &xrpclient.AccountInfo{
+	return &xrplgo.AccountInfo{
 		Sequence:                       uint64(res.Result.AccountData.Sequence),
 		XrpBalance:                     xrpBalance,
 		OwnerCount:                     uint64(res.Result.AccountData.OwnerCount),
