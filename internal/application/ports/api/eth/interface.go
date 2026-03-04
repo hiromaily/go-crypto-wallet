@@ -303,10 +303,10 @@ type TxMonitor interface {
 	GetConfirmation(ctx context.Context, txHash string) (uint64, error)
 }
 
-// ERC20NodeAPI defines the minimal Ethereum node operations needed by the ERC20
+// ERC20Operator defines the minimal Ethereum node operations needed by the ERC20
 // infrastructure implementation. apieth.Ethereumer satisfies this interface, so
 // the DI layer can inject it without any type assertion.
-type ERC20NodeAPI interface {
+type ERC20Operator interface {
 	SupportsEIP1559(ctx context.Context) bool
 	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
 	BlockNumber(ctx context.Context) (*big.Int, error)

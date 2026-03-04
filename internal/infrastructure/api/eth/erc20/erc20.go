@@ -24,11 +24,10 @@ import (
 // Compile-time check to ensure ERC20 implements the ERC20er interface
 var _ apieth.ERC20er = (*ERC20)(nil)
 
-// ERC20 struct holds both a named Ethereum field (for EIP-1559 support) and the
-// raw ethclient.Client (retained for balance, gas estimation, and nonce calls that
-// use it directly until Tasks 3.3–3.4 delegate them through the eth field).
+// ERC20 holds both a named Ethereum field (for EIP-1559 support) and the
+// raw ethclient.Client (retained for balance, gas estimation, and nonce calls).
 type ERC20 struct {
-	eth             apieth.ERC20NodeAPI
+	eth             apieth.ERC20Operator
 	client          *ethclient.Client
 	tokenClient     *contract.Token
 	token           domainCoin.ERC20Token
@@ -40,7 +39,7 @@ type ERC20 struct {
 }
 
 func NewERC20(
-	eth apieth.ERC20NodeAPI,
+	eth apieth.ERC20Operator,
 	client *ethclient.Client,
 	tokenClient *contract.Token,
 	token domainCoin.ERC20Token,
@@ -63,25 +62,7 @@ func NewERC20(
 	}
 }
 
-// func (e *ERC20) getOption(
-//	ctx context.Context,
-//	isPending bool,
-//	fromAddr common.Address,
-//	blockNumber *big.Int) *bind.CallOpts {
-//
-//	opts := bind.CallOpts{}
-//	if ctx != nil {
-//		opts.Context = ctx
-//	}
-//	opts.Pending = isPending
-//	opts.From = fromAddr
-//	if blockNumber != nil {
-//		opts.BlockNumber = blockNumber
-//	}
-//	return &opts
-//}
-
-// FloatToBigInt converts float64 to *big.Int
+// FloatToBigInt converts float64 to *big.Int using token-specific decimal precision.
 // FIXME: Is it correct to handle decimal??
 func (e *ERC20) FloatToBigInt(v float64) *big.Int {
 	if e.decimals == 18 {
@@ -102,47 +83,71 @@ func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ domainETH.Quan
 	return balance, nil
 }
 
-// CreateRawTransaction creates raw transaction for watch only wallet
-//   - Transferring Tokens (ERC-20)
-//     https://goethereumbook.org/en/transfer-tokens/
-//   - Transfer ERC20 Tokens Using Golang
-//     https://www.youtube.com/watch?v=-Epg5Ub-fA0
-//     https://github.com/what-the-func/golang-ethereum-transfer-tokens/blob/master/main.go
+// validateAddresses returns an error if either address fails validation.
+func validateAddresses(fromAddr, toAddr string) error {
+	if pkgeth.ValidateAddr(fromAddr) != nil || pkgeth.ValidateAddr(toAddr) != nil {
+		return errors.New("address validation error")
+	}
+	return nil
+}
+
+// resolveTokenAmount fetches the token balance for fromAddr and returns the
+// amount to transfer. When requested is 0, the full balance is returned.
+func (e *ERC20) resolveTokenAmount(ctx context.Context, fromAddr string, requested uint64) (*big.Int, error) {
+	balance, err := e.GetBalance(ctx, fromAddr, "")
+	if err != nil {
+		return nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
+	}
+	logger.Info("token balance", "balance", balance.String())
+	if requested == 0 {
+		return new(big.Int).Set(balance), nil
+	}
+	tokenAmount := new(big.Int).SetUint64(requested)
+	if balance.Cmp(tokenAmount) < 0 {
+		return nil, errors.New("balance is short to send token")
+	}
+	return tokenAmount, nil
+}
+
+// buildRawTx encodes the transaction and constructs the domain RawTx entity.
+func buildRawTx(
+	uid, fromAddr, toAddr string, value *big.Int, nonce uint64, tx *types.Transaction,
+) (*domainETH.RawTx, error) {
+	rawTxHex, err := pkgeth.EncodeTx(tx)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call encodeTx(): %w", err)
+	}
+	return &domainETH.RawTx{
+		UUID:  uid,
+		From:  fromAddr,
+		To:    toAddr,
+		Value: *value,
+		Nonce: nonce,
+		TxHex: *rawTxHex,
+		Hash:  tx.Hash().Hex(),
+	}, nil
+}
+
+// CreateRawTransaction creates a legacy (Type 0) raw transaction for an ERC-20 token transfer.
 //
 // Note:
-// - master address takes fee
-// - sender account delegates transfer to master address
-// - 1. call approve(address spender, uint256 amount) by fromA, spender is masterAddr
-// -  this task may be separated from normal flow `create tx`
-// - => approve requires gas to call ... this pattern is impossible
-// - 1.b. Or after approve is called, this transaction may be sent
+//   - master address takes fee
+//   - sender account delegates transfer to master address
 func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
-	// validation check
-	if pkgeth.ValidateAddr(fromAddr) != nil || pkgeth.ValidateAddr(toAddr) != nil {
-		return nil, nil, errors.New("address validation error")
+	if err := validateAddresses(fromAddr, toAddr); err != nil {
+		return nil, nil, err
 	}
-	logger.Debug("eth.CreateRawTransaction()",
-		"fromAddr", fromAddr,
-		"toAddr", toAddr,
-		"amount", amount,
-	)
+	logger.Debug("erc20.CreateRawTransaction()", "fromAddr", fromAddr, "toAddr", toAddr, "amount", amount)
 
-	balance, err := e.GetBalance(ctx, fromAddr, "")
+	tokenAmount, err := e.resolveTokenAmount(ctx, fromAddr, amount)
 	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
-	}
-	logger.Info("balance", "balance", balance.Int64())
-	if balance.Uint64() < amount {
-		return nil, nil, errors.New("balance is short to send token")
-	}
-	tokenAmount := big.NewInt(int64(amount))
-	if amount == 0 {
-		tokenAmount = balance
+		return nil, nil, err
 	}
 
 	data := e.createTransferData(toAddr, tokenAmount)
+
 	gasLimit, err := e.estimateGas(data)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call estimateGas(data): %w", err)
@@ -153,20 +158,11 @@ func (e *ERC20) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call client.SuggestGasPrice(): %w", err)
 	}
 
-	// nonce
 	nonce, err := e.getNonce(ctx, fromAddr, additionalNonce)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
 	}
 
-	logger.Debug("comparison",
-		"Nonce", nonce,
-		"TokenAmount", tokenAmount.Uint64(),
-		"GasLimit", gasLimit,
-		"GasPrice", gasPrice.Uint64(),
-	)
-
-	// create transaction
 	contractAddr := common.HexToAddress(e.contractAddress)
 	tx := types.NewTx(&types.LegacyTx{
 		Nonce:    nonce,
@@ -176,33 +172,18 @@ func (e *ERC20) CreateRawTransaction(
 		GasPrice: gasPrice,
 		Data:     data,
 	})
-	// From here, same as CreateRawTransaction() in ethgrop/eth/transaction.go
-	txHash := tx.Hash().Hex()
-	rawTxHex, err := pkgeth.EncodeTx(tx)
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
-	}
 
-	// generate UUID to trace transaction because unsignedTx is not unique
 	uid, err := e.uuidHandler.GenerateV7()
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 	}
 
-	rawTx := &domainETH.RawTx{
-		UUID:  uid.String(),
-		From:  fromAddr,
-		To:    toAddr,
-		Value: *tokenAmount,
-		Nonce: nonce,
-		TxHex: *rawTxHex,
-		Hash:  txHash,
+	rawTx, err := buildRawTx(uid.String(), fromAddr, toAddr, tokenAmount, nonce, tx)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	// Calculate transaction fee (gasPrice * gasLimit)
 	txFee := new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gasLimit))
-
-	// create TxCreateParams DTO for use case layer
 	txParams := &apieth.TxCreateParams{
 		UUID:        uid.String(),
 		FromAddress: fromAddr,
@@ -227,26 +208,20 @@ func (e *ERC20) SupportsEIP1559(ctx context.Context) bool {
 // CreateRawTransactionEIP1559 creates an EIP-1559 (Type 2) transaction for an
 // ERC-20 token transfer.
 //
-// When the connected node does not support EIP-1559 (e.g., pre-London private
-// chains), the method falls back to a legacy Type 0 transaction via
-// CreateRawTransaction.
+// When the connected node does not support EIP-1559, falls back to a legacy
+// Type 0 transaction via CreateRawTransaction.
 //
-// Fee formula (identical to Ethereum.CreateRawTransactionEIP1559):
+// Fee formula:
 //
 //	maxPriorityFeePerGas = SuggestGasTipCap()
 //	maxFeePerGas         = (baseFeePerGas × 2) + maxPriorityFeePerGas
-//
-// The calldata is ABI-encoded transfer(address,uint256) with method selector
-// 0xa9059cbb, same as the legacy path.
 func (e *ERC20) CreateRawTransactionEIP1559(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
-	// Fall back to legacy when the node does not support EIP-1559.
 	if !e.SupportsEIP1559(ctx) {
 		return e.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
 	}
 
-	// ── EIP-1559 fee parameters ──────────────────────────────────────────────
 	maxPriorityFeePerGas, err := e.eth.SuggestGasTipCap(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.SuggestGasTipCap(): %w", err)
@@ -266,45 +241,32 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 		return nil, nil, errors.New("baseFeePerGas not found in block (EIP-1559 not activated)")
 	}
 
-	// maxFeePerGas = (baseFee × 2) + tip — same formula as Ethereum.CreateRawTransactionEIP1559
-	baseFeeTimesTwo := new(big.Int).Mul(blockInfo.BaseFeePerGas, big.NewInt(2))
-	maxFeePerGas := new(big.Int).Add(baseFeeTimesTwo, maxPriorityFeePerGas)
+	maxFeePerGas := new(big.Int).Add(
+		new(big.Int).Mul(blockInfo.BaseFeePerGas, big.NewInt(2)),
+		maxPriorityFeePerGas,
+	)
 
-	// ── Chain ID ─────────────────────────────────────────────────────────────
 	chainID, err := e.client.ChainID(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call client.ChainID(): %w", err)
 	}
 
-	// ── Address validation ───────────────────────────────────────────────────
-	if err := pkgeth.ValidateAddr(fromAddr); err != nil {
-		return nil, nil, fmt.Errorf("invalid fromAddr: %w", err)
-	}
-	if err := pkgeth.ValidateAddr(toAddr); err != nil {
-		return nil, nil, fmt.Errorf("invalid toAddr: %w", err)
+	if err := validateAddresses(fromAddr, toAddr); err != nil {
+		return nil, nil, err
 	}
 
-	// ── Token balance ────────────────────────────────────────────────────────
-	balance, err := e.GetBalance(ctx, fromAddr, "")
+	tokenAmount, err := e.resolveTokenAmount(ctx, fromAddr, amount)
 	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
-	}
-	logger.Info("token balance", "balance", balance.String())
-	tokenAmount := new(big.Int).SetUint64(amount)
-	if amount == 0 {
-		tokenAmount = new(big.Int).Set(balance)
-	} else if balance.Cmp(tokenAmount) < 0 {
-		return nil, nil, errors.New("balance is short to send token")
+		return nil, nil, err
 	}
 
-	// ── Calldata & gas ───────────────────────────────────────────────────────
 	data := e.createTransferData(toAddr, tokenAmount)
+
 	gasLimit, err := e.estimateGas(data)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call estimateGas(): %w", err)
 	}
 
-	// ── Nonce ────────────────────────────────────────────────────────────────
 	nonce, err := e.getNonce(ctx, fromAddr, additionalNonce)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
@@ -319,7 +281,6 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 		"chainID", chainID.Uint64(),
 	)
 
-	// ── Build DynamicFeeTx ────────────────────────────────────────────────────
 	contractAddr := common.HexToAddress(e.contractAddress)
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID:   chainID,
@@ -332,29 +293,17 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 		Data:      data,
 	})
 
-	txHash := tx.Hash().Hex()
-	rawTxHex, err := pkgeth.EncodeTx(tx)
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
-	}
-
 	uid, err := e.uuidHandler.GenerateV7()
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 	}
 
-	txFee := new(big.Int).Mul(maxFeePerGas, new(big.Int).SetUint64(gasLimit))
-
-	rawTx := &domainETH.RawTx{
-		UUID:  uid.String(),
-		From:  fromAddr,
-		To:    toAddr,
-		Value: *tokenAmount,
-		Nonce: nonce,
-		TxHex: *rawTxHex,
-		Hash:  txHash,
+	rawTx, err := buildRawTx(uid.String(), fromAddr, toAddr, tokenAmount, nonce, tx)
+	if err != nil {
+		return nil, nil, err
 	}
 
+	txFee := new(big.Int).Mul(maxFeePerGas, new(big.Int).SetUint64(gasLimit))
 	txParams := &apieth.TxCreateParams{
 		UUID:                 uid.String(),
 		FromAddress:          fromAddr,
@@ -410,8 +359,6 @@ func (e *ERC20) estimateGas(data []byte) (uint64, error) {
 }
 
 // getNonce retrieves the pending nonce for fromAddr by delegating to e.eth.GetTransactionCount.
-// It mirrors the nonce retrieval in Ethereum.getNonce, removing the previous duplication
-// that called e.client.PendingNonceAt directly (resolves task 3.4 FIXME).
 func (e *ERC20) getNonce(ctx context.Context, fromAddr string, additionalNonce int) (uint64, error) {
 	nonce, err := e.eth.GetTransactionCount(ctx, fromAddr, domainETH.QuantityTagPending)
 	if err != nil {
