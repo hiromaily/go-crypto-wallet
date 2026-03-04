@@ -83,38 +83,58 @@ btc_setup_wallets "btc-watch:watch btc-keygen:keygen"
 
 ### Database Configuration
 
-The scripts support two database backends:
+The scripts support three database backends:
 
-#### MySQL (Default)
+#### SQLite (Default)
 
-Uses Docker MySQL container. Set `DB_TYPE=mysql` or leave unset.
+Uses local SQLite files. No Docker database container required.
 
 ```bash
-# Run with MySQL (default)
+# Run with SQLite (default)
 ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+# or explicitly:
+DB_TYPE=sqlite ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 ```
 
-#### SQLite (Lightweight Testing)
-
-Uses local SQLite files. Set `DB_TYPE=sqlite` for:
-
+Benefits:
 - Faster test startup (no Docker database container)
 - Parallel test execution (each test uses separate DB files)
 - Lighter CI/CD environments
 
+#### PostgreSQL
+
+Uses Docker PostgreSQL container. Set `DB_TYPE=postgres`.
+
 ```bash
-# Run with SQLite
-DB_TYPE=sqlite ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+# Run with PostgreSQL
+DB_TYPE=postgres ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 ```
 
-**SQLite Environment Variables:**
+Start the container with: `docker compose --profile postgres up`
+
+#### MySQL
+
+Uses Docker MySQL container. Set `DB_TYPE=mysql`.
+
+```bash
+# Run with MySQL
+DB_TYPE=mysql ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+```
+
+Start the container with: `docker compose --profile mysql up`
+
+**Environment Variables:**
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DB_TYPE` | `mysql` | Database type: `mysql` or `sqlite` |
-| `SQLITE_WATCH_DB_PATH` | `./data/sqlite/btc/watch.db` | Watch wallet database |
-| `SQLITE_KEYGEN_DB_PATH` | `./data/sqlite/btc/keygen.db` | Keygen wallet database |
-| `SQLITE_SIGN_DB_PATH` | `./data/sqlite/btc/sign.db` | Sign wallet database |
+| `DB_TYPE` | `sqlite` | Database type: `sqlite`, `postgres`, or `mysql` |
+| `SQLITE_DB_DIR` | `./data/sqlite/btc` | SQLite database directory |
+| `SQLITE_WATCH_DB_PATH` | `${SQLITE_DB_DIR}/watch.db` | Watch wallet database |
+| `SQLITE_KEYGEN_DB_PATH` | `${SQLITE_DB_DIR}/keygen.db` | Keygen wallet database |
+| `SQLITE_SIGN_DB_PATH` | `${SQLITE_DB_DIR}/sign.db` | Sign wallet database |
+| `SQLITE_SIGN2_DB_PATH` | `${SQLITE_DB_DIR}/sign2.db` | Sign2 wallet database |
+| `BTC_POSTGRES_USER` | `postgres` | PostgreSQL username |
+| `BTC_POSTGRES_PASSWORD` | `postgres` | PostgreSQL password |
 
 ---
 

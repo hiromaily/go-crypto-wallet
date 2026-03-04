@@ -1,0 +1,167 @@
+---
+paths:
+  - internal/application/usecase/keygen/xrp/*.go
+  - internal/application/usecase/sign/xrp/*.go
+  - internal/application/usecase/watch/xrp/*.go
+  - internal/application/dto/xrp/*.go
+  - internal/application/ports/api/xrp/*.go
+  - internal/application/ports/repository/watch/xrp_transaction.go
+  - internal/infrastructure/api/xrp/connection.go
+  - internal/infrastructure/api/xrp/**/*.go
+  - internal/interface-adapters/cli/keygen/api/xrp/*.go
+  - internal/interface-adapters/cli/watch/api/xrp/*.go
+  - internal/interface-adapters/wallet/xrp/*.go
+---
+
+# Claude Rules - XRP Ledger/Ripple (XRP) Development
+
+## Overview
+
+Rules for Claude Code when working on XRP-related code in go-crypto-wallet.
+Always consult the documentation under `docs/chains/xrp/` for context before making changes.
+
+## Documentation Map
+
+### Start Here
+
+| Task | Primary Doc |
+| ---- | ----------- |
+| Understand wallet architecture | [docs/chains/xrp/architecture-2026.md](../../../docs/chains/xrp/architecture-2026.md) |
+| Library selection rationale | [docs/chains/xrp/library-selection.md](../../../docs/chains/xrp/library-selection.md) |
+| Testing and CI strategy | [docs/chains/xrp/testing-strategy.md](../../../docs/chains/xrp/testing-strategy.md) |
+| Transaction flow (XRP-specific) | [docs/chains/xrp/architecture-2026.md#5-wallet-level-flows](../../../docs/chains/xrp/architecture-2026.md) |
+
+### By Topic
+
+| Topic | Documents |
+| ----- | --------- |
+| **Library architecture (dual xrpl-go)** | [library-selection.md](../../../docs/chains/xrp/library-selection.md) |
+| **Key algorithms (secp256k1 vs Ed25519)** | [architecture-2026.md §4](../../../docs/chains/xrp/architecture-2026.md) |
+| **Reliable transaction submission** | [testing-strategy.md](../../../docs/chains/xrp/testing-strategy.md), [architecture-2026.md §6](../../../docs/chains/xrp/architecture-2026.md) |
+| **Standalone rippled / CI setup** | [testing-strategy.md](../../../docs/chains/xrp/testing-strategy.md), [setup-docker-compose-standalone-xrpl.md](../../../docs/chains/xrp/setup-docker-compose-standalone-xrpl.md) |
+| **xrpl-go library capabilities** | [xrpl-go.md](../../../docs/chains/xrp/xrpl-go.md) |
+| **Network / devnet** | [network-devnet.md](../../../docs/chains/xrp/network-devnet.md) |
+
+## Key Code Paths
+
+### Implementation
+
+```
+internal/application/usecase/keygen/xrp/   # XRP keygen use cases
+internal/application/usecase/sign/xrp/    # XRP signing use cases
+internal/application/usecase/watch/xrp/   # XRP watch use cases
+internal/application/dto/xrp/             # XRP data transfer objects
+internal/application/ports/api/xrp/       # XRP port interfaces
+internal/infrastructure/api/xrp/          # rippled WebSocket client + offline signing
+internal/infrastructure/wallet/key/       # Key generation (SECURITY-CRITICAL)
+pkg/chains/xrp/                           # XRP chain utilities (keygen, signing, base58)
+```
+
+### CLI
+
+```
+internal/interface-adapters/cli/watch/api/xrp/   # Watch CLI commands
+internal/interface-adapters/wallet/xrp/          # Wallet adapter
+```
+
+### E2E Scripts
+
+```
+scripts/operation/xrp/e2e/   # XRP E2E test shell scripts
+scripts/operation/xrp/       # XRP operation scripts
+```
+
+## Critical Rules
+
+### Dual Library Architecture
+
+The XRP implementation uses **two** `xrpl-go` libraries with distinct roles:
+
+| Library | Role | Used By |
+| ------- | ---- | ------- |
+| `github.com/xrpscan/xrpl-go` | WebSocket communication, account queries, transaction submission | Watch wallet (online) |
+| `github.com/Peersyst/xrpl-go` | Offline transaction signing (single-sig and multisig) | Keygen / Sign wallets (offline) |
+
+- **DO NOT** mix roles: Peersyst is zero-network (offline); xrpscan handles all network calls.
+- **DO NOT** use the deprecated `xrpl-grpc-server` gRPC adapter — it has been retired.
+  The wallet connects **directly** to rippled via WebSocket on port 6006.
+
+### Never Sign-and-Submit
+
+- **NEVER** use sign-and-submit in production. Always sign locally (offline), persist the signed artifact, then submit `tx_blob`.
+- Correct workflow: build unsigned tx → transfer to offline machine → sign → transfer back → submit `tx_blob` → confirm validation.
+
+### Reliable Submission Validation
+
+A successful `submit` response does **NOT** mean the transaction succeeded.
+
+Always confirm:
+1. `validated == true`
+2. `meta.TransactionResult == tesSUCCESS`
+
+Only then is the transaction considered successful.
+
+### Algorithm Explicitness
+
+XRPL supports two key algorithms: `secp256k1` and `Ed25519`. Different tools may default differently — **the same seed produces different addresses depending on the algorithm**.
+
+Always store and pass the algorithm explicitly alongside the seed:
+- `seed`
+- `algorithm` (`secp256k1` | `ed25519`)
+- `address`
+- `public_key`
+
+### Private Key Encoding
+
+XRP private keys are stored as **hex-encoded raw bytes** (32 bytes) in the `WIF` field of the HD wallet repository — **not** as Base58Check-encoded strings.
+
+When reading a private key from the repository:
+- Use `hex.DecodeString(wifPrivKey)` to get the raw `[]byte`
+- Do **NOT** use `base58.Decode` or XRP-specific Base58Check decoding on the WIF field
+
+### Standalone Mode: `ledger_accept` Required
+
+In rippled standalone mode (used for CI and local dev), ledgers do **NOT** close automatically.
+Call `ledger_accept` after each transaction submission to advance the ledger and finalize the transaction.
+
+```bash
+# Advance ledger after sending a transaction
+docker compose -f compose.xrp.yaml exec rippled rippled ledger_accept
+```
+
+### WebSocket Configuration
+
+The rippled WebSocket endpoint must always be configured via environment variable — never hardcoded:
+
+```bash
+WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL=ws://127.0.0.1:6006   # local standalone
+WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL=wss://s.altnet.rippletest.net:51233  # testnet
+```
+
+Config file: `config/wallet/xrp/watch.yaml` → `ripple.websocket_public_url`
+
+### XRP Transaction Fields
+
+Every XRP transaction requires:
+- `TransactionType`
+- `Account` (sender address)
+- `Fee` (in drops)
+- `Sequence`
+- `LastLedgerSequence` (bounds the validity window)
+
+Watch wallet must fetch `Sequence` and decide `Fee` / `LastLedgerSequence` **before** building the unsigned transaction.
+
+### Security
+
+- Private keys must **never** touch the online Watch wallet
+- Key generation must only occur on trusted offline machines
+- `Fee` and `Sequence` are fetched online by Watch wallet; signing is always offline
+
+## Applicable Skills
+
+| Situation | Skill |
+| --------- | ----- |
+| Generating/updating mocks | `mockery` |
+| Writing Go code | `go-development` |
+| Running wallet CLI commands | `wallet-cli` |
+| Modifying shell scripts | `shell-scripts` |

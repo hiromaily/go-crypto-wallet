@@ -1,384 +1,377 @@
-# Bitcoin Cash E2E Workflow
+# Bitcoin Cash Operation Scripts
 
-This document describes the complete Bitcoin Cash end-to-end workflow implemented in `e2e-workflow.sh`.
+This directory contains Bitcoin Cash operation and E2E workflow scripts.
 
-## Overview
-
-The E2E workflow automates the complete Bitcoin Cash wallet operation from infrastructure setup to transaction execution. It serves as both a regression test tool and documentation of the standard Bitcoin Cash operation flow.
-
-## Prerequisites
-
-Before running the workflow, ensure the following are available:
-
-- **Docker & Docker Compose**: For running Bitcoin Cash nodes and database
-- **CLI Commands**: `watch`, `keygen`, `sign1`, `sign2` (build with `make build`)
-
-## Workflow Phases
-
-### Phase 1: Prerequisites Check
-
-Verifies that all required tools and dependencies are available:
-
-- Docker and Docker Compose are installed and running
-- All CLI commands (`watch`, `keygen`, `sign1`, `sign2`) are built and accessible
-
-### Phase 2: Infrastructure Setup
-
-Starts the required infrastructure containers:
+## Directory Structure
 
 ```
-┌─────────────────┐     ┌─────────────────┐
-│   wallet-mysql  │     │   bch-watch     │
-│   (MySQL)       │     │   (BCH Node)    │
-└─────────────────┘     └─────────────────┘
-                        ┌─────────────────┐
-                        │   bch-keygen    │
-                        │   (BCH Node)    │
-                        └─────────────────┘
-                        ┌─────────────────┐
-                        │   bch-sign1     │
-                        │   (BCH Node)    │
-                        └─────────────────┘
-                        ┌─────────────────┐
-                        │   bch-sign2     │
-                        │   (BCH Node)    │
-                        └─────────────────┘
+bch/
+├── bch_common.sh         # BCH-specific common utilities
+├── README.md             # This file
+└── e2e/                  # E2E test scripts
+    ├── e2e-p1-p2pkh-singlesig.sh  # Pattern 1: P2PKH Single-sig
+    ├── e2e-p2-p2sh-2of3.sh        # Pattern 2: P2SH 2-of-3 Multisig
+    ├── e2e-p3-p2sh-3of3.sh        # Pattern 3: P2SH 3-of-3 Multisig
+    └── e2e-parallel-runner.sh     # Parallel test runner for CI/CD
 ```
 
-1. Start database container (`compose.yaml`)
-2. Wait for database to be healthy
-3. Start Bitcoin Cash node containers (`compose.bch.yaml`)
-4. Wait for all Bitcoin Cash nodes to be healthy
+## BCH Protocol Limitations
 
-### Phase 3: Wallet Setup
+Bitcoin Cash does **NOT** support the following Bitcoin features:
 
-Creates wallets in each Bitcoin Cash node:
+| Feature | BCH Support | Notes |
+|---------|-------------|-------|
+| SegWit (P2WPKH, P2WSH) | No | P2PKH and P2SH only |
+| Taproot (P2TR) | No | |
+| Descriptor wallets | No | Cannot use descriptor APIs |
+| PSBT format | No | Raw transaction hex only |
+| Schnorr / MuSig2 | No | ECDSA only |
+| BIP49/84/86 derivation | No | BIP44 only (coin type 145) |
 
-| Node       | Wallet Name |
-|------------|-------------|
-| bch-watch  | watch       |
-| bch-keygen | keygen      |
-| bch-sign1  | sign1       |
-| bch-sign2  | sign2       |
+BCH uses **CashAddr** format (`bitcoincash:q...`) for mainnet addresses.
 
-### Phase 4: Key Generation
+## Common Utilities
 
-This phase generates all required keys for the wallet system.
+### bch_common.sh
 
-#### 4.1 Keygen Wallet Operations
+BCH-specific common functions for E2E scripts. This file automatically sources `../common.sh`, so you don't need to source both.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    KEYGEN WALLET                            │
-├─────────────────────────────────────────────────────────────┤
-│ 1. Create seed                                              │
-│    └─ keygen create seed                                    │
-│                                                             │
-│ 2. Create HD keys for each account (10 keys each)          │
-│    ├─ client account                                        │
-│    ├─ deposit account                                       │
-│    ├─ payment account                                       │
-│    └─ stored account                                        │
-│                                                             │
-│ 3. Import private keys into Bitcoin Cash node              │
-│    └─ For all accounts (client, deposit, payment, stored)  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### 4.2 Sign Wallet Operations
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    SIGN WALLETS (sign1, sign2)              │
-├─────────────────────────────────────────────────────────────┤
-│ 1. Create seed                                              │
-│    └─ sign1 create seed                                     │
-│                                                             │
-│ 2. Create HD keys                                           │
-│    ├─ sign1 create hdkey                                    │
-│    └─ sign2 create hdkey                                    │
-│                                                             │
-│ 3. Import private keys into Bitcoin Cash nodes             │
-│    ├─ sign1 import privkey                                  │
-│    └─ sign2 import privkey                                  │
-│                                                             │
-│ 4. Export full public keys                                 │
-│    ├─ sign1 export fullpubkey → fullpubkey_auth1.csv       │
-│    └─ sign2 export fullpubkey → fullpubkey_auth2.csv       │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Phase 5: Multisig Setup
-
-Creates multisig addresses and exports them to the watch wallet.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    MULTISIG SETUP                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  KEYGEN WALLET                                              │
-│  ├─ Import fullpubkey from sign1                           │
-│  ├─ Import fullpubkey from sign2                           │
-│  │                                                          │
-│  ├─ Create multisig addresses                              │
-│  │   ├─ deposit account                                     │
-│  │   ├─ payment account                                     │
-│  │   └─ stored account                                      │
-│  │                                                          │
-│  └─ Export addresses                                       │
-│      ├─ client addresses  → address_client.csv             │
-│      ├─ deposit addresses → address_deposit.csv            │
-│      ├─ payment addresses → address_payment.csv            │
-│      └─ stored addresses  → address_stored.csv             │
-│                                                             │
-│  WATCH WALLET                                               │
-│  └─ Import all address files                               │
-│      ├─ client addresses                                    │
-│      ├─ deposit addresses                                   │
-│      ├─ payment addresses                                   │
-│      └─ stored addresses                                    │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Phase 6: Test UTXO Generation
-
-For regtest environment, generates test UTXOs for transaction testing:
-
-1. Extract payment address from exported address file (CashAddr format)
-2. Generate 101 blocks to the payment address (creates mature coinbase)
-3. Wait for balance update in watch wallet
-
-### Phase 7: Transaction Flow
-
-Creates, signs, and sends a payment transaction.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    TRANSACTION FLOW                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  1. CREATE UNSIGNED TRANSACTION                             │
-│     └─ watch create payment → tx_unsigned.hex              │
-│                                                             │
-│  2. SIGN WITH KEYGEN WALLET (1st signature)                │
-│     └─ keygen sign --file tx_unsigned.hex                  │
-│        → tx_signed_1.hex                                    │
-│                                                             │
-│  3. SIGN WITH SIGN1 WALLET (2nd signature)                 │
-│     └─ sign1 sign --file tx_signed_1.hex                   │
-│        → tx_signed_2.hex                                    │
-│                                                             │
-│  4. SIGN WITH SIGN2 WALLET (3rd signature)                 │
-│     └─ sign2 sign --file tx_signed_2.hex                   │
-│        → tx_signed_3.hex                                    │
-│                                                             │
-│  5. SEND TRANSACTION                                        │
-│     └─ watch send --file tx_signed_3.hex                   │
-│        → Transaction ID                                     │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Usage
-
-### Run Complete E2E Workflow
+**Usage in E2E scripts:**
 
 ```bash
-# From fresh state (full reset first)
-./scripts/operation/bch/e2e-workflow.sh --reset
+# Source BCH common utilities
+source "${SCRIPT_DIR}/../bch_common.sh"
 
-# Run workflow (assumes clean state or continuing from previous run)
-./scripts/operation/bch/e2e-workflow.sh
+# Initialize config paths
+bch_get_config_paths
+
+# Initialize RPC hosts (required for parallel execution)
+bch_init_rpc_hosts
+```
+
+**Available Functions:**
+
+| Function | Description |
+|----------|-------------|
+| `bch_get_config_paths` | Set standard config file paths |
+| `bch_init_rpc_hosts` | Set wallet-specific RPC host addresses |
+| `bch_check_prerequisites` | Check Docker and CLI commands |
+| `bch_setup_infrastructure` | Start database and BCH nodes |
+| `bch_setup_wallets` | Create wallets in BCH nodes |
+| `bch_cleanup` | Stop containers |
+| `bch_full_reset` | Full reset with volume deletion |
+| `bch_watch_cmd` | Wrapper for watch commands |
+| `bch_keygen_cmd` | Wrapper for keygen commands |
+| `bch_sign1_cmd` | Wrapper for sign1 commands |
+| `bch_sign2_cmd` | Wrapper for sign2 commands |
+| `bch_extract_file_path` | Extract file path from command output |
+| `sqlite_init_db` | Initialize SQLite database with schema |
+| `sqlite_clean_db` | Remove SQLite database files |
+| `sqlite_query` | Execute SQLite query directly |
+| `mysql_query` | Execute MySQL query via Docker |
+| `db_query` | Execute database query (abstraction) |
+| `db_execute` | Execute database command (abstraction) |
+| `db_is_sqlite` | Check if using SQLite database |
+| `db_is_mysql` | Check if using MySQL database |
+| `bch_get_sender_address` | Get sender address from watch DB |
+| `bch_generate_receiver_addresses` | Generate receiver addresses from BCH node |
+| `bch_insert_payment_requests` | Insert payment requests directly into DB |
+
+### Database Configuration
+
+The scripts support two database backends:
+
+#### SQLite (Default)
+
+Uses local SQLite files. No Docker database container required.
+
+```bash
+# Run with SQLite (default)
+make bch-e2e-reset P=1
+# or explicitly:
+DB_TYPE=sqlite ./scripts/operation/bch/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+```
+
+Benefits:
+- Faster test startup (no Docker database container)
+- Parallel test execution (each pattern uses isolated timestamped DB files)
+- Lighter CI/CD environments
+
+#### MySQL
+
+Uses Docker MySQL container. Set `DB_TYPE=mysql`.
+
+```bash
+# Run with MySQL
+DB_TYPE=mysql make bch-e2e-reset P=1
+```
+
+Start the container with: `docker compose --profile mysql up`
+
+**Environment Variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_TYPE` | `sqlite` | Database type: `sqlite` or `mysql` |
+| `SQLITE_DB_DIR` | `./data/sqlite/bch` | SQLite database directory |
+| `SQLITE_WATCH_DB_PATH` | auto-generated | Watch wallet database |
+| `SQLITE_KEYGEN_DB_PATH` | auto-generated | Keygen wallet database |
+| `SQLITE_SIGN_DB_PATH` | auto-generated | Sign1 wallet database |
+| `SQLITE_SIGN2_DB_PATH` | auto-generated | Sign2 wallet database |
+
+SQLite DB file naming: `{wallet}-e2e-{pattern}-{timestamp}.db`
+(e.g., `watch-e2e-p1-20260101-120000.db`)
+
+---
+
+## E2E Patterns
+
+BCH supports **3 patterns** only (no SegWit, Taproot, or descriptor patterns).
+
+### Pattern 1: P2PKH Single-sig (`e2e-p1-p2pkh-singlesig.sh`)
+
+**Transaction Pattern:**
+
+- Address Type: P2PKH (BIP44)
+- Address Format: `bitcoincash:q...` (mainnet) / `m.../n...` (regtest)
+- Key Derivation: `m/44'/145'/account'/change/index`
+- Signature: Single-sig (Keygen wallet only, no Sign wallets needed)
+
+**Workflow Phases:**
+
+```
+Phase 1: Key Generation (Keygen wallet — offline)
+  └─ create seed → create hdkey (client, deposit, payment, stored)
+
+Phase 2: Address Export → Watch Import
+  └─ keygen export address --account → CSV → watch import address
+
+Phase 3: Test UTXO Generation (regtest only)
+  └─ generatetoaddress 101 blocks → wait for balance
+
+Phase 4: Payment Request Setup
+  └─ bch_insert_payment_requests (direct DB insert via bch_common.sh helper)
+
+Phase 5: Create Unsigned Transaction (Watch wallet — online)
+  └─ watch create payment → unsigned hex file
+
+Phase 6: Offline Signing (Keygen wallet — offline)
+  └─ keygen sign signature --file → signed hex file
+
+Phase 7: Broadcast (Watch wallet — online)
+  └─ watch send tx --file → txID
+```
+
+### Pattern 2: P2SH 2-of-3 Multisig (`e2e-p2-p2sh-2of3.sh`)
+
+**Transaction Pattern:**
+
+- Address Type: P2SH (BIP44 + BIP11)
+- Address Format: `bitcoincash:p...` (mainnet) / `2...` (regtest)
+- Signature: 2-of-3 (any 2 of Keygen, Sign1, Sign2)
+
+**Workflow Phases:**
+
+Same as Pattern 1 plus multisig setup:
+
+```
+Phase 1: Key Generation (Keygen + Sign1 + Sign2 wallets)
+  ├─ keygen: create seed → create hdkey → import privkey
+  ├─ sign1:  create seed → create hdkey → import privkey
+  └─ sign2:  create seed → create hdkey → import privkey
+
+Phase 2: Multisig Setup
+  ├─ sign1 export fullpubkey → fullpubkey_auth1.csv
+  ├─ sign2 export fullpubkey → fullpubkey_auth2.csv
+  ├─ keygen import fullpubkey (sign1, sign2)
+  └─ keygen create multisig address → export to watch
+
+Phase 3-7: Same as Pattern 1 (UTXO, create tx, sign, broadcast)
+  └─ Signing: keygen sign → sign1 sign → watch send (2-of-3)
+```
+
+### Pattern 3: P2SH 3-of-3 Multisig (`e2e-p3-p2sh-3of3.sh`)
+
+Same as Pattern 2 but requires **all 3** signatures (keygen + sign1 + sign2).
+
+---
+
+## Running E2E Tests
+
+### Using Makefile (Recommended)
+
+Always use Makefile targets. They automatically build binaries before running.
+
+```bash
+# Run with full reset (recommended for fresh start)
+make bch-e2e-reset P=1    # Pattern 1
+make bch-e2e-reset P=2    # Pattern 2
+make bch-e2e-reset P=3    # Pattern 3
+
+# Run without reset (continuing from previous state)
+make bch-e2e P=1
 
 # Run with verbose output
-./scripts/operation/bch/e2e-workflow.sh --verbose
+make bch-e2e-verbose P=1
+
+# Run in non-interactive CI mode
+make bch-e2e-ci P=1
+
+# Cleanup only
+make bch-e2e-cleanup P=1
 ```
 
-### Cleanup
+### Parallel Test Runner
+
+Runs all patterns in parallel using isolated SQLite databases.
 
 ```bash
-# Stop containers and cleanup state
-./scripts/operation/bch/e2e-workflow.sh --cleanup
+# Run all patterns in parallel
+make bch-e2e-parallel
+
+# Run specific patterns
+make bch-e2e-parallel PATTERNS=1,2
+
+# Run all in CI mode
+make bch-e2e-ci-all
 ```
 
-### Options
+Or directly:
 
-| Option              | Description                                        |
-|---------------------|----------------------------------------------------|
-| `--reset`           | Full reset: cleanup all state for fresh start      |
-| `--cleanup`         | Stop containers and cleanup state, then exit       |
-| `--verbose`         | Enable verbose output                              |
-| `--non-interactive` | Run without interactive prompts (for CI/CD)        |
-| `-h, --help`        | Display help message                               |
+```bash
+./scripts/operation/bch/e2e/e2e-parallel-runner.sh --ci
+./scripts/operation/bch/e2e/e2e-parallel-runner.sh --patterns 1,2 --verbose
+```
 
-## Environment Variables
+**Parallel runner options:**
 
-| Variable            | Default | Description                                      |
-|---------------------|---------|--------------------------------------------------|
-| `RPC_USER`          | `xyz`   | Bitcoin Cash RPC username (for regtest)          |
-| `RPC_PASSWORD`      | `xyz`   | Bitcoin Cash RPC password (for regtest)          |
-| `WALLET_PASSPHRASE` | `test`  | Wallet passphrase for encrypted wallets          |
+| Option | Description |
+|--------|-------------|
+| `--patterns <list>` | Patterns to run (e.g., `"1,2,3"` or `"1-3"`) |
+| `--max-parallel <N>` | Limit concurrent processes (default: 3) |
+| `--verbose` | Show real-time output |
+| `--ci` | Non-interactive CI/CD mode |
+| `-h, --help` | Display help |
+
+---
 
 ## Configuration Files
 
-| File                              | Purpose                    |
-|-----------------------------------|----------------------------|
-| `config/wallet/bch/watch.yaml`    | Watch wallet configuration |
-| `config/wallet/bch/keygen.yaml`   | Keygen wallet configuration|
-| `config/wallet/bch/sign1.yaml`    | Sign1 wallet configuration |
-| `config/wallet/bch/sign2.yaml`    | Sign2 wallet configuration |
+| File | Purpose |
+|------|---------|
+| `config/wallet/bch/watch.yaml` | Watch wallet configuration |
+| `config/wallet/bch/keygen.yaml` | Keygen wallet configuration |
+| `config/wallet/bch/sign1.yaml` | Sign1 wallet configuration |
+| `config/wallet/bch/sign2.yaml` | Sign2 wallet configuration |
+| `config/wallet/account/account.yaml` | Account config (single-sig, Pattern 1) |
+| `config/wallet/account/account_2of3.yaml` | Account config (2-of-3, Pattern 2) |
+| `config/wallet/account/account_3of3.yaml` | Account config (3-of-3, Pattern 3) |
 
 ## Generated Files
 
 ### Address Files (`data/address/bch/`)
 
-- `address_client_*.csv` - Client addresses (non-multisig)
-- `address_deposit_*.csv` - Deposit multisig addresses
-- `address_payment_*.csv` - Payment multisig addresses
-- `address_stored_*.csv` - Stored multisig addresses
+- `client_*.csv` - Client addresses (non-multisig)
+- `deposit_*.csv` - Deposit addresses
+- `payment_*.csv` - Payment addresses
+- `stored_*.csv` - Stored addresses
 
 ### Public Key Files (`data/fullpubkey/bch/`)
 
-- `fullpubkey_auth1_*.csv` - Full public keys from sign1
-- `fullpubkey_auth2_*.csv` - Full public keys from sign2
+- `auth1_*.csv` - Full public keys from sign1 (multisig patterns)
+- `auth2_*.csv` - Full public keys from sign2 (multisig patterns)
 
 ### Transaction Files (`data/tx/bch/`)
 
-- `tx_*.hex` - Unsigned and signed transaction files
+- `*.hex` - Unsigned and signed raw transaction hex files
+
+### SQLite Database Files (`data/sqlite/bch/`)
+
+- `watch-e2e-p1-{timestamp}.db` - Watch wallet for Pattern 1
+- `keygen-e2e-p1-{timestamp}.db` - Keygen wallet for Pattern 1
+- (similar files per pattern)
 
 ## Account Types
 
-| Account  | Purpose                                           | Multisig |
-|----------|---------------------------------------------------|----------|
-| client   | Client-facing addresses for receiving funds       | No       |
-| deposit  | Deposit addresses for initial fund receipt        | Yes      |
-| payment  | Payment addresses for outgoing transactions       | Yes      |
-| stored   | Cold storage addresses for long-term holding      | Yes      |
+| Account | Purpose | Multisig |
+|---------|---------|----------|
+| `client` | Client-facing addresses for receiving funds | No |
+| `deposit` | Deposit addresses for initial fund receipt | Yes (P2/P3) |
+| `payment` | Payment addresses for outgoing transactions | Yes (P2/P3) |
+| `stored` | Cold storage addresses for long-term holding | Yes (P2/P3) |
 
-## Signature Flow (3-of-3 Multisig)
+## Docker Container Names
 
-The transaction requires signatures from three wallets:
+| Container | Port | Purpose |
+|-----------|------|---------|
+| `bch-watch` | 28332 | Watch wallet node |
+| `bch-keygen` | 29332 | Keygen wallet node |
+| `bch-sign1` | 30332 | Sign1 wallet node |
+| `bch-sign2` | 31332 | Sign2 wallet node |
 
-1. **Keygen Wallet** - Primary key holder
-2. **Sign1 Wallet** - First authorization signer
-3. **Sign2 Wallet** - Second authorization signer
+## Environment Variables
 
-This implements a 3-of-3 multisig scheme where all three parties must sign to authorize a transaction.
-
-## Bitcoin Cash Specific Notes
-
-### Address Format
-
-Bitcoin Cash uses the CashAddr format (`bitcoincash:qp...`) for addresses, which is different from Bitcoin's legacy, P2SH-SegWit, and Bech32 formats.
-
-### Node Software
-
-This workflow uses Bitcoin Cash Node (BCHN) version 28.0.1, which is the most widely used full node implementation for Bitcoin Cash. See [bitcoincashnode.org](https://bitcoincashnode.org/) for more information.
-
-### Port Configuration
-
-Default ports (to avoid conflicts with Bitcoin):
-
-| Node       | Host Port |
-|------------|-----------|
-| bch-watch  | 28332     |
-| bch-keygen | 29332     |
-| bch-sign1  | 30332     |
-| bch-sign2  | 31332     |
-
-## Troubleshooting
-
-### "No UTXOs available"
-
-If the transaction phase reports no UTXOs:
-
-1. Verify blocks were generated successfully
-2. Check balance with: `watch -c config/wallet/bch/watch.yaml --coin bch monitor balance`
-3. The script automatically generates 101 blocks; if this fails, manually run:
-
-   ```bash
-   docker exec bch-watch bitcoin-cli -regtest generatetoaddress 101 <address>
-   ```
-
-### Container Health Issues
-
-If containers fail health checks:
-
-1. Check container logs: `docker logs bch-watch`
-2. Verify Docker resources are available
-3. Try full reset: `./scripts/operation/bch/e2e-workflow.sh --reset`
-
-### Key Import Failures
-
-If key import fails:
-
-1. Ensure wallets were created successfully in Bitcoin Cash nodes
-2. Check if encrypted mode is properly configured
-3. Verify configuration file paths are correct
-
-### Address Format Issues
-
-Bitcoin Cash uses CashAddr format. If you see address format errors:
-
-1. Ensure `address_type = "bch-cashaddr"` is set in configuration files
-2. Verify the wallet software supports CashAddr format
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_TYPE` | `sqlite` | Database type: `sqlite` or `mysql` |
+| `BCH_RPC_USER` | `xyz` | BCH node RPC username (regtest) |
+| `BCH_RPC_PASSWORD` | `xyz` | BCH node RPC password (regtest) |
+| `BCH_WALLET_PASSPHRASE` | `test` | Wallet passphrase (if encrypted) |
+| `BCH_ENCRYPTED` | `false` | Enable wallet encryption |
 
 ## E2E Script Verification Status
 
 ### Pattern 1: P2PKH Single-sig (`e2e-p1-p2pkh-singlesig.sh`)
 
-**Status**: ⚠️ Partially Verified (4 bugs fixed, 1 blocking issue remains)
+**Status**: Under investigation — UTXO query issue
 
-**Last Verified**: 2026-01-17
-**Issue**: #404
-
-#### Test Results
-
-| Acceptance Criteria | Status | Notes |
-|---------------------|--------|-------|
-| Script executes with `--reset` | ⚠️ Partial | Progresses through most phases |
-| All phases complete | ❌ Failed | Stops at transaction creation |
-| Transaction broadcast | ❌ Not reached | Blocked by UTXO query issue |
-| `--cleanup` works | ✅ Pass | Containers stop properly |
-| `--verbose` works | ✅ Pass | Debug output displayed |
-| `--help` works | ✅ Pass | Help message displayed |
-
-#### Bugs Fixed
-
-1. **Balance Detection** - Fixed to use `getbalance` with watch-only flag (BCH doesn't support `getbalances`)
-2. **Missing Rescan** - Added blockchain rescan after block generation to detect UTXOs
-3. **Address Format** - Fixed to use field 4 (legacy format) matching imported addresses
-4. **Sign Command** - Fixed syntax to use `keygen sign signature --file`
-
-#### Known Issues
-
-- **UTXO Query Issue**: Transaction creation fails with "No utxo" error despite UTXOs existing in wallet
-- Requires investigation of watch wallet UTXO query logic for BCH watch-only addresses
-
-#### Execution Progress
-
-- ✅ Prerequisites check
-- ✅ Infrastructure setup
-- ✅ Wallet creation
-- ✅ HD key generation
-- ✅ Address import
-- ✅ UTXO generation (50 BCH)
-- ✅ Balance verification
-- ✅ Payment request creation
-- ❌ Transaction creation (blocked)
-- ⏹️ Transaction signing (not reached)
-- ⏹️ Transaction broadcast (not reached)
+**Known Issue**: Transaction creation fails with "No utxo" error despite UTXOs existing in the watch wallet. Requires investigation of watch wallet UTXO query logic for BCH watch-only addresses.
 
 ### Pattern 2: P2SH 2-of-3 (`e2e-p2-p2sh-2of3.sh`)
 
-**Status**: ⚠️ Not Verified
-
-**Notes**: Likely has similar address format issues as Pattern 1 (uses field 3 extraction on line 192)
+**Status**: Not yet verified
 
 ### Pattern 3: P2SH 3-of-3 (`e2e-p3-p2sh-3of3.sh`)
 
-**Status**: ⚠️ Not Verified
+**Status**: Not yet verified
 
-**Notes**: Likely has similar address format issues as Pattern 1 (uses field 3 extraction on line 192)
+## Troubleshooting
+
+### "No UTXOs available"
+
+```bash
+# Check balance in watch wallet
+docker exec bch-watch bitcoin-cli -regtest -rpcwallet=watch getbalance "*" 1 true
+
+# List UTXOs
+docker exec bch-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
+
+# Generate 101 blocks manually
+docker exec bch-watch bitcoin-cli -regtest generatetoaddress 101 <address>
+```
+
+### Address Format Issues
+
+BCH uses different formats per network:
+
+| Network | P2PKH Format | P2SH Format |
+|---------|-------------|-------------|
+| Mainnet | `bitcoincash:q...` | `bitcoincash:p...` |
+| Testnet | `bchtest:q...` | `bchtest:p...` |
+| Regtest | `m.../n...` | `2...` |
+
+Ensure `address_type = "bch-cashaddr"` is set in config files.
+
+### Container Health Issues
+
+```bash
+docker logs bch-watch
+make bch-e2e-cleanup P=1
+make bch-e2e-reset P=1
+```
+
+### Build CLI Binaries
+
+```bash
+make build-all
+```
