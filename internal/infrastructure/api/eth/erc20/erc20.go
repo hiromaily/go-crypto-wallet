@@ -205,24 +205,10 @@ func (e *ERC20) SupportsEIP1559(ctx context.Context) bool {
 	return e.eth.SupportsEIP1559(ctx)
 }
 
-// CreateRawTransactionEIP1559 creates an EIP-1559 (Type 2) transaction for an
-// ERC-20 token transfer.
-//
-// When the connected node does not support EIP-1559, falls back to a legacy
-// Type 0 transaction via CreateRawTransaction.
-//
-// Fee formula:
-//
-//	maxPriorityFeePerGas = SuggestGasTipCap()
-//	maxFeePerGas         = (baseFeePerGas × 2) + maxPriorityFeePerGas
-func (e *ERC20) CreateRawTransactionEIP1559(
-	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
-	if !e.SupportsEIP1559(ctx) {
-		return e.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
-	}
-
-	maxPriorityFeePerGas, err := e.eth.SuggestGasTipCap(ctx)
+// resolveEIP1559Fees fetches EIP-1559 fee parameters from the connected node.
+// Returns maxPriorityFeePerGas and maxFeePerGas computed as (baseFee × 2) + tip.
+func (e *ERC20) resolveEIP1559Fees(ctx context.Context) (maxPriorityFeePerGas, maxFeePerGas *big.Int, err error) {
+	maxPriorityFeePerGas, err = e.eth.SuggestGasTipCap(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.SuggestGasTipCap(): %w", err)
 	}
@@ -241,10 +227,34 @@ func (e *ERC20) CreateRawTransactionEIP1559(
 		return nil, nil, errors.New("baseFeePerGas not found in block (EIP-1559 not activated)")
 	}
 
-	maxFeePerGas := new(big.Int).Add(
+	maxFeePerGas = new(big.Int).Add(
 		new(big.Int).Mul(blockInfo.BaseFeePerGas, big.NewInt(2)),
 		maxPriorityFeePerGas,
 	)
+	return maxPriorityFeePerGas, maxFeePerGas, nil
+}
+
+// CreateRawTransactionEIP1559 creates an EIP-1559 (Type 2) transaction for an
+// ERC-20 token transfer.
+//
+// When the connected node does not support EIP-1559, falls back to a legacy
+// Type 0 transaction via CreateRawTransaction.
+//
+// Fee formula:
+//
+//	maxPriorityFeePerGas = SuggestGasTipCap()
+//	maxFeePerGas         = (baseFeePerGas × 2) + maxPriorityFeePerGas
+func (e *ERC20) CreateRawTransactionEIP1559(
+	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
+	if !e.SupportsEIP1559(ctx) {
+		return e.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
+	}
+
+	maxPriorityFeePerGas, maxFeePerGas, err := e.resolveEIP1559Fees(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	chainID, err := e.client.ChainID(ctx)
 	if err != nil {
