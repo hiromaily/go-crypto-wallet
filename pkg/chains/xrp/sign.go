@@ -10,6 +10,7 @@ import (
 	"maps"
 	"strings"
 
+	addresscodec "github.com/Peersyst/xrpl-go/address-codec"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/ecdsa"
 )
@@ -141,15 +142,10 @@ func (s *Signer) deriveKeyPair(seed string) (*XRPKeyPair, error) {
 // Handles both secp256k1 seeds (prefix [0x21], "s..." in Base58) and
 // ed25519 seeds (prefix [0x01, 0xe1, 0x4b], "sEd..." in Base58).
 func decodeSeed(seed string) ([]byte, error) {
-	decoded, err := Base58Decode(seed, ALPHABET)
+	decoded, err := addresscodec.Base58CheckDecode(seed)
 	if err != nil {
 		return nil, fmt.Errorf("invalid seed encoding: %w", err)
 	}
-	// Strip 4-byte checksum (Base58Decode returns bytes including checksum)
-	if len(decoded) < 4 {
-		return nil, errors.New("decoded seed too short to contain checksum")
-	}
-	decoded = decoded[:len(decoded)-4]
 
 	// Check ed25519 prefix [0x01, 0xe1, 0x4b]
 	if len(decoded) >= 3 && decoded[0] == 0x01 && decoded[1] == 0xe1 && decoded[2] == 0x4b {
@@ -307,11 +303,10 @@ func DetectAlgorithm(publicKeyHex string) (KeyAlgorithm, error) {
 // Hex seeds default to Ed25519 as recommended for new accounts.
 func DetectAlgorithmFromSeed(seed string) (KeyAlgorithm, error) {
 	if strings.HasPrefix(seed, "s") {
-		decoded, err := Base58Decode(seed, ALPHABET)
+		decoded, err := addresscodec.Base58CheckDecode(seed)
 		if err != nil {
 			return KeyAlgorithm(-1), fmt.Errorf("invalid seed format: %w", err)
 		}
-		decoded = decoded[:len(decoded)-4] // strip checksum
 		if len(decoded) >= 3 && decoded[0] == 0x01 && decoded[1] == 0xe1 && decoded[2] == 0x4b {
 			return AlgorithmEd25519, nil
 		}

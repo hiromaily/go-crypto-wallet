@@ -132,6 +132,25 @@ func (c *container) NewFooUseCase() FooUseCase {
 | Unexported | lowerCamelCase            | `calculateFee`           |
 | Interface  | Behavior + "er"           | `Validator`, `Reader`    |
 
+### Avoid Vague Names
+
+Names must convey **what** something is or does — not just its category.
+Generic names like `client`, `handler`, `manager`, `helper`, `data`, `info`, `util` are prohibited
+unless they are qualified with a meaningful prefix that removes ambiguity.
+
+```go
+// ❌ BAD: what kind of client? what does it connect to?
+type Client struct { ... }
+var client SomeInterface
+package client
+
+// ✅ GOOD: the name tells you exactly what it is
+type WSClient struct { ... }          // WebSocket connection to XRP node
+type BitcoinRPCClient struct { ... }  // JSON-RPC client for Bitcoin
+var xrpWS *websocket.WS
+package xrplgo
+```
+
 ## Auto-Generated Files
 
 **DO NOT EDIT** files with `DO NOT EDIT` comments:

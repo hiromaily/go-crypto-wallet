@@ -1,6 +1,3 @@
-// Package xrplgo provides a WebSocket client for XRPL node communication.
-// It wraps the xrpscan/xrpl-go library and implements the small interfaces
-// defined in internal/application/ports/api/xrp.
 package xrplgo
 
 // AccountInfo represents account information retrieved from the XRP Ledger.
