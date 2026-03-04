@@ -73,6 +73,9 @@ bch_init_rpc_hosts
 | `db_execute` | Execute database command (abstraction) |
 | `db_is_sqlite` | Check if using SQLite database |
 | `db_is_mysql` | Check if using MySQL database |
+| `bch_get_sender_address` | Get sender address from watch DB |
+| `bch_generate_receiver_addresses` | Generate receiver addresses from BCH node |
+| `bch_insert_payment_requests` | Insert payment requests directly into DB |
 
 ### Database Configuration
 
@@ -147,7 +150,7 @@ Phase 3: Test UTXO Generation (regtest only)
   └─ generatetoaddress 101 blocks → wait for balance
 
 Phase 4: Payment Request Setup
-  └─ watch insert payment request
+  └─ bch_insert_payment_requests (direct DB insert via bch_common.sh helper)
 
 Phase 5: Create Unsigned Transaction (Watch wallet — online)
   └─ watch create payment → unsigned hex file
