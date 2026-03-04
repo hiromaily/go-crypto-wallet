@@ -43,7 +43,7 @@ func (n *nonceStub) GetTransactionCount(_ context.Context, _ string, _ domainETH
 func TestGetNonce_DelegatesToEth(t *testing.T) {
 	t.Parallel()
 	stub := &nonceStub{txCount: big.NewInt(42)}
-	e := &ERC20{eth: stub}
+	e := &erc20{eth: stub}
 	nonce, err := e.getNonce(context.Background(), "0x0000000000000000000000000000000000000001", 0)
 	require.NoError(t, err)
 	assert.True(t, stub.called, "GetTransactionCount must be called by getNonce")
@@ -55,7 +55,7 @@ func TestGetNonce_DelegatesToEth(t *testing.T) {
 func TestGetNonce_AddsAdditionalNonce(t *testing.T) {
 	t.Parallel()
 	stub := &nonceStub{txCount: big.NewInt(10)}
-	e := &ERC20{eth: stub}
+	e := &erc20{eth: stub}
 	nonce, err := e.getNonce(context.Background(), "0x0000000000000000000000000000000000000001", 3)
 	require.NoError(t, err)
 	assert.Equal(t, uint64(13), nonce) // 10 + 3
@@ -66,7 +66,7 @@ func TestGetNonce_AddsAdditionalNonce(t *testing.T) {
 func TestGetNonce_PropagatesError(t *testing.T) {
 	t.Parallel()
 	stub := &nonceStub{txCountErr: errors.New("rpc error")}
-	e := &ERC20{eth: stub}
+	e := &erc20{eth: stub}
 	_, err := e.getNonce(context.Background(), "0x0000000000000000000000000000000000000001", 0)
 	require.Error(t, err)
 }

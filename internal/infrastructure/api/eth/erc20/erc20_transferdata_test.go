@@ -22,7 +22,7 @@ const toAddrHex = "0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF"
 // This is the key property validated by task 5.2.
 func TestCreateTransferData_HasMethodSelector(t *testing.T) {
 	t.Parallel()
-	e := &ERC20{}
+	e := &erc20{}
 	data := e.createTransferData(toAddrHex, big.NewInt(100))
 	require.GreaterOrEqual(t, len(data), 4, "calldata must contain at least the 4-byte method selector")
 	assert.Equal(t, transferMethodSelector, data[:4],
@@ -33,7 +33,7 @@ func TestCreateTransferData_HasMethodSelector(t *testing.T) {
 // 68 bytes: 4-byte selector + 32-byte padded address + 32-byte amount.
 func TestCreateTransferData_Length(t *testing.T) {
 	t.Parallel()
-	e := &ERC20{}
+	e := &erc20{}
 	data := e.createTransferData(toAddrHex, big.NewInt(1_000_000))
 	assert.Equal(t, 68, len(data), "ABI-encoded transfer calldata must be 68 bytes")
 }
@@ -42,7 +42,7 @@ func TestCreateTransferData_Length(t *testing.T) {
 // the correct method selector (used when sending the full balance).
 func TestCreateTransferData_ZeroAmount(t *testing.T) {
 	t.Parallel()
-	e := &ERC20{}
+	e := &erc20{}
 	data := e.createTransferData(toAddrHex, big.NewInt(0))
 	require.GreaterOrEqual(t, len(data), 4)
 	assert.Equal(t, transferMethodSelector, data[:4])
