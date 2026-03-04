@@ -2,6 +2,7 @@ package strategy
 
 import (
 	"crypto/ecdsa"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
@@ -71,16 +72,15 @@ func (s *XRPKeyStrategy) GenerateWalletKey(privKey *btcec.PrivateKey) (*domainKe
 	}, nil
 }
 
-// generateXRPKeys generates XRP address, public key, and private key
+// generateXRPKeys generates XRP address, public key, and hex-encoded private key bytes.
+// The private key is returned as a 32-byte hex-encoded string for storage in the WIF field,
+// allowing repositories to recover raw bytes via hex.DecodeString.
 func (*XRPKeyStrategy) generateXRPKeys(privKey *btcec.PrivateKey) (string, string, string, error) {
 	// Convert btcec private key to ECDSA
 	xrpPrivKey := privKey.ToECDSA()
 
-	// Generate XRP private key string
-	xrpHexPrivKey, err := xrpaddr.NewAccountPrivateKey(crypto.FromECDSA(xrpPrivKey))
-	if err != nil {
-		return "", "", "", fmt.Errorf("failed to call xrpaddr.NewAccountPrivateKey(): %w", err)
-	}
+	// Store raw private key bytes as hex in the WIF field
+	privKeyHex := hex.EncodeToString(crypto.FromECDSA(xrpPrivKey))
 
 	// Generate public key hash
 	serializedPubKey := privKey.PubKey().SerializeCompressed()
@@ -101,7 +101,7 @@ func (*XRPKeyStrategy) generateXRPKeys(privKey *btcec.PrivateKey) (string, strin
 		return "", "", "", fmt.Errorf("failed to call xrpaddr.NewAccountPublicKey(): %w", err)
 	}
 
-	return address.String(), publicKey.String(), xrpHexPrivKey.String(), nil
+	return address.String(), publicKey.String(), privKeyHex, nil
 }
 
 // generateEthAddress generates an Ethereum address from the same private key

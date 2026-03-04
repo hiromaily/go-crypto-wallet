@@ -31,7 +31,7 @@ while IFS= read -r file; do
 	# grep for RawRequest actual method calls, ignoring:
 	#   - comment lines (lines starting with optional whitespace then //)
 	#   - string literals (a " before .RawRequest means it's inside a quoted string)
-	if grep -qE "^[^\"]*\.RawRequest\(" "$file" && grep -E "^[^\"]*\.RawRequest\(" "$file" | grep -qvE "^[[:space:]]*//" ; then
+	if grep -qE "^[^\"]*\.RawRequest\(" "$file" && grep -E "^[^\"]*\.RawRequest\(" "$file" | grep -qvE "^[[:space:]]*//"; then
 		if [ "$header_shown" -eq 0 ]; then
 			echo "WARNING: RawRequest called directly in infrastructure layer (move to pkg/chains/btc/rpc/):" >&2
 			echo ""

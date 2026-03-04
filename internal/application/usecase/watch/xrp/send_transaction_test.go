@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -81,109 +80,47 @@ func TestSendTransactionUseCase_Execute_InvalidFilePath(t *testing.T) {
 	assert.Empty(t, output.TxID)
 }
 
-func TestSendTransactionUseCase_Execute_JSONParsingError(t *testing.T) {
+func TestSendTransactionUseCase_Execute_ReadError(t *testing.T) {
 	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
 	// Setup mocks
-	deps.txFileRepo.EXPECT().ValidateFilePath("valid-path.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("valid-path.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.EXPECT().ReadXRPJSONFile("valid-path.json").
-		Return((*dtoxrp.XRPTransactionFile)(nil), errors.New("invalid JSON format"))
+	deps.txFileRepo.EXPECT().ReadFileSlice("valid-path.csv").
+		Return(nil, errors.New("read error"))
 
 	input := watchusecase.SendTransactionInput{
-		FilePath: "valid-path.json",
+		FilePath: "valid-path.csv",
 	}
 
 	output, err := useCase.Execute(context.Background(), input)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "fail to call txFileRepo.ReadXRPJSONFile()")
-	assert.Contains(t, err.Error(), "invalid JSON format")
+	assert.Contains(t, err.Error(), "fail to call txFileRepo.ReadFileSlice()")
 	assert.Empty(t, output.TxID)
 }
 
-func TestSendTransactionUseCase_Execute_IncompleteTransaction(t *testing.T) {
+func TestSendTransactionUseCase_Execute_InvalidLineFormat(t *testing.T) {
 	t.Parallel()
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
-	signedBlob := testSignedBlob1
-
-	txFile := &dtoxrp.XRPTransactionFile{
-		Version:   "1.0.0",
-		Chain:     "XRP",
-		Network:   "testnet",
-		CreatedAt: "2024-02-14T00:00:00Z",
-		Transactions: []dtoxrp.XRPTransactionEntry{
-			{
-				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
-				SenderAccount:      "rSenderAddress123",
-				SenderAccountType:  "client",
-				SignatureCount:     1,
-				RequiredSignatures: 2, // Incomplete: 1/2 signatures
-				SignedBlob:         &signedBlob,
-				IsComplete:         false, // Not complete
-			},
-		},
-	}
-
-	// Setup mocks
-	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
+	// Setup mocks: file contains a line with wrong format (missing txBlob field)
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
-		Return(txFile, nil)
+	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
+		Return([]string{"uuid-only-no-blob"}, nil)
 
 	input := watchusecase.SendTransactionInput{
-		FilePath: "signed.json",
+		FilePath: "signed.csv",
 	}
 
 	output, err := useCase.Execute(context.Background(), input)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "transaction is incomplete")
-	assert.Contains(t, err.Error(), "requires 2 signatures but has 1")
-	assert.Empty(t, output.TxID)
-}
-
-func TestSendTransactionUseCase_Execute_NullSignedBlob(t *testing.T) {
-	t.Parallel()
-	deps := newSendTestDependencies(t)
-	useCase := createSendUseCase(deps)
-
-	txFile := &dtoxrp.XRPTransactionFile{
-		Version:   "1.0.0",
-		Chain:     "XRP",
-		Network:   "testnet",
-		CreatedAt: "2024-02-14T00:00:00Z",
-		Transactions: []dtoxrp.XRPTransactionEntry{
-			{
-				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
-				SenderAccount:      "rSenderAddress123",
-				SenderAccountType:  "client",
-				SignatureCount:     1,
-				RequiredSignatures: 1,
-				SignedBlob:         nil, // Null signed blob
-				IsComplete:         true,
-			},
-		},
-	}
-
-	// Setup mocks
-	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
-		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
-		Return(txFile, nil)
-
-	input := watchusecase.SendTransactionInput{
-		FilePath: "signed.json",
-	}
-
-	output, err := useCase.Execute(context.Background(), input)
-
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "signedBlob is null for transaction")
+	assert.Contains(t, err.Error(), "invalid signed tx line format")
 	assert.Empty(t, output.TxID)
 }
 
@@ -192,39 +129,42 @@ func TestSendTransactionUseCase_Execute_EmptySignedBlob(t *testing.T) {
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
-	emptyBlob := ""
-	txFile := &dtoxrp.XRPTransactionFile{
-		Version:   "1.0.0",
-		Chain:     "XRP",
-		Network:   "testnet",
-		CreatedAt: "2024-02-14T00:00:00Z",
-		Transactions: []dtoxrp.XRPTransactionEntry{
-			{
-				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
-				SenderAccount:      "rSenderAddress123",
-				SenderAccountType:  "client",
-				SignatureCount:     1,
-				RequiredSignatures: 1,
-				SignedBlob:         &emptyBlob, // Empty signed blob
-				IsComplete:         true,
-			},
-		},
-	}
-
-	// Setup mocks
-	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
+	// Setup mocks: file contains a line with empty blob (third field empty)
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
-		Return(txFile, nil)
+	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
+		Return([]string{"uuid-1,txhash-1,"}, nil)
 
 	input := watchusecase.SendTransactionInput{
-		FilePath: "signed.json",
+		FilePath: "signed.csv",
 	}
 
 	output, err := useCase.Execute(context.Background(), input)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "signedBlob is empty for transaction")
+	assert.Contains(t, err.Error(), "invalid signed tx line format")
+	assert.Empty(t, output.TxID)
+}
+
+func TestSendTransactionUseCase_Execute_EmptyFile(t *testing.T) {
+	t.Parallel()
+	deps := newSendTestDependencies(t)
+	useCase := createSendUseCase(deps)
+
+	// Setup mocks: ReadFileSlice returns an empty slice
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
+		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 0, nil)
+	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
+		Return([]string{}, nil)
+
+	input := watchusecase.SendTransactionInput{
+		FilePath: "signed.csv",
+	}
+
+	output, err := useCase.Execute(context.Background(), input)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no signed transactions found in file")
 	assert.Empty(t, output.TxID)
 }
 
@@ -233,36 +173,16 @@ func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
-	signedBlob := testSignedBlob1
-
-	txFile := &dtoxrp.XRPTransactionFile{
-		Version:   "1.0.0",
-		Chain:     "XRP",
-		Network:   "testnet",
-		CreatedAt: "2024-02-14T00:00:00Z",
-		Transactions: []dtoxrp.XRPTransactionEntry{
-			{
-				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
-				SenderAccount:      "rSenderAddress123",
-				SenderAccountType:  "client",
-				SignatureCount:     1,
-				RequiredSignatures: 1,
-				SignedBlob:         &signedBlob,
-				IsComplete:         true,
-			},
-		},
-	}
-
 	// Setup mocks
-	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
-		Return(txFile, nil)
-	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob).
+	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
+		Return([]string{"01234567-89ab-cdef-0123-456789abcdef,txhash," + testSignedBlob1}, nil)
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob1).
 		Return((*xrpclient.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
 
 	input := watchusecase.SendTransactionInput{
-		FilePath: "signed.json",
+		FilePath: "signed.csv",
 	}
 
 	output, err := useCase.Execute(context.Background(), input)
@@ -277,31 +197,14 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
-	signedBlob := testSignedBlob1
+	uuid := "01234567-89ab-cdef-0123-456789abcdef"
 	txHash := "1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF"
-
-	txFile := &dtoxrp.XRPTransactionFile{
-		Version:   "1.0.0",
-		Chain:     "XRP",
-		Network:   "testnet",
-		CreatedAt: "2024-02-14T00:00:00Z",
-		Transactions: []dtoxrp.XRPTransactionEntry{
-			{
-				UUID:               "01234567-89ab-cdef-0123-456789abcdef",
-				SenderAccount:      "rSenderAddress123",
-				SenderAccountType:  "client",
-				SignatureCount:     1,
-				RequiredSignatures: 1,
-				SignedBlob:         &signedBlob,
-				IsComplete:         true,
-			},
-		},
-	}
+	csvLine := uuid + ",txhash," + testSignedBlob1
 
 	sentTx := &xrpclient.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
-		TxBlob:        signedBlob,
+		TxBlob:        testSignedBlob1,
 		TxJSON: xrpclient.TxInput{
 			Hash:               txHash,
 			LastLedgerSequence: 12345,
@@ -315,26 +218,26 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
-	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
-		Return(txFile, nil)
-	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob).
+	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
+		Return([]string{csvLine}, nil)
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob1).
 		Return(sentTx, uint64(12340), nil)
 	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12345)).
 		Return(uint64(12345), nil)
 	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash, uint64(12340)).
 		Return(txInfo, nil)
 	deps.txDetailRepo.EXPECT().UpdateAfterTxSent(
-		"01234567-89ab-cdef-0123-456789abcdef",
+		uuid,
 		domainTx.TxTypeSent,
 		txHash,
-		signedBlob,
+		testSignedBlob1,
 		uint64(12340),
 	).Return(int64(1), nil)
 
 	input := watchusecase.SendTransactionInput{
-		FilePath: "signed.json",
+		FilePath: "signed.csv",
 	}
 
 	output, err := useCase.Execute(context.Background(), input)
@@ -348,42 +251,15 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 	deps := newSendTestDependencies(t)
 	useCase := createSendUseCase(deps)
 
-	signedBlob1 := testSignedBlob1
-	signedBlob2 := testSignedBlob2
 	txHash1 := "HASH1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890AB"
 	txHash2 := "HASH2234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890AB"
-
-	txFile := &dtoxrp.XRPTransactionFile{
-		Version:   "1.0.0",
-		Chain:     "XRP",
-		Network:   "testnet",
-		CreatedAt: "2024-02-14T00:00:00Z",
-		Transactions: []dtoxrp.XRPTransactionEntry{
-			{
-				UUID:               "uuid-1",
-				SenderAccount:      "rSenderAddress1",
-				SenderAccountType:  "client",
-				SignatureCount:     1,
-				RequiredSignatures: 1,
-				SignedBlob:         &signedBlob1,
-				IsComplete:         true,
-			},
-			{
-				UUID:               "uuid-2",
-				SenderAccount:      "rSenderAddress2",
-				SenderAccountType:  "client",
-				SignatureCount:     1,
-				RequiredSignatures: 1,
-				SignedBlob:         &signedBlob2,
-				IsComplete:         true,
-			},
-		},
-	}
+	csvLine1 := "uuid-1,txhash1," + testSignedBlob1
+	csvLine2 := "uuid-2,txhash2," + testSignedBlob2
 
 	sentTx1 := &xrpclient.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
-		TxBlob:        signedBlob1,
+		TxBlob:        testSignedBlob1,
 		TxJSON: xrpclient.TxInput{
 			Hash:               txHash1,
 			LastLedgerSequence: 12345,
@@ -393,7 +269,7 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 	sentTx2 := &xrpclient.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
-		TxBlob:        signedBlob2,
+		TxBlob:        testSignedBlob2,
 		TxJSON: xrpclient.TxInput{
 			Hash:               txHash2,
 			LastLedgerSequence: 12346,
@@ -408,33 +284,35 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 	}
 
 	// Setup mocks
-	deps.txFileRepo.EXPECT().ValidateFilePath("signed.json", domainTx.TxTypeSigned).
+	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 2, nil)
-	deps.txFileRepo.EXPECT().ReadXRPJSONFile("signed.json").
-		Return(txFile, nil)
+	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
+		Return([]string{csvLine1, csvLine2}, nil)
 
 	// Transaction 1
-	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob1).
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob1).
 		Return(sentTx1, uint64(12340), nil)
 	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12345)).
 		Return(uint64(12345), nil)
 	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash1, uint64(12340)).
 		Return(txInfo1, nil)
-	deps.txDetailRepo.EXPECT().UpdateAfterTxSent("uuid-1", domainTx.TxTypeSent, txHash1, signedBlob1, uint64(12340)).
+	deps.txDetailRepo.EXPECT().
+		UpdateAfterTxSent("uuid-1", domainTx.TxTypeSent, txHash1, testSignedBlob1, uint64(12340)).
 		Return(int64(1), nil)
 
 	// Transaction 2
-	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, signedBlob2).
+	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob2).
 		Return(sentTx2, uint64(12341), nil)
 	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12346)).
 		Return(uint64(12346), nil)
 	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash2, uint64(12341)).
 		Return(txInfo2, nil)
-	deps.txDetailRepo.EXPECT().UpdateAfterTxSent("uuid-2", domainTx.TxTypeSent, txHash2, signedBlob2, uint64(12341)).
+	deps.txDetailRepo.EXPECT().
+		UpdateAfterTxSent("uuid-2", domainTx.TxTypeSent, txHash2, testSignedBlob2, uint64(12341)).
 		Return(int64(1), nil)
 
 	input := watchusecase.SendTransactionInput{
-		FilePath: "signed.json",
+		FilePath: "signed.csv",
 	}
 
 	output, err := useCase.Execute(context.Background(), input)

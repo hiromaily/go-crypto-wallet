@@ -137,13 +137,29 @@ func (s *Signer) deriveKeyPair(seed string) (*XRPKeyPair, error) {
 	return keyGen.GenerateFromEntropy(seedBytes)
 }
 
-// decodeSeed decodes an XRP seed from s... format to raw bytes.
+// decodeSeed decodes an XRP seed from Base58Check format to raw seed bytes.
+// Handles both secp256k1 seeds (prefix [0x21], "s..." in Base58) and
+// ed25519 seeds (prefix [0x01, 0xe1, 0x4b], "sEd..." in Base58).
 func decodeSeed(seed string) ([]byte, error) {
-	hash, err := NewRippleHashCheck(seed, RippleFamilySeed)
+	decoded, err := Base58Decode(seed, ALPHABET)
 	if err != nil {
-		return nil, fmt.Errorf("invalid seed format: %w", err)
+		return nil, fmt.Errorf("invalid seed encoding: %w", err)
 	}
-	return hash.Payload(), nil
+	// Strip 4-byte checksum (Base58Decode returns bytes including checksum)
+	if len(decoded) < 4 {
+		return nil, errors.New("decoded seed too short to contain checksum")
+	}
+	decoded = decoded[:len(decoded)-4]
+
+	// Check ed25519 prefix [0x01, 0xe1, 0x4b]
+	if len(decoded) >= 3 && decoded[0] == 0x01 && decoded[1] == 0xe1 && decoded[2] == 0x4b {
+		return decoded[3:], nil
+	}
+	// Check secp256k1 prefix [0x21]
+	if len(decoded) >= 1 && decoded[0] == byte(RippleFamilySeed) {
+		return decoded[1:], nil
+	}
+	return nil, errors.New("invalid seed format: unrecognized prefix")
 }
 
 // sign signs a hash using the appropriate algorithm.
@@ -285,25 +301,27 @@ func DetectAlgorithm(publicKeyHex string) (KeyAlgorithm, error) {
 	return KeyAlgorithm(-1), errors.New("unable to determine algorithm from public key")
 }
 
-// DetectAlgorithmFromSeed attempts to detect the algorithm from a seed.
-// Note: This is not always deterministic as the same seed can be used with either algorithm.
-// When in doubt, use the known algorithm or default to Ed25519 (recommended for new accounts).
+// DetectAlgorithmFromSeed detects the key algorithm from the seed encoding.
+// Ed25519 seeds use prefix [0x01, 0xe1, 0x4b] ("sEd..." in Base58).
+// Secp256k1 seeds use prefix [0x21] ("s..." in Base58).
+// Hex seeds default to Ed25519 as recommended for new accounts.
 func DetectAlgorithmFromSeed(seed string) (KeyAlgorithm, error) {
-	// Try to decode the seed first
 	if strings.HasPrefix(seed, "s") {
-		_, err := decodeSeed(seed)
+		decoded, err := Base58Decode(seed, ALPHABET)
 		if err != nil {
 			return KeyAlgorithm(-1), fmt.Errorf("invalid seed format: %w", err)
 		}
-	} else {
-		_, err := hex.DecodeString(seed)
-		if err != nil {
-			return KeyAlgorithm(-1), fmt.Errorf("invalid seed hex: %w", err)
+		decoded = decoded[:len(decoded)-4] // strip checksum
+		if len(decoded) >= 3 && decoded[0] == 0x01 && decoded[1] == 0xe1 && decoded[2] == 0x4b {
+			return AlgorithmEd25519, nil
 		}
+		return AlgorithmSecp256k1, nil
 	}
-
-	// Seeds don't encode algorithm information
-	// Default to Ed25519 as recommended for new accounts
+	_, err := hex.DecodeString(seed)
+	if err != nil {
+		return KeyAlgorithm(-1), fmt.Errorf("invalid seed hex: %w", err)
+	}
+	// Default to Ed25519 for hex seeds (recommended for new accounts)
 	return AlgorithmEd25519, nil
 }
 

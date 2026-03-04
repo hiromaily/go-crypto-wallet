@@ -241,7 +241,7 @@ func (c *container) newXRPKeygener() wallets.Keygener {
 		c.pkgContainer.NewDatabaseClient(),
 		c.walletType,
 		c.newKeygenGenerateSeedUseCase(),
-		c.newKeygenGenerateHDWalletUseCase(),
+		c.newXRPKeygenGenerateHDWalletUseCase(),
 		c.newXRPKeygenGenerateKeyUseCase(),
 		c.newKeygenExportAddressUseCase(),
 		c.newXRPKeygenSignTransactionUseCase(),
@@ -430,14 +430,16 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 			panic(err)
 		}
 
-		// admin client
-		c.wsXrpAdmin, err = websocket.New(context.Background(), c.conf.Ripple.WebsocketAdminURL)
-		if err != nil {
-			panic(
-				fmt.Errorf(
-					"fail to call websocket.New() for admin API: %s: %w",
-					c.conf.Ripple.WebsocketAdminURL, err),
-			)
+		// admin client (optional — keygen/sign wallets with offline_keygen=true leave this empty)
+		if c.conf.Ripple.WebsocketAdminURL != "" {
+			c.wsXrpAdmin, err = websocket.New(context.Background(), c.conf.Ripple.WebsocketAdminURL)
+			if err != nil {
+				panic(
+					fmt.Errorf(
+						"fail to call websocket.New() for admin API: %s: %w",
+						c.conf.Ripple.WebsocketAdminURL, err),
+				)
+			}
 		}
 	}
 	return c.wsXrpPublic, c.wsXrpAdmin
@@ -852,6 +854,25 @@ func (c *container) newETHHdWalletRepo() repocold.HDWalletRepo {
 	}
 }
 
+func (c *container) newXRPHdWalletRepo() repocold.HDWalletRepo {
+	keyAlgoStr := c.conf.Ripple.KeyAlgorithm
+	if keyAlgoStr == "" {
+		keyAlgoStr = "ed25519"
+	}
+	algorithm, err := xrpkg.ParseKeyAlgorithm(keyAlgoStr)
+	if err != nil {
+		panic(fmt.Sprintf("invalid XRP key algorithm in config: %v", err))
+	}
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewXRPHDWalletRepo(c.newXRPAccountKeyRepo(), algorithm)
+	case "postgres":
+		return coldpostgres.NewXRPHDWalletRepo(c.newXRPAccountKeyRepo(), algorithm)
+	default:
+		return coldsqlite.NewXRPHDWalletRepo(c.newXRPAccountKeyRepo(), algorithm)
+	}
+}
+
 func (c *container) newKeyGenerator() portsWallet.Generator {
 	var chainConf *chaincfg.Params
 	switch {
@@ -884,12 +905,16 @@ func (c *container) getKeyType() domainKey.KeyType {
 	//   - bech32       -> bip84
 	//   - taproot      -> bip86
 	//   - eth-address  -> bip44 (ETH uses BIP44 derivation, m/44'/60'/0'/0/x)
+	//   - xrp-address  -> bip44 (XRP uses BIP44 derivation, m/44'/144'/0'/0/x)
 	//
-	// ETH config files do not set address_type (ETH has only one address format).
-	// When AddressType is empty and the coin is ETH, default to BIP44.
+	// ETH and XRP config files do not set address_type (each has only one address format).
+	// When AddressType is empty, default to the coin-specific type.
 	addrType := c.conf.AddressType
 	if addrType == "" && domainCoin.IsETHGroup(c.conf.CoinTypeCode) {
 		addrType = domainAddress.AddrTypeETH
+	}
+	if addrType == "" && c.conf.CoinTypeCode == domainCoin.XRP {
+		addrType = domainAddress.AddrTypeXRP
 	}
 	keyType, err := addrType.ToKeyType()
 	if err != nil {
@@ -1226,6 +1251,9 @@ func (c *container) NewXRPWatchSubmitMultisigTxUseCase() watchusecase.SubmitMult
 func (c *container) NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
 	if domainCoin.IsETHGroup(c.conf.CoinTypeCode) {
 		return c.newETHKeygenGenerateHDWalletUseCase()
+	}
+	if c.conf.CoinTypeCode == domainCoin.XRP {
+		return c.newXRPKeygenGenerateHDWalletUseCase()
 	}
 	return c.newKeygenGenerateHDWalletUseCase()
 }
@@ -1652,6 +1680,14 @@ func (c *container) newETHKeygenGenerateHDWalletUseCase() keygenusecase.Generate
 	)
 }
 
+func (c *container) newXRPKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
+	return keygenusecaseshared.NewGenerateHDWalletUseCase(
+		c.newXRPHdWalletRepo(),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
+	)
+}
+
 func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
 	return keygenusecaseshared.NewGenerateSeedUseCase(
 		c.newSeedRepo(),
@@ -1659,6 +1695,13 @@ func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUse
 }
 
 func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
+	if c.conf.CoinTypeCode == domainCoin.XRP {
+		return keygenusecasexrp.NewExportAddressUseCase(
+			c.newXRPAccountKeyRepo(),
+			c.newAddressFileRepo(),
+			c.conf.CoinTypeCode,
+		)
+	}
 	return keygenusecasebtc.NewExportAddressUseCase(
 		c.newAccountKeyRepo(),
 		c.newAddressFileRepo(),

@@ -21,6 +21,7 @@ const (
 	AddrTypeTaproot     AddrType = "taproot"
 	AddrTypeBCHCashAddr AddrType = "bch-cashaddr"
 	AddrTypeETH         AddrType = "eth-address"
+	AddrTypeXRP         AddrType = "xrp-address"
 )
 
 // String converter
@@ -119,6 +120,9 @@ func (a AddrType) ToKeyType() (key.KeyType, error) {
 		return key.KeyTypeBIP44, nil
 	case AddrTypeETH:
 		// Ethereum uses BIP44 derivation path
+		return key.KeyTypeBIP44, nil
+	case AddrTypeXRP:
+		// XRP uses BIP44 derivation path
 		return key.KeyTypeBIP44, nil
 	default:
 		return "", fmt.Errorf("unsupported address type for key derivation: %s", a)

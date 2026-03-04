@@ -8,10 +8,11 @@ services:
     image: rippleci/rippled:3.1
     command: ["standalone"]
 
-    # Expose WS/JSON-RPC port to the host if your app/CLI runs outside Docker.
-    # If your app/CLI also runs as a compose service, you can skip ports and use service DNS "rippled".
+    # Expose WebSocket admin port (6006) to the host.
+    # Port 6006 = ws:// WebSocket admin (used by the wallet CLI for direct connection)
+    # Port 51233 = peer protocol (not needed for wallet CLI)
     ports:
-      - "51233:51233"
+      - "6006:6006"
 
     # Healthcheck ensures CI waits until rippled is ready.
     healthcheck:
@@ -80,13 +81,15 @@ docker compose exec -T rippled rippled --silent wallet_propose
 
 Set the endpoint to the mapped port:
 
+Set `WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL` to the mapped port:
+
 * If your Go CLI runs on the host:
 
-  * `ws://localhost:51233`
+  * `ws://localhost:6006`
 
 * If your Go CLI runs as another Compose service:
 
-  * `ws://rippled:51233` (service-to-service DNS)
+  * `ws://rippled:6006` (service-to-service DNS)
 
 ---
 

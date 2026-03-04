@@ -2,7 +2,6 @@ package xrp
 
 import (
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 )
 
@@ -84,20 +83,6 @@ func ToInfraXRPKeyType(dto dtoxrp.XRPKeyType) XRPKeyType {
 // ToDTOXRPKeyType converts infrastructure XRPKeyType to DTO XRPKeyType.
 func ToDTOXRPKeyType(infra XRPKeyType) dtoxrp.XRPKeyType {
 	return dtoxrp.XRPKeyType(infra)
-}
-
-// fromProtoAccountInfo converts protogen ResponseGetAccountInfo to pkg client AccountInfo type.
-func fromProtoAccountInfo(infra *protogen.ResponseGetAccountInfo) *xrpclient.AccountInfo {
-	if infra == nil {
-		return nil
-	}
-	return &xrpclient.AccountInfo{
-		Sequence:                       infra.GetSequence(),
-		XrpBalance:                     infra.GetXrpBalance(),
-		OwnerCount:                     infra.GetOwnerCount(),
-		PreviousAffectingTransactionID: infra.GetPreviousAffectingTransactionID(),
-		PreviousAffectingTransactionLedgerVersion: infra.GetPreviousAffectingTransactionLedgerVersion(),
-	}
 }
 
 // ToDTOResponseGenerateAddress converts infrastructure ResponseGenerateAddress to DTO.

@@ -89,10 +89,10 @@ Devnet must be treated as **ephemeral infrastructure**.
 
 Devnet must be accessed via WebSocket endpoint.
 
-The endpoint must be configurable:
+The endpoint must be configurable via:
 
 ```
-XRPL_ENDPOINT
+WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL
 ```
 
 Example (placeholder):

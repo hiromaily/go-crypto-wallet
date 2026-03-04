@@ -60,6 +60,21 @@ func NewFamilySeed(b []byte) (Hash, error) {
 	return newHash(b, RippleFamilySeed)
 }
 
+// EncodeEd25519Seed encodes 16 seed bytes as an ed25519 family seed string
+// using the XRPL ed25519 prefix [0x01, 0xe1, 0x4b].
+//
+// This format is recognized by Peersyst/xrpl-go's wallet.FromSeed() and
+// addresscodec.DecodeSeed() as an ed25519 seed, enabling correct keypair derivation.
+// The resulting string starts with "sEd" in XRPL's Base58 alphabet.
+func EncodeEd25519Seed(b []byte) (string, error) {
+	if len(b) != 16 {
+		return "", fmt.Errorf("ed25519 seed must be exactly 16 bytes, got %d", len(b))
+	}
+	// Prefix [0x01, 0xe1, 0x4b] followed by 16 seed bytes, then Base58Check encoded
+	payload := append([]byte{0x01, 0xe1, 0x4b}, b...)
+	return Base58Encode(payload, ALPHABET), nil
+}
+
 func AccountID(key Key, sequence *uint32) (Hash, error) {
 	return NewAccountID(key.Id(sequence))
 }

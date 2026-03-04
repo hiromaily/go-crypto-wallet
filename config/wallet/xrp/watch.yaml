@@ -13,9 +13,11 @@
 # =============================================================================
 ripple:
   # https://xrpl.org/get-started-with-the-rippled-api.html
-  # websocket_public_url = "wss://127.0.0.1:6005"
-  websocket_public_url: ""
-  # websocket_admin_url = "ws://127.0.0.1:6006"
+  # For local development (standalone rippled): ws://127.0.0.1:6006
+  # For testnet: see https://xrpl.org/public-servers.html
+  websocket_public_url: "ws://127.0.0.1:6006"
+  # Admin WebSocket (required for WaitValidation in standalone mode)
+  websocket_admin_url: "ws://127.0.0.1:6006"
   network_type: "testnet" # mainnet, testnet, devnet
   api:
     url: "127.0.0.1:50051"

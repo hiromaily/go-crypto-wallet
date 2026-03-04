@@ -329,10 +329,10 @@ func TestDifferentAlgorithms_ProduceDifferentAddresses(t *testing.T) {
 		t.Fatalf("ed25519 GenerateFromEntropy() error = %v", err)
 	}
 
-	// Seeds should be identical since they're both derived from the same entropy
-	// using NewFamilySeed(seedBytes) which doesn't depend on the algorithm
-	if secpKeyPair.Seed != edKeyPair.Seed {
-		t.Errorf("Seeds should match for same entropy: secp=%s, ed=%s",
+	// Seeds should differ: secp256k1 uses prefix [0x21] ("s..." prefix),
+	// while ed25519 uses prefix [0x01, 0xe1, 0x4b] ("sEd..." prefix).
+	if secpKeyPair.Seed == edKeyPair.Seed {
+		t.Errorf("Seeds should differ for different algorithms: secp=%s, ed=%s",
 			secpKeyPair.Seed, edKeyPair.Seed)
 	}
 

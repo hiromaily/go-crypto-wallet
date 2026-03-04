@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -12,8 +13,10 @@ import (
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
+	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 //-----------------------------------------------------------------------------
@@ -212,6 +215,90 @@ func (r *ETHHDWalletRepo) Insert(
 	}
 	if err := r.ethAccountKeyRepo.InsertBulk(items); err != nil {
 		return fmt.Errorf("failed to insert ETH account keys: %w", err)
+	}
+	return nil
+}
+
+//-----------------------------------------------------------------------------
+// XRPHDWalletRepo
+//-----------------------------------------------------------------------------
+
+// XRPHDWalletRepo implements repocold.HDWalletRepo for XRP using XRPAccountKeyRepositorier.
+// It derives full XRP key pairs from BIP44 private keys during the HD wallet generation phase,
+// storing the complete XRP key material in the xrp_account_key table.
+type XRPHDWalletRepo struct {
+	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
+	keyAlgorithm      xrpkg.KeyAlgorithm
+}
+
+// NewXRPHDWalletRepo creates a new XRPHDWalletRepo
+func NewXRPHDWalletRepo(
+	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,
+	keyAlgorithm xrpkg.KeyAlgorithm,
+) *XRPHDWalletRepo {
+	return &XRPHDWalletRepo{
+		xrpAccountKeyRepo: xrpAccountKeyRepo,
+		keyAlgorithm:      keyAlgorithm,
+	}
+}
+
+// GetMaxIndex returns the next available index for XRP account keys.
+func (r *XRPHDWalletRepo) GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error) {
+	keys, err := r.xrpAccountKeyRepo.GetAllAddrStatus(ctx, accountType, domainAddress.AddrStatusHDKeyGenerated)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get XRP account keys: %w", err)
+	}
+	return int64(len(keys)), nil
+}
+
+// Insert derives full XRP key pairs from BIP44 private keys and stores them in the database.
+// The WIF field of each WalletKey is expected to contain a 32-byte hex-encoded private key.
+func (r *XRPHDWalletRepo) Insert(
+	keys []domainKey.WalletKey,
+	_ string, // accountXpriv not used for XRP
+	idxFrom int64,
+	coinTypeCode domainCoin.CoinTypeCode,
+	accountType domainAccount.AccountType,
+	_ domainKey.KeyType, // keyType not used for XRP
+) error {
+	keyGen := xrpkg.NewKeyGenerator(r.keyAlgorithm)
+
+	items := make([]*domainXRP.XRPAccountKey, 0, len(keys))
+	for i, wk := range keys {
+		if wk.WIF == "" {
+			return fmt.Errorf("WIF field is empty for key at index %d", i)
+		}
+		// WIF contains a hex-encoded 32-byte private key from the BIP44 HD wallet generator.
+		privKeyBytes, err := hex.DecodeString(wk.WIF)
+		if err != nil {
+			return fmt.Errorf("failed to decode hex private key from WIF for key %d: %w", i, err)
+		}
+
+		keyPair, err := keyGen.DeriveKeyFromHDKey(privKeyBytes)
+		if err != nil {
+			return fmt.Errorf("failed to derive XRP key for index %d: %w", i, err)
+		}
+
+		xrpKey, err := domainXRP.NewXRPAccountKey(
+			coinTypeCode,
+			accountType,
+			keyPair.ClassicAddress,
+			domainXRP.ParseXRPKeyType(keyPair.Algorithm.String()),
+			keyPair.Seed,
+			keyPair.SeedHex,
+			keyPair.PublicKey,
+			keyPair.PublicKeyHex,
+			false,
+			idxFrom+int64(i),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to create XRP account key for index %d: %w", i, err)
+		}
+		items = append(items, xrpKey)
+	}
+
+	if err := r.xrpAccountKeyRepo.InsertBulk(context.Background(), items); err != nil {
+		return fmt.Errorf("failed to insert XRP account keys: %w", err)
 	}
 	return nil
 }
