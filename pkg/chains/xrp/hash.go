@@ -12,6 +12,20 @@ import (
 // Remaining bytes are the payload
 type hash []byte
 
+var hashTypes = [...]struct {
+	Description       string
+	Prefix            byte
+	Payload           int
+	MaximumCharacters int
+}{
+	RippleAccountID:      {"Short name for sending funds to an account.", 'r', 20, 35},
+	RippleNodePublic:     {"Validation public key for node.", 'n', 33, 53},
+	RippleNodePrivate:    {"Validation private key for node.", 'p', 32, 52},
+	RippleFamilySeed:     {"Family seed.", 's', 16, 29},
+	RippleAccountPrivate: {"Account private key.", 'p', 32, 52},
+	RippleAccountPublic:  {"Account public key.", 'a', 33, 53},
+}
+
 func NewRippleHash(s string) (Hash, error) {
 	// Special case which will deal short addresses
 	switch s {
