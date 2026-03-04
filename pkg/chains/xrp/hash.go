@@ -3,6 +3,8 @@ package xrp
 import (
 	"fmt"
 	"math/big"
+
+	addresscodec "github.com/Peersyst/xrpl-go/address-codec"
 )
 
 // First byte is the network
@@ -71,8 +73,7 @@ func EncodeEd25519Seed(b []byte) (string, error) {
 		return "", fmt.Errorf("ed25519 seed must be exactly 16 bytes, got %d", len(b))
 	}
 	// Prefix [0x01, 0xe1, 0x4b] followed by 16 seed bytes, then Base58Check encoded
-	payload := append([]byte{0x01, 0xe1, 0x4b}, b...)
-	return Base58Encode(payload, ALPHABET), nil
+	return addresscodec.Base58CheckEncode(b, 0x01, 0xe1, 0x4b), nil
 }
 
 func AccountID(key Key, sequence *uint32) (Hash, error) {
@@ -108,16 +109,15 @@ func newHash(b []byte, version HashVersion) (Hash, error) {
 }
 
 func newHashFromString(s string) (Hash, error) {
-	decoded, err := Base58Decode(s, ALPHABET)
+	decoded, err := addresscodec.Base58CheckDecode(s)
 	if err != nil {
 		return nil, err
 	}
-	return hash(decoded[:len(decoded)-4]), nil
+	return hash(decoded), nil
 }
 
 func (h hash) String() string {
-	b := append(hash{byte(h.Version())}, h.Payload()...)
-	return Base58Encode(b, ALPHABET)
+	return addresscodec.Base58CheckEncode(h.Payload(), byte(h.Version()))
 }
 
 func (h hash) Version() HashVersion {
