@@ -121,11 +121,11 @@ type TxOrderbookChange struct {
 }
 
 // PrepareTransaction builds an unsigned Payment transaction using WebSocket account_info.
-func (r *XRP) PrepareTransaction(
+func (w *WSClient) PrepareTransaction(
 	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoxrp.Instructions,
 ) (*dtoxrp.TxInput, string, error) {
 	// Get account info for sequence number and current ledger index
-	accInfo, err := xrprpc.AccountInfo(ctx, r.wsPublic, senderAccount)
+	accInfo, err := xrprpc.AccountInfo(ctx, w.public, senderAccount)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction(): %w", err)
 	}
@@ -268,8 +268,8 @@ func toXRPClientSentTx(local *SentTx) *xrpclient.SentTx {
 
 // SubmitTransaction submits a signed transaction blob via WebSocket.
 // - signedTx is the TxBlob returned by SignTransaction()
-func (r *XRP) SubmitTransaction(ctx context.Context, signedTx string) (*xrpclient.SentTx, uint64, error) {
-	res, err := xrprpc.Submit(ctx, r.wsPublic, signedTx)
+func (w *WSClient) SubmitTransaction(ctx context.Context, signedTx string) (*xrpclient.SentTx, uint64, error) {
+	res, err := xrprpc.Submit(ctx, w.public, signedTx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to call client.SubmitTransaction(): %w", err)
 	}
@@ -314,11 +314,11 @@ func (r *XRP) SubmitTransaction(ctx context.Context, signedTx string) (*xrpclien
 // WaitValidation waits until the ledger advances past targetLedgerVersion.
 // In standalone mode it calls ledger_accept via the admin WebSocket to advance the ledger.
 // In non-standalone environments the ledger advances naturally and this polls ledger_current.
-func (r *XRP) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error) {
+func (w *WSClient) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error) {
 	// Advance the ledger via the admin connection (standalone mode).
 	// Silently ignore errors — in production environments this command is unavailable.
-	if r.wsAdmin != nil {
-		if _, err := xrprpc.LedgerAccept(ctx, r.wsAdmin); err != nil {
+	if w.admin != nil {
+		if _, err := xrprpc.LedgerAccept(ctx, w.admin); err != nil {
 			logger.Warn("ledger_accept failed (non-critical; may not be standalone mode)", "error", err)
 		}
 	}
@@ -327,7 +327,7 @@ func (r *XRP) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (u
 	// In standalone mode each iteration calls ledger_accept to advance the ledger.
 	const maxRetries = 30
 	for range maxRetries {
-		res, err := xrprpc.LedgerCurrent(ctx, r.wsPublic)
+		res, err := xrprpc.LedgerCurrent(ctx, w.public)
 		if err != nil {
 			return 0, fmt.Errorf("fail to call ledger_current: %w", err)
 		}
@@ -340,8 +340,8 @@ func (r *XRP) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (u
 			return currentLedger, nil
 		}
 		// Advance the ledger in standalone mode and retry.
-		if r.wsAdmin != nil {
-			if _, err := xrprpc.LedgerAccept(ctx, r.wsAdmin); err != nil {
+		if w.admin != nil {
+			if _, err := xrprpc.LedgerAccept(ctx, w.admin); err != nil {
 				logger.Warn("failed to advance ledger", "error", err)
 			}
 		}
@@ -351,10 +351,10 @@ func (r *XRP) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (u
 }
 
 // GetTransaction retrieves a validated transaction by hash via WebSocket.
-func (r *XRP) GetTransaction(
+func (w *WSClient) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
 ) (*xrpclient.TxInfo, error) {
-	res, err := xrprpc.GetTx(ctx, r.wsPublic, txID, targetLedgerVersion)
+	res, err := xrprpc.GetTx(ctx, w.public, txID, targetLedgerVersion)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call client.GetTransaction(): %w", err)
 	}

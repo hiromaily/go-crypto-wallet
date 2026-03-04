@@ -14,12 +14,12 @@ import (
 const dropsPerXRP = 1_000_000
 
 // GetAccountInfo retrieves account information via WebSocket.
-func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*xrpclient.AccountInfo, error) {
+func (w *WSClient) GetAccountInfo(ctx context.Context, address string) (*xrpclient.AccountInfo, error) {
 	if address == "" {
 		return nil, errors.New("address is empty")
 	}
 
-	res, err := xrprpc.AccountInfo(ctx, r.wsPublic, address)
+	res, err := xrprpc.AccountInfo(ctx, w.public, address)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call accountClient.GetAccountInfo(): %w", err)
 	}

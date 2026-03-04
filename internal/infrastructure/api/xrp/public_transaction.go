@@ -84,7 +84,7 @@ type ResponseSign struct {
 }
 
 // Sign calls sign method
-func (r *XRP) Sign(ctx context.Context, txJSON *PublicTxType, secret string, offline bool) (*ResponseSign, error) {
+func (w *WSClient) Sign(ctx context.Context, txJSON *PublicTxType, secret string, offline bool) (*ResponseSign, error) {
 	req := Sign{
 		ID:      2,
 		Command: "sign",
@@ -93,7 +93,7 @@ func (r *XRP) Sign(ctx context.Context, txJSON *PublicTxType, secret string, off
 		Offline: offline,
 	}
 	var res ResponseSign
-	if err := r.wsPublic.Call(ctx, &req, &res); err != nil {
+	if err := w.public.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(sign): %w", err)
 	}
 	return &res, nil

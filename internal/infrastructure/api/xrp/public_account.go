@@ -11,10 +11,10 @@ import (
 // error: https://xrpl.org/error-formatting.html#universal-errors
 
 // AccountChannels calls account_channels method
-func (r *XRP) AccountChannels(
+func (w *WSClient) AccountChannels(
 	ctx context.Context, sender, receiver string,
 ) (*xrprpc.ResponseAccountChannels, error) {
-	res, err := xrprpc.AccountChannels(ctx, r.wsPublic, sender, receiver)
+	res, err := xrprpc.AccountChannels(ctx, w.public, sender, receiver)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.AccountChannels: %w", err)
 	}
@@ -22,8 +22,8 @@ func (r *XRP) AccountChannels(
 }
 
 // AccountInfo calls account_info method
-func (r *XRP) AccountInfo(ctx context.Context, address string) (*xrprpc.ResponseAccountInfo, error) {
-	res, err := xrprpc.AccountInfo(ctx, r.wsPublic, address)
+func (w *WSClient) AccountInfo(ctx context.Context, address string) (*xrprpc.ResponseAccountInfo, error) {
+	res, err := xrprpc.AccountInfo(ctx, w.public, address)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call xrprpc.AccountInfo: %w", err)
 	}
