@@ -53,6 +53,7 @@ import (
 	btcmusig2 "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/musig2"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/contract"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplclient"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 	pkgdi "github.com/hiromaily/go-crypto-wallet/pkg/di"
@@ -155,7 +156,7 @@ type container struct {
 	rpcEthClient *ethrpc.Client
 	wsXrpPublic  *websocket.WS
 	wsXrpAdmin   *websocket.WS
-	xrpAPI       *apixrpimpl.XRPAPI
+	xrpAPI       *xrplclient.XRPLClient
 	// keygen specific
 	multisig *domainAccount.MultisigConfig
 	// sign specific
@@ -548,9 +549,9 @@ func (c *container) newXRP() apixrp.XRPer {
 	return c.xrp
 }
 
-func (c *container) newXRPAPI() *apixrpimpl.XRPAPI {
+func (c *container) newXRPAPI() *xrplclient.XRPLClient {
 	if c.xrpAPI == nil {
-		c.xrpAPI = apixrpimpl.NewXRPAPI(c.pkgContainer.NewGRPCClient())
+		c.xrpAPI = xrplclient.NewXRPLClient(c.pkgContainer.NewGRPCClient())
 	}
 	return c.xrpAPI
 }

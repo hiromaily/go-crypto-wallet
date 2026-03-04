@@ -15,7 +15,7 @@ import (
 func (r *XRP) GenerateAddress(ctx context.Context) (*dtoxrp.ResponseGenerateAddress, error) {
 	req := &emptypb.Empty{}
 
-	res, err := r.API.addressClient.GenerateAddress(ctx, req)
+	res, err := r.API.AddressClient.GenerateAddress(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call addressClient.GenerateAddress(): %w", err)
 	}
@@ -34,7 +34,7 @@ func (r *XRP) GenerateAddress(ctx context.Context) (*dtoxrp.ResponseGenerateAddr
 func (r *XRP) GenerateXAddress(ctx context.Context) (*dtoxrp.ResponseGenerateXAddress, error) {
 	req := &emptypb.Empty{}
 
-	res, err := r.API.addressClient.GenerateXAddress(ctx, req)
+	res, err := r.API.AddressClient.GenerateXAddress(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call addressClient.GenerateXAddress(): %w", err)
 	}
@@ -53,7 +53,7 @@ func (r *XRP) IsValidAddress(ctx context.Context, addr string) (bool, error) {
 		Address: addr,
 	}.Build()
 
-	res, err := r.API.addressClient.IsValidAddress(ctx, req)
+	res, err := r.API.AddressClient.IsValidAddress(ctx, req)
 	if err != nil {
 		return false, fmt.Errorf("fail to call addressClient.IsValidAddress(): %w", err)
 	}

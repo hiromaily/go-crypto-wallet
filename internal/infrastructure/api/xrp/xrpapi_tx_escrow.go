@@ -108,7 +108,7 @@ func (r *XRP) PrepareEscrowCreateTransaction(
 		Instructions:    infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for EscrowCreate: %w", err)
 	}
@@ -161,7 +161,7 @@ func (r *XRP) PrepareEscrowFinishTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for EscrowFinish: %w", err)
 	}
@@ -209,7 +209,7 @@ func (r *XRP) PrepareEscrowCancelTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for EscrowCancel: %w", err)
 	}

@@ -42,7 +42,7 @@ func (r *XRP) PrepareSetRegularKeyTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for SetRegularKey: %w", err)
 	}
@@ -136,7 +136,7 @@ func (r *XRP) PrepareAccountSetTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for AccountSet: %w", err)
 	}
@@ -198,7 +198,7 @@ func (r *XRP) PrepareSignerListSetTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for SignerListSet: %w", err)
 	}
@@ -285,7 +285,7 @@ func (r *XRP) PrepareTrustSetTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for TrustSet: %w", err)
 	}
