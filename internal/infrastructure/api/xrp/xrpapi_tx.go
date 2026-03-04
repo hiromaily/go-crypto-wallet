@@ -11,9 +11,9 @@ import (
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	xrpsigner "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/signer"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
-	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -242,15 +242,15 @@ func (r *XRP) CombineTransaction(ctx context.Context, signedTxs []string) (strin
 }
 
 // toXRPClientSentTx converts local SentTx to xrpclient.SentTx.
-func toXRPClientSentTx(local *SentTx) *xrpclient.SentTx {
-	return &xrpclient.SentTx{
+func toXRPClientSentTx(local *SentTx) *xrplgo.SentTx {
+	return &xrplgo.SentTx{
 		ResultCode:          local.ResultCode,
 		ResultMessage:       local.ResultMessage,
 		EngineResult:        local.EngineResult,
 		EngineResultCode:    local.EngineResultCode,
 		EngineResultMessage: local.EngineResultMessage,
 		TxBlob:              local.TxBlob,
-		TxJSON: xrpclient.TxInput{
+		TxJSON: xrplgo.TxInput{
 			TransactionType:    local.TxJSON.TransactionType,
 			Account:            local.TxJSON.Account,
 			Amount:             local.TxJSON.Amount,
@@ -268,7 +268,7 @@ func toXRPClientSentTx(local *SentTx) *xrpclient.SentTx {
 
 // SubmitTransaction submits a signed transaction blob via WebSocket.
 // - signedTx is the TxBlob returned by SignTransaction()
-func (w *WSClient) SubmitTransaction(ctx context.Context, signedTx string) (*xrpclient.SentTx, uint64, error) {
+func (w *WSClient) SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error) {
 	res, err := xrprpc.Submit(ctx, w.public, signedTx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to call client.SubmitTransaction(): %w", err)
@@ -353,7 +353,7 @@ func (w *WSClient) WaitValidation(ctx context.Context, targetLedgerVersion uint6
 // GetTransaction retrieves a validated transaction by hash via WebSocket.
 func (w *WSClient) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
-) (*xrpclient.TxInfo, error) {
+) (*xrplgo.TxInfo, error) {
 	res, err := xrprpc.GetTx(ctx, w.public, txID, targetLedgerVersion)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call client.GetTransaction(): %w", err)
@@ -369,9 +369,9 @@ func (w *WSClient) GetTransaction(
 		"TransactionResult", res.Result.Meta.TransactionResult,
 	)
 
-	return &xrpclient.TxInfo{
+	return &xrplgo.TxInfo{
 		ID: res.Result.Hash,
-		Outcome: xrpclient.TxOutcome{
+		Outcome: xrplgo.TxOutcome{
 			Result:        res.Result.Meta.TransactionResult,
 			LedgerVersion: int(res.Result.LedgerIndex),
 		},

@@ -1,7 +1,7 @@
-// Package client provides a WebSocket client for XRPL node communication.
+// Package xrplgo provides a WebSocket client for XRPL node communication.
 // It wraps the xrpscan/xrpl-go library and implements the small interfaces
 // defined in internal/application/ports/api/xrp.
-package client
+package xrplgo
 
 // AccountInfo represents account information retrieved from the XRP Ledger.
 // Returned by Client.GetAccountInfo.

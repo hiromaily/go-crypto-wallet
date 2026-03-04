@@ -16,8 +16,8 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
 // XRPer defines the main interface for XRP blockchain operations.
@@ -55,7 +55,7 @@ type SignerEntryInput struct {
 // Implementations handle account management, address generation, and transaction operations.
 type XRPAPIProvider interface {
 	// XRPAccountAPI
-	GetAccountInfo(ctx context.Context, address string) (*xrpclient.AccountInfo, error)
+	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
 	// XRPAddressAPI
 	GenerateAddress(ctx context.Context) (*dtoxrp.ResponseGenerateAddress, error)
 	GenerateXAddress(ctx context.Context) (*dtoxrp.ResponseGenerateXAddress, error)
@@ -76,9 +76,9 @@ type XRPAPIProvider interface {
 		existingSignedBlob *string,
 	) (string, string, error)
 	CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error)
-	SubmitTransaction(ctx context.Context, signedTx string) (*xrpclient.SentTx, uint64, error)
+	SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error)
 	WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error)
-	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrpclient.TxInfo, error)
+	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error)
 
 	// Regular Key operations
 	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
