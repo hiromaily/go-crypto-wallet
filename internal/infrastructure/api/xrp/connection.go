@@ -11,6 +11,7 @@ import (
 )
 
 // NewXRPFromCoinType creates XRP instance according to coinType
+// FIXME: coinType doesn't care
 func NewXRPFromCoinType(
 	wsPublic *websocket.WS, wsAdmin *websocket.WS, api *xrplclient.XRPLClient, conf *config.Ripple,
 	coinTypeCode domainCoin.CoinTypeCode,
