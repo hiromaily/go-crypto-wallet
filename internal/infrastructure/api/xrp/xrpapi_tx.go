@@ -10,6 +10,7 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
@@ -133,7 +134,7 @@ func (r *XRP) PrepareTransaction(
 	}
 
 	sequence := uint64(accInfo.Result.AccountData.Sequence)
-	lastLedgerSequence := uint64(accInfo.Result.LedgerCurrentIndex) + MaxLedgerVersionOffset
+	lastLedgerSequence := uint64(accInfo.Result.LedgerCurrentIndex) + xrpkg.MaxLedgerVersionOffset
 	fee := "12" // minimum fee in drops
 
 	if instructions != nil {

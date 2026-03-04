@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/testutil"
+	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 type txTest struct {
@@ -39,7 +39,7 @@ func (txt *txTest) TestCreateRawTransaction() {
 				receiverAccount: "rpBzBQ6aWJhuatJCkQgfE3VJT67ukBQopf",
 				amount:          50,
 				instructions: &dtoxrp.Instructions{
-					MaxLedgerVersionOffset: apixrpimpl.MaxLedgerVersionOffset,
+					MaxLedgerVersionOffset: xrpkg.MaxLedgerVersionOffset,
 				},
 			},
 			want: want{},

@@ -9,6 +9,14 @@ const (
 	ROOT        = "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
 )
 
+// MinimumReserve is the minimum XRP reserve required for an account.
+// See: https://xrpl.org/reserves.html
+const MinimumReserve float64 = 20.0
+
+// MaxLedgerVersionOffset is the default offset added to the current ledger index for transaction expiry.
+// A value of 15 means approximately 60 seconds (each ledger takes ~4 seconds).
+const MaxLedgerVersionOffset uint64 = 15
+
 const (
 	ALPHABET = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
 
