@@ -80,15 +80,15 @@ func (u *exportAddressUseCase) Export(
 func (u *exportAddressUseCase) exportXRPAccountKey(
 	keys []*domainXRP.XRPAccountKey,
 	accountType domainAccount.AccountType,
-) (string, error) {
-	fileName := u.addrFileRepo.CreateFilePath(accountType)
+) (fileName string, err error) {
+	fileName = u.addrFileRepo.CreateFilePath(accountType)
 
 	f, err := os.Create(fileName) //nolint:gosec
 	if err != nil {
 		return "", fmt.Errorf("fail to call os.Create(%s): %w", fileName, err)
 	}
 	defer func() {
-		if cerr := f.Close(); cerr != nil {
+		if cerr := f.Close(); cerr != nil && err == nil {
 			err = fmt.Errorf("failed to close file: %w", cerr)
 		}
 	}()

@@ -27,7 +27,10 @@ func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*xrpclient.Ac
 		return nil, fmt.Errorf("fail to call accountClient.GetAccountInfo(): %s", res.Error)
 	}
 
-	info := fromWSAccountInfo(res)
+	info, err := fromWSAccountInfo(res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert account info: %w", err)
+	}
 	logger.Debug("response",
 		"Sequence", info.Sequence,
 		"XrpBalance", info.XrpBalance,
@@ -41,8 +44,11 @@ func (r *XRP) GetAccountInfo(ctx context.Context, address string) (*xrpclient.Ac
 
 // fromWSAccountInfo converts a WebSocket ResponseAccountInfo to the pkg client AccountInfo type.
 // The Balance field in the WebSocket response is in drops; this converts it to XRP.
-func fromWSAccountInfo(res *xrprpc.ResponseAccountInfo) *xrpclient.AccountInfo {
-	drops, _ := strconv.ParseInt(res.Result.AccountData.Balance, 10, 64)
+func fromWSAccountInfo(res *xrprpc.ResponseAccountInfo) (*xrpclient.AccountInfo, error) {
+	drops, err := strconv.ParseInt(res.Result.AccountData.Balance, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse account balance %q: %w", res.Result.AccountData.Balance, err)
+	}
 	xrpBalance := strconv.FormatFloat(float64(drops)/dropsPerXRP, 'f', -1, 64)
 	return &xrpclient.AccountInfo{
 		Sequence:                       uint64(res.Result.AccountData.Sequence),
@@ -50,5 +56,5 @@ func fromWSAccountInfo(res *xrprpc.ResponseAccountInfo) *xrpclient.AccountInfo {
 		OwnerCount:                     uint64(res.Result.AccountData.OwnerCount),
 		PreviousAffectingTransactionID: res.Result.AccountData.PreviousTxnID,
 		PreviousAffectingTransactionLedgerVersion: uint64(res.Result.AccountData.PreviousTxnLgrSeq),
-	}
+	}, nil
 }

@@ -30,8 +30,8 @@ services:
     # 51233: peer protocol (default standalone port)
     # 6006: WebSocket admin (ws://) — used by wallet CLI for direct WebSocket connection
     ports:
-      - "51233:51233"
-      - "6006:6006"
+      - "127.0.0.1:51233:51233"
+      - "127.0.0.1:6006:6006"
     networks:
       - xrp
     # Healthcheck ensures CI waits until rippled is ready.

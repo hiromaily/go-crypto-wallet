@@ -146,6 +146,9 @@ func decodeSeed(seed string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid seed encoding: %w", err)
 	}
 	// Strip 4-byte checksum (Base58Decode returns bytes including checksum)
+	if len(decoded) < 4 {
+		return nil, errors.New("decoded seed too short to contain checksum")
+	}
 	decoded = decoded[:len(decoded)-4]
 
 	// Check ed25519 prefix [0x01, 0xe1, 0x4b]

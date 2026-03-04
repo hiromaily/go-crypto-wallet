@@ -1502,6 +1502,7 @@ func (r *XRP) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (u
 				logger.Warn("failed to advance ledger", "error", err)
 			}
 		}
+		time.Sleep(1 * time.Second)
 	}
 	return 0, errors.New("timeout waiting for ledger validation")
 }

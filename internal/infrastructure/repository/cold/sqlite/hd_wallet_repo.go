@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -245,7 +246,7 @@ func NewXRPHDWalletRepo(
 func (r *XRPHDWalletRepo) GetMaxIndex(ctx context.Context, accountType domainAccount.AccountType) (int64, error) {
 	keys, err := r.xrpAccountKeyRepo.GetAllAddrStatus(ctx, accountType, domainAddress.AddrStatusHDKeyGenerated)
 	if err != nil {
-		return 0, nil // No existing keys, start from 0
+		return 0, fmt.Errorf("failed to get XRP account keys: %w", err)
 	}
 	return int64(len(keys)), nil
 }
@@ -267,12 +268,11 @@ func (r *XRPHDWalletRepo) Insert(
 		if wk.WIF == "" {
 			return fmt.Errorf("WIF field is empty for key at index %d", i)
 		}
-		// WIF contains a Base58-encoded XRP account private key (from XRPKeyStrategy)
-		xrpHash, err := xrpkg.NewRippleHash(wk.WIF)
+		// WIF contains a hex-encoded 32-byte private key from the BIP44 HD wallet generator.
+		privKeyBytes, err := hex.DecodeString(wk.WIF)
 		if err != nil {
-			return fmt.Errorf("failed to decode XRP private key from WIF for key %d: %w", i, err)
+			return fmt.Errorf("failed to decode hex private key from WIF for key %d: %w", i, err)
 		}
-		privKeyBytes := xrpHash.Payload() // raw 32-byte private key
 
 		keyPair, err := keyGen.DeriveKeyFromHDKey(privKeyBytes)
 		if err != nil {
