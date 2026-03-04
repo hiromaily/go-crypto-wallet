@@ -211,10 +211,6 @@ func TestETHCreateTransactionUseCase_Execute_DepositEIP1559Path(t *testing.T) {
 		GetOneUnAllocated(domainAccount.AccountTypeDeposit).
 		Return(depositAddr, nil)
 
-	// EIP-1559 path: SupportsEIP1559 returns true → CreateRawTransactionEIP1559 is called
-	deps.ethClient.EXPECT().
-		SupportsEIP1559(context.Background()).
-		Return(true)
 	deps.ethClient.EXPECT().
 		CreateRawTransactionEIP1559(
 			context.Background(), testETHFromAddr, testETHToAddr, uint64(0), 0,
@@ -263,86 +259,6 @@ func TestETHCreateTransactionUseCase_Execute_DepositEIP1559Path(t *testing.T) {
 			MaxFeePerGas:         "20000000000",
 			MaxPriorityFeePerGas: "2000000000",
 			RawTxHex:             testETHRawTx,
-		}).
-		Return(testETHTxPath, nil)
-
-	output, err := useCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
-		ActionType: string(domainTx.ActionTypeDeposit),
-	})
-
-	require.NoError(t, err)
-	assert.Equal(t, testETHTxPath, output.FileName)
-}
-
-func TestETHCreateTransactionUseCase_Execute_DepositLegacyPath(t *testing.T) {
-	t.Parallel()
-	t.Skip("Skipping until DB transaction is mocked - requires comprehensive DB mock setup")
-
-	deps := newEthCreateTxTestDeps(t)
-	useCase := newEthCreateTxUseCase(deps)
-
-	addrs := []*domainAddress.Address{
-		testETHAddress(testETHFromAddr, domainAccount.AccountTypeClient),
-	}
-	depositAddr := testETHAddress(testETHToAddr, domainAccount.AccountTypeDeposit)
-
-	deps.addrRepo.EXPECT().
-		GetAll(domainAccount.AccountTypeClient).
-		Return(addrs, nil)
-	deps.ethClient.EXPECT().
-		GetBalance(context.Background(), testETHFromAddr, domainETH.QuantityTagLatest).
-		Return(new(big.Int).SetUint64(1_000_000_000_000_000_000), nil) // 1 ETH
-	deps.addrRepo.EXPECT().
-		GetOneUnAllocated(domainAccount.AccountTypeDeposit).
-		Return(depositAddr, nil)
-
-	// Legacy path: SupportsEIP1559 returns false → CreateRawTransaction is called
-	deps.ethClient.EXPECT().
-		SupportsEIP1559(context.Background()).
-		Return(false)
-	deps.ethClient.EXPECT().
-		CreateRawTransaction(
-			context.Background(), testETHFromAddr, testETHToAddr, uint64(0), 0,
-		).
-		Return(
-			&domainETH.RawTx{
-				UUID:  "test-uuid",
-				From:  testETHFromAddr,
-				To:    testETHToAddr,
-				Value: *new(big.Int).SetUint64(999_000_000_000_000_000),
-				Nonce: 0,
-				TxHex: testETHRawTx,
-			},
-			&apieth.TxCreateParams{
-				UUID:        "test-uuid",
-				FromAddress: testETHFromAddr,
-				ToAddress:   testETHToAddr,
-				Amount:      999_000_000_000_000_000,
-				Fee:         1_000_000_000_000_000,
-				GasLimit:    21000,
-				Nonce:       0,
-				EthTxType:   0,
-				GasPrice:    20_000_000_000,
-			},
-			nil,
-		)
-
-	// txFileRepo expects WriteETHJSONFile with legacy data
-	deps.txFileRepo.EXPECT().
-		CreateFilePath(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, int64(1), 0).
-		Return(testETHTxPath)
-	deps.txFileRepo.EXPECT().
-		WriteETHJSONFile(testETHTxPath, &dtoeth.ETHTransactionFile{
-			Version:   1,
-			TxType:    string(domainTx.TxTypeUnsigned),
-			EthTxType: 0,
-			Nonce:     0,
-			From:      testETHFromAddr,
-			To:        testETHToAddr,
-			Value:     "999000000000000000",
-			Gas:       21000,
-			GasPrice:  "20000000000",
-			RawTxHex:  testETHRawTx,
 		}).
 		Return(testETHTxPath, nil)
 

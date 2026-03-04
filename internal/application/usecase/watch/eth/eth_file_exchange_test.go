@@ -6,8 +6,7 @@ package eth_test
 // hand off data through JSON transaction files. All dependencies are mocked — no
 // Ethereum node or database is required. The test exercises:
 //
-//   - EIP-1559 path: SupportsEIP1559 returns true → DynamicFeeTx file produced
-//   - Legacy fallback: SupportsEIP1559 returns false → LegacyTx file produced
+//   - EIP-1559 path: DynamicFeeTx file produced
 //   - File exchange: Watch create → Keygen sign → Watch send → Monitor TxTypeDone
 //
 // For tests that require a live Anvil node, see the sibling `//go:build integration`
@@ -180,10 +179,6 @@ func TestETHFileExchange_EIP1559Path(t *testing.T) {
 		GetOneUnAllocated(domainAccount.AccountTypeDeposit).
 		Return(&domainAddress.Address{WalletAddress: flowToAddr}, nil)
 
-	// EIP-1559 path
-	createEthClient.EXPECT().
-		SupportsEIP1559(ctx).
-		Return(true)
 	createEthClient.EXPECT().
 		CreateRawTransactionEIP1559(ctx, flowFromAddr, flowToAddr, uint64(0), 0).
 		Return(
@@ -345,104 +340,6 @@ func TestETHFileExchange_EIP1559Path(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, flowTxHash, sendOut.TxID)
-}
-
-// ---------------------------------------------------------------------------
-// Test: Legacy fallback path — SupportsEIP1559 returns false
-// ---------------------------------------------------------------------------
-
-// TestETHFileExchange_LegacyFallback verifies that when the Ethereum node does not
-// support EIP-1559, the Watch wallet falls back to creating a legacy (Type 0)
-// transaction file with GasPrice instead of MaxFeePerGas / MaxPriorityFeePerGas.
-func TestETHFileExchange_LegacyFallback(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-
-	createEthClient := ethapiamocks.NewMockERC20er(t)
-	createUoW := persistencemocks.NewMockUnitOfWork(t)
-	createTx := persistencemocks.NewMockTransaction(t)
-	createAddrRepo := repomocks.NewMockAddressRepositorier(t)
-	createTxRepo := repomocks.NewMockTxRepositorier(t)
-	createTxDetailRepo := repomocks.NewMockETHDetailTXRepositorier(t)
-	createPayReqRepo := repomocks.NewMockPaymentRequestRepositorier(t)
-	createTxFileRepo := storagemocks.NewMockTransactionFileRepositorier(t)
-
-	createAddrRepo.EXPECT().
-		GetAll(domainAccount.AccountTypeClient).
-		Return([]*domainAddress.Address{{WalletAddress: flowFromAddr}}, nil)
-	createEthClient.EXPECT().
-		GetBalance(ctx, flowFromAddr, domainETH.QuantityTagLatest).
-		Return(new(big.Int).SetUint64(1_000_000_000_000_000_000), nil)
-	createAddrRepo.EXPECT().
-		GetOneUnAllocated(domainAccount.AccountTypeDeposit).
-		Return(&domainAddress.Address{WalletAddress: flowToAddr}, nil)
-
-	// Legacy path: SupportsEIP1559 returns false
-	createEthClient.EXPECT().
-		SupportsEIP1559(ctx).
-		Return(false)
-	createEthClient.EXPECT().
-		CreateRawTransaction(ctx, flowFromAddr, flowToAddr, uint64(0), 0).
-		Return(
-			&domainETH.RawTx{
-				UUID:  flowUUID,
-				From:  flowFromAddr,
-				To:    flowToAddr,
-				Value: *new(big.Int).SetUint64(999_000_000_000_000_000),
-				Nonce: 0,
-				TxHex: flowRawTxHex,
-			},
-			&apieth.TxCreateParams{
-				UUID:        flowUUID,
-				FromAddress: flowFromAddr,
-				ToAddress:   flowToAddr,
-				Amount:      999_000_000_000_000_000,
-				Fee:         1_000_000_000_000_000,
-				GasLimit:    21000,
-				Nonce:       0,
-				EthTxType:   dtoeth.EthTxTypeLegacy,
-				ChainID:     flowChainID,
-				GasPrice:    20_000_000_000,
-			},
-			nil,
-		)
-
-	setupCreateTxDBMocks(t, createUoW, createTx, createTxRepo, createTxDetailRepo, createPayReqRepo, ctx)
-
-	createTxFileRepo.EXPECT().
-		CreateFilePath(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, flowTxID, 0).
-		Return(flowUnsignedPath)
-	createTxFileRepo.EXPECT().
-		WriteETHJSONFile(
-			flowUnsignedPath,
-			mock.MatchedBy(func(f *dtoeth.ETHTransactionFile) bool {
-				// Must use legacy fields, not EIP-1559 fields
-				return f.EthTxType == dtoeth.EthTxTypeLegacy &&
-					f.GasPrice == "20000000000" &&
-					f.MaxFeePerGas == "" &&
-					f.MaxPriorityFeePerGas == ""
-			}),
-		).
-		Return(flowUnsignedPath, nil)
-
-	createUC := watchusecaseeth.NewCreateTransactionUseCase(
-		createEthClient,
-		createUoW,
-		createAddrRepo,
-		createTxRepo,
-		createTxDetailRepo,
-		createPayReqRepo,
-		createTxFileRepo,
-		domainAccount.AccountTypeDeposit,
-		domainAccount.AccountTypePayment,
-	)
-
-	createOut, err := createUC.Execute(ctx, watchusecase.CreateTransactionInput{
-		ActionType: string(domainTx.ActionTypeDeposit),
-	})
-	require.NoError(t, err)
-	require.Equal(t, flowUnsignedPath, createOut.FileName)
 }
 
 // ---------------------------------------------------------------------------

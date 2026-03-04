@@ -467,18 +467,14 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	return rawTxInfos, txDetailItems, nil
 }
 
-// createRawTx creates a raw transaction, preferring EIP-1559 when the connected node supports it.
-// Falls back to legacy transaction when EIP-1559 is not supported.
+// createRawTx creates an EIP-1559 (Type 2) raw transaction.
 func (u *createTransactionUseCase) createRawTx(
 	ctx context.Context,
 	fromAddr, toAddr string,
 	amount uint64,
 	additionalNonce int,
 ) (*domainETH.RawTx, *apieth.TxCreateParams, error) {
-	if u.ethClient.SupportsEIP1559(ctx) {
-		return u.ethClient.CreateRawTransactionEIP1559(ctx, fromAddr, toAddr, amount, additionalNonce)
-	}
-	return u.ethClient.CreateRawTransaction(ctx, fromAddr, toAddr, amount, additionalNonce)
+	return u.ethClient.CreateRawTransactionEIP1559(ctx, fromAddr, toAddr, amount, additionalNonce)
 }
 
 func (u *createTransactionUseCase) updateDB(
@@ -576,14 +572,8 @@ func (*createTransactionUseCase) buildETHTransactionFile(
 		RawTxHex:  rawTx.TxHex,
 	}
 
-	if txParams.EthTxType == dtoeth.EthTxTypeEIP1559 {
-		// EIP-1559 fields
-		txFile.MaxFeePerGas = strconv.FormatUint(txParams.MaxFeePerGas, 10)
-		txFile.MaxPriorityFeePerGas = strconv.FormatUint(txParams.MaxPriorityFeePerGas, 10)
-	} else {
-		// Legacy fields
-		txFile.GasPrice = strconv.FormatUint(txParams.GasPrice, 10)
-	}
+	txFile.MaxFeePerGas = strconv.FormatUint(txParams.MaxFeePerGas, 10)
+	txFile.MaxPriorityFeePerGas = strconv.FormatUint(txParams.MaxPriorityFeePerGas, 10)
 
 	return txFile
 }

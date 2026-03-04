@@ -17,8 +17,8 @@ type transactionTest struct {
 	testutil.ETHTestSuite
 }
 
-// TestCreateRawTransaction is test for CreateRawTransaction
-func (txt *transactionTest) TestCreateRawTransaction() {
+// TestCreateRawTransactionEIP1559 is test for CreateRawTransactionEIP1559
+func (txt *transactionTest) TestCreateRawTransactionEIP1559() {
 	type args struct {
 		senderAddr   string
 		receiverAddr string
@@ -73,7 +73,7 @@ func (txt *transactionTest) TestCreateRawTransaction() {
 	for _, tt := range tests {
 		txt.T().Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			rawTx, txDetail, err := txt.ETH.CreateRawTransaction(
+			rawTx, txDetail, err := txt.ETH.CreateRawTransactionEIP1559(
 				ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0,
 			)
 			txt.Equal(tt.want.isErr, err != nil)
@@ -129,8 +129,8 @@ func (txt *transactionTest) TestSignAndSendRawTransaction() {
 	for _, tt := range tests {
 		txt.T().Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			// create raw transaction
-			rawTx, _, err := txt.ETH.CreateRawTransaction(
+			// create EIP-1559 raw transaction
+			rawTx, _, err := txt.ETH.CreateRawTransactionEIP1559(
 				ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0,
 			)
 			txt.NoError(err)
