@@ -16,6 +16,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -399,7 +400,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, *big.Int,
 		userPayments[idx].floatAmount = amt
 
 		// validate address
-		if err = u.ethClient.ValidateAddr(userPayments[idx].receiverAddr); err != nil {
+		if err = pkgeth.ValidateAddr(userPayments[idx].receiverAddr); err != nil {
 			// fatal error
 			logger.Error("fail to call ValidationAddr",
 				"address", userPayments[idx].receiverAddr,

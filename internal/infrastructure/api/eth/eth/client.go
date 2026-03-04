@@ -2,14 +2,17 @@ package eth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	pkgrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -36,7 +39,7 @@ type Ethereum struct {
 	netID        uint16
 	version      string
 	keyDir       string
-	clientType   ClientVersion
+	clientType   pkgeth.ClientVersion
 }
 
 // NewEthereum creates ethereum object
@@ -90,7 +93,7 @@ func NewEthereum(
 	}
 	eth.version = clientVer
 
-	eth.clientType = DetectClientType(clientVer)
+	eth.clientType = pkgeth.DetectClientType(clientVer)
 	logger.Debug("detected client type", "clientType", eth.clientType)
 
 	// check sync progress
@@ -134,4 +137,29 @@ func (e *Ethereum) CoinTypeCode() domainCoin.CoinTypeCode {
 // GetChainConf returns chain conf
 func (e *Ethereum) GetChainConf() *chaincfg.Params {
 	return e.chainConf
+}
+
+// GetKeyDir returns keystore directory
+func (e *Ethereum) GetKeyDir() string {
+	return e.keyDir
+}
+
+// GetPrivKey returns keystore.Key object by reading from the local keystore directory.
+func (e *Ethereum) GetPrivKey(hexAddr, password string) (*keystore.Key, error) {
+	keyDir := e.GetKeyDir()
+	logger.Debug("key_dir", "key_dir", keyDir)
+
+	keyJSON, err := pkgeth.ReadPrivKey(hexAddr, keyDir)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call pkgeth.ReadPrivKey(): %w", err)
+	}
+	if keyJSON == nil {
+		return nil, errors.New("private key file is not found")
+	}
+
+	key, err := keystore.DecryptKey(keyJSON, password)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call keystore.DecryptKey(): %w", err)
+	}
+	return key, nil
 }

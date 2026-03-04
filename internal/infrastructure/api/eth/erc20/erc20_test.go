@@ -60,11 +60,11 @@ func (s *stubEthNode) GetTransactionCount(_ context.Context, _ string, _ domainE
 // Task 3.1 – interface / constructor shape
 // ---------------------------------------------------------------------------
 
-// TestERC20_ImplementsERC20er verifies the compile-time interface check still holds
-// after adding the eth field to the ERC20 struct.
+// TestERC20_ImplementsERC20er verifies that NewERC20 returns a value satisfying ERC20er.
+// The compile-time assertion (var _ apieth.ERC20er = (*erc20)(nil)) lives in erc20.go.
 func TestERC20_ImplementsERC20er(t *testing.T) {
 	t.Parallel()
-	var _ apieth.ERC20er = (*apierc20impl.ERC20)(nil)
+	var _ apieth.ERC20er = apierc20impl.NewERC20(nil, nil, nil, domainCoin.TokenHYT, nil, "", "", "", 0)
 }
 
 // TestNewERC20_AcceptsEthereumer verifies that NewERC20 accepts an apieth.Ethereumer

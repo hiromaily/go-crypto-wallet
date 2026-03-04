@@ -5,8 +5,6 @@
 package mocks
 
 import (
-	"crypto/ecdsa"
-
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -77,68 +75,6 @@ func (_c *MockETHKeyAccessor_GetKeyDir_Call) Return(s string) *MockETHKeyAccesso
 }
 
 func (_c *MockETHKeyAccessor_GetKeyDir_Call) RunAndReturn(run func() string) *MockETHKeyAccessor_GetKeyDir_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// ToECDSA provides a mock function for the type MockETHKeyAccessor
-func (_mock *MockETHKeyAccessor) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
-	ret := _mock.Called(privKey)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ToECDSA")
-	}
-
-	var r0 *ecdsa.PrivateKey
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*ecdsa.PrivateKey, error)); ok {
-		return returnFunc(privKey)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *ecdsa.PrivateKey); ok {
-		r0 = returnFunc(privKey)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ecdsa.PrivateKey)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(privKey)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockETHKeyAccessor_ToECDSA_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ToECDSA'
-type MockETHKeyAccessor_ToECDSA_Call struct {
-	*mock.Call
-}
-
-// ToECDSA is a helper method to define mock.On call
-//   - privKey string
-func (_e *MockETHKeyAccessor_Expecter) ToECDSA(privKey interface{}) *MockETHKeyAccessor_ToECDSA_Call {
-	return &MockETHKeyAccessor_ToECDSA_Call{Call: _e.mock.On("ToECDSA", privKey)}
-}
-
-func (_c *MockETHKeyAccessor_ToECDSA_Call) Run(run func(privKey string)) *MockETHKeyAccessor_ToECDSA_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockETHKeyAccessor_ToECDSA_Call) Return(privateKey *ecdsa.PrivateKey, err error) *MockETHKeyAccessor_ToECDSA_Call {
-	_c.Call.Return(privateKey, err)
-	return _c
-}
-
-func (_c *MockETHKeyAccessor_ToECDSA_Call) RunAndReturn(run func(privKey string) (*ecdsa.PrivateKey, error)) *MockETHKeyAccessor_ToECDSA_Call {
 	_c.Call.Return(run)
 	return _c
 }
