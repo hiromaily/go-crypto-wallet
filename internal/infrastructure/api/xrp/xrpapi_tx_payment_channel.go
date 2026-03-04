@@ -115,7 +115,7 @@ func (r *XRP) PreparePaymentChannelCreateTransaction(
 		Instructions:    infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for PaymentChannelCreate: %w", err)
 	}
@@ -163,7 +163,7 @@ func (r *XRP) PreparePaymentChannelFundTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for PaymentChannelFund: %w", err)
 	}
@@ -216,7 +216,7 @@ func (r *XRP) PreparePaymentChannelClaimTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for PaymentChannelClaim: %w", err)
 	}

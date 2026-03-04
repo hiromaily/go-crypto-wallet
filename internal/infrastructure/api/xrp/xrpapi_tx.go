@@ -190,7 +190,7 @@ func (r *XRP) signTransactionJSON(
 		Secret: secret,
 	}.Build()
 
-	res, err := r.API.txClient.SignTransaction(ctx, req)
+	res, err := r.API.TxClient.SignTransaction(ctx, req)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call client.SignTransaction() for %s: %w", txTypeName, err)
 	}
@@ -233,7 +233,7 @@ func (r *XRP) CombineTransaction(ctx context.Context, signedTxs []string) (strin
 		SignedTransactions: signedTxs,
 	}.Build()
 
-	res, err := r.API.txClient.CombineTransaction(ctx, req)
+	res, err := r.API.TxClient.CombineTransaction(ctx, req)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call client.CombineTransaction(): %w", err)
 	}

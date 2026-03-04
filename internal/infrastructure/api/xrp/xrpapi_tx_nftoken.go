@@ -129,7 +129,7 @@ func (r *XRP) PrepareNFTokenMintTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for NFTokenMint: %w", err)
 	}
@@ -173,7 +173,7 @@ func (r *XRP) PrepareNFTokenBurnTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for NFTokenBurn: %w", err)
 	}
@@ -227,7 +227,7 @@ func (r *XRP) PrepareNFTokenCreateOfferTransaction(
 		Instructions:    infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for NFTokenCreateOffer: %w", err)
 	}
@@ -276,7 +276,7 @@ func (r *XRP) PrepareNFTokenAcceptOfferTransaction(
 		Instructions:     infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for NFTokenAcceptOffer: %w", err)
 	}
@@ -319,7 +319,7 @@ func (r *XRP) PrepareNFTokenCancelOfferTransaction(
 		Instructions:  infraInstructions,
 	}.Build()
 
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	res, err := r.API.TxClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction() for NFTokenCancelOffer: %w", err)
 	}
