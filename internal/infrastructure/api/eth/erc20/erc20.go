@@ -40,7 +40,7 @@ type erc20 struct {
 
 func NewERC20(
 	eth apieth.ERC20Operator,
-	client *ethclient.Client,
+	ethClient *ethclient.Client,
 	tokenClient *contract.Token,
 	token domainCoin.ERC20Token,
 	uuidHandler uuid.UUIDHandler,
@@ -51,7 +51,7 @@ func NewERC20(
 ) *erc20 {
 	return &erc20{
 		eth:             eth,
-		ethClient:       client,
+		ethClient:       ethClient,
 		tokenClient:     tokenClient,
 		token:           token,
 		uuidHandler:     uuidHandler,
