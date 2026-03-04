@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 )
@@ -26,6 +27,9 @@ func ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
 // The address in the filename is always lowercase without the 0x prefix.
 // Returns (nil, error) if no file or multiple files are found.
 func ReadPrivKey(hexAddr, path string) ([]byte, error) {
+	if !common.IsHexAddress(hexAddr) {
+		return nil, fmt.Errorf("invalid Ethereum address: %s", hexAddr)
+	}
 	addr := strings.TrimPrefix(strings.ToLower(hexAddr), "0x")
 	files, err := filepath.Glob(fmt.Sprintf("%s/*--%s", path, addr))
 	if err != nil {

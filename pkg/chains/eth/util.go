@@ -34,12 +34,18 @@ func FromWei(v int64) *big.Int {
 	return big.NewInt(v * params.Wei)
 }
 
-// FromGWei converts GWei(int64) to Wei(*big.Int)
+// FromGWei converts GWei(int64) to Wei(*big.Int).
+// Uses big.Int multiplication to avoid int64 overflow for large values.
 func FromGWei(v int64) *big.Int {
-	return big.NewInt(v * params.GWei)
+	return new(big.Int).Mul(big.NewInt(v), big.NewInt(params.GWei))
 }
 
-// FromFloatEther converts Ether(float64) to Wei(*big.Int)
+// FromFloatEther converts Ether(float64) to Wei(*big.Int).
+// Uses big.Float with float64 precision (53 bits) to match float64 rounding
+// while converting directly to big.Int to avoid int64 overflow.
 func FromFloatEther(v float64) *big.Int {
-	return big.NewInt(int64(v * params.Ether))
+	bf := new(big.Float).SetPrec(53).SetFloat64(v)
+	ether := new(big.Float).SetPrec(53).SetFloat64(params.Ether)
+	result, _ := new(big.Float).SetPrec(53).Mul(bf, ether).Int(nil)
+	return result
 }

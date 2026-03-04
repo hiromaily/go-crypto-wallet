@@ -61,15 +61,14 @@ func (u *importPrivateKeyUseCase) Import(
 		logger.Debug(
 			"target records",
 			"account_type", input.AccountType.String(),
-			"address", record.Address,
-			"private key", record.PrivateKey)
+			"address", record.Address)
 
 		// Convert private key to ECDSA
 		ecdsaKey, convertErr := pkgeth.ToECDSA(record.PrivateKey)
 		if convertErr != nil {
 			logger.Warn(
 				"fail to call pkgeth.ToECDSA()",
-				"private key", record.PrivateKey,
+				"address", record.Address,
 				"error", convertErr)
 			return fmt.Errorf("fail to call pkgeth.ToECDSA(): %w", convertErr)
 		}
@@ -83,7 +82,7 @@ func (u *importPrivateKeyUseCase) Import(
 			// Because database stores status, import run again by same command for this key
 			logger.Warn(
 				"fail to call ks.ImportECDSA()",
-				"private key", record.PrivateKey,
+				"address", record.Address,
 				"error", err)
 			return fmt.Errorf("fail to call ks.ImportECDSA(): %w", err)
 		}
@@ -110,7 +109,7 @@ func (u *importPrivateKeyUseCase) Import(
 				"fail to call accountKeyRepo.UpdateAddrStatus(), but privKey import is done",
 				"target_table", "eth_account_key",
 				"account_type", input.AccountType.String(),
-				"private key", record.PrivateKey,
+				"address", record.Address,
 				"error", err)
 		}
 	}

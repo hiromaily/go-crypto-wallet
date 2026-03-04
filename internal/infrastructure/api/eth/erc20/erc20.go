@@ -63,16 +63,13 @@ func NewERC20(
 }
 
 // FloatToBigInt converts float64 to *big.Int using token-specific decimal precision.
-// FIXME: Is it correct to handle decimal??
+// Uses big.Float to avoid float64 precision loss and int64 overflow.
 func (e *erc20) FloatToBigInt(v float64) *big.Int {
-	if e.decimals == 18 {
-		return big.NewInt(int64(v * 1e18))
-	}
-	// v * math.Pow(10, float64(e.decimals))
-	for i := 0; i < e.decimals; i++ {
-		v *= 10
-	}
-	return big.NewInt(int64(v))
+	multiplier := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(e.decimals)), nil)
+	bf := new(big.Float).SetPrec(256).SetFloat64(v)
+	bm := new(big.Float).SetPrec(256).SetInt(multiplier)
+	result, _ := new(big.Float).Mul(bf, bm).Int(nil)
+	return result
 }
 
 func (e *erc20) GetBalance(ctx context.Context, hexAddr string, _ domainETH.QuantityTag) (*big.Int, error) {
@@ -107,6 +104,20 @@ func (e *erc20) resolveTokenAmount(ctx context.Context, fromAddr string, request
 		return nil, errors.New("balance is short to send token")
 	}
 	return tokenAmount, nil
+}
+
+// checkETHBalanceForGas verifies that fromAddr has sufficient ETH to cover txFee.
+// ERC-20 transfers send 0 ETH but still consume ETH for gas.
+func (e *erc20) checkETHBalanceForGas(ctx context.Context, fromAddr string, txFee *big.Int) error {
+	ethBalance, err := e.ethClient.BalanceAt(ctx, common.HexToAddress(fromAddr), nil)
+	if err != nil {
+		return fmt.Errorf("fail to call ethClient.BalanceAt(): %w", err)
+	}
+	if ethBalance.Cmp(txFee) < 0 {
+		return fmt.Errorf("insufficient ETH balance for gas: have %s Wei, need %s Wei",
+			ethBalance.String(), txFee.String())
+	}
+	return nil
 }
 
 // buildRawTx encodes the transaction and constructs the domain RawTx entity.
@@ -184,6 +195,10 @@ func (e *erc20) CreateRawTransaction(
 	}
 
 	txFee := new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gasLimit))
+	if err := e.checkETHBalanceForGas(ctx, fromAddr, txFee); err != nil {
+		return nil, nil, err
+	}
+
 	txParams := &apieth.TxCreateParams{
 		UUID:        uid.String(),
 		FromAddress: fromAddr,
@@ -314,6 +329,10 @@ func (e *erc20) CreateRawTransactionEIP1559(
 	}
 
 	txFee := new(big.Int).Mul(maxFeePerGas, new(big.Int).SetUint64(gasLimit))
+	if err := e.checkETHBalanceForGas(ctx, fromAddr, txFee); err != nil {
+		return nil, nil, err
+	}
+
 	txParams := &apieth.TxCreateParams{
 		UUID:                 uid.String(),
 		FromAddress:          fromAddr,
