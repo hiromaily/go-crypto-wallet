@@ -26,10 +26,12 @@ services:
       - ./docker/nodes/xrp/config:/config:ro
       # Persistent database storage
       - xrp-node-db:/var/lib/rippled/db
-    # Expose WS/JSON-RPC port to the host if your app/CLI runs outside Docker.
-    # If your app/CLI also runs as a compose service, you can skip ports and use service DNS "rippled".
+    # Expose ports to the host for CLI/app access outside Docker.
+    # 51233: peer protocol (default standalone port)
+    # 6006: WebSocket admin (ws://) — used by wallet CLI for direct WebSocket connection
     ports:
       - "51233:51233"
+      - "6006:6006"
     networks:
       - xrp
     # Healthcheck ensures CI waits until rippled is ready.
@@ -38,7 +40,7 @@ services:
       interval: 3s
       timeout: 2s
       retries: 5
-    command: ["standalone"]
+    command: ["--conf", "/config/rippled.cfg", "--standalone"]
 
   #########################################################################
   # xrp-node (rippled v3.1.0)

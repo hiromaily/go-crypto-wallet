@@ -67,6 +67,13 @@ func (u *offlineGenerateKeyUseCase) Generate(
 	ctx context.Context,
 	input keygenusecase.GenerateKeyInput,
 ) error {
+	// When WalletKeys is nil, XRP keys were already derived and stored by XRPHDWalletRepo.Insert().
+	// The HD wallet generation phase stores complete XRP key pairs directly in xrp_account_key.
+	if input.WalletKeys == nil {
+		logger.Debug("XRP key generation skipped: keys already stored during HD wallet generation phase")
+		return nil
+	}
+
 	// Convert interface{} to []domainKey.WalletKey
 	walletKeys, ok := input.WalletKeys.([]domainKey.WalletKey)
 	if !ok {

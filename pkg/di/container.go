@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -132,7 +133,11 @@ func (c *pkgContainer) NewSQLiteClient() *sql.DB {
 // NewGRPCClient creates a new gRPC client
 func (c *pkgContainer) NewGRPCClient() *grpc.ClientConn {
 	if c.grpcConn == nil {
-		grpcConn, err := grpc.NewClient(c.config.Ripple.API.URL)
+		var opts []grpc.DialOption
+		if !c.config.Ripple.API.IsSecure {
+			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		}
+		grpcConn, err := grpc.NewClient(c.config.Ripple.API.URL, opts...)
 		if err != nil {
 			panic(err)
 		}

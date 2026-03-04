@@ -226,7 +226,7 @@ func submitTransaction(signedBlob string) (*SentTx, error) {
 
 1. ✅ **Best-of-Breed**: Each library used for its strongest capability
 2. ✅ **Offline Security**: Peersyst enables true air-gapped signing
-3. ✅ **Incremental Migration**: Replace gRPC signing first, submission later
+3. ✅ **gRPC Eliminated**: No more xrpl-grpc-server dependency; pure Go stack
 4. ✅ **Zero JavaScript**: Pure Go stack (no Node.js runtime)
 5. ✅ **Lower Risk**: Keep working submission code untouched
 
@@ -250,22 +250,28 @@ func submitTransaction(signedBlob string) (*SentTx, error) {
 
 ## Migration Path
 
-### Phase 1: Native Go Signing (Current - Task 1.1-3.1)
+### Phase 1: Native Go Signing (Completed)
 
 ```
 ✅ Task 1.1: Add Peersyst/xrpl-go dependency
 ✅ Task 1.2: Create segregated interfaces (TransactionSigner)
-⏳ Task 3.1: Implement PeersystSigner
-⏳ Task 5.1: Migrate SignTransactionUseCase to native Go signing
+✅ Task 3.1: Implement PeersystSigner
+✅ Task 5.1: Migrate SignTransactionUseCase to native Go signing
 ```
 
-### Phase 2: Retire gRPC Server (Post-Phase 5)
+### Phase 2: Retire gRPC Server (In Progress)
+
+> **Status**: xrpl-grpc-server is **deprecated**. The wallet now connects directly to rippled via
+> WebSocket (port 6006). New code must NOT use the gRPC adapter.
+> Remaining gRPC code in `xrpapi.go` / `xrpapi_tx.go` is legacy and will be removed.
 
 ```
-1. Verify all signing uses Peersyst (no gRPC calls)
-2. Remove ripple-lib-server dependency
-3. Remove gRPC protobuf definitions
-4. Simplify deployment (watch + keygen + sign, no server)
+✅ Decision: xrpl-grpc-server deprecated (direct WebSocket preferred)
+✅ E2E scripts updated to use WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL (ws://host:6006)
+⏳ Remove remaining gRPC calls in xrpapi_tx.go (PrepareTransaction)
+⏳ Remove grpc.ClientConn and protogen imports from xrpapi.go
+⏳ Remove gRPC protobuf definitions (internal/infrastructure/api/xrp/xrp/*.pb.go)
+⏳ Remove xrpl-grpc-server Docker service from compose files
 ```
 
 ### Phase 3: Evaluate Unified Library (Future)

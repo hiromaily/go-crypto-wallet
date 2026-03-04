@@ -5,18 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"strconv"
 	"time"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	xrpclient "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/client"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
+	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -123,38 +119,60 @@ type TxOrderbookChange struct {
 	Status            string       `json:"status"`
 }
 
-// PrepareTransaction calls PrepareTransaction API
+// PrepareTransaction builds an unsigned Payment transaction using WebSocket account_info.
 func (r *XRP) PrepareTransaction(
 	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoxrp.Instructions,
 ) (*dtoxrp.TxInput, string, error) {
-	// Convert DTO to infrastructure type
-	infraInstructions := ToInfraInstructions(instructions)
-
-	req := protogen.RequestPrepareTransaction_builder{
-		TxType:          protogen.EnumTransactionType_TX_PAYMENT,
-		SenderAccount:   senderAccount,
-		Amount:          amount,
-		ReceiverAccount: receiverAccount,
-		Instructions:    infraInstructions,
-	}.Build()
-
-	res, err := r.API.txClient.PrepareTransaction(ctx, req)
+	// Get account info for sequence number and current ledger index
+	accInfo, err := xrprpc.AccountInfo(ctx, r.wsPublic, senderAccount)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction(): %w", err)
 	}
-	logger.Debug("response",
-		"TxJSON", res.GetTxJSON(),
-		"Instructions", res.GetInstructions(),
-	)
-
-	var txInput TxInput
-	unquotedJSON := unquoteJSON(res.GetTxJSON())
-	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
-		return nil, "", fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
+	if accInfo.Error != "" {
+		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction(): %s", accInfo.Error)
 	}
 
+	sequence := uint64(accInfo.Result.AccountData.Sequence)
+	lastLedgerSequence := uint64(accInfo.Result.LedgerCurrentIndex) + MaxLedgerVersionOffset
+	fee := "12" // minimum fee in drops
+
+	if instructions != nil {
+		if instructions.Fee != "" {
+			fee = instructions.Fee
+		}
+		if instructions.Sequence != 0 {
+			sequence = instructions.Sequence
+		}
+		if instructions.MaxLedgerVersion != 0 {
+			lastLedgerSequence = instructions.MaxLedgerVersion
+		} else if instructions.MaxLedgerVersionOffset != 0 {
+			lastLedgerSequence = uint64(accInfo.Result.LedgerCurrentIndex) + instructions.MaxLedgerVersionOffset
+		}
+	}
+
+	// Convert XRP amount to drops (XRPL requires Amount in drops for XRP payments)
+	amountDrops := strconv.FormatInt(int64(amount*float64(dropsPerXRP)), 10)
+
+	txInput := &TxInput{
+		TransactionType:    "Payment",
+		Account:            senderAccount,
+		Amount:             amountDrops,
+		Destination:        receiverAccount,
+		Fee:                fee,
+		Flags:              0,
+		LastLedgerSequence: lastLedgerSequence,
+		Sequence:           sequence,
+	}
+
+	jsonBytes, err := json.Marshal(txInput)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call json.Marshal(txInput): %w", err)
+	}
+
+	logger.Debug("PrepareTransaction", "TxJSON", string(jsonBytes))
+
 	// Convert infrastructure type to DTO
-	return ToDTOTxInput(&txInput), unquotedJSON, nil
+	return ToDTOTxInput(txInput), string(jsonBytes), nil
 }
 
 // SetRegularKeyTxInput is the transaction input for SetRegularKey
@@ -1337,30 +1355,14 @@ func (r *XRP) SignAccountSetTransaction(
 	return r.signTransactionJSON(ctx, txInput, secret, "AccountSet")
 }
 
-// SignTransaction calls SignTransaction API
+// SignTransaction signs a payment transaction offline using native Go implementation.
 // Offline functionality
 // - https://xrpl.org/rippleapi-reference.html#offline-functionality
-func (r *XRP) SignTransaction(
+func (*XRP) SignTransaction(
 	ctx context.Context, txInput *dtoxrp.TxInput, secret string,
 ) (string, string, error) {
-	// Convert DTO to infrastructure type
-	infraTxInput := ToInfraTxInput(txInput)
-
-	strJSON, err := json.Marshal(infraTxInput)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call json.Marshal(txJSON): %w", err)
-	}
-	req := protogen.RequestSignTransaction_builder{
-		TxJSON: string(strJSON),
-		Secret: secret,
-	}.Build()
-
-	res, err := r.API.txClient.SignTransaction(ctx, req)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call client.SignTransaction(): %w", err)
-	}
-
-	return res.GetTxID(), res.GetTxBlob(), nil
+	signer := NewPeersystSigner()
+	return signer.SignTransactionNative(ctx, txInput, secret, false, nil)
 }
 
 // SignTransactionNative signs a transaction using native Go implementation (Peersyst/xrpl-go).
@@ -1421,197 +1423,113 @@ func toXRPClientSentTx(local *SentTx) *xrpclient.SentTx {
 	}
 }
 
-// toXRPClientTxInfo converts local TxInfo to xrpclient.TxInfo.
-func toXRPClientTxInfo(local *TxInfo) *xrpclient.TxInfo {
-	balanceChanges := make(map[string][]xrpclient.TxAmount)
-	for key, amounts := range local.Outcome.BalanceChanges {
-		xrpAmounts := make([]xrpclient.TxAmount, len(amounts))
-		for i, amt := range amounts {
-			xrpAmounts[i] = xrpclient.TxAmount{
-				Currency: amt.Currency,
-				Value:    amt.Value,
-			}
-		}
-		balanceChanges[key] = xrpAmounts
-	}
-
-	orderbookChanges := make(map[string][]xrpclient.TxOrderbookChange)
-	for key, changes := range local.Outcome.OrderbookChanges {
-		xrpChanges := make([]xrpclient.TxOrderbookChange, len(changes))
-		for i, change := range changes {
-			xrpChanges[i] = xrpclient.TxOrderbookChange{
-				Direction: change.Direction,
-				Quantity: xrpclient.TxAmount{
-					Currency: change.Quantity.Currency,
-					Value:    change.Quantity.Value,
-				},
-				TotalPrice: xrpclient.TxTotalPrice{
-					Currency:     change.TotalPrice.Currency,
-					Counterparty: change.TotalPrice.Counterparty,
-					Value:        change.TotalPrice.Value,
-				},
-				Sequence:          change.Sequence,
-				Status:            change.Status,
-				MakerExchangeRate: change.MakerExchangeRate,
-			}
-		}
-		orderbookChanges[key] = xrpChanges
-	}
-
-	timestamp := ""
-	if !local.Outcome.Timestamp.IsZero() {
-		timestamp = local.Outcome.Timestamp.Format("2006-01-02T15:04:05Z")
-	}
-
-	return &xrpclient.TxInfo{
-		Type:     local.Type,
-		Address:  local.Address,
-		Sequence: local.Sequence,
-		ID:       local.ID,
-		Specification: xrpclient.TxSpecification{
-			Source: xrpclient.TxSpecSource{
-				Address: local.Specification.Source.Address,
-				MaxAmount: xrpclient.TxAmount{
-					Currency: local.Specification.Source.MaxAmount.Currency,
-					Value:    local.Specification.Source.MaxAmount.Value,
-				},
-			},
-			Destination: xrpclient.TxSpecDestination{
-				Address: local.Specification.Destination.Address,
-			},
-		},
-		Outcome: xrpclient.TxOutcome{
-			Result:           local.Outcome.Result,
-			Timestamp:        timestamp,
-			Fee:              local.Outcome.Fee,
-			BalanceChanges:   balanceChanges,
-			OrderbookChanges: orderbookChanges,
-			LedgerVersion:    local.Outcome.LedgerVersion,
-			IndexInLedger:    local.Outcome.IndexInLedger,
-			DeliveredAmount: xrpclient.TxAmount{
-				Currency: local.Outcome.DeliveredAmount.Currency,
-				Value:    local.Outcome.DeliveredAmount.Value,
-			},
-		},
-	}
-}
-
-// SubmitTransaction calls SubmitTransaction API
-// - signedTx is returned TxBlob by SignTransaction()
+// SubmitTransaction submits a signed transaction blob via WebSocket.
+// - signedTx is the TxBlob returned by SignTransaction()
 func (r *XRP) SubmitTransaction(ctx context.Context, signedTx string) (*xrpclient.SentTx, uint64, error) {
-	req := protogen.RequestSubmitTransaction_builder{
-		TxBlob: signedTx,
-	}.Build()
-	res, err := r.API.txClient.SubmitTransaction(ctx, req)
+	res, err := xrprpc.Submit(ctx, r.wsPublic, signedTx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to call client.SubmitTransaction(): %w", err)
 	}
-
-	var sentTxJSON SentTx
-	if err = json.Unmarshal([]byte(res.GetResultJSONString()), &sentTxJSON); err != nil {
-		return nil, 0, fmt.Errorf("fail to call json.Unmarshal(sentTxJSON): %w", err)
+	if res.Error != "" {
+		return nil, 0, fmt.Errorf("fail to call client.SubmitTransaction(): %s", res.Error)
 	}
 
-	// FIXME:
-	// res.EarliestLedgerVersion may be useless because SentTxJSON includes `LastLedgerSequence` and it would be useful
 	logger.Debug("response of submitTransaction",
-		"res.ResultJSONString", res.GetResultJSONString(),
-		"res.EarliestLedgerVersion", res.GetEarliestLedgerVersion(),
-		"sentTxJSON.TxJSON.LastLedgerSequence", sentTxJSON.TxJSON.LastLedgerSequence,
+		"engine_result", res.Result.EngineResult,
+		"engine_result_code", res.Result.EngineResultCode,
+		"LastLedgerSequence", res.Result.TxJSON.LastLedgerSequence,
+		"validated_ledger_index", res.Result.ValidatedLedgerIndex,
 	)
-	// res.EarliestLedgerVersion => for when calling GetTransaction()
-	// sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
 
-	return toXRPClientSentTx(&sentTxJSON), res.GetEarliestLedgerVersion(), nil
-	// return toXRPClientSentTx(&sentTxJSON), sentTxJSON.TxJSON.LastLedgerSequence, nil
-}
-
-// WaitValidation calls WaitValidation API
-// - handling server streaming
-func (r *XRP) WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error) {
-	req := &emptypb.Empty{}
-	resStream, err := r.API.txClient.WaitValidation(ctx, req)
-	if err != nil {
-		return 0, fmt.Errorf("fail to call client.WaitValidation(): %w", err)
+	sentTx := &SentTx{
+		// Map engine_result to ResultCode so the use case check works
+		ResultCode:          res.Result.EngineResult,
+		ResultMessage:       res.Result.EngineResultMessage,
+		EngineResult:        res.Result.EngineResult,
+		EngineResultCode:    res.Result.EngineResultCode,
+		EngineResultMessage: res.Result.EngineResultMessage,
+		TxBlob:              res.Result.TxBlob,
+		TxJSON: TxInput{
+			TransactionType:    res.Result.TxJSON.TransactionType,
+			Account:            res.Result.TxJSON.Account,
+			Amount:             res.Result.TxJSON.Amount,
+			Destination:        res.Result.TxJSON.Destination,
+			Fee:                res.Result.TxJSON.Fee,
+			Flags:              res.Result.TxJSON.Flags,
+			LastLedgerSequence: res.Result.TxJSON.LastLedgerSequence,
+			Sequence:           res.Result.TxJSON.Sequence,
+			SigningPubKey:      res.Result.TxJSON.SigningPubKey,
+			TxnSignature:       res.Result.TxJSON.TxnSignature,
+			Hash:               res.Result.TxJSON.Hash,
+		},
 	}
 
-	defer func() {
-		logger.Debug("running in defer func()")
-		if closeErr := resStream.CloseSend(); closeErr != nil {
-			logger.Warn("fail to call resStream.CloseSend()")
-		}
-	}()
+	// ValidatedLedgerIndex is the earliest ledger where we can look for this tx
+	return toXRPClientSentTx(sentTx), res.Result.ValidatedLedgerIndex, nil
+}
 
-	for {
-		var res *protogen.ResponseWaitValidation
-		res, err = resStream.Recv()
-		if err == io.EOF {
-			logger.Warn("server is closed in WaitValidation()")
-			return 0, errors.New("server is closed")
-		} else if err != nil {
-			if respErr, ok := status.FromError(err); ok {
-				switch respErr.Code() {
-				case codes.InvalidArgument:
-					logger.Warn("parameter is invalid in WaitValidation()")
-				case codes.DeadlineExceeded:
-					logger.Warn("timeout in WaitValidation()")
-				case codes.OK, codes.Canceled, codes.Unknown, codes.NotFound, codes.AlreadyExists,
-					codes.PermissionDenied, codes.ResourceExhausted, codes.FailedPrecondition,
-					codes.Aborted, codes.OutOfRange, codes.Unimplemented, codes.Internal,
-					codes.Unavailable, codes.DataLoss, codes.Unauthenticated:
-					logger.Warn("gRPC error in WaitValidation()",
-						"code", uint32(respErr.Code()),
-						"message", respErr.Message(),
-					)
-				default:
-					logger.Warn("gRPC error in WaitValidation()",
-						"code", uint32(respErr.Code()),
-						"message", respErr.Message(),
-					)
-				}
-			} else {
-				logger.Warn("fail to call resStream.Recv()", "error", err)
+// WaitValidation waits until the ledger advances past targetLedgerVersion.
+// In standalone mode it calls ledger_accept via the admin WebSocket to advance the ledger.
+// In non-standalone environments the ledger advances naturally and this polls ledger_current.
+func (r *XRP) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error) {
+	// Advance the ledger via the admin connection (standalone mode).
+	// Silently ignore errors — in production environments this command is unavailable.
+	if r.wsAdmin != nil {
+		if _, err := xrprpc.LedgerAccept(ctx, r.wsAdmin); err != nil {
+			logger.Warn("ledger_accept failed (non-critical; may not be standalone mode)", "error", err)
+		}
+	}
+
+	// Poll ledger_current until it reaches or exceeds targetLedgerVersion.
+	// In standalone mode each iteration calls ledger_accept to advance the ledger.
+	const maxRetries = 30
+	for range maxRetries {
+		res, err := xrprpc.LedgerCurrent(ctx, r.wsPublic)
+		if err != nil {
+			return 0, fmt.Errorf("fail to call ledger_current: %w", err)
+		}
+		currentLedger := res.Result.LedgerCurrentIndex
+		logger.Info("WaitValidation polling",
+			"currentLedger", currentLedger,
+			"targetLedgerVersion", targetLedgerVersion,
+		)
+		if currentLedger >= targetLedgerVersion {
+			return currentLedger, nil
+		}
+		// Advance the ledger in standalone mode and retry.
+		if r.wsAdmin != nil {
+			if _, err := xrprpc.LedgerAccept(ctx, r.wsAdmin); err != nil {
+				logger.Warn("failed to advance ledger", "error", err)
 			}
-			// break
-			return 0, fmt.Errorf("fail to call resStream.Recv(): %w", err)
 		}
-		// success
-		logger.Info("response in WaitValidation()", "LedgerVersion", res.GetLedgerVersion())
-		if targetledgerVarsion <= res.GetLedgerVersion() {
-			// done
-			return res.GetLedgerVersion(), nil
-		}
-		// continue
 	}
+	return 0, errors.New("timeout waiting for ledger validation")
 }
 
-// GetTransaction calls GetTransaction API
+// GetTransaction retrieves a validated transaction by hash via WebSocket.
 func (r *XRP) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
 ) (*xrpclient.TxInfo, error) {
-	req := protogen.RequestGetTransaction_builder{
-		TxID:             txID,
-		MinLedgerVersion: targetLedgerVersion,
-	}.Build()
-	res, err := r.API.txClient.GetTransaction(ctx, req)
+	res, err := xrprpc.GetTx(ctx, r.wsPublic, txID, targetLedgerVersion)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call client.GetTransaction(): %w", err)
 	}
-
-	if res.GetResultJSONString() == "" {
-		return nil, fmt.Errorf("fail to get transaction info by %s", txID)
+	if res.Error != "" {
+		return nil, fmt.Errorf("fail to get transaction info by %s: %s", txID, res.Error)
 	}
 
 	logger.Debug("response of getTransaction",
-		"res.ResultJSONString", res.GetResultJSONString(),
+		"hash", res.Result.Hash,
+		"ledger_index", res.Result.LedgerIndex,
+		"validated", res.Result.Validated,
+		"TransactionResult", res.Result.Meta.TransactionResult,
 	)
 
-	var txInfo TxInfo
-	if err = json.Unmarshal([]byte(res.GetResultJSONString()), &txInfo); err != nil {
-		return nil, fmt.Errorf("fail to call json.Unmarshal(txInfo): %w", err)
-	}
-	// TODO: check
-	// txInfo.Outcome.Result : tesSUCCESS
-
-	return toXRPClientTxInfo(&txInfo), nil
+	return &xrpclient.TxInfo{
+		ID: res.Result.Hash,
+		Outcome: xrpclient.TxOutcome{
+			Result:        res.Result.Meta.TransactionResult,
+			LedgerVersion: int(res.Result.LedgerIndex),
+		},
+	}, nil
 }

@@ -61,7 +61,14 @@ This makes it ideal for:
 ## Start rippled in Standalone Mode
 
 ```bash
-docker run --rm -d --name rippled_ci -p 51233:51233 rippleci/rippled standalone
+# Port 6006 is the WebSocket admin port used by the wallet CLI
+docker run --rm -d --name rippled_ci -p 6006:6006 rippleci/rippled standalone
+```
+
+Or with Docker Compose (recommended):
+
+```bash
+docker compose -f compose.xrp.yaml up -d rippled
 ```
 
 ---
@@ -142,18 +149,21 @@ Only then is the transaction considered successful.
 
 # Environment Configuration Requirement
 
-The XRPL endpoint must be environment-configurable:
+The XRPL endpoint must be environment-configurable via:
 
 ```
-XRPL_ENDPOINT
+WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL
 ```
 
 Examples:
 
 ```
-ws://localhost:51233
-wss://s.altnet.rippletest.net:51233
+ws://localhost:6006                          # Local standalone rippled (WebSocket admin port)
+wss://s.altnet.rippletest.net:51233          # Testnet public WebSocket
 ```
+
+> **Note**: The wallet CLI connects **directly** to rippled via WebSocket.
+> No xrpl-grpc-server or intermediate server is required (that approach is deprecated).
 
 This allows the same CLI binary to operate in:
 
@@ -256,7 +266,7 @@ The AI Agent must:
 2. Always confirm `validated == true`
 3. Always confirm `tesSUCCESS`
 4. Use `ledger_accept` in Standalone
-5. Keep XRPL endpoint configurable
+5. Keep XRPL endpoint configurable via `WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL`
 6. Avoid public infrastructure in CI
 7. Ensure every test starts from clean genesis
 8. Separate logical tests from network tests

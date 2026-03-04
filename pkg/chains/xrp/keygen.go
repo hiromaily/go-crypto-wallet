@@ -197,10 +197,12 @@ func (*KeyGenerator) generateEd25519(seedBytes []byte) (*XRPKeyPair, error) {
 	// Generate account ID (address hash) from prefixed public key
 	accountID := Sha256RipeMD160(pubKeyWithPrefix)
 
-	// Create the seed in XRP format
-	seed, err := NewFamilySeed(seedBytes)
+	// Create the seed in ed25519-compatible XRP format (prefix [0x01, 0xe1, 0x4b]).
+	// This is recognized by Peersyst/xrpl-go wallet.FromSeed() as an ed25519 seed,
+	// enabling correct keypair derivation during signing.
+	seedStr, err := EncodeEd25519Seed(seedBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create family seed: %w", err)
+		return nil, fmt.Errorf("failed to encode ed25519 seed: %w", err)
 	}
 
 	// Create the account address
@@ -216,7 +218,7 @@ func (*KeyGenerator) generateEd25519(seedBytes []byte) (*XRPKeyPair, error) {
 	}
 
 	return &XRPKeyPair{
-		Seed:           seed.String(),
+		Seed:           seedStr,
 		SeedHex:        hex.EncodeToString(seedBytes),
 		PublicKey:      pubKeyHash.String(),
 		PublicKeyHex:   hex.EncodeToString(pubKeyWithPrefix),

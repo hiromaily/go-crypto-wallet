@@ -371,9 +371,12 @@ Suggested Use Cases:
 
 `internal/infrastructure/api/xrp/`
 
-* JSON-RPC client
-* WebSocket client
-* Optional gRPC adapter
+* WebSocket client (`xrpscan/xrpl-go`) — online queries and transaction submission
+* Offline signing (`Peersyst/xrpl-go`) — zero network, used by keygen/sign wallets
+
+> **Deprecated (do not use)**: The xrpl-grpc-server gRPC adapter has been retired.
+> The wallet connects directly to rippled via WebSocket on port 6006.
+> See [library-selection.md](./library-selection.md) for the dual-library architecture.
 
 ---
 
