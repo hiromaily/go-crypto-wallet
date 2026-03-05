@@ -6,8 +6,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 )
 
-// Deprecated: XRPLClient is the apps/xrpl-grpc-server client
+// XRPLClient is the apps/xrpl-grpc-server client
 // TODO: divide XRPLClient into 3 structs
+//
+// Deprecated: use protogen.* interface instead.
 type XRPLClient struct {
 	TxClient      protogen.XRPTransactionAPIClient
 	AccountClient protogen.XRPAccountAPIClient
@@ -15,7 +17,9 @@ type XRPLClient struct {
 	conn          *grpc.ClientConn
 }
 
-// XRPLClient creates XRPLServer Client object
+// NewXRPLClient creates XRPLServer Client object
+//
+// Deprecated
 func NewXRPLClient(
 	conn *grpc.ClientConn,
 ) *XRPLClient {

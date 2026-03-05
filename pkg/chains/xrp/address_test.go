@@ -1,11 +1,9 @@
-package xrp_test
+package xrp
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 // TestValidateAddress is test for ValidateAddress
@@ -45,7 +43,7 @@ func TestValidateAddress(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res := xrpkg.ValidateAddress(tt.args.addr)
+			res := ValidateAddress(tt.args.addr)
 			require.Equal(t, tt.want.isValid, res, "ValidateAddress() result mismatch")
 		})
 	}
