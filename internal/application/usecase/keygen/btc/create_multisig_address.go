@@ -5,13 +5,13 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	btcpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -109,7 +109,7 @@ func (u *createMultisigAddressUseCase) Create(
 		copy(addrs, authFullPubKeys)
 		addrs[len(authFullPubKeys)] = item.FullPublicKey
 
-		var resAddr *btcrpc.AddMultisigAddressResult
+		var resAddr *dtobtc.MultisigAddress
 		resAddr, err = u.btc.AddMultisigAddress(
 			requiredSig,
 			addrs,

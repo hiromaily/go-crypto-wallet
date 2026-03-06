@@ -3,6 +3,7 @@ package btc
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -49,51 +50,71 @@ func (*Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 }
 
 // DecodeRawTransaction decodes a serialized transaction hex string back into a JSON object
-func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcrpc.TxRawResult, error) {
-	return b.pkgrpc.DecodeRawTransaction(hexTx)
+func (b *Bitcoin) DecodeRawTransaction(hexTx string) (string, error) {
+	result, err := b.pkgrpc.DecodeRawTransaction(hexTx)
+	if err != nil {
+		return "", fmt.Errorf("fail to call pkgrpc.DecodeRawTransaction(): %w", err)
+	}
+	jsonBytes, err := json.Marshal(result)
+	if err != nil {
+		return "", fmt.Errorf("fail to call json.Marshal() on DecodeRawTransaction result: %w", err)
+	}
+	return string(jsonBytes), nil
 }
 
 // GetTransactionByTxID get transaction result by txID
-func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcrpc.GetTransactionResult, error) {
+func (b *Bitcoin) GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error) {
 	result, err := b.pkgrpc.GetTransaction(txID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.GetTransaction(%s): %w", txID, err)
 	}
 
-	return result, nil
+	return toTransactionResult(result), nil
 }
 
-// GetTxOutByTxID get txOut by txID and index
+func toTransactionResult(r *btcrpc.GetTransactionResult) *dtobtc.TransactionResult {
+	details := make([]dtobtc.TransactionDetail, len(r.Details))
+	for i, d := range r.Details {
+		details[i] = dtobtc.TransactionDetail{
+			Address:  d.Address,
+			Category: d.Category,
+			Amount:   d.Amount,
+			Label:    d.Label,
+			Vout:     d.Vout,
+		}
+	}
+	return &dtobtc.TransactionResult{
+		Amount:        r.Amount,
+		Fee:           r.Fee,
+		Confirmations: r.Confirmations,
+		BlockHash:     r.BlockHash,
+		BlockHeight:   r.BlockHeight,
+		Txid:          r.Txid,
+		Time:          r.Time,
+		Details:       details,
+		Hex:           r.Hex,
+	}
+}
+
+// GetTxOutByTxID get txOut by txID and index as JSON string
 //   - it's not used anywhere
-func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
+func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (string, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", txID, err)
+		return "", fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", txID, err)
 	}
 
 	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
-	//  client.GetTxOut is not outdated yet (at bitcoin core 0.19)
 	txOutResult, err := b.btcdClient.GetTxOut(hash, index, false)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call btc.client.GetTxOut(%s, %d, false): %w", hash, index, err)
+		return "", fmt.Errorf("fail to call btc.client.GetTxOut(%s, %d, false): %w", hash, index, err)
 	}
 
-	return txOutResult, nil
-	// value *GetTxOutResult = {
-	//	BestBlock string = "00000000000000a080461b99935872934fa35bc705453f9f2ad7712b2228e849" 64
-	//	Confirmations int64 = 473
-	//	Value float64 = 0.65
-	//	ScriptPubKey ScriptPubKeyResult = {
-	//		Asm string = "OP_HASH160 b24f4d8c8237c73a7299b6e790b309d477bb509c OP_EQUAL" 60
-	//		Hex string = "a914b24f4d8c8237c73a7299b6e790b309d477bb509c87" 46
-	//		ReqSigs int32 = 1
-	//		Type string = "scripthash" 10
-	//		Addresses []string = [
-	//			0 string = "2N9W3GVam33jQc5FbkLKwMqH7RkvkYK7xvz" 35
-	//		]
-	//	}
-	//	Coinbase bool = false
-	//}
+	jsonBytes, err := json.Marshal(txOutResult)
+	if err != nil {
+		return "", fmt.Errorf("fail to call json.Marshal() on GetTxOut result: %w", err)
+	}
+	return string(jsonBytes), nil
 }
 
 // GetRawTransactionByHex get tx from hex string
@@ -117,12 +138,19 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 // CreateRawTransaction create raw transaction
 //   - for payment action
 func (b *Bitcoin) CreateRawTransaction(
-	inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
+	inputs []dtobtc.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
 ) (*wire.MsgTx, error) {
 	lockTime := int64(0) // TODO:Raw locktime what value is exactly required??
 
-	// CreateRawTransaction
-	msgTx, err := b.btcdClient.CreateRawTransaction(inputs, outputs, &lockTime)
+	jsonInputs := make([]btcjson.TransactionInput, len(inputs))
+	for i, in := range inputs {
+		jsonInputs[i] = btcjson.TransactionInput{
+			Txid: in.TxID,
+			Vout: in.Vout,
+		}
+	}
+
+	msgTx, err := b.btcdClient.CreateRawTransaction(jsonInputs, outputs, &lockTime)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcutil.CreateRawTransaction(): %w", err)
 	}
@@ -131,9 +159,14 @@ func (b *Bitcoin) CreateRawTransaction(
 }
 
 // FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
+// Returns the funded transaction hex.
 // TODO: unused for now, but it looks useful
-func (b *Bitcoin) FundRawTransaction(hexTx string) (*btcrpc.FundRawTransactionResult, error) {
-	return b.FundRawTransactionWithOptions(hexTx, nil)
+func (b *Bitcoin) FundRawTransaction(hexTx string) (string, error) {
+	result, err := b.FundRawTransactionWithOptions(hexTx, nil)
+	if err != nil {
+		return "", err
+	}
+	return result.Hex, nil
 }
 
 // FundRawTransactionWithOptions adds inputs to a transaction with custom options.

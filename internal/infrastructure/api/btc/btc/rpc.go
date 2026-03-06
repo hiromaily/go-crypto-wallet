@@ -1,6 +1,9 @@
 package btc
 
 import (
+	"fmt"
+
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
@@ -10,13 +13,74 @@ func (b *Bitcoin) EstimateSmartFee(confirmationBlock int) (float64, error) {
 }
 
 // GetNetworkInfo returns network information from the connected node.
-func (b *Bitcoin) GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error) {
-	return b.pkgrpc.GetNetworkInfo()
+func (b *Bitcoin) GetNetworkInfo() (*dtobtc.NetworkInfo, error) {
+	result, err := b.pkgrpc.GetNetworkInfo()
+	if err != nil {
+		return nil, fmt.Errorf("fail to call pkgrpc.GetNetworkInfo(): %w", err)
+	}
+	return toNetworkInfo(result), nil
+}
+
+func toNetworkInfo(r *btcrpc.GetNetworkInfoResult) *dtobtc.NetworkInfo {
+	networks := make([]dtobtc.NetworkInfoNetwork, len(r.Networks))
+	for i, n := range r.Networks {
+		networks[i] = dtobtc.NetworkInfoNetwork{
+			Name:      n.Name,
+			Limited:   n.Limited,
+			Reachable: n.Reachable,
+			Proxy:     n.Proxy,
+		}
+	}
+	localAddrs := make([]dtobtc.NetworkInfoLocalAddress, len(r.LocalAddresses))
+	for i, a := range r.LocalAddresses {
+		localAddrs[i] = dtobtc.NetworkInfoLocalAddress{
+			Address: a.Address,
+			Port:    a.Port,
+			Score:   a.Score,
+		}
+	}
+	return &dtobtc.NetworkInfo{
+		Version:         r.Version,
+		Subversion:      r.Subversion,
+		ProtocolVersion: r.ProtocolVersion,
+		Connections:     r.Connections,
+		Networks:        networks,
+		RelayFee:        r.RelayFee,
+		LocalAddresses:  localAddrs,
+		Warnings:        r.Warnings.Value,
+	}
 }
 
 // Logging returns logging information from the connected node.
-func (b *Bitcoin) Logging() (*btcrpc.LoggingResult, error) {
-	return b.pkgrpc.Logging()
+func (b *Bitcoin) Logging() (*dtobtc.LoggingStatus, error) {
+	result, err := b.pkgrpc.Logging()
+	if err != nil {
+		return nil, fmt.Errorf("fail to call pkgrpc.Logging(): %w", err)
+	}
+	return &dtobtc.LoggingStatus{
+		Net:         result.Net,
+		Tor:         result.Tor,
+		Mempool:     result.Mempool,
+		HTTP:        result.HTTP,
+		Bench:       result.Bench,
+		Zmq:         result.Zmq,
+		Walletdb:    result.Walletdb,
+		RPC:         result.RPC,
+		Estimatefee: result.Estimatefee,
+		Addrman:     result.Addrman,
+		Selectcoins: result.Selectcoins,
+		Reindex:     result.Reindex,
+		Cmpctblock:  result.Cmpctblock,
+		Rand:        result.Rand,
+		Prune:       result.Prune,
+		Proxy:       result.Proxy,
+		Mempoolrej:  result.Mempoolrej,
+		Libevent:    result.Libevent,
+		Coindb:      result.Coindb,
+		Qt:          result.Qt,
+		Leveldb:     result.Leveldb,
+		Validation:  result.Validation,
+	}, nil
 }
 
 // EncryptWallet encrypts the wallet with the given passphrase.

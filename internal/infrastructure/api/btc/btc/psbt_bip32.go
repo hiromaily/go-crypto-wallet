@@ -178,11 +178,11 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 		"descriptor_len", len(addressInfo.Desc))
 
 	// Find and process matching wallet descriptor
-	for _, desc := range descriptorList.Descriptors {
-		foundIndex, err := b.findAddressIndexInDescriptor(desc.Desc, address)
+	for _, desc := range descriptorList {
+		foundIndex, err := b.findAddressIndexInDescriptor(desc.Descriptor, address)
 		if err == nil {
 			// Found matching descriptor - process it
-			return b.processMatchedDescriptor(updater, address, inputIndex, desc.Desc, foundIndex, desc.Internal)
+			return b.processMatchedDescriptor(updater, address, inputIndex, desc.Descriptor, foundIndex, desc.Internal)
 		}
 	}
 
@@ -459,19 +459,19 @@ func (b *Bitcoin) getDescriptorInfoForAddress(
 	)
 
 	// Find the descriptor that matches this account path
-	for _, desc := range result.Descriptors {
-		if !descriptorContainsPath(desc.Desc, accountPath, accountPathApostrophe) {
+	for _, desc := range result {
+		if !descriptorContainsPath(desc.Descriptor, accountPath, accountPathApostrophe) {
 			continue
 		}
 
 		// Skip internal (change) descriptors
 		if desc.Internal != nil && *desc.Internal {
-			logger.Debug("Skipping internal descriptor", "desc", desc.Desc[:50])
+			logger.Debug("Skipping internal descriptor", "desc", desc.Descriptor[:50])
 			continue
 		}
 
 		// Try to extract and match descriptor info
-		fingerprint, basePath, ok := parseDescriptorFingerprintAndPath(desc.Desc)
+		fingerprint, basePath, ok := parseDescriptorFingerprintAndPath(desc.Descriptor)
 		if !ok {
 			continue
 		}

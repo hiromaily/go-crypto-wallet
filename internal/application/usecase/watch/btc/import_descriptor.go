@@ -22,6 +22,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
@@ -29,7 +30,6 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/retry"
 )
@@ -160,7 +160,7 @@ func (u *importDescriptorUseCase) importToBitcoinCore(
 	}
 
 	// Build import requests for Bitcoin Core
-	requests := make([]btcrpc.ImportDescriptorsRequest, 0, len(descriptorStrs))
+	requests := make([]dtobtc.ImportDescriptorsRequest, 0, len(descriptorStrs))
 	for _, descStr := range descriptorStrs {
 		// Add checksum using Bitcoin Core if not present
 		// (keygen generates descriptors without checksums)
@@ -180,7 +180,7 @@ func (u *importDescriptorUseCase) importToBitcoinCore(
 			}
 		}
 
-		req := btcrpc.ImportDescriptorsRequest{
+		req := dtobtc.ImportDescriptorsRequest{
 			Descriptor: descStr,
 			Timestamp:  "now", // Skip rescanning (fastest)
 			Active:     true,  // Track outputs for spending

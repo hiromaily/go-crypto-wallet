@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
@@ -11,8 +12,31 @@ import (
 // Syncing returns sync status or bool
 //   - return false if not syncing (it means syncing is done)
 //   - there seems 2 different responses
-func (e *Ethereum) Syncing(ctx context.Context) (*ethrpc.ResponseSyncing, bool, error) {
-	return e.pkgrpc.Syncing(ctx)
+func (e *Ethereum) Syncing(ctx context.Context) (*dtoeth.SyncingStatus, bool, error) {
+	result, isSyncing, err := e.pkgrpc.Syncing(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	if result == nil {
+		return nil, isSyncing, nil
+	}
+	return &dtoeth.SyncingStatus{
+		StartingBlock:       result.StartingBlock,
+		HighestBlock:        result.HighestBlock,
+		CurrentBlock:        result.CurrentBlock,
+		SyncedAccounts:      result.SyncedAccounts,
+		SyncedAccountBytes:  result.SyncedAccountBytes,
+		SyncedBytecodes:     result.SyncedBytecodes,
+		SyncedBytecodeBytes: result.SyncedBytecodeBytes,
+		SyncedStorage:       result.SyncedStorage,
+		SyncedStorageBytes:  result.SyncedStorageBytes,
+		HealingBytecode:     result.HealingBytecode,
+		HealedBytecodes:     result.HealedBytecodes,
+		HealedBytecodeBytes: result.HealedBytecodeBytes,
+		HealingTrienodes:    result.HealingTrienodes,
+		HealedTrienodes:     result.HealedTrienodes,
+		HealedTrienodeBytes: result.HealedTrienodeBytes,
+	}, isSyncing, nil
 }
 
 // ProtocolVersion returns the current ethereum protocol version
@@ -74,6 +98,33 @@ func (e *Ethereum) GetUncleCountByBlockNumber(ctx context.Context, blockNumber u
 
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
-func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*ethrpc.BlockInfo, error) {
-	return e.pkgrpc.GetBlockByNumber(ctx, blockNumber)
+func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*dtoeth.BlockInfo, error) {
+	result, err := e.pkgrpc.GetBlockByNumber(ctx, blockNumber)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, nil
+	}
+	return &dtoeth.BlockInfo{
+		Number:           result.Number,
+		Hash:             result.Hash,
+		ParentHash:       result.ParentHash,
+		Nonce:            result.Nonce,
+		Sha3Uncles:       result.Sha3Uncles,
+		LogsBloom:        result.LogsBloom,
+		TransactionsRoot: result.TransactionsRoot,
+		StateRoot:        result.StateRoot,
+		Miner:            result.Miner,
+		Difficulty:       result.Difficulty,
+		TotalDifficulty:  result.TotalDifficulty,
+		ExtraData:        result.ExtraData,
+		Size:             result.Size,
+		GasLimit:         result.GasLimit,
+		GasUsed:          result.GasUsed,
+		Timestamp:        result.Timestamp,
+		Transactions:     result.Transactions,
+		Uncles:           result.Uncles,
+		BaseFeePerGas:    result.BaseFeePerGas,
+	}, nil
 }

@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
@@ -11,7 +10,7 @@ import (
 // ParsedTx holds parsed UTXO data for transaction creation.
 // This struct is shared between BTC and BCH use cases.
 type ParsedTx struct {
-	TxInputs       []btcjson.TransactionInput
+	TxInputs       []dtobtc.TransactionInput
 	TxRepoTxInputs []*domainBTC.BTCTxInput
 	PrevTxs        []dtobtc.PreviousTx
 	Addresses      []string // input, sender's address

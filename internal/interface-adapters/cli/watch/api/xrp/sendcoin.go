@@ -34,7 +34,7 @@ func waitForValidation(ctx context.Context, client apixrp.LedgerPoller, targetVe
 		if err != nil {
 			return fmt.Errorf("fail to call ledger_current: %w", err)
 		}
-		if res.Result.LedgerCurrentIndex >= targetVersion {
+		if res.LedgerCurrentIndex >= targetVersion {
 			return nil
 		}
 		time.Sleep(1 * time.Second)

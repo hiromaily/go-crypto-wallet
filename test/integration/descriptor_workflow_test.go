@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -17,7 +18,6 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/mocks"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
@@ -36,7 +36,7 @@ func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 	// Expect GetDescriptorInfo to add checksums
 	btcClient.EXPECT().
 		GetDescriptorInfo(mock.AnythingOfType("string")).
-		Return(&btcrpc.DescriptorInfo{
+		Return(&dtobtc.DescriptorInfo{
 			Descriptor: desc + "#abcd1234",
 			Checksum:   "abcd1234",
 		}, nil).
@@ -44,10 +44,10 @@ func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 
 	// Expect ImportDescriptors
 	btcClient.EXPECT().
-		ImportDescriptors(mock.MatchedBy(func(reqs []btcrpc.ImportDescriptorsRequest) bool {
+		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
 			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
 		})).
-		Return([]btcrpc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
 
 	// Expect SetLabel calls for each derived address
@@ -59,9 +59,9 @@ func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 	// Expect GetAddressInfo calls for label verification
 	btcClient.EXPECT().
 		GetAddressInfo(mock.AnythingOfType("string")).
-		Return(&btcrpc.GetAddressInfoResult{
+		Return(&dtobtc.AddressInfo{
 			Address: "mock-address",
-			Labels:  btcrpc.FlexibleLabels{"deposit"},
+			Labels:  []string{"deposit"},
 		}, nil).
 		Times(2)
 
@@ -105,7 +105,7 @@ func TestDescriptorImportWorkflow_Multisig(t *testing.T) {
 	// Expect GetDescriptorInfo to add checksums
 	btcClient.EXPECT().
 		GetDescriptorInfo(mock.AnythingOfType("string")).
-		Return(&btcrpc.DescriptorInfo{
+		Return(&dtobtc.DescriptorInfo{
 			Descriptor: desc + "#abcd1234",
 			Checksum:   "abcd1234",
 		}, nil).
@@ -113,10 +113,10 @@ func TestDescriptorImportWorkflow_Multisig(t *testing.T) {
 
 	// Expect ImportDescriptors
 	btcClient.EXPECT().
-		ImportDescriptors(mock.MatchedBy(func(reqs []btcrpc.ImportDescriptorsRequest) bool {
+		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
 			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
 		})).
-		Return([]btcrpc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
 
 	// Expect SetLabel calls for each derived address
@@ -128,9 +128,9 @@ func TestDescriptorImportWorkflow_Multisig(t *testing.T) {
 	// Expect GetAddressInfo calls for label verification
 	btcClient.EXPECT().
 		GetAddressInfo(mock.AnythingOfType("string")).
-		Return(&btcrpc.GetAddressInfoResult{
+		Return(&dtobtc.AddressInfo{
 			Address: "mock-address",
-			Labels:  btcrpc.FlexibleLabels{"deposit"},
+			Labels:  []string{"deposit"},
 		}, nil).
 		Once()
 

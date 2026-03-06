@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/admin"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +39,23 @@ func (_m *MockLedgerAdvancer) EXPECT() *MockLedgerAdvancer_Expecter {
 }
 
 // LedgerAccept provides a mock function for the type MockLedgerAdvancer
-func (_mock *MockLedgerAdvancer) LedgerAccept(ctx context.Context) (*admin.ResponseLedgerAccept, error) {
+func (_mock *MockLedgerAdvancer) LedgerAccept(ctx context.Context) (*xrp.LedgerAccept, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LedgerAccept")
 	}
 
-	var r0 *admin.ResponseLedgerAccept
+	var r0 *xrp.LedgerAccept
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*admin.ResponseLedgerAccept, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*xrp.LedgerAccept, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *admin.ResponseLedgerAccept); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *xrp.LedgerAccept); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*admin.ResponseLedgerAccept)
+			r0 = ret.Get(0).(*xrp.LedgerAccept)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -90,12 +90,12 @@ func (_c *MockLedgerAdvancer_LedgerAccept_Call) Run(run func(ctx context.Context
 	return _c
 }
 
-func (_c *MockLedgerAdvancer_LedgerAccept_Call) Return(responseLedgerAccept *admin.ResponseLedgerAccept, err error) *MockLedgerAdvancer_LedgerAccept_Call {
-	_c.Call.Return(responseLedgerAccept, err)
+func (_c *MockLedgerAdvancer_LedgerAccept_Call) Return(ledgerAccept *xrp.LedgerAccept, err error) *MockLedgerAdvancer_LedgerAccept_Call {
+	_c.Call.Return(ledgerAccept, err)
 	return _c
 }
 
-func (_c *MockLedgerAdvancer_LedgerAccept_Call) RunAndReturn(run func(ctx context.Context) (*admin.ResponseLedgerAccept, error)) *MockLedgerAdvancer_LedgerAccept_Call {
+func (_c *MockLedgerAdvancer_LedgerAccept_Call) RunAndReturn(run func(ctx context.Context) (*xrp.LedgerAccept, error)) *MockLedgerAdvancer_LedgerAccept_Call {
 	_c.Call.Return(run)
 	return _c
 }

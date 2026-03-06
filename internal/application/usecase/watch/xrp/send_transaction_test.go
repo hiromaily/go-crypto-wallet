@@ -9,14 +9,13 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/xrp"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	xrpapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
-	xrprpcpublic "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
 const (
@@ -194,7 +193,7 @@ func TestSendTransactionUseCase_Execute_SubmissionError(t *testing.T) {
 	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
 		Return([]string{"01234567-89ab-cdef-0123-456789abcdef,txhash," + testSignedBlob1}, nil)
 	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob1).
-		Return((*xrplgo.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
+		Return((*dtoxrp.SentTx)(nil), uint64(0), errors.New("tefPAST_SEQ: sequence number already used"))
 
 	input := watchusecase.SendTransactionInput{
 		FilePath: "signed.csv",
@@ -216,24 +215,23 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 	txHash := "1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF"
 	csvLine := uuid + ",txhash," + testSignedBlob1
 
-	sentTx := &xrplgo.SentTx{
+	sentTx := &dtoxrp.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        testSignedBlob1,
-		TxJSON: xrplgo.TxInput{
+		TxJSON: dtoxrp.TxInput{
 			Hash:               txHash,
 			LastLedgerSequence: 12345,
 		},
 	}
 
-	txInfo := &xrplgo.TxInfo{
-		Outcome: xrplgo.TxOutcome{
+	txInfo := &dtoxrp.TxInfo{
+		Outcome: dtoxrp.TxOutcome{
 			Result: "tesSUCCESS",
 		},
 	}
 
-	ledgerCurrentRes := &xrprpcpublic.ResponseLedgerCurrent{}
-	ledgerCurrentRes.Result.LedgerCurrentIndex = 12345
+	ledgerCurrentRes := &dtoxrp.LedgerCurrent{LedgerCurrentIndex: 12345}
 
 	// Setup mocks
 	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
@@ -274,36 +272,35 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 	csvLine1 := "uuid-1,txhash1," + testSignedBlob1
 	csvLine2 := "uuid-2,txhash2," + testSignedBlob2
 
-	sentTx1 := &xrplgo.SentTx{
+	sentTx1 := &dtoxrp.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        testSignedBlob1,
-		TxJSON: xrplgo.TxInput{
+		TxJSON: dtoxrp.TxInput{
 			Hash:               txHash1,
 			LastLedgerSequence: 12345,
 		},
 	}
 
-	sentTx2 := &xrplgo.SentTx{
+	sentTx2 := &dtoxrp.SentTx{
 		ResultCode:    "tesSUCCESS",
 		ResultMessage: "The transaction was applied.",
 		TxBlob:        testSignedBlob2,
-		TxJSON: xrplgo.TxInput{
+		TxJSON: dtoxrp.TxInput{
 			Hash:               txHash2,
 			LastLedgerSequence: 12346,
 		},
 	}
 
-	txInfo1 := &xrplgo.TxInfo{
-		Outcome: xrplgo.TxOutcome{Result: "tesSUCCESS"},
+	txInfo1 := &dtoxrp.TxInfo{
+		Outcome: dtoxrp.TxOutcome{Result: "tesSUCCESS"},
 	}
-	txInfo2 := &xrplgo.TxInfo{
-		Outcome: xrplgo.TxOutcome{Result: "tesSUCCESS"},
+	txInfo2 := &dtoxrp.TxInfo{
+		Outcome: dtoxrp.TxOutcome{Result: "tesSUCCESS"},
 	}
 
 	// Use LedgerCurrentIndex >= max(LastLedgerSequence) so either goroutine's call succeeds first.
-	ledgerCurrentRes := &xrprpcpublic.ResponseLedgerCurrent{}
-	ledgerCurrentRes.Result.LedgerCurrentIndex = 12346
+	ledgerCurrentRes := &dtoxrp.LedgerCurrent{LedgerCurrentIndex: 12346}
 
 	// Setup mocks
 	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).

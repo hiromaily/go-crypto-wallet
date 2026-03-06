@@ -20,10 +20,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
+	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
 
 // TxCreateParams contains the parameters returned from transaction creation
@@ -80,7 +80,7 @@ type Ethereumer interface {
 	NodeInfo(ctx context.Context) (*p2p.NodeInfo, error)
 	AdminPeers(ctx context.Context) ([]*p2p.PeerInfo, error)
 	// rpc_eth
-	Syncing(ctx context.Context) (*ethrpc.ResponseSyncing, bool, error)
+	Syncing(ctx context.Context) (*dtoeth.SyncingStatus, bool, error)
 	ProtocolVersion(ctx context.Context) (uint64, error)
 	Coinbase(ctx context.Context) (string, error)
 	Accounts(ctx context.Context) ([]string, error)
@@ -90,7 +90,7 @@ type Ethereumer interface {
 	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
 	GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
 	GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
-	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*ethrpc.BlockInfo, error)
+	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*dtoeth.BlockInfo, error)
 	// rpc_eth_gas
 	GasPrice(ctx context.Context) (*big.Int, error)
 	EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error)
@@ -100,8 +100,8 @@ type Ethereumer interface {
 	SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error)
 	SendRawTransaction(ctx context.Context, signedTx string) (string, error)
 	SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error)
-	GetTransactionByHash(ctx context.Context, hashTx string) (*ethrpc.ResponseGetTransaction, error)
-	GetTransactionReceipt(ctx context.Context, hashTx string) (*ethrpc.ResponseGetTransactionReceipt, error)
+	GetTransactionByHash(ctx context.Context, hashTx string) (*dtoeth.TransactionInfo, error)
+	GetTransactionReceipt(ctx context.Context, hashTx string) (*dtoeth.RawTransactionReceipt, error)
 	// GetTxReceipt returns a clean domain receipt; returns (nil, nil) if not yet mined.
 	GetTxReceipt(ctx context.Context, txHash string) (*domainETH.TransactionReceipt, error)
 	// rpc_miner
@@ -204,7 +204,7 @@ type ETHNodeAPIClient interface {
 	ClientVersion(ctx context.Context) (string, error)
 	NetVersion(ctx context.Context) (uint16, error)
 	NodeInfo(ctx context.Context) (*p2p.NodeInfo, error)
-	Syncing(ctx context.Context) (*ethrpc.ResponseSyncing, bool, error)
+	Syncing(ctx context.Context) (*dtoeth.SyncingStatus, bool, error)
 }
 
 // =============================================================================
@@ -294,7 +294,7 @@ type TxMonitor interface {
 type ERC20Operator interface {
 	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
 	BlockNumber(ctx context.Context) (*big.Int, error)
-	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*ethrpc.BlockInfo, error)
+	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*dtoeth.BlockInfo, error)
 	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainETH.QuantityTag) (*big.Int, error)
 }
 

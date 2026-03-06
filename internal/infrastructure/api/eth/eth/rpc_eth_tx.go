@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/core/types"
 
+	dtoeth "github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	domainETH "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/eth"
 	ethrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
 )
@@ -43,16 +44,58 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(ctx context.Context, tx *types.
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
 func (e *Ethereum) GetTransactionByHash(
 	ctx context.Context, hashTx string,
-) (*ethrpc.ResponseGetTransaction, error) {
-	return e.pkgrpc.GetTransactionByHash(ctx, hashTx)
+) (*dtoeth.TransactionInfo, error) {
+	result, err := e.pkgrpc.GetTransactionByHash(ctx, hashTx)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, nil
+	}
+	return &dtoeth.TransactionInfo{
+		BlockHash:        result.BlockHash,
+		BlockNumber:      result.BlockNumber,
+		From:             result.From,
+		Gas:              result.Gas,
+		GasPrice:         result.GasPrice,
+		Hash:             result.Hash,
+		Input:            result.Input,
+		Nonce:            result.Nonce,
+		To:               result.To,
+		TransactionIndex: result.TransactionIndex,
+		Value:            result.Value,
+		V:                result.V,
+		R:                result.R,
+		S:                result.S,
+	}, nil
 }
 
 // GetTransactionReceipt returns the receipt of a transaction by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
 func (e *Ethereum) GetTransactionReceipt(
 	ctx context.Context, hashTx string,
-) (*ethrpc.ResponseGetTransactionReceipt, error) {
-	return e.pkgrpc.GetTransactionReceipt(ctx, hashTx)
+) (*dtoeth.RawTransactionReceipt, error) {
+	result, err := e.pkgrpc.GetTransactionReceipt(ctx, hashTx)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, nil
+	}
+	return &dtoeth.RawTransactionReceipt{
+		TransactionHash:   result.TransactionHash,
+		TransactionIndex:  result.TransactionIndex,
+		BlockHash:         result.BlockHash,
+		BlockNumber:       result.BlockNumber,
+		From:              result.From,
+		To:                result.To,
+		CumulativeGasUsed: result.CumulativeGasUsed,
+		GasUsed:           result.GasUsed,
+		ContractAddress:   result.ContractAddress,
+		Logs:              result.Logs,
+		LogsBloom:         result.LogsBloom,
+		Status:            result.Status,
+	}, nil
 }
 
 // GetTxReceipt retrieves a transaction receipt and converts it to the clean domain type.

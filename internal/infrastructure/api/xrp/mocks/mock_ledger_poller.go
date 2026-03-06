@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +39,23 @@ func (_m *MockLedgerPoller) EXPECT() *MockLedgerPoller_Expecter {
 }
 
 // LedgerCurrent provides a mock function for the type MockLedgerPoller
-func (_mock *MockLedgerPoller) LedgerCurrent(ctx context.Context) (*public.ResponseLedgerCurrent, error) {
+func (_mock *MockLedgerPoller) LedgerCurrent(ctx context.Context) (*xrp.LedgerCurrent, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LedgerCurrent")
 	}
 
-	var r0 *public.ResponseLedgerCurrent
+	var r0 *xrp.LedgerCurrent
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*public.ResponseLedgerCurrent, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*xrp.LedgerCurrent, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *public.ResponseLedgerCurrent); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *xrp.LedgerCurrent); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*public.ResponseLedgerCurrent)
+			r0 = ret.Get(0).(*xrp.LedgerCurrent)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -90,12 +90,12 @@ func (_c *MockLedgerPoller_LedgerCurrent_Call) Run(run func(ctx context.Context)
 	return _c
 }
 
-func (_c *MockLedgerPoller_LedgerCurrent_Call) Return(responseLedgerCurrent *public.ResponseLedgerCurrent, err error) *MockLedgerPoller_LedgerCurrent_Call {
-	_c.Call.Return(responseLedgerCurrent, err)
+func (_c *MockLedgerPoller_LedgerCurrent_Call) Return(ledgerCurrent *xrp.LedgerCurrent, err error) *MockLedgerPoller_LedgerCurrent_Call {
+	_c.Call.Return(ledgerCurrent, err)
 	return _c
 }
 
-func (_c *MockLedgerPoller_LedgerCurrent_Call) RunAndReturn(run func(ctx context.Context) (*public.ResponseLedgerCurrent, error)) *MockLedgerPoller_LedgerCurrent_Call {
+func (_c *MockLedgerPoller_LedgerCurrent_Call) RunAndReturn(run func(ctx context.Context) (*xrp.LedgerCurrent, error)) *MockLedgerPoller_LedgerCurrent_Call {
 	_c.Call.Return(run)
 	return _c
 }

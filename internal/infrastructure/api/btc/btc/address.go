@@ -5,6 +5,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -58,7 +59,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 }
 
 // ValidateAddress validate address
-func (b *Bitcoin) ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error) {
+func (b *Bitcoin) ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error) {
 	result, err := b.pkgrpc.ValidateAddress(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ValidateAddress(%s): %w", addr, err)
@@ -67,12 +68,48 @@ func (b *Bitcoin) ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, e
 		return nil, fmt.Errorf("this address is invalid: %v", result)
 	}
 
-	return result, nil
+	return toValidateAddressResult(result), nil
 }
 
 // GetAddressInfo returns information about the given bitcoin address
-func (b *Bitcoin) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
-	return b.pkgrpc.GetAddressInfo(addr)
+func (b *Bitcoin) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
+	result, err := b.pkgrpc.GetAddressInfo(addr)
+	if err != nil {
+		return nil, err
+	}
+	return toAddressInfo(result), nil
+}
+
+func toAddressInfo(r *btcrpc.GetAddressInfoResult) *dtobtc.AddressInfo {
+	return &dtobtc.AddressInfo{
+		Address:             r.Address,
+		ScriptPubKey:        r.ScriptPubKey,
+		IsMine:              r.IsMine,
+		Solvable:            r.Solvable,
+		Desc:                r.Desc,
+		IsWatchOnly:         r.IsWatchOnly,
+		IsScript:            r.IsScript,
+		IsWitness:           r.IsWitness,
+		Pubkey:              r.Pubkey,
+		IsCompressed:        r.IsCompressed,
+		IsChange:            r.IsChange,
+		HDKeyPath:           r.HDKeyPath,
+		HDMasterFingerprint: r.HDMasterFingerprint,
+		Labels:              []string(r.Labels),
+		Label:               r.Label,
+	}
+}
+
+func toValidateAddressResult(r *btcrpc.ValidateAddressResult) *dtobtc.ValidateAddressResult {
+	return &dtobtc.ValidateAddressResult{
+		IsValid:           r.IsValid,
+		Address:           r.Address,
+		ScriptPubKey:      r.ScriptPubKey,
+		IsScript:          r.IsScript,
+		IsWitness:         r.IsWitness,
+		WitnessVersion:    r.WitnessVersion,
+		WitnessProgramHex: r.WitnessProgramHex,
+	}
 }
 
 // DecodeAddress decode string address to type Address
