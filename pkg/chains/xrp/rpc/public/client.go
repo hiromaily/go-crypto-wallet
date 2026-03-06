@@ -11,8 +11,3 @@ type PublicRPC struct {
 func NewPublicRPC(caller rpc.WSCaller) *PublicRPC {
 	return &PublicRPC{caller: caller}
 }
-
-// Close closes the underlying WebSocket connection.
-func (r *PublicRPC) Close() error {
-	return r.caller.Close()
-}
