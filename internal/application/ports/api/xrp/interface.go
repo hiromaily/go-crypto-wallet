@@ -21,11 +21,15 @@ import (
 )
 
 // XRPer defines the main interface for XRP blockchain operations.
-// It embeds specialized interfaces for admin, public, and API operations.
+// It embeds specialized interfaces for admin, public, and WebSocket transaction operations.
 type XRPer interface {
 	XRPAdminer
 	XRPPublicer
-	XRPAPIProvider
+	TransactionSubmitter
+	TransactionSigner
+
+	// account
+	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
 
 	// balance
 	GetBalance(ctx context.Context, addr string) (float64, error)
@@ -49,178 +53,6 @@ type XRPer interface {
 type SignerEntryInput struct {
 	Account string
 	Weight  uint32
-}
-
-// XRPAPIProvider defines the interface for XRP API operations.
-// Implementations handle account management, address generation, and transaction operations.
-type XRPAPIProvider interface {
-	// XRPAccountAPI
-	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
-	// XRPAddressAPI
-	GenerateAddress(ctx context.Context) (*dtoxrp.ResponseGenerateAddress, error)
-	GenerateXAddress(ctx context.Context) (*dtoxrp.ResponseGenerateXAddress, error)
-	IsValidAddress(ctx context.Context, addr string) (bool, error)
-	// XRPTxAPI
-	PrepareTransaction(
-		ctx context.Context,
-		senderAccount, receiverAccount string,
-		amount float64,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.TxInput, string, error)
-	SignTransaction(ctx context.Context, txJSON *dtoxrp.TxInput, secret string) (string, string, error)
-	SignTransactionNative(
-		ctx context.Context,
-		txInput *dtoxrp.TxInput,
-		secret string,
-		isMultiSig bool,
-		existingSignedBlob *string,
-	) (string, string, error)
-	CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error)
-	SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error)
-	WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error)
-	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error)
-
-	// Regular Key operations
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/setregularkey
-	PrepareSetRegularKeyTransaction(
-		ctx context.Context,
-		senderAccount, regularKey string,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.SetRegularKeyTxInput, string, error)
-
-	// Account settings operations
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset
-	PrepareAccountSetTransaction(
-		ctx context.Context,
-		senderAccount string,
-		setFlag, clearFlag uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.AccountSetTxInput, string, error)
-
-	// Multi-signature operations
-	// Reference: https://xrpl.org/docs/concepts/accounts/multi-signing
-	PrepareSignerListSetTransaction(
-		ctx context.Context,
-		senderAccount string,
-		signerQuorum uint32,
-		signerEntries []SignerEntryInput,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.SignerListSetTxInput, string, error)
-
-	// Trust line operations
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/trustset
-	PrepareTrustSetTransaction(
-		ctx context.Context,
-		senderAccount string,
-		limitAmount *dtoxrp.IssuedCurrencyAmount,
-		qualityIn, qualityOut uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.TrustSetTxInput, string, error)
-
-	// Escrow operations
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcreate
-	PrepareEscrowCreateTransaction(
-		ctx context.Context,
-		senderAccount, destinationAccount string,
-		amount float64,
-		cancelAfter, finishAfter uint32,
-		condition string,
-		destinationTag uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.EscrowCreateTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowfinish
-	PrepareEscrowFinishTransaction(
-		ctx context.Context,
-		senderAccount, owner string,
-		offerSequence uint32,
-		condition, fulfillment string,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.EscrowFinishTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/escrowcancel
-	PrepareEscrowCancelTransaction(
-		ctx context.Context,
-		senderAccount, owner string,
-		offerSequence uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.EscrowCancelTxInput, string, error)
-
-	// PaymentChannel operations
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelcreate
-	PreparePaymentChannelCreateTransaction(
-		ctx context.Context,
-		senderAccount, destinationAccount string,
-		amount float64,
-		settleDelay uint32,
-		publicKey string,
-		cancelAfter, destinationTag, sourceTag uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.PaymentChannelCreateTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelfund
-	PreparePaymentChannelFundTransaction(
-		ctx context.Context,
-		senderAccount, channel string,
-		amount float64,
-		expiration uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.PaymentChannelFundTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/paymentchannelclaim
-	PreparePaymentChannelClaimTransaction(
-		ctx context.Context,
-		senderAccount, channel string,
-		balance string,
-		amount float64,
-		signature, publicKey string,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.PaymentChannelClaimTxInput, string, error)
-
-	// NFToken operations
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenmint
-	PrepareNFTokenMintTransaction(
-		ctx context.Context,
-		senderAccount string,
-		nfTokenTaxon uint32,
-		issuer, uri string,
-		transferFee uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.NFTokenMintTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenburn
-	PrepareNFTokenBurnTransaction(
-		ctx context.Context,
-		senderAccount, nfTokenID, owner string,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.NFTokenBurnTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencreateoffer
-	PrepareNFTokenCreateOfferTransaction(
-		ctx context.Context,
-		senderAccount, nfTokenID string,
-		amount float64,
-		owner, destination string,
-		expiration uint32,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.NFTokenCreateOfferTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokenacceptoffer
-	PrepareNFTokenAcceptOfferTransaction(
-		ctx context.Context,
-		senderAccount string,
-		nfTokenSellOffer, nfTokenBuyOffer string,
-		nfTokenBrokerFee float64,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.NFTokenAcceptOfferTxInput, string, error)
-
-	// Reference: https://xrpl.org/docs/references/protocol/transactions/types/nftokencanceloffer
-	PrepareNFTokenCancelOfferTransaction(
-		ctx context.Context,
-		senderAccount string,
-		nfTokenOffers []string,
-		instructions *dtoxrp.Instructions,
-	) (*dtoxrp.NFTokenCancelOfferTxInput, string, error)
 }
 
 // XRPPublicer defines the interface for XRP public node operations.

@@ -2,11 +2,11 @@
 
 ## Overview
 
-This refactoring decomposes the monolithic `XRP` struct in `internal/infrastructure/api/xrp/` into five single-responsibility structs, each implementing exactly the port interfaces its role demands. The `WSClient` struct is reduced to a pure internal helper and is no longer exposed beyond the package. Each new struct is wired independently through the DI container, eliminating the over-provision of the current `XRPer` monolith to use cases.
+This refactoring decomposes the monolithic `XRP` struct in `internal/infrastructure/api/xrp/` into focused single-responsibility structs. Public and admin WebSocket operations use a two-layer design: typed RPC structs (`PublicRPC`, `AdminRPC`) at the `pkg` layer and adapter structs (`publicRPC`, `adminRPC`) at the infrastructure layer. Transaction, account, and address operations become `txClient`, `accountClient`, and `addressClient`. The `WSClient` struct is eliminated. Each new struct is wired independently through the DI container, eliminating the over-provision of the current `XRPer` monolith to use cases.
 
-**Purpose**: Replace the `XRP` and `WSClient` types with `publicClient`, `adminClient`, `txClient`, `accountClient`, and `addressClient` so that each use case depends only on what it actually needs.
+**Purpose**: Replace the `XRP` and `WSClient` types with focused adapter structs (`publicRPC`, `adminRPC`, `txClient`, `accountClient`, `addressClient`) so that each use case depends only on what it actually needs. The public and admin WebSocket paths use a two-layer design: a typed RPC struct at the `pkg` layer and an adapter struct at the `internal/infrastructure` layer.
 **Users**: Developers wiring XRP use cases and infrastructure; any future developer adding an XRP use case.
-**Impact**: Eliminates `XRP`, `NewXRP`, `WSClient`, `XRPer`, and `XRPAPIProvider`. All downstream use cases and the DI container are updated; no behavior changes for end users.
+**Impact**: Eliminates `XRP`, `NewXRP`, `WSClient`, `XRPer`, and `XRPAPIProvider`. The `XRPPublicer` and `XRPAdminer` interfaces move from `internal/application/ports/api/xrp/` to `pkg/chains/xrp/rpc/public/` and `pkg/chains/xrp/rpc/admin/` respectively. All downstream use cases and the DI container are updated; no behavior changes for end users.
 
 ### Goals
 
@@ -46,20 +46,24 @@ graph TD
     DI[container.go]
   end
 
+  subgraph "internal/infrastructure/api/xrp/public"
+    PC[publicRPC\ncaller xrprpcpublic.XRPPublicer]
+  end
+
+  subgraph "internal/infrastructure/api/xrp/admin"
+    AC[adminRPC\ncaller xrprpcadmin.XRPAdminer]
+  end
+
   subgraph "internal/infrastructure/api/xrp"
-    PC[publicClient\npublic *websocket.WS]
-    AC[adminClient\nadmin *websocket.WS]
     TC[txClient\nimpl protogen.XRPTransactionAPIClient\nai AccountInfoProvider]
     ACC[accountClient\nimpl protogen.XRPAccountAPIClient]
     ADRC[addressClient\nimpl protogen.XRPAddressAPIClient]
-    LTX[localTxImpl\npublic *websocket.WS\nPeersyst signing]
-    LACC[localAccountImpl\npublic *websocket.WS]
+    LTX[localTxImpl\nws *websocket.WS\nPeersyst signing]
+    LACC[localAccountImpl\nws *websocket.WS]
     LADRC[localAddressImpl\npkg/chains/xrp utilities]
   end
 
   subgraph "internal/application/ports/api/xrp"
-    XRPPublicer
-    XRPAdminer
     AccountInfoProvider
     BalanceChecker
     TransactionSubmitter
@@ -71,15 +75,24 @@ graph TD
     Closer
   end
 
+  subgraph "pkg/chains/xrp/rpc/public"
+    PubRPC[PublicRPC\ncaller rpc.WSCaller]
+    XRPPublicer[XRPPublicer interface]
+  end
+
+  subgraph "pkg/chains/xrp/rpc/admin"
+    AdmRPC[AdminRPC\ncaller rpc.WSCaller]
+    XRPAdminer[XRPAdminer interface]
+  end
+
   subgraph "pkg/chains/xrp"
     protogen[protogen.*APIClient interfaces]
     xrplclient[xrplclient.XRPLClient\ngRPC path]
-    xrprpc[rpc package]
     xrpkg[pkg/chains/xrp\nkeygen, sign, address]
   end
 
-  DI -->|constructs| PC
-  DI -->|constructs| AC
+  DI -->|constructs PublicRPC then publicRPC| PC
+  DI -->|constructs AdminRPC then adminRPC| AC
   DI -->|constructs| LTX
   DI -->|constructs| LACC
   DI -->|constructs| LADRC
@@ -90,18 +103,19 @@ graph TD
   DI -->|gRPC alt: injects xrplclient.AccountClient| ACC
   DI -->|gRPC alt: injects xrplclient.AddressClient| ADRC
 
-  PC -->|uses| xrprpc
-  AC -->|uses| xrprpc
-  LTX -->|uses| xrprpc
+  PC -->|delegates to| PubRPC
+  AC -->|delegates to| AdmRPC
+  PubRPC -.->|implements| XRPPublicer
+  AdmRPC -.->|implements| XRPAdminer
+
+  LTX -->|uses| PubRPC
   LTX -->|uses| xrpkg
-  LACC -->|uses| xrprpc
+  LACC -->|uses| PubRPC
   LADRC -->|uses| xrpkg
 
-  PC -.->|implements| XRPPublicer
   PC -.->|implements| AccountInfoProvider
   PC -.->|implements| BalanceChecker
   PC -.->|implements| TransactionSubmitter
-  AC -.->|implements| XRPAdminer
   AC -.->|implements| KeyGenerator
   TC -.->|implements| TransactionPreparer
   TC -.->|implements| TransactionCombiner
@@ -112,22 +126,31 @@ graph TD
   ADRC -.->|implements| Closer
 ```
 
-**Selected pattern**: Adapter per responsibility — each new struct adapts a lower-level transport or protocol interface to the application port interfaces.
+**Selected pattern**: Two-layer adapter per responsibility.
 
-**Existing patterns preserved**: Clean Architecture layer boundaries; port interfaces in `application/ports/`; infrastructure implements, never defines interfaces.
+- `pkg` layer: `PublicRPC` / `AdminRPC` typed structs providing typed WebSocket RPC methods (methods on receivers replacing standalone functions). Interfaces `XRPPublicer` / `XRPAdminer` defined here.
+- `internal/infrastructure` layer: `publicRPC` / `adminRPC` adapter structs wrapping the pkg-layer interface and implementing application port interfaces.
+
+**Existing patterns preserved**: Clean Architecture layer boundaries; application port interfaces in `application/ports/` (for use-case-facing interfaces); infrastructure implements, never defines port interfaces.
+
+**Exception**: `XRPPublicer` and `XRPAdminer` are defined in `pkg/` (not ports) because they describe the RPC wire protocol boundary, not the application boundary. They are parallel to `rpc.BTCRPC` (defined in `pkg/chains/btc/rpc/`) following the same pattern used in BTC.
 
 **New components rationale**:
+- `PublicRPC` / `AdminRPC` in `pkg/` encapsulate the wire-protocol shape and are testable without the infrastructure layer.
+- `publicRPC` / `adminRPC` in `internal/infrastructure/` bridge from the typed RPC calls to the application port method signatures (e.g., `GetAccountInfo`, `GetBalance`).
 - `localTxImpl` / `localAccountImpl` / `localAddressImpl` separate implementation concerns from the adapter wrapper, enabling gRPC swap without touching the wrapper.
 
 ### Technology Stack
 
 | Layer | Choice / Version | Role | Notes |
 |-------|-----------------|------|-------|
-| Infrastructure structs | Go structs in `internal/infrastructure/api/xrp/` | 5 focused adapters | Replace XRP + WSClient |
+| pkg RPC structs | `pkg/chains/xrp/rpc/public/`, `pkg/chains/xrp/rpc/admin/` | `PublicRPC`, `AdminRPC` typed structs with methods | Replace standalone functions; interfaces `XRPPublicer`/`XRPAdminer` defined here |
+| Infrastructure adapters | `internal/infrastructure/api/xrp/public/`, `admin/` | `publicRPC`, `adminRPC` adapters wrapping pkg interfaces | Bridge pkg-layer RPCs to application port interfaces |
+| Infrastructure tx/account/addr | `internal/infrastructure/api/xrp/` | `txClient`, `accountClient`, `addressClient` | Accept `protogen.*APIClient`; local or gRPC impl |
 | Offline crypto | `github.com/Peersyst/xrpl-go` v0.1.15 | Signing, key generation, address encoding | Already in go.mod |
-| WebSocket node queries | `pkg/chains/xrp/rpc` (internal) | account_info, submit, ledger_current | Wraps `pkg/websocket.WS` |
+| WebSocket node queries | `pkg/chains/xrp/rpc` (internal) | `WSCaller` interface, `account_info`, `submit`, `ledger_current` | Wraps `pkg/websocket.WS` |
 | gRPC compat | `pkg/chains/xrp/protogen` | Interface contracts for tx/account/address | DO NOT EDIT generated |
-| DI | `internal/di/container.go` | Independent construction and wiring | 5 separate factory methods |
+| DI | `internal/di/container.go` | Independent construction and wiring | Separate factory methods per struct |
 
 ---
 
@@ -139,15 +162,19 @@ graph TD
 sequenceDiagram
   participant DI as container.go
   participant WS as websocket.WS (public/admin)
-  participant PC as publicClient
-  participant AC as adminClient
+  participant PubRPC as PublicRPC (pkg/rpc/public)
+  participant PC as publicRPC (infra/public)
+  participant AdmRPC as AdminRPC (pkg/rpc/admin)
+  participant AC as adminRPC (infra/admin)
   participant LTX as localTxImpl
   participant TC as txClient
   participant UC as XRP Use Case
 
   DI->>WS: newXRPWSClient() → wsPublic, wsAdmin
-  DI->>PC: NewPublicClient(wsPublic)
-  DI->>AC: NewAdminClient(wsAdmin)
+  DI->>PubRPC: public.NewPublicRPC(wsPublic) [PublicRPC implements XRPPublicer]
+  DI->>PC: NewPublicRPC(PubRPC)  [infra adapter]
+  DI->>AdmRPC: admin.NewAdminRPC(wsAdmin) [AdminRPC implements XRPAdminer]
+  DI->>AC: NewAdminRPC(AdmRPC)  [infra adapter]
   DI->>LTX: NewLocalTxImpl(wsPublic)
   DI->>TC: NewTxClient(LTX, PC)  // PC satisfies AccountInfoProvider
   DI->>UC: NewCreateTransactionUseCase(PC, TC)
@@ -164,21 +191,22 @@ sequenceDiagram
 | Requirement | Summary | Components | Interfaces | Notes |
 |-------------|---------|------------|------------|-------|
 | 1.1 | Delete XRP struct and NewXRP | `xrp.go`, `connection.go` deleted | — | |
-| 1.2 | Create 5 unexported structs | `publicClient`, `adminClient`, `txClient`, `accountClient`, `addressClient` | All port interfaces | |
-| 1.3 | Each struct carries only needed fields | Field list per struct in Components section | — | |
-| 1.4 | Exported constructors | `NewPublicClient`, `NewAdminClient`, `NewTxClient`, `NewAccountClient`, `NewAddressClient` | — | |
-| 1.5 | WSClient eliminated or reduced | Removed from exported surface; may keep as private helper | — | |
-| 2.1 | publicClient implements public port interfaces | `XRPPublicer`, `AccountInfoProvider`, `BalanceChecker`, `TransactionSubmitter` | — | |
-| 2.2 | adminClient implements admin port interfaces | `XRPAdminer`, `KeyGenerator` | — | |
+| 1.2 | Reorganize `pkg/chains/xrp/rpc/` into `public/` and `admin/` subdirs | `PublicRPC`, `AdminRPC` structs with methods + `XRPPublicer`/`XRPAdminer` interfaces | — | Interfaces live at pkg layer |
+| 1.3 | Create infra adapter structs in matching subdirs | `publicRPC`, `adminRPC`, `txClient`, `accountClient`, `addressClient` | All port interfaces | |
+| 1.4 | Each struct carries only needed fields | Field list per struct in Components section | — | |
+| 1.5 | Exported constructors | `NewPublicRPC`, `NewAdminRPC`, `NewTxClient`, `NewAccountClient`, `NewAddressClient` | — | |
+| 1.6 | WSClient eliminated or reduced | Removed from exported surface; may keep as private helper | — | |
+| 2.1 | `XRPPublicer`/`XRPAdminer` defined in pkg layer; publicRPC/adminRPC implement port interfaces | `AccountInfoProvider`, `BalanceChecker`, `TransactionSubmitter`, `KeyGenerator` | — | Interfaces removed from ports |
+| 2.2 | No cross-responsibility methods | Verified by receiver type per method | — | |
 | 2.3 | txClient implements XRPTransactionAPIClient surface | `TransactionPreparer`, `TransactionCombiner`, `RegularKeyPreparer`, `SignerListPreparer` | via localTxImpl or gRPC |
 | 2.4 | accountClient implements XRPAccountAPIClient surface | `AccountInfoProvider`, `BalanceChecker` | via localAccountImpl or gRPC |
 | 2.5 | addressClient implements XRPAddressAPIClient surface | address port interfaces | via localAddressImpl or gRPC |
-| 2.6 | No cross-responsibility methods | Verified by receiver type per method | — | |
+| 2.7 | Mockery config updated | `XRPPublicer` mocks from pkg/public, `XRPAdminer` mocks from pkg/admin | — | |
 | 3.1 | txClient local (no gRPC) | `localTxImpl` using WebSocket + Peersyst | — | |
 | 3.2 | accountClient local (no gRPC) | `localAccountImpl` using WebSocket rpc | — | |
 | 3.3 | addressClient local (no gRPC) | `localAddressImpl` using pkg/chains/xrp | — | |
 | 3.4 | Library compliance | Peersyst offline, xrprpc WebSocket, no XRPLF | — | |
-| 4.1 | DI instantiates 5 structs independently | `container.go` | — | |
+| 4.1 | DI instantiates all structs independently | `container.go` | — | |
 | 4.2 | Use cases declare only needed port interfaces | Already satisfied; no XRPer in use case params | — | |
 | 4.3 | Former XRPAPIProvider use cases get focused interface | `txClient`/`accountClient`/`addressClient` wired per use case | — | |
 | 4.4 | Remove all references to XRP/NewXRP/XRPer | `internal/` cleanup | — | |
@@ -189,7 +217,7 @@ sequenceDiagram
 | 6.1 | make check-build passes | Full build verification | — | |
 | 6.2 | make go-lint passes | No new lint errors | — | |
 | 6.3 | make go-test passes | Unit tests in `internal/infrastructure/api/xrp/` and `pkg/chains/xrp/` | — | |
-| 6.4 | Port interface definitions unchanged | Existing small interfaces retained | — | |
+| 6.4 | Port interface definitions unchanged | Existing small interfaces retained | — | `XRPPublicer`/`XRPAdminer` moved, not changed |
 
 ---
 
@@ -197,97 +225,182 @@ sequenceDiagram
 
 ### Summary Table
 
-| Component | Layer | Intent | Req Coverage | Key Port Interfaces |
-|-----------|-------|--------|-------------|----------------------|
-| `publicClient` | Infrastructure | Public WebSocket adapter | 1.2, 2.1, 3.x | `XRPPublicer`, `AccountInfoProvider`, `BalanceChecker`, `TransactionSubmitter` |
-| `adminClient` | Infrastructure | Admin WebSocket adapter | 1.2, 2.2 | `XRPAdminer`, `KeyGenerator` |
-| `txClient` | Infrastructure | Transaction API adapter | 1.2, 2.3, 3.1 | `TransactionPreparer`, `TransactionCombiner`, `RegularKeyPreparer`, `SignerListPreparer` + all `Prepare*` |
-| `accountClient` | Infrastructure | Account API adapter | 1.2, 2.4, 3.2 | `AccountInfoProvider`, `BalanceChecker` |
-| `addressClient` | Infrastructure | Address API adapter | 1.2, 2.5, 3.3 | Address port interfaces |
-| `localTxImpl` | Infrastructure | Non-gRPC tx implementation | 3.1 | `protogen.XRPTransactionAPIClient` |
-| `localAccountImpl` | Infrastructure | Non-gRPC account implementation | 3.2 | `protogen.XRPAccountAPIClient` |
-| `localAddressImpl` | Infrastructure | Non-gRPC address implementation | 3.3 | `protogen.XRPAddressAPIClient` |
+| Component | Package | Layer | Intent | Req Coverage | Key Interfaces |
+|-----------|---------|-------|--------|-------------|----------------|
+| `PublicRPC` | `pkg/chains/xrp/rpc/public/` | pkg | Typed public-node WebSocket RPC struct | 1.2 | `XRPPublicer` (defined here) |
+| `AdminRPC` | `pkg/chains/xrp/rpc/admin/` | pkg | Typed admin-node WebSocket RPC struct | 1.2 | `XRPAdminer` (defined here) |
+| `publicRPC` | `internal/infrastructure/api/xrp/public/` | Infrastructure | Adapter: bridges `XRPPublicer` to port interfaces | 1.3, 2.1, 3.x | `AccountInfoProvider`, `BalanceChecker`, `TransactionSubmitter` |
+| `adminRPC` | `internal/infrastructure/api/xrp/admin/` | Infrastructure | Adapter: bridges `XRPAdminer` to port interfaces | 1.3, 2.2 | `KeyGenerator` |
+| `txClient` | `internal/infrastructure/api/xrp/` | Infrastructure | Transaction API adapter | 1.3, 2.3, 3.1 | `TransactionPreparer`, `TransactionCombiner`, `RegularKeyPreparer`, `SignerListPreparer` + all `Prepare*` |
+| `accountClient` | `internal/infrastructure/api/xrp/` | Infrastructure | Account API adapter | 1.3, 2.4, 3.2 | `AccountInfoProvider`, `BalanceChecker` |
+| `addressClient` | `internal/infrastructure/api/xrp/` | Infrastructure | Address API adapter | 1.3, 2.5, 3.3 | Address port interfaces |
+| `localTxImpl` | `internal/infrastructure/api/xrp/` | Infrastructure | Non-gRPC tx implementation | 3.1 | `protogen.XRPTransactionAPIClient` |
+| `localAccountImpl` | `internal/infrastructure/api/xrp/` | Infrastructure | Non-gRPC account implementation | 3.2 | `protogen.XRPAccountAPIClient` |
+| `localAddressImpl` | `internal/infrastructure/api/xrp/` | Infrastructure | Non-gRPC address implementation | 3.3 | `protogen.XRPAddressAPIClient` |
 
 ---
 
-### Infrastructure / `internal/infrastructure/api/xrp/`
+### pkg layer / `pkg/chains/xrp/rpc/public/` and `pkg/chains/xrp/rpc/admin/`
 
-#### `publicClient`
+#### `PublicRPC`
 
 | Field | Detail |
 |-------|--------|
-| Intent | Adapts public WebSocket to public-facing port interfaces |
-| Requirements | 1.2, 1.3, 1.4, 2.1 |
+| Intent | Low-level typed struct for public-node WebSocket RPC calls |
+| Location | `pkg/chains/xrp/rpc/public/client.go` |
+| Requirements | 1.2 |
 
 **Responsibilities & Constraints**
 
-- Wraps `public *websocket.WS`; does NOT hold the admin websocket
-- Owns all operations directed at the public XRPL node
-- `WaitValidation` polls ledger_current via public WS only; admin ledger_accept is removed
+- Holds a `rpc.WSCaller` (the `websocket.WS` public connection, accessed via the `WSCaller` interface)
+- Exposes methods for all public RPC commands (`AccountInfo`, `AccountChannels`, `ServerInfo`, `Submit`, `GetTx`, `LedgerCurrent`)
+- Methods replace the previous standalone functions in `pkg/chains/xrp/rpc/`
+- Does NOT hold the admin connection
 
 **Fields**
 
 ```go
-type publicClient struct {
-    ws *websocket.WS // public node connection
+// pkg/chains/xrp/rpc/public/client.go
+type PublicRPC struct {
+    caller rpc.WSCaller
 }
 ```
 
 **Constructor**
 
 ```go
-func NewPublicClient(ws *websocket.WS) *publicClient
+func NewPublicRPC(caller rpc.WSCaller) *PublicRPC
 ```
 
-**Contracts**: Service [x]
+**Interface Defined Here**
+
+```go
+// pkg/chains/xrp/rpc/public/interface.go
+type XRPPublicer interface {
+    AccountChannels(ctx context.Context, sender, receiver string) (*ResponseAccountChannels, error)
+    AccountInfo(ctx context.Context, address string) (*ResponseAccountInfo, error)
+    ServerInfo(ctx context.Context) (*ResponseServerInfo, error)
+}
+```
+
+`PublicRPC` implements `XRPPublicer`. Mocks for `XRPPublicer` are generated from this package (see `.mockery.yaml`).
+
+---
+
+#### `AdminRPC`
+
+| Field | Detail |
+|-------|--------|
+| Intent | Low-level typed struct for admin-node WebSocket RPC calls |
+| Location | `pkg/chains/xrp/rpc/admin/client.go` |
+| Requirements | 1.2 |
+
+**Fields**
+
+```go
+// pkg/chains/xrp/rpc/admin/client.go
+type AdminRPC struct {
+    caller rpc.WSCaller
+}
+```
+
+**Constructor**
+
+```go
+func NewAdminRPC(caller rpc.WSCaller) *AdminRPC
+```
+
+**Interface Defined Here**
+
+```go
+// pkg/chains/xrp/rpc/admin/interface.go
+type XRPAdminer interface {
+    ValidationCreate(ctx context.Context, secret string) (*ResponseValidationCreate, error)
+    WalletProposeWithKey(ctx context.Context, seed string, keyType xrp.KeyType) (*ResponseWalletPropose, error)
+    WalletPropose(ctx context.Context, passphrase string) (*ResponseWalletPropose, error)
+}
+```
+
+`AdminRPC` implements `XRPAdminer`. Mocks generated from this package (see `.mockery.yaml`).
+
+---
+
+### Infrastructure / `internal/infrastructure/api/xrp/`
+
+#### `publicRPC`
+
+| Field | Detail |
+|-------|--------|
+| Intent | Adapter: wraps `xrprpcpublic.XRPPublicer`, implements application port interfaces |
+| Location | `internal/infrastructure/api/xrp/public/public.go` |
+| Requirements | 1.3, 1.4, 1.5, 2.1 |
+
+**Responsibilities & Constraints**
+
+- Holds `caller xrprpcpublic.XRPPublicer`; does NOT hold `*websocket.WS` directly
+- Bridges typed RPC responses to application port method signatures
+- `WaitValidation` polls `LedgerCurrent` via the public caller
+
+**Fields**
+
+```go
+type publicRPC struct {
+    caller xrprpcpublic.XRPPublicer
+}
+```
+
+**Constructor**
+
+```go
+func NewPublicRPC(caller xrprpcpublic.XRPPublicer) *publicRPC
+```
 
 **Port Interfaces Implemented**
 
 | Interface | Methods |
 |-----------|---------|
-| `XRPPublicer` | `AccountChannels`, `AccountInfo`, `ServerInfo` |
 | `AccountInfoProvider` | `GetAccountInfo` |
 | `BalanceChecker` | `GetBalance`, `GetTotalBalance` |
 | `TransactionSubmitter` | `SubmitTransaction`, `WaitValidation`, `GetTransaction` |
 
 **Implementation Notes**
 
-- Logic migrated directly from `WSClient` methods on the public connection
+- Logic migrated from `WSClient` methods; now delegates to `r.caller.AccountInfo(...)` etc.
 - `BalanceChecker` delegates to `GetAccountInfo` (same logic as current `WSClient`)
 
 ---
 
-#### `adminClient`
+#### `adminRPC`
 
 | Field | Detail |
 |-------|--------|
-| Intent | Adapts admin WebSocket to admin port interfaces |
-| Requirements | 1.2, 1.3, 1.4, 2.2 |
+| Intent | Adapter: wraps `xrprpcadmin.XRPAdminer`, implements application port interfaces |
+| Location | `internal/infrastructure/api/xrp/admin/admin.go` |
+| Requirements | 1.3, 1.4, 1.5, 2.2 |
 
 **Fields**
 
 ```go
-type adminClient struct {
-    ws *websocket.WS // admin node connection
+type adminRPC struct {
+    caller xrprpcadmin.XRPAdminer
 }
 ```
 
 **Constructor**
 
 ```go
-func NewAdminClient(ws *websocket.WS) *adminClient
+func NewAdminRPC(caller xrprpcadmin.XRPAdminer) *adminRPC
 ```
 
 **Port Interfaces Implemented**
 
 | Interface | Methods |
 |-----------|---------|
-| `XRPAdminer` | `ValidationCreate`, `WalletProposeWithKey`, `WalletPropose` |
 | `KeyGenerator` | `WalletPropose` |
 
 **Implementation Notes**
 
-- Logic migrated directly from `WSClient` admin methods
+- Delegates directly to `r.caller.ValidationCreate(...)`, `r.caller.WalletPropose(...)`, etc.
 
 ---
 
@@ -488,15 +601,20 @@ func NewLocalAddressImpl() *localAddressImpl
 
 ---
 
-### Port Interfaces (`internal/application/ports/api/xrp/interface.go`)
+### Port Interfaces (`internal/application/ports/api/xrp/`)
 
 **To be removed**:
 - `XRPer` — monolithic composite; eliminated
 - `XRPAPIProvider` — sub-monolithic; eliminated
+- `XRPPublicer` — moved to `pkg/chains/xrp/rpc/public/interface.go`
+- `XRPAdminer` — moved to `pkg/chains/xrp/rpc/admin/interface.go`
 
 **Retained (unchanged)**:
-- `XRPPublicer`, `XRPAdminer` — implemented by `publicClient` / `adminClient`
 - `AccountInfoProvider`, `BalanceChecker`, `TransactionSubmitter`, `TransactionPreparer`, `TransactionCombiner`, `RegularKeyPreparer`, `SignerListPreparer`, `KeyGenerator`, `Closer`, `CoinTypeProvider` — all retained
+
+**Mock generation** (`.mockery.yaml`):
+- `XRPPublicer` mock: generated from `pkg/chains/xrp/rpc/public`, output to `pkg/chains/xrp/rpc/public/mocks/`
+- `XRPAdminer` mock: generated from `pkg/chains/xrp/rpc/admin`, output to `pkg/chains/xrp/rpc/admin/mocks/`
 
 **New port interfaces** (if needed): If use cases commonly combine the same pair of interfaces, a named composite may be promoted to `interface.go`. The initial implementation avoids premature composites.
 
@@ -509,20 +627,26 @@ func NewLocalAddressImpl() *localAddressImpl
 // Remove:
 xrp apixrp.XRPer
 
-// Add:
-xrpPublic   *apixrpimpl.publicClient
-xrpAdmin    *apixrpimpl.adminClient
-xrpTx       *apixrpimpl.txClient
-xrpAccount  *apixrpimpl.accountClient
-xrpAddress  *apixrpimpl.addressClient
+// Add (pkg layer RPC structs):
+xrpPublicRPC *xrprpcpublic.PublicRPC  // pkg/chains/xrp/rpc/public
+xrpAdminRPC  *xrprpcadmin.AdminRPC   // pkg/chains/xrp/rpc/admin
+
+// Add (infrastructure adapters):
+xrpPublic   *xrppublic.publicRPC    // internal/infrastructure/api/xrp/public
+xrpAdmin    *xrpadmin.adminRPC      // internal/infrastructure/api/xrp/admin
+xrpTx       *xrpinfra.txClient
+xrpAccount  *xrpinfra.accountClient
+xrpAddress  *xrpinfra.addressClient
 ```
 
-**New factory methods** (one per new struct, lazy-initialized and cached):
-- `newXRPPublicClient() *apixrpimpl.publicClient`
-- `newXRPAdminClient() *apixrpimpl.adminClient`
-- `newXRPTxClient() *apixrpimpl.txClient`
-- `newXRPAccountClient() *apixrpimpl.accountClient`
-- `newXRPAddressClient() *apixrpimpl.addressClient`
+**New factory methods** (lazy-initialized and cached):
+- `newXRPPublicRPC() *xrprpcpublic.PublicRPC` — constructs pkg-layer RPC struct with public WSCaller
+- `newXRPAdminRPC() *xrprpcadmin.AdminRPC` — constructs pkg-layer RPC struct with admin WSCaller
+- `newXRPPublicClient() *xrppublic.publicRPC` — wraps `newXRPPublicRPC()`
+- `newXRPAdminClient() *xrpadmin.adminRPC` — wraps `newXRPAdminRPC()`
+- `newXRPTxClient() *xrpinfra.txClient`
+- `newXRPAccountClient() *xrpinfra.accountClient`
+- `newXRPAddressClient() *xrpinfra.addressClient`
 
 **Use case factory updates** (examples):
 
@@ -593,11 +717,19 @@ Existing integration tests in `internal/infrastructure/api/xrp/*_test.go` are up
 
 The refactoring is **non-breaking at runtime** (same behavior, different struct boundaries). The migration order:
 
-1. Add 5 new structs and their constructors in `internal/infrastructure/api/xrp/` (new files, no deletions yet)
-2. Add local non-gRPC implementations (`localTxImpl`, `localAccountImpl`, `localAddressImpl`)
-3. Update `internal/di/container.go` to use new structs; update all use case factories
-4. Update `internal/interface-adapters/wallet/xrp/` to remove `XRPer` references
-5. Remove `XRP`, `NewXRP`, `WSClient`, `NewXRPFromCoinType`; remove `XRPer`, `XRPAPIProvider` from port interfaces
-6. Run `make go-lint && make check-build && make go-test`
+1. Reorganize `pkg/chains/xrp/rpc/` into `public/` and `admin/` subdirectories:
+   - Create `PublicRPC` struct with methods (replacing standalone functions)
+   - Create `AdminRPC` struct with methods
+   - Define `XRPPublicer` in `public/interface.go` and `XRPAdminer` in `admin/interface.go`
+   - Update `.mockery.yaml` to generate mocks from new pkg packages
+2. Add infra adapter structs in subdirectories:
+   - `publicRPC` in `internal/infrastructure/api/xrp/public/`
+   - `adminRPC` in `internal/infrastructure/api/xrp/admin/`
+3. Add local non-gRPC implementations (`localTxImpl`, `localAccountImpl`, `localAddressImpl`)
+4. Add `txClient`, `accountClient`, `addressClient` constructors in `internal/infrastructure/api/xrp/`
+5. Update `internal/di/container.go` to use new structs; update all use case factories
+6. Update `internal/interface-adapters/wallet/xrp/` to remove `XRPer` references
+7. Remove `XRP`, `NewXRP`, `WSClient`, `NewXRPFromCoinType`; remove `XRPer`, `XRPAPIProvider`, `XRPPublicer`, `XRPAdminer` from `internal/application/ports/api/xrp/`
+8. Run `make go-lint && make check-build && make go-test`
 
 Each step compiles independently, enabling incremental validation.

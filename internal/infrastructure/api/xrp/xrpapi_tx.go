@@ -11,7 +11,6 @@ import (
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	xrpsigner "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/signer"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen"
 	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -19,18 +18,6 @@ import (
 
 // - Send XRP https://xrpl.org/send-xrp.html
 // - Payment System Basics https://xrpl.org/payment-system-basics.html
-
-// unquoteJSON attempts to unquote a JSON string. If unquoting fails,
-// it returns the original string. This handles cases where the gRPC
-// response may or may not include extra quotes around the JSON.
-func unquoteJSON(s string) string {
-	unquoted, err := strconv.Unquote(s)
-	if err != nil {
-		// If unquoting fails, assume the string is not quoted
-		return s
-	}
-	return unquoted
-}
 
 // TxInput is transaction input json type
 type TxInput struct {
@@ -176,28 +163,6 @@ func (w *WSClient) PrepareTransaction(
 	return ToDTOTxInput(txInput), string(jsonBytes), nil
 }
 
-// signTransactionJSON is a generic helper that signs any transaction type.
-// It marshals the input to JSON and calls the gRPC SignTransaction API.
-func (r *XRP) signTransactionJSON(
-	ctx context.Context, txInput any, secret, txTypeName string,
-) (string, string, error) {
-	strJSON, err := json.Marshal(txInput)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call json.Marshal(%sTxInput): %w", txTypeName, err)
-	}
-	req := protogen.RequestSignTransaction_builder{
-		TxJSON: string(strJSON),
-		Secret: secret,
-	}.Build()
-
-	res, err := r.API.TxClient.SignTransaction(ctx, req)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call client.SignTransaction() for %s: %w", txTypeName, err)
-	}
-
-	return res.GetTxID(), res.GetTxBlob(), nil
-}
-
 // SignTransaction signs a payment transaction offline using native Go implementation.
 // Offline functionality
 // - https://xrpl.org/rippleapi-reference.html#offline-functionality
@@ -209,36 +174,16 @@ func (*XRP) SignTransaction(
 }
 
 // SignTransactionNative signs a transaction using native Go implementation (Peersyst/xrpl-go).
-// This method provides offline signing capability without gRPC dependencies.
-//
-// NOTE: This is a stub implementation for task 1.2 (interface segregation).
-// Full implementation will be provided in task 3.1 (PeersystSigner).
-//
-// TODO(task-3.1): Implement native Go signing using Peersyst/xrpl-go library.
+// Supports both single-signature and multi-signature transactions.
 func (*XRP) SignTransactionNative(
-	_ context.Context,
-	_ *dtoxrp.TxInput,
-	_ string,
-	_ bool,
-	_ *string,
+	ctx context.Context,
+	txInput *dtoxrp.TxInput,
+	secret string,
+	isMultiSig bool,
+	existingSignedBlob *string,
 ) (string, string, error) {
-	// Stub implementation - to be completed in task 3.1
-	return "", "", errors.New("SignTransactionNative not yet implemented (task 3.1)")
-}
-
-// CombineTransaction combines signed transactions from multiple accounts for a multisignature transaction.
-// - The signed transaction must subsequently be submitted.
-func (r *XRP) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {
-	req := protogen.RequestCombineTransaction_builder{
-		SignedTransactions: signedTxs,
-	}.Build()
-
-	res, err := r.API.TxClient.CombineTransaction(ctx, req)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call client.CombineTransaction(): %w", err)
-	}
-
-	return res.GetTxID(), res.GetSignedTransaction(), nil
+	s := xrpsigner.NewPeersystSigner()
+	return s.SignTransactionNative(ctx, txInput, secret, isMultiSig, existingSignedBlob)
 }
 
 // toXRPClientSentTx converts local SentTx to xrpclient.SentTx.
