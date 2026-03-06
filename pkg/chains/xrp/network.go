@@ -47,31 +47,3 @@ func GetPublicWSServer(networkType string) PublicWSServer {
 	}
 	return ""
 }
-
-// XRPKeyType key type
-type XRPKeyType string
-
-// network type
-const (
-	XRPKeyTypeSECP256 XRPKeyType = "secp256k1"
-	XRPKeyTypeED25519 XRPKeyType = "ed25519"
-)
-
-// XRPKeyTypeValue is XRPKeyType value
-var XRPKeyTypeValue = map[XRPKeyType]int8{
-	XRPKeyTypeSECP256: 1,
-	XRPKeyTypeED25519: 2,
-}
-
-// GetXRPKeyTypeValue returns value of XRPKeyType
-func GetXRPKeyTypeValue(key string) int8 {
-	if val, ok := XRPKeyTypeValue[XRPKeyType(key)]; ok {
-		return val
-	}
-	return 0
-}
-
-// String converter
-func (k XRPKeyType) String() string {
-	return string(k)
-}

@@ -10,13 +10,14 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	xrpadmin "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/admin"
 	xrppublic "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/public"
+	pkgxrp "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 )
 
 // chainConf resolves the chain configuration from the Ripple config.
 func chainConf(conf *config.Ripple) *chaincfg.Params {
-	if conf.NetworkType != NetworkTypeXRPMainNet.String() {
+	if conf.NetworkType != pkgxrp.NetworkTypeXRPMainNet.String() {
 		return &chaincfg.TestNet3Params
 	}
 	return &chaincfg.MainNetParams

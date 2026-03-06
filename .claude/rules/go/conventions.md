@@ -74,6 +74,26 @@ import (
 )
 ```
 
+### Deprecated Types — Comment Format
+
+`staticcheck ST1021` requires the **first comment line** on an exported type to start with the type name.
+For deprecated types, the `// Deprecated:` tag must NOT be the first line.
+
+```go
+// ❌ BAD: staticcheck ST1021 — first line must start with the type name
+// Deprecated: XRPer is kept for backward compatibility only.
+// Prefer XRPPublicClient and XRPAdminClient for new code.
+// XRPer defines the combined interface for XRP blockchain operations.
+type XRPer interface { ... }
+
+// ✅ GOOD: type name first, then blank line, then Deprecated tag
+// XRPer defines the combined interface for XRP blockchain operations.
+//
+// Deprecated: XRPer is kept for backward compatibility only.
+// Prefer XRPPublicClient and XRPAdminClient for new code.
+type XRPer interface { ... }
+```
+
 ### Error Handling
 
 Always wrap errors with context:

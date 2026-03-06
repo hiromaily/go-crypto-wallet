@@ -1,39 +1,32 @@
 // Package xrp defines interfaces for XRP blockchain operations.
 //
-// # Overview
-//
 // This package follows the Dependency Inversion Principle of Clean Architecture
 // by defining interfaces in the application layer that are implemented by the
 // infrastructure layer (internal/infrastructure/api/xrp/).
 //
 // # Interfaces
 //
-//   - XRPer: Main interface combining admin, public, and WebSocket transaction operations
-//   - XRPPublicer: Interface for public node operations
-//   - XRPAdminer: Interface for admin node operations
-//   - TransactionSubmitter: Interface for submitting transactions via WebSocket
-//   - TransactionSigner: Interface for offline transaction signing
+// Composed interfaces for use cases:
+//   - XRPPublicClient: All public node operations (primary interface for new code)
+//   - XRPAdminClient: Admin node operations (keygen wallets, standalone mode)
+//   - XRPer: Deprecated monolithic interface (kept for backward compatibility)
 //
-// # Capabilities
-//
-// The XRPer interface provides:
-//   - Balance queries (GetBalance, GetTotalBalance)
-//   - Transaction operations (CreateRawTransaction, SignTransaction, SignTransactionNative, SubmitTransaction)
-//   - Account information (AccountInfo, GetAccountInfo)
-//   - Server information (ServerInfo)
+// Small focused interfaces (Interface Segregation Principle):
+//   - XRPPublicer, XRPAdminer: Node-specific operation groups
+//   - AccountInfoProvider: Account info and balance queries
+//   - BalanceChecker: Balance queries (single and aggregate)
+//   - TransactionPreparer: Raw transaction creation
+//   - TransactionSigner: Offline signing (air-gapped capable)
+//   - TransactionSubmitter: Submission and retrieval
+//   - LedgerPoller: Current ledger index queries
+//   - LedgerAdvancer: Ledger advancement (admin, standalone mode)
+//   - CoinTypeProvider, Closer: Supporting operations
 //
 // # Usage
 //
-// Use cases depend on these interfaces, not concrete implementations:
-//
-//	import apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+// Use cases depend on the smallest interface needed:
 //
 //	type myUseCase struct {
-//	    xrp apixrp.XRPer
+//	    xrp apixrp.AccountInfoProvider  // not the full XRPPublicClient
 //	}
-//
-// # Related Packages
-//
-//   - internal/infrastructure/api/xrp/: XRP implementation
-//   - internal/application/dto/xrp/: DTOs used in interface methods
 package xrp

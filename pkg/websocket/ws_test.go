@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
+	pkgxrp "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 )
 
@@ -35,7 +35,7 @@ type ResponseAccountChannels struct {
 
 // TestCall is test for Call
 func TestCall(t *testing.T) {
-	websoc, err := websocket.New(context.Background(), apixrpimpl.PublicWSServerTestnet.String())
+	websoc, err := websocket.New(context.Background(), pkgxrp.PublicWSServerTestnet.String())
 	require.NoError(t, err, "ws.New() should not return error")
 
 	ac := AccountChannels{

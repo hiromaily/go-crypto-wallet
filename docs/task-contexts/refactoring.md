@@ -273,6 +273,34 @@ Agent Actions:
 7. 検証コマンド実行
 ```
 
+### Pattern 4: Splitting a Monolithic Infrastructure Client
+
+When splitting a monolithic struct (e.g. `XRP` with both public + admin methods) into focused
+sub-clients, read these files **upfront** to map the full dependency chain before writing any code:
+
+```
+Upfront reading order:
+1. internal/application/ports/api/<chain>/interface.go  — current interfaces
+2. internal/infrastructure/api/<chain>/xrp.go           — monolithic struct
+3. internal/di/container.go                             — how the client is injected
+4. internal/interface-adapters/wallet/<chain>/<chain>.go — wallet adapter(s) (keygen, watch, sign)
+5. internal/interface-adapters/cli/<wallet>/api/<chain>/ — CLI commands using the client
+6. internal/application/usecase/<wallet>/<chain>/        — use cases (check constructor args)
+7. internal/infrastructure/api/<chain>/testutil/xrp.go  — testutil factory (often missed!)
+```
+
+Key decision: for each method on the monolith, assign it to public-only, admin-only, or both.
+
+Steps:
+1. Read all 7 files above
+2. Define new `XRPPublicClient` and `XRPAdminClient` port interfaces in `ports/api/<chain>/`
+3. Create `internal/infrastructure/api/<chain>/public/` and `admin/` subdirectories
+4. Update DI container to construct two clients (public singleton, admin on-demand)
+5. Update wallet adapters + CLI to use `XRPPublicClient`
+6. Update `.mockery.yaml`, run `make mockery`
+7. Update `testutil/xrp.go` (often missed — see infrastructure-layer.md)
+8. Update tests (combined mock struct if use cases compose interfaces — see mockery.md)
+
 ## Anti-Patterns to Avoid
 
 ### ❌ Big Bang Refactoring
