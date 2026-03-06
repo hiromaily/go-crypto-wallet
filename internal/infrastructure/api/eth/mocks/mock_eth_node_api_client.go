@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/rpc"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -222,24 +222,24 @@ func (_c *MockETHNodeAPIClient_NodeInfo_Call) RunAndReturn(run func(ctx context.
 }
 
 // Syncing provides a mock function for the type MockETHNodeAPIClient
-func (_mock *MockETHNodeAPIClient) Syncing(ctx context.Context) (*rpc.ResponseSyncing, bool, error) {
+func (_mock *MockETHNodeAPIClient) Syncing(ctx context.Context) (*eth.SyncingStatus, bool, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Syncing")
 	}
 
-	var r0 *rpc.ResponseSyncing
+	var r0 *eth.SyncingStatus
 	var r1 bool
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*rpc.ResponseSyncing, bool, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*eth.SyncingStatus, bool, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *rpc.ResponseSyncing); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *eth.SyncingStatus); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseSyncing)
+			r0 = ret.Get(0).(*eth.SyncingStatus)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) bool); ok {
@@ -279,12 +279,12 @@ func (_c *MockETHNodeAPIClient_Syncing_Call) Run(run func(ctx context.Context)) 
 	return _c
 }
 
-func (_c *MockETHNodeAPIClient_Syncing_Call) Return(responseSyncing *rpc.ResponseSyncing, b bool, err error) *MockETHNodeAPIClient_Syncing_Call {
-	_c.Call.Return(responseSyncing, b, err)
+func (_c *MockETHNodeAPIClient_Syncing_Call) Return(syncingStatus *eth.SyncingStatus, b bool, err error) *MockETHNodeAPIClient_Syncing_Call {
+	_c.Call.Return(syncingStatus, b, err)
 	return _c
 }
 
-func (_c *MockETHNodeAPIClient_Syncing_Call) RunAndReturn(run func(ctx context.Context) (*rpc.ResponseSyncing, bool, error)) *MockETHNodeAPIClient_Syncing_Call {
+func (_c *MockETHNodeAPIClient_Syncing_Call) RunAndReturn(run func(ctx context.Context) (*eth.SyncingStatus, bool, error)) *MockETHNodeAPIClient_Syncing_Call {
 	_c.Call.Return(run)
 	return _c
 }
