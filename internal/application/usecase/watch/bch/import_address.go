@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
@@ -15,7 +16,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -161,7 +161,7 @@ func (u *importAddressUseCase) importWithRedeemScript(
 		"address", targetAddr,
 		"account", addrFmt.AccountType.String())
 
-	requests := []btcrpc.ImportMultiRequest{
+	requests := []dtobtc.ImportMultiRequest{
 		{
 			ScriptPubKey: map[string]string{"address": targetAddr},
 			Timestamp:    "now", // Skip rescanning for faster import
@@ -171,7 +171,7 @@ func (u *importAddressUseCase) importWithRedeemScript(
 		},
 	}
 
-	responses, err := u.bchClient.ImportMulti(requests, &btcrpc.ImportMultiOptions{Rescan: rescan})
+	responses, err := u.bchClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: rescan})
 	if err != nil {
 		return false, fmt.Errorf("failed to call ImportMulti for BCH address %s: %w", targetAddr, err)
 	}
@@ -216,7 +216,7 @@ func (u *importAddressUseCase) importWithPubkey(
 		timestamp = "0"
 	}
 
-	requests := []btcrpc.ImportMultiRequest{
+	requests := []dtobtc.ImportMultiRequest{
 		{
 			ScriptPubKey: map[string]string{"address": targetAddr},
 			Timestamp:    timestamp,
@@ -226,7 +226,7 @@ func (u *importAddressUseCase) importWithPubkey(
 		},
 	}
 
-	responses, err := u.bchClient.ImportMulti(requests, &btcrpc.ImportMultiOptions{Rescan: rescan})
+	responses, err := u.bchClient.ImportMulti(requests, &dtobtc.ImportMultiOptions{Rescan: rescan})
 	if err != nil {
 		return false, fmt.Errorf("failed to call ImportMulti for BCH address %s: %w", targetAddr, err)
 	}

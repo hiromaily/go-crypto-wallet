@@ -5,7 +5,6 @@ package btc_test
 import (
 	"testing"
 
-	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
@@ -14,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/testutil"
@@ -343,9 +343,9 @@ func TestPSBTWorkflow_Integration(t *testing.T) {
 	prevHash, err := chainhash.NewHashFromStr("0000000000000000000000000000000000000000000000000000000000000000")
 	require.NoError(t, err)
 
-	inputs := []btcjson.TransactionInput{
+	inputs := []dtobtc.TransactionInput{
 		{
-			Txid: prevHash.String(),
+			TxID: prevHash.String(),
 			Vout: 0,
 		},
 	}

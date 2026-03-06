@@ -4,7 +4,6 @@ import (
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
-	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -16,7 +15,6 @@ import (
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	btcdescriptor "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/descriptor"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // Bitcoiner is the full Bitcoin/BitcoinCash interface.
@@ -48,9 +46,9 @@ type Bitcoiner interface {
 	GetAccount(addr string) (string, error)
 
 	// address.go
-	GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error)
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
-	ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error)
+	ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
 
 	// balance.go
@@ -71,8 +69,8 @@ type Bitcoiner interface {
 
 	// rpc.go
 	EstimateSmartFee(confirmationBlock int) (float64, error)
-	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
-	Logging() (*btcrpc.LoggingResult, error)
+	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
+	Logging() (*dtobtc.LoggingStatus, error)
 	EncryptWallet(passphrase string) error
 	WalletLock() error
 	WalletPassphrase(passphrase string, timeoutSecs int64) error
@@ -91,15 +89,15 @@ type Bitcoiner interface {
 	ImportAddress(pubkey string) error
 	ImportAddressWithoutReScan(pubkey string) error
 	ImportAddressWithLabel(addr, label string, rescan bool) error
-	ImportDescriptors(requests []btcrpc.ImportDescriptorsRequest) ([]btcrpc.ImportDescriptorsResponse, error)
+	ImportDescriptors(requests []dtobtc.ImportDescriptorsRequest) ([]dtobtc.ImportDescriptorsResponse, error)
 	ImportMulti(
-		requests []btcrpc.ImportMultiRequest,
-		options *btcrpc.ImportMultiOptions,
-	) ([]btcrpc.ImportMultiResponse, error)
+		requests []dtobtc.ImportMultiRequest,
+		options *dtobtc.ImportMultiOptions,
+	) ([]dtobtc.ImportMultiResponse, error)
 
 	// descriptor_info.go
-	GetDescriptorInfo(descriptor string) (*btcrpc.DescriptorInfo, error)
-	ListDescriptors(privateDescriptors bool) (*btcrpc.ListDescriptorsResult, error)
+	GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error)
+	ListDescriptors(privateDescriptors bool) ([]dtobtc.DescriptorInfo, error)
 
 	// label.go
 	SetLabel(addr, label string) error
@@ -108,19 +106,19 @@ type Bitcoiner interface {
 	// multisig.go
 	AddMultisigAddress(
 		requiredSigs int, addresses []string, accountName string, addressType domainBTC.AddressType,
-	) (*btcrpc.AddMultisigAddressResult, error)
+	) (*dtobtc.MultisigAddress, error)
 
 	// transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)
 	ToMsgTx(txHex string) (*wire.MsgTx, error)
-	GetTransactionByTxID(txID string) (*btcrpc.GetTransactionResult, error)
-	GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error)
-	DecodeRawTransaction(hexTx string) (*btcrpc.TxRawResult, error)
+	GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error)
+	GetTxOutByTxID(txID string, index uint32) (string, error)
+	DecodeRawTransaction(hexTx string) (string, error)
 	GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error)
 	CreateRawTransaction(
-		inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
+		inputs []dtobtc.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
 	) (*wire.MsgTx, error)
-	FundRawTransaction(hex string) (*btcrpc.FundRawTransactionResult, error)
+	FundRawTransaction(hex string) (string, error)
 	SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx) (*wire.MsgTx, bool, error)
 	SignRawTransactionWithKey(
 		tx *wire.MsgTx, privKeysWIF []string, prevtxs []dtobtc.PreviousTx,
@@ -232,7 +230,7 @@ type RawTransactionConverter interface {
 type RawTransactionCreator interface {
 	RawTransactionConverter
 	CreateRawTransaction(
-		inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
+		inputs []dtobtc.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
 	) (*wire.MsgTx, error)
 	GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error)
 }
@@ -241,7 +239,7 @@ type RawTransactionCreator interface {
 // Used by transaction creation and import usecases.
 type AddressOperator interface {
 	DecodeAddress(addr string) (btcutil.Address, error)
-	GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error)
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
 	GetAccount(addr string) (string, error)
 }
 
@@ -264,7 +262,7 @@ type TransactionSender interface {
 // TransactionMonitor provides transaction monitoring capabilities.
 // Used by watch wallet monitor usecase.
 type TransactionMonitor interface {
-	GetTransactionByTxID(txID string) (*btcrpc.GetTransactionResult, error)
+	GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error)
 }
 
 // -----------------------------------------------------------------------------
@@ -282,8 +280,8 @@ type AddressImporter interface {
 type LegacyAddressImporter interface {
 	AddressImporter
 	ImportMulti(
-		requests []btcrpc.ImportMultiRequest, options *btcrpc.ImportMultiOptions,
-	) ([]btcrpc.ImportMultiResponse, error)
+		requests []dtobtc.ImportMultiRequest, options *dtobtc.ImportMultiOptions,
+	) ([]dtobtc.ImportMultiResponse, error)
 }
 
 // PrivateKeyImporter imports private keys into the wallet.
@@ -299,8 +297,8 @@ type PrivateKeyImporter interface {
 // DescriptorManager manages descriptor-based wallet operations (BTC only).
 // BCH does not support descriptors - use AddressImporter instead.
 type DescriptorManager interface {
-	GetDescriptorInfo(descriptor string) (*btcrpc.DescriptorInfo, error)
-	ImportDescriptors(requests []btcrpc.ImportDescriptorsRequest) ([]btcrpc.ImportDescriptorsResponse, error)
+	GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error)
+	ImportDescriptors(requests []dtobtc.ImportDescriptorsRequest) ([]dtobtc.ImportDescriptorsResponse, error)
 	SetLabel(addr, label string) error
 }
 
@@ -354,7 +352,7 @@ type RawTransactionSigner interface {
 type MultisigManager interface {
 	AddMultisigAddress(
 		requiredSigs int, addresses []string, accountName string, addressType domainBTC.AddressType,
-	) (*btcrpc.AddMultisigAddressResult, error)
+	) (*dtobtc.MultisigAddress, error)
 }
 
 // -----------------------------------------------------------------------------
@@ -418,12 +416,12 @@ type FeeEstimator interface {
 
 // NetworkInfoProvider provides network information from the connected node.
 type NetworkInfoProvider interface {
-	GetNetworkInfo() (*btcrpc.GetNetworkInfoResult, error)
+	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
 }
 
 // LoggingController controls and retrieves node logging information.
 type LoggingController interface {
-	Logging() (*btcrpc.LoggingResult, error)
+	Logging() (*dtobtc.LoggingStatus, error)
 }
 
 // WalletSecurityManager manages wallet encryption and passphrase operations.
@@ -444,7 +442,7 @@ type FullUTXOLister interface {
 
 // AddressValidator validates Bitcoin addresses.
 type AddressValidator interface {
-	ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error)
+	ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error)
 }
 
 // UTXOLocker locks and unlocks UTXOs.
@@ -475,7 +473,7 @@ type WatchAPIClient interface {
 	AddressValidator    // ValidateAddress
 	// Inline: partial overlaps with larger interfaces to avoid importing extra methods
 	ConfirmationBlock() uint64
-	GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error)
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
 	UnlockUnspent() error
 }
 

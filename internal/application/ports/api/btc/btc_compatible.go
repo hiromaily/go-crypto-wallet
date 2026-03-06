@@ -1,7 +1,6 @@
 package btc
 
 import (
-	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
@@ -11,7 +10,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // BitcoinCompatible defines methods common to both BTC and BCH.
@@ -34,9 +32,9 @@ type BitcoinCompatible interface {
 	GetAccount(addr string) (string, error)
 
 	// address.go
-	GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error)
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
-	ValidateAddress(addr string) (*btcrpc.ValidateAddressResult, error)
+	ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
 
 	// balance.go
@@ -73,19 +71,19 @@ type BitcoinCompatible interface {
 	// multisig.go (P2SH works for both, but BCH should not use P2WSH or P2TR address types)
 	AddMultisigAddress(
 		requiredSigs int, addresses []string, accountName string, addressType domainBTC.AddressType,
-	) (*btcrpc.AddMultisigAddressResult, error)
+	) (*dtobtc.MultisigAddress, error)
 
 	// transaction.go (Raw TX operations - works for both BTC and BCH)
 	ToHex(tx *wire.MsgTx) (string, error)
 	ToMsgTx(txHex string) (*wire.MsgTx, error)
-	GetTransactionByTxID(txID string) (*btcrpc.GetTransactionResult, error)
-	GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error)
-	DecodeRawTransaction(hexTx string) (*btcrpc.TxRawResult, error)
+	GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error)
+	GetTxOutByTxID(txID string, index uint32) (string, error)
+	DecodeRawTransaction(hexTx string) (string, error)
 	GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error)
 	CreateRawTransaction(
-		inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
+		inputs []dtobtc.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
 	) (*wire.MsgTx, error)
-	FundRawTransaction(hex string) (*btcrpc.FundRawTransactionResult, error)
+	FundRawTransaction(hex string) (string, error)
 	SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx) (*wire.MsgTx, bool, error)
 	SignRawTransactionWithKey(
 		tx *wire.MsgTx, privKeysWIF []string, prevtxs []dtobtc.PreviousTx,

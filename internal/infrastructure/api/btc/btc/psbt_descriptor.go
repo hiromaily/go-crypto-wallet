@@ -73,24 +73,24 @@ func (b *Bitcoin) deriveRedeemScriptForAddress(
 		"account_index", expectedAccountIndex)
 
 	// Find matching descriptor and derive redeemScript
-	for _, desc := range descriptorList.Descriptors {
+	for _, desc := range descriptorList {
 		// Skip internal (change) descriptors
 		if desc.Internal != nil && *desc.Internal {
 			continue
 		}
 
 		// Check if descriptor matches the account
-		if !b.descriptorMatchesAccountIndex(desc.Desc, expectedAccountIndex) {
+		if !b.descriptorMatchesAccountIndex(desc.Descriptor, expectedAccountIndex) {
 			continue
 		}
 
 		logger.Debug("Found matching descriptor, searching for address",
-			"descriptor_len", len(desc.Desc),
+			"descriptor_len", len(desc.Descriptor),
 			"account_index", expectedAccountIndex)
 
 		// Try to find the address by deriving up to 1000 addresses (default range)
 		for i := range uint32(1000) {
-			redeemScript, err := b.DeriveRedeemScriptFromDescriptor(desc.Desc, address, i)
+			redeemScript, err := b.DeriveRedeemScriptFromDescriptor(desc.Descriptor, address, i)
 			if err != nil {
 				// This index doesn't work, try next
 				continue

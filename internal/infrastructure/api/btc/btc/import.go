@@ -6,6 +6,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
@@ -95,22 +96,49 @@ func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) err
 //
 // Reference: Bitcoin Core RPC documentation - importdescriptors
 func (b *Bitcoin) ImportDescriptors(
-	requests []btcrpc.ImportDescriptorsRequest,
-) ([]btcrpc.ImportDescriptorsResponse, error) {
+	requests []dtobtc.ImportDescriptorsRequest,
+) ([]dtobtc.ImportDescriptorsResponse, error) {
 	if len(requests) == 0 {
 		return nil, errors.New("no descriptors to import")
 	}
 
-	responses, err := b.pkgrpc.ImportDescriptors(requests)
+	wireReqs := make([]btcrpc.ImportDescriptorsRequest, len(requests))
+	for i, r := range requests {
+		wireReqs[i] = btcrpc.ImportDescriptorsRequest{
+			Descriptor: r.Descriptor,
+			Timestamp:  r.Timestamp,
+			Active:     r.Active,
+			Range:      r.Range,
+			Label:      r.Label,
+			Internal:   r.Internal,
+			Watchonly:  r.Watchonly,
+		}
+	}
+
+	wireResps, err := b.pkgrpc.ImportDescriptors(wireReqs)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ImportDescriptors(): %w", err)
 	}
 
-	if len(responses) != len(requests) {
+	if len(wireResps) != len(requests) {
 		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
-			len(responses), len(requests))
+			len(wireResps), len(requests))
 	}
 
+	responses := make([]dtobtc.ImportDescriptorsResponse, len(wireResps))
+	for i, r := range wireResps {
+		resp := dtobtc.ImportDescriptorsResponse{
+			Success:  r.Success,
+			Warnings: r.Warnings,
+		}
+		if r.Error != nil {
+			resp.Error = &dtobtc.ImportDescriptorsError{
+				Code:    r.Error.Code,
+				Message: r.Error.Message,
+			}
+		}
+		responses[i] = resp
+	}
 	return responses, nil
 }
 
@@ -134,22 +162,55 @@ func (b *Bitcoin) ImportDescriptors(
 //
 // Reference: Bitcoin Core RPC documentation - importmulti
 func (b *Bitcoin) ImportMulti(
-	requests []btcrpc.ImportMultiRequest,
-	options *btcrpc.ImportMultiOptions,
-) ([]btcrpc.ImportMultiResponse, error) {
+	requests []dtobtc.ImportMultiRequest,
+	options *dtobtc.ImportMultiOptions,
+) ([]dtobtc.ImportMultiResponse, error) {
 	if len(requests) == 0 {
 		return nil, errors.New("no addresses to import")
 	}
 
-	responses, err := b.pkgrpc.ImportMulti(requests, options)
+	wireReqs := make([]btcrpc.ImportMultiRequest, len(requests))
+	for i, r := range requests {
+		wireReqs[i] = btcrpc.ImportMultiRequest{
+			ScriptPubKey: r.ScriptPubKey,
+			Timestamp:    r.Timestamp,
+			RedeemScript: r.RedeemScript,
+			PubKeys:      r.PubKeys,
+			Keys:         r.Keys,
+			Internal:     r.Internal,
+			WatchOnly:    r.WatchOnly,
+			Label:        r.Label,
+		}
+	}
+
+	var wireOpts *btcrpc.ImportMultiOptions
+	if options != nil {
+		wireOpts = &btcrpc.ImportMultiOptions{Rescan: options.Rescan}
+	}
+
+	wireResps, err := b.pkgrpc.ImportMulti(wireReqs, wireOpts)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcrpc.ImportMulti(): %w", err)
 	}
 
-	if len(responses) != len(requests) {
+	if len(wireResps) != len(requests) {
 		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
-			len(responses), len(requests))
+			len(wireResps), len(requests))
 	}
 
+	responses := make([]dtobtc.ImportMultiResponse, len(wireResps))
+	for i, r := range wireResps {
+		resp := dtobtc.ImportMultiResponse{
+			Success:  r.Success,
+			Warnings: r.Warnings,
+		}
+		if r.Error != nil {
+			resp.Error = &dtobtc.ImportMultiError{
+				Code:    r.Error.Code,
+				Message: r.Error.Message,
+			}
+		}
+		responses[i] = resp
+	}
 	return responses, nil
 }

@@ -208,7 +208,7 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 		return nil, fmt.Errorf("failed to list descriptors: %w", err)
 	}
 
-	if len(descriptorList.Descriptors) == 0 {
+	if len(descriptorList) == 0 {
 		logger.Warn("no descriptors found in wallet")
 		return nil, nil
 	}
@@ -220,14 +220,14 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 	// Descriptor format: "sh(wsh(sortedmulti(2,[fingerprint/path]xpub.../0/*,...))"
 	// The path contains the account index (e.g., 44h/1h/0h where 0 is the account index)
 	hasMatchingDescriptor := false
-	for _, desc := range descriptorList.Descriptors {
+	for _, desc := range descriptorList {
 		// Skip internal (change) descriptors - we only want external (receiving) descriptors
 		if desc.Internal != nil && *desc.Internal {
 			continue
 		}
 
 		// Check if this descriptor matches the account index
-		if b.descriptorMatchesAccountIndex(desc.Desc, expectedAccountIndex) {
+		if b.descriptorMatchesAccountIndex(desc.Descriptor, expectedAccountIndex) {
 			hasMatchingDescriptor = true
 			break
 		}

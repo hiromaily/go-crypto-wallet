@@ -5,22 +5,22 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/chains/bch"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`.
 // This override handles BCH nodes that return a legacy "label" string field instead
 // of the "labels" array used by BTC nodes.
-func (b *BitcoinCash) GetAddressInfo(addr string) (*btcrpc.GetAddressInfoResult, error) {
+func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 	result, err := b.Bitcoin.GetAddressInfo(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call pkgrpc.GetAddressInfo() in bch: %w", err)
 	}
 	// BCH nodes may return a legacy single "label" field instead of a "labels" array.
 	if len(result.Labels) == 0 && result.Label != "" {
-		result.Labels = btcrpc.FlexibleLabels{result.Label}
+		result.Labels = []string{result.Label}
 	}
 	return result, nil
 }

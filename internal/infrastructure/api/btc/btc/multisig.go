@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainBTC "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	btcrpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc"
 )
 
 // AddMultisigAddress create multisig address
@@ -21,7 +21,7 @@ func (b *Bitcoin) AddMultisigAddress(
 	addresses []string,
 	accountName string,
 	addressType domainBTC.AddressType,
-) (*btcrpc.AddMultisigAddressResult, error) {
+) (*dtobtc.MultisigAddress, error) {
 	if requiredSigs > len(addresses) {
 		return nil, fmt.Errorf(
 			"number of given address doesn't meet number of requiredSigs: requiredSigs:%d, len(addresses):%d",
@@ -46,5 +46,8 @@ func (b *Bitcoin) AddMultisigAddress(
 		return nil, fmt.Errorf("fail to call btcrpc.AddMultisigAddress(): %w", err)
 	}
 
-	return result, nil
+	return &dtobtc.MultisigAddress{
+		Address:      result.Address,
+		RedeemScript: result.RedeemScript,
+	}, nil
 }
