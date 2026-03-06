@@ -15,6 +15,7 @@ import (
 	xrpapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
+	xrprpcpublic "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
@@ -34,9 +35,17 @@ const (
 		"A5F00C1C26DA0BFA83140000000000000000000000000455553440000000000000000000000000000000000000000002"
 )
 
+// mockSendTxClient combines TransactionSubmitter and LedgerPoller to satisfy the
+// unexported xrpSendTxClient interface used by sendTransactionUseCase.
+type mockSendTxClient struct {
+	*xrpapiamocks.MockTransactionSubmitter
+	*xrpapiamocks.MockLedgerPoller
+}
+
 // sendTestDependencies holds all mock dependencies for SendTransactionUseCase testing
 type sendTestDependencies struct {
 	submitter    *xrpapiamocks.MockTransactionSubmitter
+	ledgerPoller *xrpapiamocks.MockLedgerPoller
 	txDetailRepo *repomocks.MockXRPDetailTXRepositorier
 	txFileRepo   *storagemocks.MockTransactionFileRepositorier
 }
@@ -46,6 +55,7 @@ func newSendTestDependencies(t *testing.T) *sendTestDependencies {
 	t.Helper()
 	return &sendTestDependencies{
 		submitter:    xrpapiamocks.NewMockTransactionSubmitter(t),
+		ledgerPoller: xrpapiamocks.NewMockLedgerPoller(t),
 		txDetailRepo: repomocks.NewMockXRPDetailTXRepositorier(t),
 		txFileRepo:   storagemocks.NewMockTransactionFileRepositorier(t),
 	}
@@ -53,8 +63,13 @@ func newSendTestDependencies(t *testing.T) *sendTestDependencies {
 
 // createSendUseCase creates a new SendTransactionUseCase with the test dependencies
 func createSendUseCase(deps *sendTestDependencies) watchusecase.SendTransactionUseCase {
+	client := &mockSendTxClient{
+		MockTransactionSubmitter: deps.submitter,
+		MockLedgerPoller:         deps.ledgerPoller,
+	}
 	return xrp.NewSendTransactionUseCase(
-		deps.submitter,
+		client,
+		nil, // ledgerAdv is nil in non-standalone environments
 		deps.txDetailRepo,
 		deps.txFileRepo,
 	)
@@ -217,6 +232,9 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 		},
 	}
 
+	ledgerCurrentRes := &xrprpcpublic.ResponseLedgerCurrent{}
+	ledgerCurrentRes.Result.LedgerCurrentIndex = 12345
+
 	// Setup mocks
 	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 1, nil)
@@ -224,8 +242,8 @@ func TestSendTransactionUseCase_Execute_Success(t *testing.T) {
 		Return([]string{csvLine}, nil)
 	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob1).
 		Return(sentTx, uint64(12340), nil)
-	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12345)).
-		Return(uint64(12345), nil)
+	deps.ledgerPoller.EXPECT().LedgerCurrent(mock.Anything).
+		Return(ledgerCurrentRes, nil)
 	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash, uint64(12340)).
 		Return(txInfo, nil)
 	deps.txDetailRepo.EXPECT().UpdateAfterTxSent(
@@ -283,17 +301,23 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 		Outcome: xrplgo.TxOutcome{Result: "tesSUCCESS"},
 	}
 
+	// Use LedgerCurrentIndex >= max(LastLedgerSequence) so either goroutine's call succeeds first.
+	ledgerCurrentRes := &xrprpcpublic.ResponseLedgerCurrent{}
+	ledgerCurrentRes.Result.LedgerCurrentIndex = 12346
+
 	// Setup mocks
 	deps.txFileRepo.EXPECT().ValidateFilePath("signed.csv", domainTx.TxTypeSigned).
 		Return(domainTx.ActionTypeDeposit, domainTx.TxTypeSigned, int64(42), 2, nil)
 	deps.txFileRepo.EXPECT().ReadFileSlice("signed.csv").
 		Return([]string{csvLine1, csvLine2}, nil)
 
+	// LedgerCurrent is called once per transaction (2 goroutines); return same value for both
+	deps.ledgerPoller.EXPECT().LedgerCurrent(mock.Anything).
+		Return(ledgerCurrentRes, nil).Times(2)
+
 	// Transaction 1
 	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob1).
 		Return(sentTx1, uint64(12340), nil)
-	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12345)).
-		Return(uint64(12345), nil)
 	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash1, uint64(12340)).
 		Return(txInfo1, nil)
 	deps.txDetailRepo.EXPECT().
@@ -303,8 +327,6 @@ func TestSendTransactionUseCase_Execute_MultipleTransactions(t *testing.T) {
 	// Transaction 2
 	deps.submitter.EXPECT().SubmitTransaction(mock.Anything, testSignedBlob2).
 		Return(sentTx2, uint64(12341), nil)
-	deps.submitter.EXPECT().WaitValidation(mock.Anything, uint64(12346)).
-		Return(uint64(12346), nil)
 	deps.submitter.EXPECT().GetTransaction(mock.Anything, txHash2, uint64(12341)).
 		Return(txInfo2, nil)
 	deps.txDetailRepo.EXPECT().

@@ -31,7 +31,11 @@ packages:
       XRPer:
       XRPPublicer:
       XRPAdminer:
+      XRPPublicClient:
+      XRPAdminClient:
       TransactionSubmitter:
+      LedgerPoller:
+      LedgerAdvancer:
       AccountInfoProvider:
       TransactionPreparer:
 

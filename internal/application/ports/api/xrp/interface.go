@@ -21,8 +21,34 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
-// XRPer defines the main interface for XRP blockchain operations.
-// It embeds specialized interfaces for admin, public, and WebSocket transaction operations.
+// XRPPublicClient defines all operations provided by the public XRP client.
+// This is the primary interface for use cases and adapters that interact with the
+// public XRP node. Prefer this over the deprecated XRPer interface.
+type XRPPublicClient interface {
+	XRPPublicer
+	AccountInfoProvider
+	BalanceChecker
+	TransactionPreparer
+	TransactionSubmitter
+	LedgerPoller
+	TransactionSigner
+	CoinTypeProvider
+	Closer
+}
+
+// XRPAdminClient defines all operations provided by the admin XRP client.
+// Used by keygen wallets and standalone-mode ledger advancement.
+type XRPAdminClient interface {
+	XRPAdminer
+	LedgerAdvancer
+	CoinTypeProvider
+	Closer
+}
+
+// XRPer defines the combined interface for XRP blockchain operations.
+//
+// Deprecated: XRPer is kept for backward compatibility only.
+// Prefer XRPPublicClient and XRPAdminClient for new code.
 type XRPer interface {
 	XRPAdminer
 	XRPPublicer

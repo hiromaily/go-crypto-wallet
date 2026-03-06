@@ -14,11 +14,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
-var xr apixrp.XRPer
+var xr apixrp.XRPPublicClient
 
 // GetXRP returns xrp instance
 // FIXME: hard coded
-func GetXRP() (apixrp.XRPer, error) {
+func GetXRP() (apixrp.XRPPublicClient, error) {
 	if xr != nil {
 		return xr, nil
 	}
@@ -37,12 +37,8 @@ func GetXRP() (apixrp.XRPer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp public websocket client: %w", err)
 	}
-	wsAdminClient, err := cryptocurrency.NewWebSocketClient(conf.Ripple.WebsocketAdminURL)
-	if err != nil {
-		return nil, fmt.Errorf("fail to create xrp admin websocket client: %w", err)
-	}
 
-	xr, err = apixrpimpl.NewXRPFromCoinType(wsPublicClient, wsAdminClient, &conf.Ripple, conf.CoinTypeCode)
+	xr, err = apixrpimpl.NewPublicXRPFromCoinType(wsPublicClient, &conf.Ripple, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}
@@ -52,7 +48,7 @@ func GetXRP() (apixrp.XRPer, error) {
 // XRPTestSuite is a test suite for XRP
 type XRPTestSuite struct {
 	suite.Suite
-	XRP apixrp.XRPer
+	XRP apixrp.XRPPublicClient
 }
 
 func (xts *XRPTestSuite) SetupTest() {

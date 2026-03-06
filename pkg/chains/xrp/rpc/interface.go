@@ -6,4 +6,5 @@ import "context"
 // *websocket.WS satisfies this interface without modification.
 type WSCaller interface {
 	Call(ctx context.Context, req, res any) error
+	Close() error
 }

@@ -8,7 +8,7 @@ import (
 )
 
 // AddCommands adds all Ripple API subcommands
-func AddCommands(parentCmd *cobra.Command, xrp apixrp.XRPer, txData *config.RippleTxData) {
+func AddCommands(parentCmd *cobra.Command, xrp apixrp.XRPPublicClient, txData *config.RippleTxData) {
 	// sendcoin command
 	var (
 		sendcoinAddress string

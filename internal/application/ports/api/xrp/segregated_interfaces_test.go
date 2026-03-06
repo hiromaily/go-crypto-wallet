@@ -89,8 +89,9 @@ func TestTransactionSubmitterInterface(t *testing.T) {
 	// Verify interface has the correct methods using reflection
 	interfaceType := reflect.TypeFor[apixrp.TransactionSubmitter]()
 
-	// Should have exactly 3 methods: SubmitTransaction, WaitValidation, GetTransaction
-	assert.Equal(t, 3, interfaceType.NumMethod(), "TransactionSubmitter should have 3 methods")
+	// Should have exactly 2 methods: SubmitTransaction, GetTransaction
+	// WaitValidation was removed — ledger polling is handled via LedgerPoller (Plan C).
+	assert.Equal(t, 2, interfaceType.NumMethod(), "TransactionSubmitter should have 2 methods")
 
 	// Verify SubmitTransaction method signature
 	submitMethod, found := interfaceType.MethodByName("SubmitTransaction")
@@ -103,12 +104,6 @@ func TestTransactionSubmitterInterface(t *testing.T) {
 		t, 3, submitMethod.Type.NumOut(),
 		"SubmitTransaction should have 3 outputs (SentTx, ledgerVersion, error)",
 	)
-
-	// Verify WaitValidation method signature
-	waitMethod, found := interfaceType.MethodByName("WaitValidation")
-	assert.True(t, found, "WaitValidation method should exist")
-	assert.Equal(t, 2, waitMethod.Type.NumIn(), "WaitValidation should have 2 inputs (ctx, targetLedgerVersion)")
-	assert.Equal(t, 2, waitMethod.Type.NumOut(), "WaitValidation should have 2 outputs (ledgerVersion, error)")
 
 	// Verify GetTransaction method signature
 	getTxMethod, found := interfaceType.MethodByName("GetTransaction")
@@ -143,7 +138,7 @@ func TestInterfaceSegregationPrinciple(t *testing.T) {
 		{
 			name:          "TransactionSubmitter",
 			interfaceType: reflect.TypeFor[apixrp.TransactionSubmitter](),
-			maxMethods:    3,
+			maxMethods:    2,
 			description:   "Transaction submitter should only have submission-related methods",
 		},
 	}
@@ -221,13 +216,6 @@ func (*mockTransactionSubmitter) SubmitTransaction(
 	signedTx string,
 ) (*xrplgo.SentTx, uint64, error) {
 	return nil, 0, nil
-}
-
-func (*mockTransactionSubmitter) WaitValidation(
-	ctx context.Context,
-	targetLedgerVersion uint64,
-) (uint64, error) {
-	return 0, nil
 }
 
 func (*mockTransactionSubmitter) GetTransaction(
