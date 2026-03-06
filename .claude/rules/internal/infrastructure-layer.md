@@ -106,6 +106,19 @@ func (r *AddressRepositorySqlc) GetAll(...) ([]*domainAddress.Address, error) {
 - Use `testutil/` for test helpers
 - Integration tests with real systems when needed
 
+### `testutil/` Files During Interface Refactoring
+
+**Rule**: When renaming or splitting an infrastructure client interface (e.g. monolithic `XRPer` →
+`XRPPublicClient`), always check `testutil/` subdirectories in the same package tree.
+These files often hold a package-level `var` and factory function referencing the old interface
+type and constructor, and they are **not** caught at compilation time until `make go-lint` runs.
+
+Checklist when refactoring an infrastructure API client:
+1. Search for `testutil/` under `internal/infrastructure/api/<chain>/`
+2. Update the package-level `var` type (e.g. `var xr apixrp.XRPer` → `var xr apixrp.XRPPublicClient`)
+3. Update the factory function return type and constructor call
+4. Remove any now-unused arguments (e.g. the admin WebSocket client if testutil only needs public)
+
 ## Mock Generation Rule
 
 Every interface defined under `internal/application/ports/` MUST have a mockery-generated mock

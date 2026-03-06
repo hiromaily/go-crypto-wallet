@@ -1,6 +1,6 @@
 # XRP Transaction Flow (Current Implementation)
 
-This document describes the **as-built** transaction flow for the XRP integration as of PR #632.
+This document describes the **as-built** transaction flow for the XRP integration as of PR #635.
 It maps each step to the concrete Go files and interfaces that implement it.
 
 For the common multi-wallet architecture shared across all chains, see
@@ -31,11 +31,12 @@ Watch Wallet (online)          Sign/Keygen Wallet (offline)       Watch Wallet (
 
 | Connection | Type | Port | Used by |
 |---|---|---|---|
-| `WSClient.public` | WebSocket | 6006 | All read/submit operations |
-| `WSClient.admin` | WebSocket | 6005 | `ledger_accept` (standalone mode only) |
+| Public WebSocket | WebSocket | 6006 | All read/submit operations (`PublicXRP`) |
+| Admin WebSocket | WebSocket | 6005 | `ledger_accept` standalone mode only (`AdminXRP`) |
 
-Both connections are held in `internal/infrastructure/api/xrp/wsclient.go`.
-The `*XRP` struct embeds `*WSClient` and is constructed via `NewXRPFromCoinType()` in `connection.go`.
+`PublicXRP` and `AdminXRP` are separate structs in `internal/infrastructure/api/xrp/public/` and
+`admin/` respectively. Both embed the corresponding low-level RPC client from `pkg/chains/xrp/rpc/`.
+Construction is via `NewPublicXRPFromCoinType()` and `NewAdminXRPFromCoinType()` in `connection.go`.
 
 ---
 
@@ -163,11 +164,30 @@ signed transaction blob ready for submission.
 **Entry point**: `internal/interface-adapters/cli/watch/`
 **Use case**: `internal/application/usecase/watch/xrp/send_transaction.go`
 
-### Interface used
+### Interfaces used
 
 | Interface | File | Methods |
 |---|---|---|
-| `apixrp.TransactionSubmitter` | `ports/api/xrp/transaction_submitter.go` | `SubmitTransaction()`, `WaitValidation()`, `GetTransaction()` |
+| `apixrp.TransactionSubmitter` | `ports/api/xrp/transaction_submitter.go` | `SubmitTransaction()`, `GetTransaction()` |
+| `apixrp.LedgerPoller` | `ports/api/xrp/transaction_submitter.go` | `LedgerCurrent()` |
+| `apixrp.LedgerAdvancer` (optional) | `ports/api/xrp/transaction_submitter.go` | `LedgerAccept()` |
+
+### Ledger Validation — Plan C Architecture
+
+`WaitValidation` was **removed** from `TransactionSubmitter`. The use case manages the
+ledger polling loop itself (Plan C):
+
+- `LedgerPoller` → `PublicXRP.LedgerCurrent()` — polls current ledger index (always available)
+- `LedgerAdvancer` → `AdminXRP.LedgerAccept()` — advances ledger in standalone mode (optional, may be nil)
+
+The local `xrpSendTxClient` interface in `send_transaction.go` composes both:
+```go
+type xrpSendTxClient interface {
+    apixrp.TransactionSubmitter
+    apixrp.LedgerPoller
+}
+```
+`ledgerAdv apixrp.LedgerAdvancer` is a separate optional field (nil in production without admin).
 
 ### Implementation path
 
@@ -180,20 +200,18 @@ sendTransactionUseCase.Execute()
     └─ for each entry (concurrent goroutines):
             │
             ├─ xrper.SubmitTransaction(ctx, txBlob)
-            │       └─ WSClient.SubmitTransaction()
+            │       └─ PublicXRP.SubmitTransaction()
             │               └─ xrprpc.Submit() → WebSocket submit
             │                  Returns SentTx{ResultCode, TxJSON{Hash, LastLedgerSequence}, ...}
             │                  Checks ResultCode contains "tesSUCCESS"
             │
-            ├─ xrper.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
-            │       └─ WSClient.WaitValidation()
-            │               │  Standalone mode: calls ledger_accept via admin WebSocket
-            │               │  Production:      polls ledger_current via public WebSocket
-            │               └─ Returns when currentLedger >= LastLedgerSequence
-            │                  Timeout: 30 retries × 1s = 30s max
+            ├─ use case: waitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
+            │       │  Polls xrper.LedgerCurrent() up to 30 times × 1s
+            │       │  If ledgerAdv != nil: calls LedgerAccept() between polls (standalone)
+            │       └─ Returns when currentLedger >= LastLedgerSequence
             │
             └─ xrper.GetTransaction(ctx, txHash, earliestLedgerVersion)
-                    └─ WSClient.GetTransaction()
+                    └─ PublicXRP.GetTransaction()
                             └─ xrprpc.GetTx() → WebSocket tx
                                Confirms Meta.TransactionResult and Validated flag
 ```
@@ -203,31 +221,35 @@ sendTransactionUseCase.Execute()
 ## Port Interface Summary
 
 ```
-apixrp.XRPer (monolithic interface — used only in DI container)
+apixrp.XRPPublicClient (focused — used everywhere except DI admin setup)
+    embeds:
+        XRPPublicer         → public queries (AccountChannels, AccountInfo, ServerInfo)
+        TransactionSubmitter→ SubmitTransaction, GetTransaction
+        TransactionSigner   → SignTransaction, SignTransactionNative
+        LedgerPoller        → LedgerCurrent
+        AccountInfoProvider → GetAccountInfo, GetBalance
+        TransactionPreparer → CreateRawTransaction
+        CoinTypeProvider, Closer, ChainConfigProvider
+
+apixrp.XRPAdminClient (focused — used only for keygen + standalone ledger)
     embeds:
         XRPAdminer          → admin keygen ops (ValidationCreate, WalletPropose)
-        XRPPublicer         → public queries (AccountChannels, AccountInfo, ServerInfo)
-        TransactionSubmitter→ SubmitTransaction, WaitValidation, GetTransaction
-        TransactionSigner   → SignTransaction, SignTransactionNative
+        LedgerAdvancer      → LedgerAccept
+        CoinTypeProvider, Closer, ChainConfigProvider
 
-    direct methods:
-        GetAccountInfo()    → account_info via WebSocket
-        GetBalance()        → account_info → XRP balance
-        GetTotalBalance()   → sum of GetBalance across addresses
-        CreateRawTransaction() → PrepareTransaction via WebSocket
-        Close()
-        CoinTypeCode()
-        GetChainConf()
+apixrp.XRPer (deprecated — kept for backward compatibility only)
+    embeds: XRPAdminClient + XRPPublicClient (effectively the union)
 ```
 
-Use cases depend only on the **focused interfaces**, not `XRPer` directly:
+Use cases depend only on the **focused interfaces**:
 
 | Use case | Interface dependency |
 |---|---|
 | `createTransactionUseCase` | `AccountInfoProvider`, `TransactionPreparer` |
 | `signTransactionUseCase` (sign/keygen) | `TransactionSigner` |
-| `sendTransactionUseCase` | `TransactionSubmitter` |
-| `monitorTransactionUseCase` | `TransactionSubmitter` (GetTransaction) |
+| `sendTransactionUseCase` | `TransactionSubmitter` + `LedgerPoller` (via local `xrpSendTxClient`), optional `LedgerAdvancer` |
+| `monitorTransactionUseCase` | `AccountInfoProvider` |
+| `generateKeyUseCase` (keygen) | `XRPAdminClient` (needs `WalletPropose`) |
 
 ---
 
@@ -255,14 +277,18 @@ in the sign wallet), but the gRPC-based `CombineTransaction` aggregation path is
 
 | File | Role |
 |---|---|
-| `internal/infrastructure/api/xrp/wsclient.go` | WebSocket connections (public + admin) |
-| `internal/infrastructure/api/xrp/xrp.go` | `*XRP` struct, implements `XRPer` |
-| `internal/infrastructure/api/xrp/xrpapi_tx.go` | `PrepareTransaction`, `SignTransaction`, `SignTransactionNative`, `SubmitTransaction`, `WaitValidation`, `GetTransaction` |
+| `internal/infrastructure/api/xrp/public/client.go` | `PublicXRP` struct (implements `XRPPublicClient`) |
+| `internal/infrastructure/api/xrp/public/transaction.go` | `PrepareTransaction`, `SubmitTransaction`, `GetTransaction`, `LedgerCurrent` |
+| `internal/infrastructure/api/xrp/public/sign.go` | `SignTransaction`, `SignTransactionNative` |
+| `internal/infrastructure/api/xrp/public/account.go` | `GetAccountInfo`, `GetBalance` |
+| `internal/infrastructure/api/xrp/admin/client.go` | `AdminXRP` struct (implements `XRPAdminClient`) |
+| `internal/infrastructure/api/xrp/admin/keygen.go` | `WalletPropose`, `ValidationCreate` |
+| `internal/infrastructure/api/xrp/connection.go` | Factory functions `NewPublicXRPFromCoinType`, `NewAdminXRPFromCoinType` |
 | `internal/infrastructure/api/xrp/signer/` | `PeersystSigner` — offline signing via Peersyst/xrpl-go |
-| `internal/application/ports/api/xrp/interface.go` | `XRPer` and focused interface definitions |
+| `internal/application/ports/api/xrp/interface.go` | `XRPPublicClient`, `XRPAdminClient`, deprecated `XRPer` |
 | `internal/application/ports/api/xrp/transaction_signer.go` | `TransactionSigner` interface |
-| `internal/application/ports/api/xrp/transaction_submitter.go` | `TransactionSubmitter` interface |
+| `internal/application/ports/api/xrp/transaction_submitter.go` | `TransactionSubmitter`, `LedgerPoller`, `LedgerAdvancer` interfaces |
 | `internal/application/usecase/watch/xrp/create_transaction.go` | Step 1: build unsigned tx |
 | `internal/application/usecase/sign/xrp/sign_transaction.go` | Step 2: sign (sign wallet) |
 | `internal/application/usecase/keygen/xrp/sign_transaction.go` | Step 2: sign (keygen wallet) |
-| `internal/application/usecase/watch/xrp/send_transaction.go` | Step 3: submit + confirm |
+| `internal/application/usecase/watch/xrp/send_transaction.go` | Step 3: submit + confirm (Plan C ledger polling) |

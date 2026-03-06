@@ -16,9 +16,9 @@ import (
 
 var xr apixrp.XRPPublicClient
 
-// GetXRP returns xrp instance
+// GetXRPPublicClient returns xrp public client instance
 // FIXME: hard coded
-func GetXRP() (apixrp.XRPPublicClient, error) {
+func GetXRPPublicClient() (apixrp.XRPPublicClient, error) {
 	if xr != nil {
 		return xr, nil
 	}
@@ -52,7 +52,7 @@ type XRPTestSuite struct {
 }
 
 func (xts *XRPTestSuite) SetupTest() {
-	xrp, err := GetXRP()
+	xrp, err := GetXRPPublicClient()
 	xts.NoError(err)
 	xts.XRP = xrp
 }

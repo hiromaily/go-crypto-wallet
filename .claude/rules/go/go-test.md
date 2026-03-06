@@ -139,6 +139,32 @@ Add `t.Parallel()` to tests with no shared mutable state. Do **not** add it to t
 
 ---
 
+## Concurrent Goroutines and Mock Expectations
+
+When the code under test spawns multiple goroutines that all call the **same mock method**, using
+per-call `.Once()` expectations with different return values is non-deterministic — goroutine A
+may steal goroutine B's response, causing "called over N times" panics or unsatisfied expectations.
+
+**Rule**: When N goroutines call the same mock method, set up a single expectation with `.Times(N)`
+returning a value that satisfies ALL callers simultaneously.
+
+```go
+// ❌ BAD: two goroutines race; either may receive the wrong response
+deps.ledgerPoller.EXPECT().LedgerCurrent(mock.Anything).Return(res1, nil).Once()
+deps.ledgerPoller.EXPECT().LedgerCurrent(mock.Anything).Return(res2, nil).Once()
+
+// ✅ GOOD: use Times(N) with a response value that satisfies every caller
+// (e.g. use the max of all required ledger indices)
+ledgerRes := &ResponseLedgerCurrent{}
+ledgerRes.Result.LedgerCurrentIndex = maxRequiredIndex
+deps.ledgerPoller.EXPECT().LedgerCurrent(mock.Anything).Return(ledgerRes, nil).Times(2)
+```
+
+This applies whenever use-case code fans out work into `go func()` goroutines and each goroutine
+calls the same mock method (e.g. `LedgerCurrent`, `GetBalance`, `GetTransaction`).
+
+---
+
 ## Verification
 
 ```bash

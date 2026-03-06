@@ -420,7 +420,7 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 		// public client
 		publicURL := c.conf.Ripple.WebsocketPublicURL
 		if publicURL == "" {
-			if publicURL = apixrpimpl.GetPublicWSServer(c.conf.Ripple.NetworkType).String(); publicURL == "" {
+			if publicURL = xrpkg.GetPublicWSServer(c.conf.Ripple.NetworkType).String(); publicURL == "" {
 				panic(errors.New("websocket URL is not found"))
 			}
 		}

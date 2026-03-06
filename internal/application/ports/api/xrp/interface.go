@@ -1,12 +1,3 @@
-// Package xrp defines interfaces for XRP blockchain operations.
-//
-// This package follows the Dependency Inversion Principle of Clean Architecture
-// by defining interfaces in the application layer that are implemented by the
-// infrastructure layer.
-//
-// Small, focused interfaces follow the Interface Segregation Principle.
-// Use cases should depend only on the specific interfaces they need through local interface
-// compositions.
 package xrp
 
 import (
@@ -22,8 +13,7 @@ import (
 )
 
 // XRPPublicClient defines all operations provided by the public XRP client.
-// This is the primary interface for use cases and adapters that interact with the
-// public XRP node. Prefer this over the deprecated XRPer interface.
+// Prefer this over the deprecated XRPer interface for new code.
 type XRPPublicClient interface {
 	XRPPublicer
 	AccountInfoProvider
@@ -55,47 +45,36 @@ type XRPer interface {
 	TransactionSubmitter
 	TransactionSigner
 
-	// account
 	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
-
-	// balance
 	GetBalance(ctx context.Context, addr string) (float64, error)
 	GetTotalBalance(ctx context.Context, addrs []string) float64
-
-	// transaction
 	CreateRawTransaction(
 		ctx context.Context,
 		senderAccount, receiverAccount string,
 		amount float64,
 		instructions *dtoxrp.Instructions,
 	) (*dtoxrp.TxInput, string, error)
-
-	// xrp
 	Close() error
 	CoinTypeCode() domainCoin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
 }
 
-// SignerEntryInput represents a signer for creating SignerListSet transactions
+// SignerEntryInput represents a signer for creating SignerListSet transactions.
 type SignerEntryInput struct {
 	Account string
 	Weight  uint32
 }
 
 // XRPPublicer defines the interface for XRP public node operations.
-// These operations query public information from the XRP network.
 type XRPPublicer interface {
-	// public_account
 	AccountChannels(ctx context.Context, sender, receiver string) (*xrprpcpublic.ResponseAccountChannels, error)
 	AccountInfo(ctx context.Context, address string) (*xrprpcpublic.ResponseAccountInfo, error)
-	// public_server_info
 	ServerInfo(ctx context.Context) (*xrprpcpublic.ResponseServerInfo, error)
 }
 
 // XRPAdminer defines the interface for XRP admin node operations.
 // These operations typically require admin access to the XRP node.
 type XRPAdminer interface {
-	// admin_keygen
 	ValidationCreate(ctx context.Context, secret string) (*xrprpcadmin.ResponseValidationCreate, error)
 	WalletProposeWithKey(
 		ctx context.Context,
@@ -105,9 +84,14 @@ type XRPAdminer interface {
 	WalletPropose(ctx context.Context, passphrase string) (*xrprpcadmin.ResponseWalletPropose, error)
 }
 
-// Small, focused interfaces following the Interface Segregation Principle.
+// AccountInfoProvider defines a minimal interface for querying XRP account information.
+// Used by use cases that need account data without depending on the full XRPPublicClient.
+type AccountInfoProvider interface {
+	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
+	GetBalance(ctx context.Context, addr string) (float64, error)
+}
 
-// CoinTypeProvider provides coin type information.
+// CoinTypeProvider provides coin type and chain configuration.
 type CoinTypeProvider interface {
 	CoinTypeCode() domainCoin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
@@ -162,4 +146,43 @@ type KeyGenerator interface {
 // Closer provides cleanup operations.
 type Closer interface {
 	Close() error
+}
+
+// TransactionSigner defines an interface for offline XRP transaction signing.
+// No network calls — suitable for air-gapped keygen and sign wallets.
+type TransactionSigner interface {
+	// SignTransaction signs a transaction using the legacy gRPC-based method.
+	//
+	// Deprecated: Use SignTransactionNative for offline native Go signing.
+	SignTransaction(ctx context.Context, txJSON *dtoxrp.TxInput, secret string) (string, string, error)
+
+	// SignTransactionNative signs an XRP transaction using native Go (offline).
+	// Supports single-signature and multi-signature transactions.
+	// Pass existingSignedBlob for additional signatures in a multi-sig workflow.
+	SignTransactionNative(
+		ctx context.Context,
+		txInput *dtoxrp.TxInput,
+		secret string,
+		isMultiSig bool,
+		existingSignedBlob *string,
+	) (string, string, error)
+}
+
+// LedgerPoller queries the current ledger index.
+// Used by use cases that poll for ledger advancement after transaction submission.
+type LedgerPoller interface {
+	LedgerCurrent(ctx context.Context) (*xrprpcpublic.ResponseLedgerCurrent, error)
+}
+
+// LedgerAdvancer advances the ledger (admin operation, standalone mode only).
+// May be nil when admin client is not configured.
+type LedgerAdvancer interface {
+	LedgerAccept(ctx context.Context) (*xrprpcadmin.ResponseLedgerAccept, error)
+}
+
+// TransactionSubmitter submits and retrieves XRP transactions.
+// Ledger polling is handled separately via LedgerPoller and LedgerAdvancer.
+type TransactionSubmitter interface {
+	SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error)
+	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error)
 }
