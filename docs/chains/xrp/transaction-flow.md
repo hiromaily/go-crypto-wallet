@@ -285,9 +285,7 @@ in the sign wallet), but the gRPC-based `CombineTransaction` aggregation path is
 | `internal/infrastructure/api/xrp/admin/keygen.go` | `WalletPropose`, `ValidationCreate` |
 | `internal/infrastructure/api/xrp/connection.go` | Factory functions `NewPublicXRPFromCoinType`, `NewAdminXRPFromCoinType` |
 | `internal/infrastructure/api/xrp/signer/` | `PeersystSigner` — offline signing via Peersyst/xrpl-go |
-| `internal/application/ports/api/xrp/interface.go` | `XRPPublicClient`, `XRPAdminClient`, deprecated `XRPer` |
-| `internal/application/ports/api/xrp/transaction_signer.go` | `TransactionSigner` interface |
-| `internal/application/ports/api/xrp/transaction_submitter.go` | `TransactionSubmitter`, `LedgerPoller`, `LedgerAdvancer` interfaces |
+| `internal/application/ports/api/xrp/interface.go` | All interfaces: `XRPPublicClient`, `XRPAdminClient`, `TransactionSigner`, `TransactionSubmitter`, `LedgerPoller`, `LedgerAdvancer`, and others |
 | `internal/application/usecase/watch/xrp/create_transaction.go` | Step 1: build unsigned tx |
 | `internal/application/usecase/sign/xrp/sign_transaction.go` | Step 2: sign (sign wallet) |
 | `internal/application/usecase/keygen/xrp/sign_transaction.go` | Step 2: sign (keygen wallet) |
