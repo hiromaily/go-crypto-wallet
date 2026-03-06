@@ -1,4 +1,4 @@
-package xrp_test
+package signer_test
 
 import (
 	"testing"
