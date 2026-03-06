@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +39,23 @@ func (_m *MockXRPPublicer) EXPECT() *MockXRPPublicer_Expecter {
 }
 
 // AccountChannels provides a mock function for the type MockXRPPublicer
-func (_mock *MockXRPPublicer) AccountChannels(ctx context.Context, sender string, receiver string) (*rpc.ResponseAccountChannels, error) {
+func (_mock *MockXRPPublicer) AccountChannels(ctx context.Context, sender string, receiver string) (*public.ResponseAccountChannels, error) {
 	ret := _mock.Called(ctx, sender, receiver)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AccountChannels")
 	}
 
-	var r0 *rpc.ResponseAccountChannels
+	var r0 *public.ResponseAccountChannels
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*rpc.ResponseAccountChannels, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*public.ResponseAccountChannels, error)); ok {
 		return returnFunc(ctx, sender, receiver)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *rpc.ResponseAccountChannels); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *public.ResponseAccountChannels); ok {
 		r0 = returnFunc(ctx, sender, receiver)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseAccountChannels)
+			r0 = ret.Get(0).(*public.ResponseAccountChannels)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
@@ -102,34 +102,34 @@ func (_c *MockXRPPublicer_AccountChannels_Call) Run(run func(ctx context.Context
 	return _c
 }
 
-func (_c *MockXRPPublicer_AccountChannels_Call) Return(responseAccountChannels *rpc.ResponseAccountChannels, err error) *MockXRPPublicer_AccountChannels_Call {
+func (_c *MockXRPPublicer_AccountChannels_Call) Return(responseAccountChannels *public.ResponseAccountChannels, err error) *MockXRPPublicer_AccountChannels_Call {
 	_c.Call.Return(responseAccountChannels, err)
 	return _c
 }
 
-func (_c *MockXRPPublicer_AccountChannels_Call) RunAndReturn(run func(ctx context.Context, sender string, receiver string) (*rpc.ResponseAccountChannels, error)) *MockXRPPublicer_AccountChannels_Call {
+func (_c *MockXRPPublicer_AccountChannels_Call) RunAndReturn(run func(ctx context.Context, sender string, receiver string) (*public.ResponseAccountChannels, error)) *MockXRPPublicer_AccountChannels_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // AccountInfo provides a mock function for the type MockXRPPublicer
-func (_mock *MockXRPPublicer) AccountInfo(ctx context.Context, address string) (*rpc.ResponseAccountInfo, error) {
+func (_mock *MockXRPPublicer) AccountInfo(ctx context.Context, address string) (*public.ResponseAccountInfo, error) {
 	ret := _mock.Called(ctx, address)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AccountInfo")
 	}
 
-	var r0 *rpc.ResponseAccountInfo
+	var r0 *public.ResponseAccountInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*rpc.ResponseAccountInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*public.ResponseAccountInfo, error)); ok {
 		return returnFunc(ctx, address)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *rpc.ResponseAccountInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *public.ResponseAccountInfo); ok {
 		r0 = returnFunc(ctx, address)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseAccountInfo)
+			r0 = ret.Get(0).(*public.ResponseAccountInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -170,34 +170,34 @@ func (_c *MockXRPPublicer_AccountInfo_Call) Run(run func(ctx context.Context, ad
 	return _c
 }
 
-func (_c *MockXRPPublicer_AccountInfo_Call) Return(responseAccountInfo *rpc.ResponseAccountInfo, err error) *MockXRPPublicer_AccountInfo_Call {
+func (_c *MockXRPPublicer_AccountInfo_Call) Return(responseAccountInfo *public.ResponseAccountInfo, err error) *MockXRPPublicer_AccountInfo_Call {
 	_c.Call.Return(responseAccountInfo, err)
 	return _c
 }
 
-func (_c *MockXRPPublicer_AccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*rpc.ResponseAccountInfo, error)) *MockXRPPublicer_AccountInfo_Call {
+func (_c *MockXRPPublicer_AccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*public.ResponseAccountInfo, error)) *MockXRPPublicer_AccountInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ServerInfo provides a mock function for the type MockXRPPublicer
-func (_mock *MockXRPPublicer) ServerInfo(ctx context.Context) (*rpc.ResponseServerInfo, error) {
+func (_mock *MockXRPPublicer) ServerInfo(ctx context.Context) (*public.ResponseServerInfo, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ServerInfo")
 	}
 
-	var r0 *rpc.ResponseServerInfo
+	var r0 *public.ResponseServerInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*rpc.ResponseServerInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*public.ResponseServerInfo, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *rpc.ResponseServerInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *public.ResponseServerInfo); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseServerInfo)
+			r0 = ret.Get(0).(*public.ResponseServerInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -232,12 +232,12 @@ func (_c *MockXRPPublicer_ServerInfo_Call) Run(run func(ctx context.Context)) *M
 	return _c
 }
 
-func (_c *MockXRPPublicer_ServerInfo_Call) Return(responseServerInfo *rpc.ResponseServerInfo, err error) *MockXRPPublicer_ServerInfo_Call {
+func (_c *MockXRPPublicer_ServerInfo_Call) Return(responseServerInfo *public.ResponseServerInfo, err error) *MockXRPPublicer_ServerInfo_Call {
 	_c.Call.Return(responseServerInfo, err)
 	return _c
 }
 
-func (_c *MockXRPPublicer_ServerInfo_Call) RunAndReturn(run func(ctx context.Context) (*rpc.ResponseServerInfo, error)) *MockXRPPublicer_ServerInfo_Call {
+func (_c *MockXRPPublicer_ServerInfo_Call) RunAndReturn(run func(ctx context.Context) (*public.ResponseServerInfo, error)) *MockXRPPublicer_ServerInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
