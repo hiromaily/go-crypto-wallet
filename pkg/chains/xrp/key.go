@@ -1,10 +1,4 @@
-package rpc
-
-// RequestCommand is the minimal request body for commands with no parameters.
-type RequestCommand struct {
-	ID      int    `json:"id"`
-	Command string `json:"command"`
-}
+package xrp
 
 // KeyType represents the cryptographic key algorithm used by an XRP Ledger account.
 type KeyType string
@@ -17,6 +11,7 @@ const (
 )
 
 // String returns the string representation of the KeyType.
+// adminClient
 func (k KeyType) String() string {
 	return string(k)
 }

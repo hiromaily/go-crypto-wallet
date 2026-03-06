@@ -6,13 +6,11 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplclient"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 )
 
 // XRP includes client to call JSON-RPC
 // This type implements the interfaces defined in internal/application/ports/api/xrp
 type XRP struct {
-	*WSClient                           // WebSocket operations (public + admin)
 	API          *xrplclient.XRPLClient // gRPC operations (legacy, being phased out)
 	chainConf    *chaincfg.Params
 	coinTypeCode domainCoin.CoinTypeCode
@@ -20,14 +18,11 @@ type XRP struct {
 
 // NewXRP creates XRP object
 func NewXRP(
-	wsPublic *websocket.WS,
-	wsAdmin *websocket.WS,
 	api *xrplclient.XRPLClient,
 	coinTypeCode domainCoin.CoinTypeCode,
 	conf *config.Ripple,
 ) (*XRP, error) {
 	xrp := &XRP{
-		WSClient:     newWSClient(wsPublic, wsAdmin),
 		API:          api,
 		coinTypeCode: coinTypeCode,
 	}
@@ -44,9 +39,6 @@ func NewXRP(
 // Close disconnects all connections (WebSocket and gRPC).
 // This overrides the promoted Close from *WSClient.
 func (r *XRP) Close() error {
-	if r.WSClient != nil {
-		_ = r.WSClient.Close()
-	}
 	if r.API != nil {
 		r.API.Close()
 	}

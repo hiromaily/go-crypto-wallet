@@ -1,4 +1,4 @@
-package xrp
+package public
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 )
 
 // GetBalance returns amount of address
-func (w *WSClient) GetBalance(ctx context.Context, addr string) (float64, error) {
-	accountInfo, err := w.GetAccountInfo(ctx, addr)
+func (r *publicRPC) GetBalance(ctx context.Context, addr string) (float64, error) {
+	accountInfo, err := r.GetAccountInfo(ctx, addr)
 	if err != nil {
 		return 0, err
 	}
@@ -16,10 +16,10 @@ func (w *WSClient) GetBalance(ctx context.Context, addr string) (float64, error)
 }
 
 // GetTotalBalance returns total amount in address list
-func (w *WSClient) GetTotalBalance(ctx context.Context, addrs []string) float64 {
+func (r *publicRPC) GetTotalBalance(ctx context.Context, addrs []string) float64 {
 	var total float64
 	for _, addr := range addrs {
-		amt, err := w.GetBalance(ctx, addr)
+		amt, err := r.GetBalance(ctx, addr)
 		if err == nil {
 			total += amt
 		}

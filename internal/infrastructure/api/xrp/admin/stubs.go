@@ -1,4 +1,4 @@
-package xrp
+package admin
 
 // Admin methods not yet implemented. See XRPL admin API reference:
 //   - Logging and data management: https://xrpl.org/logging-and-data-management-methods.html

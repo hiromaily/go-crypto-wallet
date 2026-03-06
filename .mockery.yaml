@@ -22,44 +22,13 @@ packages:
     interfaces:
       Bitcoiner:
 
-  # Ripple API - interface in application/ports, implementation in infrastructure
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp:
+  # Bitcoin RPC client interface in pkg layer
+  github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc:
     config:
-      dir: "internal/infrastructure/api/xrp/mocks"
+      dir: "pkg/chains/btc/rpc/mocks"
       pkgname: "mocks"
     interfaces:
-      XRPer:
-      XRPAPIProvider:
-      XRPPublicer:
-      XRPAdminer:
-      TransactionSubmitter:
-      AccountInfoProvider:
-      TransactionPreparer:
-
-  # File storage - interface in application/ports, implementation in infrastructure
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/file:
-    config:
-      dir: "internal/infrastructure/storage/file/transaction/mocks"
-      pkgname: "mocks"
-    interfaces:
-      TransactionFileRepositorier:
-      AddressFileRepositorier:
-      DescriptorFileWriter:
-
-  # Watch wallet persistence interfaces
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch:
-    config:
-      dir: "internal/infrastructure/repository/watch/mocks"
-      pkgname: "mocks"
-    interfaces:
-      AddressRepositorier:
-      BTCTxRepositorier:
-      TxInputRepositorier:
-      TxOutputRepositorier:
-      PaymentRequestRepositorier:
-      TxRepositorier:
-      ETHDetailTXRepositorier:
-      XRPDetailTXRepositorier:
+      BTCRPC:
 
   # Ethereum API - interface in application/ports, implementation in infrastructure
   # Excludes: Ethereumer (DI-only monolithic), ETHTransactionSender (type alias for TxSender),
@@ -84,6 +53,44 @@ packages:
       TxSender:
       TxMonitor:
 
+  # XRP Leger API - interface in application/ports, implementation in infrastructure
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp:
+    config:
+      dir: "internal/infrastructure/api/xrp/mocks"
+      pkgname: "mocks"
+    interfaces:
+      XRPer:
+      XRPAPIProvider:
+      TransactionSubmitter:
+      AccountInfoProvider:
+      TransactionPreparer:
+
+  # XRP Leger RPC admin client interface in pkg layer
+  github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/admin:
+    config:
+      dir: "pkg/chains/xrp/rpc/admin/mocks"
+      pkgname: "mocks"
+    interfaces:
+      XRPAdminer:
+
+  # XRP Leger RPC admin client interface in pkg layer
+  github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public:
+    config:
+      dir: "pkg/chains/xrp/rpc/public/mocks"
+      pkgname: "mocks"
+    interfaces:
+      XRPPublicer:
+
+  # File storage - interface in application/ports, implementation in infrastructure
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/file:
+    config:
+      dir: "internal/infrastructure/storage/file/transaction/mocks"
+      pkgname: "mocks"
+    interfaces:
+      TransactionFileRepositorier:
+      AddressFileRepositorier:
+      DescriptorFileWriter:
+
   # Persistence (UnitOfWork / Transaction) - used by watch wallet use cases
   github.com/hiromaily/go-crypto-wallet/pkg/db/tx:
     config:
@@ -93,13 +100,20 @@ packages:
       UnitOfWork:
       Transaction:
 
-  # Bitcoin RPC client interface in pkg layer
-  github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/rpc:
+  # Watch wallet persistence interfaces
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch:
     config:
-      dir: "pkg/chains/btc/rpc/mocks"
+      dir: "internal/infrastructure/repository/watch/mocks"
       pkgname: "mocks"
     interfaces:
-      BTCRPC:
+      AddressRepositorier:
+      BTCTxRepositorier:
+      TxInputRepositorier:
+      TxOutputRepositorier:
+      PaymentRequestRepositorier:
+      TxRepositorier:
+      ETHDetailTXRepositorier:
+      XRPDetailTXRepositorier:
 
   # Cold wallet persistence interfaces
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold:

@@ -1,4 +1,4 @@
-package xrp
+package public
 
 // Public methods not yet implemented. See XRPL public API reference:
 //   - Ledger methods:              https://xrpl.org/ledger-methods.html

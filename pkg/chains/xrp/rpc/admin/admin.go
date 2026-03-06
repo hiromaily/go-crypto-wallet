@@ -1,8 +1,10 @@
-package rpc
+package admin
 
 import (
 	"context"
 	"fmt"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 )
 
 // Note: Admin commands require a connection to rippled on an admin host/port.
@@ -57,22 +59,22 @@ type ResponseWalletPropose struct {
 }
 
 // ValidationCreate calls the validation_create admin WebSocket command and returns the raw wire response.
-func ValidationCreate(ctx context.Context, caller WSCaller, secret string) (*ResponseValidationCreate, error) {
+func (r *AdminRPC) ValidationCreate(ctx context.Context, secret string) (*ResponseValidationCreate, error) {
 	req := &ValidationCreateRequest{
 		ID:      0,
 		Command: "validation_create",
 		Secret:  secret,
 	}
 	var res ResponseValidationCreate
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(validation_create): %w", err)
 	}
 	return &res, nil
 }
 
 // WalletProposeWithKey calls wallet_propose with a seed and explicit key type.
-func WalletProposeWithKey(
-	ctx context.Context, caller WSCaller, seed string, keyType KeyType,
+func (r *AdminRPC) WalletProposeWithKey(
+	ctx context.Context, seed string, keyType xrp.KeyType,
 ) (*ResponseWalletPropose, error) {
 	req := &WalletProposeWithKeyRequest{
 		Command: "wallet_propose",
@@ -80,7 +82,7 @@ func WalletProposeWithKey(
 		KeyType: keyType.String(),
 	}
 	var res ResponseWalletPropose
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
 	return &res, nil
@@ -88,13 +90,13 @@ func WalletProposeWithKey(
 
 // WalletPropose calls wallet_propose with a passphrase.
 // The result is deterministic: the same passphrase always produces the same key pair.
-func WalletPropose(ctx context.Context, caller WSCaller, passphrase string) (*ResponseWalletPropose, error) {
+func (r *AdminRPC) WalletPropose(ctx context.Context, passphrase string) (*ResponseWalletPropose, error) {
 	req := &WalletProposeRequest{
 		Command:    "wallet_propose",
 		Passphrase: passphrase,
 	}
 	var res ResponseWalletPropose
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
 	return &res, nil

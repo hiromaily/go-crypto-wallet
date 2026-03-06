@@ -1,4 +1,4 @@
-package xrp
+package public
 
 import (
 	"context"
@@ -6,20 +6,19 @@ import (
 	"fmt"
 	"strconv"
 
-	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
+	xrpamount "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/amount"
+	xrprpcpublic "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-const dropsPerXRP = 1_000_000
-
 // GetAccountInfo retrieves account information via WebSocket.
-func (w *WSClient) GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error) {
+func (r *publicRPC) GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error) {
 	if address == "" {
 		return nil, errors.New("address is empty")
 	}
 
-	res, err := xrprpc.AccountInfo(ctx, w.public, address)
+	res, err := r.caller.AccountInfo(ctx, address)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call accountClient.GetAccountInfo(): %w", err)
 	}
@@ -44,12 +43,12 @@ func (w *WSClient) GetAccountInfo(ctx context.Context, address string) (*xrplgo.
 
 // fromWSAccountInfo converts a WebSocket ResponseAccountInfo to the pkg client AccountInfo type.
 // The Balance field in the WebSocket response is in drops; this converts it to XRP.
-func fromWSAccountInfo(res *xrprpc.ResponseAccountInfo) (*xrplgo.AccountInfo, error) {
+func fromWSAccountInfo(res *xrprpcpublic.ResponseAccountInfo) (*xrplgo.AccountInfo, error) {
 	drops, err := strconv.ParseInt(res.Result.AccountData.Balance, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse account balance %q: %w", res.Result.AccountData.Balance, err)
 	}
-	xrpBalance := strconv.FormatFloat(float64(drops)/dropsPerXRP, 'f', -1, 64)
+	xrpBalance := strconv.FormatFloat(float64(drops)/xrpamount.DropsPerXRP, 'f', -1, 64)
 	return &xrplgo.AccountInfo{
 		Sequence:                       uint64(res.Result.AccountData.Sequence),
 		XrpBalance:                     xrpBalance,
