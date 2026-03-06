@@ -11,3 +11,8 @@ type AdminRPC struct {
 func NewAdminRPC(caller rpc.WSCaller) *AdminRPC {
 	return &AdminRPC{caller: caller}
 }
+
+// Close closes the underlying WebSocket connection.
+func (r *AdminRPC) Close() error {
+	return r.caller.Close()
+}
