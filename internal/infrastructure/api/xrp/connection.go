@@ -16,11 +16,15 @@ import (
 )
 
 // chainConf resolves the chain configuration from the Ripple config.
+// standalone uses TestNet3Params (local isolated node, not mainnet).
 func chainConf(conf *config.Ripple) *chaincfg.Params {
-	if conf.NetworkType != pkgxrp.NetworkTypeXRPMainNet.String() {
+	switch pkgxrp.NetworkTypeXRP(conf.NetworkType) {
+	case pkgxrp.NetworkTypeXRPMainNet:
+		return &chaincfg.MainNetParams
+	default:
+		// testnet, devnet, standalone all use test network params
 		return &chaincfg.TestNet3Params
 	}
-	return &chaincfg.MainNetParams
 }
 
 // NewPublicXRP creates a PublicXRP instance for the given WebSocket and coin type.

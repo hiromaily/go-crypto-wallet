@@ -18,7 +18,7 @@ ripple:
   websocket_public_url: "ws://127.0.0.1:6006"
   # Admin WebSocket (required for WaitValidation in standalone mode)
   websocket_admin_url: "ws://127.0.0.1:6006"
-  network_type: "testnet" # mainnet, testnet, devnet
+  network_type: "standalone" # mainnet, testnet, devnet, standalone
   api:
     url: "127.0.0.1:50051"
     is_secure: false

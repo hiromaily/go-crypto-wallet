@@ -3,7 +3,7 @@
 #websocket_public_url = "wss://127.0.0.1:6005"
 websocket_public_url = ""
 #websocket_admin_url = "ws://127.0.0.1:6006"
-network_type = "testnet" # mainnet, testnet, devnet
+network_type = "standalone" # mainnet, testnet, devnet, standalone
 
 [ripple.api]
 url = "127.0.0.1:50051"

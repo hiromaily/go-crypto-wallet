@@ -24,9 +24,10 @@ type NetworkTypeXRP string
 
 // network type
 const (
-	NetworkTypeXRPMainNet NetworkTypeXRP = "mainnet"
-	NetworkTypeXRPTestNet NetworkTypeXRP = "testnet"
-	NetworkTypeXRPDevNet  NetworkTypeXRP = "devnet"
+	NetworkTypeXRPMainNet       NetworkTypeXRP = "mainnet"
+	NetworkTypeXRPTestNet       NetworkTypeXRP = "testnet"
+	NetworkTypeXRPDevNet        NetworkTypeXRP = "devnet"
+	NetworkTypeXRPStandaloneNet NetworkTypeXRP = "standalone"
 )
 
 // String converter
@@ -34,7 +35,8 @@ func (n NetworkTypeXRP) String() string {
 	return string(n)
 }
 
-// GetPublicWSServer returns public server url from network type
+// GetPublicWSServer returns public server url from network type.
+// Returns "" for standalone mode — the caller must provide a local URL via config.
 func GetPublicWSServer(networkType string) PublicWSServer {
 	switch NetworkTypeXRP(networkType) {
 	case NetworkTypeXRPMainNet:
@@ -43,6 +45,8 @@ func GetPublicWSServer(networkType string) PublicWSServer {
 		return PublicWSServerTestnet
 	case NetworkTypeXRPDevNet:
 		return PublicWSServerDevnet
+	case NetworkTypeXRPStandaloneNet:
+		return "" // local rippled node; URL must be set via websocket_public_url in config
 	default:
 	}
 	return ""
