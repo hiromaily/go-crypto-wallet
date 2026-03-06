@@ -6,6 +6,7 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
+	xrprpcadmin "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/admin"
 )
 
 // WalletProposeWithKey calls wallet_propose with the given seed and key type.
@@ -21,15 +22,7 @@ func (a *AdminXRP) WalletProposeWithKey(
 	if res.Error != "" {
 		return nil, fmt.Errorf("fail to call AdminRPC.WalletProposeWithKey: %s", res.Error)
 	}
-	return &dtoxrp.WalletInfo{
-		AccountID:     res.Result.AccountID,
-		KeyType:       res.Result.KeyType,
-		MasterKey:     res.Result.MasterKey,
-		MasterSeed:    res.Result.MasterSeed,
-		MasterSeedHex: res.Result.MasterSeedHex,
-		PublicKey:     res.Result.PublicKey,
-		PublicKeyHex:  res.Result.PublicKeyHex,
-	}, nil
+	return toWalletInfoDTO(res), nil
 }
 
 // WalletPropose calls wallet_propose with a passphrase and converts the result to a DTO.
@@ -41,6 +34,11 @@ func (a *AdminXRP) WalletPropose(ctx context.Context, passphrase string) (*dtoxr
 	if res.Error != "" {
 		return nil, fmt.Errorf("fail to call AdminRPC.WalletPropose: %s", res.Error)
 	}
+	return toWalletInfoDTO(res), nil
+}
+
+// toWalletInfoDTO converts the RPC wallet propose result to the application DTO.
+func toWalletInfoDTO(res *xrprpcadmin.ResponseWalletPropose) *dtoxrp.WalletInfo {
 	return &dtoxrp.WalletInfo{
 		AccountID:     res.Result.AccountID,
 		KeyType:       res.Result.KeyType,
@@ -49,7 +47,7 @@ func (a *AdminXRP) WalletPropose(ctx context.Context, passphrase string) (*dtoxr
 		MasterSeedHex: res.Result.MasterSeedHex,
 		PublicKey:     res.Result.PublicKey,
 		PublicKeyHex:  res.Result.PublicKeyHex,
-	}, nil
+	}
 }
 
 // ValidationCreate calls validation_create and converts the result to a DTO.
