@@ -135,6 +135,18 @@ ETH supports EIP-1559 (Type 2) transactions with EOA single-sig and ERC-20 token
 > **Note**: Supports both Anvil and Geth nodes. Database backend is configurable (SQLite/MySQL/PostgreSQL).
 > P2 deploys the HYT ERC-20 contract via Foundry (forge) onto the local Anvil node before running the transfer workflow.
 
+### XRP Ledger (XRP) Transaction Patterns
+
+XRP supports single-sig payment transfer with classic addresses (ed25519 or secp256k1).
+
+| Pattern | Type | Address Format | Signing | Status |
+|---------|------|----------------|---------|--------|
+| **P1** | Single-sig Payment Transfer | `r...` (base58) | Keygen wallet (offline) | ✅ Verified |
+
+> **Note**: XRP uses classic addresses (`r...` prefix). The Sign wallet is not required — the
+> Keygen wallet handles offline signing directly. E2E runs against a local **rippled standalone mode**
+> node (Docker), equivalent to Bitcoin regtest. Ledgers are advanced manually via `ledger_accept`.
+
 ### Quick Start
 
 ```bash
@@ -151,21 +163,30 @@ make bch-e2e P=3    # P2SH 3-of-3 Multisig
 make eth-e2e-p1     # Single-sig EIP-1559
 make eth-e2e-p2     # ERC-20 HYT Token Transfer
 
+# XRP: Run patterns
+make xrp-e2e-p1     # Single-sig Payment Transfer
+
 # ETH: Run all patterns in parallel
 make eth-e2e-parallel          # Run P1 and P2 in parallel
 make eth-e2e-ci-all            # CI mode (non-interactive)
+
+# XRP: Run all patterns in parallel
+make xrp-e2e-parallel          # Run P1 in parallel
+make xrp-e2e-ci-all            # CI mode (non-interactive)
 
 # Fresh start with full reset
 make btc-e2e-reset P=5
 make bch-e2e-reset P=3
 make eth-e2e-p1-reset
 make eth-e2e-p2-reset
+make xrp-e2e-p1-reset
 
 # CI/CD mode (non-interactive)
 make btc-e2e-ci P=3
 make bch-e2e-ci P=3
 make eth-e2e-p1-ci
 make eth-e2e-p2-ci
+make xrp-e2e-p1-ci
 ```
 
 ### Why This Matters
