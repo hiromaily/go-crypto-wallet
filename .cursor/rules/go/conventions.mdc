@@ -13,22 +13,22 @@ Rules for modifying Go files (`*.go`) in go-crypto-wallet.
 
 ## Applicable Directories
 
-| Directory | Description |
-|-----------|-------------|
+| Directory   | Description                                |
+| ----------- | ------------------------------------------ |
 | `internal/` | Core application code (Clean Architecture) |
-| `pkg/` | Reusable shared packages |
-| `cmd/` | Application entry points |
+| `pkg/`      | Reusable shared packages                   |
+| `cmd/`      | Application entry points                   |
 
 ## Verification Commands
 
 **ALWAYS run before committing:**
 
-| Command | Purpose | Required |
-|---------|---------|----------|
-| `make go-lint` | Lint and auto-fix | ✅ Yes |
-| `make tidy` | `go mod tidy` | ✅ Yes |
-| `make check-build` | Build verification (no binary) | ✅ Yes |
-| `make go-test` | Run unit tests | Recommended |
+| Command            | Purpose                        | Required    |
+| ------------------ | ------------------------------ | ----------- |
+| `make go-lint`     | Lint and auto-fix              | ✅ Yes      |
+| `make tidy`        | `go mod tidy`                  | ✅ Yes      |
+| `make check-build` | Build verification (no binary) | ✅ Yes      |
+| `make go-test`     | Run unit tests                 | Recommended |
 
 ### Quick One-Liner
 
@@ -38,25 +38,25 @@ make go-lint && make tidy && make check-build && make go-test
 
 ### Additional Commands
 
-| Command | Purpose |
-|---------|---------|
-| `make go-fmt` | Format only (gofmt) |
-| `make go-imports` | Format imports |
-| `make go-staticcheck` | Additional static analysis |
-| `make go-check-vuln` | Security vulnerability check |
-| `make go-test-integration` | Integration tests |
+| Command                    | Purpose                      |
+| -------------------------- | ---------------------------- |
+| `make go-fmt`              | Format only (gofmt)          |
+| `make go-imports`          | Format imports               |
+| `make go-staticcheck`      | Additional static analysis   |
+| `make go-check-vuln`       | Security vulnerability check |
+| `make go-test-integration` | Integration tests            |
 
 ## Build Rules
 
 **CRITICAL: Never run `go build` directly. Always use Makefile targets.**
 
-| Purpose | Command | Output Location |
-|---------|---------|-----------------|
-| Verify build (no binary) | `make check-build` | `/dev/null` |
-| Build all | `make build-all` | `${GOPATH}/bin/` |
-| Build watch only | `make build-watch` | `${GOPATH}/bin/watch` |
-| Build keygen only | `make build-keygen` | `${GOPATH}/bin/keygen` |
-| Build sign only | `make build-sign` | `${GOPATH}/bin/sign{1,2}` |
+| Purpose                  | Command             | Output Location           |
+| ------------------------ | ------------------- | ------------------------- |
+| Verify build (no binary) | `make check-build`  | `/dev/null`               |
+| Build all                | `make build-all`    | `${GOPATH}/bin/`          |
+| Build watch only         | `make build-watch`  | `${GOPATH}/bin/watch`     |
+| Build keygen only        | `make build-keygen` | `${GOPATH}/bin/keygen`    |
+| Build sign only          | `make build-sign`   | `${GOPATH}/bin/sign{1,2}` |
 
 ## Code Style
 
@@ -77,6 +77,26 @@ import (
 )
 ```
 
+### Deprecated Types — Comment Format
+
+`staticcheck ST1021` requires the **first comment line** on an exported type to start with the type name.
+For deprecated types, the `// Deprecated:` tag must NOT be the first line.
+
+```go
+// ❌ BAD: staticcheck ST1021 — first line must start with the type name
+// Deprecated: XRPer is kept for backward compatibility only.
+// Prefer XRPPublicClient and XRPAdminClient for new code.
+// XRPer defines the combined interface for XRP blockchain operations.
+type XRPer interface { ... }
+
+// ✅ GOOD: type name first, then blank line, then Deprecated tag
+// XRPer defines the combined interface for XRP blockchain operations.
+//
+// Deprecated: XRPer is kept for backward compatibility only.
+// Prefer XRPPublicClient and XRPAdminClient for new code.
+type XRPer interface { ... }
+```
+
 ### Error Handling
 
 Always wrap errors with context:
@@ -92,12 +112,12 @@ if err != nil {
 
 **`panic()` is ONLY allowed in:**
 
-| Location | Allowed | Reason |
-|----------|---------|--------|
-| `cmd/*/main.go` | ✅ Yes | Application entry points |
-| `internal/di/` | ✅ Yes | Configuration/DI errors at startup |
-| `pkg/di/` | ✅ Yes | Configuration/DI errors at startup |
-| Other packages | ❌ No | Must return errors instead |
+| Location        | Allowed | Reason                             |
+| --------------- | ------- | ---------------------------------- |
+| `cmd/*/main.go` | ✅ Yes  | Application entry points           |
+| `internal/di/`  | ✅ Yes  | Configuration/DI errors at startup |
+| `pkg/di/`       | ✅ Yes  | Configuration/DI errors at startup |
+| Other packages  | ❌ No   | Must return errors instead         |
 
 **Rationale**: Panic should only occur during initialization/startup for unrecoverable configuration errors. All runtime errors must be handled via error returns.
 
@@ -128,12 +148,31 @@ func (c *container) NewFooUseCase() FooUseCase {
 
 ### Naming Conventions
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Package | lowercase, no underscores | `account`, `transaction` |
-| Exported | UpperCamelCase | `GetAccountKey` |
-| Unexported | lowerCamelCase | `calculateFee` |
-| Interface | Behavior + "er" | `Validator`, `Reader` |
+| Type       | Convention                | Example                  |
+| ---------- | ------------------------- | ------------------------ |
+| Package    | lowercase, no underscores | `account`, `transaction` |
+| Exported   | UpperCamelCase            | `GetAccountKey`          |
+| Unexported | lowerCamelCase            | `calculateFee`           |
+| Interface  | Behavior + "er"           | `Validator`, `Reader`    |
+
+### Avoid Vague Names
+
+Names must convey **what** something is or does — not just its category.
+Generic names like `client`, `handler`, `manager`, `helper`, `data`, `info`, `util` are prohibited
+unless they are qualified with a meaningful prefix that removes ambiguity.
+
+```go
+// ❌ BAD: what kind of client? what does it connect to?
+type Client struct { ... }
+var client SomeInterface
+package client
+
+// ✅ GOOD: the name tells you exactly what it is
+type WSClient struct { ... }          // WebSocket connection to XRP node
+type BitcoinRPCClient struct { ... }  // JSON-RPC client for Bitcoin
+var xrpWS *websocket.WS
+package xrplgo
+```
 
 ## Auto-Generated Files
 
