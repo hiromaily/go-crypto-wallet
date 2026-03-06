@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +39,23 @@ func (_m *MockTransactionSubmitter) EXPECT() *MockTransactionSubmitter_Expecter 
 }
 
 // GetTransaction provides a mock function for the type MockTransactionSubmitter
-func (_mock *MockTransactionSubmitter) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error) {
+func (_mock *MockTransactionSubmitter) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error) {
 	ret := _mock.Called(ctx, txID, targetLedgerVersion)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTransaction")
 	}
 
-	var r0 *xrplgo.TxInfo
+	var r0 *xrp.TxInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) (*xrplgo.TxInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) (*xrp.TxInfo, error)); ok {
 		return returnFunc(ctx, txID, targetLedgerVersion)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) *xrplgo.TxInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) *xrp.TxInfo); ok {
 		r0 = returnFunc(ctx, txID, targetLedgerVersion)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrplgo.TxInfo)
+			r0 = ret.Get(0).(*xrp.TxInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, uint64) error); ok {
@@ -102,35 +102,35 @@ func (_c *MockTransactionSubmitter_GetTransaction_Call) Run(run func(ctx context
 	return _c
 }
 
-func (_c *MockTransactionSubmitter_GetTransaction_Call) Return(txInfo *xrplgo.TxInfo, err error) *MockTransactionSubmitter_GetTransaction_Call {
+func (_c *MockTransactionSubmitter_GetTransaction_Call) Return(txInfo *xrp.TxInfo, err error) *MockTransactionSubmitter_GetTransaction_Call {
 	_c.Call.Return(txInfo, err)
 	return _c
 }
 
-func (_c *MockTransactionSubmitter_GetTransaction_Call) RunAndReturn(run func(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error)) *MockTransactionSubmitter_GetTransaction_Call {
+func (_c *MockTransactionSubmitter_GetTransaction_Call) RunAndReturn(run func(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)) *MockTransactionSubmitter_GetTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SubmitTransaction provides a mock function for the type MockTransactionSubmitter
-func (_mock *MockTransactionSubmitter) SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error) {
+func (_mock *MockTransactionSubmitter) SubmitTransaction(ctx context.Context, signedTx string) (*xrp.SentTx, uint64, error) {
 	ret := _mock.Called(ctx, signedTx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SubmitTransaction")
 	}
 
-	var r0 *xrplgo.SentTx
+	var r0 *xrp.SentTx
 	var r1 uint64
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrplgo.SentTx, uint64, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrp.SentTx, uint64, error)); ok {
 		return returnFunc(ctx, signedTx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrplgo.SentTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrp.SentTx); ok {
 		r0 = returnFunc(ctx, signedTx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrplgo.SentTx)
+			r0 = ret.Get(0).(*xrp.SentTx)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) uint64); ok {
@@ -176,12 +176,12 @@ func (_c *MockTransactionSubmitter_SubmitTransaction_Call) Run(run func(ctx cont
 	return _c
 }
 
-func (_c *MockTransactionSubmitter_SubmitTransaction_Call) Return(sentTx *xrplgo.SentTx, v uint64, err error) *MockTransactionSubmitter_SubmitTransaction_Call {
+func (_c *MockTransactionSubmitter_SubmitTransaction_Call) Return(sentTx *xrp.SentTx, v uint64, err error) *MockTransactionSubmitter_SubmitTransaction_Call {
 	_c.Call.Return(sentTx, v, err)
 	return _c
 }
 
-func (_c *MockTransactionSubmitter_SubmitTransaction_Call) RunAndReturn(run func(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error)) *MockTransactionSubmitter_SubmitTransaction_Call {
+func (_c *MockTransactionSubmitter_SubmitTransaction_Call) RunAndReturn(run func(ctx context.Context, signedTx string) (*xrp.SentTx, uint64, error)) *MockTransactionSubmitter_SubmitTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

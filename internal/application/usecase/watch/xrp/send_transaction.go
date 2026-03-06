@@ -63,7 +63,7 @@ func (u *sendTransactionUseCase) waitValidation(ctx context.Context, targetLedge
 		if err != nil {
 			return 0, fmt.Errorf("fail to call ledger_current: %w", err)
 		}
-		currentLedger := res.Result.LedgerCurrentIndex
+		currentLedger := res.LedgerCurrentIndex
 		logger.Info("waitValidation polling",
 			"currentLedger", currentLedger,
 			"targetLedgerVersion", targetLedgerVersion,

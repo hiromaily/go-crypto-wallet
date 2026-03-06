@@ -7,9 +7,7 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	xrprpcadmin "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/admin"
 	xrprpcpublic "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
 // XRPPublicClient defines all operations provided by the public XRP client.
@@ -45,7 +43,7 @@ type XRPer interface {
 	TransactionSubmitter
 	TransactionSigner
 
-	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
+	GetAccountInfo(ctx context.Context, address string) (*dtoxrp.AccountInfo, error)
 	GetBalance(ctx context.Context, addr string) (float64, error)
 	GetTotalBalance(ctx context.Context, addrs []string) float64
 	CreateRawTransaction(
@@ -75,19 +73,19 @@ type XRPPublicer interface {
 // XRPAdminer defines the interface for XRP admin node operations.
 // These operations typically require admin access to the XRP node.
 type XRPAdminer interface {
-	ValidationCreate(ctx context.Context, secret string) (*xrprpcadmin.ResponseValidationCreate, error)
+	ValidationCreate(ctx context.Context, secret string) (*dtoxrp.ValidationKey, error)
 	WalletProposeWithKey(
 		ctx context.Context,
 		seed string,
 		keyType dtoxrp.XRPKeyType,
-	) (*xrprpcadmin.ResponseWalletPropose, error)
-	WalletPropose(ctx context.Context, passphrase string) (*xrprpcadmin.ResponseWalletPropose, error)
+	) (*dtoxrp.WalletInfo, error)
+	WalletPropose(ctx context.Context, passphrase string) (*dtoxrp.WalletInfo, error)
 }
 
 // AccountInfoProvider defines a minimal interface for querying XRP account information.
 // Used by use cases that need account data without depending on the full XRPPublicClient.
 type AccountInfoProvider interface {
-	GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error)
+	GetAccountInfo(ctx context.Context, address string) (*dtoxrp.AccountInfo, error)
 	GetBalance(ctx context.Context, addr string) (float64, error)
 }
 
@@ -140,7 +138,7 @@ type SignerListPreparer interface {
 
 // KeyGenerator generates XRP keys/wallets.
 type KeyGenerator interface {
-	WalletPropose(ctx context.Context, passphrase string) (*xrprpcadmin.ResponseWalletPropose, error)
+	WalletPropose(ctx context.Context, passphrase string) (*dtoxrp.WalletInfo, error)
 }
 
 // Closer provides cleanup operations.
@@ -171,18 +169,18 @@ type TransactionSigner interface {
 // LedgerPoller queries the current ledger index.
 // Used by use cases that poll for ledger advancement after transaction submission.
 type LedgerPoller interface {
-	LedgerCurrent(ctx context.Context) (*xrprpcpublic.ResponseLedgerCurrent, error)
+	LedgerCurrent(ctx context.Context) (*dtoxrp.LedgerCurrent, error)
 }
 
 // LedgerAdvancer advances the ledger (admin operation, standalone mode only).
 // May be nil when admin client is not configured.
 type LedgerAdvancer interface {
-	LedgerAccept(ctx context.Context) (*xrprpcadmin.ResponseLedgerAccept, error)
+	LedgerAccept(ctx context.Context) (*dtoxrp.LedgerAccept, error)
 }
 
 // TransactionSubmitter submits and retrieves XRP transactions.
 // Ledger polling is handled separately via LedgerPoller and LedgerAdvancer.
 type TransactionSubmitter interface {
-	SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error)
-	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error)
+	SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error)
+	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoxrp.TxInfo, error)
 }

@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +39,23 @@ func (_m *MockAccountInfoProvider) EXPECT() *MockAccountInfoProvider_Expecter {
 }
 
 // GetAccountInfo provides a mock function for the type MockAccountInfoProvider
-func (_mock *MockAccountInfoProvider) GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error) {
+func (_mock *MockAccountInfoProvider) GetAccountInfo(ctx context.Context, address string) (*xrp.AccountInfo, error) {
 	ret := _mock.Called(ctx, address)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAccountInfo")
 	}
 
-	var r0 *xrplgo.AccountInfo
+	var r0 *xrp.AccountInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrplgo.AccountInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrp.AccountInfo, error)); ok {
 		return returnFunc(ctx, address)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrplgo.AccountInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrp.AccountInfo); ok {
 		r0 = returnFunc(ctx, address)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrplgo.AccountInfo)
+			r0 = ret.Get(0).(*xrp.AccountInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -96,12 +96,12 @@ func (_c *MockAccountInfoProvider_GetAccountInfo_Call) Run(run func(ctx context.
 	return _c
 }
 
-func (_c *MockAccountInfoProvider_GetAccountInfo_Call) Return(accountInfo *xrplgo.AccountInfo, err error) *MockAccountInfoProvider_GetAccountInfo_Call {
+func (_c *MockAccountInfoProvider_GetAccountInfo_Call) Return(accountInfo *xrp.AccountInfo, err error) *MockAccountInfoProvider_GetAccountInfo_Call {
 	_c.Call.Return(accountInfo, err)
 	return _c
 }
 
-func (_c *MockAccountInfoProvider_GetAccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*xrplgo.AccountInfo, error)) *MockAccountInfoProvider_GetAccountInfo_Call {
+func (_c *MockAccountInfoProvider_GetAccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*xrp.AccountInfo, error)) *MockAccountInfoProvider_GetAccountInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }

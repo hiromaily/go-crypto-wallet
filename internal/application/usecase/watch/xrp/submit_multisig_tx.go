@@ -87,6 +87,6 @@ func (u *submitMultisigTxUseCase) Execute(
 
 	return watchusecase.SubmitMultisigTxOutput{
 		TxHash:   txHash,
-		IsQueued: sentTx.ResultCode == "tesSUCCESS" || sentTx.EngineResult == "tesSUCCESS",
+		IsQueued: sentTx.ResultCode == "tesSUCCESS",
 	}, nil
 }

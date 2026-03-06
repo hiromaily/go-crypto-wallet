@@ -9,7 +9,6 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -165,7 +164,7 @@ func (p *PublicXRP) CreateRawTransaction(
 }
 
 // SubmitTransaction submits a signed transaction blob via WebSocket.
-func (p *PublicXRP) SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error) {
+func (p *PublicXRP) SubmitTransaction(ctx context.Context, signedTx string) (*dtoxrp.SentTx, uint64, error) {
 	res, err := p.PublicRPC.Submit(ctx, signedTx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to call client.SubmitTransaction(): %w", err)
@@ -181,14 +180,11 @@ func (p *PublicXRP) SubmitTransaction(ctx context.Context, signedTx string) (*xr
 		"validated_ledger_index", res.Result.ValidatedLedgerIndex,
 	)
 
-	return &xrplgo.SentTx{
-		ResultCode:          res.Result.EngineResult,
-		ResultMessage:       res.Result.EngineResultMessage,
-		EngineResult:        res.Result.EngineResult,
-		EngineResultCode:    res.Result.EngineResultCode,
-		EngineResultMessage: res.Result.EngineResultMessage,
-		TxBlob:              res.Result.TxBlob,
-		TxJSON: xrplgo.TxInput{
+	return &dtoxrp.SentTx{
+		ResultCode:    res.Result.EngineResult,
+		ResultMessage: res.Result.EngineResultMessage,
+		TxBlob:        res.Result.TxBlob,
+		TxJSON: dtoxrp.TxInput{
 			TransactionType:    res.Result.TxJSON.TransactionType,
 			Account:            res.Result.TxJSON.Account,
 			Amount:             res.Result.TxJSON.Amount,
@@ -207,7 +203,7 @@ func (p *PublicXRP) SubmitTransaction(ctx context.Context, signedTx string) (*xr
 // GetTransaction retrieves a validated transaction by hash via WebSocket.
 func (p *PublicXRP) GetTransaction(
 	ctx context.Context, txID string, targetLedgerVersion uint64,
-) (*xrplgo.TxInfo, error) {
+) (*dtoxrp.TxInfo, error) {
 	res, err := p.PublicRPC.GetTx(ctx, txID, targetLedgerVersion)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call client.GetTransaction(): %w", err)
@@ -223,12 +219,26 @@ func (p *PublicXRP) GetTransaction(
 		"TransactionResult", res.Result.Meta.TransactionResult,
 	)
 
-	return &xrplgo.TxInfo{
+	return &dtoxrp.TxInfo{
 		ID: res.Result.Hash,
-		Outcome: xrplgo.TxOutcome{
+		Outcome: dtoxrp.TxOutcome{
 			Result:        res.Result.Meta.TransactionResult,
 			LedgerVersion: int(res.Result.LedgerIndex),
 		},
+	}, nil
+}
+
+// LedgerCurrent queries the current open ledger index.
+func (p *PublicXRP) LedgerCurrent(ctx context.Context) (*dtoxrp.LedgerCurrent, error) {
+	res, err := p.PublicRPC.LedgerCurrent(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call client.LedgerCurrent(): %w", err)
+	}
+	if res.Error != "" {
+		return nil, fmt.Errorf("fail to call client.LedgerCurrent(): %s", res.Error)
+	}
+	return &dtoxrp.LedgerCurrent{
+		LedgerCurrentIndex: res.Result.LedgerCurrentIndex,
 	}, nil
 }
 

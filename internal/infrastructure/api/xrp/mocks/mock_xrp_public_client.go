@@ -11,7 +11,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -365,23 +364,23 @@ func (_c *MockXRPPublicClient_CreateRawTransaction_Call) RunAndReturn(run func(c
 }
 
 // GetAccountInfo provides a mock function for the type MockXRPPublicClient
-func (_mock *MockXRPPublicClient) GetAccountInfo(ctx context.Context, address string) (*xrplgo.AccountInfo, error) {
+func (_mock *MockXRPPublicClient) GetAccountInfo(ctx context.Context, address string) (*xrp.AccountInfo, error) {
 	ret := _mock.Called(ctx, address)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAccountInfo")
 	}
 
-	var r0 *xrplgo.AccountInfo
+	var r0 *xrp.AccountInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrplgo.AccountInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrp.AccountInfo, error)); ok {
 		return returnFunc(ctx, address)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrplgo.AccountInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrp.AccountInfo); ok {
 		r0 = returnFunc(ctx, address)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrplgo.AccountInfo)
+			r0 = ret.Get(0).(*xrp.AccountInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -422,12 +421,12 @@ func (_c *MockXRPPublicClient_GetAccountInfo_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *MockXRPPublicClient_GetAccountInfo_Call) Return(accountInfo *xrplgo.AccountInfo, err error) *MockXRPPublicClient_GetAccountInfo_Call {
+func (_c *MockXRPPublicClient_GetAccountInfo_Call) Return(accountInfo *xrp.AccountInfo, err error) *MockXRPPublicClient_GetAccountInfo_Call {
 	_c.Call.Return(accountInfo, err)
 	return _c
 }
 
-func (_c *MockXRPPublicClient_GetAccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*xrplgo.AccountInfo, error)) *MockXRPPublicClient_GetAccountInfo_Call {
+func (_c *MockXRPPublicClient_GetAccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*xrp.AccountInfo, error)) *MockXRPPublicClient_GetAccountInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -602,23 +601,23 @@ func (_c *MockXRPPublicClient_GetTotalBalance_Call) RunAndReturn(run func(ctx co
 }
 
 // GetTransaction provides a mock function for the type MockXRPPublicClient
-func (_mock *MockXRPPublicClient) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error) {
+func (_mock *MockXRPPublicClient) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error) {
 	ret := _mock.Called(ctx, txID, targetLedgerVersion)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTransaction")
 	}
 
-	var r0 *xrplgo.TxInfo
+	var r0 *xrp.TxInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) (*xrplgo.TxInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) (*xrp.TxInfo, error)); ok {
 		return returnFunc(ctx, txID, targetLedgerVersion)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) *xrplgo.TxInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint64) *xrp.TxInfo); ok {
 		r0 = returnFunc(ctx, txID, targetLedgerVersion)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrplgo.TxInfo)
+			r0 = ret.Get(0).(*xrp.TxInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, uint64) error); ok {
@@ -665,34 +664,34 @@ func (_c *MockXRPPublicClient_GetTransaction_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *MockXRPPublicClient_GetTransaction_Call) Return(txInfo *xrplgo.TxInfo, err error) *MockXRPPublicClient_GetTransaction_Call {
+func (_c *MockXRPPublicClient_GetTransaction_Call) Return(txInfo *xrp.TxInfo, err error) *MockXRPPublicClient_GetTransaction_Call {
 	_c.Call.Return(txInfo, err)
 	return _c
 }
 
-func (_c *MockXRPPublicClient_GetTransaction_Call) RunAndReturn(run func(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrplgo.TxInfo, error)) *MockXRPPublicClient_GetTransaction_Call {
+func (_c *MockXRPPublicClient_GetTransaction_Call) RunAndReturn(run func(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)) *MockXRPPublicClient_GetTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // LedgerCurrent provides a mock function for the type MockXRPPublicClient
-func (_mock *MockXRPPublicClient) LedgerCurrent(ctx context.Context) (*public.ResponseLedgerCurrent, error) {
+func (_mock *MockXRPPublicClient) LedgerCurrent(ctx context.Context) (*xrp.LedgerCurrent, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LedgerCurrent")
 	}
 
-	var r0 *public.ResponseLedgerCurrent
+	var r0 *xrp.LedgerCurrent
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*public.ResponseLedgerCurrent, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*xrp.LedgerCurrent, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *public.ResponseLedgerCurrent); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *xrp.LedgerCurrent); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*public.ResponseLedgerCurrent)
+			r0 = ret.Get(0).(*xrp.LedgerCurrent)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -727,12 +726,12 @@ func (_c *MockXRPPublicClient_LedgerCurrent_Call) Run(run func(ctx context.Conte
 	return _c
 }
 
-func (_c *MockXRPPublicClient_LedgerCurrent_Call) Return(responseLedgerCurrent *public.ResponseLedgerCurrent, err error) *MockXRPPublicClient_LedgerCurrent_Call {
-	_c.Call.Return(responseLedgerCurrent, err)
+func (_c *MockXRPPublicClient_LedgerCurrent_Call) Return(ledgerCurrent *xrp.LedgerCurrent, err error) *MockXRPPublicClient_LedgerCurrent_Call {
+	_c.Call.Return(ledgerCurrent, err)
 	return _c
 }
 
-func (_c *MockXRPPublicClient_LedgerCurrent_Call) RunAndReturn(run func(ctx context.Context) (*public.ResponseLedgerCurrent, error)) *MockXRPPublicClient_LedgerCurrent_Call {
+func (_c *MockXRPPublicClient_LedgerCurrent_Call) RunAndReturn(run func(ctx context.Context) (*xrp.LedgerCurrent, error)) *MockXRPPublicClient_LedgerCurrent_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -968,24 +967,24 @@ func (_c *MockXRPPublicClient_SignTransactionNative_Call) RunAndReturn(run func(
 }
 
 // SubmitTransaction provides a mock function for the type MockXRPPublicClient
-func (_mock *MockXRPPublicClient) SubmitTransaction(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error) {
+func (_mock *MockXRPPublicClient) SubmitTransaction(ctx context.Context, signedTx string) (*xrp.SentTx, uint64, error) {
 	ret := _mock.Called(ctx, signedTx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SubmitTransaction")
 	}
 
-	var r0 *xrplgo.SentTx
+	var r0 *xrp.SentTx
 	var r1 uint64
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrplgo.SentTx, uint64, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*xrp.SentTx, uint64, error)); ok {
 		return returnFunc(ctx, signedTx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrplgo.SentTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *xrp.SentTx); ok {
 		r0 = returnFunc(ctx, signedTx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrplgo.SentTx)
+			r0 = ret.Get(0).(*xrp.SentTx)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) uint64); ok {
@@ -1031,12 +1030,12 @@ func (_c *MockXRPPublicClient_SubmitTransaction_Call) Run(run func(ctx context.C
 	return _c
 }
 
-func (_c *MockXRPPublicClient_SubmitTransaction_Call) Return(sentTx *xrplgo.SentTx, v uint64, err error) *MockXRPPublicClient_SubmitTransaction_Call {
+func (_c *MockXRPPublicClient_SubmitTransaction_Call) Return(sentTx *xrp.SentTx, v uint64, err error) *MockXRPPublicClient_SubmitTransaction_Call {
 	_c.Call.Return(sentTx, v, err)
 	return _c
 }
 
-func (_c *MockXRPPublicClient_SubmitTransaction_Call) RunAndReturn(run func(ctx context.Context, signedTx string) (*xrplgo.SentTx, uint64, error)) *MockXRPPublicClient_SubmitTransaction_Call {
+func (_c *MockXRPPublicClient_SubmitTransaction_Call) RunAndReturn(run func(ctx context.Context, signedTx string) (*xrp.SentTx, uint64, error)) *MockXRPPublicClient_SubmitTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
