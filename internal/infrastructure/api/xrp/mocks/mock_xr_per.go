@@ -9,9 +9,9 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
-	xrp0 "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/admin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -44,23 +44,23 @@ func (_m *MockXRPer) EXPECT() *MockXRPer_Expecter {
 }
 
 // AccountChannels provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) AccountChannels(ctx context.Context, sender string, receiver string) (*rpc.ResponseAccountChannels, error) {
+func (_mock *MockXRPer) AccountChannels(ctx context.Context, sender string, receiver string) (*public.ResponseAccountChannels, error) {
 	ret := _mock.Called(ctx, sender, receiver)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AccountChannels")
 	}
 
-	var r0 *rpc.ResponseAccountChannels
+	var r0 *public.ResponseAccountChannels
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*rpc.ResponseAccountChannels, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*public.ResponseAccountChannels, error)); ok {
 		return returnFunc(ctx, sender, receiver)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *rpc.ResponseAccountChannels); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *public.ResponseAccountChannels); ok {
 		r0 = returnFunc(ctx, sender, receiver)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseAccountChannels)
+			r0 = ret.Get(0).(*public.ResponseAccountChannels)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
@@ -107,34 +107,34 @@ func (_c *MockXRPer_AccountChannels_Call) Run(run func(ctx context.Context, send
 	return _c
 }
 
-func (_c *MockXRPer_AccountChannels_Call) Return(responseAccountChannels *rpc.ResponseAccountChannels, err error) *MockXRPer_AccountChannels_Call {
+func (_c *MockXRPer_AccountChannels_Call) Return(responseAccountChannels *public.ResponseAccountChannels, err error) *MockXRPer_AccountChannels_Call {
 	_c.Call.Return(responseAccountChannels, err)
 	return _c
 }
 
-func (_c *MockXRPer_AccountChannels_Call) RunAndReturn(run func(ctx context.Context, sender string, receiver string) (*rpc.ResponseAccountChannels, error)) *MockXRPer_AccountChannels_Call {
+func (_c *MockXRPer_AccountChannels_Call) RunAndReturn(run func(ctx context.Context, sender string, receiver string) (*public.ResponseAccountChannels, error)) *MockXRPer_AccountChannels_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // AccountInfo provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) AccountInfo(ctx context.Context, address string) (*rpc.ResponseAccountInfo, error) {
+func (_mock *MockXRPer) AccountInfo(ctx context.Context, address string) (*public.ResponseAccountInfo, error) {
 	ret := _mock.Called(ctx, address)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AccountInfo")
 	}
 
-	var r0 *rpc.ResponseAccountInfo
+	var r0 *public.ResponseAccountInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*rpc.ResponseAccountInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*public.ResponseAccountInfo, error)); ok {
 		return returnFunc(ctx, address)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *rpc.ResponseAccountInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *public.ResponseAccountInfo); ok {
 		r0 = returnFunc(ctx, address)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseAccountInfo)
+			r0 = ret.Get(0).(*public.ResponseAccountInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -175,12 +175,12 @@ func (_c *MockXRPer_AccountInfo_Call) Run(run func(ctx context.Context, address 
 	return _c
 }
 
-func (_c *MockXRPer_AccountInfo_Call) Return(responseAccountInfo *rpc.ResponseAccountInfo, err error) *MockXRPer_AccountInfo_Call {
+func (_c *MockXRPer_AccountInfo_Call) Return(responseAccountInfo *public.ResponseAccountInfo, err error) *MockXRPer_AccountInfo_Call {
 	_c.Call.Return(responseAccountInfo, err)
 	return _c
 }
 
-func (_c *MockXRPer_AccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*rpc.ResponseAccountInfo, error)) *MockXRPer_AccountInfo_Call {
+func (_c *MockXRPer_AccountInfo_Call) RunAndReturn(run func(ctx context.Context, address string) (*public.ResponseAccountInfo, error)) *MockXRPer_AccountInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -273,78 +273,6 @@ func (_c *MockXRPer_CoinTypeCode_Call) RunAndReturn(run func() coin.CoinTypeCode
 	return _c
 }
 
-// CombineTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {
-	ret := _mock.Called(ctx, signedTxs)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CombineTransaction")
-	}
-
-	var r0 string
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []string) (string, string, error)); ok {
-		return returnFunc(ctx, signedTxs)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []string) string); ok {
-		r0 = returnFunc(ctx, signedTxs)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, []string) string); ok {
-		r1 = returnFunc(ctx, signedTxs)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, []string) error); ok {
-		r2 = returnFunc(ctx, signedTxs)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_CombineTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CombineTransaction'
-type MockXRPer_CombineTransaction_Call struct {
-	*mock.Call
-}
-
-// CombineTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - signedTxs []string
-func (_e *MockXRPer_Expecter) CombineTransaction(ctx interface{}, signedTxs interface{}) *MockXRPer_CombineTransaction_Call {
-	return &MockXRPer_CombineTransaction_Call{Call: _e.mock.On("CombineTransaction", ctx, signedTxs)}
-}
-
-func (_c *MockXRPer_CombineTransaction_Call) Run(run func(ctx context.Context, signedTxs []string)) *MockXRPer_CombineTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 []string
-		if args[1] != nil {
-			arg1 = args[1].([]string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_CombineTransaction_Call) Return(s string, s1 string, err error) *MockXRPer_CombineTransaction_Call {
-	_c.Call.Return(s, s1, err)
-	return _c
-}
-
-func (_c *MockXRPer_CombineTransaction_Call) RunAndReturn(run func(ctx context.Context, signedTxs []string) (string, string, error)) *MockXRPer_CombineTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // CreateRawTransaction provides a mock function for the type MockXRPer
 func (_mock *MockXRPer) CreateRawTransaction(ctx context.Context, senderAccount string, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error) {
 	ret := _mock.Called(ctx, senderAccount, receiverAccount, amount, instructions)
@@ -433,130 +361,6 @@ func (_c *MockXRPer_CreateRawTransaction_Call) Return(txInput *xrp.TxInput, s st
 }
 
 func (_c *MockXRPer_CreateRawTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error)) *MockXRPer_CreateRawTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GenerateAddress provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) GenerateAddress(ctx context.Context) (*xrp.ResponseGenerateAddress, error) {
-	ret := _mock.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GenerateAddress")
-	}
-
-	var r0 *xrp.ResponseGenerateAddress
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*xrp.ResponseGenerateAddress, error)); ok {
-		return returnFunc(ctx)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *xrp.ResponseGenerateAddress); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.ResponseGenerateAddress)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockXRPer_GenerateAddress_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateAddress'
-type MockXRPer_GenerateAddress_Call struct {
-	*mock.Call
-}
-
-// GenerateAddress is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockXRPer_Expecter) GenerateAddress(ctx interface{}) *MockXRPer_GenerateAddress_Call {
-	return &MockXRPer_GenerateAddress_Call{Call: _e.mock.On("GenerateAddress", ctx)}
-}
-
-func (_c *MockXRPer_GenerateAddress_Call) Run(run func(ctx context.Context)) *MockXRPer_GenerateAddress_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_GenerateAddress_Call) Return(responseGenerateAddress *xrp.ResponseGenerateAddress, err error) *MockXRPer_GenerateAddress_Call {
-	_c.Call.Return(responseGenerateAddress, err)
-	return _c
-}
-
-func (_c *MockXRPer_GenerateAddress_Call) RunAndReturn(run func(ctx context.Context) (*xrp.ResponseGenerateAddress, error)) *MockXRPer_GenerateAddress_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GenerateXAddress provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) GenerateXAddress(ctx context.Context) (*xrp.ResponseGenerateXAddress, error) {
-	ret := _mock.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GenerateXAddress")
-	}
-
-	var r0 *xrp.ResponseGenerateXAddress
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*xrp.ResponseGenerateXAddress, error)); ok {
-		return returnFunc(ctx)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *xrp.ResponseGenerateXAddress); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.ResponseGenerateXAddress)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockXRPer_GenerateXAddress_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateXAddress'
-type MockXRPer_GenerateXAddress_Call struct {
-	*mock.Call
-}
-
-// GenerateXAddress is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockXRPer_Expecter) GenerateXAddress(ctx interface{}) *MockXRPer_GenerateXAddress_Call {
-	return &MockXRPer_GenerateXAddress_Call{Call: _e.mock.On("GenerateXAddress", ctx)}
-}
-
-func (_c *MockXRPer_GenerateXAddress_Call) Run(run func(ctx context.Context)) *MockXRPer_GenerateXAddress_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_GenerateXAddress_Call) Return(responseGenerateXAddress *xrp.ResponseGenerateXAddress, err error) *MockXRPer_GenerateXAddress_Call {
-	_c.Call.Return(responseGenerateXAddress, err)
-	return _c
-}
-
-func (_c *MockXRPer_GenerateXAddress_Call) RunAndReturn(run func(ctx context.Context) (*xrp.ResponseGenerateXAddress, error)) *MockXRPer_GenerateXAddress_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -872,1682 +676,24 @@ func (_c *MockXRPer_GetTransaction_Call) RunAndReturn(run func(ctx context.Conte
 	return _c
 }
 
-// IsValidAddress provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) IsValidAddress(ctx context.Context, addr string) (bool, error) {
-	ret := _mock.Called(ctx, addr)
-
-	if len(ret) == 0 {
-		panic("no return value specified for IsValidAddress")
-	}
-
-	var r0 bool
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
-		return returnFunc(ctx, addr)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) bool); ok {
-		r0 = returnFunc(ctx, addr)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = returnFunc(ctx, addr)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockXRPer_IsValidAddress_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsValidAddress'
-type MockXRPer_IsValidAddress_Call struct {
-	*mock.Call
-}
-
-// IsValidAddress is a helper method to define mock.On call
-//   - ctx context.Context
-//   - addr string
-func (_e *MockXRPer_Expecter) IsValidAddress(ctx interface{}, addr interface{}) *MockXRPer_IsValidAddress_Call {
-	return &MockXRPer_IsValidAddress_Call{Call: _e.mock.On("IsValidAddress", ctx, addr)}
-}
-
-func (_c *MockXRPer_IsValidAddress_Call) Run(run func(ctx context.Context, addr string)) *MockXRPer_IsValidAddress_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_IsValidAddress_Call) Return(b bool, err error) *MockXRPer_IsValidAddress_Call {
-	_c.Call.Return(b, err)
-	return _c
-}
-
-func (_c *MockXRPer_IsValidAddress_Call) RunAndReturn(run func(ctx context.Context, addr string) (bool, error)) *MockXRPer_IsValidAddress_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareAccountSetTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareAccountSetTransaction(ctx context.Context, senderAccount string, setFlag uint32, clearFlag uint32, instructions *xrp.Instructions) (*xrp.AccountSetTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, setFlag, clearFlag, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareAccountSetTransaction")
-	}
-
-	var r0 *xrp.AccountSetTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, uint32, *xrp.Instructions) (*xrp.AccountSetTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, setFlag, clearFlag, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, uint32, *xrp.Instructions) *xrp.AccountSetTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, setFlag, clearFlag, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.AccountSetTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, uint32, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, setFlag, clearFlag, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, uint32, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, setFlag, clearFlag, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareAccountSetTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareAccountSetTransaction'
-type MockXRPer_PrepareAccountSetTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareAccountSetTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - setFlag uint32
-//   - clearFlag uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareAccountSetTransaction(ctx interface{}, senderAccount interface{}, setFlag interface{}, clearFlag interface{}, instructions interface{}) *MockXRPer_PrepareAccountSetTransaction_Call {
-	return &MockXRPer_PrepareAccountSetTransaction_Call{Call: _e.mock.On("PrepareAccountSetTransaction", ctx, senderAccount, setFlag, clearFlag, instructions)}
-}
-
-func (_c *MockXRPer_PrepareAccountSetTransaction_Call) Run(run func(ctx context.Context, senderAccount string, setFlag uint32, clearFlag uint32, instructions *xrp.Instructions)) *MockXRPer_PrepareAccountSetTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 uint32
-		if args[2] != nil {
-			arg2 = args[2].(uint32)
-		}
-		var arg3 uint32
-		if args[3] != nil {
-			arg3 = args[3].(uint32)
-		}
-		var arg4 *xrp.Instructions
-		if args[4] != nil {
-			arg4 = args[4].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareAccountSetTransaction_Call) Return(accountSetTxInput *xrp.AccountSetTxInput, s string, err error) *MockXRPer_PrepareAccountSetTransaction_Call {
-	_c.Call.Return(accountSetTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareAccountSetTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, setFlag uint32, clearFlag uint32, instructions *xrp.Instructions) (*xrp.AccountSetTxInput, string, error)) *MockXRPer_PrepareAccountSetTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareEscrowCancelTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareEscrowCancelTransaction(ctx context.Context, senderAccount string, owner string, offerSequence uint32, instructions *xrp.Instructions) (*xrp.EscrowCancelTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, owner, offerSequence, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareEscrowCancelTransaction")
-	}
-
-	var r0 *xrp.EscrowCancelTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint32, *xrp.Instructions) (*xrp.EscrowCancelTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, owner, offerSequence, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint32, *xrp.Instructions) *xrp.EscrowCancelTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, owner, offerSequence, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.EscrowCancelTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, owner, offerSequence, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, owner, offerSequence, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareEscrowCancelTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareEscrowCancelTransaction'
-type MockXRPer_PrepareEscrowCancelTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareEscrowCancelTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - owner string
-//   - offerSequence uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareEscrowCancelTransaction(ctx interface{}, senderAccount interface{}, owner interface{}, offerSequence interface{}, instructions interface{}) *MockXRPer_PrepareEscrowCancelTransaction_Call {
-	return &MockXRPer_PrepareEscrowCancelTransaction_Call{Call: _e.mock.On("PrepareEscrowCancelTransaction", ctx, senderAccount, owner, offerSequence, instructions)}
-}
-
-func (_c *MockXRPer_PrepareEscrowCancelTransaction_Call) Run(run func(ctx context.Context, senderAccount string, owner string, offerSequence uint32, instructions *xrp.Instructions)) *MockXRPer_PrepareEscrowCancelTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 uint32
-		if args[3] != nil {
-			arg3 = args[3].(uint32)
-		}
-		var arg4 *xrp.Instructions
-		if args[4] != nil {
-			arg4 = args[4].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareEscrowCancelTransaction_Call) Return(escrowCancelTxInput *xrp.EscrowCancelTxInput, s string, err error) *MockXRPer_PrepareEscrowCancelTransaction_Call {
-	_c.Call.Return(escrowCancelTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareEscrowCancelTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, owner string, offerSequence uint32, instructions *xrp.Instructions) (*xrp.EscrowCancelTxInput, string, error)) *MockXRPer_PrepareEscrowCancelTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareEscrowCreateTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareEscrowCreateTransaction(ctx context.Context, senderAccount string, destinationAccount string, amount float64, cancelAfter uint32, finishAfter uint32, condition string, destinationTag uint32, instructions *xrp.Instructions) (*xrp.EscrowCreateTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, destinationAccount, amount, cancelAfter, finishAfter, condition, destinationTag, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareEscrowCreateTransaction")
-	}
-
-	var r0 *xrp.EscrowCreateTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, uint32, uint32, string, uint32, *xrp.Instructions) (*xrp.EscrowCreateTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, destinationAccount, amount, cancelAfter, finishAfter, condition, destinationTag, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, uint32, uint32, string, uint32, *xrp.Instructions) *xrp.EscrowCreateTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, destinationAccount, amount, cancelAfter, finishAfter, condition, destinationTag, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.EscrowCreateTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, float64, uint32, uint32, string, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, destinationAccount, amount, cancelAfter, finishAfter, condition, destinationTag, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, float64, uint32, uint32, string, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, destinationAccount, amount, cancelAfter, finishAfter, condition, destinationTag, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareEscrowCreateTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareEscrowCreateTransaction'
-type MockXRPer_PrepareEscrowCreateTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareEscrowCreateTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - destinationAccount string
-//   - amount float64
-//   - cancelAfter uint32
-//   - finishAfter uint32
-//   - condition string
-//   - destinationTag uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareEscrowCreateTransaction(ctx interface{}, senderAccount interface{}, destinationAccount interface{}, amount interface{}, cancelAfter interface{}, finishAfter interface{}, condition interface{}, destinationTag interface{}, instructions interface{}) *MockXRPer_PrepareEscrowCreateTransaction_Call {
-	return &MockXRPer_PrepareEscrowCreateTransaction_Call{Call: _e.mock.On("PrepareEscrowCreateTransaction", ctx, senderAccount, destinationAccount, amount, cancelAfter, finishAfter, condition, destinationTag, instructions)}
-}
-
-func (_c *MockXRPer_PrepareEscrowCreateTransaction_Call) Run(run func(ctx context.Context, senderAccount string, destinationAccount string, amount float64, cancelAfter uint32, finishAfter uint32, condition string, destinationTag uint32, instructions *xrp.Instructions)) *MockXRPer_PrepareEscrowCreateTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 float64
-		if args[3] != nil {
-			arg3 = args[3].(float64)
-		}
-		var arg4 uint32
-		if args[4] != nil {
-			arg4 = args[4].(uint32)
-		}
-		var arg5 uint32
-		if args[5] != nil {
-			arg5 = args[5].(uint32)
-		}
-		var arg6 string
-		if args[6] != nil {
-			arg6 = args[6].(string)
-		}
-		var arg7 uint32
-		if args[7] != nil {
-			arg7 = args[7].(uint32)
-		}
-		var arg8 *xrp.Instructions
-		if args[8] != nil {
-			arg8 = args[8].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-			arg6,
-			arg7,
-			arg8,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareEscrowCreateTransaction_Call) Return(escrowCreateTxInput *xrp.EscrowCreateTxInput, s string, err error) *MockXRPer_PrepareEscrowCreateTransaction_Call {
-	_c.Call.Return(escrowCreateTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareEscrowCreateTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, destinationAccount string, amount float64, cancelAfter uint32, finishAfter uint32, condition string, destinationTag uint32, instructions *xrp.Instructions) (*xrp.EscrowCreateTxInput, string, error)) *MockXRPer_PrepareEscrowCreateTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareEscrowFinishTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareEscrowFinishTransaction(ctx context.Context, senderAccount string, owner string, offerSequence uint32, condition string, fulfillment string, instructions *xrp.Instructions) (*xrp.EscrowFinishTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, owner, offerSequence, condition, fulfillment, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareEscrowFinishTransaction")
-	}
-
-	var r0 *xrp.EscrowFinishTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint32, string, string, *xrp.Instructions) (*xrp.EscrowFinishTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, owner, offerSequence, condition, fulfillment, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, uint32, string, string, *xrp.Instructions) *xrp.EscrowFinishTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, owner, offerSequence, condition, fulfillment, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.EscrowFinishTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, uint32, string, string, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, owner, offerSequence, condition, fulfillment, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, uint32, string, string, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, owner, offerSequence, condition, fulfillment, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareEscrowFinishTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareEscrowFinishTransaction'
-type MockXRPer_PrepareEscrowFinishTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareEscrowFinishTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - owner string
-//   - offerSequence uint32
-//   - condition string
-//   - fulfillment string
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareEscrowFinishTransaction(ctx interface{}, senderAccount interface{}, owner interface{}, offerSequence interface{}, condition interface{}, fulfillment interface{}, instructions interface{}) *MockXRPer_PrepareEscrowFinishTransaction_Call {
-	return &MockXRPer_PrepareEscrowFinishTransaction_Call{Call: _e.mock.On("PrepareEscrowFinishTransaction", ctx, senderAccount, owner, offerSequence, condition, fulfillment, instructions)}
-}
-
-func (_c *MockXRPer_PrepareEscrowFinishTransaction_Call) Run(run func(ctx context.Context, senderAccount string, owner string, offerSequence uint32, condition string, fulfillment string, instructions *xrp.Instructions)) *MockXRPer_PrepareEscrowFinishTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 uint32
-		if args[3] != nil {
-			arg3 = args[3].(uint32)
-		}
-		var arg4 string
-		if args[4] != nil {
-			arg4 = args[4].(string)
-		}
-		var arg5 string
-		if args[5] != nil {
-			arg5 = args[5].(string)
-		}
-		var arg6 *xrp.Instructions
-		if args[6] != nil {
-			arg6 = args[6].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-			arg6,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareEscrowFinishTransaction_Call) Return(escrowFinishTxInput *xrp.EscrowFinishTxInput, s string, err error) *MockXRPer_PrepareEscrowFinishTransaction_Call {
-	_c.Call.Return(escrowFinishTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareEscrowFinishTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, owner string, offerSequence uint32, condition string, fulfillment string, instructions *xrp.Instructions) (*xrp.EscrowFinishTxInput, string, error)) *MockXRPer_PrepareEscrowFinishTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareNFTokenAcceptOfferTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareNFTokenAcceptOfferTransaction(ctx context.Context, senderAccount string, nfTokenSellOffer string, nfTokenBuyOffer string, nfTokenBrokerFee float64, instructions *xrp.Instructions) (*xrp.NFTokenAcceptOfferTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, nfTokenSellOffer, nfTokenBuyOffer, nfTokenBrokerFee, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareNFTokenAcceptOfferTransaction")
-	}
-
-	var r0 *xrp.NFTokenAcceptOfferTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, float64, *xrp.Instructions) (*xrp.NFTokenAcceptOfferTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, nfTokenSellOffer, nfTokenBuyOffer, nfTokenBrokerFee, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, float64, *xrp.Instructions) *xrp.NFTokenAcceptOfferTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, nfTokenSellOffer, nfTokenBuyOffer, nfTokenBrokerFee, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.NFTokenAcceptOfferTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, float64, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, nfTokenSellOffer, nfTokenBuyOffer, nfTokenBrokerFee, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, string, float64, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, nfTokenSellOffer, nfTokenBuyOffer, nfTokenBrokerFee, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareNFTokenAcceptOfferTransaction'
-type MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareNFTokenAcceptOfferTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - nfTokenSellOffer string
-//   - nfTokenBuyOffer string
-//   - nfTokenBrokerFee float64
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareNFTokenAcceptOfferTransaction(ctx interface{}, senderAccount interface{}, nfTokenSellOffer interface{}, nfTokenBuyOffer interface{}, nfTokenBrokerFee interface{}, instructions interface{}) *MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call {
-	return &MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call{Call: _e.mock.On("PrepareNFTokenAcceptOfferTransaction", ctx, senderAccount, nfTokenSellOffer, nfTokenBuyOffer, nfTokenBrokerFee, instructions)}
-}
-
-func (_c *MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call) Run(run func(ctx context.Context, senderAccount string, nfTokenSellOffer string, nfTokenBuyOffer string, nfTokenBrokerFee float64, instructions *xrp.Instructions)) *MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 string
-		if args[3] != nil {
-			arg3 = args[3].(string)
-		}
-		var arg4 float64
-		if args[4] != nil {
-			arg4 = args[4].(float64)
-		}
-		var arg5 *xrp.Instructions
-		if args[5] != nil {
-			arg5 = args[5].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call) Return(nFTokenAcceptOfferTxInput *xrp.NFTokenAcceptOfferTxInput, s string, err error) *MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call {
-	_c.Call.Return(nFTokenAcceptOfferTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, nfTokenSellOffer string, nfTokenBuyOffer string, nfTokenBrokerFee float64, instructions *xrp.Instructions) (*xrp.NFTokenAcceptOfferTxInput, string, error)) *MockXRPer_PrepareNFTokenAcceptOfferTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareNFTokenBurnTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareNFTokenBurnTransaction(ctx context.Context, senderAccount string, nfTokenID string, owner string, instructions *xrp.Instructions) (*xrp.NFTokenBurnTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, nfTokenID, owner, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareNFTokenBurnTransaction")
-	}
-
-	var r0 *xrp.NFTokenBurnTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, *xrp.Instructions) (*xrp.NFTokenBurnTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, nfTokenID, owner, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, *xrp.Instructions) *xrp.NFTokenBurnTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, nfTokenID, owner, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.NFTokenBurnTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, nfTokenID, owner, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, string, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, nfTokenID, owner, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareNFTokenBurnTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareNFTokenBurnTransaction'
-type MockXRPer_PrepareNFTokenBurnTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareNFTokenBurnTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - nfTokenID string
-//   - owner string
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareNFTokenBurnTransaction(ctx interface{}, senderAccount interface{}, nfTokenID interface{}, owner interface{}, instructions interface{}) *MockXRPer_PrepareNFTokenBurnTransaction_Call {
-	return &MockXRPer_PrepareNFTokenBurnTransaction_Call{Call: _e.mock.On("PrepareNFTokenBurnTransaction", ctx, senderAccount, nfTokenID, owner, instructions)}
-}
-
-func (_c *MockXRPer_PrepareNFTokenBurnTransaction_Call) Run(run func(ctx context.Context, senderAccount string, nfTokenID string, owner string, instructions *xrp.Instructions)) *MockXRPer_PrepareNFTokenBurnTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 string
-		if args[3] != nil {
-			arg3 = args[3].(string)
-		}
-		var arg4 *xrp.Instructions
-		if args[4] != nil {
-			arg4 = args[4].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenBurnTransaction_Call) Return(nFTokenBurnTxInput *xrp.NFTokenBurnTxInput, s string, err error) *MockXRPer_PrepareNFTokenBurnTransaction_Call {
-	_c.Call.Return(nFTokenBurnTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenBurnTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, nfTokenID string, owner string, instructions *xrp.Instructions) (*xrp.NFTokenBurnTxInput, string, error)) *MockXRPer_PrepareNFTokenBurnTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareNFTokenCancelOfferTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareNFTokenCancelOfferTransaction(ctx context.Context, senderAccount string, nfTokenOffers []string, instructions *xrp.Instructions) (*xrp.NFTokenCancelOfferTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, nfTokenOffers, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareNFTokenCancelOfferTransaction")
-	}
-
-	var r0 *xrp.NFTokenCancelOfferTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, *xrp.Instructions) (*xrp.NFTokenCancelOfferTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, nfTokenOffers, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, *xrp.Instructions) *xrp.NFTokenCancelOfferTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, nfTokenOffers, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.NFTokenCancelOfferTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []string, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, nfTokenOffers, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, []string, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, nfTokenOffers, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareNFTokenCancelOfferTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareNFTokenCancelOfferTransaction'
-type MockXRPer_PrepareNFTokenCancelOfferTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareNFTokenCancelOfferTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - nfTokenOffers []string
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareNFTokenCancelOfferTransaction(ctx interface{}, senderAccount interface{}, nfTokenOffers interface{}, instructions interface{}) *MockXRPer_PrepareNFTokenCancelOfferTransaction_Call {
-	return &MockXRPer_PrepareNFTokenCancelOfferTransaction_Call{Call: _e.mock.On("PrepareNFTokenCancelOfferTransaction", ctx, senderAccount, nfTokenOffers, instructions)}
-}
-
-func (_c *MockXRPer_PrepareNFTokenCancelOfferTransaction_Call) Run(run func(ctx context.Context, senderAccount string, nfTokenOffers []string, instructions *xrp.Instructions)) *MockXRPer_PrepareNFTokenCancelOfferTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 []string
-		if args[2] != nil {
-			arg2 = args[2].([]string)
-		}
-		var arg3 *xrp.Instructions
-		if args[3] != nil {
-			arg3 = args[3].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenCancelOfferTransaction_Call) Return(nFTokenCancelOfferTxInput *xrp.NFTokenCancelOfferTxInput, s string, err error) *MockXRPer_PrepareNFTokenCancelOfferTransaction_Call {
-	_c.Call.Return(nFTokenCancelOfferTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenCancelOfferTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, nfTokenOffers []string, instructions *xrp.Instructions) (*xrp.NFTokenCancelOfferTxInput, string, error)) *MockXRPer_PrepareNFTokenCancelOfferTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareNFTokenCreateOfferTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareNFTokenCreateOfferTransaction(ctx context.Context, senderAccount string, nfTokenID string, amount float64, owner string, destination string, expiration uint32, instructions *xrp.Instructions) (*xrp.NFTokenCreateOfferTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, nfTokenID, amount, owner, destination, expiration, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareNFTokenCreateOfferTransaction")
-	}
-
-	var r0 *xrp.NFTokenCreateOfferTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, string, string, uint32, *xrp.Instructions) (*xrp.NFTokenCreateOfferTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, nfTokenID, amount, owner, destination, expiration, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, string, string, uint32, *xrp.Instructions) *xrp.NFTokenCreateOfferTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, nfTokenID, amount, owner, destination, expiration, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.NFTokenCreateOfferTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, float64, string, string, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, nfTokenID, amount, owner, destination, expiration, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, float64, string, string, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, nfTokenID, amount, owner, destination, expiration, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareNFTokenCreateOfferTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareNFTokenCreateOfferTransaction'
-type MockXRPer_PrepareNFTokenCreateOfferTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareNFTokenCreateOfferTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - nfTokenID string
-//   - amount float64
-//   - owner string
-//   - destination string
-//   - expiration uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareNFTokenCreateOfferTransaction(ctx interface{}, senderAccount interface{}, nfTokenID interface{}, amount interface{}, owner interface{}, destination interface{}, expiration interface{}, instructions interface{}) *MockXRPer_PrepareNFTokenCreateOfferTransaction_Call {
-	return &MockXRPer_PrepareNFTokenCreateOfferTransaction_Call{Call: _e.mock.On("PrepareNFTokenCreateOfferTransaction", ctx, senderAccount, nfTokenID, amount, owner, destination, expiration, instructions)}
-}
-
-func (_c *MockXRPer_PrepareNFTokenCreateOfferTransaction_Call) Run(run func(ctx context.Context, senderAccount string, nfTokenID string, amount float64, owner string, destination string, expiration uint32, instructions *xrp.Instructions)) *MockXRPer_PrepareNFTokenCreateOfferTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 float64
-		if args[3] != nil {
-			arg3 = args[3].(float64)
-		}
-		var arg4 string
-		if args[4] != nil {
-			arg4 = args[4].(string)
-		}
-		var arg5 string
-		if args[5] != nil {
-			arg5 = args[5].(string)
-		}
-		var arg6 uint32
-		if args[6] != nil {
-			arg6 = args[6].(uint32)
-		}
-		var arg7 *xrp.Instructions
-		if args[7] != nil {
-			arg7 = args[7].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-			arg6,
-			arg7,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenCreateOfferTransaction_Call) Return(nFTokenCreateOfferTxInput *xrp.NFTokenCreateOfferTxInput, s string, err error) *MockXRPer_PrepareNFTokenCreateOfferTransaction_Call {
-	_c.Call.Return(nFTokenCreateOfferTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenCreateOfferTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, nfTokenID string, amount float64, owner string, destination string, expiration uint32, instructions *xrp.Instructions) (*xrp.NFTokenCreateOfferTxInput, string, error)) *MockXRPer_PrepareNFTokenCreateOfferTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareNFTokenMintTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareNFTokenMintTransaction(ctx context.Context, senderAccount string, nfTokenTaxon uint32, issuer string, uri string, transferFee uint32, instructions *xrp.Instructions) (*xrp.NFTokenMintTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, nfTokenTaxon, issuer, uri, transferFee, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareNFTokenMintTransaction")
-	}
-
-	var r0 *xrp.NFTokenMintTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, string, string, uint32, *xrp.Instructions) (*xrp.NFTokenMintTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, nfTokenTaxon, issuer, uri, transferFee, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, string, string, uint32, *xrp.Instructions) *xrp.NFTokenMintTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, nfTokenTaxon, issuer, uri, transferFee, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.NFTokenMintTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, uint32, string, string, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, nfTokenTaxon, issuer, uri, transferFee, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, uint32, string, string, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, nfTokenTaxon, issuer, uri, transferFee, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareNFTokenMintTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareNFTokenMintTransaction'
-type MockXRPer_PrepareNFTokenMintTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareNFTokenMintTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - nfTokenTaxon uint32
-//   - issuer string
-//   - uri string
-//   - transferFee uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareNFTokenMintTransaction(ctx interface{}, senderAccount interface{}, nfTokenTaxon interface{}, issuer interface{}, uri interface{}, transferFee interface{}, instructions interface{}) *MockXRPer_PrepareNFTokenMintTransaction_Call {
-	return &MockXRPer_PrepareNFTokenMintTransaction_Call{Call: _e.mock.On("PrepareNFTokenMintTransaction", ctx, senderAccount, nfTokenTaxon, issuer, uri, transferFee, instructions)}
-}
-
-func (_c *MockXRPer_PrepareNFTokenMintTransaction_Call) Run(run func(ctx context.Context, senderAccount string, nfTokenTaxon uint32, issuer string, uri string, transferFee uint32, instructions *xrp.Instructions)) *MockXRPer_PrepareNFTokenMintTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 uint32
-		if args[2] != nil {
-			arg2 = args[2].(uint32)
-		}
-		var arg3 string
-		if args[3] != nil {
-			arg3 = args[3].(string)
-		}
-		var arg4 string
-		if args[4] != nil {
-			arg4 = args[4].(string)
-		}
-		var arg5 uint32
-		if args[5] != nil {
-			arg5 = args[5].(uint32)
-		}
-		var arg6 *xrp.Instructions
-		if args[6] != nil {
-			arg6 = args[6].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-			arg6,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenMintTransaction_Call) Return(nFTokenMintTxInput *xrp.NFTokenMintTxInput, s string, err error) *MockXRPer_PrepareNFTokenMintTransaction_Call {
-	_c.Call.Return(nFTokenMintTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareNFTokenMintTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, nfTokenTaxon uint32, issuer string, uri string, transferFee uint32, instructions *xrp.Instructions) (*xrp.NFTokenMintTxInput, string, error)) *MockXRPer_PrepareNFTokenMintTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PreparePaymentChannelClaimTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PreparePaymentChannelClaimTransaction(ctx context.Context, senderAccount string, channel string, balance string, amount float64, signature string, publicKey string, instructions *xrp.Instructions) (*xrp.PaymentChannelClaimTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, channel, balance, amount, signature, publicKey, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PreparePaymentChannelClaimTransaction")
-	}
-
-	var r0 *xrp.PaymentChannelClaimTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, float64, string, string, *xrp.Instructions) (*xrp.PaymentChannelClaimTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, channel, balance, amount, signature, publicKey, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, float64, string, string, *xrp.Instructions) *xrp.PaymentChannelClaimTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, channel, balance, amount, signature, publicKey, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.PaymentChannelClaimTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string, float64, string, string, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, channel, balance, amount, signature, publicKey, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, string, float64, string, string, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, channel, balance, amount, signature, publicKey, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PreparePaymentChannelClaimTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PreparePaymentChannelClaimTransaction'
-type MockXRPer_PreparePaymentChannelClaimTransaction_Call struct {
-	*mock.Call
-}
-
-// PreparePaymentChannelClaimTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - channel string
-//   - balance string
-//   - amount float64
-//   - signature string
-//   - publicKey string
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PreparePaymentChannelClaimTransaction(ctx interface{}, senderAccount interface{}, channel interface{}, balance interface{}, amount interface{}, signature interface{}, publicKey interface{}, instructions interface{}) *MockXRPer_PreparePaymentChannelClaimTransaction_Call {
-	return &MockXRPer_PreparePaymentChannelClaimTransaction_Call{Call: _e.mock.On("PreparePaymentChannelClaimTransaction", ctx, senderAccount, channel, balance, amount, signature, publicKey, instructions)}
-}
-
-func (_c *MockXRPer_PreparePaymentChannelClaimTransaction_Call) Run(run func(ctx context.Context, senderAccount string, channel string, balance string, amount float64, signature string, publicKey string, instructions *xrp.Instructions)) *MockXRPer_PreparePaymentChannelClaimTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 string
-		if args[3] != nil {
-			arg3 = args[3].(string)
-		}
-		var arg4 float64
-		if args[4] != nil {
-			arg4 = args[4].(float64)
-		}
-		var arg5 string
-		if args[5] != nil {
-			arg5 = args[5].(string)
-		}
-		var arg6 string
-		if args[6] != nil {
-			arg6 = args[6].(string)
-		}
-		var arg7 *xrp.Instructions
-		if args[7] != nil {
-			arg7 = args[7].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-			arg6,
-			arg7,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PreparePaymentChannelClaimTransaction_Call) Return(paymentChannelClaimTxInput *xrp.PaymentChannelClaimTxInput, s string, err error) *MockXRPer_PreparePaymentChannelClaimTransaction_Call {
-	_c.Call.Return(paymentChannelClaimTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PreparePaymentChannelClaimTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, channel string, balance string, amount float64, signature string, publicKey string, instructions *xrp.Instructions) (*xrp.PaymentChannelClaimTxInput, string, error)) *MockXRPer_PreparePaymentChannelClaimTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PreparePaymentChannelCreateTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PreparePaymentChannelCreateTransaction(ctx context.Context, senderAccount string, destinationAccount string, amount float64, settleDelay uint32, publicKey string, cancelAfter uint32, destinationTag uint32, sourceTag uint32, instructions *xrp.Instructions) (*xrp.PaymentChannelCreateTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, destinationAccount, amount, settleDelay, publicKey, cancelAfter, destinationTag, sourceTag, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PreparePaymentChannelCreateTransaction")
-	}
-
-	var r0 *xrp.PaymentChannelCreateTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, uint32, string, uint32, uint32, uint32, *xrp.Instructions) (*xrp.PaymentChannelCreateTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, destinationAccount, amount, settleDelay, publicKey, cancelAfter, destinationTag, sourceTag, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, uint32, string, uint32, uint32, uint32, *xrp.Instructions) *xrp.PaymentChannelCreateTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, destinationAccount, amount, settleDelay, publicKey, cancelAfter, destinationTag, sourceTag, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.PaymentChannelCreateTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, float64, uint32, string, uint32, uint32, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, destinationAccount, amount, settleDelay, publicKey, cancelAfter, destinationTag, sourceTag, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, float64, uint32, string, uint32, uint32, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, destinationAccount, amount, settleDelay, publicKey, cancelAfter, destinationTag, sourceTag, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PreparePaymentChannelCreateTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PreparePaymentChannelCreateTransaction'
-type MockXRPer_PreparePaymentChannelCreateTransaction_Call struct {
-	*mock.Call
-}
-
-// PreparePaymentChannelCreateTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - destinationAccount string
-//   - amount float64
-//   - settleDelay uint32
-//   - publicKey string
-//   - cancelAfter uint32
-//   - destinationTag uint32
-//   - sourceTag uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PreparePaymentChannelCreateTransaction(ctx interface{}, senderAccount interface{}, destinationAccount interface{}, amount interface{}, settleDelay interface{}, publicKey interface{}, cancelAfter interface{}, destinationTag interface{}, sourceTag interface{}, instructions interface{}) *MockXRPer_PreparePaymentChannelCreateTransaction_Call {
-	return &MockXRPer_PreparePaymentChannelCreateTransaction_Call{Call: _e.mock.On("PreparePaymentChannelCreateTransaction", ctx, senderAccount, destinationAccount, amount, settleDelay, publicKey, cancelAfter, destinationTag, sourceTag, instructions)}
-}
-
-func (_c *MockXRPer_PreparePaymentChannelCreateTransaction_Call) Run(run func(ctx context.Context, senderAccount string, destinationAccount string, amount float64, settleDelay uint32, publicKey string, cancelAfter uint32, destinationTag uint32, sourceTag uint32, instructions *xrp.Instructions)) *MockXRPer_PreparePaymentChannelCreateTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 float64
-		if args[3] != nil {
-			arg3 = args[3].(float64)
-		}
-		var arg4 uint32
-		if args[4] != nil {
-			arg4 = args[4].(uint32)
-		}
-		var arg5 string
-		if args[5] != nil {
-			arg5 = args[5].(string)
-		}
-		var arg6 uint32
-		if args[6] != nil {
-			arg6 = args[6].(uint32)
-		}
-		var arg7 uint32
-		if args[7] != nil {
-			arg7 = args[7].(uint32)
-		}
-		var arg8 uint32
-		if args[8] != nil {
-			arg8 = args[8].(uint32)
-		}
-		var arg9 *xrp.Instructions
-		if args[9] != nil {
-			arg9 = args[9].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-			arg6,
-			arg7,
-			arg8,
-			arg9,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PreparePaymentChannelCreateTransaction_Call) Return(paymentChannelCreateTxInput *xrp.PaymentChannelCreateTxInput, s string, err error) *MockXRPer_PreparePaymentChannelCreateTransaction_Call {
-	_c.Call.Return(paymentChannelCreateTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PreparePaymentChannelCreateTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, destinationAccount string, amount float64, settleDelay uint32, publicKey string, cancelAfter uint32, destinationTag uint32, sourceTag uint32, instructions *xrp.Instructions) (*xrp.PaymentChannelCreateTxInput, string, error)) *MockXRPer_PreparePaymentChannelCreateTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PreparePaymentChannelFundTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PreparePaymentChannelFundTransaction(ctx context.Context, senderAccount string, channel string, amount float64, expiration uint32, instructions *xrp.Instructions) (*xrp.PaymentChannelFundTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, channel, amount, expiration, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PreparePaymentChannelFundTransaction")
-	}
-
-	var r0 *xrp.PaymentChannelFundTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, uint32, *xrp.Instructions) (*xrp.PaymentChannelFundTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, channel, amount, expiration, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, uint32, *xrp.Instructions) *xrp.PaymentChannelFundTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, channel, amount, expiration, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.PaymentChannelFundTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, float64, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, channel, amount, expiration, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, float64, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, channel, amount, expiration, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PreparePaymentChannelFundTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PreparePaymentChannelFundTransaction'
-type MockXRPer_PreparePaymentChannelFundTransaction_Call struct {
-	*mock.Call
-}
-
-// PreparePaymentChannelFundTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - channel string
-//   - amount float64
-//   - expiration uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PreparePaymentChannelFundTransaction(ctx interface{}, senderAccount interface{}, channel interface{}, amount interface{}, expiration interface{}, instructions interface{}) *MockXRPer_PreparePaymentChannelFundTransaction_Call {
-	return &MockXRPer_PreparePaymentChannelFundTransaction_Call{Call: _e.mock.On("PreparePaymentChannelFundTransaction", ctx, senderAccount, channel, amount, expiration, instructions)}
-}
-
-func (_c *MockXRPer_PreparePaymentChannelFundTransaction_Call) Run(run func(ctx context.Context, senderAccount string, channel string, amount float64, expiration uint32, instructions *xrp.Instructions)) *MockXRPer_PreparePaymentChannelFundTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 float64
-		if args[3] != nil {
-			arg3 = args[3].(float64)
-		}
-		var arg4 uint32
-		if args[4] != nil {
-			arg4 = args[4].(uint32)
-		}
-		var arg5 *xrp.Instructions
-		if args[5] != nil {
-			arg5 = args[5].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PreparePaymentChannelFundTransaction_Call) Return(paymentChannelFundTxInput *xrp.PaymentChannelFundTxInput, s string, err error) *MockXRPer_PreparePaymentChannelFundTransaction_Call {
-	_c.Call.Return(paymentChannelFundTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PreparePaymentChannelFundTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, channel string, amount float64, expiration uint32, instructions *xrp.Instructions) (*xrp.PaymentChannelFundTxInput, string, error)) *MockXRPer_PreparePaymentChannelFundTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareSetRegularKeyTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareSetRegularKeyTransaction(ctx context.Context, senderAccount string, regularKey string, instructions *xrp.Instructions) (*xrp.SetRegularKeyTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, regularKey, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareSetRegularKeyTransaction")
-	}
-
-	var r0 *xrp.SetRegularKeyTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *xrp.Instructions) (*xrp.SetRegularKeyTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, regularKey, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *xrp.Instructions) *xrp.SetRegularKeyTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, regularKey, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.SetRegularKeyTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, regularKey, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, regularKey, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareSetRegularKeyTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareSetRegularKeyTransaction'
-type MockXRPer_PrepareSetRegularKeyTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareSetRegularKeyTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - regularKey string
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareSetRegularKeyTransaction(ctx interface{}, senderAccount interface{}, regularKey interface{}, instructions interface{}) *MockXRPer_PrepareSetRegularKeyTransaction_Call {
-	return &MockXRPer_PrepareSetRegularKeyTransaction_Call{Call: _e.mock.On("PrepareSetRegularKeyTransaction", ctx, senderAccount, regularKey, instructions)}
-}
-
-func (_c *MockXRPer_PrepareSetRegularKeyTransaction_Call) Run(run func(ctx context.Context, senderAccount string, regularKey string, instructions *xrp.Instructions)) *MockXRPer_PrepareSetRegularKeyTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 *xrp.Instructions
-		if args[3] != nil {
-			arg3 = args[3].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareSetRegularKeyTransaction_Call) Return(setRegularKeyTxInput *xrp.SetRegularKeyTxInput, s string, err error) *MockXRPer_PrepareSetRegularKeyTransaction_Call {
-	_c.Call.Return(setRegularKeyTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareSetRegularKeyTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, regularKey string, instructions *xrp.Instructions) (*xrp.SetRegularKeyTxInput, string, error)) *MockXRPer_PrepareSetRegularKeyTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareSignerListSetTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareSignerListSetTransaction(ctx context.Context, senderAccount string, signerQuorum uint32, signerEntries []xrp0.SignerEntryInput, instructions *xrp.Instructions) (*xrp.SignerListSetTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, signerQuorum, signerEntries, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareSignerListSetTransaction")
-	}
-
-	var r0 *xrp.SignerListSetTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) (*xrp.SignerListSetTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) *xrp.SignerListSetTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.SignerListSetTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareSignerListSetTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareSignerListSetTransaction'
-type MockXRPer_PrepareSignerListSetTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareSignerListSetTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - signerQuorum uint32
-//   - signerEntries []xrp0.SignerEntryInput
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareSignerListSetTransaction(ctx interface{}, senderAccount interface{}, signerQuorum interface{}, signerEntries interface{}, instructions interface{}) *MockXRPer_PrepareSignerListSetTransaction_Call {
-	return &MockXRPer_PrepareSignerListSetTransaction_Call{Call: _e.mock.On("PrepareSignerListSetTransaction", ctx, senderAccount, signerQuorum, signerEntries, instructions)}
-}
-
-func (_c *MockXRPer_PrepareSignerListSetTransaction_Call) Run(run func(ctx context.Context, senderAccount string, signerQuorum uint32, signerEntries []xrp0.SignerEntryInput, instructions *xrp.Instructions)) *MockXRPer_PrepareSignerListSetTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 uint32
-		if args[2] != nil {
-			arg2 = args[2].(uint32)
-		}
-		var arg3 []xrp0.SignerEntryInput
-		if args[3] != nil {
-			arg3 = args[3].([]xrp0.SignerEntryInput)
-		}
-		var arg4 *xrp.Instructions
-		if args[4] != nil {
-			arg4 = args[4].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareSignerListSetTransaction_Call) Return(signerListSetTxInput *xrp.SignerListSetTxInput, s string, err error) *MockXRPer_PrepareSignerListSetTransaction_Call {
-	_c.Call.Return(signerListSetTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareSignerListSetTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, signerQuorum uint32, signerEntries []xrp0.SignerEntryInput, instructions *xrp.Instructions) (*xrp.SignerListSetTxInput, string, error)) *MockXRPer_PrepareSignerListSetTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareTransaction(ctx context.Context, senderAccount string, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, receiverAccount, amount, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareTransaction")
-	}
-
-	var r0 *xrp.TxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, *xrp.Instructions) (*xrp.TxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, receiverAccount, amount, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, float64, *xrp.Instructions) *xrp.TxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, receiverAccount, amount, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.TxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, float64, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, receiverAccount, amount, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, float64, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, receiverAccount, amount, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareTransaction'
-type MockXRPer_PrepareTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - receiverAccount string
-//   - amount float64
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareTransaction(ctx interface{}, senderAccount interface{}, receiverAccount interface{}, amount interface{}, instructions interface{}) *MockXRPer_PrepareTransaction_Call {
-	return &MockXRPer_PrepareTransaction_Call{Call: _e.mock.On("PrepareTransaction", ctx, senderAccount, receiverAccount, amount, instructions)}
-}
-
-func (_c *MockXRPer_PrepareTransaction_Call) Run(run func(ctx context.Context, senderAccount string, receiverAccount string, amount float64, instructions *xrp.Instructions)) *MockXRPer_PrepareTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 float64
-		if args[3] != nil {
-			arg3 = args[3].(float64)
-		}
-		var arg4 *xrp.Instructions
-		if args[4] != nil {
-			arg4 = args[4].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareTransaction_Call) Return(txInput *xrp.TxInput, s string, err error) *MockXRPer_PrepareTransaction_Call {
-	_c.Call.Return(txInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error)) *MockXRPer_PrepareTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// PrepareTrustSetTransaction provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) PrepareTrustSetTransaction(ctx context.Context, senderAccount string, limitAmount *xrp.IssuedCurrencyAmount, qualityIn uint32, qualityOut uint32, instructions *xrp.Instructions) (*xrp.TrustSetTxInput, string, error) {
-	ret := _mock.Called(ctx, senderAccount, limitAmount, qualityIn, qualityOut, instructions)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PrepareTrustSetTransaction")
-	}
-
-	var r0 *xrp.TrustSetTxInput
-	var r1 string
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, *xrp.IssuedCurrencyAmount, uint32, uint32, *xrp.Instructions) (*xrp.TrustSetTxInput, string, error)); ok {
-		return returnFunc(ctx, senderAccount, limitAmount, qualityIn, qualityOut, instructions)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, *xrp.IssuedCurrencyAmount, uint32, uint32, *xrp.Instructions) *xrp.TrustSetTxInput); ok {
-		r0 = returnFunc(ctx, senderAccount, limitAmount, qualityIn, qualityOut, instructions)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*xrp.TrustSetTxInput)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, *xrp.IssuedCurrencyAmount, uint32, uint32, *xrp.Instructions) string); ok {
-		r1 = returnFunc(ctx, senderAccount, limitAmount, qualityIn, qualityOut, instructions)
-	} else {
-		r1 = ret.Get(1).(string)
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, *xrp.IssuedCurrencyAmount, uint32, uint32, *xrp.Instructions) error); ok {
-		r2 = returnFunc(ctx, senderAccount, limitAmount, qualityIn, qualityOut, instructions)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// MockXRPer_PrepareTrustSetTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareTrustSetTransaction'
-type MockXRPer_PrepareTrustSetTransaction_Call struct {
-	*mock.Call
-}
-
-// PrepareTrustSetTransaction is a helper method to define mock.On call
-//   - ctx context.Context
-//   - senderAccount string
-//   - limitAmount *xrp.IssuedCurrencyAmount
-//   - qualityIn uint32
-//   - qualityOut uint32
-//   - instructions *xrp.Instructions
-func (_e *MockXRPer_Expecter) PrepareTrustSetTransaction(ctx interface{}, senderAccount interface{}, limitAmount interface{}, qualityIn interface{}, qualityOut interface{}, instructions interface{}) *MockXRPer_PrepareTrustSetTransaction_Call {
-	return &MockXRPer_PrepareTrustSetTransaction_Call{Call: _e.mock.On("PrepareTrustSetTransaction", ctx, senderAccount, limitAmount, qualityIn, qualityOut, instructions)}
-}
-
-func (_c *MockXRPer_PrepareTrustSetTransaction_Call) Run(run func(ctx context.Context, senderAccount string, limitAmount *xrp.IssuedCurrencyAmount, qualityIn uint32, qualityOut uint32, instructions *xrp.Instructions)) *MockXRPer_PrepareTrustSetTransaction_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 *xrp.IssuedCurrencyAmount
-		if args[2] != nil {
-			arg2 = args[2].(*xrp.IssuedCurrencyAmount)
-		}
-		var arg3 uint32
-		if args[3] != nil {
-			arg3 = args[3].(uint32)
-		}
-		var arg4 uint32
-		if args[4] != nil {
-			arg4 = args[4].(uint32)
-		}
-		var arg5 *xrp.Instructions
-		if args[5] != nil {
-			arg5 = args[5].(*xrp.Instructions)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-			arg5,
-		)
-	})
-	return _c
-}
-
-func (_c *MockXRPer_PrepareTrustSetTransaction_Call) Return(trustSetTxInput *xrp.TrustSetTxInput, s string, err error) *MockXRPer_PrepareTrustSetTransaction_Call {
-	_c.Call.Return(trustSetTxInput, s, err)
-	return _c
-}
-
-func (_c *MockXRPer_PrepareTrustSetTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, limitAmount *xrp.IssuedCurrencyAmount, qualityIn uint32, qualityOut uint32, instructions *xrp.Instructions) (*xrp.TrustSetTxInput, string, error)) *MockXRPer_PrepareTrustSetTransaction_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // ServerInfo provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) ServerInfo(ctx context.Context) (*rpc.ResponseServerInfo, error) {
+func (_mock *MockXRPer) ServerInfo(ctx context.Context) (*public.ResponseServerInfo, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ServerInfo")
 	}
 
-	var r0 *rpc.ResponseServerInfo
+	var r0 *public.ResponseServerInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*rpc.ResponseServerInfo, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*public.ResponseServerInfo, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *rpc.ResponseServerInfo); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *public.ResponseServerInfo); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseServerInfo)
+			r0 = ret.Get(0).(*public.ResponseServerInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -2582,12 +728,12 @@ func (_c *MockXRPer_ServerInfo_Call) Run(run func(ctx context.Context)) *MockXRP
 	return _c
 }
 
-func (_c *MockXRPer_ServerInfo_Call) Return(responseServerInfo *rpc.ResponseServerInfo, err error) *MockXRPer_ServerInfo_Call {
+func (_c *MockXRPer_ServerInfo_Call) Return(responseServerInfo *public.ResponseServerInfo, err error) *MockXRPer_ServerInfo_Call {
 	_c.Call.Return(responseServerInfo, err)
 	return _c
 }
 
-func (_c *MockXRPer_ServerInfo_Call) RunAndReturn(run func(ctx context.Context) (*rpc.ResponseServerInfo, error)) *MockXRPer_ServerInfo_Call {
+func (_c *MockXRPer_ServerInfo_Call) RunAndReturn(run func(ctx context.Context) (*public.ResponseServerInfo, error)) *MockXRPer_ServerInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2835,23 +981,23 @@ func (_c *MockXRPer_SubmitTransaction_Call) RunAndReturn(run func(ctx context.Co
 }
 
 // ValidationCreate provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) ValidationCreate(ctx context.Context, secret string) (*rpc.ResponseValidationCreate, error) {
+func (_mock *MockXRPer) ValidationCreate(ctx context.Context, secret string) (*admin.ResponseValidationCreate, error) {
 	ret := _mock.Called(ctx, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ValidationCreate")
 	}
 
-	var r0 *rpc.ResponseValidationCreate
+	var r0 *admin.ResponseValidationCreate
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*rpc.ResponseValidationCreate, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*admin.ResponseValidationCreate, error)); ok {
 		return returnFunc(ctx, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *rpc.ResponseValidationCreate); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *admin.ResponseValidationCreate); ok {
 		r0 = returnFunc(ctx, secret)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseValidationCreate)
+			r0 = ret.Get(0).(*admin.ResponseValidationCreate)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -2892,19 +1038,19 @@ func (_c *MockXRPer_ValidationCreate_Call) Run(run func(ctx context.Context, sec
 	return _c
 }
 
-func (_c *MockXRPer_ValidationCreate_Call) Return(responseValidationCreate *rpc.ResponseValidationCreate, err error) *MockXRPer_ValidationCreate_Call {
+func (_c *MockXRPer_ValidationCreate_Call) Return(responseValidationCreate *admin.ResponseValidationCreate, err error) *MockXRPer_ValidationCreate_Call {
 	_c.Call.Return(responseValidationCreate, err)
 	return _c
 }
 
-func (_c *MockXRPer_ValidationCreate_Call) RunAndReturn(run func(ctx context.Context, secret string) (*rpc.ResponseValidationCreate, error)) *MockXRPer_ValidationCreate_Call {
+func (_c *MockXRPer_ValidationCreate_Call) RunAndReturn(run func(ctx context.Context, secret string) (*admin.ResponseValidationCreate, error)) *MockXRPer_ValidationCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // WaitValidation provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error) {
-	ret := _mock.Called(ctx, targetledgerVarsion)
+func (_mock *MockXRPer) WaitValidation(ctx context.Context, targetLedgerVersion uint64) (uint64, error) {
+	ret := _mock.Called(ctx, targetLedgerVersion)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WaitValidation")
@@ -2913,15 +1059,15 @@ func (_mock *MockXRPer) WaitValidation(ctx context.Context, targetledgerVarsion 
 	var r0 uint64
 	var r1 error
 	if returnFunc, ok := ret.Get(0).(func(context.Context, uint64) (uint64, error)); ok {
-		return returnFunc(ctx, targetledgerVarsion)
+		return returnFunc(ctx, targetLedgerVersion)
 	}
 	if returnFunc, ok := ret.Get(0).(func(context.Context, uint64) uint64); ok {
-		r0 = returnFunc(ctx, targetledgerVarsion)
+		r0 = returnFunc(ctx, targetLedgerVersion)
 	} else {
 		r0 = ret.Get(0).(uint64)
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
-		r1 = returnFunc(ctx, targetledgerVarsion)
+		r1 = returnFunc(ctx, targetLedgerVersion)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2935,12 +1081,12 @@ type MockXRPer_WaitValidation_Call struct {
 
 // WaitValidation is a helper method to define mock.On call
 //   - ctx context.Context
-//   - targetledgerVarsion uint64
-func (_e *MockXRPer_Expecter) WaitValidation(ctx interface{}, targetledgerVarsion interface{}) *MockXRPer_WaitValidation_Call {
-	return &MockXRPer_WaitValidation_Call{Call: _e.mock.On("WaitValidation", ctx, targetledgerVarsion)}
+//   - targetLedgerVersion uint64
+func (_e *MockXRPer_Expecter) WaitValidation(ctx interface{}, targetLedgerVersion interface{}) *MockXRPer_WaitValidation_Call {
+	return &MockXRPer_WaitValidation_Call{Call: _e.mock.On("WaitValidation", ctx, targetLedgerVersion)}
 }
 
-func (_c *MockXRPer_WaitValidation_Call) Run(run func(ctx context.Context, targetledgerVarsion uint64)) *MockXRPer_WaitValidation_Call {
+func (_c *MockXRPer_WaitValidation_Call) Run(run func(ctx context.Context, targetLedgerVersion uint64)) *MockXRPer_WaitValidation_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -2963,29 +1109,29 @@ func (_c *MockXRPer_WaitValidation_Call) Return(v uint64, err error) *MockXRPer_
 	return _c
 }
 
-func (_c *MockXRPer_WaitValidation_Call) RunAndReturn(run func(ctx context.Context, targetledgerVarsion uint64) (uint64, error)) *MockXRPer_WaitValidation_Call {
+func (_c *MockXRPer_WaitValidation_Call) RunAndReturn(run func(ctx context.Context, targetLedgerVersion uint64) (uint64, error)) *MockXRPer_WaitValidation_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // WalletPropose provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) WalletPropose(ctx context.Context, passphrase string) (*rpc.ResponseWalletPropose, error) {
+func (_mock *MockXRPer) WalletPropose(ctx context.Context, passphrase string) (*admin.ResponseWalletPropose, error) {
 	ret := _mock.Called(ctx, passphrase)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WalletPropose")
 	}
 
-	var r0 *rpc.ResponseWalletPropose
+	var r0 *admin.ResponseWalletPropose
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*rpc.ResponseWalletPropose, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*admin.ResponseWalletPropose, error)); ok {
 		return returnFunc(ctx, passphrase)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *rpc.ResponseWalletPropose); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *admin.ResponseWalletPropose); ok {
 		r0 = returnFunc(ctx, passphrase)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseWalletPropose)
+			r0 = ret.Get(0).(*admin.ResponseWalletPropose)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -3026,34 +1172,34 @@ func (_c *MockXRPer_WalletPropose_Call) Run(run func(ctx context.Context, passph
 	return _c
 }
 
-func (_c *MockXRPer_WalletPropose_Call) Return(responseWalletPropose *rpc.ResponseWalletPropose, err error) *MockXRPer_WalletPropose_Call {
+func (_c *MockXRPer_WalletPropose_Call) Return(responseWalletPropose *admin.ResponseWalletPropose, err error) *MockXRPer_WalletPropose_Call {
 	_c.Call.Return(responseWalletPropose, err)
 	return _c
 }
 
-func (_c *MockXRPer_WalletPropose_Call) RunAndReturn(run func(ctx context.Context, passphrase string) (*rpc.ResponseWalletPropose, error)) *MockXRPer_WalletPropose_Call {
+func (_c *MockXRPer_WalletPropose_Call) RunAndReturn(run func(ctx context.Context, passphrase string) (*admin.ResponseWalletPropose, error)) *MockXRPer_WalletPropose_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // WalletProposeWithKey provides a mock function for the type MockXRPer
-func (_mock *MockXRPer) WalletProposeWithKey(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*rpc.ResponseWalletPropose, error) {
+func (_mock *MockXRPer) WalletProposeWithKey(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*admin.ResponseWalletPropose, error) {
 	ret := _mock.Called(ctx, seed, keyType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WalletProposeWithKey")
 	}
 
-	var r0 *rpc.ResponseWalletPropose
+	var r0 *admin.ResponseWalletPropose
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) (*rpc.ResponseWalletPropose, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) (*admin.ResponseWalletPropose, error)); ok {
 		return returnFunc(ctx, seed, keyType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) *rpc.ResponseWalletPropose); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, xrp.XRPKeyType) *admin.ResponseWalletPropose); ok {
 		r0 = returnFunc(ctx, seed, keyType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*rpc.ResponseWalletPropose)
+			r0 = ret.Get(0).(*admin.ResponseWalletPropose)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, xrp.XRPKeyType) error); ok {
@@ -3100,12 +1246,12 @@ func (_c *MockXRPer_WalletProposeWithKey_Call) Run(run func(ctx context.Context,
 	return _c
 }
 
-func (_c *MockXRPer_WalletProposeWithKey_Call) Return(responseWalletPropose *rpc.ResponseWalletPropose, err error) *MockXRPer_WalletProposeWithKey_Call {
+func (_c *MockXRPer_WalletProposeWithKey_Call) Return(responseWalletPropose *admin.ResponseWalletPropose, err error) *MockXRPer_WalletProposeWithKey_Call {
 	_c.Call.Return(responseWalletPropose, err)
 	return _c
 }
 
-func (_c *MockXRPer_WalletProposeWithKey_Call) RunAndReturn(run func(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*rpc.ResponseWalletPropose, error)) *MockXRPer_WalletProposeWithKey_Call {
+func (_c *MockXRPer_WalletProposeWithKey_Call) RunAndReturn(run func(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*admin.ResponseWalletPropose, error)) *MockXRPer_WalletProposeWithKey_Call {
 	_c.Call.Return(run)
 	return _c
 }

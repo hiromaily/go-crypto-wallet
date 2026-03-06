@@ -1,4 +1,4 @@
-package rpc
+package public
 
 import (
 	"context"
@@ -6,6 +6,27 @@ import (
 )
 
 // https://xrpl.org/transaction-methods.html
+// 1. Connect to a Test Net Server
+// 2. Prepare Transaction
+//{
+//  "TransactionType": "Payment",
+//  "Account": "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe",
+//  "Amount": "2000000",
+//  "Destination": "rUCzEr6jrEyMpjhs4wSdQdz4g8Y382NxfM"
+//}
+// Transaction Common Fields
+// - https://xrpl.org/transaction-common-fields.html
+// - [Required]
+//   - Account
+//   - TransactionType
+//   - Fee (auto-fillable)
+//   - Sequence (auto-fillable)
+//   - LastLedgerSequence (strongly recommended)
+
+// Is there alternative way of prepareTransaction()??
+// - LastLedgerSequence look important, how is it retrieved?
+// - ledger command https://xrpl.org/ledger.html
+// - Is `ledger_index` LastLedgerSequence??
 
 // SubmitRequest is the request payload for the submit command.
 type SubmitRequest struct {
@@ -46,14 +67,14 @@ type ResponseSubmit struct {
 }
 
 // Submit calls the submit WebSocket command and returns the raw wire response.
-func Submit(ctx context.Context, caller WSCaller, txBlob string) (*ResponseSubmit, error) {
+func (r *PublicRPC) Submit(ctx context.Context, txBlob string) (*ResponseSubmit, error) {
 	req := &SubmitRequest{
 		ID:      3,
 		Command: "submit",
 		TxBlob:  txBlob,
 	}
 	var res ResponseSubmit
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(submit): %w", err)
 	}
 	return &res, nil
@@ -97,7 +118,7 @@ type ResponseTx struct {
 }
 
 // GetTx calls the tx WebSocket command and returns the raw wire response.
-func GetTx(ctx context.Context, caller WSCaller, txHash string, minLedger uint64) (*ResponseTx, error) {
+func (r *PublicRPC) GetTx(ctx context.Context, txHash string, minLedger uint64) (*ResponseTx, error) {
 	req := &TxRequest{
 		ID:          4,
 		Command:     "tx",
@@ -105,7 +126,7 @@ func GetTx(ctx context.Context, caller WSCaller, txHash string, minLedger uint64
 		MinLedger:   minLedger,
 	}
 	var res ResponseTx
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(tx): %w", err)
 	}
 	return &res, nil
@@ -128,44 +149,85 @@ type ResponseLedgerCurrent struct {
 }
 
 // LedgerCurrent calls the ledger_current WebSocket command and returns the current open ledger index.
-func LedgerCurrent(ctx context.Context, caller WSCaller) (*ResponseLedgerCurrent, error) {
+func (r *PublicRPC) LedgerCurrent(ctx context.Context) (*ResponseLedgerCurrent, error) {
 	req := &LedgerCurrentRequest{
 		ID:      5,
 		Command: "ledger_current",
 	}
 	var res ResponseLedgerCurrent
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(ledger_current): %w", err)
 	}
 	return &res, nil
 }
 
-// LedgerAcceptRequest is the request payload for the ledger_accept admin command.
-type LedgerAcceptRequest struct {
-	ID      int    `json:"id"`
-	Command string `json:"command"`
+// Sign is request data for sign method
+type Sign struct {
+	ID         int          `json:"id"`
+	Command    string       `json:"command"`
+	TxJSON     PublicTxType `json:"tx_json"`
+	Secret     string       `json:"secret"`
+	Offline    bool         `json:"offline"`
+	FeeMultMax int          `json:"fee_mult_max"`
 }
 
-// ResponseLedgerAccept is the wire-format response of the ledger_accept admin command.
-type ResponseLedgerAccept struct {
-	Result struct {
-		LedgerCurrentIndex uint64 `json:"ledger_current_index"`
-	} `json:"result"`
+// PublicTxType is part of Sign request
+type PublicTxType struct {
+	TransactionType string `json:"TransactionType"`
+	Account         string `json:"Account"`
+	Destination     string `json:"Destination"`
+	Amount          Amount `json:"Amount"`
+}
+
+// Amount is part of Sign request
+type Amount struct {
+	Currency string `json:"currency"`
+	Value    string `json:"value"`
+	Issuer   string `json:"issuer"`
+}
+
+// ResponseSign is response data for sign method
+type ResponseSign struct {
+	ID     int    `json:"id"`
 	Status string `json:"status"`
 	Type   string `json:"type"`
-	Error  string `json:"error,omitempty"`
+	Result struct {
+		TxBlob string `json:"tx_blob"`
+		TxJSON struct {
+			Account string `json:"Account"`
+			Amount  struct {
+				Currency string `json:"currency"`
+				Issuer   string `json:"issuer"`
+				Value    string `json:"value"`
+			} `json:"Amount"`
+			Destination     string `json:"Destination"`
+			Fee             string `json:"Fee"`
+			Flags           int64  `json:"Flags"`
+			Sequence        int    `json:"Sequence"`
+			SigningPubKey   string `json:"SigningPubKey"`
+			TransactionType string `json:"TransactionType"`
+			TxnSignature    string `json:"TxnSignature"`
+			Hash            string `json:"hash"`
+		} `json:"tx_json"`
+	} `json:"result"`
+	Error string `json:"error,omitempty"`
 }
 
-// LedgerAccept calls the ledger_accept admin WebSocket command to advance the ledger in standalone mode.
-// This is only available on admin connections and should be used only in standalone/testing environments.
-func LedgerAccept(ctx context.Context, caller WSCaller) (*ResponseLedgerAccept, error) {
-	req := &LedgerAcceptRequest{
-		ID:      6,
-		Command: "ledger_accept",
+// Sign calls sign method
+// TODO: add Sign() to proper interface
+func (r *PublicRPC) Sign(
+	ctx context.Context, txJSON *PublicTxType, secret string, offline bool,
+) (*ResponseSign, error) {
+	req := Sign{
+		ID:      2,
+		Command: "sign",
+		TxJSON:  *txJSON,
+		Secret:  secret,
+		Offline: offline,
 	}
-	var res ResponseLedgerAccept
-	if err := caller.Call(ctx, req, &res); err != nil {
-		return nil, fmt.Errorf("fail to call wsAdmin.Call(ledger_accept): %w", err)
+	var res ResponseSign
+	if err := r.caller.Call(ctx, &req, &res); err != nil {
+		return nil, fmt.Errorf("fail to call wsClient.Call(sign): %w", err)
 	}
 	return &res, nil
 }

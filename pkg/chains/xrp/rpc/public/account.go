@@ -1,4 +1,4 @@
-package rpc
+package public
 
 import (
 	"context"
@@ -53,35 +53,38 @@ type AccountInfoRequest struct {
 	Queue       bool   `json:"queue"`
 }
 
+// AccountInfo holds the account data returned by the account_info command.
+type AccountInfo struct {
+	AccountData struct {
+		Account           string `json:"Account"`
+		Balance           string `json:"Balance"`
+		Flags             int    `json:"Flags"`
+		LedgerEntryType   string `json:"LedgerEntryType"`
+		OwnerCount        int    `json:"OwnerCount"`
+		PreviousTxnID     string `json:"PreviousTxnID"`
+		PreviousTxnLgrSeq int    `json:"PreviousTxnLgrSeq"`
+		Sequence          int    `json:"Sequence"`
+		Index             string `json:"index"`
+	} `json:"account_data"`
+	LedgerCurrentIndex int `json:"ledger_current_index"`
+	QueueData          struct {
+		TxnCount int `json:"txn_count"`
+	} `json:"queue_data"`
+	Validated bool `json:"validated"`
+}
+
 // ResponseAccountInfo is the wire-format response of the account_info command.
 type ResponseAccountInfo struct {
-	ID     int `json:"id"`
-	Result struct {
-		AccountData struct {
-			Account           string `json:"Account"`
-			Balance           string `json:"Balance"`
-			Flags             int    `json:"Flags"`
-			LedgerEntryType   string `json:"LedgerEntryType"`
-			OwnerCount        int    `json:"OwnerCount"`
-			PreviousTxnID     string `json:"PreviousTxnID"`
-			PreviousTxnLgrSeq int    `json:"PreviousTxnLgrSeq"`
-			Sequence          int    `json:"Sequence"`
-			Index             string `json:"index"`
-		} `json:"account_data"`
-		LedgerCurrentIndex int `json:"ledger_current_index"`
-		QueueData          struct {
-			TxnCount int `json:"txn_count"`
-		} `json:"queue_data"`
-		Validated bool `json:"validated"`
-	} `json:"result"`
-	Status string `json:"status"`
-	Type   string `json:"type"`
-	Error  string `json:"error,omitempty"`
+	ID     int         `json:"id"`
+	Result AccountInfo `json:"result"`
+	Status string      `json:"status"`
+	Type   string      `json:"type"`
+	Error  string      `json:"error,omitempty"`
 }
 
 // AccountChannels calls the account_channels WebSocket command and returns the raw wire response.
-func AccountChannels(
-	ctx context.Context, caller WSCaller, sender, receiver string,
+func (r *PublicRPC) AccountChannels(
+	ctx context.Context, sender, receiver string,
 ) (*ResponseAccountChannels, error) {
 	req := &AccountChannelsRequest{
 		ID:                 1,
@@ -91,14 +94,14 @@ func AccountChannels(
 		LedgerIndex:        "validated",
 	}
 	var res ResponseAccountChannels
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(account_channels): %w", err)
 	}
 	return &res, nil
 }
 
 // AccountInfo calls the account_info WebSocket command and returns the raw wire response.
-func AccountInfo(ctx context.Context, caller WSCaller, address string) (*ResponseAccountInfo, error) {
+func (r *PublicRPC) AccountInfo(ctx context.Context, address string) (*ResponseAccountInfo, error) {
 	req := &AccountInfoRequest{
 		ID:          2,
 		Command:     "account_info",
@@ -108,7 +111,7 @@ func AccountInfo(ctx context.Context, caller WSCaller, address string) (*Respons
 		Queue:       true,
 	}
 	var res ResponseAccountInfo
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(account_info): %w", err)
 	}
 	return &res, nil

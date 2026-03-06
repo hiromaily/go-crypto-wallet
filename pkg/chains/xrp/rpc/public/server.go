@@ -1,4 +1,4 @@
-package rpc
+package public
 
 import (
 	"context"
@@ -6,6 +6,12 @@ import (
 )
 
 // https://xrpl.org/server-info-methods.html
+
+// RequestCommand is the minimal request body for commands with no parameters.
+type RequestCommand struct {
+	ID      int    `json:"id"`
+	Command string `json:"command"`
+}
 
 // ResponseServerInfo is the wire-format response of the server_info command.
 type ResponseServerInfo struct {
@@ -85,13 +91,13 @@ type ResponseServerInfo struct {
 }
 
 // ServerInfo calls the server_info WebSocket command and returns the raw wire response.
-func ServerInfo(ctx context.Context, caller WSCaller) (*ResponseServerInfo, error) {
+func (r *PublicRPC) ServerInfo(ctx context.Context) (*ResponseServerInfo, error) {
 	req := &RequestCommand{
 		ID:      1,
 		Command: "server_info",
 	}
 	var res ResponseServerInfo
-	if err := caller.Call(ctx, req, &res); err != nil {
+	if err := r.caller.Call(ctx, req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(server_info): %w", err)
 	}
 	return &res, nil

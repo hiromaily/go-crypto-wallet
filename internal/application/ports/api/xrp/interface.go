@@ -16,7 +16,8 @@ import (
 
 	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	xrprpc "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc"
+	xrprpcadmin "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/admin"
+	xrprpcpublic "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplgo"
 )
 
@@ -59,23 +60,23 @@ type SignerEntryInput struct {
 // These operations query public information from the XRP network.
 type XRPPublicer interface {
 	// public_account
-	AccountChannels(ctx context.Context, sender, receiver string) (*xrprpc.ResponseAccountChannels, error)
-	AccountInfo(ctx context.Context, address string) (*xrprpc.ResponseAccountInfo, error)
+	AccountChannels(ctx context.Context, sender, receiver string) (*xrprpcpublic.ResponseAccountChannels, error)
+	AccountInfo(ctx context.Context, address string) (*xrprpcpublic.ResponseAccountInfo, error)
 	// public_server_info
-	ServerInfo(ctx context.Context) (*xrprpc.ResponseServerInfo, error)
+	ServerInfo(ctx context.Context) (*xrprpcpublic.ResponseServerInfo, error)
 }
 
 // XRPAdminer defines the interface for XRP admin node operations.
 // These operations typically require admin access to the XRP node.
 type XRPAdminer interface {
 	// admin_keygen
-	ValidationCreate(ctx context.Context, secret string) (*xrprpc.ResponseValidationCreate, error)
+	ValidationCreate(ctx context.Context, secret string) (*xrprpcadmin.ResponseValidationCreate, error)
 	WalletProposeWithKey(
 		ctx context.Context,
 		seed string,
 		keyType dtoxrp.XRPKeyType,
-	) (*xrprpc.ResponseWalletPropose, error)
-	WalletPropose(ctx context.Context, passphrase string) (*xrprpc.ResponseWalletPropose, error)
+	) (*xrprpcadmin.ResponseWalletPropose, error)
+	WalletPropose(ctx context.Context, passphrase string) (*xrprpcadmin.ResponseWalletPropose, error)
 }
 
 // Small, focused interfaces following the Interface Segregation Principle.
@@ -129,7 +130,7 @@ type SignerListPreparer interface {
 
 // KeyGenerator generates XRP keys/wallets.
 type KeyGenerator interface {
-	WalletPropose(ctx context.Context, passphrase string) (*xrprpc.ResponseWalletPropose, error)
+	WalletPropose(ctx context.Context, passphrase string) (*xrprpcadmin.ResponseWalletPropose, error)
 }
 
 // Closer provides cleanup operations.
