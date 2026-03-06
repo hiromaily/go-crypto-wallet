@@ -8,17 +8,17 @@
 //
 // # Interfaces
 //
-//   - XRPer: Main interface combining admin, public, and API operations
-//   - XRPAPIProvider: Interface for XRP API operations (account, address, transaction)
+//   - XRPer: Main interface combining admin, public, and WebSocket transaction operations
 //   - XRPPublicer: Interface for public node operations
 //   - XRPAdminer: Interface for admin node operations
+//   - TransactionSubmitter: Interface for submitting transactions via WebSocket
+//   - TransactionSigner: Interface for offline transaction signing
 //
 // # Capabilities
 //
 // The XRPer interface provides:
 //   - Balance queries (GetBalance, GetTotalBalance)
-//   - Transaction operations (CreateRawTransaction, SignTransaction, SubmitTransaction)
-//   - Address generation (GenerateAddress, GenerateXAddress)
+//   - Transaction operations (CreateRawTransaction, SignTransaction, SignTransactionNative, SubmitTransaction)
 //   - Account information (AccountInfo, GetAccountInfo)
 //   - Server information (ServerInfo)
 //
