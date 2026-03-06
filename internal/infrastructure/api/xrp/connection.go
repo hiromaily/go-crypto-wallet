@@ -46,7 +46,7 @@ func NewAdminXRP(
 
 // NewPublicXRPFromCoinType creates a PublicXRP instance for the given coin type.
 // Returns an error for unsupported coin types.
-func NewPublicXRP(
+func NewPublicXRPFromCoinType(
 	wsPublic *websocket.WS, conf *config.Ripple, coinTypeCode domainCoin.CoinTypeCode,
 ) (apixrp.XRPPublicClient, error) {
 	switch coinTypeCode {
