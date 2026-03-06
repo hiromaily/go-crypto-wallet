@@ -2,6 +2,9 @@
 
 This document proposes an XRP Ledger (XRPL) module architecture aligned with **go-crypto-wallet’s Clean Architecture + 3-wallet security model** (Watch / Keygen / Sign).
 
+> **As-built reference**: For the current implementation details (post PR #632), see
+> [transaction-flow.md](./transaction-flow.md).
+
 It focuses on:
 
 * **Transaction flow**: build → sign (single or multisig) → submit → confirm (validated ledger)
