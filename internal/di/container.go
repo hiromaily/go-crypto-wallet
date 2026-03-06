@@ -149,7 +149,7 @@ type container struct {
 	btc        apibtc.Bitcoiner
 	eth        apieth.Ethereumer
 	erc20      apieth.ERC20er
-	xrp        apixrp.XRPer
+	xrpPublic  apixrp.XRPPublicClient
 	// client
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
@@ -236,7 +236,7 @@ func (c *container) newETHKeygener() wallets.Keygener {
 
 func (c *container) newXRPKeygener() wallets.Keygener {
 	return xrpwallet.NewXRPKeygen(
-		c.newXRP(),
+		c.newPublicXRP(),
 		c.pkgContainer.NewDatabaseClient(),
 		c.walletType,
 		c.newKeygenGenerateSeedUseCase(),
@@ -377,7 +377,7 @@ func (c *container) newETHWalleter() wallets.Watcher {
 
 func (c *container) newXRPWalleter() wallets.Watcher {
 	return xrpwallet.NewXRPWatch(
-		c.newXRP(),
+		c.newPublicXRP(),
 		c.pkgContainer.NewDatabaseClient(),
 		c.newXRPWatchCreateTransactionUseCase(),
 		c.newXRPWatchMonitorTransactionUseCase(),
@@ -529,13 +529,12 @@ func (c *container) newERC20() apieth.ERC20er {
 	return c.erc20
 }
 
-func (c *container) newXRP() apixrp.XRPer {
-	if c.xrp == nil {
+func (c *container) newPublicXRP() apixrp.XRPPublicClient {
+	if c.xrpPublic == nil {
 		var err error
-		wsPublic, wsAdmin := c.newXRPWSClient()
-		c.xrp, err = apixrpimpl.NewXRPFromCoinType(
+		wsPublic, _ := c.newXRPWSClient()
+		c.xrpPublic, err = apixrpimpl.NewPublicXRPFromCoinType(
 			wsPublic,
-			wsAdmin,
 			&c.conf.Ripple,
 			c.conf.CoinTypeCode,
 		)
@@ -543,7 +542,16 @@ func (c *container) newXRP() apixrp.XRPer {
 			panic(err)
 		}
 	}
-	return c.xrp
+	return c.xrpPublic
+}
+
+func (c *container) newAdminXRP() apixrp.XRPAdminClient {
+	_, wsAdmin := c.newXRPWSClient()
+	client, err := apixrpimpl.NewAdminXRPFromCoinType(wsAdmin, &c.conf.Ripple, c.conf.CoinTypeCode)
+	if err != nil {
+		panic(err)
+	}
+	return client
 }
 
 //
@@ -833,7 +841,7 @@ func (c *container) newKeyGenerator() portsWallet.Generator {
 	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		chainConf = c.newETH().GetChainConf()
 	case c.conf.CoinTypeCode == domainCoin.XRP:
-		chainConf = c.newXRP().GetChainConf()
+		chainConf = c.newPublicXRP().GetChainConf()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	}
@@ -1516,7 +1524,7 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 // XRP Watch Use Cases
 
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
-	xrpClient := c.newXRP() // XRP client implements both AccountInfoProvider and TransactionPreparer
+	xrpClient := c.newPublicXRP() // XRP client implements both AccountInfoProvider and TransactionPreparer
 	return watchusecasexrp.NewCreateTransactionUseCase(
 		xrpClient, // AccountInfoProvider
 		xrpClient, // TransactionPreparer
@@ -1534,14 +1542,15 @@ func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 func (c *container) newXRPWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
 	return watchusecasexrp.NewMonitorTransactionUseCase(
-		c.newXRP(),
+		c.newPublicXRP(),
 		c.newAddressRepo(),
 	)
 }
 
 func (c *container) newXRPWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
 	return watchusecasexrp.NewSendTransactionUseCase(
-		c.newXRP(),
+		c.newPublicXRP(),
+		c.newAdminXRP(),
 		c.newXRPTxDetailRepo(),
 		c.newTxFileRepo(),
 	)
@@ -1557,7 +1566,7 @@ func (*container) newXRPWatchSetSignerListUseCase() watchusecase.SetSignerListUs
 
 func (c *container) newXRPWatchCreateMultisigTxUseCase() watchusecase.CreateMultisigTxUseCase {
 	return watchusecasexrp.NewCreateMultisigTxUseCase(
-		c.newXRP(),
+		c.newPublicXRP(),
 		c.pkgContainer.NewUUIDHandler(),
 		c.newXRPSignerListRepo(),
 		c.newXRPPendingMultisigRepo(),
@@ -1570,7 +1579,7 @@ func (*container) newXRPWatchAddMultisigSignatureUseCase() watchusecase.AddMulti
 
 func (c *container) newXRPWatchSubmitMultisigTxUseCase() watchusecase.SubmitMultisigTxUseCase {
 	return watchusecasexrp.NewSubmitMultisigTxUseCase(
-		c.newXRP(),
+		c.newPublicXRP(),
 		c.newXRPPendingMultisigRepo(),
 	)
 }
@@ -1752,7 +1761,7 @@ func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUs
 
 	// Use API-based key generation (legacy behavior)
 	return keygenusecasexrp.NewGenerateKeyUseCase(
-		c.newXRP(),
+		c.newAdminXRP(),
 		c.conf.CoinTypeCode,
 		c.newXRPAccountKeyRepo(),
 	)
@@ -1788,7 +1797,7 @@ func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTrans
 
 func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecasexrp.NewSignTransactionUseCase(
-		c.newXRP(),
+		c.newPublicXRP(),
 		c.newXRPAccountKeyRepo(),
 		c.newTxFileRepo(),
 	)
@@ -1902,7 +1911,7 @@ func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUs
 
 func (c *container) newXRPSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecasexrp.NewSignTransactionUseCase(
-		c.newXRP(),
+		c.newPublicXRP(),
 		c.newXRPAccountKeyRepo(),
 		c.newTxFileRepo(),
 		c.walletType,

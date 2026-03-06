@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bookerzzz/grok"
 	"google.golang.org/grpc/status"
@@ -13,16 +14,41 @@ import (
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	domainXRP "github.com/hiromaily/go-crypto-wallet/internal/domain/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-func runSendCoin(xrpAPI apixrp.XRPer, txData *config.RippleTxData, receiverAddr string, amount float64) error {
+// sendCoinClient defines the interface for XRP operations needed by runSendCoin.
+type sendCoinClient interface {
+	apixrp.TransactionPreparer
+	apixrp.TransactionSigner
+	apixrp.TransactionSubmitter
+	apixrp.LedgerPoller
+	apixrp.AccountInfoProvider
+}
+
+// waitForValidation polls ledger_current until the ledger advances past targetVersion.
+func waitForValidation(ctx context.Context, client apixrp.LedgerPoller, targetVersion uint64) error {
+	const maxRetries = 30
+	for range maxRetries {
+		res, err := client.LedgerCurrent(ctx)
+		if err != nil {
+			return fmt.Errorf("fail to call ledger_current: %w", err)
+		}
+		if res.Result.LedgerCurrentIndex >= targetVersion {
+			return nil
+		}
+		time.Sleep(1 * time.Second)
+	}
+	return errors.New("timeout waiting for ledger validation")
+}
+
+func runSendCoin(xrpAPI sendCoinClient, txData *config.RippleTxData, receiverAddr string, amount float64) error {
 	// validator
 	if receiverAddr == "" {
 		return errors.New("address option [-address] is invalid")
 	}
 
 	// send coin
-	// PrepareTransaction
 	instructions := &dtoxrp.Instructions{
 		MaxLedgerVersionOffset: domainXRP.MaxLedgerVersionOffset,
 	}
@@ -33,7 +59,7 @@ func runSendCoin(xrpAPI apixrp.XRPer, txData *config.RippleTxData, receiverAddr 
 	}
 	grok.Value(txJSON)
 
-	// SingTransaction
+	// SignTransaction
 	txID, txBlob, err := xrpAPI.SignTransaction(context.TODO(), txJSON, txData.Secret)
 	if err != nil {
 		return fmt.Errorf("fail to call xrp.SignTransaction() %w", err)
@@ -50,10 +76,9 @@ func runSendCoin(xrpAPI apixrp.XRPer, txData *config.RippleTxData, receiverAddr 
 			sentTx.ResultCode, sentTx.ResultMessage)
 	}
 
-	// validate transaction
-	_, err = xrpAPI.WaitValidation(context.TODO(), sentTx.TxJSON.LastLedgerSequence)
-	if err != nil {
-		return fmt.Errorf("fail to call xrp.WaitValidation() %w", err)
+	// Wait for ledger to advance past the transaction's LastLedgerSequence
+	if err = waitForValidation(context.TODO(), xrpAPI, sentTx.TxJSON.LastLedgerSequence); err != nil {
+		logger.Warn("ledger validation timed out", "error", err)
 	}
 
 	// get transaction info
