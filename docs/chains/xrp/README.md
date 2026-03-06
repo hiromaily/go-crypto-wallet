@@ -62,6 +62,27 @@ Classic address (`r...`) is derived from the public key via:
 
 ## Address Types & Key Derivation
 
+### Address Format: Classic vs X-address
+
+XRPL has two address encodings:
+
+| Format | Prefix | Level | Status |
+|--------|--------|-------|--------|
+| **Classic address** | `r...` (base58check) | Protocol-native | Standard — used on-ledger |
+| **X-address** | `X...` mainnet / `T...` testnet | Presentation only | Proposed (XLS-5d), not widely adopted |
+
+**Classic addresses are the standard as of 2026.** X-addresses (proposed in [XLS-5d](https://github.com/XRPLF/XRPL-Standards/discussions/18)) are a convenience encoding that wraps a classic address together with an optional destination tag into a single string. They operate entirely at the application/presentation layer — the XRPL protocol and `xrpl-go` library use classic addresses internally.
+
+This project uses classic addresses (`r...`). This is correct and not legacy.
+
+#### Destination Tag (known limitation)
+
+The problem X-addresses tried to solve is **destination tag routing**: many exchanges share a single deposit address and use a destination tag (a 32-bit integer) to identify individual users. X-addresses encode address + tag into one string to prevent users from forgetting the tag.
+
+This project does not currently handle destination tags. This is a known feature gap for exchange-style deposit flows, but does not affect direct wallet-to-wallet transfers (P2P).
+
+---
+
 ### HD Wallet Derivation Path
 
 **Standard:** BIP44 with XRP coin type
