@@ -7,6 +7,23 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
+// MultisigFileRepositorier handles Safe multisig transaction JSON file I/O.
+// It is intentionally defined as a separate interface from TransactionFileRepositorier
+// to satisfy the Interface Segregation Principle: existing single-sig use cases and their
+// mocks are unaffected by multisig file operations.
+type MultisigFileRepositorier interface {
+	// WriteETHMultisigJSONFile serialises f to JSON and writes it to path.
+	// Returns the written file path on success.
+	WriteETHMultisigJSONFile(path string, f *dtoeth.ETHMultisigTransactionFile) (string, error)
+
+	// ReadETHMultisigJSONFile reads the JSON file at path and deserialises it.
+	ReadETHMultisigJSONFile(path string) (*dtoeth.ETHMultisigTransactionFile, error)
+
+	// CreateMultisigFilePath produces a canonical file path of the form:
+	// {actionType}_multisig_{uuid}_{signedCount}.json
+	CreateMultisigFilePath(actionType domainTx.ActionType, uuid string, signedCount int) string
+}
+
 // TransactionFileRepositorier is file storager for tx info
 type TransactionFileRepositorier interface {
 	CreateFilePath(actionType domainTx.ActionType, txType domainTx.TxType, txID int64, signedCount int) string
