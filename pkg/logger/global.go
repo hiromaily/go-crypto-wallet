@@ -23,11 +23,16 @@ func SetGlobal(logger Logger) {
 // If no logger has been set, it initializes and returns a no-op logger.
 // This function is thread-safe for concurrent reads.
 func getGlobalLogger() Logger {
-	// Acquire a read lock to allow concurrent reads while blocking writes
 	mu.RLock()
-	defer mu.RUnlock()
+	l := globalLogger
+	mu.RUnlock()
+	if l != nil {
+		return l
+	}
+	// Promote to a write lock to initialize the default no-op logger.
+	mu.Lock()
+	defer mu.Unlock()
 	if globalLogger == nil {
-		// Set a no-op logger as the default
 		globalLogger = NewNoopLogger()
 	}
 	return globalLogger
