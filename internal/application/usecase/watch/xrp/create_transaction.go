@@ -772,7 +772,7 @@ func (u *createTransactionUseCase) generateMultisigJSONFile(
 		Version:      "1.0.0",
 		Chain:        "XRP",
 		Network:      network,
-		CreatedAt:    time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+		CreatedAt:    time.Now().UTC().Format(time.RFC3339),
 		Transactions: txEntries,
 	}
 
