@@ -131,9 +131,13 @@ xrp_watch_cmd() {
 xrp_keygen_cmd() {
 	if [ "${DB_TYPE}" = "sqlite" ]; then
 		WALLET_DATABASE_SQLITE_PATH="${SQLITE_KEYGEN_DB_PATH}" \
+			WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL="ws://${XRP_WS_HOST}:${XRP_WS_PORT}" \
+			WALLET_RIPPLE_WEBSOCKET_ADMIN_URL="ws://${XRP_WS_HOST}:${XRP_WS_PORT}" \
 			"${GOPATH}/bin/keygen" "$@"
 	else
-		"${GOPATH}/bin/keygen" "$@"
+		WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL="ws://${XRP_WS_HOST}:${XRP_WS_PORT}" \
+			WALLET_RIPPLE_WEBSOCKET_ADMIN_URL="ws://${XRP_WS_HOST}:${XRP_WS_PORT}" \
+			"${GOPATH}/bin/keygen" "$@"
 	fi
 }
 
@@ -385,7 +389,7 @@ xrp_fund_address() {
 # Usage: file=$(xrp_extract_file_path "$output")
 xrp_extract_file_path() {
 	local output="$1"
-	echo "$output" | grep '^\[fileName\]:' | sed 's/^\[fileName\]: //'
+	echo "$output" | grep '^\[fileName\]:' | sed 's/^\[fileName\]: //' || true
 }
 
 # Extract txID from watch send tx output

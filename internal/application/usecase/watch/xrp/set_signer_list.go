@@ -144,8 +144,16 @@ func (u *setSignerListUseCase) Execute(
 		0,
 	)
 
+	// First line identifies the signer's account for key lookup.
+	// Prefer account type label (e.g. "payment") so the keygen can look up the
+	// private key by account type + address. Fall back to the wallet address.
+	firstLine := input.SenderAccountType
+	if firstLine == "" {
+		firstLine = input.AccountAddress
+	}
+
 	generatedFileName, err := u.txFileRepo.WriteFileSlice(path, []string{
-		input.AccountAddress, // First line is the account
+		firstLine,
 		serializedTx,
 	})
 	if err != nil {

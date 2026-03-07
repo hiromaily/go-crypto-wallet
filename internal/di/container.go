@@ -384,6 +384,7 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 		c.newXRPWatchSendTransactionUseCase(),
 		c.newWatchImportAddressUseCase(),
 		c.newWatchCreatePaymentRequestUseCase(),
+		c.newXRPWatchSetSignerListUseCase(),
 		c.walletType,
 	)
 }
@@ -697,7 +698,20 @@ func (c *container) newXRPSignerListRepo() repocold.XRPSignerListRepositorier {
 	case "postgres":
 		return coldpostgres.NewXRPSignerListRepositorySqlc(c.pkgContainer.NewPostgresClient())
 	case "sqlite":
-		panic("XRP signer list repository not implemented for sqlite")
+		return coldsqlite.NewXRPSignerListRepositorySqlc(c.pkgContainer.NewSQLiteClient())
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
+}
+
+func (c *container) newXRPSignerEntryRepo() repocold.XRPSignerEntryRepositorier {
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewXRPSignerEntryRepositorySqlc(c.pkgContainer.NewDatabaseClient())
+	case "postgres":
+		return coldpostgres.NewXRPSignerEntryRepositorySqlc(c.pkgContainer.NewPostgresClient())
+	case "sqlite":
+		return coldsqlite.NewXRPSignerEntryRepositorySqlc(c.pkgContainer.NewSQLiteClient())
 	default:
 		panic("unsupported database type: " + c.conf.Database.Type)
 	}
@@ -710,7 +724,7 @@ func (c *container) newXRPPendingMultisigRepo() repowatch.XRPPendingMultisigRepo
 	case "postgres":
 		return watchpostgres.NewXRPPendingMultisigRepositorySqlc(c.pkgContainer.NewPostgresClient())
 	case "sqlite":
-		panic("XRP pending multisig repository not implemented for sqlite")
+		return watchsqlite.NewXRPPendingMultisigRepositorySqlc(c.pkgContainer.NewSQLiteClient())
 	default:
 		panic("unsupported database type: " + c.conf.Database.Type)
 	}
@@ -1537,6 +1551,7 @@ func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTra
 		c.newTxFileRepo(),
 		c.newDepositAccount(),
 		c.newPaymentAccount(),
+		c.conf.Ripple.NetworkType,
 	)
 }
 
@@ -1560,8 +1575,14 @@ func (*container) newXRPWatchSetRegularKeyUseCase() watchusecase.SetRegularKeyUs
 	panic("SetRegularKey is not supported: gRPC-based XRP API has been removed")
 }
 
-func (*container) newXRPWatchSetSignerListUseCase() watchusecase.SetSignerListUseCase {
-	panic("SetSignerList is not supported: gRPC-based XRP API has been removed")
+func (c *container) newXRPWatchSetSignerListUseCase() watchusecase.SetSignerListUseCase {
+	return watchusecasexrp.NewSetSignerListUseCase(
+		c.newPublicXRP(),
+		c.pkgContainer.NewUUIDHandler(),
+		c.newXRPSignerListRepo(),
+		c.newXRPSignerEntryRepo(),
+		c.newTxFileRepo(),
+	)
 }
 
 func (c *container) newXRPWatchCreateMultisigTxUseCase() watchusecase.CreateMultisigTxUseCase {
@@ -1574,7 +1595,7 @@ func (c *container) newXRPWatchCreateMultisigTxUseCase() watchusecase.CreateMult
 }
 
 func (*container) newXRPWatchAddMultisigSignatureUseCase() watchusecase.AddMultisigSignatureUseCase {
-	panic("AddMultisigSignature is not supported: gRPC-based XRP API has been removed")
+	return NewNotImplementedAddMultisigSignatureUseCase()
 }
 
 func (c *container) newXRPWatchSubmitMultisigTxUseCase() watchusecase.SubmitMultisigTxUseCase {

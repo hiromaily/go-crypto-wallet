@@ -23,6 +23,11 @@ type TxInput struct {
 	SigningPubKey      string
 	TxnSignature       string
 	Hash               string
+	// RawTxFields carries the original JSON-decoded transaction fields.
+	// When set, convertToPeersystTransaction uses this map as the base instead of
+	// building from the individual fields above. This preserves transaction-type-specific
+	// fields (e.g. SignerQuorum, SignerEntries for SignerListSet) that are not in TxInput.
+	RawTxFields map[string]any
 }
 
 // SignerListEntry represents a single signer in a SignerList.

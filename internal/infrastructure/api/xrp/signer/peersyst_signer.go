@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 
 	binarycodec "github.com/Peersyst/xrpl-go/binary-codec"
 	"github.com/Peersyst/xrpl-go/xrpl/wallet"
@@ -148,15 +149,35 @@ func validateTxInput(txInput *dtoxrp.TxInput) error {
 //   - txInput: Transaction input data
 //   - isMultiSig: Explicit indicator from caller - true for multi-sig, false for single-sig
 func convertToPeersystTransaction(txInput *dtoxrp.TxInput, isMultiSig bool) map[string]any {
-	// Build base transaction map
-	tx := map[string]any{
-		"TransactionType":    txInput.TransactionType,
-		"Account":            txInput.Account,
-		"Destination":        txInput.Destination,
-		"Amount":             txInput.Amount,
-		"Fee":                txInput.Fee,
-		"Sequence":           txInput.Sequence,
-		"LastLedgerSequence": txInput.LastLedgerSequence,
+	var tx map[string]any
+
+	if txInput.RawTxFields != nil {
+		// Use raw fields as base to preserve transaction-type-specific fields
+		// (e.g. SignerQuorum/SignerEntries for SignerListSet).
+		tx = make(map[string]any, len(txInput.RawTxFields))
+		maps.Copy(tx, txInput.RawTxFields)
+		// Remove signing fields that wallet.Sign/Multisign will populate
+		delete(tx, "SigningPubKey")
+		delete(tx, "TxnSignature")
+		delete(tx, "Hash")
+	} else {
+		// Build transaction map from individual fields (Payment transactions)
+		tx = map[string]any{
+			"TransactionType":    txInput.TransactionType,
+			"Account":            txInput.Account,
+			"Fee":                txInput.Fee,
+			"Sequence":           txInput.Sequence,
+			"LastLedgerSequence": txInput.LastLedgerSequence,
+		}
+		if txInput.Destination != "" {
+			tx["Destination"] = txInput.Destination
+		}
+		if txInput.Amount != "" {
+			tx["Amount"] = txInput.Amount
+		}
+		if txInput.Flags != 0 {
+			tx["Flags"] = txInput.Flags
+		}
 	}
 
 	// For multi-sig, explicitly set empty SigningPubKey (XRP Ledger requirement)
@@ -164,11 +185,6 @@ func convertToPeersystTransaction(txInput *dtoxrp.TxInput, isMultiSig bool) map[
 		tx["SigningPubKey"] = ""
 	}
 	// For single-sig: don't include SigningPubKey (wallet.Sign will add it)
-
-	// Add Flags if non-zero
-	if txInput.Flags != 0 {
-		tx["Flags"] = txInput.Flags
-	}
 
 	return tx
 }

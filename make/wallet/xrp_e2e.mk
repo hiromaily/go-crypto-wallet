@@ -35,6 +35,40 @@ xrp-e2e-p1-cleanup:
 	DB_TYPE="$(DB)" XRP_WS_HOST="$(XRP_WS_HOST)" XRP_WS_PORT="$(XRP_WS_PORT)" ./scripts/operation/xrp/e2e/e2e-p1.sh --cleanup
 
 ###############################################################################
+# E2E Tests
+#
+# Pattern 2: 2-of-2 Multisig Payment Transfer
+#   DB:           sqlite (default) or mysql
+#   XRP_WS_HOST:  rippled WebSocket host (default: 127.0.0.1)
+#   XRP_WS_PORT:  rippled WebSocket port (default: 6006)
+#
+# Usage:
+#   make xrp-e2e-p2-reset             # Run with SQLite (full reset)
+#   make xrp-e2e-p2                   # Run without reset
+#   make xrp-e2e-p2-ci                # Run non-interactive (CI mode)
+#   make xrp-e2e-p2-cleanup           # Stop containers and cleanup
+#
+# Note: Sign 1 and Sign 2 phases are currently documented (pending implementation).
+#       Phases 1-7 (setup, SignerListSet, multisig TX creation) run end-to-end.
+###############################################################################
+
+.PHONY: xrp-e2e-p2-reset
+xrp-e2e-p2-reset: build-all
+	DB_TYPE="$(DB)" XRP_WS_HOST="$(XRP_WS_HOST)" XRP_WS_PORT="$(XRP_WS_PORT)" ./scripts/operation/xrp/e2e/e2e-p2.sh --reset
+
+.PHONY: xrp-e2e-p2
+xrp-e2e-p2: build-all
+	DB_TYPE="$(DB)" XRP_WS_HOST="$(XRP_WS_HOST)" XRP_WS_PORT="$(XRP_WS_PORT)" ./scripts/operation/xrp/e2e/e2e-p2.sh
+
+.PHONY: xrp-e2e-p2-ci
+xrp-e2e-p2-ci: build-all
+	DB_TYPE="$(DB)" XRP_WS_HOST="$(XRP_WS_HOST)" XRP_WS_PORT="$(XRP_WS_PORT)" ./scripts/operation/xrp/e2e/e2e-p2.sh --non-interactive
+
+.PHONY: xrp-e2e-p2-cleanup
+xrp-e2e-p2-cleanup:
+	DB_TYPE="$(DB)" XRP_WS_HOST="$(XRP_WS_HOST)" XRP_WS_PORT="$(XRP_WS_PORT)" ./scripts/operation/xrp/e2e/e2e-p2.sh --cleanup
+
+###############################################################################
 # Parallel E2E Testing - Run Multiple Patterns Concurrently
 ###############################################################################
 # Usage:

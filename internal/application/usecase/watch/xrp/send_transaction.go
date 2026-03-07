@@ -150,6 +150,48 @@ func (u *sendTransactionUseCase) submitOneTx(ctx context.Context, e signedTxEntr
 	return sentTx.TxJSON.Hash
 }
 
+// readSignedEntries reads signed transaction entries from a file with content-based format detection.
+// It tries JSON format (XRPTransactionFile) first; if parsing fails or there are no transactions,
+// it falls back to the legacy text format (ReadFileSlice).
+func (u *sendTransactionUseCase) readSignedEntries(filePath string) ([]signedTxEntry, error) {
+	// Try JSON format first
+	jsonFile, jsonErr := u.txFileRepo.ReadXRPJSONFile(filePath)
+	if jsonErr == nil && jsonFile != nil && len(jsonFile.Transactions) > 0 {
+		var entries []signedTxEntry
+		for _, tx := range jsonFile.Transactions {
+			if !tx.IsComplete {
+				return nil, fmt.Errorf("multisig transaction %s is not yet complete (is_complete=false)", tx.UUID)
+			}
+			if tx.SignedBlob == nil {
+				return nil, fmt.Errorf("multisig transaction %s has no signed blob", tx.UUID)
+			}
+			entries = append(entries, signedTxEntry{UUID: tx.UUID, TxBlob: *tx.SignedBlob})
+		}
+		return entries, nil
+	}
+
+	// Fall back to legacy text format
+	lines, err := u.txFileRepo.ReadFileSlice(filePath)
+	if err != nil {
+		logger.Error("fail to call txFileRepo.ReadFileSlice()", "file_path", filePath, "error", err)
+		return nil, fmt.Errorf("fail to call txFileRepo.ReadFileSlice(): %w", err)
+	}
+
+	entries := make([]signedTxEntry, 0, len(lines))
+	for _, line := range lines {
+		parts := strings.SplitN(line, ",", 3)
+		if len(parts) != 3 || parts[0] == "" || parts[2] == "" {
+			return nil, fmt.Errorf("invalid signed tx line format: %s", line)
+		}
+		entries = append(entries, signedTxEntry{UUID: parts[0], TxBlob: parts[2]})
+	}
+
+	if len(entries) == 0 {
+		return nil, fmt.Errorf("no signed transactions found in file: %s", filePath)
+	}
+	return entries, nil
+}
+
 func (u *sendTransactionUseCase) Execute(
 	ctx context.Context,
 	input watchusecase.SendTransactionInput,
@@ -161,24 +203,9 @@ func (u *sendTransactionUseCase) Execute(
 
 	logger.Debug("send_tx", "action_type", actionType.String(), "file_path", input.FilePath)
 
-	lines, err := u.txFileRepo.ReadFileSlice(input.FilePath)
+	entries, err := u.readSignedEntries(input.FilePath)
 	if err != nil {
-		logger.Error("fail to call txFileRepo.ReadFileSlice()", "file_path", input.FilePath, "error", err)
-		return watchusecase.SendTransactionOutput{}, fmt.Errorf("fail to call txFileRepo.ReadFileSlice(): %w", err)
-	}
-
-	entries := make([]signedTxEntry, 0, len(lines))
-	for _, line := range lines {
-		parts := strings.SplitN(line, ",", 3)
-		if len(parts) != 3 || parts[0] == "" || parts[2] == "" {
-			return watchusecase.SendTransactionOutput{}, fmt.Errorf("invalid signed tx line format: %s", line)
-		}
-		entries = append(entries, signedTxEntry{UUID: parts[0], TxBlob: parts[2]})
-	}
-
-	if len(entries) == 0 {
-		return watchusecase.SendTransactionOutput{}, fmt.Errorf(
-			"no signed transactions found in file: %s", input.FilePath)
+		return watchusecase.SendTransactionOutput{}, err
 	}
 
 	var wg sync.WaitGroup

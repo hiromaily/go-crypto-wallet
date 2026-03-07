@@ -142,10 +142,13 @@ XRP supports single-sig payment transfer with classic addresses (ed25519 or secp
 | Pattern | Type | Address Format | Signing | Status |
 |---------|------|----------------|---------|--------|
 | **P1** | Single-sig Payment Transfer | `r...` (base58) | Keygen wallet (offline) | ✅ Verified |
+| **P2** | 2-of-2 Multisig Payment Transfer | `r...` (base58) | Keygen wallet (offline, sequential) | ✅ Verified |
 
 > **Note**: XRP uses classic addresses (`r...` prefix). The Sign wallet is not required — the
 > Keygen wallet handles offline signing directly. E2E runs against a local **rippled standalone mode**
 > node (Docker), equivalent to Bitcoin regtest. Ledgers are advanced manually via `ledger_accept`.
+> P2 exercises the full XRP multisig workflow: set-signer-list → create-multisig-tx →
+> add-multisig-signature (×2) → submit-multisig-tx.
 
 ### Quick Start
 
@@ -165,13 +168,14 @@ make eth-e2e-p2     # ERC-20 HYT Token Transfer
 
 # XRP: Run patterns
 make xrp-e2e-p1     # Single-sig Payment Transfer
+make xrp-e2e-p2     # 2-of-2 Multisig Payment Transfer
 
 # ETH: Run all patterns in parallel
 make eth-e2e-parallel          # Run P1 and P2 in parallel
 make eth-e2e-ci-all            # CI mode (non-interactive)
 
 # XRP: Run all patterns in parallel
-make xrp-e2e-parallel          # Run P1 in parallel
+make xrp-e2e-parallel          # Run P1 and P2 in parallel
 make xrp-e2e-ci-all            # CI mode (non-interactive)
 
 # Fresh start with full reset
@@ -180,6 +184,7 @@ make bch-e2e-reset P=3
 make eth-e2e-p1-reset
 make eth-e2e-p2-reset
 make xrp-e2e-p1-reset
+make xrp-e2e-p2-reset
 
 # CI/CD mode (non-interactive)
 make btc-e2e-ci P=3
@@ -187,6 +192,7 @@ make bch-e2e-ci P=3
 make eth-e2e-p1-ci
 make eth-e2e-p2-ci
 make xrp-e2e-p1-ci
+make xrp-e2e-p2-ci
 ```
 
 ### Why This Matters

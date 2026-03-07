@@ -20,6 +20,7 @@ type XRPPublicClient interface {
 	TransactionSubmitter
 	LedgerPoller
 	TransactionSigner
+	SignerListPreparer
 	CoinTypeProvider
 	Closer
 }

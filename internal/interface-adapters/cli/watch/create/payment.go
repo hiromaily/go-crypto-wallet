@@ -9,14 +9,15 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
-func runPayment(container di.Container, fee float64) error {
+func runPayment(container di.Container, fee float64, multisigQuorum uint32) error {
 	// Get use case from container
 	useCase := container.NewWatchCreateTransactionUseCase().(watchusecase.CreateTransactionUseCase)
 
 	// Create payment transaction
 	output, err := useCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
-		ActionType:    domainTx.ActionTypePayment.String(),
-		AdjustmentFee: fee,
+		ActionType:     domainTx.ActionTypePayment.String(),
+		AdjustmentFee:  fee,
+		MultisigQuorum: multisigQuorum,
 	})
 	if err != nil {
 		return fmt.Errorf("fail to create payment transaction: %w", err)

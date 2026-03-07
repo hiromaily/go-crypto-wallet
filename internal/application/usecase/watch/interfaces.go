@@ -52,6 +52,7 @@ type CreateTransactionInput struct {
 	Amount            float64
 	AdjustmentFee     float64
 	PaymentRequestIDs []int64 // For payment transactions
+	MultisigQuorum    uint32  // 0 = single-sig (default); >1 = multisig JSON-format file
 }
 
 // CreateTransactionOutput represents output from creating a transaction
@@ -177,9 +178,10 @@ type SignerEntry struct {
 
 // SetSignerListInput represents input for setting a signer list
 type SetSignerListInput struct {
-	AccountAddress string        // XRP account to configure multi-sig for
-	SignerQuorum   uint32        // Minimum weight required for signatures
-	SignerEntries  []SignerEntry // List of authorized signers with weights
+	AccountAddress    string        // XRP account to configure multi-sig for
+	SenderAccountType string        // Account type label (e.g. "payment") for key lookup by keygen signer
+	SignerQuorum      uint32        // Minimum weight required for signatures
+	SignerEntries     []SignerEntry // List of authorized signers with weights
 }
 
 // SetSignerListOutput represents output from setting a signer list

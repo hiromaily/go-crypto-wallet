@@ -11,7 +11,7 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
-func runTransfer(container di.Container, account1, account2 string, amount, fee float64) error {
+func runTransfer(container di.Container, account1, account2 string, amount, fee float64, multisigQuorum uint32) error {
 	// validator
 	if !domainAccount.ValidateAccountType(account1) {
 		return errors.New("account option [-account1] is invalid")
@@ -45,6 +45,7 @@ func runTransfer(container di.Container, account1, account2 string, amount, fee 
 		ReceiverAccount: domainAccount.AccountType(account2),
 		Amount:          amount,
 		AdjustmentFee:   fee,
+		MultisigQuorum:  multisigQuorum,
 	})
 	if err != nil {
 		return fmt.Errorf("fail to create transfer transaction: %w", err)

@@ -82,6 +82,13 @@ func (u *signTransactionUseCase) Sign(
 		if err = json.Unmarshal([]byte(txJSON), &txInput); err != nil {
 			return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 		}
+		// Populate RawTxFields to preserve transaction-type-specific fields
+		// (e.g. SignerQuorum/SignerEntries for SignerListSet) not captured in TxInput.
+		var rawFields map[string]any
+		if err = json.Unmarshal([]byte(txJSON), &rawFields); err != nil {
+			return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to unmarshal raw tx fields: %w", err)
+		}
+		txInput.RawTxFields = rawFields
 
 		// TODO: get secret from database by txInput.Account
 		// master_seed from xrp_account_key table
