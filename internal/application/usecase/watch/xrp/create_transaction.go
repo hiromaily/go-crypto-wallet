@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/bookerzzz/grok"
 
@@ -29,6 +30,15 @@ type userAmount struct {
 	Amount  float64
 }
 
+// multisigTxEntry holds per-transaction data needed to build an XRPTransactionEntry
+// for the multisig JSON file path.
+type multisigTxEntry struct {
+	uid           string
+	txJSON        *dtoxrp.TxInput
+	senderAddr    string
+	senderAccType string
+}
+
 type createTransactionUseCase struct {
 	accountInfo     apixrp.AccountInfoProvider
 	txPreparer      apixrp.TransactionPreparer
@@ -41,6 +51,7 @@ type createTransactionUseCase struct {
 	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
+	network         string // "mainnet" or "testnet" (normalized for XRPTransactionFile)
 }
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase.
@@ -51,6 +62,8 @@ type createTransactionUseCase struct {
 // Parameters:
 //   - accountInfo: Provides account balance and information queries
 //   - txPreparer: Prepares unsigned raw transactions
+//   - network: XRP network type string (e.g. "mainnet", "testnet", "standalone"); used
+//     when writing multisig JSON files. Any non-"mainnet" value is treated as "testnet".
 //
 // Note: Typically both interfaces are implemented by the same XRPer concrete type,
 // but accepting them separately allows for better testability and clearer dependencies.
@@ -66,6 +79,7 @@ func NewCreateTransactionUseCase(
 	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
+	network string,
 ) watchusecase.CreateTransactionUseCase {
 	return &createTransactionUseCase{
 		accountInfo:     accountInfo,
@@ -79,6 +93,7 @@ func NewCreateTransactionUseCase(
 		txFileRepo:      txFileRepo,
 		depositReceiver: depositReceiver,
 		paymentSender:   paymentSender,
+		network:         network,
 	}
 }
 
@@ -97,11 +112,12 @@ func (u *createTransactionUseCase) Execute(
 
 	switch actionType {
 	case domainTx.ActionTypeDeposit:
-		fileName, execErr = u.createDepositTx(ctx)
+		fileName, execErr = u.createDepositTx(ctx, input.MultisigQuorum)
 	case domainTx.ActionTypePayment:
-		fileName, execErr = u.createPaymentTx(ctx)
+		fileName, execErr = u.createPaymentTx(ctx, input.MultisigQuorum)
 	case domainTx.ActionTypeTransfer:
-		fileName, execErr = u.createTransferTx(ctx, input.SenderAccount, input.ReceiverAccount, input.Amount)
+		fileName, execErr = u.createTransferTx(
+			ctx, input.SenderAccount, input.ReceiverAccount, input.Amount, input.MultisigQuorum)
 	default:
 		return watchusecase.CreateTransactionOutput{}, fmt.Errorf("unsupported action type: %s", input.ActionType)
 	}
@@ -119,7 +135,7 @@ func (u *createTransactionUseCase) Execute(
 // createDepositTx creates unsigned tx if client accounts have coins
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but this should be flexible
-func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string, error) {
+func (u *createTransactionUseCase) createDepositTx(ctx context.Context, multisigQuorum uint32) (string, error) {
 	sender := domainAccount.AccountTypeClient
 	receiver := u.depositReceiver
 	targetAction := domainTx.ActionTypeDeposit
@@ -137,7 +153,8 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 		return "", nil
 	}
 
-	serializedTxs, txDetailItems, err := u.createDepositRawTransactions(ctx, sender, receiver, userAmounts)
+	serializedTxs, txDetailItems, msEntries, err := u.createDepositRawTransactions(
+		ctx, sender, receiver, userAmounts, multisigQuorum)
 	if err != nil {
 		return "", err
 	}
@@ -152,7 +169,14 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 
 	// save transaction result to file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
+	if multisigQuorum > 1 {
+		if len(msEntries) != 0 {
+			generatedFileName, err = u.generateMultisigJSONFile(targetAction, txID, multisigQuorum, msEntries)
+			if err != nil {
+				return "", fmt.Errorf("failed to call generateMultisigJSONFile(): %w", err)
+			}
+		}
+	} else if len(serializedTxs) != 0 {
 		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
 			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
@@ -168,7 +192,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 // Note:
 // - to avoid complex logic to create raw transaction
 // - only one address of sender should afford to send coin to all payment request users.
-func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string, error) {
+func (u *createTransactionUseCase) createPaymentTx(ctx context.Context, multisigQuorum uint32) (string, error) {
 	sender := u.paymentSender
 	receiver := domainAccount.AccountTypeAnonymous
 	targetAction := domainTx.ActionTypePayment
@@ -198,7 +222,8 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 	}
 
 	// create raw transaction for each address
-	serializedTxs, txDetailItems := u.createPaymentRawTransactions(ctx, sender, receiver, userPayments, senderAddr)
+	serializedTxs, txDetailItems, msEntries := u.createPaymentRawTransactions(
+		ctx, sender, receiver, userPayments, senderAddr, multisigQuorum)
 	if len(txDetailItems) == 0 {
 		return "", nil
 	}
@@ -210,7 +235,14 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 
 	// save transaction result to file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
+	if multisigQuorum > 1 {
+		if len(msEntries) != 0 {
+			generatedFileName, err = u.generateMultisigJSONFile(targetAction, txID, multisigQuorum, msEntries)
+			if err != nil {
+				return "", fmt.Errorf("failed to call generateMultisigJSONFile(): %w", err)
+			}
+		}
+	} else if len(serializedTxs) != 0 {
 		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
 			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
@@ -254,6 +286,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	floatValue float64,
+	multisigQuorum uint32,
 ) (string, error) {
 	targetAction := domainTx.ActionTypeTransfer
 
@@ -343,7 +376,18 @@ func (u *createTransactionUseCase) createTransferTx(
 
 	// save transaction result to file
 	var generatedFileName string
-	if len(serializedTxs) != 0 {
+	if multisigQuorum > 1 {
+		msEntries := []multisigTxEntry{{
+			uid:           uid.String(),
+			txJSON:        txJSON,
+			senderAddr:    senderAddr.WalletAddress,
+			senderAccType: sender.String(),
+		}}
+		generatedFileName, err = u.generateMultisigJSONFile(targetAction, txID, multisigQuorum, msEntries)
+		if err != nil {
+			return "", fmt.Errorf("failed to call generateMultisigJSONFile(): %w", err)
+		}
+	} else if len(serializedTxs) != 0 {
 		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
 			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
@@ -386,21 +430,24 @@ func (u *createTransactionUseCase) getUserAmounts(
 	return userAmounts, nil
 }
 
-// createDepositRawTransactions creates raw transactions for deposit
+// createDepositRawTransactions creates raw transactions for deposit.
+// When multisigQuorum > 1, it also populates msEntries for the JSON file path.
 func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []userAmount,
-) ([]string, []*domainXRP.XRPDetailTx, error) {
+	multisigQuorum uint32,
+) ([]string, []*domainXRP.XRPDetailTx, []multisigTxEntry, error) {
 	// get address for deposit account
 	depositAddr, err := u.getAndValidateAddress(receiver, "deposit")
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// create raw transaction for each address
 	serializedTxs := make([]string, 0, len(userAmounts))
 	txDetailItems := make([]*domainXRP.XRPDetailTx, 0, len(userAmounts))
+	var msEntries []multisigTxEntry
 
 	var sequence uint64
 	for _, val := range userAmounts {
@@ -428,10 +475,19 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		// generate UUID to trace transaction because unsignedTx is not unique
 		uid, err := u.uuidHandler.GenerateV7()
 		if err != nil {
-			return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
+			return nil, nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 		}
 
 		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
+
+		if multisigQuorum > 1 {
+			msEntries = append(msEntries, multisigTxEntry{
+				uid:           uid.String(),
+				txJSON:        txJSON,
+				senderAddr:    val.Address,
+				senderAccType: sender.String(),
+			})
+		}
 
 		// create insert data for xrp_detail_tx
 		txDetailItem, err := domainXRP.NewXRPDetailTx(
@@ -450,12 +506,12 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 			txJSON.Sequence,
 		)
 		if err != nil {
-			return nil, nil, fmt.Errorf("fail to create XRPDetailTx: %w", err)
+			return nil, nil, nil, fmt.Errorf("fail to create XRPDetailTx: %w", err)
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 
-	return serializedTxs, txDetailItems, nil
+	return serializedTxs, txDetailItems, msEntries, nil
 }
 
 // userPayment represents user's payment address and amount
@@ -533,17 +589,20 @@ func (u *createTransactionUseCase) validateAmount(
 	return nil
 }
 
-// createPaymentRawTransactions creates raw transactions for payment
+// createPaymentRawTransactions creates raw transactions for payment.
+// When multisigQuorum > 1, it also populates msEntries for the JSON file path.
 func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *domainAddress.Address,
-) ([]string, []*domainXRP.XRPDetailTx) {
+	multisigQuorum uint32,
+) ([]string, []*domainXRP.XRPDetailTx, []multisigTxEntry) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*domainXRP.XRPDetailTx, 0, len(userPayments))
+	var msEntries []multisigTxEntry
 	var sequence uint64
-	for _, userPayment := range userPayments {
+	for _, up := range userPayments {
 		// call CreateRawTransaction
 		instructions := &dtoxrp.Instructions{
 			MaxLedgerVersionOffset: domainXRP.MaxLedgerVersionOffset,
@@ -552,7 +611,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 			instructions.Sequence = sequence
 		}
 		txJSON, rawTxString, err := u.txPreparer.CreateRawTransaction(
-			ctx, senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
+			ctx, senderAddr.WalletAddress, up.receiverAddr, up.floatAmount, instructions)
 		if err != nil {
 			// TODO: which is better to return err or continue?
 			// return error in ethereum logic
@@ -574,6 +633,15 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
 
+		if multisigQuorum > 1 {
+			msEntries = append(msEntries, multisigTxEntry{
+				uid:           uid.String(),
+				txJSON:        txJSON,
+				senderAddr:    senderAddr.WalletAddress,
+				senderAccType: sender.String(),
+			})
+		}
+
 		// create insert data for xrp_detail_tx
 		txDetailItem, err := domainXRP.NewXRPDetailTx(
 			0, // TxID will be set after insertion
@@ -582,7 +650,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 			sender.String(),
 			senderAddr.WalletAddress,
 			receiver.String(),
-			userPayment.receiverAddr,
+			up.receiverAddr,
 			txJSON.Amount,
 			txJSON.TransactionType,
 			txJSON.Fee,
@@ -596,7 +664,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
-	return serializedTxs, txDetailItems
+	return serializedTxs, txDetailItems, msEntries
 }
 
 // updateDB updates database in a transaction
@@ -667,6 +735,51 @@ func (u *createTransactionUseCase) generateHexFile(
 	generatedFileName, err := u.txFileRepo.WriteFileSlice(path, serializedTxs)
 	if err != nil {
 		return "", fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)
+	}
+
+	return generatedFileName, nil
+}
+
+// generateMultisigJSONFile generates an XRPTransactionFile JSON for multisig unsigned transactions.
+// This is a parallel path to generateHexFile, invoked only when MultisigQuorum > 1.
+func (u *createTransactionUseCase) generateMultisigJSONFile(
+	actionType domainTx.ActionType,
+	txID int64,
+	quorum uint32,
+	entries []multisigTxEntry,
+) (string, error) {
+	// Normalize network: only "mainnet" or "testnet" are valid in XRPTransactionFile
+	network := u.network
+	if network != string(xrpkg.NetworkTypeXRPMainNet) {
+		network = string(xrpkg.NetworkTypeXRPTestNet)
+	}
+
+	txEntries := make([]dtoxrp.XRPTransactionEntry, len(entries))
+	for i, e := range entries {
+		txEntries[i] = dtoxrp.XRPTransactionEntry{
+			UUID:               e.uid,
+			UnsignedData:       *e.txJSON,
+			SenderAccount:      e.senderAddr,
+			SenderAccountType:  e.senderAccType,
+			SignatureCount:     0,
+			RequiredSignatures: int(quorum),
+			SignedBlob:         nil,
+			IsComplete:         false,
+		}
+	}
+
+	txFile := &dtoxrp.XRPTransactionFile{
+		Version:      "1.0.0",
+		Chain:        "XRP",
+		Network:      network,
+		CreatedAt:    time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+		Transactions: txEntries,
+	}
+
+	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, txID, 0)
+	generatedFileName, err := u.txFileRepo.WriteXRPJSONFile(path, txFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to call txFileRepo.WriteXRPJSONFile(): %w", err)
 	}
 
 	return generatedFileName, nil

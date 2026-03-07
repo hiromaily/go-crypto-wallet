@@ -1537,6 +1537,7 @@ func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTra
 		c.newTxFileRepo(),
 		c.newDepositAccount(),
 		c.newPaymentAccount(),
+		c.conf.Ripple.NetworkType,
 	)
 }
 

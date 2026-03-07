@@ -44,14 +44,14 @@
   - Required for `AddMultisigSignatureUseCase` to compile (the use case is currently stubbed but the repository must still satisfy the interface)
   - _Requirements: 6_
 
-- [ ] 4. (P) Extend the Watch wallet transaction creation flow to support multisig JSON-format files
+- [x] 4. (P) Extend the Watch wallet transaction creation flow to support multisig JSON-format files
   - Add a `MultisigQuorum` field to the create transaction input (zero value keeps the existing single-sig text-format path fully unchanged)
   - When `MultisigQuorum >= 2`, write an `XRPTransactionFile` JSON file instead of the legacy text file; set `required_signatures` to the quorum value, `signature_count` to 0, and `is_complete` to false
   - The unsigned payment transaction JSON (without `Signers` array) is identical between single-sig and multisig paths
   - The existing `generateHexFile()` text-format path is untouched; the new JSON path is a parallel branch invoked only when the quorum field is set
   - _Requirements: 2_
 
-- [ ] 5. (P) Extend the Watch wallet send flow to detect and process JSON-format signed transaction files
+- [x] 5. (P) Extend the Watch wallet send flow to detect and process JSON-format signed transaction files
   - Use content-based format detection: attempt to parse the file as `XRPTransactionFile` JSON first; if parsing fails or the transactions slice is empty, fall back to the existing text-format `ReadFileSlice` path
   - Do not use file extension for detection — both the legacy text format and the new JSON format share the `.json` extension
   - For a successfully parsed JSON file: find entries where `is_complete == true` and extract the `signed_blob` for submission; return a clear error if `is_complete` is false

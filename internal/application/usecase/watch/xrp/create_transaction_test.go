@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	dtoxrp "github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/xrp"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -17,6 +18,7 @@ import (
 	xrpapiamocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
+	dbtxmocks "github.com/hiromaily/go-crypto-wallet/pkg/db/tx/mocks"
 	pkguuid "github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
@@ -30,6 +32,8 @@ type testDependencies struct {
 	payReqRepo   *repomocks.MockPaymentRequestRepositorier
 	txFileRepo   *storagemocks.MockTransactionFileRepositorier
 	uuidHandler  pkguuid.UUIDHandler
+	unitOfWork   *dbtxmocks.MockUnitOfWork
+	network      string
 }
 
 // newTestDependencies creates all mock dependencies
@@ -44,6 +48,7 @@ func newTestDependencies(t *testing.T) *testDependencies {
 		payReqRepo:   repomocks.NewMockPaymentRequestRepositorier(t),
 		txFileRepo:   storagemocks.NewMockTransactionFileRepositorier(t),
 		uuidHandler:  pkguuid.NewGoogleUUIDHandler(),
+		network:      "testnet",
 	}
 }
 
@@ -52,7 +57,7 @@ func createUseCase(deps *testDependencies) watchusecase.CreateTransactionUseCase
 	return xrp.NewCreateTransactionUseCase(
 		deps.accountInfo,
 		deps.txPreparer,
-		nil, // dbConn - nil is safe for tests that don't reach DB operations
+		deps.unitOfWork, // nil is safe for tests that don't reach DB operations
 		deps.uuidHandler,
 		deps.addrRepo,
 		deps.txRepo,
@@ -61,6 +66,7 @@ func createUseCase(deps *testDependencies) watchusecase.CreateTransactionUseCase
 		deps.txFileRepo,
 		domainAccount.AccountTypeDeposit,
 		domainAccount.AccountTypePayment,
+		deps.network,
 	)
 }
 
@@ -248,8 +254,127 @@ func TestCreateTransactionUseCase_Dependencies(t *testing.T) {
 			deps.txFileRepo,
 			domainAccount.AccountTypeDeposit,
 			domainAccount.AccountTypePayment,
+			"testnet",
 		)
 
 		assert.NotNil(t, useCase, "use case should be created with segregated interfaces")
 	})
+}
+
+func TestCreateTransactionUseCase_Execute_TransferMultisig_WritesJSONFile(t *testing.T) {
+	t.Parallel()
+
+	deps := newTestDependencies(t)
+	deps.unitOfWork = dbtxmocks.NewMockUnitOfWork(t)
+
+	senderAddr := &domainAddress.Address{ID: 1, WalletAddress: "rSenderAddr123"}
+	receiverAddr := &domainAddress.Address{ID: 2, WalletAddress: "rReceiverAddr456"}
+	txJSON := &dtoxrp.TxInput{
+		TransactionType:    "Payment",
+		Amount:             "10000000",
+		Fee:                "12",
+		Sequence:           100,
+		LastLedgerSequence: 200,
+	}
+	mockTx := dbtxmocks.NewMockTransaction(t)
+
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypePayment).Return(senderAddr, nil)
+	deps.accountInfo.EXPECT().GetBalance(mock.Anything, "rSenderAddr123").Return(50.0, nil)
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypeDeposit).Return(receiverAddr, nil)
+	deps.txPreparer.EXPECT().
+		CreateRawTransaction(mock.Anything, "rSenderAddr123", "rReceiverAddr456", 10.0, mock.Anything).
+		Return(txJSON, `{"TransactionType":"Payment"}`, nil)
+
+	deps.unitOfWork.EXPECT().Begin(mock.Anything).Return(mockTx, nil)
+	deps.txRepo.EXPECT().WithTransaction(mockTx).Return(deps.txRepo, nil)
+	deps.txDetailRepo.EXPECT().WithTransaction(mockTx).Return(deps.txDetailRepo, nil)
+	deps.payReqRepo.EXPECT().WithTransaction(mockTx).Return(deps.payReqRepo, nil)
+	deps.txRepo.EXPECT().InsertUnsignedTx(domainTx.ActionTypeTransfer).Return(int64(42), nil)
+	deps.txDetailRepo.EXPECT().InsertBulk(mock.Anything).Return(nil)
+	mockTx.EXPECT().Commit().Return(nil)
+
+	deps.txFileRepo.EXPECT().
+		CreateFilePath(domainTx.ActionTypeTransfer, domainTx.TxTypeUnsigned, int64(42), 0).
+		Return("/tmp/multisig_transfer_42_0.json")
+	deps.txFileRepo.EXPECT().
+		WriteXRPJSONFile("/tmp/multisig_transfer_42_0.json", mock.MatchedBy(func(f *dtoxrp.XRPTransactionFile) bool {
+			return f.Chain == "XRP" &&
+				f.Network == "testnet" &&
+				f.Version == "1.0.0" &&
+				len(f.Transactions) == 1 &&
+				f.Transactions[0].RequiredSignatures == 2 &&
+				f.Transactions[0].SignatureCount == 0 &&
+				!f.Transactions[0].IsComplete &&
+				f.Transactions[0].SignedBlob == nil
+		})).
+		Return("/tmp/multisig_transfer_42_0.json", nil)
+
+	useCase := createUseCase(deps)
+	input := watchusecase.CreateTransactionInput{
+		ActionType:      domainTx.ActionTypeTransfer.String(),
+		SenderAccount:   domainAccount.AccountTypePayment,
+		ReceiverAccount: domainAccount.AccountTypeDeposit,
+		Amount:          10.0,
+		MultisigQuorum:  2,
+	}
+
+	output, err := useCase.Execute(context.Background(), input)
+
+	require.NoError(t, err)
+	assert.Equal(t, "/tmp/multisig_transfer_42_0.json", output.FileName)
+}
+
+func TestCreateTransactionUseCase_Execute_TransferSingleSig_WritesTextFile(t *testing.T) {
+	t.Parallel()
+
+	deps := newTestDependencies(t)
+	deps.unitOfWork = dbtxmocks.NewMockUnitOfWork(t)
+
+	senderAddr := &domainAddress.Address{ID: 1, WalletAddress: "rSenderAddr123"}
+	receiverAddr := &domainAddress.Address{ID: 2, WalletAddress: "rReceiverAddr456"}
+	txJSON := &dtoxrp.TxInput{
+		TransactionType:    "Payment",
+		Amount:             "10000000",
+		Fee:                "12",
+		Sequence:           100,
+		LastLedgerSequence: 200,
+	}
+	mockTx := dbtxmocks.NewMockTransaction(t)
+
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypePayment).Return(senderAddr, nil)
+	deps.accountInfo.EXPECT().GetBalance(mock.Anything, "rSenderAddr123").Return(50.0, nil)
+	deps.addrRepo.EXPECT().GetOneUnAllocated(domainAccount.AccountTypeDeposit).Return(receiverAddr, nil)
+	deps.txPreparer.EXPECT().
+		CreateRawTransaction(mock.Anything, "rSenderAddr123", "rReceiverAddr456", 10.0, mock.Anything).
+		Return(txJSON, `{"TransactionType":"Payment"}`, nil)
+
+	deps.unitOfWork.EXPECT().Begin(mock.Anything).Return(mockTx, nil)
+	deps.txRepo.EXPECT().WithTransaction(mockTx).Return(deps.txRepo, nil)
+	deps.txDetailRepo.EXPECT().WithTransaction(mockTx).Return(deps.txDetailRepo, nil)
+	deps.payReqRepo.EXPECT().WithTransaction(mockTx).Return(deps.payReqRepo, nil)
+	deps.txRepo.EXPECT().InsertUnsignedTx(domainTx.ActionTypeTransfer).Return(int64(42), nil)
+	deps.txDetailRepo.EXPECT().InsertBulk(mock.Anything).Return(nil)
+	mockTx.EXPECT().Commit().Return(nil)
+
+	deps.txFileRepo.EXPECT().
+		CreateFilePath(domainTx.ActionTypeTransfer, domainTx.TxTypeUnsigned, int64(42), 0).
+		Return("/tmp/transfer_42_0.json")
+	// Single-sig path: WriteFileSlice is called, NOT WriteXRPJSONFile
+	deps.txFileRepo.EXPECT().
+		WriteFileSlice("/tmp/transfer_42_0.json", mock.Anything).
+		Return("/tmp/transfer_42_0.json", nil)
+
+	useCase := createUseCase(deps)
+	input := watchusecase.CreateTransactionInput{
+		ActionType:      domainTx.ActionTypeTransfer.String(),
+		SenderAccount:   domainAccount.AccountTypePayment,
+		ReceiverAccount: domainAccount.AccountTypeDeposit,
+		Amount:          10.0,
+		MultisigQuorum:  0, // Single-sig path
+	}
+
+	output, err := useCase.Execute(context.Background(), input)
+
+	require.NoError(t, err)
+	assert.Equal(t, "/tmp/transfer_42_0.json", output.FileName)
 }

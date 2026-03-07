@@ -52,6 +52,7 @@ type CreateTransactionInput struct {
 	Amount            float64
 	AdjustmentFee     float64
 	PaymentRequestIDs []int64 // For payment transactions
+	MultisigQuorum    uint32  // 0 = single-sig (default); >1 = multisig JSON-format file
 }
 
 // CreateTransactionOutput represents output from creating a transaction
