@@ -159,7 +159,7 @@ sequenceDiagram
     participant DB as Keygen DB
     participant File as File Transfer
 
-    Op->>CLI: set-signer-list --account r... --quorum 2 --signer r1:1 --signer r2:1
+    Op->>CLI: set-signer-list --account r... --quorum 2 --signers "r1:1,r2:1"
     CLI->>UC: Execute(SetSignerListInput)
     UC->>UC: ValidateSignerEntries (domain validator)
     UC->>API: PrepareSignerListSetTransaction(account, quorum, entries, instructions)
@@ -459,22 +459,22 @@ activated when `input.MultisigQuorum > 1`; no repository read is needed to deter
 ##### Service Interface
 
 ```go
-// Added to internal/interface-adapters/cli/watch/api/xrp/api.go
-// Command: watch api xrp set-signer-list
+// Located in internal/interface-adapters/cli/watch/send/multisig.go
+// Command: watch send multisig set-signer-list
 // Flags:
-//   --account string   XRP account address to configure (required)
-//   --quorum  uint32   Minimum signature weight required (required)
-//   --signer  []string Signer entries as "address:weight" (repeatable, required)
+//   --account  string  XRP account address to configure (required)
+//   --quorum   uint32  Minimum signature weight required (required)
+//   --signers  string  Signer list as "address:weight,..." comma-separated (required)
 func runSetSignerList(
-    uc watchusecase.SetSignerListUseCase,
-    accountAddress string,
-    signerQuorum uint32,
-    signerEntries []string,  // "r...:weight" format, parsed to []watchusecase.SignerEntry
+    ctx context.Context,
+    container di.Container,
+    account, signersStr string,
+    quorum uint32,
 ) error
 ```
 
 **Implementation Notes**
-- Integration: Parse `--signer` strings into `watchusecase.SignerEntry` structs; validate non-empty before calling use case
+- Integration: Parse `--signers` comma-separated string into `[]watchusecase.SignerEntry` via `parseSignerEntries()`; validate non-empty before calling use case
 - Validation: Validate quorum ≥ 1 and signer count 1–8 in the CLI layer before calling use case
 - Risks: None; pure CLI delegation pattern
 
@@ -630,7 +630,7 @@ Fail fast with wrapped errors; all errors propagate to CLI for display. No retry
 - `signerQuorum == 0` → `"signer quorum must be at least 1"` (validated in domain)
 - `len(signerEntries) > 8` → `"signer list cannot exceed 8 entries"` (validated in domain)
 - `sum(weights) < quorum` → `"signer quorum exceeds total signer weight"` (validated in domain)
-- Missing `--account` or `--signer` CLI flags → Cobra required-flag error
+- Missing `--account` or `--signers` CLI flags → Cobra required-flag error
 
 **Infrastructure Errors**:
 - `AccountInfo` RPC failure → `"failed to prepare SignerListSet: <wrapped RPC error>"`

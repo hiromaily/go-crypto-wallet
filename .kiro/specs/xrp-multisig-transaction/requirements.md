@@ -77,7 +77,7 @@ configures an XRP account for multi-signature authorization.
 1. The Watch wallet CLI exposes a `set-signer-list` command that accepts:
    - `--account` — the XRP account address to configure (required)
    - `--quorum` — minimum signature weight required (required, must be ≥ 1)
-   - `--signer` flag (repeatable) — signer entries in `address:weight` format (required, 1–8 entries)
+   - `--signers` — signer entries as a comma-separated `address:weight,...` string (required, 1–8 entries)
 2. The command produces an unsigned `SignerListSet` transaction file compatible with the existing file format
 3. The file can be signed by the keygen wallet using the existing `sign` command (single-sig, master key)
 4. After the signed file is sent via the Watch wallet `send` command, the signer list is active on-ledger
@@ -216,7 +216,7 @@ so that the use cases can persist signer lists and operate end-to-end.
 
 **Acceptance Criteria**:
 
-1. `watch api xrp set-signer-list` command is added (from FR-1)
+1. `watch send multisig set-signer-list` command is added (from FR-1)
 2. All commands follow the existing Cobra CLI pattern used in `internal/interface-adapters/cli/watch/`
 3. `XRPWatch` wallet adapter is updated to include the new use cases
 
