@@ -33,8 +33,7 @@ watch
 ├── create
 │   ├── deposit                    Create unsigned deposit transaction
 │   ├── payment                    Create unsigned payment transaction
-│   ├── transfer                   Create unsigned transfer transaction between accounts
-│   └── db                         Create dummy payment_request data (dev only)
+│   └── transfer                   Create unsigned transfer transaction between accounts
 ├── send
 │   ├── tx                         Send signed transaction to the network
 │   └── multisig                   Multi-signature operations
@@ -64,7 +63,7 @@ watch
     │   ├── syncing                Get sync status
     │   └── netversion             Get network version
     └── xrp
-        └── sendcoin               Send XRP from faucet
+        └── sendcoin               Send XRP from faucet (testing only)
 ```
 
 ---
@@ -83,28 +82,26 @@ keygen
 │   │   ├── generate               Generate a descriptor for an account
 │   │   ├── export                 Export descriptors for one account to file
 │   │   └── export-all             Export all descriptors (receive + change) to file
-│   └── multisig                   Create multisig address (traditional P2SH/P2WSH or MuSig2 Taproot)
+│   └── multisig                   (BTC only) Create multisig address (traditional P2SH/P2WSH or MuSig2 Taproot)
 ├── export
 │   ├── address                    Export generated public keys as CSV
-│   └── descriptor                 Export output descriptors to file
+│   ├── descriptor                 (BTC only) Export output descriptors to file
+│   └── fullpubkey                 (ETH only) Export account xpub for Watch wallet address derivation
 ├── import
-│   ├── privkey                    Import private keys from database into Bitcoin Core wallet
-│   └── fullpubkey                 Import full public key exported by sign wallet
+│   ├── privkey                    (BTC/BCH/ETH) Import private keys into node wallet / keystore
+│   └── fullpubkey                 (BTC only) Import full public key exported by sign wallet
 ├── sign
-│   ├── signature                  Sign an unsigned transaction
+│   ├── signature                  Sign an unsigned transaction (1st signature)
 │   └── musig2                     (BTC only) MuSig2 signing operations
 │       ├── nonce                  Generate MuSig2 nonce (Round 1)
 │       └── sign                   Create MuSig2 partial signature (Round 2)
-└── api                            Chain node RPC commands (coin-specific)
-    ├── btc / bch
-    │   ├── encryptwallet          Encrypt the wallet with a passphrase
-    │   ├── walletpassphrase       Unlock the wallet for N seconds
-    │   ├── walletpassphrasechange Change the wallet passphrase
-    │   ├── walletlock             Lock the wallet immediately
-    │   ├── dumpwallet             Dump all wallet keys to a file
-    │   └── importwallet           Import keys from a wallet dump file
-    └── eth
-        └── importrawkey           Import an Ethereum raw private key
+└── api                            Chain node RPC commands (BTC/BCH only)
+    ├── encryptwallet              Encrypt the Bitcoin Core wallet with a passphrase
+    ├── walletpassphrase           Unlock the wallet for N seconds
+    ├── walletpassphrasechange     Change the wallet passphrase
+    ├── walletlock                 Lock the wallet immediately
+    ├── dumpwallet                 Dump all wallet keys to a file
+    └── importwallet               Import keys from a wallet dump file
 ```
 
 ---
@@ -120,41 +117,109 @@ sign
 │   ├── hdkey                      Create HD wallet authorization keys
 │   └── seed                       Create or store a seed
 ├── export
-│   └── fullpubkey                 Export full public key for import by keygen wallet
+│   └── fullpubkey                 (BTC only) Export full public key for import by keygen wallet
 ├── import
-│   └── privkey                    Import authorization private key into database
+│   └── privkey                    (BTC only) Import authorization private key into Bitcoin Core
 ├── sign
-│   ├── signature                  Sign a multisig transaction
+│   ├── signature                  Sign a multisig transaction (2nd+ signature)
 │   └── musig2                     (BTC only) MuSig2 signing operations
 │       ├── nonce                  Generate MuSig2 nonce (Round 1)
 │       └── sign                   Create MuSig2 partial signature (Round 2)
-└── api                            Chain node RPC commands (coin-specific)
-    ├── btc / bch
-    │   ├── encryptwallet          Encrypt the wallet with a passphrase
-    │   ├── walletpassphrase       Unlock the wallet for N seconds
-    │   ├── walletpassphrasechange Change the wallet passphrase
-    │   └── walletlock             Lock the wallet immediately
-    └── eth
-        └── importrawkey           Import an Ethereum raw private key
+└── api                            Chain node RPC commands (BTC/BCH only)
+    ├── encryptwallet              Encrypt the Bitcoin Core wallet with a passphrase
+    ├── walletpassphrase           Unlock the wallet for N seconds
+    ├── walletpassphrasechange     Change the wallet passphrase
+    └── walletlock                 Lock the wallet immediately
 ```
 
 ---
 
-## Coin Support Matrix
+## Command x Chain x UseCase Matrix
 
-| Command group            | BTC | BCH | ETH | XRP |
-|--------------------------|:---:|:---:|:---:|:---:|
-| watch import address     |  ✓  |  ✓  |  ✓  |  ✓  |
-| watch import descriptor  |  ✓  |  –  |  –  |  –  |
-| watch create *           |  ✓  |  ✓  |  ✓  |  ✓  |
-| watch send tx            |  ✓  |  ✓  |  ✓  |  ✓  |
-| watch send multisig      |  ✓  |  –  |  –  |  ✓  |
-| watch monitor *          |  ✓  |  ✓  |  ✓  |  ✓  |
-| watch api                |  ✓  |  ✓  |  ✓  |  ✓  |
-| keygen create descriptor |  ✓  |  –  |  –  |  –  |
-| keygen create multisig   |  ✓  |  –  |  –  |  –  |
-| keygen sign musig2       |  ✓  |  –  |  –  |  –  |
-| sign sign musig2         |  ✓  |  –  |  –  |  –  |
+This section is the **single source of truth (SSOT)** for:
+
+- Which commands are available per chain (`✓` supported / `–` not applicable)
+- The use case interface each command invokes
+- The role of each command in the wallet workflow
+
+Interface references are in `internal/application/usecase/{wallet}/interfaces.go`.
+`(node RPC)` = direct call to the chain node API, bypasses the use case layer.
+
+### watch
+
+| Command | BTC | BCH | ETH | XRP | Use Case Interface | Role |
+|---------|:---:|:---:|:---:|:---:|---|---|
+| `import address` | ✓ | ✓ | ✓ | ✓ | `watch.ImportAddressUseCase` | Import addresses exported by keygen wallet into watch DB |
+| `import descriptor` | ✓ | – | – | – | `watch.ImportDescriptorUseCase` | Import output descriptors into Bitcoin Core; enables address derivation without importing individual keys |
+| `create deposit` | ✓ | ✓ | ✓ | ✓ | `watch.CreateTransactionUseCase` | Create unsigned deposit tx: aggregate coins from client addresses into cold wallet |
+| `create payment` | ✓ | ✓ | ✓ | ✓ | `watch.CreateTransactionUseCase` | Create unsigned payment tx: send coins from cold wallet to user-specified addresses |
+| `create transfer` | ✓ | ✓ | ✓ | ✓ | `watch.CreateTransactionUseCase` | Create unsigned transfer tx: move coins between internal accounts (e.g. deposit → payment) |
+| `send tx` | ✓ | ✓ | ✓ | ✓ | `watch.SendTransactionUseCase` | Broadcast a signed transaction file to the blockchain network |
+| `send multisig collect-nonces` | ✓ | – | – | – | `watch.AggregateMuSig2SignaturesUseCase` | Collect MuSig2 nonces from all signers and embed them in PSBT (Round 1 aggregation) |
+| `send multisig aggregate` | ✓ | – | – | – | `watch.AggregateMuSig2SignaturesUseCase` | Aggregate MuSig2 partial signatures from all signers into the final transaction (Round 2) |
+| `send multisig set-regular-key` | – | – | – | ✓ | `watch.SetRegularKeyUseCase` | Set or remove a regular key on an XRP account (allows signing without the master key) |
+| `send multisig set-signer-list` | – | – | – | ✓ | `watch.SetSignerListUseCase` | Configure the XRP multi-sig signer list and quorum for an account |
+| `send multisig create-multisig-tx` | – | – | – | ✓ | `watch.CreateMultisigTxUseCase` | Create a pending XRP multi-sig transaction stored in DB awaiting signatures |
+| `send multisig add-multisig-signature` | – | – | – | ✓ | `watch.AddMultisigSignatureUseCase` | Record a signer's signed-tx blob; auto-combines when quorum is met |
+| `send multisig submit-multisig-tx` | – | – | – | ✓ | `watch.SubmitMultisigTxUseCase` | Submit a quorum-complete combined XRP multi-sig transaction to the ledger |
+| `monitor senttx` | ✓ | ✓ | ✓ | ✓ | `watch.MonitorTransactionUseCase` | Update confirmation status of sent transactions in watch DB |
+| `monitor balance` | ✓ | ✓ | ✓ | ✓ | `watch.MonitorTransactionUseCase` | Query and record current account balances from the chain |
+| `api balance` | ✓ | ✓ | – | – | _(node RPC)_ | Query account balance directly from Bitcoin Core node |
+| `api estimatefee` | ✓ | ✓ | – | – | _(node RPC)_ | Estimate smart fee (sat/vB) from Bitcoin Core node |
+| `api getnetworkinfo` | ✓ | ✓ | – | – | _(node RPC)_ | Retrieve version and network info from Bitcoin Core node |
+| `api getaddressinfo` | ✓ | ✓ | – | – | _(node RPC)_ | Query full metadata for a specific address from Bitcoin Core |
+| `api listunspent` | ✓ | ✓ | – | – | _(node RPC)_ | List UTXOs for an account with optional confirmation filter |
+| `api logging` | ✓ | ✓ | – | – | _(node RPC)_ | Adjust Bitcoin Core log categories/level at runtime |
+| `api unlocktx` | ✓ | ✓ | – | – | _(node RPC)_ | Unlock locked UTXOs so they can be spent again |
+| `api validateaddress` | ✓ | ✓ | – | – | _(node RPC)_ | Validate whether a Bitcoin/BCH address is well-formed |
+| `api clientversion` | – | – | ✓ | – | _(node RPC)_ | Get Ethereum client (geth/etc.) version string |
+| `api nodeinfo` | – | – | ✓ | – | _(node RPC)_ | Get Ethereum node peer and connection info |
+| `api syncing` | – | – | ✓ | – | _(node RPC)_ | Get Ethereum node sync status and progress |
+| `api netversion` | – | – | ✓ | – | _(node RPC)_ | Get Ethereum network/chain ID |
+| `api sendcoin` | – | – | – | ✓ | _(node RPC)_ | Send XRP from faucet account to a target address (testing only) |
+
+### keygen
+
+| Command | BTC | BCH | ETH | XRP | Use Case Interface | Role |
+|---------|:---:|:---:|:---:|:---:|---|---|
+| `create seed` | ✓ | ✓ | ✓ | ✓ | `keygen.GenerateSeedUseCase` | Generate or store a BIP39 seed in the cold wallet DB |
+| `create key` | ✓ | ✓ | ✓ | – | _(debug)_ | Create one key pair for debugging and verification |
+| `create hdkey` | ✓ | ✓ | ✓ | ✓ | `keygen.GenerateHDWalletUseCase` / `keygen.GenerateKeyUseCase` | Generate HD keys (BIP32/44); use `--keypair` flag for XRP key pair generation |
+| `create descriptor generate` | ✓ | – | – | – | `keygen.GenerateDescriptorUseCase` | Generate an output descriptor for a given account and address type |
+| `create descriptor export` | ✓ | – | – | – | `keygen.ExportDescriptorUseCase` | Export descriptors for one account to file (bitcoin-core/json/text format) |
+| `create descriptor export-all` | ✓ | – | – | – | `keygen.ExportDescriptorUseCase` | Export all receive + change descriptors for an account in one call |
+| `create multisig` | ✓ | – | – | – | `keygen.CreateMultisigAddressUseCase` / `keygen.CreateMuSig2AddressUseCase` | Create P2SH/P2WSH (traditional) or MuSig2 Taproot multisig address |
+| `export address` | ✓ | ✓ | ✓ | ✓ | `keygen.ExportAddressUseCase` | Export generated public key addresses as CSV for Watch wallet import |
+| `export descriptor` | ✓ | – | – | – | `keygen.ExportDescriptorUseCase` | Export output descriptors to file (shorthand path under `export`) |
+| `export fullpubkey` | – | – | ✓ | – | `keygen.ExportFullPubkeyUseCase` | Export account-level xpub (ETH only) so Watch wallet can derive and verify child addresses |
+| `import privkey` | ✓ | ✓ | ✓ | – | `keygen.ImportPrivateKeyUseCase` | Import private keys into Bitcoin Core node wallet (BTC/BCH) or ETH keystore |
+| `import fullpubkey` | ✓ | – | – | – | `keygen.ImportFullPubkeyUseCase` | Import sign wallet's public key to enable multisig address creation |
+| `sign signature` | ✓ | ✓ | ✓ | ✓ | `keygen.SignTransactionUseCase` | Sign unsigned transaction; provides the 1st signature in multisig flows |
+| `sign musig2 nonce` | ✓ | – | – | – | `keygen.GenerateMuSig2NonceUseCase` | Generate MuSig2 nonce (Round 1); share output with Watch wallet for aggregation |
+| `sign musig2 sign` | ✓ | – | – | – | `keygen.MuSig2SignUseCase` | Create MuSig2 partial signature (Round 2); send signed PSBT to Watch for aggregation |
+| `api encryptwallet` | ✓ | ✓ | – | – | _(node RPC)_ | Encrypt the Bitcoin Core wallet with a passphrase |
+| `api walletpassphrase` | ✓ | ✓ | – | – | _(node RPC)_ | Temporarily unlock the encrypted wallet for N seconds |
+| `api walletpassphrasechange` | ✓ | ✓ | – | – | _(node RPC)_ | Change the wallet encryption passphrase |
+| `api walletlock` | ✓ | ✓ | – | – | _(node RPC)_ | Lock the wallet immediately (remove decryption key from memory) |
+| `api dumpwallet` | ✓ | ✓ | – | – | _(node RPC)_ | Dump all wallet keys to a human-readable backup file |
+| `api importwallet` | ✓ | ✓ | – | – | _(node RPC)_ | Import keys from a wallet dump file |
+
+### sign
+
+| Command | BTC | BCH | ETH | XRP | Use Case Interface | Role |
+|---------|:---:|:---:|:---:|:---:|---|---|
+| `create seed` | ✓ | ✓ | ✓ | ✓ | `sign.GenerateSeedUseCase` / `sign.StoreSeedUseCase` | Generate or store the authorization seed in the cold wallet DB |
+| `create key` | ✓ | ✓ | ✓ | – | _(debug)_ | Create one authorization key pair for debugging |
+| `create hdkey` | ✓ | ✓ | ✓ | ✓ | `sign.GenerateAuthKeyUseCase` | Generate HD authorization keys from the stored seed |
+| `export fullpubkey` | ✓ | – | – | – | `sign.ExportFullPubkeyUseCase` | Export this signer's public key as CSV; keygen wallet imports it to build multisig addresses |
+| `import privkey` | ✓ | – | – | – | `sign.ImportPrivateKeyUseCase` | Import authorization private keys into Bitcoin Core wallet |
+| `sign signature` | ✓ | ✓ | ✓ | ✓ | `sign.SignTransactionUseCase` | Sign a transaction that already has the 1st signature (provides 2nd+ signature in multisig) |
+| `sign musig2 nonce` | ✓ | – | – | – | `sign.GenerateMuSig2NonceUseCase` | Generate MuSig2 nonce (Round 1); share with Watch wallet for nonce aggregation |
+| `sign musig2 sign` | ✓ | – | – | – | `sign.MuSig2SignUseCase` | Create MuSig2 partial signature (Round 2); send signed PSBT to Watch for final aggregation |
+| `api encryptwallet` | ✓ | ✓ | – | – | _(node RPC)_ | Encrypt the Bitcoin Core wallet with a passphrase |
+| `api walletpassphrase` | ✓ | ✓ | – | – | _(node RPC)_ | Temporarily unlock the encrypted wallet for N seconds |
+| `api walletpassphrasechange` | ✓ | ✓ | – | – | _(node RPC)_ | Change the wallet encryption passphrase |
+| `api walletlock` | ✓ | ✓ | – | – | _(node RPC)_ | Lock the wallet immediately (remove decryption key from memory) |
 
 ---
 
@@ -162,7 +227,7 @@ sign
 
 | Document | Description |
 |----------|-------------|
-| [`docs/commands.md`](../../../docs/commands.md) | Detailed flags, options, and usage examples |
+| [`docs/commands.md`](../../../docs/commands.md) | Detailed flags, options, and usage examples per command |
 | [`.claude/skills/wallet-cli/SKILL.md`](../../../.claude/skills/wallet-cli/SKILL.md) | How to run wallet CLI commands |
 | [`.claude/rules/internal/cli-structure.md`](../../../.claude/rules/internal/cli-structure.md) | CLI command hierarchy rules |
 | [`docs/chains/btc/operations/wallet-flow.md`](../../../docs/chains/btc/operations/wallet-flow.md) | BTC end-to-end transaction workflow |

@@ -9,7 +9,7 @@ paths:
 
 # CLI Subcommand Structure Rules
 
-> **Current command tree**: [`internal/interface-adapters/cli/README.md`](../../../internal/interface-adapters/cli/README.md)
+> **Current command tree and Command × Chain × UseCase matrix (SSOT)**: [`internal/interface-adapters/cli/README.md`](../../../internal/interface-adapters/cli/README.md)
 
 ## Rule 1: Command Hierarchy Order
 
