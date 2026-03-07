@@ -180,7 +180,7 @@ sequenceDiagram
     Note over CLI,RPC: Existing sendTransactionUseCase broadcasts the SignerListSet TX
 ```
 
-**Key decisions**: The `SignerListSet` TX is signed by the account's master key (single-sig); only the setup step uses multisig later.
+**Key decisions**: The `SignerListSet` transaction itself is signed with the account's master key (single-sig); multi-signing is used for subsequent transactions like payments.
 
 ---
 

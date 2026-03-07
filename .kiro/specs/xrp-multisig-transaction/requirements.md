@@ -88,7 +88,7 @@ configures an XRP account for multi-signature authorization.
 
 **Implementation Notes**:
 - Uses `SignerListPreparer.PrepareSignerListSetTransaction()` port interface
-- Infrastructure must implement `PrepareSignerListSetTransaction` using the WebSocket `xrpl_submit` RPC
+- Infrastructure must implement `PrepareSignerListSetTransaction` using the WebSocket `account_info` RPC to fetch the account sequence number and current ledger index before building the unsigned transaction
 - The signed TX is a standard single-sig transaction (signed by the account's master key, not by signers)
 
 ---
@@ -102,15 +102,15 @@ signatures, using the same file-based mechanism as BTC.
 
 1. The Watch wallet supports a multisig mode for `create deposit`, `create payment`, and `create transfer` commands
 2. When multisig mode is active, the unsigned transaction file has `required_signatures` set to the `SignerQuorum` count (N > 1) rather than 1
-3. The Watch wallet reads the configured `SignerQuorum` from the local signer list database
+3. The operator supplies the `SignerQuorum` value via a `--quorum N` CLI flag when invoking the create command; no database read is required for quorum resolution
 4. The unsigned transaction JSON in the file is the raw `Payment` transaction JSON (without `Signers` array), identical to the single-sig case
 5. The `XRPTransactionFile` format's `required_signatures` field is already defined; no changes to the DTO are needed
 6. `signature_count` starts at 0; `is_complete` starts as `false`
-7. The account address used as the sender must have a configured signer list in the database
+7. When `--quorum` is omitted (or set to 0), the existing single-sig path is used unchanged
 
 **Implementation Notes**:
-- The `create_transaction.go` use case must detect if the sender account has a signer list configured and set `required_signatures` accordingly
-- Alternatively, a new flag or dedicated command (`create multisig-payment`) may be used — design decision for Phase 2
+- The `create_transaction.go` use case accepts `MultisigQuorum uint32` as an explicit field in `CreateTransactionInput`; when `MultisigQuorum > 1` it writes a JSON-format multisig file; otherwise it follows the existing single-sig text-format path
+- This eliminates any dependency on reading signer list state from the database during TX creation, avoiding cross-namespace (keygen DB vs watch DB) coupling
 
 ---
 
