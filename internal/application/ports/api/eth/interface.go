@@ -318,3 +318,81 @@ type KeygenSignTxDeps interface {
 	ChainConfigProvider
 	TxSigner
 }
+
+// =============================================================================
+// Safe (Gnosis Safe v1.4.1) Multisig Interfaces
+// =============================================================================
+//
+// These interfaces define the port boundary for Safe multisig transaction operations.
+// Use cases depend on the narrow interfaces, NOT on SafeClientDeps directly.
+// SafeClientDeps is provided for DI composition only.
+//
+// Safe execution parameters are carried by SafeExecParams (defined in this package)
+// to maintain clean port boundaries — the infrastructure type is never exposed.
+// =============================================================================
+
+// SafeExecParams carries all fields required to call execTransaction on the Safe contract.
+// The use case constructs this from ETHMultisigTransactionFile before calling SafeExecuter.
+type SafeExecParams struct {
+	SafeAddress    string   // EIP-55 checksummed Safe proxy address
+	To             string   // Recipient address
+	Value          *big.Int // Wei amount
+	Data           []byte   // Call data (empty for plain ETH transfer)
+	Operation      uint8    // 0=Call, 1=DelegateCall
+	SafeTxGas      *big.Int // Safe-internal gas limit (0 for ETH transfer)
+	BaseGas        *big.Int // Base gas for refund (0 for ETH transfer)
+	GasPrice       *big.Int // Gas price for refund (0 for ETH transfer)
+	GasToken       string   // Token address for gas refund (zero address = ETH)
+	RefundReceiver string   // Refund receiver address (zero address)
+	Nonce          *big.Int // Safe contract nonce
+	Signatures     []byte   // Concatenated 65-byte signatures sorted by signer address ascending
+}
+
+// SafeInfo carries the on-chain state of a Safe contract, returned by SafeInfoReader.
+type SafeInfo struct {
+	Owners    []string // EIP-55 checksummed owner addresses
+	Threshold uint64   // Current signature threshold (m in m-of-n)
+	Nonce     uint64   // Current Safe nonce
+	Balance   *big.Int // Safe balance in Wei
+}
+
+// SafeTxHashComputer computes the EIP-712 safeTxHash by calling getTransactionHash
+// on the deployed Safe contract. The result is the authoritative hash used for signing.
+// GetSafeTxHash returns the EIP-712 safeTxHash as a 0x-prefixed hex string.
+type SafeTxHashComputer interface {
+	GetSafeTxHash(
+		ctx context.Context,
+		safeAddr, to string,
+		value *big.Int,
+		data []byte,
+		operation uint8,
+		nonce *big.Int,
+	) (string, error)
+}
+
+// SafeNonceReader fetches the current nonce from a Safe contract.
+// The nonce is embedded in the proposal file at creation time.
+type SafeNonceReader interface {
+	GetSafeNonce(ctx context.Context, safeAddr string) (*big.Int, error)
+}
+
+// SafeExecuter submits a fully signed Safe transaction to the network.
+// The caller is responsible for sorting signatures by signer address before calling.
+// ExecuteSafeTransaction returns the submitted Ethereum transaction hash.
+type SafeExecuter interface {
+	ExecuteSafeTransaction(ctx context.Context, params SafeExecParams) (string, error)
+}
+
+// SafeInfoReader retrieves the on-chain state of a Safe contract.
+type SafeInfoReader interface {
+	GetSafeInfo(ctx context.Context, safeAddr string) (*SafeInfo, error)
+}
+
+// SafeClientDeps is the composed interface of all four Safe narrow interfaces.
+// It is provided for DI use only — use cases MUST depend on the narrow interfaces above.
+type SafeClientDeps interface {
+	SafeTxHashComputer
+	SafeNonceReader
+	SafeExecuter
+	SafeInfoReader
+}
