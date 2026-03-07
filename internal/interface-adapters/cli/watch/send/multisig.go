@@ -405,9 +405,17 @@ func runSetSignerList(
 ) error {
 	fmt.Println("Setting signer list for XRP account")
 
+	if quorum < 1 {
+		return fmt.Errorf("quorum must be at least 1, got %d", quorum)
+	}
+
 	signerEntries, err := parseSignerEntries(signersStr)
 	if err != nil {
 		return fmt.Errorf("invalid signers format: %w", err)
+	}
+
+	if len(signerEntries) > 8 {
+		return fmt.Errorf("signer list cannot exceed 8 entries, got %d", len(signerEntries))
 	}
 
 	useCase := container.NewXRPWatchSetSignerListUseCase()

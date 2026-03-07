@@ -78,16 +78,16 @@
   - Confirm the full DI chain builds without errors: run `make check-build` after all repository adapters are in place
   - _Requirements: 7_
 
-- [ ] 7. Add the `set-signer-list` Watch wallet CLI command and update the wallet adapter
+- [x] 7. Add the `set-signer-list` Watch wallet CLI command and update the wallet adapter
 
-- [ ] 7.1 (P) Implement the `watch send multisig set-signer-list` Cobra command
+- [x] 7.1 (P) Implement the `watch send multisig set-signer-list` Cobra command
   - Accept `--account` (required), `--quorum` (required, must be ≥ 1), and `--signers` (required, comma-separated `address:weight,...` string) flags
   - Parse the `--signers` string into structured signer entries via `parseSignerEntries()`; validate quorum ≥ 1 and signer count between 1 and 8 in the CLI layer before calling the use case
   - Delegate to `SetSignerListUseCase.Execute()`; on success, print the unsigned transaction file path to stdout
   - Follow the existing Cobra command registration pattern used in the XRP Watch CLI command group
   - _Requirements: 1, 8_
 
-- [ ] 7.2 (P) Update the XRPWatch wallet adapter and the create commands to pass multisig quorum
+- [x] 7.2 (P) Update the XRPWatch wallet adapter and the create commands to pass multisig quorum
   - Add `setSignerListUseCase` as a field in the `XRPWatch` adapter struct; update the constructor and add a `SetSignerList()` method delegating to the use case
   - Register the new `set-signer-list` command in the XRP Watch CLI subcommand tree
   - Add an optional `--quorum` flag to the `create deposit`, `create payment`, and `create transfer` commands; when supplied (value ≥ 2), set `MultisigQuorum` in `CreateTransactionInput` to activate the JSON file path from Task 4

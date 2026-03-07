@@ -384,6 +384,7 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 		c.newXRPWatchSendTransactionUseCase(),
 		c.newWatchImportAddressUseCase(),
 		c.newWatchCreatePaymentRequestUseCase(),
+		c.newXRPWatchSetSignerListUseCase(),
 		c.walletType,
 	)
 }

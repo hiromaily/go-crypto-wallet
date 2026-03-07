@@ -10,27 +10,37 @@ import (
 // AddCommands adds all create subcommands
 func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGetter func() di.Container) {
 	// deposit command
-	var depositFee float64
+	var (
+		depositFee    float64
+		depositQuorum uint32
+	)
 	depositCmd := &cobra.Command{
 		Use:   "deposit",
 		Short: "create a deposit unsigned transaction file for client account",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDeposit(containerGetter(), depositFee)
+			return runDeposit(containerGetter(), depositFee, depositQuorum)
 		},
 	}
 	depositCmd.Flags().Float64Var(&depositFee, "fee", 0, "adjustment fee")
+	depositCmd.Flags().Uint32Var(&depositQuorum, "quorum", 0,
+		"multisig quorum (≥2 enables JSON-format multisig TX file)")
 	parentCmd.AddCommand(depositCmd)
 
 	// payment command
-	var paymentFee float64
+	var (
+		paymentFee    float64
+		paymentQuorum uint32
+	)
 	paymentCmd := &cobra.Command{
 		Use:   "payment",
 		Short: "create a payment unsigned transaction file for payment account",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPayment(containerGetter(), paymentFee)
+			return runPayment(containerGetter(), paymentFee, paymentQuorum)
 		},
 	}
 	paymentCmd.Flags().Float64Var(&paymentFee, "fee", 0, "adjustment fee")
+	paymentCmd.Flags().Uint32Var(&paymentQuorum, "quorum", 0,
+		"multisig quorum (≥2 enables JSON-format multisig TX file)")
 	parentCmd.AddCommand(paymentCmd)
 
 	// transfer command
@@ -39,12 +49,14 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGet
 		transferAccount2 string
 		transferAmount   float64
 		transferFee      float64
+		transferQuorum   uint32
 	)
 	transferCmd := &cobra.Command{
 		Use:   "transfer",
 		Short: "create unsigned transaction for transfer among accounts",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runTransfer(containerGetter(), transferAccount1, transferAccount2, transferAmount, transferFee)
+			return runTransfer(
+				containerGetter(), transferAccount1, transferAccount2, transferAmount, transferFee, transferQuorum)
 		},
 	}
 	transferCmd.Flags().StringVar(&transferAccount1, "account1", "", "sender account")
@@ -52,5 +64,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGet
 	transferCmd.Flags().Float64Var(
 		&transferAmount, "amount", 0, "amount to send coin. if amount=0, all coin is sent")
 	transferCmd.Flags().Float64Var(&transferFee, "fee", 0, "adjustment fee")
+	transferCmd.Flags().Uint32Var(&transferQuorum, "quorum", 0,
+		"multisig quorum (≥2 enables JSON-format multisig TX file)")
 	parentCmd.AddCommand(transferCmd)
 }

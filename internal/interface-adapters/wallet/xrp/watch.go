@@ -23,6 +23,7 @@ type XRPWatch struct {
 	sendTxUseCase           watchusecase.SendTransactionUseCase
 	importAddrUseCase       watchusecase.ImportAddressUseCase
 	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase
+	setSignerListUseCase    watchusecase.SetSignerListUseCase
 }
 
 // NewXRPWatch returns XRPWatch object
@@ -34,6 +35,7 @@ func NewXRPWatch(
 	sendTxUseCase watchusecase.SendTransactionUseCase,
 	importAddrUseCase watchusecase.ImportAddressUseCase,
 	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase,
+	setSignerListUseCase watchusecase.SetSignerListUseCase,
 	walletType domainWallet.WalletType,
 ) *XRPWatch {
 	return &XRPWatch{
@@ -45,7 +47,16 @@ func NewXRPWatch(
 		sendTxUseCase:           sendTxUseCase,
 		importAddrUseCase:       importAddrUseCase,
 		createPaymentReqUseCase: createPaymentReqUseCase,
+		setSignerListUseCase:    setSignerListUseCase,
 	}
+}
+
+// SetSignerList creates a SignerListSet unsigned transaction file for the given XRP account.
+func (w *XRPWatch) SetSignerList(
+	ctx context.Context,
+	input watchusecase.SetSignerListInput,
+) (watchusecase.SetSignerListOutput, error) {
+	return w.setSignerListUseCase.Execute(ctx, input)
 }
 
 // ImportAddress imports address
