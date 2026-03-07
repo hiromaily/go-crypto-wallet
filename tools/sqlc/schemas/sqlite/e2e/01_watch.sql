@@ -143,3 +143,21 @@ CREATE TABLE xrp_pending_multisig (
   updated_at TEXT DEFAULT (CURRENT_TIMESTAMP),
   CHECK (((status) IN (('pending'), ('ready'), ('submitted'), ('confirmed'), ('failed'), ('expired'))))
 );
+
+CREATE TABLE xrp_signer_entry (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  signer_list_id INTEGER NOT NULL,
+  signer_account TEXT NOT NULL,
+  signer_weight INTEGER NOT NULL,
+  created_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+);
+
+CREATE TABLE xrp_signer_list (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  account_id TEXT NOT NULL,
+  signer_quorum INTEGER NOT NULL,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  set_tx_hash TEXT,
+  created_at TEXT DEFAULT (CURRENT_TIMESTAMP),
+  updated_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+);

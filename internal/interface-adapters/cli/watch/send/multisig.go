@@ -236,9 +236,10 @@ Leave --regular-key empty to remove the current regular key.`,
 
 func newSetSignerListCommand(wallet *wallets.Watcher, containerGetter func() di.Container) *cobra.Command {
 	var (
-		account string
-		signers string
-		quorum  uint32
+		account     string
+		accountType string
+		signers     string
+		quorum      uint32
 	)
 
 	cmd := &cobra.Command{
@@ -256,11 +257,13 @@ The quorum is the minimum total weight required to authorize a transaction.`,
 				fmt.Println("this command is only supported for XRP")
 				return nil
 			}
-			return runSetSignerList(cmd.Context(), containerGetter(), account, signers, quorum)
+			return runSetSignerList(cmd.Context(), containerGetter(), account, accountType, signers, quorum)
 		},
 	}
 
 	cmd.Flags().StringVar(&account, "account", "", "XRP account address (required)")
+	cmd.Flags().StringVar(&accountType, "account-type", "",
+		"Account type label for key lookup by keygen signer (e.g. payment, deposit)")
 	cmd.Flags().StringVar(&signers, "signers", "", "Signer list as 'address:weight,...' (required)")
 	cmd.Flags().Uint32Var(&quorum, "quorum", 0, "Required quorum weight (required)")
 	cobra.CheckErr(cmd.MarkFlagRequired("account"))
@@ -400,7 +403,7 @@ func runSetRegularKey(ctx context.Context, container di.Container, account, regu
 func runSetSignerList(
 	ctx context.Context,
 	container di.Container,
-	account, signersStr string,
+	account, accountType, signersStr string,
 	quorum uint32,
 ) error {
 	fmt.Println("Setting signer list for XRP account")
@@ -420,9 +423,10 @@ func runSetSignerList(
 
 	useCase := container.NewXRPWatchSetSignerListUseCase()
 	output, err := useCase.Execute(ctx, watchusecase.SetSignerListInput{
-		AccountAddress: account,
-		SignerQuorum:   quorum,
-		SignerEntries:  signerEntries,
+		AccountAddress:    account,
+		SenderAccountType: accountType,
+		SignerQuorum:      quorum,
+		SignerEntries:     signerEntries,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to set signer list: %w", err)
@@ -432,7 +436,7 @@ func runSetSignerList(
 	fmt.Printf("  Account: %s\n", account)
 	fmt.Printf("  Quorum: %d\n", quorum)
 	fmt.Printf("  Signer List ID: %d\n", output.SignerListID)
-	fmt.Printf("  Transaction File: %s\n", output.FileName)
+	fmt.Printf("[fileName]: %s\n", output.FileName)
 	fmt.Println("\nSigners:")
 	for _, entry := range signerEntries {
 		fmt.Printf("  - %s (weight: %d)\n", entry.Account, entry.Weight)

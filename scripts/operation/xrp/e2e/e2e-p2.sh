@@ -341,6 +341,7 @@ set_signer_list_phase() {
 	set_signer_output=$(xrp_watch_cmd -c "${XRP_CONFIG_WATCH}" --coin "${XRP_COIN}" \
 		send multisig set-signer-list \
 		--account "${sender_addr}" \
+		--account-type "${PAYMENT_ACCOUNT}" \
 		--quorum "${MULTISIG_QUORUM}" \
 		--signers "${signer_spec}" 2>&1) || {
 		log_error "Failed to create SignerListSet transaction"
@@ -577,7 +578,7 @@ sign_tx_phase_1() {
 		log_warn "Output: ${sign_output}"
 		log_warn "SKIPPING: Sign 1 requires keygen to support JSON format multisig files"
 		log_warn "See: internal/application/usecase/keygen/xrp/sign_transaction.go"
-		return 0  # Non-fatal: continue to document the workflow
+		return 0 # Non-fatal: continue to document the workflow
 	}
 
 	SIGNED_1_TX_FILE=$(xrp_extract_file_path "${sign_output}")
@@ -635,7 +636,7 @@ sign_tx_phase_2() {
 	log_warn "See: internal/di/container.go:NewSigner (XRP case returns 'not implemented')"
 	log_warn "See: internal/application/usecase/sign/xrp/sign_transaction.go (implementation ready)"
 
-	return 0  # Non-fatal: continue to document the workflow
+	return 0 # Non-fatal: continue to document the workflow
 }
 
 ###############################################################################

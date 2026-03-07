@@ -14,17 +14,20 @@ The following code under `internal/` is dead because it makes calls through `r.A
 `*xrplclient.XRPLClient` gRPC client) which requires the non-operational server:
 
 **Entire files (all methods gRPC-only):**
+
 - `internal/infrastructure/api/xrp/xrpapi_address.go` — `GenerateAddress`, `GenerateXAddress`, `IsValidAddress` (all via `r.API.AddressClient`)
 - `internal/infrastructure/api/xrp/xrpapi_tx_escrow.go` — `PrepareEscrowCreate/Finish/CancelTransaction` (all via `r.API.TxClient`)
 - `internal/infrastructure/api/xrp/xrpapi_tx_payment_channel.go` — all payment channel prepare methods (via `r.API.TxClient`)
 - `internal/infrastructure/api/xrp/xrpapi_tx_nftoken.go` — all NFToken prepare methods (via `r.API.TxClient`)
 
 **Partial files (gRPC methods within otherwise WebSocket files):**
+
 - `internal/infrastructure/api/xrp/xrpapi_tx.go` — `signTransactionJSON()`, `CombineTransaction()`, `SignTransactionNative()` (stub) use `r.API.TxClient`; WebSocket methods `PrepareTransaction`, `SubmitTransaction`, `WaitValidation`, `GetTransaction` are NOT dead
 - `internal/infrastructure/api/xrp/xrpapi_tx_account.go` — all `Prepare*` and `Sign*` methods use `r.API.TxClient` or `signTransactionJSON()`; entire file is dead
 - `internal/infrastructure/api/xrp/converter.go` — `ToInfraInstructions`, `ToDTOInstructions` convert to/from `protogen.Instructions` (only needed by deleted methods); other converters may be kept if still referenced
 
 **Supporting infrastructure:**
+
 - `internal/infrastructure/api/xrp/xrp.go` — `API *xrplclient.XRPLClient` field and its `r.API.Close()` call in `Close()`
 - `internal/infrastructure/api/xrp/connection.go` — `api *xrplclient.XRPLClient` parameter in `NewXRPFromCoinType` and passed to `NewXRP`
 - `internal/infrastructure/api/xrp/testutil/xrp.go` — creates gRPC connection and passes to `NewXRPFromCoinType`
@@ -32,9 +35,11 @@ The following code under `internal/` is dead because it makes calls through `r.A
 - `internal/application/ports/api/xrp/interface.go` — `XRPAPIProvider` interface (composites all the gRPC-backed port methods)
 
 **Mocks to remove:**
+
 - `internal/infrastructure/api/xrp/mocks/mock_xrpapi_provider.go` — mock for `XRPAPIProvider`
 
 **Tests to remove:**
+
 - `internal/infrastructure/api/xrp/xrpapi_address_test.go` — integration tests for deleted address methods
 - `internal/infrastructure/api/xrp/xrpapi_account_test.go` — integration tests referencing deleted methods
 
@@ -113,7 +118,7 @@ The following WebSocket-based code is NOT dead and must be preserved:
    - Remove the `xrplclient` import
 3. In `internal/infrastructure/api/xrp/testutil/xrp.go`:
    - Remove gRPC connection setup (`grpc.NewClient`, `xrplclient.NewXRPLClient`)
-   - Update `GetXRP()` call to `NewXRPFromCoinType` without gRPC parameter
+   - Update `GetXRPPublicClient()` call to `NewXRPFromCoinType` without gRPC parameter
    - Remove `xrplclient` and `pkg/grpc` imports
 
 ---
@@ -157,4 +162,3 @@ The following WebSocket-based code is NOT dead and must be preserved:
 2. `make go-lint` shall produce no new lint errors after all deletions.
 3. `make go-test` shall pass for all unit tests under `internal/` (integration tests requiring the gRPC server are excluded).
 4. No `import` of `github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/xrplclient` or `github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/protogen` shall remain in any file under `internal/` after the deletions (those packages themselves are NOT deleted — only their consumers in `internal/`).
-
