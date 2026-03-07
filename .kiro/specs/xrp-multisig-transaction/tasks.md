@@ -80,9 +80,9 @@
 
 - [ ] 7. Add the `set-signer-list` Watch wallet CLI command and update the wallet adapter
 
-- [ ] 7.1 (P) Implement the `watch api xrp set-signer-list` Cobra command
-  - Accept `--account` (required), `--quorum` (required, must be ≥ 1), and repeatable `--signer` (required, format `address:weight`) flags
-  - Parse each `--signer` string into a structured signer entry; validate quorum ≥ 1 and signer count between 1 and 8 in the CLI layer before calling the use case
+- [ ] 7.1 (P) Implement the `watch send multisig set-signer-list` Cobra command
+  - Accept `--account` (required), `--quorum` (required, must be ≥ 1), and `--signers` (required, comma-separated `address:weight,...` string) flags
+  - Parse the `--signers` string into structured signer entries via `parseSignerEntries()`; validate quorum ≥ 1 and signer count between 1 and 8 in the CLI layer before calling the use case
   - Delegate to `SetSignerListUseCase.Execute()`; on success, print the unsigned transaction file path to stdout
   - Follow the existing Cobra command registration pattern used in the XRP Watch CLI command group
   - _Requirements: 1, 8_
@@ -96,7 +96,7 @@
 - [ ] 8. Add the P2 end-to-end test for the complete 2-of-2 multisig payment flow
 
 - [ ] 8.1 Implement the P2 E2E test script covering the full multisig lifecycle against a local rippled node
-  - **Setup**: fund two signer accounts from the genesis wallet; call `watch api xrp set-signer-list` to configure a 2-of-2 signer list on the sender account; sign and broadcast the `SignerListSet` TX via the existing watch send command
+  - **Setup**: fund two signer accounts from the genesis wallet; call `watch send multisig set-signer-list` to configure a 2-of-2 signer list on the sender account; sign and broadcast the `SignerListSet` TX via the existing watch send command
   - **Create**: Watch wallet creates an unsigned multisig payment JSON file with `required_signatures=2`, `signature_count=0`, `is_complete=false`
   - **Sign 1**: Keygen wallet signs the unsigned file; assert that the output file has `signature_count=1` and `is_complete=false`
   - **Sign 2**: Sign wallet receives the partially-signed file from Keygen and signs it; assert `signature_count=2` and `is_complete=true`
