@@ -436,6 +436,8 @@ For traditional local development setup, follow the installation guide below.
 
 ## Command example
 
+- [CLI Command Reference](./internal/interface-adapters/cli/README.md) - Command × Chain × UseCase matrix (SSOT): which commands each chain supports, corresponding use case interfaces, and role of each command
+- [docs/commands.md](./docs/commands.md) - Detailed flags, options, and usage examples per command
 - [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/main/Makefile) - Main Makefile with modular includes
 - Makefile modules (in `make/` directory):
   - [watch_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/main/make/watch_op.mk) - Watch wallet operations
