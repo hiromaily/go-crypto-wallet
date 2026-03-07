@@ -38,6 +38,7 @@ packages:
       LedgerAdvancer:
       AccountInfoProvider:
       TransactionPreparer:
+      SignerListPreparer:
 
   # File storage - interface in application/ports, implementation in infrastructure
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/file:
@@ -116,3 +117,5 @@ packages:
       XRPAccountKeyRepositorier:
       AuthFullPubkeyRepositorier:
       AuthAccountKeyRepositorier:
+      XRPSignerListRepositorier:
+      XRPSignerEntryRepositorier:

@@ -59,21 +59,21 @@
   - The existing submission path (`SubmitTransaction`) is unchanged
   - _Requirements: 4_
 
-- [ ] 6. Fix the DI container so all XRP multisig use cases wire correctly without panicking at startup
+- [x] 6. Fix the DI container so all XRP multisig use cases wire correctly without panicking at startup
 
-- [ ] 6.1 Wire `SetSignerListUseCase` in its DI factory function
+- [x] 6.1 Wire `SetSignerListUseCase` in its DI factory function
   - Replace the current "gRPC removed" startup panic with proper construction of the use case
   - Inject: `PublicXRP` (satisfying `SignerListPreparer`), the UUID handler, `XRPSignerListRepository` (keygen DB, from Task 2.1), `XRPSignerEntryRepository` (keygen DB, from Task 2.2), and the transaction file repository
   - Requires Tasks 1, 2.1, and 2.2 to be complete
   - _Requirements: 7_
 
-- [ ] 6.2 Replace the `AddMultisigSignature` DI panic with a no-op use case struct
+- [x] 6.2 Replace the `AddMultisigSignature` DI panic with a no-op use case struct
   - Implement a `notImplementedAddMultisigSignatureUseCase` struct whose `Execute()` returns `fmt.Errorf("AddMultisigSignature is not yet implemented")`
   - The struct must fully satisfy the `AddMultisigSignatureUseCase` interface; a nil interface return is forbidden (causes a silent nil pointer panic at the first call site, which is worse than the current named startup panic)
   - The use case application code remains intact for future extension; only the DI factory is changed
   - _Requirements: 7_
 
-- [ ] 6.3 Verify that `CreateMultisigTxUseCase` and `SubmitMultisigTxUseCase` DI factories compile and run after injecting the new watch DB repositories
+- [x] 6.3 Verify that `CreateMultisigTxUseCase` and `SubmitMultisigTxUseCase` DI factories compile and run after injecting the new watch DB repositories
   - These factories are already wired in the container; update them to inject `XRPPendingMultisigRepository` and `XRPMultisigSignatureRepository` from Tasks 3.1 and 3.2
   - Confirm the full DI chain builds without errors: run `make check-build` after all repository adapters are in place
   - _Requirements: 7_
