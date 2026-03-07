@@ -173,7 +173,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context, multisig
 		if len(msEntries) != 0 {
 			generatedFileName, err = u.generateMultisigJSONFile(targetAction, txID, multisigQuorum, msEntries)
 			if err != nil {
-				return "", fmt.Errorf("failed to call generateMultisigJSONFile(): %w", err)
+				return "", fmt.Errorf("fail to call generateMultisigJSONFile(): %w", err)
 			}
 		}
 	} else if len(serializedTxs) != 0 {
@@ -239,7 +239,7 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context, multisig
 		if len(msEntries) != 0 {
 			generatedFileName, err = u.generateMultisigJSONFile(targetAction, txID, multisigQuorum, msEntries)
 			if err != nil {
-				return "", fmt.Errorf("failed to call generateMultisigJSONFile(): %w", err)
+				return "", fmt.Errorf("fail to call generateMultisigJSONFile(): %w", err)
 			}
 		}
 	} else if len(serializedTxs) != 0 {
@@ -385,7 +385,7 @@ func (u *createTransactionUseCase) createTransferTx(
 		}}
 		generatedFileName, err = u.generateMultisigJSONFile(targetAction, txID, multisigQuorum, msEntries)
 		if err != nil {
-			return "", fmt.Errorf("failed to call generateMultisigJSONFile(): %w", err)
+			return "", fmt.Errorf("fail to call generateMultisigJSONFile(): %w", err)
 		}
 	} else if len(serializedTxs) != 0 {
 		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
@@ -779,7 +779,7 @@ func (u *createTransactionUseCase) generateMultisigJSONFile(
 	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, txID, 0)
 	generatedFileName, err := u.txFileRepo.WriteXRPJSONFile(path, txFile)
 	if err != nil {
-		return "", fmt.Errorf("failed to call txFileRepo.WriteXRPJSONFile(): %w", err)
+		return "", fmt.Errorf("fail to call txFileRepo.WriteXRPJSONFile(): %w", err)
 	}
 
 	return generatedFileName, nil
