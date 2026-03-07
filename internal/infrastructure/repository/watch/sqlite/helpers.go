@@ -1,5 +1,7 @@
 package sqlite
 
+const sqliteTimestampFormat = "2006-01-02 15:04:05"
+
 // boolToInt64 converts bool to int64 for SQLite
 // stores booleans as INTEGER (0 or 1)
 func boolToInt64(b bool) int64 {

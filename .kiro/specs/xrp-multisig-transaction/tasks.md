@@ -7,7 +7,7 @@
 
 ---
 
-- [ ] 1. (P) Add the ability to prepare an unsigned `SignerListSet` transaction for a given XRP account
+- [x] 1. (P) Add the ability to prepare an unsigned `SignerListSet` transaction for a given XRP account
   - Fetch the account's current sequence number and ledger index via the existing account_info WebSocket RPC (same pattern as the existing payment transaction preparation)
   - Construct the SignerListSet transaction body with the signer entries array, quorum, fee, sequence, and last ledger sequence
   - Fee calculation: use `(N+1) * 12` drops where N is the number of signer entries, matching the XRPL protocol minimum for SignerListSet
@@ -15,30 +15,30 @@
   - Satisfies the `SignerListPreparer` port interface already defined in ports/api/xrp/
   - _Requirements: 1_
 
-- [ ] 2. (P) Implement the keygen DB repository adapters for signer list data
+- [x] 2. (P) Implement the keygen DB repository adapters for signer list data
 
-- [ ] 2.1 (P) Build the signer list aggregate repository backed by keygen DB SQLC queries
+- [x] 2.1 (P) Build the signer list aggregate repository backed by keygen DB SQLC queries
   - Wrap all SQLC-generated keygen queries for `xrp_signer_list`; implement every method of the `XRPSignerListRepositorier` port interface
   - Convert SQLC row types to `XRPSignerList` domain entities using private conversion functions; never expose SQLC types outside the repository
   - Implement for all three DB drivers: postgres, mysql, and sqlite (three separate adapter files following the existing cold repository layout)
   - The deactivate-then-insert sequence is non-atomic; document this as an accepted CLI limitation in code comments
   - _Requirements: 1, 6_
 
-- [ ] 2.2 (P) Build the signer entry repository backed by keygen DB SQLC queries
+- [x] 2.2 (P) Build the signer entry repository backed by keygen DB SQLC queries
   - Wrap all SQLC-generated keygen queries for `xrp_signer_entry`; implement every method of the `XRPSignerEntryRepositorier` port interface
   - Convert rows to `XRPSignerEntry` domain entities; list ID is passed explicitly (no cross-table join needed)
   - Implement for all three DB drivers, collocated with the signer list adapters
   - _Requirements: 1, 6_
 
-- [ ] 3. (P) Implement the watch DB repository adapters for pending multisig state
+- [x] 3. (P) Implement the watch DB repository adapters for pending multisig state
 
-- [ ] 3.1 (P) Build the pending multisig transaction repository backed by watch DB SQLC queries
+- [x] 3.1 (P) Build the pending multisig transaction repository backed by watch DB SQLC queries
   - Wrap all SQLC-generated watch queries for `xrp_pending_multisig`; implement every method of the `XRPPendingMultisigRepositorier` port interface
   - Convert rows to `XRPPendingMultisig` domain entities; implement for all three DB drivers under the watch repository layout
   - These adapters enable `CreateMultisigTxUseCase` and `SubmitMultisigTxUseCase` (already wired in DI) to compile and run against real DB
   - _Requirements: 6_
 
-- [ ] 3.2 (P) Build the multisig signature repository backed by watch DB SQLC queries
+- [x] 3.2 (P) Build the multisig signature repository backed by watch DB SQLC queries
   - Wrap all SQLC-generated watch queries for `xrp_multisig_signature`; implement every method of the `XRPMultisigSignatureRepositorier` port interface
   - Convert rows to `XRPMultisigSignature` domain entities; implement for all three DB drivers, collocated with the pending multisig adapters
   - Required for `AddMultisigSignatureUseCase` to compile (the use case is currently stubbed but the repository must still satisfy the interface)
