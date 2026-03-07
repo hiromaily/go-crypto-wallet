@@ -259,7 +259,7 @@ type ETHMultisigTransactionFile struct {
     SafeAddress    string `json:"safe_address"`
     To             string `json:"to"`
     Value          string `json:"value"`          // Wei decimal string
-    Data           string `json:"data"`            // hex-encoded, empty "" for ETH transfer
+    Data           string `json:"data"`            // hex-encoded, empty "0x" for ETH transfer
     Operation      uint8  `json:"operation"`       // 0=Call, 1=DelegateCall
     SafeTxGas      string `json:"safe_tx_gas"`     // "0" for simple transfers
     BaseGas        string `json:"base_gas"`        // "0"

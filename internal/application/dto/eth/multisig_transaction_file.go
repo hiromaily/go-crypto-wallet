@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
+
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
@@ -82,8 +84,8 @@ var (
 	ErrEmptyMultisigSafeTxHash = errors.New("safe_tx_hash is required")
 	// ErrInvalidMultisigThreshold is returned when threshold is less than 1.
 	ErrInvalidMultisigThreshold = errors.New("threshold must be >= 1")
-	// ErrSignatureCountExceedsThreshold is returned when more signatures exist than the threshold.
-	ErrSignatureCountExceedsThreshold = errors.New("signature count cannot exceed threshold")
+	// ErrInvalidMultisigAddress is returned when an address is not a valid EIP-55 checksummed hex address.
+	ErrInvalidMultisigAddress = errors.New("address must be a valid EIP-55 checksummed Ethereum address")
 	// ErrSignedTxTypeInconsistent is returned when tx_type is "signed" but signature count < threshold.
 	ErrSignedTxTypeInconsistent = errors.New("tx_type is \"signed\" but signature count is below threshold")
 	// ErrUnsignedTxTypeInconsistent is returned when tx_type is "unsigned" but signature count >= threshold.
@@ -124,8 +126,14 @@ func (f *ETHMultisigTransactionFile) validateRequiredFields() error {
 	if f.SafeAddress == "" {
 		return ErrEmptyMultisigSafeAddress
 	}
+	if !isChecksumAddress(f.SafeAddress) {
+		return ErrInvalidMultisigAddress
+	}
 	if f.To == "" {
 		return ErrEmptyMultisigTo
+	}
+	if !isChecksumAddress(f.To) {
+		return ErrInvalidMultisigAddress
 	}
 	if f.Value == "" {
 		return ErrEmptyMultisigValue
@@ -143,12 +151,14 @@ func (f *ETHMultisigTransactionFile) validateRequiredFields() error {
 }
 
 func (f *ETHMultisigTransactionFile) validateSignatures() error {
-	if len(f.Signatures) > f.Threshold {
-		return ErrSignatureCountExceedsThreshold
-	}
-	// Check for duplicate signer addresses (case-insensitive)
+	// Check for duplicate signer addresses and validate each address (case-insensitive dedup).
+	// More signatures than threshold is intentionally allowed: for an m-of-n Safe where n > m,
+	// additional owners may sign beyond the threshold and the Safe contract accepts them.
 	seen := make(map[string]struct{}, len(f.Signatures))
 	for _, entry := range f.Signatures {
+		if !isChecksumAddress(entry.SignerAddress) {
+			return ErrInvalidMultisigAddress
+		}
 		key := strings.ToLower(entry.SignerAddress)
 		if _, exists := seen[key]; exists {
 			return ErrDuplicateSigner
@@ -156,6 +166,15 @@ func (f *ETHMultisigTransactionFile) validateSignatures() error {
 		seen[key] = struct{}{}
 	}
 	return nil
+}
+
+// isChecksumAddress returns true when addr is a non-empty hex address whose casing matches
+// the EIP-55 checksum (i.e. common.HexToAddress(addr).Hex() round-trips back to addr).
+func isChecksumAddress(addr string) bool {
+	if !common.IsHexAddress(addr) {
+		return false
+	}
+	return addr == common.HexToAddress(addr).Hex()
 }
 
 func (f *ETHMultisigTransactionFile) validateTxTypeConsistency() error {

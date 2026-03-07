@@ -31,7 +31,7 @@
 
 - **Context**: Signers must recompute `safeTxHash` offline to verify the file before signing.
 - **Findings**:
-  - Domain separator: `keccak256(abi.encode(DOMAIN_SEPARATOR_TYPEHASH, keccak256("Safe"), keccak256("1.4.1"), chainId, safeAddress))`
+  - Domain separator: `keccak256(abi.encode(keccak256("EIP712Domain(uint256 chainId,address verifyingContract)"), chainId, safeAddress))`
   - Safe TX type hash (constant): `keccak256("SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address payable refundReceiver,uint256 nonce)")`
   - Struct hash: `keccak256(abi.encode(SAFE_TX_TYPEHASH, to, value, keccak256(data), operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce))`
   - Final hash: `keccak256("\x19\x01", domainSeparator, structHash)` — standard EIP-712 encoding
