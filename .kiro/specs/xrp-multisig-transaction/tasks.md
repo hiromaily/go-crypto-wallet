@@ -93,9 +93,9 @@
   - Add an optional `--quorum` flag to the `create deposit`, `create payment`, and `create transfer` commands; when supplied (value ≥ 2), set `MultisigQuorum` in `CreateTransactionInput` to activate the JSON file path from Task 4
   - _Requirements: 2, 8_
 
-- [ ] 8. Add the P2 end-to-end test for the complete 2-of-2 multisig payment flow
+- [x] 8. Add the P2 end-to-end test for the complete 2-of-2 multisig payment flow
 
-- [ ] 8.1 Implement the P2 E2E test script covering the full multisig lifecycle against a local rippled node
+- [x] 8.1 Implement the P2 E2E test script covering the full multisig lifecycle against a local rippled node
   - **Setup**: fund two signer accounts from the genesis wallet; call `watch send multisig set-signer-list` to configure a 2-of-2 signer list on the sender account; sign and broadcast the `SignerListSet` TX via the existing watch send command
   - **Create**: Watch wallet creates an unsigned multisig payment JSON file with `required_signatures=2`, `signature_count=0`, `is_complete=false`
   - **Sign 1**: Keygen wallet signs the unsigned file; assert that the output file has `signature_count=1` and `is_complete=false`
@@ -104,7 +104,7 @@
   - Runs against the existing Docker Compose rippled standalone setup (same infrastructure as P1)
   - _Requirements: 9_
 
-- [ ] 8.2 Add Makefile targets for the P2 multisig E2E test
+- [x] 8.2 Add Makefile targets for the P2 multisig E2E test
   - Add `xrp-e2e-p2` (interactive run), `xrp-e2e-p2-ci` (CI-friendly non-interactive run), and `xrp-e2e-p2-reset` (ledger reset / cleanup) targets
   - Follow the structure and variable conventions of the existing `xrp-e2e-p1` / `xrp-e2e-p1-ci` targets
   - _Requirements: 9_
