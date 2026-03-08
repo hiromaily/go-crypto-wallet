@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -117,8 +116,7 @@ func (u *signMultisigTransactionUseCase) Sign(
 	}
 
 	// 8. Write the updated file with an incremented counter in the path.
-	actionType := extractActionTypeFromPath(input.FilePath)
-	newPath := u.multisigRepo.CreateMultisigFilePath(actionType, f.UUID, signCount)
+	newPath := u.multisigRepo.CreateMultisigFilePath(domainTx.ActionType(f.ActionType), f.UUID, signCount)
 
 	outPath, err := u.multisigRepo.WriteETHMultisigJSONFile(newPath, f)
 	if err != nil {
@@ -141,16 +139,4 @@ func (u *signMultisigTransactionUseCase) Sign(
 		SignCount:  signCount,
 		Threshold:  f.Threshold,
 	}, nil
-}
-
-// extractActionTypeFromPath derives the ActionType from a multisig file path of the form
-// {dir}/{actionType}_multisig_{uuid}_{n}.json.
-// Falls back to ActionTypePayment if the pattern cannot be parsed.
-func extractActionTypeFromPath(filePath string) domainTx.ActionType {
-	base := filepath.Base(filePath)
-	idx := strings.Index(base, "_multisig_")
-	if idx > 0 {
-		return domainTx.ActionType(base[:idx])
-	}
-	return domainTx.ActionTypePayment
 }

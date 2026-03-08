@@ -86,6 +86,7 @@ func (u *createETHMultisigTransactionUseCase) Execute(
 		Version:        1,
 		TxType:         "unsigned",
 		UUID:           uuidStr,
+		ActionType:     string(actionType),
 		SafeAddress:    input.SafeAddress,
 		To:             input.To,
 		Value:          weiValue.String(),

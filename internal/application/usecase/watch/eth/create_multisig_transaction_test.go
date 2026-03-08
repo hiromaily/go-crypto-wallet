@@ -286,6 +286,7 @@ func TestCreateETHMultisigTransaction_FileContents(t *testing.T) {
 	assert.Equal(t, 1, capturedFile.Version)
 	assert.Equal(t, "unsigned", capturedFile.TxType)
 	assert.Equal(t, msTestUUIDStr, capturedFile.UUID)
+	assert.Equal(t, "payment", capturedFile.ActionType)
 	assert.Equal(t, msTestSafeAddr, capturedFile.SafeAddress)
 	assert.Equal(t, msTestToAddr, capturedFile.To)
 	// 0.1 ETH in Wei via float64 conversion (matches pkgeth.FromFloatEther behaviour)
