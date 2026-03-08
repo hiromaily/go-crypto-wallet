@@ -122,6 +122,22 @@ proto-go-protoc: protoc-version-check clean-pb-go
 		-I proto/xrpapi \
 		proto/xrpapi/*.proto
 
+# ETH MPC output directory
+PROTO_ETH_MPC_OUT_DIR := internal/infrastructure/api/eth/mpc/protogen
+
+# Generate Go stubs for the ETH MPC/TSS relay proto (edition 2024)
+.PHONY: proto-eth
+proto-eth: protoc-version-check
+	@echo "Generating Go proto files for ETH MPC with protoc (edition 2024)..."
+	@mkdir -p $(PROTO_ETH_MPC_OUT_DIR)
+	protoc \
+		--go_out=$(PROTO_ETH_MPC_OUT_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_ETH_MPC_OUT_DIR) \
+		--go-grpc_opt=paths=source_relative \
+		-I proto/ethapi \
+		proto/ethapi/mpc.proto
+
 # Generate TypeScript code using protoc
 # Requires: protoc-gen-es >= 2.x (install via: cd apps/xrpl-grpc-server && bun install)
 # Note: protoc-gen-es v2 generates both messages and services in *_pb.ts files

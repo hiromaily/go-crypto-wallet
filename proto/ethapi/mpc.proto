@@ -1,0 +1,82 @@
+edition = "2024";
+
+package ethapi.mpc;
+
+// Use proto3 semantics for field presence (implicit presence).
+option features.field_presence = IMPLICIT;
+
+// Generated Go code is placed in the ETH MPC infrastructure package.
+option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/mpc/protogen";
+
+// =============================================================================
+// MPC/TSS message relay protocol for ETH threshold signature signing.
+//
+// The Watch wallet coordinator acts as the message bus:
+//   1. It calls InitSigning on each of the T participating nodes to start a session.
+//   2. It opens a bidirectional RelaySession stream to each node.
+//   3. It forwards MPCMessage frames received from one node to all other T-1 nodes.
+//   4. After all TSS rounds complete, the nodes signal completion via RelaySession.
+// =============================================================================
+
+// MPCMessage carries a single TSS protocol round message between the Watch wallet
+// coordinator and an MPC node server during DKG or signing sessions.
+// The payload bytes are opaque: they are the serialised tss-lib/v2 round message.
+message MPCMessage {
+  // session_id is the UUIDv4 identifying the DKG or signing session.
+  // Nodes MUST discard messages whose session_id does not match the active session.
+  string session_id = 1;
+
+  // from_party is the party ID of the node that produced this message.
+  string from_party = 2;
+
+  // payload is the opaque tss-lib/v2 round message bytes (ParsedMessage serialised).
+  bytes payload = 3;
+}
+
+// MPCSigningRequest initiates a TSS signing session on a node.
+// The coordinator sends this to each of the T nodes before opening the relay stream.
+message MPCSigningRequest {
+  // session_id is the UUIDv4 for this signing session (coordinator-generated).
+  string session_id = 1;
+
+  // hash is the 32-byte Keccak256 hash of the unsigned transaction.
+  // Nodes verify hash(raw_tx_hex) == hash before participating.
+  bytes hash = 2;
+
+  // party_ids lists the sorted party IDs of all T participants in this session.
+  // Must be identical on all nodes for the GG18 protocol to converge.
+  repeated string party_ids = 3;
+
+  // threshold is T — the minimum number of signers required.
+  int32 threshold = 4;
+}
+
+// MPCSigningResponse is returned by InitSigning.
+// On success, signature is empty and error is empty (the signature is returned
+// through the RelaySession stream after all rounds complete).
+// On failure, error is non-empty.
+message MPCSigningResponse {
+  // session_id echoes MPCSigningRequest.session_id for correlation.
+  string session_id = 1;
+
+  // error is non-empty if the node rejected the signing request (e.g. shard
+  // not loaded, hash mismatch, or threshold validation failure).
+  string error = 2;
+}
+
+// MPCNodeService is exposed by each MPC node daemon (`keygen serve mpc`).
+// The Watch wallet coordinator calls this service to coordinate TSS sessions.
+service MPCNodeService {
+  // InitSigning submits a signing session request to this node before opening
+  // the relay stream. The node loads its key shard, verifies the hash against
+  // the raw transaction, and prepares the local tss-lib signing party.
+  // Returns an error response if the node cannot participate.
+  rpc InitSigning(MPCSigningRequest) returns (MPCSigningResponse) {}
+
+  // RelaySession opens a bidirectional stream for TSS protocol message relay.
+  // The coordinator sends MPCMessage frames (from other nodes) to drive this
+  // node's tss-lib state machine; the node responds with outbound MPCMessage
+  // frames destined for other nodes (which the coordinator will fan out).
+  // The stream is closed when the signing session completes or times out.
+  rpc RelaySession(stream MPCMessage) returns (stream MPCMessage) {}
+}

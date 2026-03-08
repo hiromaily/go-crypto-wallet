@@ -55,7 +55,7 @@
 ---
 
 - [ ] 3. Define gRPC proto schema and implement MPC transport layer
-- [ ] 3.1 Define proto schema for MPC message relay and generate gRPC stubs
+- [x] 3.1 Define proto schema for MPC message relay and generate gRPC stubs
   - Add `mpc.proto` to the project's existing proto directory, following the XRP gRPC proto conventions
   - Define RPC methods for: submitting a signing request (session ID + hash + party config), relaying a TSS round message (session ID + from_party + payload bytes), and collecting results
   - Generate Go stubs via `make proto` (or equivalent) and verify the generated files compile
