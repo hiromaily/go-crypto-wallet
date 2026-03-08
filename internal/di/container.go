@@ -10,9 +10,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
+	"os"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
@@ -53,6 +57,7 @@ import (
 	cryptocurrency "github.com/hiromaily/go-crypto-wallet/pkg/chains"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 	btcmusig2 "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/musig2"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
@@ -521,14 +526,40 @@ func (c *container) newETH() apieth.Ethereumer {
 }
 
 // newSafeClient constructs a SafeClient wrapping the Safe v1.4.1 ABI bindings.
-// The chain ID is fetched once from the node and cached. From/SignerFn are left
-// empty; ExecuteSafeTransaction will return an error if called without a signer,
-// which is acceptable for the non-sending Watch use cases (Create, SafeInfo).
+// The chain ID is fetched once from the node and cached.
+// If WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY env var is set, the derived address and
+// signer are configured so ExecuteSafeTransaction can submit the outer Ethereum tx.
+// Otherwise From/SignerFn are left empty (acceptable for Create/SafeInfo use cases).
+//
+// Note: the env var is read via os.Getenv because viper's AutomaticEnv does not
+// populate mapstructure fields that are absent from the config YAML file.
 func (c *container) newSafeClient() *safeinfra.SafeClient {
 	if c.safeClient == nil {
 		client := ethclient.NewClient(c.newEthRPCClient())
+		params := safeinfra.NewSafeClientParams{}
+
+		hexKey := os.Getenv("WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY")
+		if hexKey == "" {
+			hexKey = c.conf.Ethereum.SafeGasPayerHexKey
+		}
+		if hexKey != "" {
+			privKey, err := pkgeth.ToECDSA(hexKey)
+			if err != nil {
+				panic(fmt.Sprintf("WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY: failed to parse private key: %v", err))
+			}
+			chainID := new(big.Int).SetUint64(c.conf.Ethereum.ChainID)
+			txOpts, err := bind.NewKeyedTransactorWithChainID(privKey, chainID)
+			if err != nil {
+				panic(fmt.Sprintf("WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY: failed to create transactor: %v", err))
+			}
+			params.From = txOpts.From
+			params.SignerFn = txOpts.Signer
+		} else {
+			params.From = common.Address{}
+		}
+
 		var err error
-		c.safeClient, err = safeinfra.NewSafeClient(context.Background(), client, safeinfra.NewSafeClientParams{})
+		c.safeClient, err = safeinfra.NewSafeClient(context.Background(), client, params)
 		if err != nil {
 			panic(fmt.Sprintf("failed to construct SafeClient: %v", err))
 		}

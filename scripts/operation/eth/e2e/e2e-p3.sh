@@ -67,6 +67,11 @@ else
 fi
 export WALLET_ETHEREUM_PORT="${ETH_RPC_PORT}"
 
+# Gas payer for execTransaction: use the deployer key (Anvil account 0).
+# The deployer is pre-funded and its key is available as a raw hex value.
+# This tells the Watch wallet which key to use when submitting the Safe tx on-chain.
+export WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY="${DEPLOYER_KEY:-0xd3f1327df33c2a67ac03877f37410f33ed3a37085a84c739a7f5a137e5152bf2}"
+
 ###############################################################################
 # Configuration
 ###############################################################################

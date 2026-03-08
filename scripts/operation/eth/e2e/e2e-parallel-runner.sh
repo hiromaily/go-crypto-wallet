@@ -5,8 +5,8 @@
 # Usage: ./scripts/operation/eth/e2e/e2e-parallel-runner.sh [OPTIONS]
 #
 # Options:
-#   --patterns <list>      Run specific patterns (e.g., "1,2" or "1-2")
-#   --max-parallel <N>     Limit concurrent processes (default: 2 for all patterns)
+#   --patterns <list>      Run specific patterns (e.g., "1,2,3" or "1-3")
+#   --max-parallel <N>     Limit concurrent processes (default: 3 for all patterns)
 #   --verbose              Show real-time output from all processes
 #   --ci                   Non-interactive mode with structured output for CI
 #   -h, --help             Display help message
@@ -29,8 +29,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
 # Default configuration
-PATTERNS="1-2"
-MAX_PARALLEL=2
+PATTERNS="1-3"
+MAX_PARALLEL=3
 VERBOSE=false
 CI_MODE=false
 LOG_DIR="${PROJECT_ROOT}/data/logs/e2e-parallel-eth"
@@ -42,12 +42,32 @@ ETH_RPC_PORT="${ETH_RPC_PORT:-8546}"
 declare -A PATTERN_SCRIPTS=(
 	[1]="e2e-p1.sh"
 	[2]="e2e-p2.sh"
+	[3]="e2e-p3.sh"
 )
 
 # Pattern descriptions
 declare -A PATTERN_DESCRIPTIONS=(
 	[1]="Single-sig EIP-1559"
 	[2]="ERC-20 HYT Token Transfer (EIP-1559)"
+	[3]="Safe 2-of-2 Multisig Payment"
+)
+
+# Per-pattern deployer private keys (isolated Anvil accounts to avoid nonce conflicts
+# when patterns run in parallel and each needs to send real on-chain transactions).
+# All accounts are pre-funded by Anvil from the project mnemonic:
+#   toy echo orbit embrace opinion file client report history bomb regret life
+# P1 uses anvil_setBalance (no deployer key needed).
+# P2 and P3 each get a dedicated account so their forge/cast transactions don't conflict.
+declare -A PATTERN_DEPLOYER_KEYS=(
+	[1]=""                                                                   # P1 uses anvil_setBalance only — no deployer key needed
+	[2]="0x3962662895394ad00c82fe9930495c0432f3c75aa882386837d904107b03c4bb" # account 1
+	[3]="0x4c806f247777f4a43fc661c4fcae3855bc8e009d605f3d1640b7b9aefa02bacd" # account 2
+)
+
+declare -A PATTERN_DEPLOYER_ADDRS=(
+	[1]=""
+	[2]="0x5c2415367A9558Cb95926619337859aD64beA345" # account 1
+	[3]="0x079E8899f086E679a12999f1Af811d513C25d083" # account 2
 )
 
 ###############################################################################
@@ -85,10 +105,10 @@ Ethereum E2E Parallel Test Runner
 Usage: $0 [OPTIONS]
 
 Options:
-  --patterns <list>      Run specific patterns (e.g., "1,2" or "1-2")
-                         Default: "1-2" (all patterns)
+  --patterns <list>      Run specific patterns (e.g., "1,2,3" or "1-3")
+                         Default: "1-3" (all patterns)
   --max-parallel <N>     Limit concurrent processes
-                         Default: 2 (run all patterns in parallel)
+                         Default: 3 (run all patterns in parallel)
   --verbose              Show real-time output from all processes
   --ci                   Non-interactive mode with structured output for CI
   -h, --help             Display this help message
@@ -98,7 +118,7 @@ Examples:
   $0 --ci
 
   # Run specific patterns
-  $0 --patterns 1,2 --verbose
+  $0 --patterns 1,2,3 --verbose
 
   # Run single pattern for debugging
   $0 --patterns 1 --verbose
@@ -106,6 +126,7 @@ Examples:
 Available Patterns:
   1:  Single-sig EIP-1559
   2:  ERC-20 HYT Token Transfer (EIP-1559)
+  3:  Safe 2-of-2 Multisig Payment
 EOF
 }
 
@@ -227,6 +248,22 @@ run_pattern() {
 	export E2E_PATTERN="p${pattern}"
 	export E2E_SHARED_INFRASTRUCTURE="true" # Tell script to skip infrastructure setup
 	export NODE_TYPE="${NODE_TYPE}"
+
+	# Assign a dedicated deployer account per pattern to prevent nonce conflicts when
+	# multiple patterns run concurrently and each needs to broadcast on-chain transactions.
+	local deployer_key="${PATTERN_DEPLOYER_KEYS[$pattern]:-}"
+	local deployer_addr="${PATTERN_DEPLOYER_ADDRS[$pattern]:-}"
+	if [[ -n "$deployer_key" ]]; then
+		# P2: overrides HYT_DEPLOYER_KEY / HYT_MASTER_ADDRESS used in e2e-p2.sh
+		export HYT_DEPLOYER_KEY="$deployer_key"
+		export HYT_MASTER_ADDRESS="$deployer_addr"
+		# P3: overrides DEPLOYER_KEY / DEPLOYER_ADDRESS used in e2e-p3.sh
+		export DEPLOYER_KEY="$deployer_key"
+		export DEPLOYER_ADDRESS="$deployer_addr"
+		# P3: gas payer for Safe execTransaction (derived from DEPLOYER_KEY in e2e-p3.sh,
+		# but export explicitly so it's available regardless of sourcing order)
+		export WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY="$deployer_key"
+	fi
 
 	log_info "Starting P${pattern}: ${PATTERN_DESCRIPTIONS[$pattern]}"
 
