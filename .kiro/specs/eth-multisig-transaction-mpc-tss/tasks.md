@@ -61,7 +61,7 @@
   - Generate Go stubs via `make proto` (or equivalent) and verify the generated files compile
   - _Requirements: 5.5_
 
-- [ ] 3.2 (P) Implement `GRPCOutboundTransport` — Watch-side gRPC client
+- [x] 3.2 (P) Implement `GRPCOutboundTransport` — Watch-side gRPC client
   - Implement in `internal/infrastructure/api/eth/mpc/grpc_outbound.go` satisfying `MPCOutboundTransport`
   - `Send(ctx, peerAddr, msg)`: open (or reuse) a gRPC connection to `peerAddr` and stream the TSS message bytes
   - `Receive(ctx)`: return a channel that delivers inbound messages routed back from node responses
@@ -69,7 +69,7 @@
   - Include exponential backoff on connection failures; surface the error after context deadline
   - _Requirements: 5.5_
 
-- [ ] 3.3 (P) Implement `GRPCInboundTransport` — Node-side gRPC server
+- [x] 3.3 (P) Implement `GRPCInboundTransport` — Node-side gRPC server
   - Implement in `internal/infrastructure/api/eth/mpc/grpc_inbound.go` satisfying `MPCInboundTransport`
   - `Listen(ctx, listenAddr)`: start a gRPC server accepting TSS relay messages from the coordinator
   - `Receive(ctx)`: expose a channel of inbound message bytes delivered by the gRPC server handler
