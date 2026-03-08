@@ -153,7 +153,7 @@ func TestReadETHMPCJSONFile(t *testing.T) {
 	t.Parallel()
 
 	tempDir := t.TempDir()
-	repo := mpcstore.NewMPCFileRepository("")
+	repo := mpcstore.NewMPCFileRepository(tempDir + "/")
 
 	// Write a valid file to read back.
 	f := validMPCFile()
