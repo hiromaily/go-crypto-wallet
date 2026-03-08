@@ -115,13 +115,13 @@
 
 ## Task 6. Wire all new components in the DI container
 
-- [ ] 6.1 Add DI factory functions for SafeClient and all new use cases
+- [x] 6.1 Add DI factory functions for SafeClient and all new use cases
   - Add `newSafeClient()` factory that constructs a `SafeClient` using the existing Ethereum client, fetches the chain ID once, and returns the cached instance; the factory is called by each use case factory that needs a Safe port
   - Add factories for `CreateMultisigTransactionUseCase`, `SendMultisigTransactionUseCase`, and `SafeInfoUseCase` for the Watch wallet, injecting the appropriate narrow Safe interface from `SafeClient`
   - Add factories for `SignMultisigTransactionUseCase` for both the Keygen and Sign wallet containers, injecting the account key repository and the multisig file repository
   - _Requirements: 9_
 
-- [ ] 6.2 Update wallet adapter constructors in the DI container
+- [x] 6.2 Update wallet adapter constructors in the DI container
   - Pass the three new Watch use cases into `NewETHWatch` and add the Sign multisig use case to `NewETHKeygen` and `NewETHSign`; verify that no panics occur and that all ETH wallet types compile cleanly
   - Confirm the existing single-sig factories and their injected dependencies are unchanged
   - _Requirements: 9_

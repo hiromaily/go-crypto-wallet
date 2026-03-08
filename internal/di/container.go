@@ -32,6 +32,7 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
+	safeinfra "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/safe"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
@@ -149,6 +150,7 @@ type container struct {
 	btc        apibtc.Bitcoiner
 	eth        apieth.Ethereumer
 	erc20      apieth.ERC20er
+	safeClient *safeinfra.SafeClient
 	xrpPublic  apixrp.XRPPublicClient
 	// client
 	rpcClient    *rpcclient.Client
@@ -289,7 +291,9 @@ func (c *container) NewSigner(authName string) (wallets.Signer, error) {
 	switch c.conf.CoinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		return c.newBTCSigner(authType), nil
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
+	case domainCoin.ETH:
+		return c.newETHSigner(), nil
+	case domainCoin.LTC, domainCoin.XRP, domainCoin.HYT:
 		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
 	default:
 		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
@@ -338,6 +342,15 @@ func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer
 	)
 }
 
+func (c *container) newETHSigner() wallets.Signer {
+	return ethwallet.NewETHSign(
+		c.newETH(),
+		c.pkgContainer.NewDatabaseClient(),
+		c.walletType,
+		c.newETHSignSignMultisigTransactionUseCase(),
+	)
+}
+
 func (c *container) newBTCWalleter() wallets.Watcher {
 	// Select BTC or BCH specific use cases
 	var createTxUseCase watchusecase.CreateTransactionUseCase
@@ -372,9 +385,9 @@ func (c *container) newETHWalleter() wallets.Watcher {
 		c.newETHWatchSendTransactionUseCase(),
 		c.newWatchImportAddressUseCase(),
 		c.newWatchCreatePaymentRequestUseCase(),
-		NewNotImplementedCreateETHMultisigTransactionUseCase(),
-		NewNotImplementedSendETHMultisigTransactionUseCase(),
-		NewNotImplementedETHSafeInfoUseCase(),
+		c.newETHWatchCreateMultisigTransactionUseCase(),
+		c.newETHWatchSendMultisigTransactionUseCase(),
+		c.newETHWatchSafeInfoUseCase(),
 		c.walletType,
 	)
 }
@@ -505,6 +518,22 @@ func (c *container) newETH() apieth.Ethereumer {
 		}
 	}
 	return c.eth
+}
+
+// newSafeClient constructs a SafeClient wrapping the Safe v1.4.1 ABI bindings.
+// The chain ID is fetched once from the node and cached. From/SignerFn are left
+// empty; ExecuteSafeTransaction will return an error if called without a signer,
+// which is acceptable for the non-sending Watch use cases (Create, SafeInfo).
+func (c *container) newSafeClient() *safeinfra.SafeClient {
+	if c.safeClient == nil {
+		client := ethclient.NewClient(c.newEthRPCClient())
+		var err error
+		c.safeClient, err = safeinfra.NewSafeClient(context.Background(), client, safeinfra.NewSafeClientParams{})
+		if err != nil {
+			panic(fmt.Sprintf("failed to construct SafeClient: %v", err))
+		}
+	}
+	return c.safeClient
 }
 
 func (c *container) newERC20() apieth.ERC20er {
@@ -1539,6 +1568,32 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 	)
 }
 
+// ETH Watch Safe Multisig Use Cases
+
+func (c *container) newETHWatchCreateMultisigTransactionUseCase() watchusecase.CreateETHMultisigTransactionUseCase {
+	safeClient := c.newSafeClient()
+	return watchusecaseeth.NewCreateETHMultisigTransactionUseCase(
+		safeClient, // SafeNonceReader
+		safeClient, // SafeTxHashComputer
+		c.newMultisigFileRepo(),
+		c.pkgContainer.NewUUIDHandler(),
+		c.conf.Ethereum.ChainID,
+	)
+}
+
+func (c *container) newETHWatchSendMultisigTransactionUseCase() watchusecase.SendETHMultisigTransactionUseCase {
+	return watchusecaseeth.NewSendETHMultisigTransactionUseCase(
+		c.newSafeClient(), // SafeExecuter
+		c.newMultisigFileRepo(),
+	)
+}
+
+func (c *container) newETHWatchSafeInfoUseCase() watchusecase.ETHSafeInfoUseCase {
+	return watchusecaseeth.NewETHSafeInfoUseCase(
+		c.newSafeClient(), // SafeInfoReader
+	)
+}
+
 // XRP Watch Use Cases
 
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
@@ -1940,6 +1995,13 @@ func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUs
 		c.newTxFileRepo(),
 		c.walletType,
 		c.conf.Ethereum.KeystorePassword,
+	)
+}
+
+func (c *container) newETHSignSignMultisigTransactionUseCase() keygenusecase.SignMultisigTransactionUseCase {
+	return keygenusecaseeth.NewSignMultisigTransactionUseCase(
+		c.newMultisigFileRepo(),
+		c.newEthAccountKeyRepo(),
 	)
 }
 
