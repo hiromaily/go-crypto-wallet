@@ -232,3 +232,59 @@ type SubmitMultisigTxOutput struct {
 	TxHash   string // Submitted transaction hash
 	IsQueued bool   // True if queued for validation
 }
+
+// ETH Safe Multisig Use Cases
+
+// CreateETHMultisigTransactionUseCase creates an unsigned Safe multisig transaction proposal file.
+// No database record is created; the output is a JSON file written to disk.
+type CreateETHMultisigTransactionUseCase interface {
+	Execute(ctx context.Context, input CreateETHMultisigTransactionInput) (CreateETHMultisigTransactionOutput, error)
+}
+
+// SendETHMultisigTransactionUseCase submits a fully signed Safe multisig transaction to Ethereum.
+type SendETHMultisigTransactionUseCase interface {
+	Execute(ctx context.Context, input SendETHMultisigTransactionInput) (SendETHMultisigTransactionOutput, error)
+}
+
+// ETHSafeInfoUseCase retrieves on-chain Safe contract state.
+type ETHSafeInfoUseCase interface {
+	Execute(ctx context.Context, input ETHSafeInfoInput) (ETHSafeInfoOutput, error)
+}
+
+// CreateETHMultisigTransactionInput is the input for the ETH multisig proposal creation use case.
+type CreateETHMultisigTransactionInput struct {
+	SafeAddress string  // EIP-55 checksummed Safe proxy address
+	To          string  // Recipient address (EIP-55 checksum)
+	AmountEther float64 // Amount in Ether (converted to Wei internally)
+	Threshold   int     // Required signer count (m in m-of-n)
+	ActionType  string  // "deposit", "payment", "transfer"
+}
+
+// CreateETHMultisigTransactionOutput is the output of the ETH multisig proposal creation use case.
+type CreateETHMultisigTransactionOutput struct {
+	FilePath string // Absolute path of the written unsigned multisig JSON file
+	UUID     string // Generated proposal UUID
+}
+
+// SendETHMultisigTransactionInput is the input for the ETH multisig submission use case.
+type SendETHMultisigTransactionInput struct {
+	FilePath string // Path to the fully signed multisig JSON file
+}
+
+// SendETHMultisigTransactionOutput is the output of the ETH multisig submission use case.
+type SendETHMultisigTransactionOutput struct {
+	TxHash string // Submitted Ethereum transaction hash
+}
+
+// ETHSafeInfoInput is the input for the ETH Safe info use case.
+type ETHSafeInfoInput struct {
+	SafeAddress string // EIP-55 checksummed Safe proxy address
+}
+
+// ETHSafeInfoOutput is the output of the ETH Safe info use case.
+type ETHSafeInfoOutput struct {
+	Owners     []string // EIP-55 checksummed owner addresses
+	Threshold  uint64   // Current signature threshold
+	Nonce      uint64   // Current Safe nonce
+	BalanceWei string   // Safe balance in Wei (decimal string)
+}

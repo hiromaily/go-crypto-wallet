@@ -27,14 +27,14 @@
 
 ## Task 2. Generate Safe ABI bindings and implement the Safe contract client
 
-- [ ] 2.1 Generate Safe v1.4.1 ABI bindings
+- [x] 2.1 Generate Safe v1.4.1 ABI bindings
   - Obtain the official Safe v1.4.1 ABI JSON from the `safe-global/safe-smart-account` repository
   - Run `abigen` to generate a typed Go client and place the output in the Safe contract bindings package under `internal/infrastructure/contract/safe/`
   - The generated file must carry the `// Code generated - DO NOT EDIT.` header
   - Add a `make safe-abi` Makefile target with a comment documenting the ABI source URL
   - _Requirements: 1_
 
-- [ ] 2.2 Implement the `SafeClient` infrastructure component
+- [x] 2.2 Implement the `SafeClient` infrastructure component
   - Create a `SafeClient` struct in `internal/infrastructure/api/eth/safe/` wrapping the generated ABI bindings and an Ethereum JSON-RPC client
   - Fetch and cache the chain ID at construction time via `client.ChainID(ctx)` — never hardcode it
   - Implement `GetSafeTxHash`: call `getTransactionHash` on the Safe contract for the given parameters and return the result as a 0x-prefixed hex string
@@ -44,7 +44,7 @@
   - The struct satisfies `SafeClientDeps` (all four narrow interfaces)
   - _Requirements: 1, 3_
 
-- [ ] 2.3 Implement the `MultisigFileRepositorier` in the file infrastructure
+- [x] 2.3 Implement the `MultisigFileRepositorier` in the file infrastructure
   - Add `WriteETHMultisigJSONFile`, `ReadETHMultisigJSONFile`, and `CreateMultisigFilePath` to the existing concrete file implementation in `internal/infrastructure/file/`
   - `CreateMultisigFilePath` produces paths of the form `{actionType}_multisig_{uuid}_{signedCount}.json`
   - The concrete implementation now satisfies both `TransactionFileRepositorier` and `MultisigFileRepositorier` without any interface change to the former
@@ -52,14 +52,14 @@
 
 ## Task 3. Implement Watch wallet use cases for multisig transaction lifecycle
 
-- [ ] 3.1 (P) Implement the multisig transaction creation use case
+- [x] 3.1 (P) Implement the multisig transaction creation use case
   - Define `CreateMultisigTransactionUseCase` interface and its input/output structs in the Watch use case interfaces file; input carries the Safe address, recipient, Ether amount, threshold, and action type
   - Generate a UUID for the proposal, convert Ether to Wei, call `SafeNonceReader` to fetch the current Safe nonce, then call `SafeTxHashComputer` with all-zero gas parameters and empty call data for a simple ETH transfer
   - Populate and write an `ETHMultisigTransactionFile` with `TxType: "unsigned"` and an empty signatures list via `MultisigFileRepositorier`
   - Output the generated file path; no database record is created
   - _Requirements: 4_
 
-- [ ] 3.2 (P) Implement the multisig transaction submission use case
+- [x] 3.2 (P) Implement the multisig transaction submission use case
   - Define `SendMultisigTransactionUseCase` interface and its input/output structs; input carries the file path, output carries the submitted transaction hash
   - Read and validate the `ETHMultisigTransactionFile`; return `ErrNotFullySigned` if `TxType` is still `"unsigned"`
   - Sort the `Signatures` slice by signer address in ascending order (hex string comparison, case-insensitive) before concatenation — this ordering is required by the Safe contract
@@ -67,7 +67,7 @@
   - Call `SafeExecuter.ExecuteSafeTransaction` and poll for the transaction receipt using the existing receipt-polling pattern; log the transaction hash on success
   - _Requirements: 6_
 
-- [ ] 3.3 (P) Implement the Safe info use case
+- [x] 3.3 (P) Implement the Safe info use case
   - Define `SafeInfoUseCase` interface and its input/output structs; input carries the Safe address, output carries owners list, threshold, nonce, and balance as a Wei decimal string
   - Call `SafeInfoReader.GetSafeInfo` and map the result to the output struct
   - _Requirements: 7_
