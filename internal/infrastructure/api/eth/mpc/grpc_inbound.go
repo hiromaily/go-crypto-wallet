@@ -28,7 +28,7 @@ const (
 // Subsequent RelaySession messages are validated against this session ID; messages with an
 // unknown or mismatched session ID are silently discarded to prevent cross-session routing.
 //
-// The MPCNodeServer (Task 4.2) calls EnqueueOutbound to send messages back to the coordinator
+// MPCNodeServer calls EnqueueOutbound to send messages back to the coordinator
 // over the open bidirectional RelaySession stream.
 type GRPCInboundTransport struct {
 	protogen.UnimplementedMPCNodeServiceServer
@@ -89,7 +89,7 @@ func (t *GRPCInboundTransport) Close() error {
 
 // EnqueueOutbound queues msg to be sent to the coordinator over the active RelaySession stream.
 // This method is NOT part of the MPCInboundTransport interface; it is called by MPCNodeServer
-// (infrastructure, Task 4.2) to relay outbound TSS protocol messages back to the coordinator.
+// to relay outbound TSS protocol messages back to the coordinator.
 func (t *GRPCInboundTransport) EnqueueOutbound(msg []byte) error {
 	select {
 	case t.sendCh <- msg:
@@ -129,6 +129,8 @@ func (t *GRPCInboundTransport) RelaySession(
 ) error {
 	recvDone := make(chan struct{})
 
+	streamCtx := stream.Context()
+
 	// Goroutine: receive from coordinator, validate session ID, forward to recvCh.
 	go func() {
 		defer close(recvDone)
@@ -144,7 +146,13 @@ func (t *GRPCInboundTransport) RelaySession(
 			if expected == "" || msg.GetSessionId() != expected {
 				continue // discard messages with unknown/mismatched session ID
 			}
-			t.recvCh <- msg.GetPayload()
+			// Use a context-aware send so the goroutine exits if the stream is cancelled
+			// rather than blocking indefinitely when the receive buffer is full.
+			select {
+			case t.recvCh <- msg.GetPayload():
+			case <-streamCtx.Done():
+				return
+			}
 		}
 	}()
 

@@ -56,7 +56,8 @@ func NewGRPCOutboundTransport() *GRPCOutboundTransport {
 //
 // If no stream exists for peerAddr, a new gRPC connection and RelaySession stream are
 // established with exponential backoff. The connection is reused on subsequent calls to the
-// same peer. The operation fails when ctx is cancelled or its deadline expires.
+// same peer. ctx is accepted for interface compatibility but is not used for stream lifetime
+// (the stream lives until Close is called).
 func (t *GRPCOutboundTransport) Send(ctx context.Context, peerAddr string, msg []byte) error {
 	pc, err := t.getOrCreatePeer(ctx, peerAddr)
 	if err != nil {
