@@ -170,7 +170,11 @@ func (c *MPCCoordinator) relayLoop(
 	}
 }
 
-// routeMessage sends wm.Data to the appropriate peer(s).
+// routeMessage forwards wm to the appropriate peer(s).
+//
+// The coordinator re-encodes a relay MPCWireMessage that preserves From and IsBroadcast
+// (so the receiving node can call tss.ParseWireMessage correctly) but clears To (the
+// recipient does not need routing metadata).
 //
 // If wm.To is empty, the message is broadcast to all peers except wm.From.
 // If wm.To is non-empty, the message is sent only to the listed party IDs.
@@ -181,13 +185,25 @@ func (c *MPCCoordinator) routeMessage(
 	wm MPCWireMessage,
 	sessionID string,
 ) error {
+	// Build relay envelope: preserve sender and broadcast flag so the node can parse
+	// the embedded TSS wire bytes with tss.ParseWireMessage(data, from, isBroadcast).
+	relay := MPCWireMessage{
+		From:        wm.From,
+		IsBroadcast: wm.IsBroadcast,
+		Data:        wm.Data,
+	}
+	relayData, err := json.Marshal(relay)
+	if err != nil {
+		return fmt.Errorf("mpc coordinator [%s]: marshal relay message: %w", sessionID, err)
+	}
+
 	if len(wm.To) == 0 {
 		// Broadcast: send to all parties except the sender.
 		for pid, addr := range partyToAddr {
 			if pid == wm.From {
 				continue
 			}
-			if err := transport.Send(ctx, addr, wm.Data); err != nil {
+			if err := transport.Send(ctx, addr, relayData); err != nil {
 				return fmt.Errorf(
 					"mpc coordinator [%s]: broadcast to %s: %w", sessionID, addr, err,
 				)
@@ -204,7 +220,7 @@ func (c *MPCCoordinator) routeMessage(
 				"session", sessionID, "party", pid)
 			continue
 		}
-		if err := transport.Send(ctx, addr, wm.Data); err != nil {
+		if err := transport.Send(ctx, addr, relayData); err != nil {
 			return fmt.Errorf(
 				"mpc coordinator [%s]: unicast to %s: %w", sessionID, addr, err,
 			)

@@ -89,7 +89,7 @@
   - Return wrapped error (with session ID) if any node drops or context times out
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7_
 
-- [ ] 4.2 Implement `MPCNodeServer` — Node-side DKG and signing participant
+- [x] 4.2 Implement `MPCNodeServer` — Node-side DKG and signing participant
   - Implement in `internal/infrastructure/api/eth/mpc/node_server.go` satisfying `MPCNodeDeps` (compile-time check: `var _ apieth.MPCNodeDeps = (*MPCNodeServer)(nil)`)
   - `GeneratePreParams(ctx, outputPath)`: call `keygen.GeneratePreParams(timeout)` from `tss-lib/v2`; marshal to JSON; write to `outputPath`
   - `RunDKG(ctx, params)`: load pre-params from `params.PreParamsPath`; create `keygen.LocalParty` with the sorted party ID set; drive DKG rounds by reading from `MPCInboundTransport.Receive()` and routing outbound messages back to the coordinator; on completion, marshal `LocalPartySaveData` to JSON and pass to `MPCKeyShardStorage.SaveShard`; return joint Ethereum address and public key

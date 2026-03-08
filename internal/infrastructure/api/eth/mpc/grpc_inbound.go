@@ -88,8 +88,8 @@ func (t *GRPCInboundTransport) Close() error {
 }
 
 // EnqueueOutbound queues msg to be sent to the coordinator over the active RelaySession stream.
-// This method is NOT part of the MPCInboundTransport interface; it is called by MPCNodeServer
-// to relay outbound TSS protocol messages back to the coordinator.
+// It implements the MPCInboundTransport.EnqueueOutbound method, allowing the node server to
+// push outbound TSS protocol messages back to the coordinator without a separate connection.
 func (t *GRPCInboundTransport) EnqueueOutbound(msg []byte) error {
 	select {
 	case t.sendCh <- msg:

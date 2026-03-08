@@ -151,10 +151,12 @@ type MPCOutboundTransport interface {
 }
 
 // MPCInboundTransport is used by MPC node servers to accept incoming TSS round messages
-// from the Watch wallet coordinator.
+// from the Watch wallet coordinator and to send TSS round messages back over the same
+// bidirectional relay stream.
 //
 // Each MPC node starts this transport before awaiting signing sessions.
-// The node reads from Receive() to drive the local tss-lib state machine.
+// The node reads from Receive() to drive the local tss-lib state machine and calls
+// EnqueueOutbound to push outbound round messages back to the coordinator.
 type MPCInboundTransport interface {
 	// Listen starts the gRPC listener on listenAddr. Non-blocking after the port is bound.
 	Listen(ctx context.Context, listenAddr string) error
@@ -162,6 +164,10 @@ type MPCInboundTransport interface {
 	// Receive returns a channel that delivers inbound TSS round messages from the coordinator.
 	// The channel is closed when Close is called or ctx is cancelled.
 	Receive(ctx context.Context) (<-chan []byte, error)
+
+	// EnqueueOutbound queues msg to be sent to the coordinator over the active RelaySession
+	// stream. Returns an error if the outbound send buffer is full.
+	EnqueueOutbound(msg []byte) error
 
 	// Close gracefully stops the gRPC listener and closes the receive channel.
 	Close() error

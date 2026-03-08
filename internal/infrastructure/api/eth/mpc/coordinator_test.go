@@ -205,6 +205,58 @@ func TestMPCCoordinator_SignTransaction_CollectsSignature(t *testing.T) {
 	assert.Equal(t, sig, result.Signature)
 }
 
+// reactiveTestNode is a coordinatorTestNode whose RelaySession sends a configured
+// reply as soon as it receives the first inbound message. This makes it possible
+// to verify routing without relying on post-Close() delivery timing.
+type reactiveTestNode struct {
+	protogen.UnimplementedMPCNodeServiceServer
+
+	mu       sync.Mutex
+	received chan []byte
+	reply    *mpcinfra.MPCWireMessage // sent after the first inbound message arrives
+}
+
+func newReactiveTestNode(reply mpcinfra.MPCWireMessage) *reactiveTestNode {
+	return &reactiveTestNode{
+		received: make(chan []byte, 64),
+		reply:    &reply,
+	}
+}
+
+func (*reactiveTestNode) InitSigning(
+	_ context.Context,
+	req *protogen.MPCSigningRequest,
+) (*protogen.MPCSigningResponse, error) {
+	return (&protogen.MPCSigningResponse_builder{SessionId: req.GetSessionId()}).Build(), nil
+}
+
+func (n *reactiveTestNode) RelaySession(
+	stream grpc.BidiStreamingServer[protogen.MPCMessage, protogen.MPCMessage],
+) error {
+	for {
+		msg, err := stream.Recv()
+		if err != nil {
+			return nil
+		}
+		n.received <- msg.GetPayload()
+
+		// On first message, send the pre-configured reply if set.
+		n.mu.Lock()
+		reply := n.reply
+		n.reply = nil
+		n.mu.Unlock()
+		if reply != nil {
+			data, err := json.Marshal(reply)
+			if err != nil {
+				return err
+			}
+			if err := stream.Send((&protogen.MPCMessage_builder{Payload: data}).Build()); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 func TestMPCCoordinator_SignTransaction_RoutesBroadcast(t *testing.T) {
 	t.Parallel()
 
@@ -213,51 +265,39 @@ func TestMPCCoordinator_SignTransaction_RoutesBroadcast(t *testing.T) {
 	sig := make([]byte, 65)
 	sig[64] = 28
 
-	// Node 1: sends a broadcast round message, then (after coordinator routes it to node 2)
-	// node 2 will send the signature.
+	// Node 1: sends a broadcast round message (no To → broadcast to all except sender).
 	roundMsg := []byte("tss-round-1-from-party-1")
 	node1 := newCoordinatorTestNode(
-		// Broadcast round message (To is empty → send to all except sender)
 		mpcinfra.MPCWireMessage{
 			From: "party-1",
 			Data: roundMsg,
 		},
 	)
 
-	// Node 2: sends the signature after receiving node 1's round message from coordinator.
-	node2 := newCoordinatorTestNode()
+	// Node 2: reactive — sends the signature after it receives node 1's routed broadcast.
+	// This guarantees that the broadcast was delivered BEFORE coord.SignTransaction returns,
+	// avoiding any post-Close() delivery race.
+	node2 := newReactiveTestNode(mpcinfra.MPCWireMessage{
+		From:        "party-2",
+		IsSignature: true,
+		Data:        sig,
+	})
 
 	addr1 := startCoordinatorTestNode(t, node1)
-	addr2 := startCoordinatorTestNode(t, node2)
 
-	// Give node 2 a way to react: it'll send the signature after receiving the routed message.
-	// We add a helper goroutine to simulate node 2 responding.
-	signalDone := make(chan struct{})
-	go func() {
-		defer close(signalDone)
-		select {
-		case payload := <-node2.received:
-			// Verify node 2 received the routed round message.
-			assert.Equal(t, roundMsg, payload)
-		case <-time.After(5 * time.Second):
-			return
-		}
-	}()
+	// Start node2's gRPC server (reactive node implements the same interface).
+	lis2, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	srv2 := grpc.NewServer()
+	protogen.RegisterMPCNodeServiceServer(srv2, node2)
+	go func() { _ = srv2.Serve(lis2) }()
+	t.Cleanup(func() { srv2.GracefulStop() })
+	addr2 := lis2.Addr().String()
 
 	coord := mpcinfra.NewMPCCoordinator(slog.Default())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
-	// For this test, node 1 sends sig immediately after the round msg to avoid
-	// a complex reactive node implementation. We layer both messages in toSend.
-	node1.mu.Lock()
-	node1.toSend = append(node1.toSend, mpcinfra.MPCWireMessage{
-		From:        "party-1",
-		IsSignature: true,
-		Data:        sig,
-	})
-	node1.mu.Unlock()
 
 	result, err := coord.SignTransaction(ctx, apieth.MPCSigningRequest{
 		SessionID: sessionID,
@@ -271,11 +311,15 @@ func TestMPCCoordinator_SignTransaction_RoutesBroadcast(t *testing.T) {
 	require.NotNil(t, result)
 	assert.Equal(t, sig, result.Signature)
 
-	// Verify the broadcast was routed to node 2.
+	// node2 received the routed broadcast message (it must have, since it replied with the sig).
 	select {
-	case <-signalDone:
-	case <-time.After(3 * time.Second):
-		t.Fatal("node 2 did not receive the routed broadcast message in time")
+	case payload := <-node2.received:
+		var relayed mpcinfra.MPCWireMessage
+		require.NoError(t, json.Unmarshal(payload, &relayed), "routed message must be valid MPCWireMessage JSON")
+		assert.Equal(t, "party-1", relayed.From)
+		assert.Equal(t, roundMsg, relayed.Data)
+	default:
+		t.Fatal("node2 did not record any received message")
 	}
 }
 

@@ -115,9 +115,18 @@ func (t *GRPCOutboundTransport) Receive(_ context.Context) (<-chan []byte, error
 	return t.recvCh, nil
 }
 
-// Close cancels the internal context, waits for all receive goroutines to exit, then closes
-// every open gRPC connection. It is safe to call Close multiple times.
+// Close half-closes all streams (flushing any pending DATA frames), cancels the internal
+// context, waits for all receive goroutines to exit, then closes every open gRPC connection.
+// Calling CloseSend before cancel ensures that DATA frames already queued in the gRPC write
+// buffer are delivered to the peer before the RST_STREAM teardown.
+// It is safe to call Close multiple times.
 func (t *GRPCOutboundTransport) Close() error {
+	t.mu.Lock()
+	for _, pc := range t.peers {
+		_ = pc.stream.CloseSend()
+	}
+	t.mu.Unlock()
+
 	t.cancel()
 	t.wg.Wait()
 
