@@ -12,6 +12,9 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGet
 	// multisig command (ETH only: Safe proxy multisig proposal)
 	parentCmd.AddCommand(newMultisigCommand(wallet))
 
+	// mpc command (ETH only: MPC/TSS threshold signing)
+	parentCmd.AddCommand(newMPCCommand(wallet))
+
 	// deposit command
 	var (
 		depositFee    float64

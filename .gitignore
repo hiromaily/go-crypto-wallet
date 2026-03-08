@@ -38,6 +38,7 @@ data/dump/*
 data/fullpubkey/*
 data/keystore/*
 data/logs/*
+data/mpc/*
 data/tx/*
 data/gaiad/*
 data/sqlite/**/*.db

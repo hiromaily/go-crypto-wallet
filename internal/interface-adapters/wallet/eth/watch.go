@@ -25,6 +25,8 @@ type ETHWatch struct {
 	createMultisigTxUseCase watchusecase.CreateETHMultisigTransactionUseCase
 	sendMultisigTxUseCase   watchusecase.SendETHMultisigTransactionUseCase
 	safeInfoUseCase         watchusecase.ETHSafeInfoUseCase
+	createMPCTxUseCase      watchusecase.CreateMPCTransactionUseCase
+	sendMPCTxUseCase        watchusecase.SendMPCTransactionUseCase
 }
 
 // NewETHWatch returns ETHWatch object
@@ -39,6 +41,8 @@ func NewETHWatch(
 	createMultisigTxUseCase watchusecase.CreateETHMultisigTransactionUseCase,
 	sendMultisigTxUseCase watchusecase.SendETHMultisigTransactionUseCase,
 	safeInfoUseCase watchusecase.ETHSafeInfoUseCase,
+	createMPCTxUseCase watchusecase.CreateMPCTransactionUseCase,
+	sendMPCTxUseCase watchusecase.SendMPCTransactionUseCase,
 	walletType domainWallet.WalletType,
 ) *ETHWatch {
 	return &ETHWatch{
@@ -53,6 +57,8 @@ func NewETHWatch(
 		createMultisigTxUseCase: createMultisigTxUseCase,
 		sendMultisigTxUseCase:   sendMultisigTxUseCase,
 		safeInfoUseCase:         safeInfoUseCase,
+		createMPCTxUseCase:      createMPCTxUseCase,
+		sendMPCTxUseCase:        sendMPCTxUseCase,
 	}
 }
 
@@ -163,6 +169,41 @@ func (w *ETHWatch) SendMultisigTx(filePath string) (string, error) {
 		watchusecase.SendETHMultisigTransactionInput{
 			FilePath: filePath,
 		})
+	if err != nil {
+		return "", err
+	}
+	return output.TxHash, nil
+}
+
+// CreateMPCTx creates an unsigned ETH MPC transaction file.
+func (w *ETHWatch) CreateMPCTx(
+	ctx context.Context,
+	from, to string,
+	amount float64,
+	threshold int,
+	partyIDs []string,
+	actionType string,
+) (filePath string, txHash string, err error) {
+	output, err := w.createMPCTxUseCase.Execute(ctx, watchusecase.CreateMPCTransactionInput{
+		FromAddress: from,
+		ToAddress:   to,
+		AmountEther: amount,
+		ActionType:  actionType,
+		Threshold:   threshold,
+		PartyIDs:    partyIDs,
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return output.FilePath, output.TxHash, nil
+}
+
+// SendMPCTx initiates an MPC signing session and broadcasts the signed transaction.
+func (w *ETHWatch) SendMPCTx(ctx context.Context, filePath string, peerAddrs []string) (txHash string, err error) {
+	output, err := w.sendMPCTxUseCase.Execute(ctx, watchusecase.SendMPCTransactionInput{
+		FilePath:  filePath,
+		PeerAddrs: peerAddrs,
+	})
 	if err != nil {
 		return "", err
 	}

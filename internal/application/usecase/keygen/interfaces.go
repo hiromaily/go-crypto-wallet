@@ -79,6 +79,45 @@ type SignMultisigTransactionUseCase interface {
 	Sign(ctx context.Context, input SignMultisigTransactionInput) (SignMultisigTransactionOutput, error)
 }
 
+// RunDKGUseCase runs the DKG ceremony for this node, saves the encrypted key shard, and
+// returns the joint Ethereum address shared by all ceremony participants.
+type RunDKGUseCase interface {
+	Execute(ctx context.Context, input RunDKGInput) (RunDKGOutput, error)
+}
+
+// ServeMPCUseCase starts the MPC node gRPC daemon that accepts signing sessions from the
+// Watch wallet coordinator. It blocks until ctx is cancelled (graceful shutdown).
+type ServeMPCUseCase interface {
+	Serve(ctx context.Context, input ServeMPCInput) error
+}
+
+// RunDKGInput carries the configuration for a DKG ceremony on this node.
+type RunDKGInput struct {
+	PartyID         string
+	AllPartyIDs     []string
+	Threshold       int
+	ListenAddr      string // gRPC listen address for this node in P2P DKG mode (e.g., "localhost:9001")
+	PeerAddrs       []string
+	PreParamsPath   string
+	ShardOutputPath string
+	Passphrase      string
+}
+
+// RunDKGOutput carries the result of a successful DKG ceremony.
+type RunDKGOutput struct {
+	EthAddress string // Checksummed joint Ethereum address
+	ShardPath  string // Filesystem path where the encrypted shard was saved
+}
+
+// ServeMPCInput carries the configuration for starting the MPC signing daemon.
+type ServeMPCInput struct {
+	ListenAddr  string
+	ShardPath   string
+	Passphrase  string
+	PartyID     string
+	AllPartyIDs []string
+}
+
 // GenerateDescriptorUseCase generates descriptors for an account (single-sig or multisig)
 type GenerateDescriptorUseCase interface {
 	Generate(ctx context.Context, input GenerateDescriptorInput) (GenerateDescriptorOutput, error)

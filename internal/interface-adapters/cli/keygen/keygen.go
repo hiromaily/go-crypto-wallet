@@ -9,8 +9,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	btcapi "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/create"
+	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/dkg"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/export"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/imports"
+	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/serve"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/sign"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
@@ -51,6 +53,22 @@ func AddCommands(
 	}
 	rootCmd.AddCommand(signCmd)
 	sign.AddCommands(signCmd, wallet, containerGetter)
+
+	// DKG command (ETH only: MPC/TSS Distributed Key Generation)
+	dkgCmd := &cobra.Command{
+		Use:   "dkg",
+		Short: "MPC/TSS Distributed Key Generation commands (ETH only)",
+	}
+	rootCmd.AddCommand(dkgCmd)
+	dkg.AddCommands(dkgCmd, wallet)
+
+	// Serve command (ETH only: MPC node daemon)
+	serveCmd := &cobra.Command{
+		Use:   "serve",
+		Short: "Start wallet service daemons",
+	}
+	rootCmd.AddCommand(serveCmd)
+	serve.AddCommands(serveCmd, wallet)
 
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{
