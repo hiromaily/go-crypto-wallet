@@ -5,10 +5,9 @@ paths: ["scripts/operation/btc/e2e/**"]
 # BTC E2E Script Development Rules
 
 Rules applied when creating or modifying Bitcoin E2E scripts.
+**Also load**: `.claude/rules/chains/e2e-script.md` for universal E2E rules (DB config, Makefile policy, security, etc.).
 
 ## Required Documentation
-
-Read the following documents before creating or modifying scripts:
 
 | Document                                                 | Contents                                                    |
 | -------------------------------------------------------- | ----------------------------------------------------------- |
@@ -18,11 +17,7 @@ Read the following documents before creating or modifying scripts:
 | `pkg/config/README.md`                                   | Configuration override via environment variables            |
 | `config/wallet/README.md`                                | Wallet configuration file policies                          |
 
-## Script Structure Conventions
-
-### Header Comments
-
-Each script must include header comments in the following format:
+## Script Header Template
 
 ```bash
 #!/usr/bin/env bash
@@ -52,7 +47,7 @@ Each script must include header comments in the following format:
 #   - config/wallet/btc/keygen.yaml: address_type: "[type]"
 ```
 
-### Environment Variable Section
+## Environment Variable Override Section
 
 ```bash
 ###############################################################################
@@ -66,9 +61,7 @@ Each script must include header comments in the following format:
 export WALLET_ADDRESS_TYPE="[type]"
 ```
 
-### Account Configuration Files
-
-Use the appropriate configuration file based on the pattern:
+## Account Configuration Files
 
 | Pattern         | Account Config                            |
 | --------------- | ----------------------------------------- |
@@ -76,98 +69,45 @@ Use the appropriate configuration file based on the pattern:
 | 2-of-3 Multisig | `config/wallet/account/account_2of3.yaml` |
 | 3-of-3 Multisig | `config/wallet/account/account_3of3.yaml` |
 
-## Database Configuration
-
-E2E scripts support two database backends via the `DB_TYPE` environment variable:
-
-| DB_TYPE                | Description            | Docker MySQL | Use Case              |
-| ---------------------- | ---------------------- | ------------ | --------------------- |
-| `sqlite` (**default**) | Local SQLite file      | Not required | Fast testing, CI/CD   |
-| `mysql`                | Docker MySQL container | Required     | Full integration test |
-
-### Usage
-
-```bash
-# SQLite (default) - faster startup, no Docker MySQL needed
-make btc-e2e-reset P=1
-
-# MySQL - traditional Docker-based testing
-make btc-e2e-reset P=1 DB=mysql
-```
-
-### SQLite Configuration Variables
+## Database Configuration (BTC-Specific)
 
 | Variable         | Default                    | Description          |
 | ---------------- | -------------------------- | -------------------- |
 | `DB_TYPE`        | `sqlite`                   | Database type        |
 | `SQLITE_DB_PATH` | `./data/sqlite/btc/e2e.db` | SQLite database file |
 
-### How It Works
-
-When `DB_TYPE=sqlite`:
-
-1. Environment variables `WALLET_DATABASE_TYPE` and `WALLET_DATABASE_SQLITE_PATH` are exported
-2. All wallet commands (watch, keygen, sign) use SQLite instead of MySQL
-3. `btc_setup_infrastructure` initializes SQLite with all schemas
-4. No Docker MySQL container is started
+When `DB_TYPE=sqlite`, `btc_setup_infrastructure` initializes SQLite with all schemas. No Docker MySQL container is started.
 
 ### Database Debug Commands
 
-Use the database abstraction functions from `btc_common.sh` for queries:
-
 ```bash
-# Query addresses (works with both SQLite and MySQL)
-db_query "watch" "SELECT wallet_address, account FROM address WHERE coin='btc' LIMIT 10"
-
-# Query payment requests
-db_query "watch" "SELECT * FROM payment_request WHERE coin='btc'"
-
-# Query account keys
+# Via btc_common.sh abstraction (works for both SQLite and MySQL)
+db_query "watch"  "SELECT wallet_address, account FROM address WHERE coin='btc' LIMIT 10"
+db_query "watch"  "SELECT * FROM payment_request WHERE coin='btc'"
 db_query "keygen" "SELECT * FROM account_key LIMIT 5"
 ```
 
-**Manual queries** (when abstraction functions are not available):
+| DB_TYPE  | Manual query command                                                                     |
+| -------- | ---------------------------------------------------------------------------------------- |
+| `sqlite` | `sqlite3 ./data/sqlite/btc/e2e.db "SELECT ..."`                                          |
+| `mysql`  | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."`        |
 
-| DB_TYPE  | Command                                                                          |
-| -------- | -------------------------------------------------------------------------------- |
-| `sqlite` | `sqlite3 ./data/sqlite/btc/e2e.db "SELECT ..."`                                  |
-| `mysql`  | `docker compose exec -T wallet-mysql mysql -u root -proot watch -e "SELECT ..."` |
+## Address Type Configuration
 
-## Configuration File Policy (Important)
+⚠️ **CRITICAL**: For P2TR patterns (9, 10, 11), use `address_type="taproot"` NOT `"bech32m"`. See `btc-terminology` skill for details.
 
-### ❌ Do NOT Edit Config Files Directly
+`key_type` is **automatically derived** from `address_type` — do not set `WALLET_KEY_TYPE` explicitly.
 
-Do **not** edit configuration files (`btc/watch.yaml`, `btc/keygen.yaml`, etc.) directly.
-Use **environment variables** to override settings when different values are needed.
-
-### ✅ Override via Environment Variables
-
-```bash
-# Export within the script
-export WALLET_ADDRESS_TYPE="legacy"
-
-# Priority order:
-# 1. Environment Variables (highest priority)
-# 2. Config File
-# 3. Default Values (lowest priority)
-```
-
-### Automatic key_type Derivation
-
-`key_type` is **automatically derived** from `address_type`. The `WALLET_KEY_TYPE` environment variable is not needed.
-
-| address_type          | Derived key_type | Use Case                                 |
-| --------------------- | ---------------- | ---------------------------------------- |
-| `legacy`              | `bip44`          | P2PKH (Pattern 1, 2)                     |
+| address_type          | Derived key_type | Use Case                                  |
+| --------------------- | ---------------- | ----------------------------------------- |
+| `legacy`              | `bip44`          | P2PKH (Pattern 1, 2)                      |
 | `p2sh-segwit`         | `bip49`          | P2SH-P2WPKH/P2SH-P2WSH (Pattern 3, 4, 8) |
-| `bech32`              | `bip84`          | Native SegWit (Pattern 5, 6, 7)          |
-| `taproot` / `bech32m` | `bip86`          | Taproot (Pattern 9, 10, 11)              |
+| `bech32`              | `bip84`          | Native SegWit (Pattern 5, 6, 7)           |
+| `taproot` / `bech32m` | `bip86`          | Taproot (Pattern 9, 10, 11)               |
 
 Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 
-## Pattern-Specific Settings
-
-⚠️ **CRITICAL**: For P2TR patterns (9, 10, 11), use `address_type="taproot"` NOT `"bech32m"`. See `btc-terminology` skill for details.
+## Transaction Patterns
 
 | Pattern | Description                     | address_type  | Address Format         | Signature |
 | ------- | ------------------------------- | ------------- | ---------------------- | --------- |
@@ -183,32 +123,9 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 | 10      | P2TR MuSig2 N-of-N              | `taproot`     | `bcrt1p...`            | N-of-N    |
 | 11      | P2TR Tapscript M-of-N           | `taproot`     | `bcrt1p...`            | M-of-N    |
 
-**Note**: `address_type` values represent **address types** (semantic), NOT encoding formats. "bech32m" is an encoding format used by Taproot addresses, but you configure the type as "taproot". See `.claude/skills/btc-terminology/SKILL.md` for details.
+## Makefile Targets
 
-## E2E Execution Rules
-
-### ⚠️ MANDATORY: Always Use Makefile Targets
-
-**AI Agents and developers MUST use Makefile targets to run E2E tests.**
-Do NOT execute E2E scripts directly.
-
-```bash
-# ✅ CORRECT: Use Makefile target
-make btc-e2e-reset P=2
-
-# ❌ WRONG: Do not run scripts directly
-./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh --reset
-```
-
-### Why Makefile Targets?
-
-1. **Automatic Build**: `make btc-e2e-reset` includes `build-all` as a dependency
-   - Incremental build: only rebuilds when Go sources change
-   - No need to run `make build-all` separately
-2. **Consistent Environment**: Properly sets `DB_TYPE` and other variables
-3. **Validated Patterns**: Validates pattern number before execution
-
-### Available Makefile Targets
+Add targets to `make/btc_e2e.mk`. Naming convention: `btc-e2e-pN`.
 
 | Target                     | Description                          |
 | -------------------------- | ------------------------------------ |
@@ -217,137 +134,6 @@ make btc-e2e-reset P=2
 | `make btc-e2e-verbose P=N` | Run with verbose output              |
 | `make btc-e2e-ci P=N`      | Run in non-interactive mode          |
 | `make btc-e2e-cleanup P=N` | Cleanup only                         |
-
-### Verification After Go Code Changes
-
-```bash
-# 1. Lint, build, and test
-make go-lint && make check-build && make go-test
-
-# 2. Run E2E test (build is automatic via dependency)
-make btc-e2e-reset P=N
-```
-
-### Verification After Shell Script Changes
-
-```bash
-make shfmt
-```
-
-## Retry Limit
-
-**If the fix-test cycle exceeds 5 iterations, organize progress and report.**
-
-### Escalation Conditions
-
-- Same error occurs repeatedly
-- Deep understanding of Bitcoin specifications required
-- Large-scale Go code changes needed
-
-### Progress Report Format
-
-```markdown
-## Progress Report
-
-### Error Details
-
-[Error message that occurred]
-
-### Attempted Fixes
-
-1. [Fix attempt 1]
-2. [Fix attempt 2]
-
-### Current State
-
-[Description of current state]
-
-### Environment Variable Status
-
-- WALLET_ADDRESS_TYPE: [value]
-
-### Next Steps
-
-[Required next actions]
-```
-
-## Security Rules
-
-- ❌ Do NOT log private keys
-- ❌ Do NOT use test passphrases/RPC credentials in production
-- Reference: `docs/guidelines/security.md`
-
-## Avoiding Impact on Other Patterns
-
-### When Modifying common.sh
-
-- Always verify impact on other E2E patterns
-- Do not break existing pattern behavior
-
-### Pattern-Specific Changes
-
-- Set environment variables locally within each script
-- Confirm regression with unit tests when modifying shared code
-
-## Common Errors
-
-### "No utxo" Error
-
-1. Verify Descriptor is correctly imported
-2. Confirm block generation (101+) is complete
-3. Check `address_type` is correct
-
-```bash
-# Debug
-docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch \
-  getaddressinfo "<address>"
-```
-
-### address_type Mismatch
-
-When generated address differs from expected:
-
-```bash
-# Check environment variable
-echo $WALLET_ADDRESS_TYPE
-```
-
-### duplicate key Error
-
-When data from previous execution remains:
-
-```bash
-make btc-e2e-pN-reset  # e.g., make btc-e2e-p1-reset
-```
-
-## Makefile Targets
-
-Add targets to `make/btc_e2e.mk` when creating new scripts.
-
-**Naming Convention**: `btc-e2e-pN` where N is the pattern number.
-
-```makefile
-# Example for Pattern 1 (e2e-p1-p2pkh-singlesig.sh)
-.PHONY: btc-e2e-p1-reset
-btc-e2e-p1-reset:
-  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --reset
-
-.PHONY: btc-e2e-p1
-btc-e2e-p1:
-  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
-
-.PHONY: btc-e2e-p1-verbose
-btc-e2e-p1-verbose:
-  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose
-
-.PHONY: btc-e2e-p1-ci
-btc-e2e-p1-ci:
-  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --non-interactive
-
-.PHONY: btc-e2e-p1-cleanup
-btc-e2e-p1-cleanup:
-  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --cleanup
-```
 
 **Current Scripts**:
 
@@ -365,11 +151,26 @@ btc-e2e-p1-cleanup:
 | 10      | `e2e-p10-p2tr-musig2.sh`          | `btc-e2e-p10` | ✅     |
 | 11      | `e2e-p11-p2tr-tapscript.sh`       | `btc-e2e-p11` | ✅     |
 
-## Related Skills
+## Common Errors
 
-| Skill             | Use Case                     |
-| ----------------- | ---------------------------- |
-| `shell-scripts`   | Script creation/modification |
-| `go-development`  | Go code changes              |
-| `makefile-update` | Makefile updates             |
-| `git-workflow`    | Branch management            |
+### "No utxo" Error
+
+1. Verify Descriptor is correctly imported
+2. Confirm block generation (101+) is complete
+3. Check `address_type` is correct
+
+```bash
+docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch getaddressinfo "<address>"
+```
+
+### address_type Mismatch
+
+```bash
+echo $WALLET_ADDRESS_TYPE
+```
+
+### duplicate key Error (Data from Previous Run)
+
+```bash
+make btc-e2e-reset P=N
+```
