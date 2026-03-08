@@ -24,6 +24,9 @@ type ETHKeygen struct {
 	exportFullPubkeyUseCase keygenusecase.ExportFullPubkeyUseCase
 	signTxUseCase           keygenusecase.SignTransactionUseCase
 	signMultisigTxUseCase   keygenusecase.SignMultisigTransactionUseCase
+	runDKGUseCase           keygenusecase.RunDKGUseCase
+	serveMPCUseCase         keygenusecase.ServeMPCUseCase
+	mpcKeyGenerator         apieth.MPCKeyGeneratorPort
 	signerAddress           string
 }
 
@@ -39,6 +42,9 @@ func NewETHKeygen(
 	exportFullPubkeyUseCase keygenusecase.ExportFullPubkeyUseCase,
 	signTxUseCase keygenusecase.SignTransactionUseCase,
 	signMultisigTxUseCase keygenusecase.SignMultisigTransactionUseCase,
+	runDKGUseCase keygenusecase.RunDKGUseCase,
+	serveMPCUseCase keygenusecase.ServeMPCUseCase,
+	mpcKeyGenerator apieth.MPCKeyGeneratorPort,
 ) *ETHKeygen {
 	return &ETHKeygen{
 		ETH:                     eth,
@@ -51,6 +57,9 @@ func NewETHKeygen(
 		exportFullPubkeyUseCase: exportFullPubkeyUseCase,
 		signTxUseCase:           signTxUseCase,
 		signMultisigTxUseCase:   signMultisigTxUseCase,
+		runDKGUseCase:           runDKGUseCase,
+		serveMPCUseCase:         serveMPCUseCase,
+		mpcKeyGenerator:         mpcKeyGenerator,
 	}
 }
 
@@ -167,6 +176,21 @@ func (k *ETHKeygen) SignTx(filePath string) (string, bool, string, error) {
 	isDone := output.UnsignedCount == 0
 
 	return output.FilePath, isDone, "", nil
+}
+
+// RunDKG runs the DKG ceremony for this MPC node.
+func (k *ETHKeygen) RunDKG(ctx context.Context, input keygenusecase.RunDKGInput) (keygenusecase.RunDKGOutput, error) {
+	return k.runDKGUseCase.Execute(ctx, input)
+}
+
+// ServeMPC starts the MPC node gRPC daemon and blocks until ctx is cancelled.
+func (k *ETHKeygen) ServeMPC(ctx context.Context, input keygenusecase.ServeMPCInput) error {
+	return k.serveMPCUseCase.Serve(ctx, input)
+}
+
+// GeneratePreParams generates Paillier pre-computation parameters and writes them to outputPath.
+func (k *ETHKeygen) GeneratePreParams(ctx context.Context, outputPath string) error {
+	return k.mpcKeyGenerator.GeneratePreParams(ctx, outputPath)
 }
 
 // Done should be called before exit

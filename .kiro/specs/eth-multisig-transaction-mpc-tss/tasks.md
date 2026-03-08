@@ -146,27 +146,27 @@
 
 ---
 
-- [ ] 6. Update wallet adapters and add CLI commands for the MPC flow
-- [ ] 6.1 (P) Extend `ETHWatch` wallet adapter with MPC use case fields and methods
+- [x] 6. Update wallet adapters and add CLI commands for the MPC flow
+- [x] 6.1 (P) Extend `ETHWatch` wallet adapter with MPC use case fields and methods
   - Add `createMPCTxUseCase watchusecase.CreateMPCTransactionUseCase` and `sendMPCTxUseCase watchusecase.SendMPCTransactionUseCase` fields to `internal/interface-adapters/wallet/eth/watch.go`
   - Add public method `CreateMPCTx(ctx, from, to string, amount float64, threshold int, partyIDs []string, actionType string) (filePath string, txHash string, err error)` delegating to the use case
   - Add public method `SendMPCTx(ctx, filePath string, peerAddrs []string) (txHash string, err error)` delegating to the use case
   - _Requirements: 9.1, 9.2, 9.5, 9.6_
 
-- [ ] 6.2 (P) Extend `ETHKeygen` wallet adapter with DKG and serve use case fields and methods
+- [x] 6.2 (P) Extend `ETHKeygen` wallet adapter with DKG and serve use case fields and methods
   - Add `runDKGUseCase keygenusecase.RunDKGUseCase` and `serveMPCUseCase keygenusecase.ServeMPCUseCase` fields to `internal/interface-adapters/wallet/eth/keygen.go`
   - Add public method `RunDKG(ctx context.Context, input keygenusecase.RunDKGInput) (keygenusecase.RunDKGOutput, error)` delegating to the use case
   - Add public method `ServeMPC(ctx context.Context, input keygenusecase.ServeMPCInput) error` delegating to the use case
   - Add public method `GeneratePreParams(ctx context.Context, outputPath string) error` calling `MPCKeyGeneratorPort.GeneratePreParams`
   - _Requirements: 9.3, 9.4, 9.5, 9.6_
 
-- [ ] 6.3 (P) Add `watch create mpc` and `watch send mpc` Cobra CLI commands
+- [x] 6.3 (P) Add `watch create mpc` and `watch send mpc` Cobra CLI commands
   - Add `internal/interface-adapters/cli/watch/create/mpc.go`: validate `--from`, `--to`, `--amount`, `--action-type`, `--threshold`, `--party-ids` flags; call `ETHWatch.CreateMPCTx`; print the file path on success
   - Add `internal/interface-adapters/cli/watch/send/mpc.go`: validate `--file` and `--peer-addrs` flags; call `ETHWatch.SendMPCTx`; print the transaction hash on success
   - Return a descriptive error for any missing or invalid CLI input without invoking use cases
   - _Requirements: 9.1, 9.2, 9.5, 9.6_
 
-- [ ] 6.4 (P) Add `keygen dkg`, `keygen pre-params`, and `keygen serve mpc` Cobra CLI commands
+- [x] 6.4 (P) Add `keygen dkg`, `keygen pre-params`, and `keygen serve mpc` Cobra CLI commands
   - Add `internal/interface-adapters/cli/keygen/dkg/dkg.go` with `dkg` subcommand (flags: `--threshold`, `--parties`, `--party-id`, `--peers`, `--pre-params-path`, `--shard-output`, `--passphrase`); call `ETHKeygen.RunDKG`
   - Add `pre-params` subcommand (flag: `--output`); call `ETHKeygen.GeneratePreParams`; print the output path on success
   - Add `internal/interface-adapters/cli/keygen/serve/mpc.go` with `serve mpc` subcommand (flags: `--listen-addr`, `--shard-path`, `--passphrase`, `--party-id`, `--all-party-ids`); call `ETHKeygen.ServeMPC`; run until SIGINT

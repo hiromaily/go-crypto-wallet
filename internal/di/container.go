@@ -36,6 +36,7 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
+	mpcinfra "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/mpc"
 	safeinfra "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/safe"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
@@ -47,6 +48,7 @@ import (
 	watchsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/sqlite"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/descriptor"
+	mpcfile "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/mpc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	infraKeyGen "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key/generator"
@@ -239,6 +241,9 @@ func (c *container) newETHKeygener() wallets.Keygener {
 		c.newETHKeygenExportFullPubkeyUseCase(),
 		c.newETHKeygenSignTransactionUseCase(),
 		c.newETHKeygenSignMultisigTransactionUseCase(),
+		c.newETHKeygenRunDKGUseCase(),
+		c.newETHKeygenServeMPCUseCase(),
+		c.newMPCNodeServer(),
 	)
 }
 
@@ -393,6 +398,8 @@ func (c *container) newETHWalleter() wallets.Watcher {
 		c.newETHWatchCreateMultisigTransactionUseCase(),
 		c.newETHWatchSendMultisigTransactionUseCase(),
 		c.newETHWatchSafeInfoUseCase(),
+		c.newETHWatchCreateMPCTransactionUseCase(),
+		c.newETHWatchSendMPCTransactionUseCase(),
 		c.walletType,
 	)
 }
@@ -1625,6 +1632,24 @@ func (c *container) newETHWatchSafeInfoUseCase() watchusecase.ETHSafeInfoUseCase
 	)
 }
 
+// ETH MPC/TSS Watch Use Cases
+
+func (c *container) newETHWatchCreateMPCTransactionUseCase() watchusecase.CreateMPCTransactionUseCase {
+	return watchusecaseeth.NewCreateMPCTransactionUseCase(
+		c.newETH(), // TxCreator
+		c.newMPCFileRepo(),
+		c.pkgContainer.NewUUIDHandler(),
+	)
+}
+
+func (c *container) newETHWatchSendMPCTransactionUseCase() watchusecase.SendMPCTransactionUseCase {
+	return watchusecaseeth.NewSendMPCTransactionUseCase(
+		c.newMPCCoordinator(), // MPCTransactionSigner
+		c.newETH(),            // TxSender
+		c.newMPCFileRepo(),
+	)
+}
+
 // XRP Watch Use Cases
 
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
@@ -1915,6 +1940,45 @@ func (c *container) newETHKeygenSignMultisigTransactionUseCase() keygenusecase.S
 
 func (c *container) newMultisigFileRepo() file.MultisigFileRepositorier {
 	return transaction.NewTransactionFileRepository(c.conf.FilePath.Tx)
+}
+
+// ETH MPC/TSS Keygen Use Cases
+
+func (c *container) newETHKeygenRunDKGUseCase() keygenusecase.RunDKGUseCase {
+	return keygenusecaseeth.NewRunDKGUseCase(c.newMPCNodeServer())
+}
+
+func (c *container) newETHKeygenServeMPCUseCase() keygenusecase.ServeMPCUseCase {
+	return keygenusecaseeth.NewServeMPCUseCase(
+		c.newMPCShardStore(),
+		c.newGRPCInboundTransport(),
+	)
+}
+
+// MPC Infrastructure Factories
+
+func (*container) newMPCShardStore() *mpcfile.MPCShardStore {
+	return mpcfile.NewMPCShardStore()
+}
+
+func (*container) newGRPCInboundTransport() *mpcinfra.GRPCInboundTransport {
+	return mpcinfra.NewGRPCInboundTransport()
+}
+
+func (*container) newMPCCoordinator() *mpcinfra.MPCCoordinator {
+	return mpcinfra.NewMPCCoordinator(nil) // uses slog.Default() when nil
+}
+
+func (c *container) newMPCNodeServer() *mpcinfra.MPCNodeServer {
+	return mpcinfra.NewMPCNodeServer(
+		c.newGRPCInboundTransport(),
+		c.newMPCShardStore(),
+		nil, // uses slog.Default() when nil
+	)
+}
+
+func (c *container) newMPCFileRepo() *mpcfile.MPCFileRepository {
+	return mpcfile.NewMPCFileRepository(c.conf.FilePath.Tx)
 }
 
 func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {

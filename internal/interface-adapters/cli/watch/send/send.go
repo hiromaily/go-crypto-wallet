@@ -22,6 +22,9 @@ func AddCommand(wallet *wallets.Watcher, containerGetter func() di.Container) *c
 	// tx target
 	cmd.AddCommand(newTxCommand(containerGetter))
 
+	// mpc target (ETH only: MPC/TSS threshold signing)
+	cmd.AddCommand(newSendMPCCommand(wallet))
+
 	// multisig target (BTC: MuSig2, XRP: multisig)
 	addMultisigCommands(cmd, wallet, containerGetter)
 
