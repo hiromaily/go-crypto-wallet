@@ -1,5 +1,5 @@
 ---
-paths: ["scripts/operation/btc/e2e/**", "scripts/operation/bch/e2e/**", "scripts/operation/eth/e2e/**"]
+paths: ["scripts/operation/btc/e2e/**", "scripts/operation/bch/e2e/**", "scripts/operation/eth/e2e/**", "scripts/operation/xrp/e2e/**"]
 ---
 
 # E2E Script Development Rules (All Chains)
@@ -10,6 +10,7 @@ For chain-specific rules, see the per-chain files:
 - BTC: `.claude/rules/chains/btc/e2e-script.md`
 - BCH: `.claude/rules/chains/bch/e2e-script.md`
 - ETH: `.claude/rules/chains/eth/e2e-script.md`
+- XRP: `.claude/rules/chains/xrp/e2e-script.md`
 
 ## Standard Script Options
 
