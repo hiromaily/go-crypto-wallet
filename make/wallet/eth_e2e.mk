@@ -67,19 +67,56 @@ eth-e2e-p2-cleanup:
 	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p2.sh --cleanup
 
 ###############################################################################
+# E2E Tests
+#
+# Pattern 3: Safe 2-of-2 multisig payment
+#   NODE_TYPE: anvil (default) or geth
+#   DB:        sqlite (default) or mysql
+#
+# Requires:
+#   - Anvil running (started automatically)
+#   - apps/eth-contracts/node_modules installed (bun install in eth-contracts)
+#
+# Usage:
+#   make eth-e2e-p3-reset             # Run with Anvil + SQLite (full reset)
+#   make eth-e2e-p3                   # Run without reset
+#   make eth-e2e-p3-ci                # Non-interactive (CI mode)
+###############################################################################
+
+.PHONY: eth-e2e-p3-reset
+eth-e2e-p3-reset: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --reset
+
+.PHONY: eth-e2e-p3
+eth-e2e-p3: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh
+
+.PHONY: eth-e2e-p3-verbose
+eth-e2e-p3-verbose: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --verbose
+
+.PHONY: eth-e2e-p3-ci
+eth-e2e-p3-ci: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --non-interactive
+
+.PHONY: eth-e2e-p3-cleanup
+eth-e2e-p3-cleanup:
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --cleanup
+
+###############################################################################
 # Parallel E2E Testing - Run Multiple Patterns Concurrently
 ###############################################################################
 # Usage:
-#   make eth-e2e-parallel                          # Run all patterns (P1-P2) in parallel
+#   make eth-e2e-parallel                          # Run all patterns (P1-P3) in parallel
 #   make eth-e2e-parallel PATTERNS=1,2             # Run specific patterns
 #   make eth-e2e-parallel MAX_PARALLEL=1           # Limit concurrent processes
 #   make eth-e2e-ci-all                            # Run all patterns in CI mode
 #
 # Parameters:
-#   PATTERNS      - Comma-separated list or range (e.g., "1,2" or "1-2")
-#                   Default: "1-2" (all patterns)
+#   PATTERNS      - Comma-separated list or range (e.g., "1,2,3" or "1-3")
+#                   Default: "1-3" (all patterns)
 #   MAX_PARALLEL  - Maximum number of concurrent processes
-#                   Default: 2 (all patterns run in parallel)
+#                   Default: 3 (all patterns run in parallel)
 #   VERBOSE       - Show real-time output (true/false)
 #                   Default: false
 #
@@ -91,8 +128,8 @@ eth-e2e-p2-cleanup:
 ###############################################################################
 
 # Default parameters
-PATTERNS ?= 1-2
-MAX_PARALLEL ?= 2
+PATTERNS ?= 1-3
+MAX_PARALLEL ?= 3
 VERBOSE ?= false
 
 # Parallel runner script path
@@ -106,8 +143,8 @@ endif
 
 # Run E2E tests in parallel
 # Note: build-all uses incremental build - only rebuilds when Go sources change
-# Usage: make eth-e2e-parallel [PATTERNS=1-2] [MAX_PARALLEL=2] [VERBOSE=true]
-#  e.g. make eth-e2e-parallel PATTERNS=1-2 MAX_PARALLEL=2
+# Usage: make eth-e2e-parallel [PATTERNS=1-3] [MAX_PARALLEL=3] [VERBOSE=true]
+#  e.g. make eth-e2e-parallel PATTERNS=1-3 MAX_PARALLEL=3
 .PHONY: eth-e2e-parallel
 eth-e2e-parallel: build-all
 	NODE_TYPE="$(NODE_TYPE)" $(E2E_ETH_PARALLEL_SCRIPT) --patterns "$(PATTERNS)" --max-parallel "$(MAX_PARALLEL)" $(ETH_VERBOSE_FLAG)

@@ -15,6 +15,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
+	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
 	xrpwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/xrp"
 )
 
@@ -23,15 +24,19 @@ import (
 func addMultisigCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGetter func() di.Container) {
 	multisigCmd := &cobra.Command{
 		Use:   "multisig",
-		Short: "Multi-signature operations (BTC: MuSig2, XRP: multisig)",
+		Short: "Multi-signature operations (BTC: MuSig2, ETH: Safe, XRP: multisig)",
 		Long: `Multi-signature transaction operations.
 BTC: MuSig2 nonce collection and signature aggregation.
+ETH: Submit a fully signed Safe multisig transaction.
 XRP: Signer list management, multi-signature transaction creation and submission.`,
 	}
 
 	// BTC MuSig2 subcommands
 	multisigCmd.AddCommand(newCollectNoncesCommand(wallet, containerGetter))
 	multisigCmd.AddCommand(newAggregateCommand(wallet, containerGetter))
+
+	// ETH Safe multisig subcommand
+	multisigCmd.AddCommand(newSendETHMultisigCommand(wallet))
 
 	// XRP multisig subcommands
 	multisigCmd.AddCommand(newSetRegularKeyCommand(wallet, containerGetter))
@@ -41,6 +46,51 @@ XRP: Signer list management, multi-signature transaction creation and submission
 	multisigCmd.AddCommand(newSubmitMultisigTxCommand(wallet, containerGetter))
 
 	parentCmd.AddCommand(multisigCmd)
+}
+
+// --- ETH Safe multisig commands ---
+
+func newSendETHMultisigCommand(wallet *wallets.Watcher) *cobra.Command {
+	var filePath string
+
+	cmd := &cobra.Command{
+		Use:   "send-eth",
+		Short: "Submit a fully signed Safe multisig transaction to Ethereum (ETH only)",
+		Long: `Read a signed ETH Safe multisig JSON file and submit the transaction.
+The file must have TxType "signed" (all required signatures collected).`,
+		Example: "  watch --coin eth send multisig send-eth --file payment_multisig_<uuid>_2.json",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if wallet == nil || *wallet == nil {
+				return errors.New("wallet not initialized, check --coin flag")
+			}
+			ethWatch, ok := (*wallet).(*ethwallet.ETHWatch)
+			if !ok {
+				fmt.Println("this command is only supported for ETH")
+				return nil
+			}
+			if filePath == "" {
+				return errors.New("--file flag is required")
+			}
+			return runSendETHMultisig(ethWatch, filePath)
+		},
+	}
+
+	cmd.Flags().StringVar(&filePath, "file", "", "Signed multisig JSON file path (required)")
+	cobra.CheckErr(cmd.MarkFlagRequired("file"))
+
+	return cmd
+}
+
+func runSendETHMultisig(ethWatch *ethwallet.ETHWatch, filePath string) error {
+	txHash, err := ethWatch.SendMultisigTx(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to send multisig transaction: %w", err)
+	}
+
+	fmt.Printf("Safe multisig transaction submitted\n")
+	fmt.Printf("  TX Hash: %s\n", txHash)
+
+	return nil
 }
 
 // --- BTC MuSig2 commands ---

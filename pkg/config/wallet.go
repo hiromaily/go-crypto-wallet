@@ -83,6 +83,10 @@ type Ethereum struct {
 	MaxFeePerGasCap uint64 `toml:"max_fee_per_gas_cap" yaml:"max_fee_per_gas_cap" mapstructure:"max_fee_per_gas_cap"` // EIP-1559: absolute fee ceiling in Gwei
 	// KeystorePassword is the keystore encryption password. Replaces the hardcoded default.
 	KeystorePassword string `toml:"keystore_password" yaml:"keystore_password" mapstructure:"keystore_password"`
+	// SafeGasPayerHexKey is the hex-encoded private key of the account that pays gas for
+	// Safe execTransaction calls. Set via WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY env var.
+	// For development and E2E testing only — never set this in production.
+	SafeGasPayerHexKey string `toml:"safe_gas_payer_hex_key" yaml:"safe_gas_payer_hex_key" mapstructure:"safe_gas_payer_hex_key"` //nolint:lll,revive
 }
 
 // ERC20 information
@@ -364,7 +368,11 @@ func (c *WalletRoot) validateEthereum() error {
 		if eth.ChainID == 0 {
 			eth.ChainID = 17000
 		}
-	case "anvil", "local":
+	case "anvil":
+		if eth.ChainID == 0 {
+			eth.ChainID = 31337
+		}
+	case "local":
 		if eth.ChainID == 0 {
 			eth.ChainID = 1337
 		}

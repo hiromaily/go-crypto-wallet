@@ -98,3 +98,19 @@ clean-mocks:
 .PHONY: generate-abi
 generate-abi:
 	abigen --abi ./contracts/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go
+
+###############################################################################
+# Safe ABI
+#------------------------------------------------------------------------------
+# Generate Go bindings for Safe v1.4.1 contract using abigen.
+#
+# ABI source:
+#   https://unpkg.com/@safe-global/safe-deployments@1.37.30/dist/assets/v1.4.1/safe.json
+#   (extract the "abi" field with: curl <url> | jq '.abi' > contracts/safe.abi)
+#
+# Source:  contracts/safe.abi
+# Output:  internal/infrastructure/contract/safe/safe.go
+#------------------------------------------------------------------------------
+.PHONY: safe-abi
+safe-abi:
+	abigen --abi ./contracts/safe.abi --pkg safe --type Safe --out ./internal/infrastructure/contract/safe/safe.go

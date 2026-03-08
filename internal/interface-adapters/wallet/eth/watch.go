@@ -22,6 +22,9 @@ type ETHWatch struct {
 	sendTxUseCase           watchusecase.SendTransactionUseCase
 	importAddrUseCase       watchusecase.ImportAddressUseCase
 	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase
+	createMultisigTxUseCase watchusecase.CreateETHMultisigTransactionUseCase
+	sendMultisigTxUseCase   watchusecase.SendETHMultisigTransactionUseCase
+	safeInfoUseCase         watchusecase.ETHSafeInfoUseCase
 }
 
 // NewETHWatch returns ETHWatch object
@@ -33,6 +36,9 @@ func NewETHWatch(
 	sendTxUseCase watchusecase.SendTransactionUseCase,
 	importAddrUseCase watchusecase.ImportAddressUseCase,
 	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase,
+	createMultisigTxUseCase watchusecase.CreateETHMultisigTransactionUseCase,
+	sendMultisigTxUseCase watchusecase.SendETHMultisigTransactionUseCase,
+	safeInfoUseCase watchusecase.ETHSafeInfoUseCase,
 	walletType domainWallet.WalletType,
 ) *ETHWatch {
 	return &ETHWatch{
@@ -44,6 +50,9 @@ func NewETHWatch(
 		sendTxUseCase:           sendTxUseCase,
 		importAddrUseCase:       importAddrUseCase,
 		createPaymentReqUseCase: createPaymentReqUseCase,
+		createMultisigTxUseCase: createMultisigTxUseCase,
+		sendMultisigTxUseCase:   sendMultisigTxUseCase,
+		safeInfoUseCase:         safeInfoUseCase,
 	}
 }
 
@@ -124,6 +133,46 @@ func (w *ETHWatch) CreatePaymentRequest() error {
 	}
 	return w.createPaymentReqUseCase.Execute(context.Background(), watchusecase.CreatePaymentRequestInput{
 		AmountList: amtList,
+	})
+}
+
+// CreateMultisigTx creates an unsigned Safe multisig transaction proposal file.
+func (w *ETHWatch) CreateMultisigTx(
+	safeAddress, to string,
+	amountEther float64,
+	threshold int,
+	actionType string,
+) (string, string, error) {
+	output, err := w.createMultisigTxUseCase.Execute(context.Background(),
+		watchusecase.CreateETHMultisigTransactionInput{
+			SafeAddress: safeAddress,
+			To:          to,
+			AmountEther: amountEther,
+			Threshold:   threshold,
+			ActionType:  actionType,
+		})
+	if err != nil {
+		return "", "", err
+	}
+	return output.FilePath, output.UUID, nil
+}
+
+// SendMultisigTx submits a fully signed Safe multisig transaction to Ethereum.
+func (w *ETHWatch) SendMultisigTx(filePath string) (string, error) {
+	output, err := w.sendMultisigTxUseCase.Execute(context.Background(),
+		watchusecase.SendETHMultisigTransactionInput{
+			FilePath: filePath,
+		})
+	if err != nil {
+		return "", err
+	}
+	return output.TxHash, nil
+}
+
+// GetSafeInfo retrieves on-chain Safe contract state.
+func (w *ETHWatch) GetSafeInfo(safeAddress string) (watchusecase.ETHSafeInfoOutput, error) {
+	return w.safeInfoUseCase.Execute(context.Background(), watchusecase.ETHSafeInfoInput{
+		SafeAddress: safeAddress,
 	})
 }
 

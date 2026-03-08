@@ -125,15 +125,18 @@ BCH supports P2PKH and P2SH patterns with CashAddr format. SegWit and Taproot ar
 
 ### Ethereum (ETH) Transaction Patterns
 
-ETH supports EIP-1559 (Type 2) transactions with EOA single-sig and ERC-20 token transfers.
+ETH supports EIP-1559 (Type 2) transactions with EOA single-sig, ERC-20 token transfers, and Safe multisig payments.
 
 | Pattern | Type | Address Format | Transaction Type | Status |
 |---------|------|----------------|------------------|--------|
 | **P1** | Single-sig (EOA) | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
 | **P2** | ERC-20 HYT Token Transfer | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
+| **P3** | Safe 2-of-2 Multisig Payment | `0x...` | Safe `execTransaction` | ✅ Verified |
 
 > **Note**: Supports both Anvil and Geth nodes. Database backend is configurable (SQLite/MySQL/PostgreSQL).
 > P2 deploys the HYT ERC-20 contract via Foundry (forge) onto the local Anvil node before running the transfer workflow.
+> P3 deploys a [Safe v1.4.1](https://safe.global/) proxy contract via Foundry, then exercises the full 2-of-2 multisig
+> workflow: propose → offline EIP-712 sign (signer 1) → offline EIP-712 sign (signer 2) → broadcast `execTransaction`.
 
 ### XRP Ledger (XRP) Transaction Patterns
 
@@ -165,13 +168,14 @@ make bch-e2e P=3    # P2SH 3-of-3 Multisig
 # ETH: Run individual patterns
 make eth-e2e-p1     # Single-sig EIP-1559
 make eth-e2e-p2     # ERC-20 HYT Token Transfer
+make eth-e2e-p3     # Safe 2-of-2 Multisig Payment
 
 # XRP: Run patterns
 make xrp-e2e-p1     # Single-sig Payment Transfer
 make xrp-e2e-p2     # 2-of-2 Multisig Payment Transfer
 
 # ETH: Run all patterns in parallel
-make eth-e2e-parallel          # Run P1 and P2 in parallel
+make eth-e2e-parallel          # Run P1, P2, and P3 in parallel
 make eth-e2e-ci-all            # CI mode (non-interactive)
 
 # XRP: Run all patterns in parallel
@@ -183,6 +187,7 @@ make btc-e2e-reset P=5
 make bch-e2e-reset P=3
 make eth-e2e-p1-reset
 make eth-e2e-p2-reset
+make eth-e2e-p3-reset
 make xrp-e2e-p1-reset
 make xrp-e2e-p2-reset
 
@@ -191,6 +196,7 @@ make btc-e2e-ci P=3
 make bch-e2e-ci P=3
 make eth-e2e-p1-ci
 make eth-e2e-p2-ci
+make eth-e2e-p3-ci
 make xrp-e2e-p1-ci
 make xrp-e2e-p2-ci
 ```

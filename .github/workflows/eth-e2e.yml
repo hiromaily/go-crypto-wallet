@@ -41,13 +41,13 @@ on:
           - anvil
           - geth
       patterns:
-        description: "Patterns to run (e.g., 1-2 or 1,2)"
+        description: "Patterns to run (e.g., 1-3 or 1,2,3)"
         required: false
-        default: "1-2"
+        default: "1-3"
       max_parallel:
         description: "Max parallel processes"
         required: false
-        default: "2"
+        default: "3"
 
 env:
   GO_VERSION: "1.25.6"
@@ -113,8 +113,8 @@ jobs:
 
       - name: Run ETH E2E tests in parallel
         run: |
-          PATTERNS="${{ github.event.inputs.patterns || '1-2' }}"
-          MAX_PARALLEL="${{ github.event.inputs.max_parallel || '2' }}"
+          PATTERNS="${{ github.event.inputs.patterns || '1-3' }}"
+          MAX_PARALLEL="${{ github.event.inputs.max_parallel || '3' }}"
           NODE_TYPE="${{ github.event.inputs.node_type || 'anvil' }}" \
             ./scripts/operation/eth/e2e/e2e-parallel-runner.sh \
               --patterns "${PATTERNS}" \

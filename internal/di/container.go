@@ -10,9 +10,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
+	"os"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
@@ -32,7 +36,9 @@ import (
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
 	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
+	safeinfra "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/safe"
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
 	coldpostgres "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/postgres"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
@@ -51,7 +57,7 @@ import (
 	cryptocurrency "github.com/hiromaily/go-crypto-wallet/pkg/chains"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/multisig"
 	btcmusig2 "github.com/hiromaily/go-crypto-wallet/pkg/chains/btc/musig2"
-	"github.com/hiromaily/go-crypto-wallet/pkg/chains/eth/contract"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	xrpkg "github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	dbtx "github.com/hiromaily/go-crypto-wallet/pkg/db/tx"
@@ -149,6 +155,7 @@ type container struct {
 	btc        apibtc.Bitcoiner
 	eth        apieth.Ethereumer
 	erc20      apieth.ERC20er
+	safeClient *safeinfra.SafeClient
 	xrpPublic  apixrp.XRPPublicClient
 	// client
 	rpcClient    *rpcclient.Client
@@ -231,6 +238,7 @@ func (c *container) newETHKeygener() wallets.Keygener {
 		c.newKeygenExportAddressUseCase(),
 		c.newETHKeygenExportFullPubkeyUseCase(),
 		c.newETHKeygenSignTransactionUseCase(),
+		c.newETHKeygenSignMultisigTransactionUseCase(),
 	)
 }
 
@@ -288,7 +296,9 @@ func (c *container) NewSigner(authName string) (wallets.Signer, error) {
 	switch c.conf.CoinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		return c.newBTCSigner(authType), nil
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.HYT:
+	case domainCoin.ETH:
+		return c.newETHSigner(), nil
+	case domainCoin.LTC, domainCoin.XRP, domainCoin.HYT:
 		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
 	default:
 		return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
@@ -337,6 +347,15 @@ func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer
 	)
 }
 
+func (c *container) newETHSigner() wallets.Signer {
+	return ethwallet.NewETHSign(
+		c.newETH(),
+		c.pkgContainer.NewDatabaseClient(),
+		c.walletType,
+		c.newETHSignSignMultisigTransactionUseCase(),
+	)
+}
+
 func (c *container) newBTCWalleter() wallets.Watcher {
 	// Select BTC or BCH specific use cases
 	var createTxUseCase watchusecase.CreateTransactionUseCase
@@ -371,6 +390,9 @@ func (c *container) newETHWalleter() wallets.Watcher {
 		c.newETHWatchSendTransactionUseCase(),
 		c.newWatchImportAddressUseCase(),
 		c.newWatchCreatePaymentRequestUseCase(),
+		c.newETHWatchCreateMultisigTransactionUseCase(),
+		c.newETHWatchSendMultisigTransactionUseCase(),
+		c.newETHWatchSafeInfoUseCase(),
 		c.walletType,
 	)
 }
@@ -501,6 +523,48 @@ func (c *container) newETH() apieth.Ethereumer {
 		}
 	}
 	return c.eth
+}
+
+// newSafeClient constructs a SafeClient wrapping the Safe v1.4.1 ABI bindings.
+// The chain ID is fetched once from the node and cached.
+// If WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY env var is set, the derived address and
+// signer are configured so ExecuteSafeTransaction can submit the outer Ethereum tx.
+// Otherwise From/SignerFn are left empty (acceptable for Create/SafeInfo use cases).
+//
+// Note: the env var is read via os.Getenv because viper's AutomaticEnv does not
+// populate mapstructure fields that are absent from the config YAML file.
+func (c *container) newSafeClient() *safeinfra.SafeClient {
+	if c.safeClient == nil {
+		client := ethclient.NewClient(c.newEthRPCClient())
+		params := safeinfra.NewSafeClientParams{}
+
+		hexKey := os.Getenv("WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY")
+		if hexKey == "" {
+			hexKey = c.conf.Ethereum.SafeGasPayerHexKey
+		}
+		if hexKey != "" {
+			privKey, err := pkgeth.ToECDSA(hexKey)
+			if err != nil {
+				panic(fmt.Sprintf("WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY: failed to parse private key: %v", err))
+			}
+			chainID := new(big.Int).SetUint64(c.conf.Ethereum.ChainID)
+			txOpts, err := bind.NewKeyedTransactorWithChainID(privKey, chainID)
+			if err != nil {
+				panic(fmt.Sprintf("WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY: failed to create transactor: %v", err))
+			}
+			params.From = txOpts.From
+			params.SignerFn = txOpts.Signer
+		} else {
+			params.From = common.Address{}
+		}
+
+		var err error
+		c.safeClient, err = safeinfra.NewSafeClient(context.Background(), client, params)
+		if err != nil {
+			panic(fmt.Sprintf("failed to construct SafeClient: %v", err))
+		}
+	}
+	return c.safeClient
 }
 
 func (c *container) newERC20() apieth.ERC20er {
@@ -1535,6 +1599,32 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 	)
 }
 
+// ETH Watch Safe Multisig Use Cases
+
+func (c *container) newETHWatchCreateMultisigTransactionUseCase() watchusecase.CreateETHMultisigTransactionUseCase {
+	safeClient := c.newSafeClient()
+	return watchusecaseeth.NewCreateETHMultisigTransactionUseCase(
+		safeClient, // SafeNonceReader
+		safeClient, // SafeTxHashComputer
+		c.newMultisigFileRepo(),
+		c.pkgContainer.NewUUIDHandler(),
+		c.conf.Ethereum.ChainID,
+	)
+}
+
+func (c *container) newETHWatchSendMultisigTransactionUseCase() watchusecase.SendETHMultisigTransactionUseCase {
+	return watchusecaseeth.NewSendETHMultisigTransactionUseCase(
+		c.newSafeClient(), // SafeExecuter
+		c.newMultisigFileRepo(),
+	)
+}
+
+func (c *container) newETHWatchSafeInfoUseCase() watchusecase.ETHSafeInfoUseCase {
+	return watchusecaseeth.NewETHSafeInfoUseCase(
+		c.newSafeClient(), // SafeInfoReader
+	)
+}
+
 // XRP Watch Use Cases
 
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
@@ -1816,6 +1906,17 @@ func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTrans
 	)
 }
 
+func (c *container) newETHKeygenSignMultisigTransactionUseCase() keygenusecase.SignMultisigTransactionUseCase {
+	return keygenusecaseeth.NewSignMultisigTransactionUseCase(
+		c.newMultisigFileRepo(),
+		c.newEthAccountKeyRepo(),
+	)
+}
+
+func (c *container) newMultisigFileRepo() file.MultisigFileRepositorier {
+	return transaction.NewTransactionFileRepository(c.conf.FilePath.Tx)
+}
+
 func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecasexrp.NewSignTransactionUseCase(
 		c.newPublicXRP(),
@@ -1925,6 +2026,13 @@ func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUs
 		c.newTxFileRepo(),
 		c.walletType,
 		c.conf.Ethereum.KeystorePassword,
+	)
+}
+
+func (c *container) newETHSignSignMultisigTransactionUseCase() keygenusecase.SignMultisigTransactionUseCase {
+	return keygenusecaseeth.NewSignMultisigTransactionUseCase(
+		c.newMultisigFileRepo(),
+		c.newEthAccountKeyRepo(),
 	)
 }
 

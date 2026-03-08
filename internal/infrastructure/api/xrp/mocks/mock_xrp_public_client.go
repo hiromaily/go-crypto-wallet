@@ -9,6 +9,7 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp"
+	xrp0 "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/chains/xrp/rpc/public"
 	mock "github.com/stretchr/testify/mock"
@@ -732,6 +733,98 @@ func (_c *MockXRPPublicClient_LedgerCurrent_Call) Return(ledgerCurrent *xrp.Ledg
 }
 
 func (_c *MockXRPPublicClient_LedgerCurrent_Call) RunAndReturn(run func(ctx context.Context) (*xrp.LedgerCurrent, error)) *MockXRPPublicClient_LedgerCurrent_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PrepareSignerListSetTransaction provides a mock function for the type MockXRPPublicClient
+func (_mock *MockXRPPublicClient) PrepareSignerListSetTransaction(ctx context.Context, senderAccount string, signerQuorum uint32, signerEntries []xrp0.SignerEntryInput, instructions *xrp.Instructions) (*xrp.SignerListSetTxInput, string, error) {
+	ret := _mock.Called(ctx, senderAccount, signerQuorum, signerEntries, instructions)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PrepareSignerListSetTransaction")
+	}
+
+	var r0 *xrp.SignerListSetTxInput
+	var r1 string
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) (*xrp.SignerListSetTxInput, string, error)); ok {
+		return returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) *xrp.SignerListSetTxInput); ok {
+		r0 = returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*xrp.SignerListSetTxInput)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) string); ok {
+		r1 = returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
+	} else {
+		r1 = ret.Get(1).(string)
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, uint32, []xrp0.SignerEntryInput, *xrp.Instructions) error); ok {
+		r2 = returnFunc(ctx, senderAccount, signerQuorum, signerEntries, instructions)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// MockXRPPublicClient_PrepareSignerListSetTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PrepareSignerListSetTransaction'
+type MockXRPPublicClient_PrepareSignerListSetTransaction_Call struct {
+	*mock.Call
+}
+
+// PrepareSignerListSetTransaction is a helper method to define mock.On call
+//   - ctx context.Context
+//   - senderAccount string
+//   - signerQuorum uint32
+//   - signerEntries []xrp0.SignerEntryInput
+//   - instructions *xrp.Instructions
+func (_e *MockXRPPublicClient_Expecter) PrepareSignerListSetTransaction(ctx interface{}, senderAccount interface{}, signerQuorum interface{}, signerEntries interface{}, instructions interface{}) *MockXRPPublicClient_PrepareSignerListSetTransaction_Call {
+	return &MockXRPPublicClient_PrepareSignerListSetTransaction_Call{Call: _e.mock.On("PrepareSignerListSetTransaction", ctx, senderAccount, signerQuorum, signerEntries, instructions)}
+}
+
+func (_c *MockXRPPublicClient_PrepareSignerListSetTransaction_Call) Run(run func(ctx context.Context, senderAccount string, signerQuorum uint32, signerEntries []xrp0.SignerEntryInput, instructions *xrp.Instructions)) *MockXRPPublicClient_PrepareSignerListSetTransaction_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 uint32
+		if args[2] != nil {
+			arg2 = args[2].(uint32)
+		}
+		var arg3 []xrp0.SignerEntryInput
+		if args[3] != nil {
+			arg3 = args[3].([]xrp0.SignerEntryInput)
+		}
+		var arg4 *xrp.Instructions
+		if args[4] != nil {
+			arg4 = args[4].(*xrp.Instructions)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockXRPPublicClient_PrepareSignerListSetTransaction_Call) Return(signerListSetTxInput *xrp.SignerListSetTxInput, s string, err error) *MockXRPPublicClient_PrepareSignerListSetTransaction_Call {
+	_c.Call.Return(signerListSetTxInput, s, err)
+	return _c
+}
+
+func (_c *MockXRPPublicClient_PrepareSignerListSetTransaction_Call) RunAndReturn(run func(ctx context.Context, senderAccount string, signerQuorum uint32, signerEntries []xrp0.SignerEntryInput, instructions *xrp.Instructions) (*xrp.SignerListSetTxInput, string, error)) *MockXRPPublicClient_PrepareSignerListSetTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }

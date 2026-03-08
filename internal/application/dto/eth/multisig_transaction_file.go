@@ -27,9 +27,10 @@ type SignEntry struct {
 // All gas fields (SafeTxGas, BaseGas, GasPrice, GasToken, RefundReceiver) default to zero/empty
 // for simple ETH transfers. The safe nonce is fetched at proposal time via the Safe contract.
 type ETHMultisigTransactionFile struct {
-	Version int    `json:"version"` // File format version (1)
-	TxType  string `json:"tx_type"` // "unsigned" or "signed"
-	UUID    string `json:"uuid"`    // Unique proposal identifier (UUIDv4); used in file names
+	Version    int    `json:"version"`     // File format version (1)
+	TxType     string `json:"tx_type"`     // "unsigned" or "signed"
+	UUID       string `json:"uuid"`        // Unique proposal identifier (UUIDv4); used in file names
+	ActionType string `json:"action_type"` // "deposit", "payment", or "transfer"
 
 	// Safe contract identity
 	SafeAddress string `json:"safe_address"` // EIP-55 checksummed Safe proxy address

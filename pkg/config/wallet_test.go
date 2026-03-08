@@ -431,7 +431,7 @@ func TestEthereumChainIDAutoPopulation(t *testing.T) {
 		{network: "mainnet", wantChainID: 1},
 		{network: "sepolia", wantChainID: 11155111},
 		{network: "holesky", wantChainID: 17000},
-		{network: "anvil", wantChainID: 1337},
+		{network: "anvil", wantChainID: 31337},
 		{network: "local", wantChainID: 1337},
 		// When ChainID is explicitly set, it should be preserved
 		{network: "mainnet", explicitChainID: 999, wantChainID: 999},

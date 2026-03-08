@@ -49,6 +49,7 @@ packages:
       TransactionFileRepositorier:
       AddressFileRepositorier:
       DescriptorFileWriter:
+      MultisigFileRepositorier:
 
   # Watch wallet persistence interfaces
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch:
@@ -67,7 +68,7 @@ packages:
 
   # Ethereum API - interface in application/ports, implementation in infrastructure
   # Excludes: Ethereumer (DI-only monolithic), ETHTransactionSender (type alias for TxSender),
-  # and composed interfaces (ETHKeygenSignClient, ETHWatchClient, WatchTxCreationDeps, KeygenSignTxDeps)
+  # and composed interfaces (ETHKeygenSignClient, ETHWatchClient, WatchTxCreationDeps, KeygenSignTxDeps, SafeClientDeps)
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth:
     config:
       dir: "internal/infrastructure/api/eth/mocks"
@@ -87,6 +88,10 @@ packages:
       TxSigner:
       TxSender:
       TxMonitor:
+      SafeTxHashComputer:
+      SafeNonceReader:
+      SafeExecuter:
+      SafeInfoReader:
 
   # Persistence (UnitOfWork / Transaction) - used by watch wallet use cases
   github.com/hiromaily/go-crypto-wallet/pkg/db/tx:
@@ -104,6 +109,14 @@ packages:
       pkgname: "mocks"
     interfaces:
       BTCRPC:
+
+  # UUID generation handler
+  github.com/hiromaily/go-crypto-wallet/pkg/uuid:
+    config:
+      dir: "pkg/uuid/mocks"
+      pkgname: "mocks"
+    interfaces:
+      UUIDHandler:
 
   # Cold wallet persistence interfaces
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold:
