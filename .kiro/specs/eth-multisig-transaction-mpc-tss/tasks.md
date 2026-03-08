@@ -30,8 +30,8 @@
 
 ---
 
-- [ ] 2. Implement encrypted key shard storage and MPC transaction file I/O
-- [ ] 2.1 (P) Implement `MPCShardStore` — encrypted shard file read/write
+- [x] 2. Implement encrypted key shard storage and MPC transaction file I/O
+- [x] 2.1 (P) Implement `MPCShardStore` — encrypted shard file read/write
   - Implement `internal/infrastructure/storage/file/mpc/shard_store.go` satisfying `MPCKeyShardStorage`
   - Derive a 32-byte AES-256-GCM key from the passphrase using scrypt (N=1<<15, r=8, p=1)
   - Encrypt the JSON bundle `{version, party_id, all_party_ids, threshold, eth_address, pre_params, save_data}` as a single AES-256-GCM ciphertext
@@ -40,14 +40,14 @@
   - Return descriptive error (never raw key bytes) if file is missing or passphrase is wrong
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 2.2 (P) Implement the `MPCFileRepositorier` for `ETHMPCTransactionFile` JSON persistence
+- [x] 2.2 (P) Implement the `MPCFileRepositorier` for `ETHMPCTransactionFile` JSON persistence
   - Implement `internal/infrastructure/storage/file/mpc/mpc_file_repository.go` satisfying `MPCFileRepositorier`
   - `WriteETHMPCJSONFile`: marshal to indented JSON, write to `{action_type}_mpc_{uuid}.json` (unsigned) or `{action_type}_mpc_{uuid}_signed.json` (signed)
   - `ReadETHMPCJSONFile`: unmarshal and call `Validate()` before returning; return `ErrNotUnsigned` or `ErrNotSigned` sentinel appropriately
   - `CreateMPCFilePath`: compose file path deterministically from action type, UUID, and signed flag
   - _Requirements: 6.2, 7.5, 8.1_
 
-- [ ] 2.3* Implement unit tests for `MPCShardStore` and `MPCFileRepositorier`
+- [x] 2.3* Implement unit tests for `MPCShardStore` and `MPCFileRepositorier`
   - `shard_store_test.go`: save+load round-trip with correct passphrase; verify decryption failure with wrong passphrase; verify missing file error
   - `mpc_file_repository_test.go`: write unsigned file, read it back; attempt to read a signed file as unsigned and verify sentinel error
   - _Requirements: 3.1, 3.4, 6.2_

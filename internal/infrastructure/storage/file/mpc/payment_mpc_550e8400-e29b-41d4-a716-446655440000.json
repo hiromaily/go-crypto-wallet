@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "tx_type": "unsigned",
+  "uuid": "550e8400-e29b-41d4-a716-446655440000",
+  "action_type": "payment",
+  "from": "0x0742D35CC6634c0532925A3b844bc9E7595f0Beb",
+  "to": "0x1234567890AbcdEF1234567890aBcdef12345678",
+  "value": "1000000000000000000",
+  "nonce": 0,
+  "gas_limit": 21000,
+  "chain_id": 1,
+  "max_fee_per_gas": "30000000000",
+  "max_priority_fee_per_gas": "2000000000",
+  "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+  "raw_tx_hex": "0x02f86c",
+  "threshold": 2,
+  "party_ids": [
+    "node-1",
+    "node-2",
+    "node-3"
+  ]
+}
