@@ -82,6 +82,8 @@ var (
 	ErrMPCPartyIDsBelowThreshold = errors.New("len(party_ids) must be >= threshold")
 	// ErrMissingMPCSignedTxHex is returned when tx_type is "signed" but SignedTxHex is empty.
 	ErrMissingMPCSignedTxHex = errors.New("signed_tx_hex is required when tx_type is \"signed\"")
+	// ErrNotUnsigned is returned when a send operation is attempted on a file that is not unsigned.
+	ErrNotUnsigned = errors.New("transaction file must have tx_type \"unsigned\" to initiate signing")
 )
 
 // Validate validates all invariants of the ETHMPCTransactionFile.

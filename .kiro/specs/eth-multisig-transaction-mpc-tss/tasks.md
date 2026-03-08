@@ -100,8 +100,8 @@
 
 ---
 
-- [ ] 5. Implement application use cases for the MPC flow
-- [ ] 5.1 (P) Implement `RunDKGUseCase` on the Keygen wallet
+- [x] 5. Implement application use cases for the MPC flow
+- [x] 5.1 (P) Implement `RunDKGUseCase` on the Keygen wallet
   - Add `RunDKGUseCase` interface, `RunDKGInput`, and `RunDKGOutput` to `internal/application/usecase/keygen/interfaces.go`
   - Implement in `internal/application/usecase/keygen/eth/run_dkg.go`
   - Validate `len(input.AllPartyIDs) >= input.Threshold` before calling the port; return a descriptive error if invalid
@@ -109,7 +109,7 @@
   - Print the joint Ethereum address to stdout on success
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-- [ ] 5.2 (P) Implement `CreateMPCTransactionUseCase` on the Watch wallet
+- [x] 5.2 (P) Implement `CreateMPCTransactionUseCase` on the Watch wallet
   - Add `CreateMPCTransactionUseCase` interface and DTOs to `internal/application/usecase/watch/interfaces.go`
   - Implement in `internal/application/usecase/watch/eth/create_mpc_transaction.go`
   - Validate EIP-55 addresses before building the transaction; return error on invalid input
@@ -118,7 +118,7 @@
   - Print the generated file path to stdout on success
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
 
-- [ ] 5.3 (P) Implement `SendMPCTransactionUseCase` on the Watch wallet
+- [x] 5.3 (P) Implement `SendMPCTransactionUseCase` on the Watch wallet
   - Add `SendMPCTransactionUseCase` interface and DTOs to `internal/application/usecase/watch/interfaces.go`
   - Implement in `internal/application/usecase/watch/eth/send_mpc_transaction.go`
   - Read `ETHMPCTransactionFile` via `MPCFileRepositorier`; return `ErrNotUnsigned` if `TxType != "unsigned"`
@@ -128,7 +128,7 @@
   - If the TSS session times out, preserve the unsigned file and return a wrapped error with session ID
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 5.4 (P) Implement `ServeMPCUseCase` on the Keygen wallet (node daemon)
+- [x] 5.4 (P) Implement `ServeMPCUseCase` on the Keygen wallet (node daemon)
   - Add `ServeMPCUseCase` interface and `ServeMPCInput` to `internal/application/usecase/keygen/interfaces.go`
   - Implement in `internal/application/usecase/keygen/eth/serve_mpc.go`
   - On startup, load the key shard from `MPCKeyShardStorage.LoadShard` using the passphrase from input
@@ -137,7 +137,7 @@
   - Block until context is cancelled (graceful shutdown); write the signed partial result via the transport channel
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8_
 
-- [ ] 5.5* Implement unit tests for each use case
+- [x] 5.5* Implement unit tests for each use case
   - `run_dkg_test.go`: mock `MPCKeyGeneratorPort` and `MPCKeyShardStorage`; verify DKG abort on invalid threshold; verify no shard saved on port error
   - `create_mpc_transaction_test.go`: mock `TxCreator`, `GasEstimator`, `MPCFileRepositorier`; verify all file fields are populated; verify invalid address is rejected
   - `send_mpc_transaction_test.go`: mock `MPCTransactionSigner`, `TxSender`, `MPCFileRepositorier`; verify `ErrNotUnsigned` guard; verify `ErrSenderMismatch` is returned when recovered address does not match `from`

@@ -173,6 +173,31 @@ type MPCInboundTransport interface {
 	Close() error
 }
 
+// MPCSessionRequest is the first message sent by the Watch wallet coordinator to a signing node
+// to initiate a new signing session. It carries the transaction data so that the node can verify
+// the hash before participating in the TSS protocol.
+//
+// The node unmarshals the first message from MPCInboundTransport.Receive() as MPCSessionRequest
+// and computes hash(RawTxHex) to validate it matches TxHash. If they do not match, the node
+// aborts and returns ErrTxHashMismatch.
+type MPCSessionRequest struct {
+	// SessionID is a UUIDv4 that uniquely identifies this signing session.
+	SessionID string `json:"session_id"`
+
+	// TxHash is the 0x-prefixed hex hash of the unsigned transaction (RawTxHex decoded → tx.Hash()).
+	TxHash string `json:"tx_hash"`
+
+	// RawTxHex is the 0x-prefixed hex-encoded RLP of the unsigned transaction.
+	// The node verifies hash(RawTxHex) == TxHash before participating.
+	RawTxHex string `json:"raw_tx_hex"`
+
+	// PartyIDs contains the sorted identifiers of all T participating nodes.
+	PartyIDs []string `json:"party_ids"`
+
+	// Threshold is T — minimum signers required.
+	Threshold int `json:"threshold"`
+}
+
 // =============================================================================
 // Composed DI interfaces — for DI layer use only.
 // Use cases MUST depend on the narrow interfaces above, not these composed types.

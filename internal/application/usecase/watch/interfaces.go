@@ -128,6 +128,48 @@ type AggregateMuSig2SignaturesOutput struct {
 	TxID       string
 }
 
+// ETH MPC/TSS Pattern 4 Use Cases
+
+// CreateMPCTransactionUseCase builds an unsigned EIP-1559 transaction and writes an
+// ETHMPCTransactionFile so that MPC nodes can cooperatively sign it.
+type CreateMPCTransactionUseCase interface {
+	Execute(ctx context.Context, input CreateMPCTransactionInput) (CreateMPCTransactionOutput, error)
+}
+
+// SendMPCTransactionUseCase reads an unsigned ETHMPCTransactionFile, initiates a TSS signing
+// session, applies the assembled signature, and broadcasts the signed transaction.
+type SendMPCTransactionUseCase interface {
+	Execute(ctx context.Context, input SendMPCTransactionInput) (SendMPCTransactionOutput, error)
+}
+
+// CreateMPCTransactionInput carries parameters for creating an unsigned MPC transaction file.
+type CreateMPCTransactionInput struct {
+	FromAddress string
+	ToAddress   string
+	AmountEther float64
+	ActionType  string
+	Threshold   int
+	PartyIDs    []string
+}
+
+// CreateMPCTransactionOutput carries the result of creating an unsigned MPC transaction file.
+type CreateMPCTransactionOutput struct {
+	FilePath string
+	UUID     string
+	TxHash   string
+}
+
+// SendMPCTransactionInput carries parameters for initiating a TSS signing session.
+type SendMPCTransactionInput struct {
+	FilePath  string
+	PeerAddrs []string // gRPC addresses of all T signing nodes (index-matched with PartyIDs)
+}
+
+// SendMPCTransactionOutput carries the result of a completed MPC signing and broadcast.
+type SendMPCTransactionOutput struct {
+	TxHash string
+}
+
 // XRP Multi-signature and Regular Key Use Cases
 
 // SetRegularKeyUseCase creates SetRegularKey transactions for XRP accounts.
