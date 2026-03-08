@@ -4,6 +4,8 @@ package eth
 import (
 	"errors"
 
+	"github.com/ethereum/go-ethereum/common"
+
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
@@ -120,13 +122,13 @@ func (f *ETHMPCTransactionFile) validateRequiredFields() error {
 	if f.From == "" {
 		return ErrEmptyMPCFrom
 	}
-	if !isChecksumAddress(f.From) {
+	if !common.IsHexAddress(f.From) {
 		return ErrInvalidMPCAddress
 	}
 	if f.To == "" {
 		return ErrEmptyMPCTo
 	}
-	if !isChecksumAddress(f.To) {
+	if !common.IsHexAddress(f.To) {
 		return ErrInvalidMPCAddress
 	}
 	if f.Value == "" {

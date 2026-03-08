@@ -224,26 +224,10 @@ func (s *MPCNodeServer) runDKGLoopP2P(
 	peerTransport *GRPCOutboundTransport,
 	peerAddrByPartyID map[string]string,
 ) (*apieth.DKGResult, error) {
-	for {
-		select {
-		case <-ctx.Done():
-			return nil, fmt.Errorf("mpc node: DKG cancelled: %w", ctx.Err())
-
-		case msg := <-outCh:
-			if err := s.sendToPeers(ctx, msg, peerTransport, peerAddrByPartyID); err != nil {
-				return nil, fmt.Errorf("mpc node: send DKG message to peers: %w", err)
-			}
-
-		case payload, ok := <-recvCh:
-			if !ok {
-				return nil, errors.New("mpc node: inbound channel closed unexpectedly")
-			}
-			s.handleInbound(party, partyByID, payload)
-
-		case saveData := <-endCh:
-			return s.finalizeDKG(ctx, saveData, params)
-		}
+	sendFn := func(ctx context.Context, msg tss.Message) error {
+		return s.sendToPeers(ctx, msg, peerTransport, peerAddrByPartyID)
 	}
+	return s.runDKGMessageLoop(ctx, party, partyByID, outCh, endCh, recvCh, params, sendFn)
 }
 
 // sendToPeers routes a TSS outbound message to the appropriate peer node(s).
@@ -336,7 +320,7 @@ func waitForTCPAddr(ctx context.Context, addr string, timeout time.Duration) err
 	}
 }
 
-// runDKGLoop drives the tss-lib keygen state machine.
+// runDKGLoop drives the tss-lib keygen state machine in coordinator relay mode.
 //
 // It selects over three channels simultaneously:
 //   - outCh: TSS library has produced an outbound round message → encode and send to coordinator.
@@ -352,14 +336,32 @@ func (s *MPCNodeServer) runDKGLoop(
 	recvCh <-chan []byte,
 	params apieth.DKGParams,
 ) (*apieth.DKGResult, error) {
+	sendFn := func(_ context.Context, msg tss.Message) error {
+		return s.sendOutbound(msg)
+	}
+	return s.runDKGMessageLoop(ctx, party, partyByID, outCh, endCh, recvCh, params, sendFn)
+}
+
+// runDKGMessageLoop is the shared DKG event loop used by both coordinator relay and P2P modes.
+// sendFn is called for every outbound TSS round message and encapsulates transport-specific routing.
+func (s *MPCNodeServer) runDKGMessageLoop(
+	ctx context.Context,
+	party tss.Party,
+	partyByID map[string]*tss.PartyID,
+	outCh <-chan tss.Message,
+	endCh <-chan *keygen.LocalPartySaveData,
+	recvCh <-chan []byte,
+	params apieth.DKGParams,
+	sendFn func(ctx context.Context, msg tss.Message) error,
+) (*apieth.DKGResult, error) {
 	for {
 		select {
 		case <-ctx.Done():
 			return nil, fmt.Errorf("mpc node: DKG cancelled: %w", ctx.Err())
 
 		case msg := <-outCh:
-			if err := s.sendOutbound(msg); err != nil {
-				return nil, fmt.Errorf("mpc node: send outbound DKG message: %w", err)
+			if err := sendFn(ctx, msg); err != nil {
+				return nil, fmt.Errorf("mpc node: send DKG message: %w", err)
 			}
 
 		case payload, ok := <-recvCh:
