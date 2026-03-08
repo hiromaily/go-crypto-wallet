@@ -80,7 +80,7 @@
 ---
 
 - [ ] 4. Implement TSS coordinator and node server using `tss-lib/v2`
-- [ ] 4.1 Implement `MPCCoordinator` — Watch-side TSS signing coordinator
+- [x] 4.1 Implement `MPCCoordinator` — Watch-side TSS signing coordinator
   - Implement in `internal/infrastructure/api/eth/mpc/coordinator.go` satisfying `MPCCoordinatorDeps` (compile-time check: `var _ apieth.MPCCoordinatorDeps = (*MPCCoordinator)(nil)`)
   - `SignTransaction(ctx, req)`: validate `len(req.Hash) == 32` and `len(req.PartyIDs) >= req.Threshold`; open connections to all T nodes via `MPCOutboundTransport`; fan out signing request
   - Act as message bus: receive TSS round messages from each node via `MPCOutboundTransport.Receive()` and forward to the appropriate T-1 other nodes until all 9 GG18 rounds complete
