@@ -67,6 +67,43 @@ eth-e2e-p2-cleanup:
 	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p2.sh --cleanup
 
 ###############################################################################
+# E2E Tests
+#
+# Pattern 3: Safe 2-of-2 multisig payment
+#   NODE_TYPE: anvil (default) or geth
+#   DB:        sqlite (default) or mysql
+#
+# Requires:
+#   - Anvil running (started automatically)
+#   - apps/eth-contracts/node_modules installed (bun install in eth-contracts)
+#
+# Usage:
+#   make eth-e2e-p3-reset             # Run with Anvil + SQLite (full reset)
+#   make eth-e2e-p3                   # Run without reset
+#   make eth-e2e-p3-ci                # Non-interactive (CI mode)
+###############################################################################
+
+.PHONY: eth-e2e-p3-reset
+eth-e2e-p3-reset: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --reset
+
+.PHONY: eth-e2e-p3
+eth-e2e-p3: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh
+
+.PHONY: eth-e2e-p3-verbose
+eth-e2e-p3-verbose: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --verbose
+
+.PHONY: eth-e2e-p3-ci
+eth-e2e-p3-ci: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --non-interactive
+
+.PHONY: eth-e2e-p3-cleanup
+eth-e2e-p3-cleanup:
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --cleanup
+
+###############################################################################
 # Parallel E2E Testing - Run Multiple Patterns Concurrently
 ###############################################################################
 # Usage:

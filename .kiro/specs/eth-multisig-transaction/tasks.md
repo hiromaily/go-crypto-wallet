@@ -128,13 +128,13 @@
 
 ## Task 7. Implement the E2E P2 test for 2-of-2 Safe multisig payment
 
-- [ ] 7.1 Write the Foundry deployment script for Safe
+- [x] 7.1 Write the Foundry deployment script for Safe
   - Create `DeploySafe.s.sol` in `apps/eth-contracts/script/` that accepts owner addresses and a threshold as constructor arguments and deploys a Safe v1.4.1 proxy pointing to the canonical singleton
   - The script prints the deployed Safe address to stdout in a parseable format for use by the shell script
   - The deployment targets Anvil (local) and requires no mainnet credentials
   - _Requirements: 10_
 
-- [ ] 7.2 Write the E2E P2 shell script
+- [x] 7.2 Write the E2E P2 shell script
   - Create `scripts/operation/eth/e2e/e2e-p2.sh` following the structure of the existing `e2e-p1.sh`
   - Phase 0 — Provisioning: initialise a primary keygen DB (signer 1) and a separate keygen DB that acts as the Sign wallet (signer 2); generate HD keys in each; export signer addresses
   - Phase 1 — Setup: call the Foundry `DeploySafe.s.sol` script with both signer addresses and threshold=2; fund the resulting Safe contract address via Anvil
@@ -146,7 +146,7 @@
   - Support `--cleanup`, `--reset`, `--non-interactive`, and `--verbose` flags consistent with the existing E2E scripts
   - _Requirements: 10_
 
-- [ ] 7.3 Add Makefile targets for the P2 E2E test
+- [x] 7.3 Add Makefile targets for the P2 E2E test
   - Add `eth-e2e-p2` target that runs `e2e-p2.sh` interactively
   - Add `eth-e2e-p2-ci` target that runs with `--non-interactive` for CI use
   - Place the targets in `make/wallet/eth_e2e.mk` alongside the existing P1 targets

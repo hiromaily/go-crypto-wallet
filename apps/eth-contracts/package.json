@@ -10,7 +10,8 @@
     "deploy:local": "forge script script/DeployHYC.s.sol --rpc-url http://localhost:8545 --broadcast"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.6.1"
+    "@openzeppelin/contracts": "^5.6.1",
+    "@safe-global/safe-contracts": "1.4.1-2"
   },
   "devDependencies": {
     "solhint": "^6.0.3",
