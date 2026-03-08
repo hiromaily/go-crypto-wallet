@@ -6,13 +6,16 @@ This document provides a comprehensive technical reference for Ethereum implemen
 
 | Document | Description |
 |----------|-------------|
-| [architecture.md](./architecture.md) | **ETH wallet architecture** — wallet roles, use case boundary map, Clean Architecture layers, KeygenSignTx offline signing detail |
+| [architecture.md](./architecture.md) | **[SSOT] ETH wallet architecture** — wallet roles, use case assignments, Clean Architecture boundary maps (EOA + Safe), port interfaces, offline signing detail |
+| [multisig.md](./multisig.md) | **ETH Safe multisig** — Safe v1.4.1 implementation, EIP-712 signing flow, file format, CLI commands, E2E Pattern 3 |
 | [docs/transaction-flow.md](../../transaction-flow.md) | Chain-agnostic 3-wallet setup, signing, and monitoring flows |
 
 For Ethereum-specific concerns on top of the common flow, see [ETH-Specific Flow Details](#eth-specific-flow-details) below.
 
-> **Key point:** ETH uses single-sig EOA only. Only Watch and Keygen wallets are required.
-> The Keygen Wallet performs transaction signing. The Sign Wallet is not used for ETH.
+> **Key point:** ETH supports both single-sig EOA and Safe multisig flows.
+> For single-sig, only Watch and Keygen wallets are required.
+> For Safe multisig (E2E Pattern 3), all three wallets are used: Watch proposes and submits, Keygen and Sign wallets each sign offline.
+> See [multisig.md](./multisig.md) for the Safe multisig implementation details.
 
 ---
 
@@ -114,7 +117,7 @@ Address:      20 bytes = Keccak256(pubkey)[12:]
 
 ### Address Type
 
-This system supports **EOA (Externally Owned Account)** addresses only. Smart contract wallets are not supported.
+This system supports **EOA (Externally Owned Account)** addresses for key generation and single-sig flows. **Safe (Gnosis Safe v1.4.1) smart contract wallets** are also supported for multisig flows — see [multisig.md](./multisig.md).
 
 EOA addresses:
 
@@ -427,31 +430,17 @@ recipientReceives = amount
 
 ## Wallet Implementation
 
-### Wallet Roles
+> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](./architecture.md). This section provides a quick-reference summary only.
 
-| Wallet | Role | Network |
-|--------|------|---------|
-| **Watch** | Create transactions, broadcast, monitor | Online |
-| **Keygen** | Generate keys, import to keystore, sign (first sig) | Offline (air-gapped) |
-| **Sign** | Additional signatures | Offline (air-gapped) |
+### Wallet Roles (Summary)
 
-### Keygen Wallet Operations
+| Wallet | Single-sig EOA | Safe Multisig | Network |
+|--------|---------------|---------------|---------|
+| **Watch** | Create transactions, broadcast, monitor | Propose multisig tx, submit `execTransaction`, monitor | Online |
+| **Keygen** | Generate keys, sign transactions | Generate keys, sign as Safe owner 1 | Offline (air-gapped) |
+| **Sign** | Not used | Sign as Safe owner 2…n | Offline (air-gapped) |
 
-1. **`create seed`** — Generate BIP39 mnemonic and store encrypted seed
-2. **`create hdkey`** — Derive BIP44 HD keys for specified account
-3. **`import privkey`** — Import private keys into local keystore (encrypted)
-4. **`export address`** — Export public addresses to file for Watch Wallet
-
-### Watch Wallet Operations
-
-1. **`import address`** — Import addresses from Keygen Wallet file
-2. **`create deposit/payment/transfer`** — Build unsigned transactions
-3. **`send`** — Broadcast signed transactions
-4. **`monitor`** — Track transaction confirmation status
-
-### Sign Wallet Operations
-
-1. **`sign`** — Sign unsigned transaction files using keystore private keys
+See [architecture.md](./architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
 
 ### Database Schema (ETH-specific tables)
 
@@ -603,6 +592,7 @@ anvil --fork-url https://mainnet.infura.io/v3/<key>
 | [EIP-55](https://eips.ethereum.org/EIPS/eip-55) | Mixed-case checksum address encoding | Address format |
 | [EIP-155](https://eips.ethereum.org/EIPS/eip-155) | Simple replay attack protection | Chain ID in signatures |
 | [EIP-191](https://eips.ethereum.org/EIPS/eip-191) | Signed data standard | Message signing |
+| [EIP-712](https://eips.ethereum.org/EIPS/eip-712) | Typed structured data hashing and signing | Safe multisig `safeTxHash` computation |
 | [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) | Fee market change | Base fee + priority fee |
 | [EIP-2718](https://eips.ethereum.org/EIPS/eip-2718) | Typed Transaction Envelope | Transaction type field |
 | [EIP-2930](https://eips.ethereum.org/EIPS/eip-2930) | Access list transactions (Type 1) | Optional optimization |
@@ -655,12 +645,18 @@ Ethereum-specific steps:
 
 ### Multisig
 
-> Ethereum EOA does not natively support multisig at the protocol level (unlike Bitcoin's P2SH/P2WSH).
-> This system's multisig support for Ethereum would require a smart contract (e.g., Gnosis Safe).
-> The current implementation uses **single-sig EOA only**.
+Ethereum EOA does not natively support multisig at the protocol level (unlike Bitcoin's P2SH/P2WSH). This system implements multisig via **Gnosis Safe v1.4.1** — an audited smart contract that enforces an m-of-n threshold before executing any transaction.
+
+The implementation uses a file-based, offline-signing workflow:
+
+1. Watch Wallet proposes a transaction and writes an unsigned JSON file
+2. Each owner (Keygen or Sign wallet) verifies the EIP-712 `safeTxHash` offline and appends a signature
+3. When the threshold is reached, Watch Wallet submits `execTransaction` on-chain
+
+See [multisig.md](./multisig.md) for the complete reference including file format, CLI commands, EIP-712 signing details, and E2E Pattern 3 (2-of-2 Safe payment).
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2026-02-24
+**Document Version:** 1.1
+**Last Updated:** 2026-03-08
 **Maintainer:** go-crypto-wallet team
