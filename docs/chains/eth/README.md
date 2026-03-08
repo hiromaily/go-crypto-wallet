@@ -6,7 +6,7 @@ This document provides a comprehensive technical reference for Ethereum implemen
 
 | Document | Description |
 |----------|-------------|
-| [architecture.md](./architecture.md) | **ETH wallet architecture** — wallet roles, use case boundary map, Clean Architecture layers, KeygenSignTx offline signing detail |
+| [architecture.md](./architecture.md) | **[SSOT] ETH wallet architecture** — wallet roles, use case assignments, Clean Architecture boundary maps (EOA + Safe), port interfaces, offline signing detail |
 | [multisig.md](./multisig.md) | **ETH Safe multisig** — Safe v1.4.1 implementation, EIP-712 signing flow, file format, CLI commands, E2E Pattern 3 |
 | [docs/transaction-flow.md](../../transaction-flow.md) | Chain-agnostic 3-wallet setup, signing, and monitoring flows |
 
@@ -430,33 +430,17 @@ recipientReceives = amount
 
 ## Wallet Implementation
 
-### Wallet Roles
+> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](./architecture.md). This section provides a quick-reference summary only.
 
-| Wallet | Role (Single-sig EOA) | Role (Safe Multisig) | Network |
-|--------|----------------------|----------------------|---------|
+### Wallet Roles (Summary)
+
+| Wallet | Single-sig EOA | Safe Multisig | Network |
+|--------|---------------|---------------|---------|
 | **Watch** | Create transactions, broadcast, monitor | Propose multisig tx, submit `execTransaction`, monitor | Online |
-| **Keygen** | Generate keys, import to keystore, sign | Generate keys, sign as owner 1 (offline) | Offline (air-gapped) |
-| **Sign** | Not used for ETH single-sig | Sign as owner 2…n (offline) | Offline (air-gapped) |
+| **Keygen** | Generate keys, sign transactions | Generate keys, sign as Safe owner 1 | Offline (air-gapped) |
+| **Sign** | Not used | Sign as Safe owner 2…n | Offline (air-gapped) |
 
-### Keygen Wallet Operations
-
-1. **`create seed`** — Generate BIP39 mnemonic and store encrypted seed
-2. **`create hdkey`** — Derive BIP44 HD keys for specified account
-3. **`import privkey`** — Import private keys into local keystore (encrypted)
-4. **`export address`** — Export public addresses to file for Watch Wallet
-
-### Watch Wallet Operations
-
-1. **`import address`** — Import addresses from Keygen Wallet file
-2. **`create deposit/payment/transfer`** — Build unsigned transactions
-3. **`send`** — Broadcast signed transactions
-4. **`monitor`** — Track transaction confirmation status
-
-### Sign Wallet Operations
-
-1. **`sign signature --signer-address`** — Sign a Safe multisig proposal file using an owner's private key (ETH multisig only)
-
-> **Note:** The Sign Wallet is not used in the single-sig EOA flow. It is only active for ETH Safe multisig (E2E Pattern 3), where it acts as an additional owner co-signer.
+See [architecture.md](./architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
 
 ### Database Schema (ETH-specific tables)
 
