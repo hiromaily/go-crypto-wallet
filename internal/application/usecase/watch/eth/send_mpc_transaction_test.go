@@ -170,10 +170,6 @@ func TestSendMPCTransaction_SenderMismatch(t *testing.T) {
 func TestSendMPCTransaction_SigningError(t *testing.T) {
 	t.Parallel()
 
-	privKey, err := ethcrypto.GenerateKey()
-	require.NoError(t, err)
-	_ = privKey
-
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID: big.NewInt(31337),
 		Gas:     21000,

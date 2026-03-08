@@ -24,14 +24,14 @@ func (u *runDKGUseCase) Execute(
 	ctx context.Context,
 	input keygenusecase.RunDKGInput,
 ) (keygenusecase.RunDKGOutput, error) {
-	// 1. Validate threshold vs party count.
+	// 1. Validate threshold (fail fast on zero before comparing against party count).
+	if input.Threshold < 1 {
+		return keygenusecase.RunDKGOutput{}, fmt.Errorf("threshold must be >= 1, got %d", input.Threshold)
+	}
 	if len(input.AllPartyIDs) < input.Threshold {
 		return keygenusecase.RunDKGOutput{},
 			fmt.Errorf("invalid DKG configuration: len(AllPartyIDs)=%d is less than Threshold=%d",
 				len(input.AllPartyIDs), input.Threshold)
-	}
-	if input.Threshold < 1 {
-		return keygenusecase.RunDKGOutput{}, fmt.Errorf("threshold must be >= 1, got %d", input.Threshold)
 	}
 
 	// 2. Build DKGParams from input.

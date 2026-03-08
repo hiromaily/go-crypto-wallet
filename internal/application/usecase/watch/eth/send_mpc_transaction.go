@@ -13,6 +13,7 @@ import (
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	portfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -56,7 +57,7 @@ func (u *sendMPCTransactionUseCase) Execute(
 	}
 
 	// 2. Guard: only unsigned files can initiate signing.
-	if f.TxType != "unsigned" {
+	if f.TxType != string(domainTx.TxTypeUnsigned) {
 		return watchusecase.SendMPCTransactionOutput{},
 			fmt.Errorf("%w: got tx_type %q", dtoeth.ErrNotUnsigned, f.TxType)
 	}
@@ -91,7 +92,7 @@ func (u *sendMPCTransactionUseCase) Execute(
 	}
 
 	// 7. Write the signed file.
-	f.TxType = "signed"
+	f.TxType = string(domainTx.TxTypeSigned)
 	f.SignedTxHex = signedTxHex
 	if _, writeErr := u.mpcFileRepo.WriteETHMPCJSONFile(f, true); writeErr != nil {
 		// Non-fatal: tx already broadcast. Log and continue.
