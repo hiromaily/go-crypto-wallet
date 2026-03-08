@@ -115,9 +115,9 @@ func TestMPCNodeServer_GeneratePreParams_CreatesJSONFile(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, data)
 
-	// Must be valid JSON.
-	var raw map[string]any
-	require.NoError(t, json.Unmarshal(data, &raw), "pre_params.json must be valid JSON")
+	// Must be valid JSON (pre-params contain large Paillier integers that exceed float64 range,
+	// so we validate syntax only rather than decoding into map[string]any).
+	require.True(t, json.Valid(data), "pre_params.json must be valid JSON")
 }
 
 // =============================================================================
