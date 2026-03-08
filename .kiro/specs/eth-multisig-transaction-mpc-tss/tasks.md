@@ -175,15 +175,15 @@
 
 ---
 
-- [ ] 7. Wire all MPC components in the DI container
-- [ ] 7.1 Add MPC infrastructure factory functions and wire use cases in `internal/di/container.go`
+- [x] 7. Wire all MPC components in the DI container
+- [x] 7.1 Add MPC infrastructure factory functions and wire use cases in `internal/di/container.go`
   - Add factory functions `newMPCShardStore`, `newGRPCOutboundTransport`, `newGRPCInboundTransport`, `newMPCCoordinator`, `newMPCNodeServer` following the existing `newXxx` naming convention
   - Wire `RunDKGUseCase`, `ServeMPCUseCase`, `CreateMPCTransactionUseCase`, and `SendMPCTransactionUseCase` constructors, injecting the corresponding port implementations
   - If gRPC listen address is not configured at startup, return a descriptive error rather than panicking; add a configuration check in the startup path
   - Inject new use cases into `ETHWatch` and `ETHKeygen` adapter constructors
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 7.2 Verify all existing DI wiring remains unchanged and the build passes
+- [x] 7.2 Verify all existing DI wiring remains unchanged and the build passes
   - Confirm `make check-build` and `make go-lint` both pass with no regressions in P1 (single-sig) and P3 (Safe multisig) wiring
   - Confirm all pre-existing unit tests pass
   - _Requirements: 10.5_
