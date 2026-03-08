@@ -31,3 +31,51 @@ func (*notImplementedAddMultisigSignatureUseCase) Execute(
 	return watchusecase.AddMultisigSignatureOutput{},
 		errors.New("AddMultisigSignature is not yet implemented")
 }
+
+// notImplementedCreateETHMultisigTransactionUseCase is a placeholder until Task 6.1 wires SafeClient.
+type notImplementedCreateETHMultisigTransactionUseCase struct{}
+
+// NewNotImplementedCreateETHMultisigTransactionUseCase returns a stub that errors on every call.
+func NewNotImplementedCreateETHMultisigTransactionUseCase() watchusecase.CreateETHMultisigTransactionUseCase {
+	return &notImplementedCreateETHMultisigTransactionUseCase{}
+}
+
+func (*notImplementedCreateETHMultisigTransactionUseCase) Execute(
+	_ context.Context,
+	_ watchusecase.CreateETHMultisigTransactionInput,
+) (watchusecase.CreateETHMultisigTransactionOutput, error) {
+	return watchusecase.CreateETHMultisigTransactionOutput{},
+		errors.New("CreateETHMultisigTransaction is not yet implemented (wire SafeClient in Task 6.1)")
+}
+
+// notImplementedSendETHMultisigTransactionUseCase is a placeholder until Task 6.1 wires SafeClient.
+type notImplementedSendETHMultisigTransactionUseCase struct{}
+
+// NewNotImplementedSendETHMultisigTransactionUseCase returns a stub that errors on every call.
+func NewNotImplementedSendETHMultisigTransactionUseCase() watchusecase.SendETHMultisigTransactionUseCase {
+	return &notImplementedSendETHMultisigTransactionUseCase{}
+}
+
+func (*notImplementedSendETHMultisigTransactionUseCase) Execute(
+	_ context.Context,
+	_ watchusecase.SendETHMultisigTransactionInput,
+) (watchusecase.SendETHMultisigTransactionOutput, error) {
+	return watchusecase.SendETHMultisigTransactionOutput{},
+		errors.New("SendETHMultisigTransaction is not yet implemented (wire SafeClient in Task 6.1)")
+}
+
+// notImplementedETHSafeInfoUseCase is a placeholder until Task 6.1 wires SafeClient.
+type notImplementedETHSafeInfoUseCase struct{}
+
+// NewNotImplementedETHSafeInfoUseCase returns a stub that errors on every call.
+func NewNotImplementedETHSafeInfoUseCase() watchusecase.ETHSafeInfoUseCase {
+	return &notImplementedETHSafeInfoUseCase{}
+}
+
+func (*notImplementedETHSafeInfoUseCase) Execute(
+	_ context.Context,
+	_ watchusecase.ETHSafeInfoInput,
+) (watchusecase.ETHSafeInfoOutput, error) {
+	return watchusecase.ETHSafeInfoOutput{},
+		errors.New("ETHSafeInfo is not yet implemented (wire SafeClient in Task 6.1)")
+}

@@ -12,6 +12,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/create"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/monitor"
+	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/safe"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/send"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
@@ -55,6 +56,14 @@ func AddCommands(
 	}
 	rootCmd.AddCommand(monitorCmd)
 	monitor.AddCommands(monitorCmd, wallet, containerGetter)
+
+	// Safe command (ETH only: Safe contract operations)
+	safeCmd := &cobra.Command{
+		Use:   "safe",
+		Short: "Safe contract operations (ETH only)",
+	}
+	rootCmd.AddCommand(safeCmd)
+	safe.AddCommands(safeCmd, wallet, containerGetter)
 
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{

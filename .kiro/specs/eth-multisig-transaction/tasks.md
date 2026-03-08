@@ -74,14 +74,14 @@
 
 ## Task 4. Implement the offline EIP-712 signing use case
 
-- [ ] 4.1 (P) Implement the EIP-712 hash recomputation helper
+- [x] 4.1 (P) Implement the EIP-712 hash recomputation helper
   - Implement a pure-Go function (no network calls) that recomputes the `safeTxHash` from the fields stored in `ETHMultisigTransactionFile`
   - Follow the exact hash chain: domain separator typehash → domain separator → Safe TX typehash → struct hash → final EIP-191 prefix hash using `crypto.Keccak256` and ABI-encoding via `go-ethereum/accounts/abi`
   - The function returns the computed hash as a byte slice; the caller compares it to the `SafeTxHash` field in the file and aborts with `ErrSafeTxHashMismatch` if they differ
   - Cover the helper with unit tests using known Safe transaction vectors to confirm the output matches the on-chain value
   - _Requirements: 5_
 
-- [ ] 4.2 (P) Implement the offline multisig signing use case
+- [x] 4.2 (P) Implement the offline multisig signing use case
   - Define `SignMultisigTransactionUseCase` interface and its input/output structs in the keygen use case interfaces file; input carries the file path and signer address (supplied by the CLI); output carries the new file path, completion flag, and counts
   - Read the `ETHMultisigTransactionFile`, invoke the EIP-712 recomputation helper, and abort if the hash does not match
   - Look up the signer's private key by the provided signer address in the account key repository; derive the child private key via the existing BIP-44 derivation helper
@@ -93,7 +93,7 @@
 
 ## Task 5. Extend wallet adapters and add CLI commands
 
-- [ ] 5.1 Extend the ETHWatch wallet adapter and add Watch CLI commands
+- [x] 5.1 Extend the ETHWatch wallet adapter and add Watch CLI commands
   - Add `createMultisigTxUseCase`, `sendMultisigTxUseCase`, and `safeInfoUseCase` fields to the `ETHWatch` struct; update its constructor accordingly
   - Add adapter methods `CreateMultisigTx`, `SendMultisigTx`, and `GetSafeInfo` that delegate to the respective use cases
   - Add a `watch create multisig` Cobra command with `--safe`, `--to`, `--amount`, `--threshold`, and `--action-type` flags; validate non-empty address fields at the CLI layer before calling the adapter
@@ -101,13 +101,13 @@
   - Add a `watch safe info` Cobra command with a `--safe` flag; place it in a new `safe/` subdirectory under the Watch CLI
   - _Requirements: 7, 8_
 
-- [ ] 5.2 (P) Extend the ETHKeygen adapter to route multisig signing
+- [x] 5.2 (P) Extend the ETHKeygen adapter to route multisig signing
   - Add a `signMultisigTxUseCase` field to `ETHKeygen`; update its constructor
   - In the existing `SignTx` adapter method, detect the file format by reading the JSON and checking for the `safe_address` field: if present, route to `signMultisigTxUseCase.Sign()` with the signer address derived from CLI context; otherwise keep the existing single-sig path
   - Pass `--signer-address` from the CLI flag through to the use case input
   - _Requirements: 5, 8_
 
-- [ ] 5.3 (P) Activate the ETHSign wallet adapter for multisig signing
+- [x] 5.3 (P) Activate the ETHSign wallet adapter for multisig signing
   - Add a `signMultisigTxUseCase` field to `ETHSign` (currently the struct has no signing capability) and update its constructor
   - Wire the `SignTx` adapter method (currently a no-op returning empty values) to `signMultisigTxUseCase.Sign()` following the same file-type detection and signer address routing as the Keygen adapter
   - The Sign wallet handles multisig only; single-sig ETH signing remains Keygen-only and is unaffected

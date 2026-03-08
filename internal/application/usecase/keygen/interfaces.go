@@ -71,6 +71,14 @@ type MuSig2SignUseCase interface {
 	Sign(ctx context.Context, input MuSig2SignInput) (MuSig2SignOutput, error)
 }
 
+// SignMultisigTransactionUseCase performs offline EIP-712 signing of a Safe multisig proposal.
+// It reads the multisig file, verifies the safeTxHash, signs with the signer's private key,
+// and writes the updated file. No network calls are made — suitable for air-gapped wallets.
+// Used by both ETHKeygen and ETHSign wallet adapters.
+type SignMultisigTransactionUseCase interface {
+	Sign(ctx context.Context, input SignMultisigTransactionInput) (SignMultisigTransactionOutput, error)
+}
+
 // GenerateDescriptorUseCase generates descriptors for an account (single-sig or multisig)
 type GenerateDescriptorUseCase interface {
 	Generate(ctx context.Context, input GenerateDescriptorInput) (GenerateDescriptorOutput, error)
@@ -231,4 +239,18 @@ type MuSig2SignInput struct {
 type MuSig2SignOutput struct {
 	PartialSignature [32]byte
 	SignerID         string
+}
+
+// SignMultisigTransactionInput represents input for offline EIP-712 Safe multisig signing.
+type SignMultisigTransactionInput struct {
+	FilePath      string // path to the ETHMultisigTransactionFile JSON
+	SignerAddress string // EIP-55 checksummed EOA address of this signer
+}
+
+// SignMultisigTransactionOutput represents the result of a successful multisig signing step.
+type SignMultisigTransactionOutput struct {
+	FilePath   string // path to the newly written file (counter incremented)
+	IsComplete bool   // true when len(Signatures) >= Threshold after this signing
+	SignCount  int    // number of signatures collected (including this one)
+	Threshold  int    // threshold required for execution
 }

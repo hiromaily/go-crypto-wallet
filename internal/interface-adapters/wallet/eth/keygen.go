@@ -23,6 +23,8 @@ type ETHKeygen struct {
 	exportAddressUseCase    keygenusecase.ExportAddressUseCase
 	exportFullPubkeyUseCase keygenusecase.ExportFullPubkeyUseCase
 	signTxUseCase           keygenusecase.SignTransactionUseCase
+	signMultisigTxUseCase   keygenusecase.SignMultisigTransactionUseCase
+	signerAddress           string
 }
 
 // NewETHKeygen returns ETHKeygen object
@@ -36,6 +38,7 @@ func NewETHKeygen(
 	exportAddressUseCase keygenusecase.ExportAddressUseCase,
 	exportFullPubkeyUseCase keygenusecase.ExportFullPubkeyUseCase,
 	signTxUseCase keygenusecase.SignTransactionUseCase,
+	signMultisigTxUseCase keygenusecase.SignMultisigTransactionUseCase,
 ) *ETHKeygen {
 	return &ETHKeygen{
 		ETH:                     eth,
@@ -47,7 +50,14 @@ func NewETHKeygen(
 		exportAddressUseCase:    exportAddressUseCase,
 		exportFullPubkeyUseCase: exportFullPubkeyUseCase,
 		signTxUseCase:           signTxUseCase,
+		signMultisigTxUseCase:   signMultisigTxUseCase,
 	}
+}
+
+// SetSignerAddress sets the signer address used for ETH Safe multisig signing.
+// This must be called by the CLI before invoking SignTx when the file is a multisig proposal.
+func (k *ETHKeygen) SetSignerAddress(addr string) {
+	k.signerAddress = addr
 }
 
 // GenerateSeed generates seed
@@ -129,8 +139,23 @@ func (k *ETHKeygen) ExportAddress(accountType domainAccount.AccountType) (string
 	return output.FileName, nil
 }
 
-// SignTx signs on transaction
+// SignTx signs on transaction.
+// If the file is an ETH Safe multisig proposal (detected by the "safe_address" JSON field)
+// and a signer address has been set via SetSignerAddress, the multisig signing path is used.
+// Otherwise the existing single-sig path is taken.
 func (k *ETHKeygen) SignTx(filePath string) (string, bool, string, error) {
+	if k.signMultisigTxUseCase != nil && k.signerAddress != "" && isETHMultisigFile(filePath) {
+		output, err := k.signMultisigTxUseCase.Sign(context.Background(),
+			keygenusecase.SignMultisigTransactionInput{
+				FilePath:      filePath,
+				SignerAddress: k.signerAddress,
+			})
+		if err != nil {
+			return "", false, "", err
+		}
+		return output.FilePath, output.IsComplete, "", nil
+	}
+
 	output, err := k.signTxUseCase.Sign(context.Background(), keygenusecase.SignTransactionInput{
 		FilePath: filePath,
 	})

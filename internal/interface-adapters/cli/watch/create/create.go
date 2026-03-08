@@ -9,6 +9,9 @@ import (
 
 // AddCommands adds all create subcommands
 func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGetter func() di.Container) {
+	// multisig command (ETH only: Safe proxy multisig proposal)
+	parentCmd.AddCommand(newMultisigCommand(wallet))
+
 	// deposit command
 	var (
 		depositFee    float64

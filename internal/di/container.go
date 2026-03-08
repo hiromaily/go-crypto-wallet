@@ -231,6 +231,7 @@ func (c *container) newETHKeygener() wallets.Keygener {
 		c.newKeygenExportAddressUseCase(),
 		c.newETHKeygenExportFullPubkeyUseCase(),
 		c.newETHKeygenSignTransactionUseCase(),
+		c.newETHKeygenSignMultisigTransactionUseCase(),
 	)
 }
 
@@ -371,6 +372,9 @@ func (c *container) newETHWalleter() wallets.Watcher {
 		c.newETHWatchSendTransactionUseCase(),
 		c.newWatchImportAddressUseCase(),
 		c.newWatchCreatePaymentRequestUseCase(),
+		NewNotImplementedCreateETHMultisigTransactionUseCase(),
+		NewNotImplementedSendETHMultisigTransactionUseCase(),
+		NewNotImplementedETHSafeInfoUseCase(),
 		c.walletType,
 	)
 }
@@ -1814,6 +1818,17 @@ func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTrans
 		c.newTxFileRepo(),
 		c.newEthAccountKeyRepo(),
 	)
+}
+
+func (c *container) newETHKeygenSignMultisigTransactionUseCase() keygenusecase.SignMultisigTransactionUseCase {
+	return keygenusecaseeth.NewSignMultisigTransactionUseCase(
+		c.newMultisigFileRepo(),
+		c.newEthAccountKeyRepo(),
+	)
+}
+
+func (c *container) newMultisigFileRepo() file.MultisigFileRepositorier {
+	return transaction.NewTransactionFileRepository(c.conf.FilePath.Tx)
 }
 
 func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
