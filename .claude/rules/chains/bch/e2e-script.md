@@ -1,5 +1,5 @@
 ---
-paths: "scripts/operation/bch/e2e/**"
+paths: ["scripts/operation/bch/e2e/**"]
 ---
 
 # BCH E2E Script Development Rules

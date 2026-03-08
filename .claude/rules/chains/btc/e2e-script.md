@@ -1,5 +1,5 @@
 ---
-paths: "scripts/operation/btc/e2e/**"
+paths: ["scripts/operation/btc/e2e/**"]
 ---
 
 # BTC E2E Script Development Rules
