@@ -190,8 +190,8 @@
 
 ---
 
-- [ ] 8. Add E2E test for MPC-TSS Pattern 4 (P4) and Makefile targets
-- [ ] 8.1 Write `scripts/operation/eth/e2e/e2e-p4.sh` covering the full 2-of-3 MPC-TSS flow
+- [x] 8. Add E2E test for MPC-TSS Pattern 4 (P4) and Makefile targets
+- [x] 8.1 Write `scripts/operation/eth/e2e/e2e-p4.sh` covering the full 2-of-3 MPC-TSS flow
   - Generate pre-params for 3 nodes (`keygen pre-params`)
   - Run DKG ceremony for all 3 nodes concurrently; capture the joint Ethereum address output
   - Fund the joint address from an Anvil pre-funded account
@@ -202,11 +202,11 @@
   - Verify the signed `ETHMPCTransactionFile` exists with `tx_type: signed` and a non-empty `signed_tx_hex`
   - _Requirements: 11.1, 11.3_
 
-- [ ] 8.2 (P) Add `make eth-e2e-p4` and `make eth-e2e-p4-ci` Makefile targets
+- [x] 8.2 (P) Add `make eth-e2e-p4` and `make eth-e2e-p4-ci` Makefile targets
   - Add targets to the Makefile that invoke `e2e-p4.sh`, following the existing `eth-e2e-p1` and `eth-e2e-p3` target conventions
   - _Requirements: 11.2_
 
-- [ ] 8.3 (P) Update the E2E parallel runner to include P4
+- [x] 8.3 (P) Update the E2E parallel runner to include P4
   - Update `scripts/operation/eth/e2e/e2e-parallel-runner.sh` to add P4 as a parallel pattern alongside P1 and P3
   - Assign P4 an isolated set of Anvil accounts to prevent nonce conflicts with P1 and P3 runs
   - Confirm P1 and P3 test runs remain unmodified and pass in the updated parallel runner

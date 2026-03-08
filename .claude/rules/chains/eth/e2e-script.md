@@ -164,7 +164,7 @@ make eth-e2e-ci-all                       # CI mode, all patterns
 | 1       | `e2e-p1.sh` | `eth-e2e-p1`  | ✅      |
 | 2       | `e2e-p2.sh` | `eth-e2e-p2`  | ✅      |
 | 3       | `e2e-p3.sh` | `eth-e2e-p3`  | ✅      |
-| 4       | `e2e-p4.sh` | `eth-e2e-p4`  | planned |
+| 4       | `e2e-p4.sh` | `eth-e2e-p4`  | ✅      |
 
 ## Common Errors
 

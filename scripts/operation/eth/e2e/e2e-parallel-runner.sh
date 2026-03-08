@@ -29,8 +29,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
 # Default configuration
-PATTERNS="1-3"
-MAX_PARALLEL=3
+PATTERNS="1-4"
+MAX_PARALLEL=4
 VERBOSE=false
 CI_MODE=false
 LOG_DIR="${PROJECT_ROOT}/data/logs/e2e-parallel-eth"
@@ -43,6 +43,7 @@ declare -A PATTERN_SCRIPTS=(
 	[1]="e2e-p1.sh"
 	[2]="e2e-p2.sh"
 	[3]="e2e-p3.sh"
+	[4]="e2e-p4.sh"
 )
 
 # Pattern descriptions
@@ -50,6 +51,7 @@ declare -A PATTERN_DESCRIPTIONS=(
 	[1]="Single-sig EIP-1559"
 	[2]="ERC-20 HYT Token Transfer (EIP-1559)"
 	[3]="Safe 2-of-2 Multisig Payment"
+	[4]="MPC-TSS 2-of-3 Threshold Signing"
 )
 
 # Per-pattern deployer private keys (isolated Anvil accounts to avoid nonce conflicts
@@ -58,16 +60,19 @@ declare -A PATTERN_DESCRIPTIONS=(
 #   toy echo orbit embrace opinion file client report history bomb regret life
 # P1 uses anvil_setBalance (no deployer key needed).
 # P2 and P3 each get a dedicated account so their forge/cast transactions don't conflict.
+# P4 uses anvil_setBalance to fund the joint address; account 3 is the MPC payment recipient.
 declare -A PATTERN_DEPLOYER_KEYS=(
 	[1]=""                                                                   # P1 uses anvil_setBalance only — no deployer key needed
 	[2]="0x3962662895394ad00c82fe9930495c0432f3c75aa882386837d904107b03c4bb" # account 1
 	[3]="0x4c806f247777f4a43fc661c4fcae3855bc8e009d605f3d1640b7b9aefa02bacd" # account 2
+	[4]="0x7e158ddc72ce0f51ec256a110f52de99aaf53a188071b0e57f14e7a181070573" # account 3 — P4 MPC recipient
 )
 
 declare -A PATTERN_DEPLOYER_ADDRS=(
 	[1]=""
 	[2]="0x5c2415367A9558Cb95926619337859aD64beA345" # account 1
 	[3]="0x079E8899f086E679a12999f1Af811d513C25d083" # account 2
+	[4]="0x0505bCf2c03Af6F5D36b1591BC9175295986fD2B" # account 3
 )
 
 ###############################################################################
@@ -127,6 +132,7 @@ Available Patterns:
   1:  Single-sig EIP-1559
   2:  ERC-20 HYT Token Transfer (EIP-1559)
   3:  Safe 2-of-2 Multisig Payment
+  4:  MPC-TSS 2-of-3 Threshold Signing
 EOF
 }
 
@@ -263,6 +269,10 @@ run_pattern() {
 		# P3: gas payer for Safe execTransaction (derived from DEPLOYER_KEY in e2e-p3.sh,
 		# but export explicitly so it's available regardless of sourcing order)
 		export WALLET_ETHEREUM_SAFE_GAS_PAYER_HEX_KEY="$deployer_key"
+	elif [[ -n "$deployer_addr" ]]; then
+		# P4: no on-chain contract deployment (no deployer key needed), but DEPLOYER_ADDRESS
+		# is used as the MPC payment recipient — export it for isolation.
+		export DEPLOYER_ADDRESS="$deployer_addr"
 	fi
 
 	log_info "Starting P${pattern}: ${PATTERN_DESCRIPTIONS[$pattern]}"

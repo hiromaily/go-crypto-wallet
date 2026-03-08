@@ -104,17 +104,55 @@ eth-e2e-p3-cleanup:
 	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p3.sh --cleanup
 
 ###############################################################################
+# E2E Tests
+#
+# Pattern 4: MPC-TSS 2-of-3 threshold signing
+#   NODE_TYPE: anvil (default) or geth
+#   DB:        sqlite (default) or mysql
+#
+# Requires:
+#   - Anvil running (started automatically)
+#   - tss-lib/v2 pre-computation parameters (generated automatically)
+#   - Ports 9001-9003 available for MPC gRPC daemons
+#
+# Usage:
+#   make eth-e2e-p4-reset             # Run with Anvil + SQLite (full reset)
+#   make eth-e2e-p4                   # Run without reset
+#   make eth-e2e-p4-ci                # Non-interactive (CI mode)
+###############################################################################
+
+.PHONY: eth-e2e-p4-reset
+eth-e2e-p4-reset: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p4.sh --reset
+
+.PHONY: eth-e2e-p4
+eth-e2e-p4: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p4.sh
+
+.PHONY: eth-e2e-p4-verbose
+eth-e2e-p4-verbose: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p4.sh --verbose
+
+.PHONY: eth-e2e-p4-ci
+eth-e2e-p4-ci: build-all
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p4.sh --non-interactive
+
+.PHONY: eth-e2e-p4-cleanup
+eth-e2e-p4-cleanup:
+	NODE_TYPE="$(NODE_TYPE)" DB_TYPE="$(DB)" ./scripts/operation/eth/e2e/e2e-p4.sh --cleanup
+
+###############################################################################
 # Parallel E2E Testing - Run Multiple Patterns Concurrently
 ###############################################################################
 # Usage:
-#   make eth-e2e-parallel                          # Run all patterns (P1-P3) in parallel
+#   make eth-e2e-parallel                          # Run all patterns (P1-P4) in parallel
 #   make eth-e2e-parallel PATTERNS=1,2             # Run specific patterns
-#   make eth-e2e-parallel MAX_PARALLEL=1           # Limit concurrent processes
+#   make eth-e2e-parallel MAX_PARALLEL=2           # Limit concurrent processes
 #   make eth-e2e-ci-all                            # Run all patterns in CI mode
 #
 # Parameters:
-#   PATTERNS      - Comma-separated list or range (e.g., "1,2,3" or "1-3")
-#                   Default: "1-3" (all patterns)
+#   PATTERNS      - Comma-separated list or range (e.g., "1,2,3,4" or "1-4")
+#                   Default: "1-4" (all patterns)
 #   MAX_PARALLEL  - Maximum number of concurrent processes
 #                   Default: 3 (all patterns run in parallel)
 #   VERBOSE       - Show real-time output (true/false)
@@ -128,8 +166,8 @@ eth-e2e-p3-cleanup:
 ###############################################################################
 
 # Default parameters
-PATTERNS ?= 1-3
-MAX_PARALLEL ?= 3
+PATTERNS ?= 1-4
+MAX_PARALLEL ?= 4
 VERBOSE ?= false
 
 # Parallel runner script path
