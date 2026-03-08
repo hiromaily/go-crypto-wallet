@@ -73,10 +73,10 @@ eth_init_database
 
 ETH E2E scripts support two node backends via the `NODE_TYPE` environment variable:
 
-| NODE_TYPE           | Description                         | Docker Profile | Port |
-| ------------------- | ----------------------------------- | -------------- | ---- |
-| `anvil` (**default**) | Foundry Anvil local devnet         | `anvil`        | 8546 |
-| `geth`              | Geth `--dev` PoA chain (chain 1337) | `geth-dev`     | 8545 |
+| NODE_TYPE           | Description                          | Docker Profile | Port | Chain ID |
+| ------------------- | ------------------------------------ | -------------- | ---- | -------- |
+| `anvil` (**default**) | Foundry Anvil local devnet          | `anvil`        | 8546 | 31337    |
+| `geth`              | Geth `--dev` PoA chain (geth --dev)  | `geth-dev`     | 8545 | 1337     |
 
 **Port Note**: Anvil defaults to port **8546** to avoid conflict with Geth on 8545.
 
@@ -84,10 +84,11 @@ ETH E2E scripts support two node backends via the `NODE_TYPE` environment variab
 
 E2E scripts support two database backends via the `DB_TYPE` environment variable:
 
-| DB_TYPE                | Description        | Docker MySQL | Use Case              |
-| ---------------------- | ------------------ | ------------ | --------------------- |
-| `sqlite` (**default**) | Local SQLite files | Not required | Fast testing, CI/CD   |
-| `mysql`                | Docker MySQL       | Required     | Full integration test |
+| DB_TYPE                | Description        | Docker Required | Use Case              |
+| ---------------------- | ------------------ | --------------- | --------------------- |
+| `sqlite` (**default**) | Local SQLite files | No              | Fast testing, CI/CD   |
+| `mysql`                | Docker MySQL       | Yes             | Full integration test |
+| `postgres`             | Docker PostgreSQL  | Yes             | Full integration test |
 
 ### SQLite File Paths
 
