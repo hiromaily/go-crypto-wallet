@@ -4,14 +4,14 @@
 
 ---
 
-- [ ] 1. Add TSS library dependency and define all MPC port interfaces
-- [ ] 1.1 Add `github.com/bnb-chain/tss-lib/v2` v2.0.1 and `google.golang.org/grpc` to `go.mod`
+- [x] 1. Add TSS library dependency and define all MPC port interfaces
+- [x] 1.1 Add `github.com/bnb-chain/tss-lib/v2` v2.0.1 and `google.golang.org/grpc` to `go.mod`
   - Run `go get github.com/bnb-chain/tss-lib/v2@v2.0.1` and verify the module graph resolves cleanly
   - Add `google.golang.org/grpc` (any compatible version) required by the gRPC transport implementation
   - Confirm `make check-build` passes after the dependency additions
   - _Requirements: 1.1, 1.3, 1.5_
 
-- [ ] 1.2 Define all MPC port interfaces in `internal/application/ports/api/eth/interfaces_mpc.go`
+- [x] 1.2 Define all MPC port interfaces in `internal/application/ports/api/eth/interfaces_mpc.go`
   - Define request/result structs `MPCSigningRequest`, `MPCSigningResult`, `DKGParams`, `DKGResult` using only Go primitives and `context.Context`
   - Define `MPCTransactionSigner` with `SignTransaction(ctx, req) (*MPCSigningResult, error)`
   - Define `MPCKeyGeneratorPort` with `RunDKG(ctx, params) (*DKGResult, error)` and `GeneratePreParams(ctx, outputPath) error`
@@ -21,7 +21,7 @@
   - Verify no TSS library types, gRPC types, or protobuf types appear anywhere in this file
   - _Requirements: 1.2, 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 1.3 Define `ETHMPCTransactionFile` DTO and `MPCFileRepositorier` port
+- [x] 1.3 Define `ETHMPCTransactionFile` DTO and `MPCFileRepositorier` port
   - Add `ETHMPCTransactionFile` struct to `internal/application/dto/eth/mpc_transaction_file.go` with all fields: version, tx_type, uuid, action_type, from/to/value/nonce/gas_limit/chain_id, EIP-1559 fee fields, tx_hash, raw_tx_hex, signed_tx_hex (omitempty), threshold, party_ids
   - Implement `Validate()` method enforcing version ≥ 1, valid tx_type enum, chain_id > 0, valid EIP-55 addresses, non-empty tx_hash, `len(PartyIDs) >= Threshold`, and when signed: non-empty SignedTxHex
   - Define sentinel errors in a `var` block following the `ETHMultisigTransactionFile` pattern
