@@ -87,6 +87,12 @@ TRANSFER_AMOUNT_ETH=1
 # Recipient for the MPC payment (Anvil account 3 — isolated for P4 in parallel runner)
 RECIPIENT_ADDRESS="${DEPLOYER_ADDRESS:-0x0505bCf2c03Af6F5D36b1591BC9175295986fD2B}"
 
+# Signing participants for 2-of-3: use node1 and node2.
+# The transaction file must list exactly the T parties that will sign (not all N).
+# PeerAddrs must be index-matched with the signing party IDs.
+MPC_SIGNING_PARTY_IDS="node1,node2"
+MPC_SIGNING_PEER_ADDRS="${MPC_NODE1_ADDR},${MPC_NODE2_ADDR}"
+
 # Data directory for MPC artefacts (pre-params, shards, logs)
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 MPC_DATA_DIR="${PROJECT_ROOT}/data/mpc/e2e-p4"
@@ -100,6 +106,12 @@ PREPARAMS_NODE3="${MPC_DATA_DIR}/pre_params_node3.json"
 SHARD_NODE1="${MPC_DATA_DIR}/shard_node1.json"
 SHARD_NODE2="${MPC_DATA_DIR}/shard_node2.json"
 SHARD_NODE3="${MPC_DATA_DIR}/shard_node3.json"
+
+# Per-node SQLite DB paths for DKG and serve-mpc
+# (Concurrent keygen processes must use separate DBs to avoid SQLite locking)
+SQLITE_NODE1_DB="${PROJECT_ROOT}/data/sqlite/eth/keygen-e2e-p4-node1.db"
+SQLITE_NODE2_DB="${PROJECT_ROOT}/data/sqlite/eth/keygen-e2e-p4-node2.db"
+SQLITE_NODE3_DB="${PROJECT_ROOT}/data/sqlite/eth/keygen-e2e-p4-node3.db"
 
 # DKG stdout/stderr capture files
 DKG_LOG_NODE1="${MPC_DATA_DIR}/dkg_node1.log"
@@ -181,6 +193,39 @@ while [[ $# -gt 0 ]]; do
 done
 
 ###############################################################################
+# Per-Node SQLite DB Helpers
+###############################################################################
+
+# Initialize a keygen SQLite DB from the e2e schema for a given node
+p4_init_node_db() {
+	local db_path="$1"
+	local keygen_schema="${PROJECT_ROOT}/tools/sqlc/schemas/sqlite/e2e/02_keygen.sql"
+
+	mkdir -p "$(dirname "${db_path}")"
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		if [ -f "${keygen_schema}" ]; then
+			rm -f "${db_path}"
+			sqlite3 "${db_path}" <"${keygen_schema}"
+		else
+			log_warn "Keygen schema not found: ${keygen_schema}"
+		fi
+	fi
+}
+
+# Run a keygen command using a specific per-node SQLite DB.
+# Usage: p4_keygen_node_cmd <db_path> [keygen args...]
+p4_keygen_node_cmd() {
+	local db_path="$1"
+	shift
+	if [ "${DB_TYPE}" = "sqlite" ]; then
+		WALLET_DATABASE_SQLITE_PATH="${db_path}" \
+			"${GOPATH}/bin/keygen" "$@"
+	else
+		"${GOPATH}/bin/keygen" "$@"
+	fi
+}
+
+###############################################################################
 # MPC Process Management
 ###############################################################################
 
@@ -232,15 +277,24 @@ preparams_phase() {
 	log_step "Pre-Params Phase — Generate Paillier parameters for 3 nodes"
 
 	mkdir -p "${MPC_DATA_DIR}"
+	mkdir -p "$(dirname "${SQLITE_NODE1_DB}")"
+
+	# Initialise per-node SQLite DBs (needed because keygen opens a DB connection on startup)
+	for node_num in 1 2 3; do
+		local db_var="SQLITE_NODE${node_num}_DB"
+		p4_init_node_db "${!db_var}"
+		log_info "  node${node_num}: SQLite DB initialized: ${!db_var}"
+	done
 
 	for node_num in 1 2 3; do
 		local preparams_file="${MPC_DATA_DIR}/pre_params_node${node_num}.json"
+		local db_var="SQLITE_NODE${node_num}_DB"
 		if [ -f "${preparams_file}" ]; then
 			log_info "  node${node_num}: pre-params already exist, skipping"
 			continue
 		fi
 		log_substep "Generating pre-params for node${node_num} (CPU-intensive, may take minutes)..."
-		eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" pre-params \
+		p4_keygen_node_cmd "${!db_var}" -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" dkg pre-params \
 			--output "${preparams_file}"
 		log_info "  node${node_num}: pre-params written to ${preparams_file}"
 	done
@@ -270,33 +324,37 @@ dkg_phase() {
 	# Each node:
 	#  - Identifies itself with --party-id
 	#  - Knows all participants via --all-party-ids
-	#  - Lists the other two nodes' gRPC addresses via --peers
+	#  - Binds its own gRPC server via --listen-addr (P2P mode)
+	#  - Lists the other two nodes' gRPC addresses via --peers (index-matched to all-party-ids minus self)
 	#  - Uses locally generated pre-params
 	#  - Writes its encrypted key shard to --shard-output
-	(eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" dkg \
+	(p4_keygen_node_cmd "${SQLITE_NODE1_DB}" -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" dkg dkg \
 		--party-id "node1" \
 		--all-party-ids "${MPC_ALL_PARTY_IDS}" \
 		--threshold "${MPC_THRESHOLD}" \
+		--listen-addr "${MPC_NODE1_ADDR}" \
 		--peers "${MPC_NODE2_ADDR},${MPC_NODE3_ADDR}" \
 		--pre-params-path "${PREPARAMS_NODE1}" \
 		--shard-output "${SHARD_NODE1}" \
 		--passphrase "${MPC_PASSPHRASE}" >"${DKG_LOG_NODE1}" 2>&1) &
 	local dkg_pid1=$!
 
-	(eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" dkg \
+	(p4_keygen_node_cmd "${SQLITE_NODE2_DB}" -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" dkg dkg \
 		--party-id "node2" \
 		--all-party-ids "${MPC_ALL_PARTY_IDS}" \
 		--threshold "${MPC_THRESHOLD}" \
+		--listen-addr "${MPC_NODE2_ADDR}" \
 		--peers "${MPC_NODE1_ADDR},${MPC_NODE3_ADDR}" \
 		--pre-params-path "${PREPARAMS_NODE2}" \
 		--shard-output "${SHARD_NODE2}" \
 		--passphrase "${MPC_PASSPHRASE}" >"${DKG_LOG_NODE2}" 2>&1) &
 	local dkg_pid2=$!
 
-	(eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" dkg \
+	(p4_keygen_node_cmd "${SQLITE_NODE3_DB}" -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" dkg dkg \
 		--party-id "node3" \
 		--all-party-ids "${MPC_ALL_PARTY_IDS}" \
 		--threshold "${MPC_THRESHOLD}" \
+		--listen-addr "${MPC_NODE3_ADDR}" \
 		--peers "${MPC_NODE1_ADDR},${MPC_NODE2_ADDR}" \
 		--pre-params-path "${PREPARAMS_NODE3}" \
 		--shard-output "${SHARD_NODE3}" \
@@ -389,7 +447,7 @@ create_mpc_phase() {
 		--to "${RECIPIENT_ADDRESS}" \
 		--amount "${TRANSFER_AMOUNT_ETH}" \
 		--threshold "${MPC_THRESHOLD}" \
-		--party-ids "${MPC_ALL_PARTY_IDS}" \
+		--party-ids "${MPC_SIGNING_PARTY_IDS}" \
 		--action-type "payment" 2>&1) || {
 		log_error "Failed to create MPC transaction"
 		log_error "Output: ${create_output}"
@@ -429,7 +487,7 @@ start_nodes_phase() {
 
 	# Start node1
 	log_substep "Starting MPC node1 daemon on ${MPC_NODE1_ADDR}"
-	eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" serve mpc \
+	p4_keygen_node_cmd "${SQLITE_NODE1_DB}" -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" serve mpc \
 		--listen-addr "${MPC_NODE1_ADDR}" \
 		--shard-path "${SHARD_NODE1}" \
 		--passphrase "${MPC_PASSPHRASE}" \
@@ -440,7 +498,7 @@ start_nodes_phase() {
 
 	# Start node2
 	log_substep "Starting MPC node2 daemon on ${MPC_NODE2_ADDR}"
-	eth_keygen_cmd -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" serve mpc \
+	p4_keygen_node_cmd "${SQLITE_NODE2_DB}" -c "${ETH_CONFIG_KEYGEN}" --coin "${ETH_COIN}" serve mpc \
 		--listen-addr "${MPC_NODE2_ADDR}" \
 		--shard-path "${SHARD_NODE2}" \
 		--passphrase "${MPC_PASSPHRASE}" \
@@ -478,11 +536,11 @@ send_mpc_phase() {
 	log_step "Send Phase — Initiate MPC signing session and broadcast (Watch wallet)"
 
 	log_substep "Signing and broadcasting: ${MPC_TX_FILE}"
-	log_info "  Signing nodes: ${MPC_NODE1_ADDR}, ${MPC_NODE2_ADDR}"
+	log_info "  Signing nodes: ${MPC_SIGNING_PEER_ADDRS}"
 	local send_output
 	send_output=$(eth_watch_cmd -c "${ETH_CONFIG_WATCH}" --coin "${ETH_COIN}" send mpc \
 		--file "${MPC_TX_FILE}" \
-		--peer-addrs "${MPC_NODE1_ADDR},${MPC_NODE2_ADDR}" 2>&1) || {
+		--peer-addrs "${MPC_SIGNING_PEER_ADDRS}" 2>&1) || {
 		log_error "Failed to send MPC transaction"
 		log_error "Output: ${send_output}"
 		return 1
@@ -597,15 +655,29 @@ e2e_full_workflow() {
 p4_cleanup_data() {
 	log_substep "Removing MPC data directory: ${MPC_DATA_DIR}"
 	rm -rf "${MPC_DATA_DIR}"
+	log_substep "Removing per-node SQLite DBs"
+	rm -f "${SQLITE_NODE1_DB}" "${SQLITE_NODE2_DB}" "${SQLITE_NODE3_DB}"
+}
+
+p4_release_mpc_ports() {
+	log_substep "Releasing MPC gRPC ports (9001-9003)"
+	local pids
+	pids=$(lsof -ti:9001,9002,9003 2>/dev/null || true)
+	if [ -n "${pids}" ]; then
+		# shellcheck disable=SC2086  # intentional word splitting for PIDs
+		kill -9 ${pids} 2>/dev/null || true
+	fi
 }
 
 p4_cleanup() {
 	p4_stop_node_daemons
+	p4_release_mpc_ports
 	eth_cleanup
 }
 
 p4_full_reset() {
 	p4_stop_node_daemons
+	p4_release_mpc_ports
 	p4_cleanup_data
 	eth_cleanup
 	log_info "Full reset completed"

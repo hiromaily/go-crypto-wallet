@@ -25,6 +25,7 @@ func newDKGCommand(wallet *wallets.Keygener) *cobra.Command {
 		partyID         string
 		allPartyIDs     string
 		threshold       int
+		listenAddr      string
 		peerAddrs       string
 		preParamsPath   string
 		shardOutputPath string
@@ -62,6 +63,7 @@ On success, an encrypted key shard is saved to --shard-output.`,
 				PartyID:         partyID,
 				AllPartyIDs:     ids,
 				Threshold:       threshold,
+				ListenAddr:      listenAddr,
 				PeerAddrs:       peers,
 				PreParamsPath:   preParamsPath,
 				ShardOutputPath: shardOutputPath,
@@ -82,6 +84,8 @@ On success, an encrypted key shard is saved to --shard-output.`,
 	cmd.Flags().StringVar(&allPartyIDs, "all-party-ids", "",
 		"Comma-separated IDs of all ceremony participants (required)")
 	cmd.Flags().IntVar(&threshold, "threshold", 2, "Required signer count (m in m-of-n)")
+	cmd.Flags().StringVar(&listenAddr, "listen-addr", "",
+		"gRPC listen address for this node in P2P DKG mode (e.g., localhost:9001)")
 	cmd.Flags().StringVar(&peerAddrs, "peers", "", "Comma-separated gRPC addresses of other nodes")
 	cmd.Flags().StringVar(&preParamsPath, "pre-params-path", "", "Path to pre-computed Paillier parameters JSON file")
 	cmd.Flags().StringVar(&shardOutputPath, "shard-output", "", "Output path for the encrypted key shard")

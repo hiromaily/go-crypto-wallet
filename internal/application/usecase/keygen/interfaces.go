@@ -96,6 +96,7 @@ type RunDKGInput struct {
 	PartyID         string
 	AllPartyIDs     []string
 	Threshold       int
+	ListenAddr      string // gRPC listen address for this node in P2P DKG mode (e.g., "localhost:9001")
 	PeerAddrs       []string
 	PreParamsPath   string
 	ShardOutputPath string

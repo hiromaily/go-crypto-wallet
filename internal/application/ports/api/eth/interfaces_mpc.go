@@ -71,8 +71,14 @@ type DKGParams struct {
 	// Threshold is T — minimum signers needed for a future signing session.
 	Threshold int
 
+	// ListenAddr is the gRPC listen address for this node's P2P DKG server (e.g., "localhost:9001").
+	// When non-empty, RunDKG starts a gRPC listener and connects to peers directly (P2P mode).
+	// When empty, the coordinator relay model is used (backward-compatible).
+	ListenAddr string
+
 	// PeerAddrs contains the gRPC addresses of peer nodes (excluding self).
-	// Index-matched with AllPartyIDs (self entry skipped).
+	// Index-matched with AllPartyIDs (self entry skipped): the i-th entry corresponds to
+	// the i-th party in AllPartyIDs after removing PartyID.
 	PeerAddrs []string
 
 	// PreParamsPath is the filesystem path to the pre-computed Paillier pre-params file.

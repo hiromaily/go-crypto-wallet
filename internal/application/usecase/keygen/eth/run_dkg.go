@@ -39,6 +39,7 @@ func (u *runDKGUseCase) Execute(
 		PartyID:         input.PartyID,
 		AllPartyIDs:     input.AllPartyIDs,
 		Threshold:       input.Threshold,
+		ListenAddr:      input.ListenAddr,
 		PeerAddrs:       input.PeerAddrs,
 		PreParamsPath:   input.PreParamsPath,
 		ShardOutputPath: input.ShardOutputPath,
