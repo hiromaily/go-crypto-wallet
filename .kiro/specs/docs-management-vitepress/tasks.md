@@ -97,9 +97,9 @@ Phase 5 → Task 5 (SSOT enforcement)
 
 ---
 
-- [ ] 5. Enforce SSOT across .claude/ files and directory READMEs
+- [x] 5. Enforce SSOT across .claude/ files and directory READMEs
 
-- [ ] 5.1 (P) Audit and update .claude/rules/ files
+- [x] 5.1 (P) Audit and update .claude/rules/ files
   - For each file under `.claude/rules/`, identify sections where body content is a verbatim or near-verbatim copy (>50% overlap) of a section in `docs/`
   - Replace duplicate body content with a Markdown link to the canonical `docs/` page and a one-line summary of the linked content
   - Preserve meta-instructions, agent-specific guidance, and content that merely references or links to `docs/` — these are not duplicates
@@ -107,21 +107,21 @@ Phase 5 → Task 5 (SSOT enforcement)
   - Can be executed in parallel with 5.2, 5.3, 5.4 (disjoint file sets)
   - _Requirements: 2.2_
 
-- [ ] 5.2 (P) Audit and update .claude/skills/ files
+- [x] 5.2 (P) Audit and update .claude/skills/ files
   - For each `SKILL.md` under `.claude/skills/*/`, identify sections duplicating `docs/` content using the same >50% overlap criterion
   - Replace duplicate sections with links to the canonical `docs/` page; preserve skill-specific invocation instructions and examples
   - After updates, confirm every `docs/` page referenced actually exists (search the VitePress site or check the file tree)
   - Can be executed in parallel with 5.1, 5.3, 5.4
   - _Requirements: 2.3_
 
-- [ ] 5.3 (P) Audit and update .claude/commands/ files
+- [x] 5.3 (P) Audit and update .claude/commands/ files
   - For each file under `.claude/commands/`, identify sections duplicating `docs/` content
   - Replace duplicate sections with links to the canonical `docs/` page; preserve command-specific prompts and invocation logic
   - After updates, confirm every `docs/` page referenced actually exists (search the VitePress site or check the file tree)
   - Can be executed in parallel with 5.1, 5.2, 5.4
   - _Requirements: 2.4_
 
-- [ ] 5.4 (P) Audit and update directory-level README.md files
+- [x] 5.4 (P) Audit and update directory-level README.md files
   - Focus on READMEs in `internal/`, `apps/`, `scripts/`, `cmd/`, and other directories that contain prose duplicating `docs/` content
   - Replace duplicated explanatory sections with links to the canonical `docs/` page; preserve per-directory quick-start steps that are directory-specific and not in `docs/`
   - After updates, run `bun run docs:build` to confirm all newly linked `docs/` pages exist (no broken references)
