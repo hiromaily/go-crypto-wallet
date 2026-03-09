@@ -299,7 +299,11 @@ func (e *Ethereum) CreateRawTransactionEIP1559(
 		Data:      nil,
 	})
 
-	txHash := tx.Hash().Hex()
+	// Use the signer hash (EIP-1559 pre-image) not tx.Hash() for MPC-TSS signing.
+	// tx.Hash() encodes the unsigned tx with zero r/s/v fields, producing a different hash
+	// than what types.Sender recovers from. signer.Hash(tx) is the canonical pre-image.
+	signer := types.LatestSignerForChainID(chainID)
+	txHash := signer.Hash(tx).Hex()
 	rawTxHex, err := pkgeth.EncodeTx(tx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)

@@ -45,6 +45,11 @@ func (s *stubInboundTransport) EnqueueOutbound(msg []byte) error {
 	return nil
 }
 
+func (*stubInboundTransport) AwaitSessionInfo(ctx context.Context) (apieth.MPCSigningSessionInfo, error) {
+	<-ctx.Done()
+	return apieth.MPCSigningSessionInfo{}, ctx.Err()
+}
+
 func (*stubInboundTransport) Close() error { return nil }
 
 // stubShardStorage is a minimal MPCKeyShardStorage that saves shards in memory.

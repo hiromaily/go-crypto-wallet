@@ -1949,10 +1949,16 @@ func (c *container) newETHKeygenRunDKGUseCase() keygenusecase.RunDKGUseCase {
 }
 
 func (c *container) newETHKeygenServeMPCUseCase() keygenusecase.ServeMPCUseCase {
+	inbound := c.newGRPCInboundTransport()
 	return keygenusecaseeth.NewServeMPCUseCase(
 		c.newMPCShardStore(),
-		c.newGRPCInboundTransport(),
+		inbound,
+		c.newMPCSigningNode(inbound),
 	)
+}
+
+func (*container) newMPCSigningNode(transport *mpcinfra.GRPCInboundTransport) *mpcinfra.MPCSigningNode {
+	return mpcinfra.NewMPCSigningNode(transport, nil) // uses slog.Default() when nil
 }
 
 // MPC Infrastructure Factories

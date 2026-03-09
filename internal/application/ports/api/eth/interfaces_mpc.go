@@ -156,6 +156,23 @@ type MPCOutboundTransport interface {
 	Close() error
 }
 
+// MPCSigningSessionInfo carries the session parameters delivered to a node by the coordinator's
+// InitSigning RPC call. The node uses these to construct the TSS signing party.
+type MPCSigningSessionInfo struct {
+	// SessionID is a UUIDv4 that uniquely identifies this signing session.
+	SessionID string
+
+	// Hash is the 32-byte Keccak256 hash of the unsigned transaction that nodes sign.
+	Hash []byte
+
+	// PartyIDs contains the sorted identifiers of all T participating signing nodes.
+	// Must be identical on every signing node.
+	PartyIDs []string
+
+	// Threshold is T — minimum signers required.
+	Threshold int
+}
+
 // MPCInboundTransport is used by MPC node servers to accept incoming TSS round messages
 // from the Watch wallet coordinator and to send TSS round messages back over the same
 // bidirectional relay stream.
@@ -175,8 +192,46 @@ type MPCInboundTransport interface {
 	// stream. Returns an error if the outbound send buffer is full.
 	EnqueueOutbound(msg []byte) error
 
+	// AwaitSessionInfo blocks until the coordinator's InitSigning RPC is received,
+	// then returns the session parameters. Returns ctx.Err() if ctx is cancelled before InitSigning.
+	AwaitSessionInfo(ctx context.Context) (MPCSigningSessionInfo, error)
+
 	// Close gracefully stops the gRPC listener and closes the receive channel.
 	Close() error
+}
+
+// MPCSigningNodeParams carries configuration for a single TSS signing session on this node.
+type MPCSigningNodeParams struct {
+	// SessionID is a UUIDv4 that uniquely identifies this signing session.
+	SessionID string
+
+	// Hash is the 32-byte Keccak256 hash of the unsigned transaction to sign.
+	Hash []byte
+
+	// PartyID is this node's own party identifier within the session.
+	PartyID string
+
+	// AllPartyIDs contains the sorted identifiers of all T signing parties (from coordinator).
+	AllPartyIDs []string
+
+	// Threshold is T — minimum signers required.
+	Threshold int
+
+	// ShardJSON is the decrypted LocalPartySaveData JSON bytes from the DKG ceremony.
+	ShardJSON []byte
+}
+
+// MPCSigningNodePort is implemented by MPC node servers to run the TSS signing state machine.
+// The implementation drives the tss-lib/v2 signing package and sends the assembled signature
+// back to the coordinator via the transport.
+//
+
+type MPCSigningNodePort interface {
+	// RunSigning runs the TSS ECDSA signing protocol for the given session.
+	// It drives all signing rounds, exchanging messages with peer nodes through the
+	// transport, and enqueues the assembled 65-byte signature when complete.
+	// Blocks until signing completes, ctx is cancelled, or an error occurs.
+	RunSigning(ctx context.Context, params MPCSigningNodeParams) error
 }
 
 // MPCSessionRequest is the first message sent by the Watch wallet coordinator to a signing node
