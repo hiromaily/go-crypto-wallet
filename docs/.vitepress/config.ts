@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'go-crypto-wallet',
   description:
     'A multi-chain cryptocurrency wallet supporting BTC, BCH, ETH, XRP, and Cosmos with Clean Architecture',
@@ -323,4 +324,4 @@ export default defineConfig({
       },
     ],
   },
-})
+}))
