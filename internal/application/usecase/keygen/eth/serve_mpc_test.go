@@ -2,11 +2,11 @@ package eth_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"math/big"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -21,6 +21,7 @@ import (
 type serveMPCDeps struct {
 	shardStorage *ethapiamocks.MockMPCKeyShardStorage
 	transport    *ethapiamocks.MockMPCInboundTransport
+	signingNode  *ethapiamocks.MockMPCSigningNodePort
 }
 
 func newServeMPCDeps(t *testing.T) *serveMPCDeps {
@@ -28,11 +29,12 @@ func newServeMPCDeps(t *testing.T) *serveMPCDeps {
 	return &serveMPCDeps{
 		shardStorage: ethapiamocks.NewMockMPCKeyShardStorage(t),
 		transport:    ethapiamocks.NewMockMPCInboundTransport(t),
+		signingNode:  ethapiamocks.NewMockMPCSigningNodePort(t),
 	}
 }
 
 func newServeMPCUseCase(deps *serveMPCDeps) keygenusecase.ServeMPCUseCase {
-	return keygenusecaseeth.NewServeMPCUseCase(deps.shardStorage, deps.transport)
+	return keygenusecaseeth.NewServeMPCUseCase(deps.shardStorage, deps.transport, deps.signingNode)
 }
 
 func newServeMPCInput() keygenusecase.ServeMPCInput {
@@ -45,58 +47,83 @@ func newServeMPCInput() keygenusecase.ServeMPCInput {
 	}
 }
 
-// buildValidSessionRequest creates a well-formed session request with consistent tx hash.
-func buildValidSessionRequest(t *testing.T, sessionID string) ([]byte, string) {
+// testTxData holds a valid raw transaction hex and the corresponding signing hash,
+// used to satisfy the hash verification introduced to prevent blind signing.
+type testTxData struct {
+	rawTxHex string
+	hash     []byte
+}
+
+// makeTestTxData builds an EIP-1559 transaction and returns its encoded hex
+// together with the signing hash (signer.Hash) for chainID 1337.
+func makeTestTxData(t *testing.T) testTxData {
 	t.Helper()
+
+	chainID := big.NewInt(1337)
+	to := common.HexToAddress("0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0")
 	tx := types.NewTx(&types.DynamicFeeTx{
-		ChainID:   big.NewInt(31337),
-		Nonce:     1,
-		GasTipCap: big.NewInt(1e9),
-		GasFeeCap: big.NewInt(2e9),
+		ChainID:   chainID,
+		Nonce:     7,
+		To:        &to,
+		Value:     big.NewInt(500_000_000_000_000_000),
 		Gas:       21000,
-		To:        nil,
-		Value:     big.NewInt(1e18),
+		GasTipCap: big.NewInt(2_000_000_000),
+		GasFeeCap: big.NewInt(30_000_000_000),
 	})
+
 	txHex, err := pkgeth.EncodeTx(tx)
 	require.NoError(t, err)
+	require.NotNil(t, txHex)
 
-	req := apieth.MPCSessionRequest{
-		SessionID: sessionID,
-		TxHash:    tx.Hash().Hex(),
-		RawTxHex:  *txHex,
-		PartyIDs:  []string{"node-1", "node-2"},
-		Threshold: 2,
-	}
-	data, err := json.Marshal(req)
-	require.NoError(t, err)
-	return data, *txHex
+	signer := types.LatestSignerForChainID(chainID)
+	hash := signer.Hash(tx)
+	return testTxData{rawTxHex: *txHex, hash: hash.Bytes()}
 }
 
-// buildMismatchedSessionRequest creates a session request where TxHash doesn't match RawTxHex.
-func buildMismatchedSessionRequest(t *testing.T, sessionID string) []byte {
-	t.Helper()
-	tx := types.NewTx(&types.DynamicFeeTx{
-		ChainID: big.NewInt(31337),
-		Nonce:   1,
-		Gas:     21000,
-		Value:   big.NewInt(1e18),
-	})
-	txHex, err := pkgeth.EncodeTx(tx)
-	require.NoError(t, err)
-
-	req := apieth.MPCSessionRequest{
+func makeSessionInfo(sessionID string, txd testTxData) apieth.MPCSigningSessionInfo {
+	return apieth.MPCSigningSessionInfo{
 		SessionID: sessionID,
-		TxHash:    "0x" + "ab" + "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", // wrong hash
-		RawTxHex:  *txHex,
+		Hash:      txd.hash,
 		PartyIDs:  []string{"node-1", "node-2"},
 		Threshold: 2,
+		RawTxHex:  txd.rawTxHex,
 	}
-	data, err := json.Marshal(req)
-	require.NoError(t, err)
-	return data
 }
 
-func TestServeMPC_TxHashMismatch(t *testing.T) {
+func TestServeMPC_SigningCompletes(t *testing.T) {
+	t.Parallel()
+
+	txd := makeTestTxData(t)
+	deps := newServeMPCDeps(t)
+
+	deps.shardStorage.EXPECT().
+		LoadShard(mock.Anything, dkgShardPath, dkgPassphrase).
+		Return([]byte(`{"dummy":"shard"}`), nil).Once()
+
+	deps.transport.EXPECT().
+		Listen(mock.Anything, "localhost:9001").
+		Return(nil).Once()
+
+	deps.transport.EXPECT().
+		AwaitSessionInfo(mock.Anything).
+		Return(makeSessionInfo("session-ok", txd), nil).Once()
+
+	deps.transport.EXPECT().
+		Close().
+		Return(nil).Once()
+
+	deps.signingNode.EXPECT().
+		RunSigning(mock.Anything, mock.MatchedBy(func(p apieth.MPCSigningNodeParams) bool {
+			return p.SessionID == "session-ok" && p.PartyID == dkgPartyID
+		})).
+		Return(nil).Once()
+
+	uc := newServeMPCUseCase(deps)
+	err := uc.Serve(context.Background(), newServeMPCInput())
+	require.NoError(t, err)
+}
+
+func TestServeMPC_AwaitSessionInfoCancelled(t *testing.T) {
 	t.Parallel()
 
 	deps := newServeMPCDeps(t)
@@ -109,12 +136,9 @@ func TestServeMPC_TxHashMismatch(t *testing.T) {
 		Listen(mock.Anything, "localhost:9001").
 		Return(nil).Once()
 
-	ch := make(chan []byte, 1)
-	msgBytes := buildMismatchedSessionRequest(t, "session-bad-hash")
-	ch <- msgBytes
 	deps.transport.EXPECT().
-		Receive(mock.Anything).
-		Return((<-chan []byte)(ch), nil).Once()
+		AwaitSessionInfo(mock.Anything).
+		Return(apieth.MPCSigningSessionInfo{}, context.Canceled).Once()
 
 	deps.transport.EXPECT().
 		Close().
@@ -123,46 +147,6 @@ func TestServeMPC_TxHashMismatch(t *testing.T) {
 	uc := newServeMPCUseCase(deps)
 	err := uc.Serve(context.Background(), newServeMPCInput())
 
-	require.Error(t, err)
-	require.ErrorIs(t, err, keygenusecaseeth.ErrTxHashMismatch)
-}
-
-func TestServeMPC_ValidHash_BlocksUntilCancel(t *testing.T) {
-	t.Parallel()
-
-	deps := newServeMPCDeps(t)
-
-	deps.shardStorage.EXPECT().
-		LoadShard(mock.Anything, dkgShardPath, dkgPassphrase).
-		Return([]byte(`{"dummy":"shard"}`), nil).Once()
-
-	deps.transport.EXPECT().
-		Listen(mock.Anything, "localhost:9001").
-		Return(nil).Once()
-
-	ch := make(chan []byte, 1)
-	msgBytes, _ := buildValidSessionRequest(t, "session-valid")
-	ch <- msgBytes
-	deps.transport.EXPECT().
-		Receive(mock.Anything).
-		Return((<-chan []byte)(ch), nil).Once()
-
-	deps.transport.EXPECT().
-		Close().
-		Return(nil).Once()
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	done := make(chan error, 1)
-	go func() {
-		done <- newServeMPCUseCase(deps).Serve(ctx, newServeMPCInput())
-	}()
-
-	// Cancel after a short time to simulate graceful shutdown.
-	cancel()
-
-	err := <-done
-	// Expect context cancellation, not ErrTxHashMismatch.
 	require.Error(t, err)
 	require.ErrorIs(t, err, context.Canceled)
 }
@@ -182,4 +166,78 @@ func TestServeMPC_ShardLoadFailure(t *testing.T) {
 
 	require.Error(t, err)
 	require.ErrorIs(t, err, shardErr)
+}
+
+func TestServeMPC_SigningNodeError(t *testing.T) {
+	t.Parallel()
+
+	txd := makeTestTxData(t)
+	deps := newServeMPCDeps(t)
+	signingErr := errors.New("tss round 2 failed")
+
+	deps.shardStorage.EXPECT().
+		LoadShard(mock.Anything, dkgShardPath, dkgPassphrase).
+		Return([]byte(`{"dummy":"shard"}`), nil).Once()
+
+	deps.transport.EXPECT().
+		Listen(mock.Anything, "localhost:9001").
+		Return(nil).Once()
+
+	deps.transport.EXPECT().
+		AwaitSessionInfo(mock.Anything).
+		Return(makeSessionInfo("session-err", txd), nil).Once()
+
+	deps.transport.EXPECT().
+		Close().
+		Return(nil).Once()
+
+	deps.signingNode.EXPECT().
+		RunSigning(mock.Anything, mock.Anything).
+		Return(signingErr).Once()
+
+	uc := newServeMPCUseCase(deps)
+	err := uc.Serve(context.Background(), newServeMPCInput())
+
+	require.Error(t, err)
+	require.ErrorIs(t, err, signingErr)
+}
+
+func TestServeMPC_HashMismatch(t *testing.T) {
+	t.Parallel()
+
+	txd := makeTestTxData(t)
+	deps := newServeMPCDeps(t)
+
+	deps.shardStorage.EXPECT().
+		LoadShard(mock.Anything, dkgShardPath, dkgPassphrase).
+		Return([]byte(`{"dummy":"shard"}`), nil).Once()
+
+	deps.transport.EXPECT().
+		Listen(mock.Anything, "localhost:9001").
+		Return(nil).Once()
+
+	// Provide a tampered hash that does not match the raw tx.
+	tamperedHash := make([]byte, 32)
+	tamperedHash[0] = 0xff
+	sessionInfo := apieth.MPCSigningSessionInfo{
+		SessionID: "session-tampered",
+		Hash:      tamperedHash,
+		PartyIDs:  []string{"node-1", "node-2"},
+		Threshold: 2,
+		RawTxHex:  txd.rawTxHex,
+	}
+
+	deps.transport.EXPECT().
+		AwaitSessionInfo(mock.Anything).
+		Return(sessionInfo, nil).Once()
+
+	deps.transport.EXPECT().
+		Close().
+		Return(nil).Once()
+
+	uc := newServeMPCUseCase(deps)
+	err := uc.Serve(context.Background(), newServeMPCInput())
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "tx hash verification failed")
 }

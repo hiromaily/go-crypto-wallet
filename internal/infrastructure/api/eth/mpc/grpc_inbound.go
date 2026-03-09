@@ -24,7 +24,8 @@ const (
 
 // GRPCInboundTransport implements MPCInboundTransport as a gRPC server.
 //
-// When the Watch wallet coordinator calls InitSigning, the expected session ID is registered.
+// When the Watch wallet coordinator calls InitSigning, the expected session ID is registered
+// and the session parameters are delivered via sessionInfoCh for consumption by AwaitSessionInfo.
 // Subsequent RelaySession messages are validated against this session ID; messages with an
 // unknown or mismatched session ID are silently discarded to prevent cross-session routing.
 //
@@ -39,15 +40,17 @@ type GRPCInboundTransport struct {
 	server  *grpc.Server
 	started atomic.Bool
 
-	recvCh chan []byte // coordinator → node messages delivered to MPCNodeServer
-	sendCh chan []byte // node → coordinator messages queued by MPCNodeServer
+	recvCh        chan []byte                       // coordinator → node messages delivered to MPCNodeServer
+	sendCh        chan []byte                       // node → coordinator messages queued by MPCNodeServer
+	sessionInfoCh chan apieth.MPCSigningSessionInfo // delivers InitSigning parameters to AwaitSessionInfo
 }
 
 // NewGRPCInboundTransport creates a transport ready for Listen to be called.
 func NewGRPCInboundTransport() *GRPCInboundTransport {
 	return &GRPCInboundTransport{
-		recvCh: make(chan []byte, inboundRecvBuf),
-		sendCh: make(chan []byte, inboundSendBuf),
+		recvCh:        make(chan []byte, inboundRecvBuf),
+		sendCh:        make(chan []byte, inboundSendBuf),
+		sessionInfoCh: make(chan apieth.MPCSigningSessionInfo, 1),
 	}
 }
 
@@ -103,17 +106,44 @@ func (t *GRPCInboundTransport) EnqueueOutbound(msg []byte) error {
 // MPCNodeServiceServer implementation (gRPC server handlers)
 // =============================================================================
 
-// InitSigning registers the session ID for this signing session.
-// The coordinator calls this before opening the RelaySession stream.
+// InitSigning registers the session ID for this signing session and delivers session
+// parameters to AwaitSessionInfo. The coordinator calls this before opening the RelaySession stream.
 func (t *GRPCInboundTransport) InitSigning(
 	_ context.Context,
 	req *protogen.MPCSigningRequest,
 ) (*protogen.MPCSigningResponse, error) {
+	sessionID := req.GetSessionId()
+
 	t.mu.Lock()
-	t.sessionID = req.GetSessionId()
+	t.sessionID = sessionID
 	t.mu.Unlock()
 
-	return (&protogen.MPCSigningResponse_builder{SessionId: req.GetSessionId()}).Build(), nil
+	// Deliver session parameters to AwaitSessionInfo so the node can start the signing state machine.
+	info := apieth.MPCSigningSessionInfo{
+		SessionID: sessionID,
+		Hash:      req.GetHash(),
+		PartyIDs:  req.GetPartyIds(),
+		Threshold: int(req.GetThreshold()),
+		RawTxHex:  req.GetRawTxHex(),
+	}
+	select {
+	case t.sessionInfoCh <- info:
+	default:
+		// Channel already full — drop silently (session already registered).
+	}
+
+	return (&protogen.MPCSigningResponse_builder{SessionId: sessionID}).Build(), nil
+}
+
+// AwaitSessionInfo blocks until the coordinator's InitSigning RPC is received and returns
+// the session parameters. Returns ctx.Err() if ctx is cancelled before InitSigning arrives.
+func (t *GRPCInboundTransport) AwaitSessionInfo(ctx context.Context) (apieth.MPCSigningSessionInfo, error) {
+	select {
+	case <-ctx.Done():
+		return apieth.MPCSigningSessionInfo{}, ctx.Err()
+	case info := <-t.sessionInfoCh:
+		return info, nil
+	}
 }
 
 // RelaySession handles the bidirectional stream used for TSS round message relay.

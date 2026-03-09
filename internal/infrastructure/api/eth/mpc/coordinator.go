@@ -78,6 +78,7 @@ func (c *MPCCoordinator) SignTransaction(
 		Hash:      req.Hash,
 		PartyIds:  req.PartyIDs,
 		Threshold: int32(req.Threshold),
+		RawTxHex:  req.RawTxHex,
 	}).Build()
 
 	transport := NewGRPCOutboundTransportForSession(req.SessionID, initReq)

@@ -7,6 +7,7 @@ package mocks
 import (
 	"context"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -35,6 +36,66 @@ type MockMPCInboundTransport_Expecter struct {
 
 func (_m *MockMPCInboundTransport) EXPECT() *MockMPCInboundTransport_Expecter {
 	return &MockMPCInboundTransport_Expecter{mock: &_m.Mock}
+}
+
+// AwaitSessionInfo provides a mock function for the type MockMPCInboundTransport
+func (_mock *MockMPCInboundTransport) AwaitSessionInfo(ctx context.Context) (eth.MPCSigningSessionInfo, error) {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AwaitSessionInfo")
+	}
+
+	var r0 eth.MPCSigningSessionInfo
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (eth.MPCSigningSessionInfo, error)); ok {
+		return returnFunc(ctx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context) eth.MPCSigningSessionInfo); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(eth.MPCSigningSessionInfo)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockMPCInboundTransport_AwaitSessionInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AwaitSessionInfo'
+type MockMPCInboundTransport_AwaitSessionInfo_Call struct {
+	*mock.Call
+}
+
+// AwaitSessionInfo is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockMPCInboundTransport_Expecter) AwaitSessionInfo(ctx interface{}) *MockMPCInboundTransport_AwaitSessionInfo_Call {
+	return &MockMPCInboundTransport_AwaitSessionInfo_Call{Call: _e.mock.On("AwaitSessionInfo", ctx)}
+}
+
+func (_c *MockMPCInboundTransport_AwaitSessionInfo_Call) Run(run func(ctx context.Context)) *MockMPCInboundTransport_AwaitSessionInfo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockMPCInboundTransport_AwaitSessionInfo_Call) Return(mPCSigningSessionInfo eth.MPCSigningSessionInfo, err error) *MockMPCInboundTransport_AwaitSessionInfo_Call {
+	_c.Call.Return(mPCSigningSessionInfo, err)
+	return _c
+}
+
+func (_c *MockMPCInboundTransport_AwaitSessionInfo_Call) RunAndReturn(run func(ctx context.Context) (eth.MPCSigningSessionInfo, error)) *MockMPCInboundTransport_AwaitSessionInfo_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // Close provides a mock function for the type MockMPCInboundTransport

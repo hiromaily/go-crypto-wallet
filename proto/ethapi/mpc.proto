@@ -49,6 +49,10 @@ message MPCSigningRequest {
 
   // threshold is T — the minimum number of signers required.
   int32 threshold = 4;
+
+  // raw_tx_hex is the 0x-prefixed RLP-encoded unsigned transaction.
+  // Nodes verify signer.Hash(raw_tx_hex) == hash before participating.
+  string raw_tx_hex = 5;
 }
 
 // MPCSigningResponse is returned by InitSigning.

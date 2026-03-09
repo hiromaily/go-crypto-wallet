@@ -88,6 +88,7 @@ require (
 	github.com/brunoga/deep v1.3.1 // indirect
 	github.com/bsv-blockchain/go-sdk v1.2.18 // indirect
 	github.com/btcsuite/btclog v1.0.0 // indirect
+	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd // indirect
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792 // indirect
 	github.com/butuzov/ireturn v0.4.0 // indirect
