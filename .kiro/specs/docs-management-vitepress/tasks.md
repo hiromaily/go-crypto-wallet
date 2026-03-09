@@ -66,7 +66,7 @@ Phase 5 → Task 5 (SSOT enforcement)
 
 ---
 
-- [ ] 3. Create the documentation home page
+- [x] 3. Create the documentation home page
   - Create `docs/index.md` with VitePress home layout frontmatter (`layout: home`)
   - Add a hero section: project name (go-crypto-wallet), a one-sentence tagline describing the multi-chain wallet, and action buttons ("Get Started" → Installation, "View on GitHub" → repo URL)
   - Add a features section with cards linking to the six major documentation areas: Architecture, Chains, Getting Started, Development Guidelines, Database, AI Agent & Dev Workflow
