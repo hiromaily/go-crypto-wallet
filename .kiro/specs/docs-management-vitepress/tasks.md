@@ -31,9 +31,9 @@ Phase 5 → Task 5 (SSOT enforcement)
 
 ---
 
-- [ ] 2. Configure navigation bar and sidebar
+- [x] 2. Configure navigation bar and sidebar
 
-- [ ] 2.1 Define the top-level navigation bar
+- [x] 2.1 Define the top-level navigation bar
   - Add a `nav` array to `themeConfig` with the following top-level items:
     - Getting Started (links to installation / commands page)
     - Architecture (links to guidelines/architecture)
@@ -44,7 +44,7 @@ Phase 5 → Task 5 (SSOT enforcement)
   - Each nav item must link to a page that exists in `docs/`; verify with `bun run docs:build`
   - _Requirements: 1.4, 2.6, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 2.2 Define the complete sidebar hierarchy covering all docs/ content
+- [x] 2.2 Define the complete sidebar hierarchy covering all docs/ content
   - Define a path-keyed `sidebar` object in `themeConfig` with groups for each major section:
     - **Overview**: overview, transaction-flow (top-level pages)
     - **Getting Started**: Installation, commands, devcontainer, proto
