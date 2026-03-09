@@ -4,13 +4,11 @@ on:
     branches:
       - main
     paths-ignore:
-      - "**.md"
       - "**.mdc"
   pull_request:
     branches:
       - main
     paths-ignore:
-      - "**.md"
       - "**.mdc"
 env:
   GO_VERSION: "1.25.6"
@@ -26,6 +24,7 @@ jobs:
       hcl: ${{ steps.filter.outputs.hcl }}
       ts: ${{ steps.filter.outputs.ts }}
       sol: ${{ steps.filter.outputs.sol }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
@@ -60,6 +59,10 @@ jobs:
               - 'apps/eth-contracts/foundry.toml'
               - 'apps/eth-contracts/package.json'
               - 'apps/eth-contracts/.solhint.json'
+            docs:
+              - 'docs/**'
+              - 'package.json'
+              - 'bun.lock'
   # Go linting
   # PR: only-new-issues=true checks only changed code (faster)
   # Push to main: full check for post-merge quality assurance
@@ -258,3 +261,22 @@ jobs:
       - name: Run Unit Test
         working-directory: ./
         run: make go-test
+  # Docs build check (only when docs/ or package files change)
+  docs-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.docs == 'true' }}
+    name: docs-build
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build docs
+        run: bun run docs:build

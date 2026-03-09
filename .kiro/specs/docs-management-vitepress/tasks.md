@@ -75,9 +75,9 @@ Phase 5 → Task 5 (SSOT enforcement)
 
 ---
 
-- [ ] 4. Set up GitHub Actions CI/CD
+- [x] 4. Set up GitHub Actions CI/CD
 
-- [ ] 4.1 Create the docs deploy workflow
+- [x] 4.1 Create the docs deploy workflow
   - Create `.github/workflows/docs.yml` with:
     - Trigger: push to `main` with path filter `docs/**`, `package.json`, `bun.lock`; also `workflow_dispatch`
     - Permissions: `contents: read`, `pages: write`, `id-token: write`
@@ -87,7 +87,7 @@ Phase 5 → Task 5 (SSOT enforcement)
   - Note in implementation: GitHub Pages must be enabled in repo Settings → Pages → Source: GitHub Actions (one-time manual step)
   - _Requirements: 5.1, 5.3_
 
-- [ ] 4.2 (P) Extend lint-test.yml with a docs build check job
+- [x] 4.2 (P) Extend lint-test.yml with a docs build check job
   - Add a `docs` entry to the `dorny/paths-filter` step: paths `docs/**`, `package.json`, `bun.lock`
   - Add a `docs-build` job that runs when `needs.changes.outputs.docs == 'true'`
   - Job config: `ubuntu-slim`, `timeout-minutes: 5`, `permissions: contents: read`
