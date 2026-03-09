@@ -305,12 +305,12 @@ sequenceDiagram
     participant Node2 as MPC Node 2<br/>(Keygen — gRPC daemon)
     participant Chain as Ethereum Network
 
-    Note over User,Node2: Step 1: Start MPC signing daemons (all nodes)
+    Note over User,Node2: Step 1: Start MPC signing daemons (at least T nodes, where T is the threshold)
     User->>Node1: keygen serve mpc --listen-addr :9001 --shard-path shard1.enc --party-id 1
     User->>Node2: keygen serve mpc --listen-addr :9002 --shard-path shard2.enc --party-id 2
 
     Note over User,Watch: Step 2: Create unsigned MPC transaction file
-    User->>Watch: watch create mpc --from <mpc_addr> --to <recipient><br/>--amount <ETH> --threshold 2 --party-ids 1,2,3
+    User->>Watch: watch create mpc --from <mpc_addr> --to <recipient><br/>--amount <ETH> --threshold 2 --party-ids 1,2
     Watch->>Watch: Build raw EIP-1559 transaction, compute signer hash
     Watch-->>User: Return: [filePath], [uuid], [txHash]
 
