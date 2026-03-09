@@ -333,6 +333,6 @@ Steps:
 ## Related Documents
 
 - [Architecture Guidelines](../guidelines/architecture.md) - Clean Architecture詳細
-- [Refactoring Plan](../../issues/REFACTORING_PLAN.md) - プロジェクトのリファクタリング計画
+- [Refactoring Plan](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/issues/REFACTORING_PLAN.md) - プロジェクトのリファクタリング計画
 - [Code Generation](../guidelines/code-generation.md) - モック生成など
-- [Internal Guidelines](../../../internal/AGENTS.md) - internalパッケージ構造
+- `internal/AGENTS.md` - internalパッケージ構造

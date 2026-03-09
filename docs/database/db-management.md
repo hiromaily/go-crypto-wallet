@@ -168,6 +168,6 @@ See [Database Schema Changes Guide](schema-changes.md) for complete mapping tabl
 
 ## See Also
 
-- [Code Generation Guidelines](code-generation.md) - Complete overview of all code generation tools
+- [Code Generation Guidelines](/guidelines/code-generation) - Complete overview of all code generation tools
 - [Architecture Guidelines](architecture.md) - Infrastructure layer guidelines for repositories
-- [Workflow Guidelines](workflow.md) - Dependency management and verification commands
+- [Workflow Guidelines](/guidelines/workflow) - Dependency management and verification commands

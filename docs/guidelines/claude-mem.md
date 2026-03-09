@@ -256,4 +256,4 @@ If sessions start slowly due to too much injected context:
 
 - [Workflow Guidelines](workflow.md) - Development workflow
 - [Security Guidelines](security.md) - Security requirements (relevant for privacy controls)
-- [CLAUDE.md](../../CLAUDE.md) - Project-level Claude Code configuration
+- `CLAUDE.md` - Project-level Claude Code configuration

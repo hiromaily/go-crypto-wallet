@@ -12,13 +12,13 @@ version: 2.0.0
 
 | File Type | Rule File | Required Commands |
 |-----------|-----------|-------------------|
-| `*.go` | [.claude/rules/go.md](../../.claude/rules/go.md) | `make go-lint`, `make check-build` |
-| `*.ts`, `*.js` | [.claude/rules/typescript.md](../../.claude/rules/typescript.md) | `yarn lint` / `npm run lint` |
-| `*.sh` | [.claude/rules/shell-script.md](../../.claude/rules/shell-script.md) | `make shfmt` |
-| `*.sql` | [.claude/rules/sql.md](../../.claude/rules/sql.md) | `make sqlc-validate` |
-| `*.hcl` | [.claude/rules/hcl.md](../../.claude/rules/hcl.md) | `make atlas-fmt`, `make atlas-lint` |
-| `*.proto` | [.claude/rules/proto.md](../../.claude/rules/proto.md) | `make lint-proto` |
-| `*.yaml` | [.claude/rules/yaml.md](../../.claude/rules/yaml.md) | `make yaml-lint` |
+| `*.go` | `.claude/rules/go/` | `make go-lint`, `make check-build` |
+| `*.ts`, `*.js` | `.claude/rules/typescript.md` | `yarn lint` / `npm run lint` |
+| `*.sh` | `.claude/rules/shell-script.md` | `make shfmt` |
+| `*.sql` | `.claude/rules/sql.md` | `make sqlc-validate` |
+| `*.hcl` | `.claude/rules/hcl.md` | `make atlas-fmt`, `make atlas-lint` |
+| `*.proto` | `.claude/rules/proto.md` | `make lint-proto` |
+| `*.yaml` | `.claude/rules/yaml.md` | `make yaml-lint` |
 | `*.md` | - | (none required) |
 
 ## Task Type × File Type Matrix

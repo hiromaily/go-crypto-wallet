@@ -10,7 +10,7 @@ The project uses both `pkg/` and `internal/` directories:
 - **`internal/`**: New architecture following Clean Architecture (domain, application, infrastructure, interface-adapters)
 - **`pkg/`**: Public packages containing shared utilities (configuration, logging, database, etc.)
   - **Critical Rule**: Packages in `pkg/` MUST NOT import or depend on `internal/` directory
-  - See [`pkg/AGENTS.md`](../pkg/AGENTS.md) for detailed guidelines
+  - See `pkg/AGENTS.md` for detailed guidelines
 
 ## Root Directory Structure
 
@@ -115,7 +115,7 @@ These packages provide shared utilities, configuration management, logging, and 
 
 **⚠️ Critical Rule**: Packages in `pkg/` MUST NOT import or depend on any packages in `internal/` directory.
 
-For detailed guidelines, see [`pkg/AGENTS.md`](../pkg/AGENTS.md).
+For detailed guidelines, see `pkg/AGENTS.md`.
 
 ```text
 pkg/
@@ -289,13 +289,13 @@ The project follows Clean Architecture principles:
 - **New Architecture**: `internal/` directory with Clean Architecture (domain, application, infrastructure, interface-adapters)
 - **Shared Utilities**: `pkg/` directory contains public packages for external use (configuration, logging, utilities)
   - **Critical Rule**: Packages in `pkg/` MUST NOT import or depend on `internal/` directory
-  - See [`pkg/AGENTS.md`](../pkg/AGENTS.md) for detailed guidelines
+  - See `pkg/AGENTS.md` for detailed guidelines
 
 For detailed refactoring status, see `docs/issues/REFACTORING_CHECKLIST.md`.
 
 ## References
 
-- [AGENTS.md](../AGENTS.md) - Detailed architecture guidelines
-- [pkg/AGENTS.md](../pkg/AGENTS.md) - Guidelines for working with `pkg/` packages
-- [README.md](../README.md) - Project overview
-- [docs/issues/REFACTORING_PLAN.md](issues/REFACTORING_PLAN.md) - Refactoring plan
+- `AGENTS.md` - Detailed architecture guidelines
+- `pkg/AGENTS.md` - Guidelines for working with `pkg/` packages
+- [README.md](https://github.com/hiromaily/go-crypto-wallet/blob/main/README.md) - Project overview
+- [docs/issues/REFACTORING_PLAN.md](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/issues/REFACTORING_PLAN.md) - Refactoring plan

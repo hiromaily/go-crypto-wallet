@@ -584,10 +584,10 @@ docker images | grep go-crypto-wallet | awk '{print $3}' | xargs docker rmi
 
 ### Project-Specific Documentation
 
-- [Installation Guide](../Installation.md)
-- [Database Development](database.md)
-- [AI Agent Skills](../ai-agents/agent-skills.md)
-- [Architecture Overview](../architecture/)
+- [Installation Guide](/Installation)
+- [Database Development](/database/architecture)
+- [AI Agent Skills](/agent-skills)
+- [Architecture Overview](/guidelines/architecture)
 
 ### Getting Help
 

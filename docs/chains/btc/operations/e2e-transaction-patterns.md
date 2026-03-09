@@ -935,12 +935,12 @@ No additional E2E scripts planned at this time. All 11 Bitcoin patterns are impl
 
 ## Related Documents
 
-- [BTC Technical Reference](./README.md) - Bitcoin technical reference
-- [Taproot User Guide](./TAPROOT_GUIDE.md) - How to use Taproot
-- [MuSig2 User Guide](./musig2_guide.md) - How to use MuSig2
-- [Descriptor Examples](./descriptor_examples.md) - Descriptor examples
-- [PSBT Developer Guide](./psbt_developer_guide.md) - PSBT development guide
-- [BCH E2E Workflow](../../../scripts/operation/bch/README.md) - BCH E2E workflow
+- [BTC Technical Reference](/chains/btc/operations/README) - Bitcoin technical reference
+- [Taproot User Guide](/chains/btc/taproot/user-guide) - How to use Taproot
+- [MuSig2 User Guide](/chains/btc/musig2/user-guide) - How to use MuSig2
+- [Descriptor Examples](/chains/btc/descriptor/examples) - Descriptor examples
+- [PSBT Developer Guide](/chains/btc/psbt/developer-guide) - PSBT development guide
+- [BCH E2E Workflow](https://github.com/hiromaily/go-crypto-wallet/blob/main/scripts/operation/bch/README.md) - BCH E2E workflow
 
 ---
 

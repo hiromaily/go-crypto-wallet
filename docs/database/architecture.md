@@ -608,7 +608,7 @@ This runs 5 steps:
 5. **Test on development database first**
 6. **Update both MySQL and PostgreSQL HCL schemas** when making changes
 
-For more detailed information, see [Atlas README](../../tools/atlas/README.md).
+For more detailed information, see [Atlas README](https://github.com/hiromaily/go-crypto-wallet/blob/main/tools/atlas/README.md).
 
 ---
 
@@ -902,5 +902,5 @@ docker volume rm go-crypto-wallet_sign-db
 - [MySQL 8.4 Documentation](https://dev.mysql.com/doc/refman/8.4/en/)
 - [Atlas Documentation](https://atlasgo.io/docs)
 - [SQLC Documentation](https://docs.sqlc.dev/)
-- [Atlas README](../../tools/atlas/README.md)
+- [Atlas README](https://github.com/hiromaily/go-crypto-wallet/blob/main/tools/atlas/README.md)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)

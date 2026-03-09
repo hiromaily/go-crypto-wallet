@@ -1708,7 +1708,7 @@ POST /api/v1/address/create
 2. Application-level validation before signing
 3. Error handling stops signing if duplicate detected
 
-Never override these protections. See [Security Documentation](../security/musig2_security.md) for details.
+Never override these protections. See [Security Documentation](/chains/btc/musig2/security) for details.
 
 #### Q: How do I verify a MuSig2 transaction before broadcast?
 
@@ -1875,8 +1875,8 @@ After successful migration, you'll achieve:
 
 ### Next Steps
 
-1. Review [Security Documentation](../security/musig2_security.md)
-2. Read [MuSig2 User Guide](../crypto/btc/musig2_guide.md)
+1. Review [Security Documentation](/chains/btc/musig2/security)
+2. Read [MuSig2 User Guide](/chains/btc/musig2/user-guide)
 3. Create your migration plan using this guide as template
 4. Schedule testnet testing
 5. Execute migration following documented procedures

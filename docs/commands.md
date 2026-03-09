@@ -1,6 +1,6 @@
 # Commands
 
-> **Command tree overview**: [`internal/interface-adapters/cli/README.md`](../internal/interface-adapters/cli/README.md)
+> **Command tree overview**: [`internal/interface-adapters/cli/README.md`](https://github.com/hiromaily/go-crypto-wallet/blob/main/internal/interface-adapters/cli/README.md)
 
 This document describes all available CLI commands for the three wallet types: Watch Wallet, Keygen Wallet, and Sign Wallet.
 
@@ -411,4 +411,4 @@ API commands are coin-specific and dynamically configured based on the `--coin` 
 
 ## Global Flags
 
-> See [Global Flags](../internal/interface-adapters/cli/README.md#global-flags) in the CLI README.
+> See [Global Flags](https://github.com/hiromaily/go-crypto-wallet/blob/main/internal/interface-adapters/cli/README.md#global-flags) in the CLI README.

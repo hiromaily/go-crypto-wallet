@@ -105,5 +105,5 @@
 
 - [Task-Oriented Context Management](./task-oriented-context.md) - 概念と戦略
 - [Task Analysis](./task-analysis.md) - Issue/Commit パターン分析
-- [AGENTS.md](../../AGENTS.md) - プロジェクトガイドライン
+- `AGENTS.md` - プロジェクトガイドライン
 - [Workflow Guidelines](../guidelines/workflow.md) - 共通ワークフロー

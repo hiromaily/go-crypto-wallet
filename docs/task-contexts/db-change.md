@@ -389,6 +389,6 @@ docker compose exec mysql mysql -u wallet -p wallet
 
 ## Related Documents
 
-- [Database Management](../guidelines/database.md) - Atlas/SQLC詳細手順
+- [Database Management](/database/architecture) - Atlas/SQLC詳細手順
 - [Code Generation](../guidelines/code-generation.md) - 自動生成ファイルの扱い
 - [Architecture Guidelines](../guidelines/architecture.md) - Repository層の設計

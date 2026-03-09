@@ -779,10 +779,10 @@ func (b *BitcoinCash) initChainParams() {
 
 ### Project-Specific Guides
 
-- [Taproot User Guide](btc/TAPROOT_GUIDE.md) - Detailed Taproot implementation
-- [MuSig2 User Guide](btc/musig2_guide.md) - MuSig2 multisig operations
-- [PSBT Developer Guide](btc/psbt_developer_guide.md) - PSBT implementation details
-- [Operation Examples](btc/operation_example.md) - Wallet configuration and usage
+- [Taproot User Guide](/chains/btc/taproot/user-guide) - Detailed Taproot implementation
+- [MuSig2 User Guide](/chains/btc/musig2/user-guide) - MuSig2 multisig operations
+- [PSBT Developer Guide](/chains/btc/psbt/developer-guide) - PSBT implementation details
+- [Wallet Flow](/chains/btc/operations/wallet-flow) - Wallet configuration and usage
 
 ### External References
 
