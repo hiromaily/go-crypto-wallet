@@ -34,11 +34,17 @@ watch
 │   ├── deposit                    Create unsigned deposit transaction
 │   ├── payment                    Create unsigned payment transaction
 │   ├── transfer                   Create unsigned transfer transaction between accounts
-│   └── multisig                   (ETH only) Create unsigned Safe multisig transaction proposal file
-│                                  Flags: --safe <addr>, --to <addr>, --amount <ETH>,
-│                                         --threshold <n>, --action-type <type>
+│   ├── multisig                   (ETH only) Create unsigned Safe multisig transaction proposal file
+│   │                              Flags: --safe <addr>, --to <addr>, --amount <ETH>,
+│   │                                     --threshold <n>, --action-type <type>
+│   └── mpc                        (ETH only) Create unsigned MPC/TSS transaction file
+│                                  Flags: --from <addr>, --to <addr>, --amount <ETH>,
+│                                         --threshold <n>, --party-ids <ids>,
+│                                         --action-type <type>
 ├── send
 │   ├── tx                         Send signed transaction to the network
+│   ├── mpc                        (ETH only) Initiate MPC/TSS signing session and broadcast
+│   │                              Flags: --file <path>, --peer-addrs <addr1,addr2,...>
 │   └── multisig                   Multi-signature operations
 │       ├── send-eth               (ETH) Submit a fully signed Safe multisig transaction
 │       │                          Flags: --file <path>
@@ -91,6 +97,18 @@ keygen
 │   │   ├── export                 Export descriptors for one account to file
 │   │   └── export-all             Export all descriptors (receive + change) to file
 │   └── multisig                   (BTC only) Create multisig address (traditional P2SH/P2WSH or MuSig2 Taproot)
+├── dkg                            (ETH only) Run the DKG ceremony for this MPC node
+│                                  Flags: --party-id <id>, --all-party-ids <ids>,
+│                                         --threshold <n>, --listen-addr <addr>,
+│                                         --peers <addrs>, --pre-params-path <path>,
+│                                         --shard-output <path>, --passphrase <pass>
+├── pre-params                     (ETH only) Generate Paillier pre-computation parameters for DKG
+│                                  Flags: --output <path>
+├── serve
+│   └── mpc                        (ETH only) Start the MPC node gRPC signing daemon (blocking)
+│                                  Flags: --listen-addr <addr>, --shard-path <path>,
+│                                         --party-id <id>, --all-party-ids <ids>,
+│                                         --passphrase <pass>
 ├── export
 │   ├── address                    Export generated public keys as CSV
 │   ├── descriptor                 (BTC only) Export output descriptors to file
@@ -165,7 +183,9 @@ Interface references are in `internal/application/usecase/{wallet}/interfaces.go
 | `create payment` | ✓ | ✓ | ✓ | ✓ | `watch.CreateTransactionUseCase` | Create unsigned payment tx: send coins from cold wallet to user-specified addresses |
 | `create transfer` | ✓ | ✓ | ✓ | ✓ | `watch.CreateTransactionUseCase` | Create unsigned transfer tx: move coins between internal accounts (e.g. deposit → payment) |
 | `create multisig` | – | – | ✓ | – | `watch.CreateETHMultisigTransactionUseCase` | (ETH) Propose a new Safe multisig tx: fetch on-chain nonce, compute EIP-712 hash, write unsigned JSON proposal file |
+| `create mpc` | – | – | ✓ | – | `watch.CreateMPCTransactionUseCase` | (ETH) Create unsigned MPC/TSS transaction file with tx hash for threshold signing |
 | `send tx` | ✓ | ✓ | ✓ | ✓ | `watch.SendTransactionUseCase` | Broadcast a signed transaction file to the blockchain network |
+| `send mpc` | – | – | ✓ | – | `watch.SendMPCTransactionUseCase` | (ETH) Initiate MPC/TSS signing session via gRPC with all nodes and broadcast signed tx |
 | `send multisig send-eth` | – | – | ✓ | – | `watch.SendETHMultisigTransactionUseCase` | (ETH) Submit a fully signed Safe multisig JSON file by calling `execTransaction` on-chain |
 | `send multisig collect-nonces` | ✓ | – | – | – | `watch.AggregateMuSig2SignaturesUseCase` | Collect MuSig2 nonces from all signers and embed them in PSBT (Round 1 aggregation) |
 | `send multisig aggregate` | ✓ | – | – | – | `watch.AggregateMuSig2SignaturesUseCase` | Aggregate MuSig2 partial signatures from all signers into the final transaction (Round 2) |
@@ -202,6 +222,9 @@ Interface references are in `internal/application/usecase/{wallet}/interfaces.go
 | `create descriptor export` | ✓ | – | – | – | `keygen.ExportDescriptorUseCase` | Export descriptors for one account to file (bitcoin-core/json/text format) |
 | `create descriptor export-all` | ✓ | – | – | – | `keygen.ExportDescriptorUseCase` | Export all receive + change descriptors for an account in one call |
 | `create multisig` | ✓ | – | – | – | `keygen.CreateMultisigAddressUseCase` / `keygen.CreateMuSig2AddressUseCase` | Create P2SH/P2WSH (traditional) or MuSig2 Taproot multisig address |
+| `dkg` | – | – | ✓ | – | `keygen.RunDKGUseCase` | (ETH) Run the Distributed Key Generation ceremony; outputs a key shard file and the shared ETH address |
+| `pre-params` | – | – | ✓ | – | _(direct port call)_ | (ETH) Generate Paillier pre-computation parameters to speed up DKG; write to JSON file |
+| `serve mpc` | – | – | ✓ | – | `keygen.ServeMPCUseCase` | (ETH) Start the MPC node gRPC signing daemon; blocks until cancelled, awaiting signing sessions |
 | `export address` | ✓ | ✓ | ✓ | ✓ | `keygen.ExportAddressUseCase` | Export generated public key addresses as CSV for Watch wallet import |
 | `export descriptor` | ✓ | – | – | – | `keygen.ExportDescriptorUseCase` | Export output descriptors to file (shorthand path under `export`) |
 | `export fullpubkey` | – | – | ✓ | – | `keygen.ExportFullPubkeyUseCase` | Export account-level xpub (ETH only) so Watch wallet can derive and verify child addresses |
