@@ -69,6 +69,7 @@ func (u *sendMPCTransactionUseCase) Execute(
 		PartyIDs:  f.PartyIDs,
 		Threshold: f.Threshold,
 		PeerAddrs: input.PeerAddrs,
+		RawTxHex:  f.RawTxHex,
 	}
 
 	// 4. Initiate the TSS signing session and collect the 65-byte signature.

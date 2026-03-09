@@ -194,8 +194,10 @@ func (s *MPCSigningNode) handleInbound(
 // sends it to the coordinator as a terminal MPCWireMessage with IsSignature=true.
 func (s *MPCSigningNode) finalizeSignature(sigData *common.SignatureData, sessionID string) error {
 	sig := make([]byte, 65)
-	copy(sig[:32], sigData.R)
-	copy(sig[32:64], sigData.S)
+	// R and S from tss-lib are not zero-padded (big.Int.Bytes() omits leading zeros).
+	// Use FillBytes to ensure each component is exactly 32 bytes.
+	new(big.Int).SetBytes(sigData.R).FillBytes(sig[0:32])
+	new(big.Int).SetBytes(sigData.S).FillBytes(sig[32:64])
 	if len(sigData.SignatureRecovery) > 0 {
 		sig[64] = sigData.SignatureRecovery[0]
 	}

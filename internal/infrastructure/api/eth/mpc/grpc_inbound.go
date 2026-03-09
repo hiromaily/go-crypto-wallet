@@ -124,6 +124,7 @@ func (t *GRPCInboundTransport) InitSigning(
 		Hash:      req.GetHash(),
 		PartyIDs:  req.GetPartyIds(),
 		Threshold: int(req.GetThreshold()),
+		RawTxHex:  req.GetRawTxHex(),
 	}
 	select {
 	case t.sessionInfoCh <- info:

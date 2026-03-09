@@ -123,6 +123,7 @@ type MPCSigningRequest struct {
 	xxx_hidden_Hash      []byte                 `protobuf:"bytes,2,opt,name=hash"`
 	xxx_hidden_PartyIds  []string               `protobuf:"bytes,3,rep,name=party_ids,json=partyIds"`
 	xxx_hidden_Threshold int32                  `protobuf:"varint,4,opt,name=threshold"`
+	xxx_hidden_RawTxHex  string                 `protobuf:"bytes,5,opt,name=raw_tx_hex,json=rawTxHex"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -180,6 +181,13 @@ func (x *MPCSigningRequest) GetThreshold() int32 {
 	return 0
 }
 
+func (x *MPCSigningRequest) GetRawTxHex() string {
+	if x != nil {
+		return x.xxx_hidden_RawTxHex
+	}
+	return ""
+}
+
 func (x *MPCSigningRequest) SetSessionId(v string) {
 	x.xxx_hidden_SessionId = v
 }
@@ -199,6 +207,10 @@ func (x *MPCSigningRequest) SetThreshold(v int32) {
 	x.xxx_hidden_Threshold = v
 }
 
+func (x *MPCSigningRequest) SetRawTxHex(v string) {
+	x.xxx_hidden_RawTxHex = v
+}
+
 type MPCSigningRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -212,6 +224,9 @@ type MPCSigningRequest_builder struct {
 	PartyIds []string
 	// threshold is T — the minimum number of signers required.
 	Threshold int32
+	// raw_tx_hex is the 0x-prefixed RLP-encoded unsigned transaction.
+	// Nodes verify signer.Hash(raw_tx_hex) == hash before participating.
+	RawTxHex string
 }
 
 func (b0 MPCSigningRequest_builder) Build() *MPCSigningRequest {
@@ -222,6 +237,7 @@ func (b0 MPCSigningRequest_builder) Build() *MPCSigningRequest {
 	x.xxx_hidden_Hash = b.Hash
 	x.xxx_hidden_PartyIds = b.PartyIds
 	x.xxx_hidden_Threshold = b.Threshold
+	x.xxx_hidden_RawTxHex = b.RawTxHex
 	return m0
 }
 
@@ -315,13 +331,15 @@ const file_mpc_proto_rawDesc = "" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x1d\n" +
 	"\n" +
 	"from_party\x18\x02 \x01(\tR\tfromParty\x12\x18\n" +
-	"\apayload\x18\x03 \x01(\fR\apayload\"\x81\x01\n" +
+	"\apayload\x18\x03 \x01(\fR\apayload\"\x9f\x01\n" +
 	"\x11MPCSigningRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
 	"\x04hash\x18\x02 \x01(\fR\x04hash\x12\x1b\n" +
 	"\tparty_ids\x18\x03 \x03(\tR\bpartyIds\x12\x1c\n" +
-	"\tthreshold\x18\x04 \x01(\x05R\tthreshold\"I\n" +
+	"\tthreshold\x18\x04 \x01(\x05R\tthreshold\x12\x1c\n" +
+	"\n" +
+	"raw_tx_hex\x18\x05 \x01(\tR\brawTxHex\"I\n" +
 	"\x12MPCSigningResponse\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x14\n" +

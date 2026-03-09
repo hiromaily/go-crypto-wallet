@@ -1,11 +1,15 @@
 package eth
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/core/types"
+
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	pkgeth "github.com/hiromaily/go-crypto-wallet/pkg/chains/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -58,7 +62,12 @@ func (u *serveMPCUseCase) Serve(ctx context.Context, input keygenusecase.ServeMP
 		"parties", sessionInfo.PartyIDs,
 	)
 
-	// 4. Run the TSS signing protocol.
+	// 4. Verify that signer.Hash(raw_tx) matches the hash from InitSigning to prevent blind signing.
+	if err = verifySigningHash(sessionInfo.RawTxHex, sessionInfo.Hash); err != nil {
+		return fmt.Errorf("tx hash verification failed, refusing to sign: %w", err)
+	}
+
+	// 5. Run the TSS signing protocol.
 	return u.signingNode.RunSigning(ctx, apieth.MPCSigningNodeParams{
 		SessionID:   sessionInfo.SessionID,
 		Hash:        sessionInfo.Hash,
@@ -67,4 +76,22 @@ func (u *serveMPCUseCase) Serve(ctx context.Context, input keygenusecase.ServeMP
 		Threshold:   sessionInfo.Threshold,
 		ShardJSON:   shardJSON,
 	})
+}
+
+// verifySigningHash decodes rawTxHex and verifies that the EIP-1559 signing pre-image
+// (signer.Hash) matches the expectedHash provided by the coordinator. This prevents
+// blind signing: a compromised coordinator cannot make the node sign an arbitrary hash.
+func verifySigningHash(rawTxHex string, expectedHash []byte) error {
+	tx, err := pkgeth.DecodeTx(rawTxHex)
+	if err != nil {
+		return fmt.Errorf("decode raw tx: %w", err)
+	}
+	chainID := tx.ChainId()
+	signer := types.LatestSignerForChainID(chainID)
+	computed := signer.Hash(tx)
+	if !bytes.Equal(computed.Bytes(), expectedHash) {
+		return fmt.Errorf("hash mismatch: coordinator sent %x but raw_tx hashes to %x",
+			expectedHash, computed.Bytes())
+	}
+	return nil
 }

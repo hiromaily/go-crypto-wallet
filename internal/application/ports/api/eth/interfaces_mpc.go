@@ -33,6 +33,10 @@ type MPCSigningRequest struct {
 	// PeerAddrs contains the gRPC listen addresses of all T nodes.
 	// Index-matched with PartyIDs: PeerAddrs[i] is the address of PartyIDs[i].
 	PeerAddrs []string
+
+	// RawTxHex is the 0x-prefixed RLP-encoded unsigned transaction.
+	// Nodes verify signer.Hash(RawTxHex) == Hash before participating.
+	RawTxHex string
 }
 
 // MPCSigningResult carries the assembled ECDSA signature from a completed TSS session.
@@ -171,6 +175,10 @@ type MPCSigningSessionInfo struct {
 
 	// Threshold is T — minimum signers required.
 	Threshold int
+
+	// RawTxHex is the 0x-prefixed RLP-encoded unsigned transaction.
+	// Nodes verify signer.Hash(RawTxHex) == Hash before signing.
+	RawTxHex string
 }
 
 // MPCInboundTransport is used by MPC node servers to accept incoming TSS round messages
