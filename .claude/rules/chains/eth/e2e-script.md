@@ -205,3 +205,9 @@ make eth-e2e-pN-reset   # --reset wipes and restarts
 ### MPC Party Timeout (Pattern 4)
 
 All `keygen serve mpc` daemons must be listening **before** `watch send mpc` is called.
+
+**Required P4 command order:**
+1. `keygen dkg` — run once per node to generate key shards and the shared ETH address
+2. `keygen serve mpc` — start each node daemon (must be running before step 3)
+3. `watch create mpc` — create the unsigned transaction file (outputs `--file` path)
+4. `watch send mpc --file <path> --peer-addrs <addr1,...>` — trigger signing and broadcast

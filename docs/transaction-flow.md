@@ -266,6 +266,68 @@ sequenceDiagram
 
 For full details see [`docs/chains/eth/multisig.md`](chains/eth/multisig.md).
 
+### ETH MPC-TSS Flow (Pattern 4: 2-of-3 Threshold Signing)
+
+Ethereum MPC-TSS uses threshold ECDSA (tss-lib) where N nodes each hold a key shard — no single node ever holds the full private key. Key differences from Safe multisig:
+
+- **Setup**: A one-time DKG ceremony produces key shards (one per node) and a shared ETH address
+- **Signing**: Watch Wallet coordinates signing over gRPC — signing nodes receive the tx hash and return partial signatures; no file transfer between wallets
+- **Broadcast**: Watch Wallet reconstructs the full ECDSA signature and broadcasts the raw transaction
+
+#### MPC Setup Flow (one-time DKG)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Node1 as MPC Node 1<br/>(Keygen)
+    participant Node2 as MPC Node 2<br/>(Keygen)
+    participant Node3 as MPC Node 3<br/>(Keygen)
+
+    Note over User,Node3: Step 1 (optional): Pre-generate Paillier parameters
+    User->>Node1: keygen pre-params --output pre_params.json
+    User->>Node2: keygen pre-params --output pre_params.json
+    User->>Node3: keygen pre-params --output pre_params.json
+
+    Note over User,Node3: Step 2: Run DKG ceremony (all nodes simultaneously)
+    User->>Node1: keygen dkg --party-id 1 --all-party-ids 1,2,3 --threshold 2<br/>--listen-addr :9001 --peers :9002,:9003 --shard-output shard1.enc
+    User->>Node2: keygen dkg --party-id 2 --all-party-ids 1,2,3 --threshold 2<br/>--listen-addr :9002 --peers :9001,:9003 --shard-output shard2.enc
+    User->>Node3: keygen dkg --party-id 3 --all-party-ids 1,2,3 --threshold 2<br/>--listen-addr :9003 --peers :9001,:9002 --shard-output shard3.enc
+    Note over Node1,Node3: DKG produces shared ETH address + one shard per node
+```
+
+#### MPC Transaction Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Watch as Watch Wallet<br/>(Online)
+    participant Node1 as MPC Node 1<br/>(Keygen — gRPC daemon)
+    participant Node2 as MPC Node 2<br/>(Keygen — gRPC daemon)
+    participant Chain as Ethereum Network
+
+    Note over User,Node2: Step 1: Start MPC signing daemons (all nodes)
+    User->>Node1: keygen serve mpc --listen-addr :9001 --shard-path shard1.enc --party-id 1
+    User->>Node2: keygen serve mpc --listen-addr :9002 --shard-path shard2.enc --party-id 2
+
+    Note over User,Watch: Step 2: Create unsigned MPC transaction file
+    User->>Watch: watch create mpc --from <mpc_addr> --to <recipient><br/>--amount <ETH> --threshold 2 --party-ids 1,2,3
+    Watch->>Watch: Build raw EIP-1559 transaction, compute signer hash
+    Watch-->>User: Return: [filePath], [uuid], [txHash]
+
+    Note over User,Chain: Step 3: Initiate signing session and broadcast
+    User->>Watch: watch send mpc --file <tx_file> --peer-addrs :9001,:9002
+    Watch->>Node1: gRPC InitSigning(txHash, rawTxHex, sessionID)
+    Watch->>Node2: gRPC InitSigning(txHash, rawTxHex, sessionID)
+    Node1-->>Watch: Partial signature share
+    Node2-->>Watch: Partial signature share
+    Watch->>Watch: Reconstruct full ECDSA signature
+    Watch->>Chain: eth_sendRawTransaction(signed tx)
+    Chain-->>Watch: txHash
+    Watch-->>User: Return: txHash
+```
+
+For full details see [`docs/chains/eth/transaction-patterns.md`](chains/eth/transaction-patterns.md).
+
 ---
 
 ## 3. Transaction Types
