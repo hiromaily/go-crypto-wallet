@@ -125,18 +125,21 @@ BCH supports P2PKH and P2SH patterns with CashAddr format. SegWit and Taproot ar
 
 ### Ethereum (ETH) Transaction Patterns
 
-ETH supports EIP-1559 (Type 2) transactions with EOA single-sig, ERC-20 token transfers, and Safe multisig payments.
+ETH supports EIP-1559 (Type 2) transactions with EOA single-sig, ERC-20 token transfers, Safe multisig payments, and MPC-TSS threshold signing.
 
 | Pattern | Type | Address Format | Transaction Type | Status |
 |---------|------|----------------|------------------|--------|
 | **P1** | Single-sig (EOA) | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
 | **P2** | ERC-20 HYT Token Transfer | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
 | **P3** | Safe 2-of-2 Multisig Payment | `0x...` | Safe `execTransaction` | ✅ Verified |
+| **P4** | MPC-TSS 2-of-3 Threshold Signing | `0x...` | EIP-1559 (Type 2) | ✅ Verified |
 
 > **Note**: Supports both Anvil and Geth nodes. Database backend is configurable (SQLite/MySQL/PostgreSQL).
 > P2 deploys the HYT ERC-20 contract via Foundry (forge) onto the local Anvil node before running the transfer workflow.
 > P3 deploys a [Safe v1.4.1](https://safe.global/) proxy contract via Foundry, then exercises the full 2-of-2 multisig
 > workflow: propose → offline EIP-712 sign (signer 1) → offline EIP-712 sign (signer 2) → broadcast `execTransaction`.
+> P4 implements threshold ECDSA signing via MPC-TSS (tss-lib): 3 nodes run distributed key generation (DKG) offline,
+> then 2-of-3 nodes collaborate online to produce a single ECDSA signature without any party holding the full private key.
 
 ### XRP Ledger (XRP) Transaction Patterns
 
@@ -169,13 +172,14 @@ make bch-e2e P=3    # P2SH 3-of-3 Multisig
 make eth-e2e-p1     # Single-sig EIP-1559
 make eth-e2e-p2     # ERC-20 HYT Token Transfer
 make eth-e2e-p3     # Safe 2-of-2 Multisig Payment
+make eth-e2e-p4     # MPC-TSS 2-of-3 Threshold Signing
 
 # XRP: Run patterns
 make xrp-e2e-p1     # Single-sig Payment Transfer
 make xrp-e2e-p2     # 2-of-2 Multisig Payment Transfer
 
 # ETH: Run all patterns in parallel
-make eth-e2e-parallel          # Run P1, P2, and P3 in parallel
+make eth-e2e-parallel          # Run P1, P2, P3, and P4 in parallel
 make eth-e2e-ci-all            # CI mode (non-interactive)
 
 # XRP: Run all patterns in parallel
@@ -188,6 +192,7 @@ make bch-e2e-reset P=3
 make eth-e2e-p1-reset
 make eth-e2e-p2-reset
 make eth-e2e-p3-reset
+make eth-e2e-p4-reset
 make xrp-e2e-p1-reset
 make xrp-e2e-p2-reset
 
@@ -197,6 +202,7 @@ make bch-e2e-ci P=3
 make eth-e2e-p1-ci
 make eth-e2e-p2-ci
 make eth-e2e-p3-ci
+make eth-e2e-p4-ci
 make xrp-e2e-p1-ci
 make xrp-e2e-p2-ci
 ```
