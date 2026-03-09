@@ -8,11 +8,6 @@ export default defineConfig({
   base: '/go-crypto-wallet/',
   cleanUrls: true,
 
-  // Existing docs contain cross-references to files outside docs/ (AGENTS.md, CLAUDE.md,
-  // .claude/rules/, scripts/, internal/, etc.). These will be cleaned up in Task 5
-  // (SSOT enforcement). Until then, suppress dead-link build failures.
-  ignoreDeadLinks: true,
-
   // Exclude internal investigation/archive documents that are not suitable for the
   // public-facing docs site, or that contain syntax (e.g. ${{ }}) that conflicts
   // with Vue template processing.

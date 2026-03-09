@@ -270,5 +270,5 @@ Agent Actions:
 ## Related Documents
 
 - [Testing Standards](../guidelines/testing.md) - Detailed test strategy
-- [Go Development Skill](../../.claude/skills/go-development/SKILL.md) - Go development workflow
+- `.claude/skills/go-development/SKILL.md` - Go development workflow
 - [Task Classification](../guidelines/task-classification.md) - Task classification SSOT

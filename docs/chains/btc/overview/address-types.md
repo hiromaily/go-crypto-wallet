@@ -392,9 +392,9 @@ print(identify_address_type("bc1p5d7rjq7g6rdk2yhzks9smlaqtedr4dekq08ge8ztwac72sf
 
 ### Related Documentation
 
-- [TAPROOT_GUIDE.md](./TAPROOT_GUIDE.md): Comprehensive Taproot usage guide
-- [e2e_transaction_patterns.md](./e2e_transaction_patterns.md): E2E test patterns for all address types
-- [btc_bch_technical_guide.md](./btc_bch_technical_guide.md): Bitcoin and Bitcoin Cash technical details
+- [Taproot User Guide](/chains/btc/taproot/user-guide): Comprehensive Taproot usage guide
+- [E2E Transaction Patterns](/chains/btc/operations/e2e-transaction-patterns): E2E test patterns for all address types
+- BTC/BCH Technical Guide (internal document): Bitcoin and Bitcoin Cash technical details
 
 ## Summary
 

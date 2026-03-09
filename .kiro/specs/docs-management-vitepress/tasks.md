@@ -130,14 +130,14 @@ Phase 5 → Task 5 (SSOT enforcement)
 
 ---
 
-- [ ] 6. Fix dead links in docs/ and remove ignoreDeadLinks workaround
+- [x] 6. Fix dead links in docs/ and remove ignoreDeadLinks workaround
 
   **Context**: `ignoreDeadLinks: true` was set in Task 1 as a temporary workaround because 156 relative
   links inside `docs/` point outside the `docs/` directory (e.g. `../../tools/atlas/README.md`,
   `../../../AGENTS.md`, `../../.claude/skills/…`). These cause VitePress build failures. This task
   cleans them up so the flag can be removed.
 
-- [ ] 6.1 Audit and categorize all out-of-docs relative links
+- [x] 6.1 Audit and categorize all out-of-docs relative links
   - Run: `grep -rn "](\.\./" docs/ --include="*.md"` (excluding srcExclude paths) to collect all 156 links
   - Categorize each into one of three fix strategies:
     - **A — Remap to docs/ page**: link target has an equivalent page already in `docs/` → update to VitePress-style absolute path (e.g. `/database/architecture`)
@@ -146,7 +146,7 @@ Phase 5 → Task 5 (SSOT enforcement)
   - Produce a mapping table (file → line → category → fix) before making any edits
   - _Requirements: 1.3_
 
-- [ ] 6.2 Apply fixes — category A (remap to docs/ pages)
+- [x] 6.2 Apply fixes — category A (remap to docs/ pages)
   - For each category-A link, replace the relative `../` path with the VitePress absolute path (leading `/`)
   - Key path mappings expected:
     - `../../tools/atlas/README.md` → `/database/architecture` (or `/database/db-management`)
@@ -157,18 +157,18 @@ Phase 5 → Task 5 (SSOT enforcement)
   - After each file edit, confirm the target path exists in `docs/`
   - _Requirements: 1.3_
 
-- [ ] 6.3 Apply fixes — category B (convert to GitHub URLs)
+- [x] 6.3 Apply fixes — category B (convert to GitHub URLs)
   - For each category-B link (source files, scripts, configs), replace with:
     `https://github.com/hiromaily/go-crypto-wallet/blob/main/<repo-relative-path>`
   - Key examples: `../../tools/atlas/README.md` references from non-database docs, `../internal/interface-adapters/cli/README.md`
   - _Requirements: 1.3_
 
-- [ ] 6.4 Apply fixes — category C (convert to plain text)
+- [x] 6.4 Apply fixes — category C (convert to plain text)
   - For each category-C link (`.claude/`, `AGENTS.md`, `CLAUDE.md`, `ARCHITECTURE.md`), remove the hyperlink and render as a code-span: `` `.claude/skills/label-context-mapping/` `` instead of a broken link
   - These files are agent-configuration files not served by the docs site
   - _Requirements: 1.3, 2.2_
 
-- [ ] 6.5 Remove ignoreDeadLinks and verify clean build
+- [x] 6.5 Remove ignoreDeadLinks and verify clean build
   - Remove `ignoreDeadLinks: true` (and its comment) from `docs/.vitepress/config.ts`
   - Run `bun run docs:build` — must complete with **zero dead-link errors**
   - If any remaining dead links appear, fix them before proceeding

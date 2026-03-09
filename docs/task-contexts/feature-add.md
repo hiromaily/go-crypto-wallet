@@ -297,6 +297,6 @@ Agent Actions:
 ## Related Documents
 
 - [Architecture Guidelines](../guidelines/architecture.md) - Clean Architecture詳細
-- [Coding Standards](../guidelines/coding-standards.md) - コーディング規約詳細
-- [Internal Guidelines](../../../internal/AGENTS.md) - internalパッケージ詳細
+- [Coding Standards](/guidelines/coding-conventions) - コーディング規約詳細
+- `internal/AGENTS.md` - internalパッケージ詳細
 - [Multi-Chain Support](../guidelines/multi-chain.md) - マルチチェーン対応詳細

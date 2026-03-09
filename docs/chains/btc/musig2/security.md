@@ -1711,8 +1711,8 @@ No single layer is perfect, but together they provide robust security.
 **Author**: go-crypto-wallet Security Team
 **Related Documents**:
 
-- [MuSig2 User Guide](../crypto/btc/musig2_guide.md)
-- [Migration Guide](../migration/traditional_to_musig2.md)
-- [Architecture Documentation](../architecture/musig2_architecture.md)
+- [MuSig2 User Guide](/chains/btc/musig2/user-guide)
+- [Migration Guide](/chains/btc/musig2/migration-from-traditional)
+- [Architecture Documentation](/chains/btc/musig2/architecture)
 
 **Related Issues**: #141, #171

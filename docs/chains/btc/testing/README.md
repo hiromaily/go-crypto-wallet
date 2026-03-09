@@ -35,4 +35,4 @@ make btc-e2e-pattern2  # Traditional multisig
 ## Related Documentation
 
 - [../README.md](../README.md) - Main BTC documentation index
-- [../../../guidelines/testing.md](../../../guidelines/testing.md) - Project testing standards
+- [Project Testing Standards](/guidelines/testing) - Project testing standards

@@ -474,7 +474,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 
 - [Agent Skills Overview (Anthropic)](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
 - [GitHub CLI Documentation](https://cli.github.com/manual/)
-- [AGENTS.md](../../AGENTS.md) - Project-specific AI agent guidelines
+- `AGENTS.md` - Project-specific AI agent guidelines
 - [Workflow Guidelines](./guidelines/workflow.md) - Common workflow steps
 
 ## Contributing
@@ -494,5 +494,5 @@ If you encounter issues with Agent Skills:
 
 1. Check [Troubleshooting](#troubleshooting) section above
 2. Review skill-specific documentation in `.claude/skills/{skill-name}/SKILL.md`
-3. Check project guidelines in [AGENTS.md](../../AGENTS.md)
+3. Check project guidelines in `AGENTS.md`
 4. Create a GitHub issue for repository-specific problems

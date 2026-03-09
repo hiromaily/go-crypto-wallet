@@ -8,13 +8,13 @@ For detailed rules, format commands, and verification commands, see the correspo
 
 | Language | Rule File | Key Commands |
 |----------|-----------|--------------|
-| Go | [.claude/rules/go.md](../../.claude/rules/go.md) | `make go-lint`, `make check-build` |
-| TypeScript/JS | [.claude/rules/typescript.md](../../.claude/rules/typescript.md) | `yarn lint`, `npm run lint` |
-| Shell | [.claude/rules/shell-script.md](../../.claude/rules/shell-script.md) | `make shfmt`, `shellcheck` |
-| SQL | [.claude/rules/sql.md](../../.claude/rules/sql.md) | `make sqlc-validate`, `make sqlc` |
-| HCL | [.claude/rules/hcl.md](../../.claude/rules/hcl.md) | `make atlas-fmt`, `make atlas-lint` |
-| Proto | [.claude/rules/proto.md](../../.claude/rules/proto.md) | `make proto-fmt`, `make proto` |
-| YAML | [.claude/rules/yaml.md](../../.claude/rules/yaml.md) | `make yaml-lint` |
+| Go | `.claude/rules/go/` | `make go-lint`, `make check-build` |
+| TypeScript/JS | `.claude/rules/typescript.md` | `yarn lint`, `npm run lint` |
+| Shell | `.claude/rules/shell-script.md` | `make shfmt`, `shellcheck` |
+| SQL | `.claude/rules/sql.md` | `make sqlc-validate`, `make sqlc` |
+| HCL | `.claude/rules/hcl.md` | `make atlas-fmt`, `make atlas-lint` |
+| Proto | `.claude/rules/proto.md` | `make proto-fmt`, `make proto` |
+| YAML | `.claude/rules/yaml.md` | `make yaml-lint` |
 
 ## Quick Verification Reference
 

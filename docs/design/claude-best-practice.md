@@ -441,8 +441,8 @@ The Kiro spec workflow (`/kiro:spec-init` -> `/kiro:spec-requirements`) already 
 
 ## Related Documents
 
-- [CLAUDE.md](../../CLAUDE.md) - Project root instructions
-- [AGENTS.md](../../AGENTS.md) - AI agent guidelines
+- `CLAUDE.md` - Project root instructions
+- `AGENTS.md` - AI agent guidelines
 - [AI Agents Instruction Architecture](ai-agents-instruction.md) - System design
 - [Workflow Guidelines](../guidelines/workflow.md) - Development workflow
 - [Security Guidelines](../guidelines/security.md) - Security requirements

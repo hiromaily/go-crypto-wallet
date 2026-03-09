@@ -56,7 +56,7 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 - **Note**: **CRITICAL** - This project uses Atlas v1.0.0.
   Using older versions may not support required features.
   Always verify version before running Atlas commands.
-- **Usage**: Database schema management and migrations (see [Database Management](database.md))
+- **Usage**: Database schema management and migrations (see [Database Management](/database/architecture))
 
 ### markdownlint-cli
 
@@ -120,5 +120,5 @@ docker compose version    # Should show v2.x.x or later
 ## See Also
 
 - [Workflow Guidelines](workflow.md) - Development workflow and common steps
-- [Database Management](database.md) - Atlas usage for database migrations
+- [Database Management](/database/architecture) - Atlas usage for database migrations
 - [Coding Standards](coding-conventions.md) - golangci-lint configuration and usage

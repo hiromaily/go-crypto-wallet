@@ -941,9 +941,9 @@ Update these files when schema changes:
 
 - [Atlas Documentation](https://atlasgo.io/)
 - [SQLC Documentation](https://sqlc.dev/)
-- [Database Architecture](../development/database.md)
-- [Code Generation Guidelines](code-generation.md)
-- [PostgreSQL Integration Spec](.kiro/specs/postgres-integration/)
+- [Database Architecture](/database/architecture)
+- [Code Generation Guidelines](/guidelines/code-generation)
+- PostgreSQL Integration Spec (`.kiro/specs/postgres-integration/`)
 
 ---
 

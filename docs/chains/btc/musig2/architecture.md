@@ -1597,9 +1597,9 @@ internal/infrastructure/api/btc/btc/
 
 ### Internal Documentation
 
-- [MuSig2 User Guide](../crypto/btc/musig2_guide.md)
-- [MuSig2 Library Selection](../research/musig2_library_selection.md)
-- [MuSig2 Usage Guide](../research/musig2_usage_guide.md)
+- [MuSig2 User Guide](/chains/btc/musig2/user-guide)
+- MuSig2 Library Selection (internal research document)
+- MuSig2 Usage Guide (internal research document)
 
 ---
 

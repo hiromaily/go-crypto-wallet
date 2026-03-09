@@ -224,7 +224,7 @@ Command Behavior:
 
 ## Related Documents
 
-- [AGENTS.md](../../AGENTS.md) - プロジェクトガイドライン
+- `AGENTS.md` - プロジェクトガイドライン
 - [Agent Skills](../agent-skills.md) - Agent Skills使用ガイド
 - [Task Contexts](./README.md) - タスクコンテキスト一覧
 - [Task Analysis](./task-analysis.md) - Issue/Commit パターン分析

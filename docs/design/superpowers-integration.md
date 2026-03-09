@@ -180,7 +180,7 @@ When `writing-plans` is triggered for a `.kiro/specs/` tracked feature:
 
 #### Phase 3: Update Documentation
 
-1. Update [AGENTS.md](../../AGENTS.md) to mention superpowers integration
+1. Update `AGENTS.md` to mention superpowers integration
 2. Add setup instructions to contributor docs
 3. Update [ai-agents-instruction.md](ai-agents-instruction.md) architecture diagram
 

@@ -322,8 +322,8 @@ fix-issue command (simple interface)
 
 ## Related Documents
 
-- [AGENTS.md](../../../AGENTS.md) - Entry point for all agents
-- [Task Classification](../guidelines/task-classification.md) - SSOT for labels
-- [label-context-mapping](../../.claude/skills/label-context-mapping/SKILL.md) - Mapping skill
-- [Commands Documentation](../commands/README.md) - Command reference
-- [Skills Documentation](../agent-skills.md) - Skills reference
+- `AGENTS.md` - Entry point for all agents
+- [Task Classification](/guidelines/task-classification) - SSOT for labels
+- `.claude/skills/label-context-mapping/SKILL.md` - Mapping skill
+- [Commands Documentation](/commands) - Command reference
+- [Skills Documentation](/agent-skills) - Skills reference

@@ -367,4 +367,4 @@ esac
 - [Bitcoin Core signet documentation](https://en.bitcoin.it/wiki/Signet)
 - [Signet faucet](https://signetfaucet.com/)
 - [Bitcoin network ports](https://en.bitcoin.it/wiki/Running_Bitcoin)
-- [Project E2E documentation](../crypto/btc/operations/e2e-transaction-patterns.md)
+- [Project E2E documentation](/chains/btc/operations/e2e-transaction-patterns)

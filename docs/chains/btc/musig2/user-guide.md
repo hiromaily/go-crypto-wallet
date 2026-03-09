@@ -923,10 +923,10 @@ From integration testing:
 
 ### Documentation
 
-- [PSBT User Guide](psbt_user_guide.md) - Prerequisite for MuSig2
-- [Taproot Guide](TAPROOT_GUIDE.md) - Understanding Taproot addresses
-- [Operation Examples](operation_example.md) - Wallet setup and configuration
-- [MuSig2 Developer Guide](musig2_developer_guide.md) - For developers
+- [PSBT User Guide](/chains/btc/psbt/user-guide) - Prerequisite for MuSig2
+- [Taproot Guide](/chains/btc/taproot/user-guide) - Understanding Taproot addresses
+- [Wallet Flow](/chains/btc/operations/wallet-flow) - Wallet setup and configuration
+- [MuSig2 Architecture](/chains/btc/musig2/architecture) - For developers
 
 ### Standards and Specifications
 

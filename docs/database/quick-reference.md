@@ -275,9 +275,9 @@ sqlite3 ./data/sqlite/btc/e2e.db \
 ## 📚 Documentation Links
 
 - **Complete Workflow**: [Database Schema Changes Guide](schema-changes.md)
-- **Database Architecture**: [Development Database Docs](../development/database.md)
+- **Database Architecture**: [Development Database Docs](/database/architecture)
 - **Atlas Details**: `tools/atlas/README.md`
-- **Code Generation**: [Code Generation Guidelines](code-generation.md)
+- **Code Generation**: [Code Generation Guidelines](/guidelines/code-generation)
 - **PostgreSQL Integration**: `.kiro/specs/postgres-integration/`
 
 ## 🆘 Troubleshooting

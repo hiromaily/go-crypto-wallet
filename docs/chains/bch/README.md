@@ -1056,9 +1056,9 @@ While not currently implemented in go-crypto-wallet, BCH has planned upgrades:
 | Document | Description |
 |----------|-------------|
 | [BTC E2E Transaction Patterns](../btc/operations/e2e-transaction-patterns.md) | Comprehensive BTC patterns guide |
-| [BTC/BCH Technical Guide](../btc/btc_bch_technical_guide.md) | Comprehensive BTC/BCH comparison |
+| BTC/BCH Technical Guide (internal document) | Comprehensive BTC/BCH comparison |
 | [Bitcoin README](../btc/README.md) | Bitcoin technical reference |
-| [BCH E2E Workflow](../../../scripts/operation/bch/README.md) | BCH E2E script documentation |
+| [BCH E2E Workflow](https://github.com/hiromaily/go-crypto-wallet/blob/main/scripts/operation/bch/README.md) | BCH E2E script documentation |
 
 ### Implementation Files
 

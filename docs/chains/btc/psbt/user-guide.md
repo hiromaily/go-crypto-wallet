@@ -736,10 +736,10 @@ bitcoin-cli getrawtransaction <txid> 1
 
 ### Documentation
 
-- [PSBT Implementation Details](psbt_implementation.md)
-- [PSBT Migration Guide](psbt_migration.md)
-- [PSBT Developer Guide](psbt_developer_guide.md)
-- [Operation Examples](operation_example.md)
+- [PSBT Implementation Details](./implementation)
+- [PSBT Migration Guide](./migration)
+- [PSBT Developer Guide](./developer-guide)
+- [Wallet Flow](/chains/btc/operations/wallet-flow)
 
 ### Standards
 

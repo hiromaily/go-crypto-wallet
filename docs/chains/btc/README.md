@@ -9,15 +9,15 @@ This directory is organized into the following categories:
 | File / Directory | Description | Audience |
 |------------------|-------------|----------|
 | [architecture.md](./architecture.md) | **Wallet architecture** — wallet roles, use case boundary map, Keygen vs Sign signing | Developers |
-| [overview/](overview/) | Fundamental technical references and Bitcoin basics | All |
-| [operations/](operations/) | Wallet operation guides and transaction flows | Operators |
-| [keygen/](keygen/) | Key generation design and improvements | Developers |
-| [psbt/](psbt/) | PSBT implementation and usage guides | All |
-| [descriptor/](descriptor/) | Output Descriptor implementation | Developers |
-| [taproot/](taproot/) | Taproot (BIP341/BIP86) guides | All |
-| [musig2/](musig2/) | MuSig2 multisignature implementation | All |
-| [testing/](testing/) | Test procedures and verification | Developers |
-| [archive/](archive/) | Outdated documentation (reference only) | - |
+| [overview/](overview/README) | Fundamental technical references and Bitcoin basics | All |
+| [operations/](operations/README) | Wallet operation guides and transaction flows | Operators |
+| [keygen/](keygen/README) | Key generation design and improvements | Developers |
+| [psbt/](psbt/README) | PSBT implementation and usage guides | All |
+| [descriptor/](descriptor/README) | Output Descriptor implementation | Developers |
+| [taproot/](taproot/README) | Taproot (BIP341/BIP86) guides | All |
+| [musig2/](musig2/README) | MuSig2 multisignature implementation | All |
+| [testing/](testing/README) | Test procedures and verification | Developers |
+| archive/ | Outdated documentation (reference only) | - |
 
 ## Quick Start
 
@@ -285,7 +285,7 @@ MuSig2 enables N-of-N multisig that appears as single-sig on-chain.
 - Generate fresh nonces for every transaction
 - Delete nonces after signing
 
-See [musig2/](musig2/) for detailed documentation.
+See [musig2/](musig2/README) for detailed documentation.
 
 ---
 
@@ -315,7 +315,7 @@ PSBT (BIP174) is the standard format for offline/multi-party signing workflows.
    └── Extract broadcastable transaction
 ```
 
-See [psbt/](psbt/) for detailed documentation.
+See [psbt/](psbt/README) for detailed documentation.
 
 ---
 
@@ -568,7 +568,7 @@ See [musig2/security.md](musig2/security.md) for details.
 
 | Resource | Location |
 |----------|----------|
-| E2E Test Scripts | [scripts/operation/btc/e2e/](../../../scripts/operation/btc/e2e/) |
+| E2E Test Scripts | [scripts/operation/btc/e2e/](https://github.com/hiromaily/go-crypto-wallet/tree/main/scripts/operation/btc/e2e) |
 | Project Testing Standards | [docs/guidelines/testing.md](../../guidelines/testing.md) |
 | Security Standards | [docs/guidelines/security.md](../../guidelines/security.md) |
 

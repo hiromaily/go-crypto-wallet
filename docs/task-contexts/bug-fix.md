@@ -200,6 +200,6 @@ Agent Actions:
 
 ## Related Documents
 
-- [Fix Issue Command](../../../.claude/commands/fix-issue.md) - Issue修正コマンド詳細
+- `.claude/commands/fix-issue.md` - Issue修正コマンド詳細
 - [Workflow Guidelines](../guidelines/workflow.md) - 検証ステップ詳細
 - [Core Principles](../guidelines/core.md) - エラーハンドリング詳細
