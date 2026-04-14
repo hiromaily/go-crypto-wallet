@@ -37,10 +37,10 @@ version: 1.0.0
 
 | Chain | Reference Document |
 |-------|-------------------|
-| BTC | [BTC Documentation](../chains/btc/README.md) |
-| BCH | [BCH Documentation](../chains/bch/README.md) |
-| ETH | [ETH Documentation](../chains/eth/README.md) |
-| XRP | [XRP Documentation](../chains/xrp/README.md) |
+| BTC | [BTC Documentation](../../chains/btc/README.md) |
+| BCH | [BCH Documentation](../../chains/bch/README.md) |
+| ETH | [ETH Documentation](../../chains/eth/README.md) |
+| XRP | [XRP Documentation](../../chains/xrp/README.md) |
 
 ## Required Context Documents
 
@@ -327,6 +327,6 @@ Agent Actions:
 
 ## Related Documents
 
-- [Multi-Chain Support](../guidelines/multi-chain.md) - マルチチェーンアーキテクチャ詳細
-- [Architecture Guidelines](../guidelines/architecture.md) - レイヤー構造
+- [Multi-Chain Support](../../guidelines/multi-chain.md) - マルチチェーンアーキテクチャ詳細
+- [Architecture Guidelines](../../guidelines/architecture.md) - レイヤー構造
 - [Chain Documentation (BTC)](/chains/btc/README) - 各チェーンの詳細ドキュメント

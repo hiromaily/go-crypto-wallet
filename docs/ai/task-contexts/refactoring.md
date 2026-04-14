@@ -332,7 +332,7 @@ Steps:
 
 ## Related Documents
 
-- [Architecture Guidelines](../guidelines/architecture.md) - Clean Architecture詳細
+- [Architecture Guidelines](../../guidelines/architecture.md) - Clean Architecture詳細
 - [Refactoring Plan](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/issues/REFACTORING_PLAN.md) - プロジェクトのリファクタリング計画
-- [Code Generation](../guidelines/code-generation.md) - モック生成など
+- [Code Generation](../../guidelines/code-generation.md) - モック生成など
 - `internal/AGENTS.md` - internalパッケージ構造

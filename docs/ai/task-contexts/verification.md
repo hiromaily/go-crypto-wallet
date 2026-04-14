@@ -9,7 +9,7 @@ version: 2.0.0
 ## SSOT Reference
 
 ファイルタイプ別の検証コマンドは `.claude/rules/` に定義されています（SSOT）。  
-完全なルールファイルと検証コマンドの一覧は [Coding Conventions — Language-Specific Rules](../guidelines/coding-conventions.md#language-specific-rules) を参照してください。
+完全なルールファイルと検証コマンドの一覧は [Coding Conventions — Language-Specific Rules](../../guidelines/coding-conventions.md#language-specific-rules) を参照してください。
 
 ## Task Type × File Type Matrix
 
@@ -47,4 +47,4 @@ version: 2.0.0
 ## Related Documents
 
 - [Task Contexts README](./README.md) - タスクコンテキスト一覧
-- [Coding Conventions](../guidelines/coding-conventions.md) - コーディング規約
+- [Coding Conventions](../../guidelines/coding-conventions.md) - コーディング規約

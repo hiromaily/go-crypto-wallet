@@ -16,7 +16,6 @@ This directory is organized into the following categories:
 | [descriptor/](descriptor/README) | Output Descriptor implementation | Developers |
 | [taproot/](taproot/README) | Taproot (BIP341/BIP86) guides | All |
 | [musig2/](musig2/README) | MuSig2 multisignature implementation | All |
-| [testing/](testing/README) | Test procedures and verification | Developers |
 | archive/ | Outdated documentation (reference only) | - |
 
 ## Quick Start
@@ -562,7 +561,7 @@ See [musig2/security.md](musig2/security.md) for details.
 | **Descriptor** | [user-guide.md](descriptor/user-guide.md), [architecture.md](descriptor/architecture.md), [api.md](descriptor/api.md) |
 | **Taproot** | [user-guide.md](taproot/user-guide.md), [testing.md](taproot/testing.md) |
 | **MuSig2** | [user-guide.md](musig2/user-guide.md), [architecture.md](musig2/architecture.md), [security.md](musig2/security.md) |
-| **Testing** | [pattern3-verification.md](testing/pattern3-verification.md) |
+| **Testing** | [pattern3-verification.md](operations/pattern3-verification.md) |
 
 ### Related Resources
 

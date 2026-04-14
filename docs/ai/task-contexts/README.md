@@ -21,10 +21,10 @@
 
 | Chain | Documentation | Key Features |
 |-------|---------------|--------------|
-| BTC | [docs/chains/btc/README.md](../chains/btc/README.md) | UTXO, Descriptor, Taproot, MuSig2 |
-| BCH | [docs/chains/bch/README.md](../chains/bch/README.md) | UTXO, CashAddr |
-| ETH | [docs/chains/eth/README.md](../chains/eth/README.md) | Account, Gas, ERC-20 |
-| XRP | [docs/chains/xrp/README.md](../chains/xrp/README.md) | Account, gRPC, Destination Tag |
+| BTC | [docs/chains/btc/README.md](../../chains/btc/README.md) | UTXO, Descriptor, Taproot, MuSig2 |
+| BCH | [docs/chains/bch/README.md](../../chains/bch/README.md) | UTXO, CashAddr |
+| ETH | [docs/chains/eth/README.md](../../chains/eth/README.md) | Account, Gas, ERC-20 |
+| XRP | [docs/chains/xrp/README.md](../../chains/xrp/README.md) | Account, gRPC, Destination Tag |
 
 ## Usage
 
@@ -106,4 +106,4 @@
 - [Task-Oriented Context Management](./task-oriented-context.md) - 概念と戦略
 - [Task Analysis](./task-analysis.md) - Issue/Commit パターン分析
 - `AGENTS.md` - プロジェクトガイドライン
-- [Workflow Guidelines](../guidelines/workflow.md) - 共通ワークフロー
+- [Workflow Guidelines](../../guidelines/workflow.md) - 共通ワークフロー
