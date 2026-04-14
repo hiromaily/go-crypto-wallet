@@ -38,7 +38,7 @@ Repository Implementations
 
 ## Supported Databases
 
-See [Database Architecture](./architecture.md) for supported backends (MySQL 8.4, SQLite, PostgreSQL). Database type is selected via `database.type` in wallet config files.
+See [Database Architecture](../../template/docs/database/architecture.md) for supported backends (MySQL 8.4, SQLite, PostgreSQL). Database type is selected via `database.type` in wallet config files.
 
 ## Quick Reference
 
@@ -928,8 +928,8 @@ Update these files when schema changes:
 
 - [Atlas Documentation](https://atlasgo.io/)
 - [SQLC Documentation](https://sqlc.dev/)
-- [Database Architecture](./architecture.md)
-- [Code Generation Guidelines](../guidelines/code-generation.md)
+- [Database Architecture](../../template/docs/database/architecture.md)
+- [Code Generation Guidelines](../../template/docs/guidelines/code-generation.md)
 - PostgreSQL Integration Spec (`.kiro/specs/postgres-integration/`)
 
 ---

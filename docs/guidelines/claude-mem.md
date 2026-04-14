@@ -112,7 +112,7 @@ Use for private keys, credentials, or sensitive discussion.
 - Private keys and seeds
 - Wallet passwords
 - API credentials
-- Any content that would violate our [security guidelines](./security.md)
+- Any content that would violate our [security guidelines](../../template/docs/guidelines/security.md)
 
 ## Effective Usage Patterns
 
@@ -254,6 +254,6 @@ If sessions start slowly due to too much injected context:
 
 ## Related Documentation
 
-- [Workflow Guidelines](./workflow.md) - Development workflow
-- [Security Guidelines](./security.md) - Security requirements (relevant for privacy controls)
+- [Workflow Guidelines](../../template/docs/guidelines/workflow.md) - Development workflow
+- [Security Guidelines](../../template/docs/guidelines/security.md) - Security requirements (relevant for privacy controls)
 - `CLAUDE.md` - Project-level Claude Code configuration

@@ -192,7 +192,7 @@ func TestRepository_Integration(t *testing.T) {
 
 ## Mock Generation with Mockery
 
-> **Code Generation**: For mock generation commands and configuration, see [Code Generation Guide](./code-generation.md#mock-code-mockery).
+> **Code Generation**: For mock generation commands and configuration, see [Code Generation Guide](../../template/docs/guidelines/code-generation.md#mock-code-mockery).
 
 This project uses [mockery v3](https://github.com/vektra/mockery) to generate mock implementations from Go interfaces.
 
@@ -541,7 +541,7 @@ func TestFunction(t *testing.T) {
 
 ## See Also
 
-- [Architecture Guidelines](./architecture.md) - Layer structure and responsibilities
-- [Coding Standards](./coding-conventions.md) - Code quality and verification commands
-- [Code Generation](./code-generation.md) - Mock generation and other code generation tools
-- [Workflow Guidelines](./workflow.md) - Running tests in CI/CD workflow
+- [Architecture Guidelines](../../template/docs/guidelines/architecture.md) - Layer structure and responsibilities
+- [Coding Standards](../../template/docs/guidelines/coding-conventions.md) - Code quality and verification commands
+- [Code Generation](../../template/docs/guidelines/code-generation.md) - Mock generation and other code generation tools
+- [Workflow Guidelines](../../template/docs/guidelines/workflow.md) - Running tests in CI/CD workflow

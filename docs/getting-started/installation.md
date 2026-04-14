@@ -6,7 +6,6 @@ This installation expects MacOS environment.
 
 - Golang 1.25+
 - [Docker](https://www.docker.com/get-started)
-
 ## Common Setup
 
 1. install Golang, Docker
@@ -29,7 +28,6 @@ go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 ```
 docker compose up wallet-mysql
 ```
-
 ## Bitcoind Setup
 
 At least, one bitcoin core server and 1 database (with 3 schemas: watch, keygen, sign) are required.
@@ -84,7 +82,6 @@ docker compose -f compose.btc.yaml up btc-watch btc-keygen btc-sign
 4. operation
 
 - see [Operation Example](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/btc/OperationExample.md)
-
 ## Bitcoind Setup without container
 
 1. install `bitcoind` on macOS directly if needed
@@ -114,7 +111,6 @@ docker compose -f compose.btc.yaml up btc-watch btc-keygen btc-sign
       "sign5"
     ]
     ```
-
 ## Ethereum Setup
 
 It depends on which node you choose
@@ -153,7 +149,6 @@ docker compose -f compose.eth.yaml up ganache
 
 - prepare sql file if you choose Ganache.
   But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/eth/Ganache.md)
-
 ## ERC20 Token Setup
 
 - deploy ERC-20 token contract if needed
@@ -178,5 +173,4 @@ yarn ts-node src/web3.ts --mode balance --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # transfer to specific address
 yarn ts-node src/web3.ts --mode transfer --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --amount 100
 ```
-
 ## Ripple Setup

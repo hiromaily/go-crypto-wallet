@@ -5,7 +5,6 @@ This document describes all code generation tools used in the go-crypto-wallet p
 ## Overview
 
 This project uses several code generation tools. **All auto-generated files contain `DO NOT EDIT` comments and must never be manually modified.**
-
 ## Database Migrations (Atlas)
 
 **Tool**: [Atlas](https://atlasgo.io/)
@@ -19,8 +18,7 @@ This project uses several code generation tools. **All auto-generated files cont
 - `tools/atlas/migrations/sign/*.sql` - Sign schema migrations
 - `tools/atlas/migrations/*/atlas.sum` - Migration checksums
 
-**Note**: See [Database Management Guidelines](../database/architecture.md) for detailed workflow.
-
+**Note**: See [Database Management Guidelines](../../template/docs/database/architecture.md) for detailed workflow.
 ## SQLC Schema Files (from Database Dumps)
 
 **Tool**: Custom shell script (`scripts/db/extract-sqlc-schema.sh`)
@@ -34,7 +32,6 @@ This project uses several code generation tools. **All auto-generated files cont
 - `tools/sqlc/schemas/mysql/03_sign.sql` - Sign schema for SQLC
 
 **Note**: These schema files are extracted from MySQL database dumps. The source of truth is the Atlas HCL files (`tools/atlas/schemas/{db_dialect}/*.hcl`). To update schemas, modify the HCL files and run the database migration flow.
-
 ## Database Code (SQLC)
 
 **Tool**: [sqlc](https://sqlc.dev/)
@@ -53,7 +50,6 @@ This project uses several code generation tools. **All auto-generated files cont
 **Note**: The legacy location `pkg/db/rdb/sqlcgen/*.go` is no longer generated and can be safely deleted.
 
 **Note**: SQLC generates type-safe Go code from SQL queries and schemas.
-
 ## Protocol Buffer Code (Go) [DEPRECATED for XRP]
 
 > **⚠️ DEPRECATED**: XRP protocol buffers (`proto/rippleapi/`) are no longer used.
@@ -77,7 +73,6 @@ This project uses several code generation tools. **All auto-generated files cont
   - `transaction_grpc.pb.go` - Transaction gRPC service code [Deprecated]
 
 **Note**: Protocol buffers were previously used for XRP (Ripple) gRPC communication. This is no longer the case.
-
 ## Smart Contract ABI Code
 
 **Tool**: [abigen](https://geth.ethereum.org/docs/tools/abigen) (from go-ethereum)
@@ -89,7 +84,6 @@ This project uses several code generation tools. **All auto-generated files cont
 - `internal/infrastructure/contract/token-abi.go` - ERC-20 token contract bindings
 
 **Note**: ABI code is generated from Ethereum smart contract ABI JSON files.
-
 ## Mock Code (Mockery)
 
 **Tool**: [mockery v3](https://github.com/vektra/mockery)
@@ -161,8 +155,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 **Note**: The `make mockery` target automatically runs `clean-mocks` first, so old mocks will be removed before generating new ones. This ensures no stale mocks remain when paths change.
 
-**Note**: See [Testing Guidelines](./testing.md) for mock usage examples and best practices.
-
+**Note**: See [Testing Guidelines](../../template/docs/guidelines/testing.md) for mock usage examples and best practices.
 ## Protocol Buffer Code (TypeScript) [DEPRECATED]
 
 > **⚠️ DEPRECATED**: XRP gRPC server (`apps/xrpl-grpc-server/`) is no longer used.
@@ -182,7 +175,6 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
   - `address_connect.ts` - Address service client [Deprecated]
   - `transaction_pb.ts` - Transaction message types [Deprecated]
   - `transaction_connect.ts` - Transaction service client [Deprecated]
-
 ## Web Project Build Artifacts
 
 **Tool**: Various build tools (Truffle, webpack, etc.)
@@ -192,7 +184,6 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 - `web/erc20-token/build/` - Compiled smart contracts and frontend assets
 
 **Note**: These are build outputs from the ERC-20 token web project.
-
 ## Dependency Lock Files
 
 **Tool**: Go modules, npm/yarn
@@ -204,7 +195,6 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 - `web/*/package-lock.json` - npm package lock files
 
 **Note**: These files track exact dependency versions and should be committed to version control.
-
 ## Important Rules
 
 1. **Never manually edit auto-generated files** - Changes will be overwritten on next generation
@@ -217,7 +207,6 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
    - ABI: Edit `contracts/token.abi` (or regenerate from Solidity source)
 3. **Regenerate after source changes** - Run the appropriate make command after modifying source files
 4. **Verify generation** - Run `make check-build` after regenerating to ensure code compiles
-
 ## Quick Reference
 
 | Tool | Source Files | Command | Generated Files |
@@ -229,10 +218,9 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 | ~~Protocol Buffers (Go)~~ [DEPRECATED] | ~~`proto/rippleapi/*.proto`~~ | ~~`make proto`~~ | ~~(XRP protobufs no longer used)~~ |
 | Smart Contract ABI | `contracts/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
 | ~~Protocol Buffers (TS)~~ [DEPRECATED] | ~~`proto/rippleapi/*.proto`~~ | ~~`make proto-ts`~~ | ~~(XRP gRPC server no longer used)~~ |
-
 ## See Also
 
-- [Database Management Guidelines](../database/architecture.md) - Detailed database schema workflow
-- [Testing Guidelines](./testing.md) - Mock usage and unit testing patterns
-- [Coding Standards](./coding-conventions.md) - Verification commands
-- [Core Principles](./core.md) - Rules about editing auto-generated files
+- [Database Management Guidelines](../../template/docs/database/architecture.md) - Detailed database schema workflow
+- [Testing Guidelines](../../template/docs/guidelines/testing.md) - Mock usage and unit testing patterns
+- [Coding Standards](../../template/docs/guidelines/coding-conventions.md) - Verification commands
+- [Core Principles](../../template/docs/guidelines/core.md) - Rules about editing auto-generated files

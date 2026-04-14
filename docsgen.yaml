@@ -52,6 +52,23 @@ targets:
     output: docs/database/atlas-migration-flow.md
   - input: template/pages/docs/database/sqlc-code-generation-flow.tpl.md
     output: docs/database/sqlc-code-generation-flow.md
+  # docs/architecture/
+  - input: template/pages/docs/architecture/index.tpl.md
+    output: docs/architecture/index.md
+  - input: template/pages/docs/architecture/design-philosophy.tpl.md
+    output: docs/architecture/design-philosophy.md
+  - input: template/pages/docs/architecture/layers.tpl.md
+    output: docs/architecture/layers.md
+  - input: template/pages/docs/architecture/wallet-architecture.tpl.md
+    output: docs/architecture/wallet-architecture.md
+  - input: template/pages/docs/architecture/dependency-injection.tpl.md
+    output: docs/architecture/dependency-injection.md
+  - input: template/pages/docs/architecture/data-flow.tpl.md
+    output: docs/architecture/data-flow.md
+  - input: template/pages/docs/architecture/shared-packages.tpl.md
+    output: docs/architecture/shared-packages.md
+  - input: template/pages/docs/architecture/directory-structure.tpl.md
+    output: docs/architecture/directory-structure.md
   # docs/ root pages
   - input: template/pages/docs/overview.tpl.md
     output: docs/overview.md
