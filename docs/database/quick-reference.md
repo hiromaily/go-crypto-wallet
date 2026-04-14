@@ -1,7 +1,6 @@
 # Database Quick Reference Card
 
 Quick reference for common database operations in go-crypto-wallet project.
-
 ## 🎯 Common Workflows
 
 ### Schema Change Workflow
@@ -60,7 +59,6 @@ docker compose exec wallet-mysql mysql -uroot -proot \
   -e "DROP DATABASE watch; CREATE DATABASE watch;"
 make atlas-migrate-docker
 ```
-
 ## 📁 File Locations
 
 ```
@@ -103,7 +101,6 @@ internal/infrastructure/database/
 - ✏️  Manual editing allowed/required
 - 🔒 Auto-generated - Do not edit
 - 🔄 Extracted from database
-
 ## ⚡ Make Commands
 
 ### Atlas (Schema Migrations)
@@ -146,7 +143,6 @@ internal/infrastructure/database/
 | `docker compose down -v` | Stop and remove database (data lost) |
 | `docker compose exec wallet-mysql mysql -uroot -proot watch` | Access watch schema |
 | `docker compose logs wallet-mysql` | View database logs |
-
 ## 🗄️ Database Configuration
 
 ### MySQL (Production)
@@ -187,7 +183,6 @@ user = "hiromaily"
 pass = "hiromaily"
 sslmode = "prefer"
 ```
-
 ## 🔄 Data Type Mapping
 
 | Concept | MySQL | SQLite | PostgreSQL |
@@ -199,7 +194,6 @@ sslmode = "prefer"
 | **Timestamp** | `DATETIME` | `TEXT (ISO8601)` | `TIMESTAMP` |
 | **Text (sized)** | `VARCHAR(255)` | `TEXT` | `VARCHAR(255)` |
 | **Text (large)** | `TEXT` | `TEXT` | `TEXT` |
-
 ## 🧪 Testing Commands
 
 ```bash
@@ -219,7 +213,6 @@ make btc-e2e-reset P=1 DB=mysql
 make go-lint
 make check-build
 ```
-
 ## 🔍 Useful SQL Queries
 
 ### List All Tables
@@ -259,7 +252,6 @@ docker compose exec wallet-mysql mysql -uroot -proot watch \
 sqlite3 ./data/sqlite/btc/e2e.db \
   "SELECT * FROM atlas_schema_revisions ORDER BY version DESC LIMIT 5;"
 ```
-
 ## ❌ Common Mistakes to Avoid
 
 | ❌ Don't Do This | ✅ Do This Instead |
@@ -271,7 +263,6 @@ sqlite3 ./data/sqlite/btc/e2e.db \
 | Commit without testing | Run full test cycle before commit |
 | Use different column names | Maintain identical names across all databases |
 | Modify only one database | Update all three databases (MySQL, SQLite, PostgreSQL) |
-
 ## 📚 Documentation Links
 
 - **Complete Workflow**: [Database Schema Changes Guide](./schema-changes.md)
@@ -279,7 +270,6 @@ sqlite3 ./data/sqlite/btc/e2e.db \
 - **Atlas Details**: `tools/atlas/README.md`
 - **Code Generation**: [Code Generation Guidelines](../guidelines/code-generation.md)
 - **PostgreSQL Integration**: `.kiro/specs/postgres-integration/`
-
 ## 🆘 Troubleshooting
 
 ### Migration Fails

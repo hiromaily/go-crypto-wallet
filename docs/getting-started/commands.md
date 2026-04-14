@@ -5,7 +5,6 @@
 This document describes all available CLI commands for the three wallet types: Watch Wallet, Keygen Wallet, and Sign Wallet.
 
 ---
-
 ## Watch Wallet Commands
 
 Watch Wallet operates online and manages public keys only. It creates unsigned transactions, sends signed
@@ -163,7 +162,6 @@ API commands are coin-specific and dynamically configured based on the `--coin` 
   - `--amount <float>` - Amount to send
 
 ---
-
 ## Keygen Wallet Commands
 
 Keygen Wallet operates offline as a cold wallet. It generates keys, creates multisig addresses, and provides
@@ -313,7 +311,6 @@ API commands are coin-specific and dynamically configured based on the `--coin` 
   - `--pass <string>` - Passphrase for the key
 
 ---
-
 ## Sign Wallet Commands
 
 Sign Wallet operates offline as a cold wallet. It provides subsequent signatures (2nd, 3rd, etc.) for multisig
@@ -408,7 +405,6 @@ API commands are coin-specific and dynamically configured based on the `--coin` 
 - `sign api nodeinfo` - Get node information
 - `sign api syncing` - Get synchronization status
 - `sign api netversion` - Get network version
-
 ## Global Flags
 
 > See [Global Flags](https://github.com/hiromaily/go-crypto-wallet/blob/main/internal/interface-adapters/cli/README.md#global-flags) in the CLI README.

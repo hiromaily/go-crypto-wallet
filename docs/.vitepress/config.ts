@@ -21,7 +21,7 @@ export default withMermaid(defineConfig({
     nav: [
       { text: 'Overview', link: '/overview' },
       { text: 'Getting Started', link: '/getting-started/installation' },
-      { text: 'Architecture', link: '/guidelines/architecture' },
+      { text: 'Architecture', link: '/architecture/' },
       {
         text: 'Chains',
         items: [
@@ -78,6 +78,22 @@ export default withMermaid(defineConfig({
             { text: 'Installation', link: '/getting-started/installation' },
             { text: 'CLI Commands', link: '/getting-started/commands' },
             { text: 'Dev Container', link: '/getting-started/devcontainer' },
+          ],
+        },
+      ],
+
+      '/architecture/': [
+        {
+          text: 'Architecture',
+          items: [
+            { text: 'Overview', link: '/architecture/' },
+            { text: 'Design Philosophy', link: '/architecture/design-philosophy' },
+            { text: 'Layer Architecture', link: '/architecture/layers' },
+            { text: 'Wallet Architecture', link: '/architecture/wallet-architecture' },
+            { text: 'Dependency Injection', link: '/architecture/dependency-injection' },
+            { text: 'Data Flow', link: '/architecture/data-flow' },
+            { text: 'Shared Packages', link: '/architecture/shared-packages' },
+            { text: 'Directory Structure', link: '/architecture/directory-structure' },
           ],
         },
       ],
