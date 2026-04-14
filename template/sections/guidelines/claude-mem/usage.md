@@ -42,4 +42,4 @@ Use for private keys, credentials, or sensitive discussion.
 - Private keys and seeds
 - Wallet passwords
 - API credentials
-- Any content that would violate our [security guidelines](../../../docs/guidelines/security.md)
+- Any content that would violate our [security guidelines](../../../../docs/guidelines/security.md)

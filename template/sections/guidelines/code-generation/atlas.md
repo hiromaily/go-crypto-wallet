@@ -11,4 +11,4 @@
 - `tools/atlas/migrations/sign/*.sql` - Sign schema migrations
 - `tools/atlas/migrations/*/atlas.sum` - Migration checksums
 
-**Note**: See [Database Management Guidelines](../../../docs/database/architecture.md) for detailed workflow.
+**Note**: See [Database Management Guidelines](../../../../docs/database/architecture.md) for detailed workflow.

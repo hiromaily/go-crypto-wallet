@@ -61,7 +61,7 @@ External dependencies and implementations:
 - `infrastructure/api/eth/` ... Ethereum JSON-RPC API clients
   - [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
 - `infrastructure/api/xrp/` ... Ripple gRPC API clients
-  - Communicates with [xrpl-grpc-server](../../../apps/xrpl-grpc-server/) [Deprecated]
+  - Communicates with `apps/xrpl-grpc-server/` [Deprecated]
 - `infrastructure/database/` ... Database connections and generated code
   - `mysql/` ... MySQL connection management
   - `sqlc/` ... SQLC generated database code

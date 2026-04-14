@@ -110,7 +110,7 @@ TODO: updating
 
 - `xrp/`: Ripple gRPC client [Deprecated]
 
-**Note**: XRP uses protocol buffers for gRPC communication. See [Code Generation Guidelines](../../template/docs/guidelines/code-generation.md) for protobuf code generation.
+**Note**: XRP uses protocol buffers for gRPC communication. See [Code Generation Guidelines](./code-generation.md) for protobuf code generation.
 
 ## Multi-Chain Architecture
 
@@ -220,7 +220,7 @@ Add tests for all layers:
 
 ## See Also
 
-- [Architecture Guidelines](../../template/docs/guidelines/architecture.md) - Layer structure and organization
-- [Code Generation Guidelines](../../template/docs/guidelines/code-generation.md) - Protocol buffer generation for XRP
-- [Testing Guidelines](../../template/docs/guidelines/testing.md) - Testing multi-chain implementations
+- [Architecture Guidelines](./architecture.md) - Layer structure and organization
+- [Code Generation Guidelines](./code-generation.md) - Protocol buffer generation for XRP
+- [Testing Guidelines](./testing.md) - Testing multi-chain implementations
 - `pkg/testutil/` - Test utilities for BTC, ETH, XRP

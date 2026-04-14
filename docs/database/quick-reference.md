@@ -265,10 +265,10 @@ sqlite3 ./data/sqlite/btc/e2e.db \
 | Modify only one database | Update all three databases (MySQL, SQLite, PostgreSQL) |
 ## 📚 Documentation Links
 
-- **Complete Workflow**: [Database Schema Changes Guide](../../template/docs/database/schema-changes.md)
-- **Database Architecture**: [Development Database Docs](../../template/docs/database/architecture.md)
+- **Complete Workflow**: [Database Schema Changes Guide](./schema-changes.md)
+- **Database Architecture**: [Development Database Docs](./architecture.md)
 - **Atlas Details**: `tools/atlas/README.md`
-- **Code Generation**: [Code Generation Guidelines](../../template/docs/guidelines/code-generation.md)
+- **Code Generation**: [Code Generation Guidelines](../guidelines/code-generation.md)
 - **PostgreSQL Integration**: `.kiro/specs/postgres-integration/`
 ## 🆘 Troubleshooting
 
@@ -318,4 +318,4 @@ diff -u tools/sqlc/schemas/mysql/01_watch.sql tools/sqlc/schemas/sqlite/01_watch
 
 ---
 
-**For detailed explanations and complete workflows, see [Database Schema Changes Guide](../../template/docs/database/schema-changes.md)**
+**For detailed explanations and complete workflows, see [Database Schema Changes Guide](./schema-changes.md)**

@@ -1,6 +1,6 @@
 ### Mock Generation with Mockery
 
-> **Code Generation**: For mock generation commands and configuration, see [Code Generation Guide](../../../docs/guidelines/code-generation.md#mock-code-mockery).
+> **Code Generation**: For mock generation commands and configuration, see [Code Generation Guide](../../../../docs/guidelines/code-generation.md#mock-code-mockery).
 
 This project uses [mockery v3](https://github.com/vektra/mockery) to generate mock implementations from Go interfaces.
 

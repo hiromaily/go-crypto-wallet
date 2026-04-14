@@ -56,4 +56,4 @@ TODO: updating
 
 - `xrp/`: Ripple gRPC client [Deprecated]
 
-**Note**: XRP uses protocol buffers for gRPC communication. See [Code Generation Guidelines](../../../docs/guidelines/code-generation.md) for protobuf code generation.
+**Note**: XRP uses protocol buffers for gRPC communication. See [Code Generation Guidelines](../../../../docs/guidelines/code-generation.md) for protobuf code generation.

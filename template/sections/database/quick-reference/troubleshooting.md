@@ -46,4 +46,4 @@ diff -u tools/sqlc/schemas/mysql/01_watch.sql tools/sqlc/schemas/sqlite/01_watch
 
 ---
 
-**For detailed explanations and complete workflows, see [Database Schema Changes Guide](../../../docs/database/schema-changes.md)**
+**For detailed explanations and complete workflows, see [Database Schema Changes Guide](../../../../docs/database/schema-changes.md)**

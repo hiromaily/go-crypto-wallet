@@ -1,6 +1,6 @@
 ### Testing Standards
 
-See [Testing Guidelines](../../../docs/guidelines/testing.md) for comprehensive testing standards.
+See [Testing Guidelines](../../../../docs/guidelines/testing.md) for comprehensive testing standards.
 
 **Basic Guidelines:**
 

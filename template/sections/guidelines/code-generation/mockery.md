@@ -69,4 +69,4 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 **Note**: The `make mockery` target automatically runs `clean-mocks` first, so old mocks will be removed before generating new ones. This ensures no stale mocks remain when paths change.
 
-**Note**: See [Testing Guidelines](../../../docs/guidelines/testing.md) for mock usage examples and best practices.
+**Note**: See [Testing Guidelines](../../../../docs/guidelines/testing.md) for mock usage examples and best practices.

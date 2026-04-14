@@ -63,7 +63,7 @@ Infrastructure Layer (internal/infrastructure/*)
                         └────────────────────┘
 ```
 
-For detailed architecture guidelines, see [AGENTS.md](../../AGENTS.md).
+For detailed architecture guidelines, see `AGENTS.md`.
 
 # Components inside repository
 

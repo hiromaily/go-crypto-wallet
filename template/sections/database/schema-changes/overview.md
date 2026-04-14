@@ -38,4 +38,4 @@ Repository Implementations
 
 ### Supported Databases
 
-See [Database Architecture](../../../docs/database/architecture.md) for supported backends (MySQL 8.4, SQLite, PostgreSQL). Database type is selected via `database.type` in wallet config files.
+See [Database Architecture](../../../../docs/database/architecture.md) for supported backends (MySQL 8.4, SQLite, PostgreSQL). Database type is selected via `database.type` in wallet config files.

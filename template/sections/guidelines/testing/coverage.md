@@ -9,7 +9,7 @@
 
 ### See Also
 
-- [Architecture Guidelines](../../../docs/guidelines/architecture.md) - Layer structure and responsibilities
-- [Coding Standards](../../../docs/guidelines/coding-conventions.md) - Code quality and verification commands
-- [Code Generation](../../../docs/guidelines/code-generation.md) - Mock generation and other code generation tools
-- [Workflow Guidelines](../../../docs/guidelines/workflow.md) - Running tests in CI/CD workflow
+- [Architecture Guidelines](../../../../docs/guidelines/architecture.md) - Layer structure and responsibilities
+- [Coding Standards](../../../../docs/guidelines/coding-conventions.md) - Code quality and verification commands
+- [Code Generation](../../../../docs/guidelines/code-generation.md) - Mock generation and other code generation tools
+- [Workflow Guidelines](../../../../docs/guidelines/workflow.md) - Running tests in CI/CD workflow
