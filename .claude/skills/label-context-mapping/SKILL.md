@@ -20,13 +20,13 @@ Central mapping from GitHub labels to Skills and Context documents.
 
 | Label            | Context Document                      |
 | ---------------- | ------------------------------------- |
-| `bug`            | `docs/task-contexts/bug-fix.md`       |
-| `enhancement`    | `docs/task-contexts/feature-add.md`   |
-| `refactoring`    | `docs/task-contexts/refactoring.md`   |
-| `documentation`  | `docs/task-contexts/documentation.md` |
-| `security`       | `docs/task-contexts/security.md`      |
-| `technical-debt` | `docs/task-contexts/refactoring.md`   |
-| `test`           | `docs/task-contexts/test.md`          |
+| `bug`            | `docs/ai/task-contexts/bug-fix.md`       |
+| `enhancement`    | `docs/ai/task-contexts/feature-add.md`   |
+| `refactoring`    | `docs/ai/task-contexts/refactoring.md`   |
+| `documentation`  | `docs/ai/task-contexts/documentation.md` |
+| `security`       | `docs/ai/task-contexts/security.md`      |
+| `technical-debt` | `docs/ai/task-contexts/refactoring.md`   |
+| `test`           | `docs/ai/task-contexts/test.md`          |
 
 ### Language Labels → Skills
 
@@ -52,12 +52,12 @@ Central mapping from GitHub labels to Skills and Context documents.
 
 | Label         | Context Documents                                                   |
 | ------------- | ------------------------------------------------------------------- |
-| `chain:btc`   | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
-| `chain:bch`   | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
-| `chain:eth`   | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
-| `chain:erc20` | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
-| `chain:xrp`   | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
-| `chain:all`   | `docs/task-contexts/chain-specific.md`                              |
+| `chain:btc`   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
+| `chain:bch`   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
+| `chain:eth`   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| `chain:erc20` | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| `chain:xrp`   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
+| `chain:all`   | `docs/ai/task-contexts/chain-specific.md`                              |
 
 ### Test Scope Labels → Verification
 

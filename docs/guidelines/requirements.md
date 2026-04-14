@@ -27,10 +27,10 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 
 ### Go
 
-- **Required Version**: Go 1.25.6 (specified in `go.mod`)
+- **Required Version**: Go 1.26.2 (specified in `go.mod`)
 - **Check version**: `go version`
 - **Installation**: <https://go.dev/dl/>
-- **Note**: Must match the version specified in `go.mod` (currently `go 1.25.6`)
+- **Note**: Must match the version specified in `go.mod` (currently `go 1.26.2`)
 
 ## Development Tools
 
@@ -38,7 +38,7 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 
 - **Required Version**: v2.8.0 (specified in `make/vars.mk`)
 - **Check version**: `golangci-lint --version`
-- **Installation**: See [Coding Standards](coding-conventions.md)
+- **Installation**: See [Coding Standards](./coding-conventions.md)
 - **Note**: Used for code linting and formatting
 
 ### Atlas
@@ -56,7 +56,7 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 - **Note**: **CRITICAL** - This project uses Atlas v1.0.0.
   Using older versions may not support required features.
   Always verify version before running Atlas commands.
-- **Usage**: Database schema management and migrations (see [Database Management](/database/architecture))
+- **Usage**: Database schema management and migrations (see [Database Management](../database/architecture.md))
 
 ### markdownlint-cli
 
@@ -98,7 +98,7 @@ Before starting work, verify all required tools are installed and at the correct
 # Essential tools
 git --version
 gh --version
-go version  # Should show go1.25.6
+go version  # Should show go1.26.2
 
 # Development tools
 golangci-lint --version  # Should show v2.8.0
@@ -119,6 +119,6 @@ docker compose version    # Should show v2.x.x or later
 
 ## See Also
 
-- [Workflow Guidelines](workflow.md) - Development workflow and common steps
-- [Database Management](/database/architecture) - Atlas usage for database migrations
-- [Coding Standards](coding-conventions.md) - golangci-lint configuration and usage
+- [Workflow Guidelines](./workflow.md) - Development workflow and common steps
+- [Database Management](../database/architecture.md) - Atlas usage for database migrations
+- [Coding Standards](./coding-conventions.md) - golangci-lint configuration and usage

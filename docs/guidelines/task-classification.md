@@ -19,13 +19,13 @@ Define the nature of the task.
 
 | Label | Description | Context File | Keywords |
 |-------|-------------|--------------|----------|
-| `bug` | Something isn't working | `docs/task-contexts/bug-fix.md` | bug, fix, error, issue |
-| `enhancement` | New feature or request | `docs/task-contexts/feature-add.md` | add, implement, feature, new |
-| `refactoring` | Code improvement without changing functionality | `docs/task-contexts/refactoring.md` | refactor, reorganize, move, cleanup |
-| `documentation` | Documentation updates | `docs/task-contexts/documentation.md` | document, README, docs, comment |
-| `security` | Security-related issues | `docs/task-contexts/security.md` | security, vulnerability, CVE |
-| `technical-debt` | Code quality improvements | `docs/task-contexts/refactoring.md` | debt, cleanup, improve |
-| `test` | Test additions or fixes | `docs/task-contexts/test.md` | test, coverage, spec |
+| `bug` | Something isn't working | `docs/ai/task-contexts/bug-fix.md` | bug, fix, error, issue |
+| `enhancement` | New feature or request | `docs/ai/task-contexts/feature-add.md` | add, implement, feature, new |
+| `refactoring` | Code improvement without changing functionality | `docs/ai/task-contexts/refactoring.md` | refactor, reorganize, move, cleanup |
+| `documentation` | Documentation updates | `docs/ai/task-contexts/documentation.md` | document, README, docs, comment |
+| `security` | Security-related issues | `docs/ai/task-contexts/security.md` | security, vulnerability, CVE |
+| `technical-debt` | Code quality improvements | `docs/ai/task-contexts/refactoring.md` | debt, cleanup, improve |
+| `test` | Test additions or fixes | `docs/ai/task-contexts/test.md` | test, coverage, spec |
 
 ### Language Labels (For Code Tasks)
 
@@ -142,4 +142,4 @@ Priority Order:
 - [GitHub Labels](https://github.com/hiromaily/go-crypto-wallet/blob/main/.github/labels.yml) - Label definitions with colors
 - `.claude/rules/task-context-loading.md` - Auto-loading rules
 - `.claude/skills/github-issue-creation/SKILL.md` - Issue creation workflow
-- [Task Contexts](../task-contexts/README.md) - Context file details
+- [Task Contexts](../ai/task-contexts/README.md) - Context file details

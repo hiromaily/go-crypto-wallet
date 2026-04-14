@@ -28,30 +28,7 @@ The combination of these creates various E2E workflows.
 
 ## Supported Key Types
 
-### Bitcoin (BTC)
-
-| Address Type | BIP | Prefix (Mainnet) | Prefix (Testnet) | Description |
-|--------------|-----|------------------|------------------|-------------|
-| **P2PKH** (Legacy) | BIP44 | `1...` | `m.../n...` | Traditional Pay-to-Public-Key-Hash |
-| **P2SH-P2WPKH** | BIP49 | `3...` | `2...` | SegWit wrapped in P2SH |
-| **P2WPKH** (Native SegWit) | BIP84 | `bc1q...` | `tb1q...` | Native SegWit |
-| **P2TR** (Taproot) | BIP86 | `bc1p...` | `tb1p...` | Taproot (recommended) |
-
-### Bitcoin Cash (BCH)
-
-| Address Type | Prefix | Description |
-|--------------|--------|-------------|
-| **CashAddr** | `bitcoincash:q...` | Bitcoin Cash dedicated format |
-| **Legacy** | `1...` | Legacy format (for compatibility) |
-
-### Key Derivation Paths
-
-| Standard | Path | Usage |
-|----------|------|-------|
-| BIP44 | `m/44'/0'/account'/change/index` | P2PKH (Legacy) |
-| BIP49 | `m/49'/0'/account'/change/index` | P2SH-P2WPKH |
-| BIP84 | `m/84'/0'/account'/change/index` | P2WPKH (Native SegWit) |
-| BIP86 | `m/86'/0'/account'/change/index` | P2TR (Taproot) |
+See [BTC Technical Reference — Address Types & Key Derivation](../README.md#address-types--key-derivation) for the full address type table and BIP derivation paths.
 
 ---
 

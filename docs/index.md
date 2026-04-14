@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /Installation
+      link: /getting-started/installation
     - theme: alt
       text: View on GitHub
       link: https://github.com/hiromaily/go-crypto-wallet
@@ -26,7 +26,7 @@ features:
 
   - title: Getting Started
     details: Install dependencies, configure wallets, and run CLI commands for key generation, signing, and transaction watching.
-    link: /Installation
+    link: /getting-started/installation
     linkText: Install now
 
   - title: Development Guidelines
@@ -41,6 +41,6 @@ features:
 
   - title: AI Agent & Dev Workflow
     details: Kiro spec-driven development, agent skills, task contexts, and Claude memory integration for AI-assisted development.
-    link: /agent-skills
+    link: /ai/agent-skills
     linkText: Explore AI workflow
 ---

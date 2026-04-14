@@ -47,11 +47,9 @@ PSBT (Partially Signed Bitcoin Transaction) is a Bitcoin standard (BIP 174) that
 
 ### System Requirements
 
-- **Watch Wallet** (online): Bitcoin Core node or compatible RPC endpoint
-- **Keygen Wallet** (offline): Isolated system for key generation and first signature
-- **Sign Wallet** (offline): Isolated system for additional signatures
-- **Go version**: 1.21 or higher
-- **Bitcoin Core**: v22.0 or higher (for PSBT support)
+See [MuSig2 User Guide — Prerequisites](../musig2/user-guide.md#prerequisites) for the common system requirements (wallet types, Go version, Bitcoin Core version).
+
+PSBT-specific requirement: **Bitcoin Core v22.0+** with PSBT (BIP174) support enabled.
 
 ### Wallet Configuration
 
@@ -654,22 +652,14 @@ bitcoin-cli getrawtransaction <txid> 1
 
 ### Security
 
-1. **Air-Gapped Signing**
-   - ✅ Keep Keygen and Sign wallets offline at all times
-   - ✅ Use dedicated, isolated computers for offline wallets
-   - ✅ Never connect offline wallets to networks
+> For general offline wallet security (air-gapped signing, file transfer security), see [MuSig2 Best Practices](../musig2/user-guide.md#best-practices).
 
-2. **File Transfer Security**
-   - ✅ Use dedicated USB drives for PSBT transfer
-   - ✅ Virus scan USB drives before use
-   - ✅ Verify file checksums after transfer
-
-3. **Private Key Protection**
+1. **Private Key Protection**
    - ✅ Store seeds and private keys in secure offline storage
    - ✅ Use hardware security modules (HSMs) for production
    - ✅ Implement proper access controls
 
-4. **Transaction Verification**
+2. **Transaction Verification**
    - ✅ Always verify transaction amounts before signing
    - ✅ Check recipient addresses carefully
    - ✅ Verify fees are reasonable

@@ -138,6 +138,22 @@
     "editor.tabSize": 4
   },
   // ===================
+  // Spell Check (cSpell)
+  // ===================
+  "cSpell.words": [
+    "sqlc",
+    "mockery",
+    "docsgen",
+    "lefthook",
+    "protoc",
+    "atlassian",
+    "musig2",
+    "taproot",
+    "bech32",
+    "xrpl",
+    "psbt"
+  ],
+  // ===================
   // File Associations
   // ===================
   "files.associations": {

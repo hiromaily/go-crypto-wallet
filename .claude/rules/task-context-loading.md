@@ -41,13 +41,13 @@ If no GitHub labels are available, determine task type from keywords:
 
 | Keywords                                          | Task Type       | Context File                          |
 | ------------------------------------------------- | --------------- | ------------------------------------- |
-| bug, fix, error, issue                            | `bug`           | `docs/task-contexts/bug-fix.md`       |
-| add, implement, feature, new                      | `enhancement`   | `docs/task-contexts/feature-add.md`   |
-| refactor, reorganize, move, cleanup               | `refactoring`   | `docs/task-contexts/refactoring.md`   |
-| schema, DB, table, column, migration              | `db-change`     | `docs/task-contexts/db-change.md`     |
-| document, README, description, docs, comment      | `documentation` | `docs/task-contexts/documentation.md` |
-| test, coverage, spec, unit test, integration test | `test`          | `docs/task-contexts/test.md`          |
-| security, vulnerability, CVE                      | `security`      | `docs/task-contexts/security.md`      |
+| bug, fix, error, issue                            | `bug`           | `docs/ai/task-contexts/bug-fix.md`       |
+| add, implement, feature, new                      | `enhancement`   | `docs/ai/task-contexts/feature-add.md`   |
+| refactor, reorganize, move, cleanup               | `refactoring`   | `docs/ai/task-contexts/refactoring.md`   |
+| schema, DB, table, column, migration              | `db-change`     | `docs/ai/task-contexts/db-change.md`     |
+| document, README, description, docs, comment      | `documentation` | `docs/ai/task-contexts/documentation.md` |
+| test, coverage, spec, unit test, integration test | `test`          | `docs/ai/task-contexts/test.md`          |
+| security, vulnerability, CVE                      | `security`      | `docs/ai/task-contexts/security.md`      |
 
 ## Chain Detection
 
@@ -55,10 +55,10 @@ Identify the chain from the following keywords:
 
 | Keywords                                        | Chain | Context Files                                                       |
 | ----------------------------------------------- | ----- | ------------------------------------------------------------------- |
-| Bitcoin, BTC, Taproot, Descriptor, PSBT, MuSig2 | BTC   | `docs/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
-| Bitcoin Cash, BCH, CashAddr                     | BCH   | `docs/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
-| Ethereum, ETH, ERC-20, Gas, Nonce               | ETH   | `docs/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
-| Ripple, XRP, Destination Tag                    | XRP   | `docs/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
+| Bitcoin, BTC, Taproot, Descriptor, PSBT, MuSig2 | BTC   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/btc/README.md` |
+| Bitcoin Cash, BCH, CashAddr                     | BCH   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/bch/README.md` |
+| Ethereum, ETH, ERC-20, Gas, Nonce               | ETH   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/eth/README.md` |
+| Ripple, XRP, Destination Tag                    | XRP   | `docs/ai/task-contexts/chain-specific.md`, `docs/chains/xrp/README.md` |
 
 ## File Type Detection for Verification
 
@@ -75,7 +75,7 @@ Determine appropriate verification commands based on the edited file extension:
 
 **Important**: Do **NOT** run Go-related verification commands for documentation-only (`*.md`) changes.
 
-See `docs/task-contexts/verification.md` for details.
+See `docs/ai/task-contexts/verification.md` for details.
 
 ## Context Loading Procedure
 
@@ -87,10 +87,10 @@ See `docs/task-contexts/verification.md` for details.
 
 ```
 Order:
-1. docs/task-contexts/{task-type}.md (by task type)
-2. docs/task-contexts/chain-specific.md (if chain-related)
+1. docs/ai/task-contexts/{task-type}.md (by task type)
+2. docs/ai/task-contexts/chain-specific.md (if chain-related)
 3. docs/chains/{chain}/README.md (for specific chain)
-4. docs/task-contexts/verification.md (verification commands)
+4. docs/ai/task-contexts/verification.md (verification commands)
 5. Additional related documents (specified in each context file)
 ```
 
@@ -208,6 +208,6 @@ Task Received
 
 - [label-context-mapping](../skills/label-context-mapping/SKILL.md) - Label → Skill/Context mapping
 - [Task Classification SSOT](../../docs/guidelines/task-classification.md) - Label definitions
-- [Task Contexts](../../docs/task-contexts/README.md) - Context file details
-- [Verification Matrix](../../docs/task-contexts/verification.md) - Verification commands
+- [Task Contexts](../../docs/ai/task-contexts/README.md) - Context file details
+- [Verification Matrix](../../docs/ai/task-contexts/verification.md) - Verification commands
 - [AGENTS.md](../../AGENTS.md) - Project-wide guidelines

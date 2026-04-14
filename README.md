@@ -29,12 +29,12 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 
 | Tool | Version | Description |
 |------|---------|-------------|
-| Go | 1.25.6 | Programming language |
-| Atlas | 1.1.0 | Database schema migration |
+| Go | 1.26.2 | Programming language |
+| Atlas | v1.0.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
 | Docker Compose | latest | Container orchestration |
-| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.10.0+ | Linter (for development) |
+| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.8.0 | Linter (for development) |
 | [protoc](https://grpc.io/docs/protoc-installation/) | 33.0+ | Protocol buffer compiler (**Edition 2024**) |
 | [buf](https://buf.build/) | latest | Protocol buffer management (lint, format) |
 
@@ -44,7 +44,7 @@ Supported databases (choose one)
 
 | Tool | Version | Description |
 |------|---------|-------------|
-| PostgreSQL | 18.2+ | Database (via Docker) |
+| PostgreSQL | 17+ | Database (via Docker) |
 | MySQL | 8.4+ | Database (via Docker) |
 | SQLite | 3.0+ | Database |
 
@@ -63,11 +63,11 @@ Supported databases (choose one)
 | Package | Version | Description |
 |---------|---------|-------------|
 | btcsuite/btcd | v0.25.0 | Bitcoin library |
-| ethereum/go-ethereum | v1.16.7 | Ethereum library |
+| ethereum/go-ethereum | v1.17.2 | Ethereum library |
 | spf13/cobra | v1.10.2 | CLI framework |
 | spf13/viper | v1.21.0 | Configuration management |
-| google.golang.org/grpc | v1.78.0 | gRPC for XRP communication |
-| golang.org/x/crypto | v0.46.0 | Cryptographic functions |
+| google.golang.org/grpc | v1.80.0 | gRPC for XRP communication |
+| golang.org/x/crypto | v0.50.0 | Cryptographic functions |
 
 ## Current development
 
@@ -307,7 +307,7 @@ The codebase is organized into `internal/` (new architecture) and `pkg/` (shared
 - `config/` ... Application configuration files (Git managed)
   - `wallet/` ... Wallet configuration TOML files
   - `blockchain/` ... Blockchain node configuration files
-- `proto/` ... Protocol Buffers definitions (**Edition 2024**, see [docs/proto.md](./docs/proto.md))
+- `proto/` ... Protocol Buffers definitions (**Edition 2024**, see [docs/proto.md](./docs/reference/proto.md))
 - `contracts/` ... Smart contract ABI files (Git managed, code generation source)
 - `data/` ... Generated files (ignored by Git)
   - `address/` ... Generated address files (bch, btc, eth, xrp)
@@ -353,7 +353,7 @@ External dependencies and implementations:
 - `infrastructure/api/eth/` ... Ethereum JSON-RPC API clients
   - [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
 - `infrastructure/api/xrp/` ... Ripple gRPC API clients
-  - Communicates with [xrpl-grpc-server](./apps/xrpl-grpc-server/) [Deprecated]
+  - Communicates with [xrpl-grpc-server](./apps/xrpl-grpc-server) [Deprecated]
 - `infrastructure/database/` ... Database connections and generated code
   - `mysql/` ... MySQL connection management
   - `sqlc/` ... SQLC generated database code
@@ -418,7 +418,7 @@ This project provides an **optional** DevContainer configuration for a standardi
 **Key Benefits:**
 
 - ✅ **Safe AI Development**: Isolated environment protects your host system from accidental AI-generated changes
-- ✅ **Consistent Setup**: Pre-configured with Go 1.25.6, golangci-lint v2.8.0, Atlas v1.0.0, and GitHub CLI
+- ✅ **Consistent Setup**: Pre-configured with Go 1.26.2, golangci-lint v2.8.0, Atlas v1.0.0, and GitHub CLI
 - ✅ **Quick Start**: New developers can start coding in minutes
 - ✅ **Zero Impact**: Local development workflow remains completely unchanged
 
@@ -437,8 +437,8 @@ code .
 
 **Documentation:**
 
-- 📖 [Complete DevContainer Guide](./docs/devcontainer.md) - Setup, usage, and troubleshooting
-- 🤖 [AI-Assisted Development with DevContainer](./docs/devcontainer.md#using-with-ai-tools) - Claude Code, Copilot integration
+- 📖 [Complete DevContainer Guide](./docs/getting-started/devcontainer.md) - Setup, usage, and troubleshooting
+- 🤖 [AI-Assisted Development with DevContainer](./docs/getting-started/devcontainer.md#using-with-ai-tools) - Claude Code, Copilot integration
 
 **Note:** DevContainer is completely optional. Continue with local development if you prefer.
 
@@ -448,7 +448,7 @@ For traditional local development setup, follow the installation guide below.
 
 ## Installation
 
-[Installation](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/Installation.md)
+[Installation](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/getting-started/installation.md)
 
 ## Operation example
 
@@ -458,7 +458,7 @@ For traditional local development setup, follow the installation guide below.
 ## Command example
 
 - [CLI Command Reference](./internal/interface-adapters/cli/README.md) - Command × Chain × UseCase matrix (SSOT): which commands each chain supports, corresponding use case interfaces, and role of each command
-- [docs/commands.md](./docs/commands.md) - Detailed flags, options, and usage examples per command
+- [docs/getting-started/commands.md](./docs/getting-started/commands.md) - Detailed flags, options, and usage examples per command
 - [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/main/Makefile) - Main Makefile with modular includes
 - Makefile modules (in `make/` directory):
   - [watch_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/main/make/watch_op.mk) - Watch wallet operations

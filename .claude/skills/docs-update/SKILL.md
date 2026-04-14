@@ -21,7 +21,7 @@ Workflow for documentation changes with SSOT awareness.
 | Category                 | SSOT Location                            | Description                     |
 | ------------------------ | ---------------------------------------- | ------------------------------- |
 | Agent behavior           | `AGENTS.md`                              | Entry point for all agents      |
-| Agent instruction design | `docs/design/ai-agents-instruction.md`   | Command/Skill/Rule architecture |
+| Agent instruction design | `docs/ai/design.md`                      | Command/Skill/Rule architecture |
 | Label definitions        | `docs/guidelines/task-classification.md` | All label types and meanings    |
 | Label → Skill mapping    | `.claude/skills/label-context-mapping/`  | Operational routing             |
 | Coding conventions       | `docs/guidelines/coding-conventions.md`  | Code style rules                |
@@ -44,7 +44,7 @@ Workflow for documentation changes with SSOT awareness.
 | `docs/guidelines/`    | SSOT        | Project guidelines and standards |
 | `docs/design/`        | Reference   | Design documents                 |
 | `docs/chains/`        | Reference   | Chain-specific documentation     |
-| `docs/task-contexts/` | Context     | Task-specific procedures         |
+| `docs/ai/task-contexts/` | Context     | Task-specific procedures         |
 | `internal/AGENTS.md`  | Scoped SSOT | Internal package guidelines      |
 | `pkg/AGENTS.md`       | Scoped SSOT | Public package guidelines        |
 
@@ -53,7 +53,7 @@ Workflow for documentation changes with SSOT awareness.
 ```
 AGENTS.md (entry point)
     │
-    ├─ docs/design/ai-agents-instruction.md (instruction system design)
+    ├─ docs/ai/design.md (instruction system design)
     │
     ├─ docs/guidelines/ (guidelines and standards)
     │   ├─ task-classification.md (label definitions, SSOT)
@@ -65,7 +65,7 @@ AGENTS.md (entry point)
     │   ├─ code-generation.md
     │   └─ ...
     │
-    └─ docs/task-contexts/ (task-specific context)
+    └─ docs/ai/task-contexts/ (task-specific context)
         ├─ bug-fix.md, feature-add.md, etc.
         └─ chains/ (chain-specific)
 ```
@@ -173,5 +173,5 @@ Example: `docs(standards): update coding conventions for error handling`
 
 - `git-workflow` - Branch, commit, PR workflow
 - [AGENTS.md](../../../AGENTS.md) - Agent entry point
-- [AI Agent Instruction Design](../../../docs/design/ai-agents-instruction.md) - System design
+- [AI Agent Instruction Design](../../../docs/ai/design.md) - System design
 - [Task Classification](../../../docs/guidelines/task-classification.md) - Label SSOT

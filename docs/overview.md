@@ -1,230 +1,93 @@
-# Overview
+# go-crypto-wallet
 
-This repository is a wallet system that handles cryptocurrencies such as Bitcoin, Bitcoin Cash, Ethereum, ERC-20 Tokens, and Ripple.
-With a security-focused design, it separates three different types of wallets (Watch Wallet, Keygen Wallet, and Sign Wallet), each serving a different role.
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/xrp-img.jpg?raw=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/ethereum-img.png?raw=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true">
 
-## Wallet Types
+[![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
+[![Test](https://github.com/hiromaily/go-crypto-wallet/actions/workflows/lint-test.yml/badge.svg)](https://github.com/hiromaily/go-crypto-wallet/actions/workflows/lint-test.yml)
+[![GitHub release](https://img.shields.io/badge/release-v6.2.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://hiromaily.github.io/go-crypto-wallet/)
 
-### 1. Watch Wallet
+**[📖 Documentation Site](https://hiromaily.github.io/go-crypto-wallet/)**
 
-**Features:**
+Wallet functionalities to create raw transaction, to sign on unsigned transaction,
+to send signed transaction for BTC, BCH, ETH, XRP and so on.
 
-- Operates in an **online environment**
-- Holds **public keys only** (does not hold private keys)
-- Can access blockchain nodes
+# Wallet Type
 
-**Main Functions:**
+This is explained for BTC/BCH for now.
+There are mainly 3 wallets separately and these wallets are expected to be installed in each different devices.
 
-- Create unsigned transactions
-- Send signed transactions
-- Monitor transaction status
-- Import addresses (public key addresses exported from Keygen Wallet)
+## 1.Watch only wallet
 
-**Main CLI Commands:**
+- Only this wallet run online to access to BTC/BCH Nodes.
+- Only pubkey address is stored. Private key is NOT stored for security reason. That's why this is called `watch only wallet`.
+- Major functionalities are
+  - creating unsigned transaction
+  - sending signed transaction
+  - monitoring transaction status.
 
-- `watch import address` - Import addresses
-- `watch create deposit` - Create unsigned deposit transactions
-- `watch create payment` - Create unsigned payment transactions
-- `watch create transfer` - Create unsigned transfer transactions between accounts
-- `watch send` - Send signed transactions
-- `watch monitor` - Monitor transactions and balances
-- `watch api` - API calls to blockchain nodes (BTC/BCH/ETH/XRP specific)
+## 2.Keygen wallet as cold wallet
 
-### 2. Keygen Wallet
+- Key management functionalities for accounts.
+- This wallet is expected to work offline.
+- Major functionalities are
+  - generating seed for accounts
+  - generating keys based on `HD Wallet`
+  - generating multisig addressed according to account setting
+  - exporting pubkey addresses as csv file which is imported from `Watch only wallet`
+  - signing on unsigned transaction as first sign. However, multisig addresses could not be completed by only this wallet.
 
-**Features:**
+## 3.Sign wallet as cold wallet (Auth wallet)
 
-- Operates in an **offline environment** (cold wallet)
-- Manages account key management
-- Key generation based on HD Wallet (Hierarchical Deterministic Wallet)
+- The internal authorization operators would use this wallet to sign on unsigned transaction for multisig addresses.
+- Each of operators would be given own authorization account and Sing wallet apps.
+- This wallet is expected to work offline.
+- Major functionalities are
+  - generating seed for accounts for own auth account
+  - generating keys based on `HD Wallet` for own auth account
+  - exporting full-pubkey addresses as csv file which is imported from `Keygen wallet` to generate multisig address
+  - signing on unsigned transaction as second or more signs for multisig addresses.
 
-**Main Functions:**
+# Workflow diagram
 
-- Generate seeds for accounts
-- Generate keys based on HD Wallet
-- Generate multisig addresses (based on account configuration)
-- Export public key addresses (CSV format, for import to Watch Wallet)
-- **First signature** on unsigned transactions (for multisig)
+## BTC
 
-**Main CLI Commands:**
+### 1. Generate keys
 
-- `keygen create seed` - Generate seeds
-- `keygen create hdkey` - Generate HD keys
-- `keygen create multisig` - Generate multisig addresses
-- `keygen export address` - Export public key addresses
-- `keygen import full-pubkey` - Import full public keys exported from Sign Wallet
-- `keygen sign` - Sign unsigned transactions (first signature)
-- `keygen api` - Wallet management API (BTC/BCH/ETH specific)
+![generate keys](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/0_key%20generation%20diagram.png?raw=true)
 
-### 3. Sign Wallet
+### 2. Create unsigned transaction, Sign on unsigned tx, Send signed tx for non-multisig address
 
-**Features:**
+![create tx](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/1_Handle%20transactions%20for%20non-multisig%20address.png?raw=true)
 
-- Operates in an **offline environment** (cold wallet)
-- Used by authentication operators
-- Each operator is provided with their own authentication account and Sign Wallet application
+### 3. Create unsigned transaction, Sign on unsigned tx, Send signed tx for multisig address
 
-**Main Functions:**
+![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
 
-- Generate seeds for authentication accounts
-- Generate HD keys for authentication accounts
-- Export full public key addresses (CSV format, for import to Keygen Wallet)
-- **Second and subsequent signatures** on unsigned transactions (for multisig)
+# Wallet Architecture
 
-**Main CLI Commands:**
+## Three Wallet Types
 
-- `sign create seed` - Generate seeds
-- `sign create hdkey` - Generate HD keys
-- `sign export fullpubkey` - Export full public key addresses
-- `sign import privkey` - Import private keys
-- `sign sign` - Sign unsigned transactions (second and subsequent signatures)
-
-## Transaction Execution Flow
-
-> For a complete visual flow with Mermaid diagrams, see [Transaction Flow](transaction-flow.md).
-
-
-### For Non-Multisig Addresses
-
-```text
-1. Watch Wallet: Create unsigned transaction
-   └─> watch create deposit/payment/transfer
-   └─> Transaction file (unsigned) is generated
-
-2. Keygen Wallet: Execute first signature
-   └─> keygen sign -file <tx_file>
-   └─> Signed transaction file is generated
-
-3. Watch Wallet: Send signed transaction
-   └─> watch send -file <signed_tx_file>
-   └─> Transaction is sent to blockchain and transaction ID is returned
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Watch Wallet  │     │  Keygen Wallet  │     │   Sign Wallet   │
+│    (Online)     │     │   (Offline)     │     │   (Offline)     │
+├─────────────────┤     ├─────────────────┤     ├─────────────────┤
+│ • Monitor txs   │     │ • Generate keys │     │ • Auth signing  │
+│ • Create unsig  │     │ • Create multis │     │ • Second+ sign  │
+│ • Send signed   │     │ • First sign    │     │ • Export pubkey │
+│ • Import pubkey │     │ • Export pubkey │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │                       │
+        │    CSV/File Export    │    CSV/File Export    │
+        └───────────────────────┴───────────────────────┘
 ```
 
-### For Multisig Addresses
+## Security Model
 
-```text
-1. Watch Wallet: Create unsigned transaction
-   └─> watch create deposit/payment/transfer
-   └─> Transaction file (unsigned) is generated
-
-2. Keygen Wallet: Execute first signature
-   └─> keygen sign -file <tx_file>
-   └─> Transaction file with first signature is generated
-
-3. Sign Wallet #1: Execute second signature
-   └─> sign sign -file <tx_file_signed1>
-   └─> Transaction file with second signature is generated
-
-4. Sign Wallet #2: Execute third signature (if needed)
-   └─> sign sign -file <tx_file_signed2>
-   └─> Transaction file with third signature is generated
-   └─> (Repeat as needed based on multisig configuration until required number of signatures)
-
-5. Watch Wallet: Send signed transaction
-   └─> watch send -file <fully_signed_tx_file>
-   └─> Transaction is sent to blockchain and transaction ID is returned
-```
-
-## Key Generation Flow
-
-Key generation flow for creating multisig addresses:
-
-```text
-1. Keygen Wallet: Generate seed for account
-   └─> keygen create seed
-
-2. Keygen Wallet: Generate HD key
-   └─> keygen create hdkey --account <account>
-
-3. Sign Wallet #1: Generate seed for authentication account
-   └─> sign create seed
-
-4. Sign Wallet #1: Generate HD key for authentication account
-   └─> sign create hdkey
-
-5. Sign Wallet #1: Export full public key
-   └─> sign export fullpubkey
-   └─> CSV file is generated
-
-6. Keygen Wallet: Import full public key exported from Sign Wallet
-   └─> keygen import full-pubkey -file <fullpubkey.csv>
-
-7. Keygen Wallet: Generate multisig address
-   └─> keygen create multisig --account <account>
-   └─> Multisig address is generated
-
-8. Keygen Wallet: Export public key address
-   └─> keygen export address
-   └─> CSV file is generated
-
-9. Watch Wallet: Import address exported from Keygen Wallet
-   └─> watch import address -file <address.csv>
-   └─> Watch Wallet can now monitor the address
-```
-
-## Transaction Types
-
-### Deposit
-
-A transaction that consolidates coins sent to client addresses into a secure offline-managed address (cold wallet).
-
-```bash
-# Create unsigned transaction in Watch Wallet
-watch create deposit
-
-# Sign in Keygen Wallet
-keygen sign -file <tx_file>
-
-# Send in Watch Wallet
-watch send -file <signed_tx_file>
-```
-
-### Payment
-
-A transaction that sends coins to a specified address based on user withdrawal requests.
-
-```bash
-# Create unsigned transaction in Watch Wallet
-watch create payment
-
-# First signature in Keygen Wallet
-keygen sign -file <tx_file>
-
-# Second and subsequent signatures in Sign Wallet (for multisig)
-sign sign -file <tx_file_signed1>
-
-# Send in Watch Wallet
-watch send -file <fully_signed_tx_file>
-```
-
-### Transfer
-
-A transaction that transfers coins between internal accounts.
-
-```bash
-# Create unsigned transaction in Watch Wallet
-watch create transfer --account1 <sender> --account2 <receiver> --amount <amount>
-
-# Sign in Keygen Wallet
-keygen sign -file <tx_file>
-
-# Send in Watch Wallet
-watch send -file <signed_tx_file>
-```
-
-## Security Design
-
-- **Private Key Separation**: Watch Wallet does not hold any private keys and only manages public keys
-- **Offline Operation**: Keygen Wallet and Sign Wallet operate in offline environments, isolated from networks
-- **Multisig**: Multisig addresses requiring multiple signatures eliminate single points of failure
-- **Role Separation**: Key generation, signing, and sending functions are separated into different wallets
-
-## Supported Coins
-
-- **Bitcoin (BTC)**
-- **Bitcoin Cash (BCH)**
-- **Ethereum (ETH)**
-- **ERC-20 Token**
-- **Ripple (XRP)**
-
-All three wallet types are implemented for each coin.
+1. **Keygen Wallet** (Offline): Generates HD wallet seeds and keys. Never connects to network.
+2. **Sign Wallet** (Offline): Provides authorization signatures. Each operator has own instance.
+3. **Watch Wallet** (Online): Only stores public keys. Cannot sign transactions.

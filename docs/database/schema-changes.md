@@ -38,20 +38,7 @@ Repository Implementations
 
 ## Supported Databases
 
-The project supports three database backends:
-
-| Database | Status | Use Case | Engine |
-|----------|--------|----------|--------|
-| **MySQL 8.4** | ✅ Production | Production, full integration testing | Docker container |
-| **SQLite** | ✅ Production | E2E testing, CI/CD, lightweight testing | Local file |
-| **PostgreSQL 18.2** | 🚧 In Development | Production alternative, advanced features | Docker container |
-
-**Configuration**: Database type is selected via `database.type` field in wallet TOML config files.
-
-```toml
-[database]
-type = "mysql"  # or "sqlite" or "postgres" (coming soon)
-```
+See [Database Architecture](./architecture.md) for supported backends (MySQL 8.4, SQLite, PostgreSQL). Database type is selected via `database.type` in wallet config files.
 
 ## Quick Reference
 
@@ -941,8 +928,8 @@ Update these files when schema changes:
 
 - [Atlas Documentation](https://atlasgo.io/)
 - [SQLC Documentation](https://sqlc.dev/)
-- [Database Architecture](/database/architecture)
-- [Code Generation Guidelines](/guidelines/code-generation)
+- [Database Architecture](./architecture.md)
+- [Code Generation Guidelines](../guidelines/code-generation.md)
 - PostgreSQL Integration Spec (`.kiro/specs/postgres-integration/`)
 
 ---

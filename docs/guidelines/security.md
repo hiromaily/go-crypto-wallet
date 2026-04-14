@@ -52,4 +52,4 @@ Run for:
 
 ## Detailed Guidelines
 
-See [core.md](core.md) for full security guidelines including error handling, panic usage, and core patterns.
+See [core.md](./core.md) for full security guidelines including error handling, panic usage, and core patterns.

@@ -166,7 +166,7 @@ The `goimports` tool (via `make go-fmt`) will automatically organize imports in 
 
 ## Testing Standards
 
-See [Testing Guidelines](testing.md) for comprehensive testing standards.
+See [Testing Guidelines](./testing.md) for comprehensive testing standards.
 
 **Basic Guidelines:**
 
@@ -177,6 +177,6 @@ See [Testing Guidelines](testing.md) for comprehensive testing standards.
 
 ## See Also
 
-- [Core Principles](core.md) - Error handling, panic usage, and core patterns
-- [Testing Guidelines](testing.md) - Comprehensive testing strategy
-- [Workflow Guidelines](workflow.md) - Dependency management and verification commands
+- [Core Principles](./core.md) - Error handling, panic usage, and core patterns
+- [Testing Guidelines](./testing.md) - Comprehensive testing strategy
+- [Workflow Guidelines](./workflow.md) - Dependency management and verification commands

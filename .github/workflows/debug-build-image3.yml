@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 env:
-  GO_VERSION: "1.25.6"
+  GO_VERSION: "1.26.2"
   CMD_PATH: ${{ inputs.cmd_path }}
 
 jobs:

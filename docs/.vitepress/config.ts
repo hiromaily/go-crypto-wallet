@@ -1,7 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 
-// https://vitepress.dev/reference/site-config
 export default withMermaid(defineConfig({
   title: 'go-crypto-wallet',
   description:
@@ -9,9 +8,6 @@ export default withMermaid(defineConfig({
   base: '/go-crypto-wallet/',
   cleanUrls: true,
 
-  // Exclude internal investigation/archive documents that are not suitable for the
-  // public-facing docs site, or that contain syntax (e.g. ${{ }}) that conflicts
-  // with Vue template processing.
   srcExclude: [
     '**/github-actions/**', // Japanese investigation docs with GitHub Actions ${{ }} syntax
     '**/issues/**', // Internal refactoring checklists/plans
@@ -22,12 +18,9 @@ export default withMermaid(defineConfig({
   ],
 
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
-
-    // ─── Navigation bar ────────────────────────────────────────────────────────
     nav: [
       { text: 'Overview', link: '/overview' },
-      { text: 'Getting Started', link: '/Installation' },
+      { text: 'Getting Started', link: '/getting-started/installation' },
       { text: 'Architecture', link: '/guidelines/architecture' },
       {
         text: 'Chains',
@@ -41,45 +34,54 @@ export default withMermaid(defineConfig({
       },
       { text: 'Database', link: '/database/architecture' },
       { text: 'Guidelines', link: '/guidelines/' },
-      { text: 'AI Agent', link: '/agent-skills' },
+      { text: 'AI Agent', link: '/ai/agent-skills' },
     ],
 
-    // ─── Sidebars (path-keyed; longest-prefix match wins) ──────────────────────
     sidebar: {
-      // ── Default sidebar: overview, getting started, AI agent (root-level pages) ──
       '/': [
         {
           text: 'Overview',
           items: [
             { text: 'Project Overview', link: '/overview' },
             { text: 'Transaction Flow', link: '/transaction-flow' },
-            { text: 'Directory Structure', link: '/directory_structure' },
+            { text: 'Directory Structure', link: '/directory-structure' },
           ],
         },
         {
           text: 'Getting Started',
           items: [
-            { text: 'Installation', link: '/Installation' },
-            { text: 'CLI Commands', link: '/commands' },
-            { text: 'Dev Container', link: '/devcontainer' },
-            { text: 'Protocol Buffers', link: '/proto' },
+            { text: 'Installation', link: '/getting-started/installation' },
+            { text: 'CLI Commands', link: '/getting-started/commands' },
+            { text: 'Dev Container', link: '/getting-started/devcontainer' },
           ],
         },
         {
-          text: 'AI Agent & Dev Workflow',
+          text: 'AI Agent',
           items: [
-            { text: 'Agent Skills', link: '/agent-skills' },
-            { text: 'AI Agent Design', link: '/design/ai-agents-instruction' },
-            { text: 'Task Contexts', link: '/task-contexts/' },
+            { text: 'Agent Skills', link: '/ai/agent-skills' },
+            { text: 'AI Agent Design', link: '/ai/design' },
+            { text: 'Task Contexts', link: '/ai/task-contexts/' },
           ],
         },
         {
-          text: 'Tools',
-          items: [{ text: 'golangci-lint', link: '/tools/golangci-lint' }],
+          text: 'Reference',
+          items: [
+            { text: 'Protocol Buffers', link: '/reference/proto' },
+          ],
         },
       ],
 
-      // ── Guidelines ────────────────────────────────────────────────────────────
+      '/getting-started/': [
+        {
+          text: 'Getting Started',
+          items: [
+            { text: 'Installation', link: '/getting-started/installation' },
+            { text: 'CLI Commands', link: '/getting-started/commands' },
+            { text: 'Dev Container', link: '/getting-started/devcontainer' },
+          ],
+        },
+      ],
+
       '/guidelines/': [
         {
           text: 'Guidelines',
@@ -97,11 +99,12 @@ export default withMermaid(defineConfig({
             { text: 'Task Classification', link: '/guidelines/task-classification' },
             { text: 'Requirements', link: '/guidelines/requirements' },
             { text: 'Claude Memory', link: '/guidelines/claude-mem' },
+            { text: 'Claude Best Practice', link: '/guidelines/claude-best-practice' },
+            { text: 'golangci-lint', link: '/guidelines/golangci-lint' },
           ],
         },
       ],
 
-      // ── Bitcoin (BTC) ─────────────────────────────────────────────────────────
       '/chains/btc/': [
         {
           text: 'Bitcoin (BTC)',
@@ -182,19 +185,11 @@ export default withMermaid(defineConfig({
             { text: 'Wallet Flow', link: '/chains/btc/operations/wallet-flow' },
             { text: 'E2E Transaction Patterns', link: '/chains/btc/operations/e2e-transaction-patterns' },
             { text: 'Wallet Flow Improvements 2025', link: '/chains/btc/operations/wallet-flow-improvements-2025' },
-          ],
-        },
-        {
-          text: 'Testing',
-          collapsed: false,
-          items: [
-            { text: 'README', link: '/chains/btc/testing/' },
-            { text: 'Pattern 3 Verification', link: '/chains/btc/testing/pattern3-verification' },
+            { text: 'Pattern 3 Verification', link: '/chains/btc/operations/pattern3-verification' },
           ],
         },
       ],
 
-      // ── Bitcoin Cash (BCH) ───────────────────────────────────────────────────
       '/chains/bch/': [
         {
           text: 'Bitcoin Cash (BCH)',
@@ -205,7 +200,6 @@ export default withMermaid(defineConfig({
         },
       ],
 
-      // ── Ethereum (ETH) ───────────────────────────────────────────────────────
       '/chains/eth/': [
         {
           text: 'Ethereum (ETH)',
@@ -220,7 +214,6 @@ export default withMermaid(defineConfig({
         },
       ],
 
-      // ── XRP ──────────────────────────────────────────────────────────────────
       '/chains/xrp/': [
         {
           text: 'XRP (Ripple)',
@@ -238,7 +231,6 @@ export default withMermaid(defineConfig({
         },
       ],
 
-      // ── Cosmos ───────────────────────────────────────────────────────────────
       '/chains/cosmos/': [
         {
           text: 'Cosmos',
@@ -246,7 +238,6 @@ export default withMermaid(defineConfig({
         },
       ],
 
-      // ── Database ─────────────────────────────────────────────────────────────
       '/database/': [
         {
           text: 'Database',
@@ -261,54 +252,51 @@ export default withMermaid(defineConfig({
         },
       ],
 
-      // ── Design Notes ─────────────────────────────────────────────────────────
-      '/design/': [
+      '/ai/': [
         {
-          text: 'Design Notes',
+          text: 'AI Agent',
           items: [
-            { text: 'AI Agents Instruction', link: '/design/ai-agents-instruction' },
-            { text: 'BTC Network Mode Switching', link: '/design/btc-network-mode-switching' },
-            { text: 'Revise DB Atlas SQLC Flow', link: '/design/revise-db-atlas-sqlc-flow' },
-            { text: 'Superpowers Integration', link: '/design/superpowers-integration' },
-            { text: 'PG2SQLite Alter Table', link: '/design/pg2sqlite-alter-table-support' },
-            { text: 'Claude Best Practice', link: '/design/claude-best-practice' },
-          ],
-        },
-      ],
-
-      // ── Task Contexts ─────────────────────────────────────────────────────────
-      '/task-contexts/': [
-        {
-          text: 'AI Agent & Dev Workflow',
-          items: [
-            { text: 'Agent Skills', link: '/agent-skills' },
-            { text: 'AI Agent Design', link: '/design/ai-agents-instruction' },
+            { text: 'Agent Skills', link: '/ai/agent-skills' },
+            { text: 'AI Agent Design', link: '/ai/design' },
             {
               text: 'Task Contexts',
               collapsed: false,
               items: [
-                { text: 'Overview', link: '/task-contexts/' },
-                { text: 'Task-Oriented Context', link: '/task-contexts/task-oriented-context' },
-                { text: 'Task Analysis', link: '/task-contexts/task-analysis' },
-                { text: 'Bug Fix', link: '/task-contexts/bug-fix' },
-                { text: 'Feature Add', link: '/task-contexts/feature-add' },
-                { text: 'Refactoring', link: '/task-contexts/refactoring' },
-                { text: 'DB Change', link: '/task-contexts/db-change' },
-                { text: 'Documentation', link: '/task-contexts/documentation' },
-                { text: 'Testing', link: '/task-contexts/test' },
-                { text: 'Chain-Specific', link: '/task-contexts/chain-specific' },
-                { text: 'Verification', link: '/task-contexts/verification' },
+                { text: 'Overview', link: '/ai/task-contexts/' },
+                { text: 'Task-Oriented Context', link: '/ai/task-contexts/task-oriented-context' },
+                { text: 'Task Analysis', link: '/ai/task-contexts/task-analysis' },
+                { text: 'Bug Fix', link: '/ai/task-contexts/bug-fix' },
+                { text: 'Feature Add', link: '/ai/task-contexts/feature-add' },
+                { text: 'Refactoring', link: '/ai/task-contexts/refactoring' },
+                { text: 'DB Change', link: '/ai/task-contexts/db-change' },
+                { text: 'Documentation', link: '/ai/task-contexts/documentation' },
+                { text: 'Testing', link: '/ai/task-contexts/test' },
+                { text: 'Chain-Specific', link: '/ai/task-contexts/chain-specific' },
+                { text: 'Verification', link: '/ai/task-contexts/verification' },
               ],
             },
           ],
         },
       ],
 
-      // ── Tools ─────────────────────────────────────────────────────────────────
-      '/tools/': [
+      '/design/': [
         {
-          text: 'Tools',
-          items: [{ text: 'golangci-lint', link: '/tools/golangci-lint' }],
+          text: 'Design Notes',
+          items: [
+            { text: 'BTC Network Mode Switching', link: '/design/btc-network-mode-switching' },
+            { text: 'Revise DB Atlas SQLC Flow', link: '/design/revise-db-atlas-sqlc-flow' },
+            { text: 'Superpowers Integration', link: '/design/superpowers-integration' },
+            { text: 'PG2SQLite Alter Table', link: '/design/pg2sqlite-alter-table-support' },
+          ],
+        },
+      ],
+
+      '/reference/': [
+        {
+          text: 'Reference',
+          items: [
+            { text: 'Protocol Buffers', link: '/reference/proto' },
+          ],
         },
       ],
     },

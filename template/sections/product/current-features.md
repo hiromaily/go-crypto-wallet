@@ -1,0 +1,21 @@
+## Current development
+
+- This project is under refactoring based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
+  - ✅ Domain layer separated (`internal/domain/`) - Pure business logic with zero infrastructure dependencies
+  - ✅ Application layer (`internal/application/usecase/`) - Use case implementations following Clean Architecture
+  - ✅ Infrastructure layer (`internal/infrastructure/`) - External dependencies (API clients, database, repositories)
+  - ✅ Interface adapters layer (`internal/interface-adapters/`) - CLI commands and wallet adapters
+- ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures
+  - 30-50% transaction size/fee reduction compared to legacy multisig
+  - Enhanced privacy with indistinguishable spend patterns
+  - See [Taproot User Guide](../../../docs/TAPROOT_GUIDE.md) for setup and usage
+- ✅ **MuSig2 (BIP327) Support** - Simple Two-Round Schnorr multisignatures for efficient multisig transactions
+  - Single aggregated signature on-chain (looks like single-sig)
+  - 30-50% smaller transactions compared to traditional P2WSH multisig
+  - Parallel nonce generation (Round 1) for faster workflow
+  - Maximum privacy - indistinguishable from single-signature transactions
+  - See [MuSig2 User Guide](../../../docs/chains/btc/musig2/user-guide.md) for setup and usage
+- ✅ **Descriptor Wallets (BIP380)** - Generate, export, and import descriptors for BTC accounts (Bitcoin Core compatible)
+  - Export receive/change descriptors in Bitcoin Core JSON or text formats
+  - Watch wallet import/validate commands for descriptor onboarding (single-key; multisig import intentionally disabled)
+  - See [Descriptor User Guide](../../../docs/descriptor_user_guide.md) and [Descriptor API](../../../docs/api/descriptor_api.md)
