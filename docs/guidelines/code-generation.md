@@ -19,7 +19,7 @@ This project uses several code generation tools. **All auto-generated files cont
 - `tools/atlas/migrations/sign/*.sql` - Sign schema migrations
 - `tools/atlas/migrations/*/atlas.sum` - Migration checksums
 
-**Note**: See [Database Management Guidelines](/database/architecture) for detailed workflow.
+**Note**: See [Database Management Guidelines](../database/architecture.md) for detailed workflow.
 
 ## SQLC Schema Files (from Database Dumps)
 
@@ -161,7 +161,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 **Note**: The `make mockery` target automatically runs `clean-mocks` first, so old mocks will be removed before generating new ones. This ensures no stale mocks remain when paths change.
 
-**Note**: See [Testing Guidelines](testing.md) for mock usage examples and best practices.
+**Note**: See [Testing Guidelines](./testing.md) for mock usage examples and best practices.
 
 ## Protocol Buffer Code (TypeScript) [DEPRECATED]
 
@@ -232,7 +232,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 
 ## See Also
 
-- [Database Management Guidelines](/database/architecture) - Detailed database schema workflow
-- [Testing Guidelines](testing.md) - Mock usage and unit testing patterns
-- [Coding Standards](coding-conventions.md) - Verification commands
-- [Core Principles](core.md) - Rules about editing auto-generated files
+- [Database Management Guidelines](../database/architecture.md) - Detailed database schema workflow
+- [Testing Guidelines](./testing.md) - Mock usage and unit testing patterns
+- [Coding Standards](./coding-conventions.md) - Verification commands
+- [Core Principles](./core.md) - Rules about editing auto-generated files

@@ -187,6 +187,6 @@ Ensure `--coin` flag has valid value:
 
 ## Related
 
-- `docs/commands.md` - Full command reference
+- `docs/getting-started/commands.md` - Full command reference
 - `docs/chains/btc/psbt/user-guide.md` - PSBT workflow
 - `docs/chains/btc/taproot/user-guide.md` - Taproot usage

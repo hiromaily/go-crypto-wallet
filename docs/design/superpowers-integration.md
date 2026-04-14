@@ -169,7 +169,7 @@ Superpowers `verification-before-completion` must use this project's verificatio
 - Go files: `make go-lint`, `make check-build`
 - SQL/HCL files: `make atlas-fmt`, `make atlas-lint`
 - Shell scripts: `make shfmt`
-- See docs/task-contexts/verification.md for full matrix
+- See docs/ai/task-contexts/verification.md for full matrix
 
 ## Planning Integration
 
@@ -182,7 +182,7 @@ When `writing-plans` is triggered for a `.kiro/specs/` tracked feature:
 
 1. Update `AGENTS.md` to mention superpowers integration
 2. Add setup instructions to contributor docs
-3. Update [ai-agents-instruction.md](ai-agents-instruction.md) architecture diagram
+3. Update [ai-agents-instruction.md](../ai/design.md) architecture diagram
 
 #### Phase 4: Team Onboarding
 

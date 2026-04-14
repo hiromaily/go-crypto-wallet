@@ -266,7 +266,7 @@ Use cases currently have constructor tests that verify:
 - Use case can be instantiated with dependencies
 - Correct interface implementation
 
-For comprehensive testing strategy, see [Testing Guidelines](testing.md).
+For comprehensive testing strategy, see [Testing Guidelines](./testing.md).
 
 **When to Create a New Use Case:**
 
@@ -392,7 +392,7 @@ Key Principles:
 
 ## See Also
 
-- [Core Principles](core.md) - Security, error handling, and core patterns
-- [Testing Guidelines](testing.md) - Testing strategy for each layer
+- [Core Principles](./core.md) - Security, error handling, and core patterns
+- [Testing Guidelines](./testing.md) - Testing strategy for each layer
 - `internal/AGENTS.md` - Detailed guidelines for `internal/` directory
 - `pkg/AGENTS.md` - Guidelines for `pkg/` directory

@@ -307,7 +307,7 @@ The codebase is organized into `internal/` (new architecture) and `pkg/` (shared
 - `config/` ... Application configuration files (Git managed)
   - `wallet/` ... Wallet configuration TOML files
   - `blockchain/` ... Blockchain node configuration files
-- `proto/` ... Protocol Buffers definitions (**Edition 2024**, see [docs/proto.md](./docs/proto.md))
+- `proto/` ... Protocol Buffers definitions (**Edition 2024**, see [docs/proto.md](./docs/reference/proto.md))
 - `contracts/` ... Smart contract ABI files (Git managed, code generation source)
 - `data/` ... Generated files (ignored by Git)
   - `address/` ... Generated address files (bch, btc, eth, xrp)
@@ -353,7 +353,7 @@ External dependencies and implementations:
 - `infrastructure/api/eth/` ... Ethereum JSON-RPC API clients
   - [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
 - `infrastructure/api/xrp/` ... Ripple gRPC API clients
-  - Communicates with [xrpl-grpc-server](./apps/xrpl-grpc-server/) [Deprecated]
+  - Communicates with [xrpl-grpc-server](./apps/xrpl-grpc-server) [Deprecated]
 - `infrastructure/database/` ... Database connections and generated code
   - `mysql/` ... MySQL connection management
   - `sqlc/` ... SQLC generated database code
@@ -437,8 +437,8 @@ code .
 
 **Documentation:**
 
-- 📖 [Complete DevContainer Guide](./docs/devcontainer.md) - Setup, usage, and troubleshooting
-- 🤖 [AI-Assisted Development with DevContainer](./docs/devcontainer.md#using-with-ai-tools) - Claude Code, Copilot integration
+- 📖 [Complete DevContainer Guide](./docs/getting-started/devcontainer.md) - Setup, usage, and troubleshooting
+- 🤖 [AI-Assisted Development with DevContainer](./docs/getting-started/devcontainer.md#using-with-ai-tools) - Claude Code, Copilot integration
 
 **Note:** DevContainer is completely optional. Continue with local development if you prefer.
 
@@ -448,7 +448,7 @@ For traditional local development setup, follow the installation guide below.
 
 ## Installation
 
-[Installation](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/Installation.md)
+[Installation](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/getting-started/installation.md)
 
 ## Operation example
 
@@ -458,7 +458,7 @@ For traditional local development setup, follow the installation guide below.
 ## Command example
 
 - [CLI Command Reference](./internal/interface-adapters/cli/README.md) - Command × Chain × UseCase matrix (SSOT): which commands each chain supports, corresponding use case interfaces, and role of each command
-- [docs/commands.md](./docs/commands.md) - Detailed flags, options, and usage examples per command
+- [docs/getting-started/commands.md](./docs/getting-started/commands.md) - Detailed flags, options, and usage examples per command
 - [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/main/Makefile) - Main Makefile with modular includes
 - Makefile modules (in `make/` directory):
   - [watch_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/main/make/watch_op.mk) - Watch wallet operations

@@ -1,0 +1,62 @@
+index:
+  output: template/INDEX.md
+
+targets:
+  - input: template/pages/README.tpl.md
+    output: README.md
+  - input: template/pages/CLAUDE.tpl.md
+    output: CLAUDE.md
+  - input: template/pages/AGENTS.tpl.md
+    output: AGENTS.md
+  - input: template/pages/ARCHITECTURE.tpl.md
+    output: ARCHITECTURE.md
+  - input: template/pages/CONTRIBUTING.tpl.md
+    output: CONTRIBUTING.md
+  # docs/guidelines/
+  - input: template/pages/docs/guidelines/overview.tpl.md
+    output: docs/guidelines/README.md
+  - input: template/pages/docs/guidelines/architecture.tpl.md
+    output: docs/guidelines/architecture.md
+  - input: template/pages/docs/guidelines/coding-conventions.tpl.md
+    output: docs/guidelines/coding-conventions.md
+  - input: template/pages/docs/guidelines/testing.tpl.md
+    output: docs/guidelines/testing.md
+  - input: template/pages/docs/guidelines/workflow.tpl.md
+    output: docs/guidelines/workflow.md
+  - input: template/pages/docs/guidelines/security.tpl.md
+    output: docs/guidelines/security.md
+  - input: template/pages/docs/guidelines/core.tpl.md
+    output: docs/guidelines/core.md
+  - input: template/pages/docs/guidelines/multi-chain.tpl.md
+    output: docs/guidelines/multi-chain.md
+  - input: template/pages/docs/guidelines/code-generation.tpl.md
+    output: docs/guidelines/code-generation.md
+  - input: template/pages/docs/guidelines/release.tpl.md
+    output: docs/guidelines/release.md
+  - input: template/pages/docs/guidelines/requirements.tpl.md
+    output: docs/guidelines/requirements.md
+  - input: template/pages/docs/guidelines/task-classification.tpl.md
+    output: docs/guidelines/task-classification.md
+  - input: template/pages/docs/guidelines/claude-mem.tpl.md
+    output: docs/guidelines/claude-mem.md
+  # docs/database/
+  - input: template/pages/docs/database/architecture.tpl.md
+    output: docs/database/architecture.md
+  - input: template/pages/docs/database/db-management.tpl.md
+    output: docs/database/db-management.md
+  - input: template/pages/docs/database/schema-changes.tpl.md
+    output: docs/database/schema-changes.md
+  - input: template/pages/docs/database/quick-reference.tpl.md
+    output: docs/database/quick-reference.md
+  - input: template/pages/docs/database/atlas-migration-flow.tpl.md
+    output: docs/database/atlas-migration-flow.md
+  - input: template/pages/docs/database/sqlc-code-generation-flow.tpl.md
+    output: docs/database/sqlc-code-generation-flow.md
+  # docs/ root pages
+  - input: template/pages/docs/overview.tpl.md
+    output: docs/overview.md
+  # docs/getting-started/
+  - input: template/pages/docs/getting-started/installation.tpl.md
+    output: docs/getting-started/installation.md
+  - input: template/pages/docs/getting-started/commands.tpl.md
+    output: docs/getting-started/commands.md

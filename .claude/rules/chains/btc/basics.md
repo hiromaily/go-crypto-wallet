@@ -41,7 +41,7 @@ Always consult the documentation under `docs/chains/btc/` for context before mak
 | **Output Descriptors**               | [descriptor/architecture.md](../../../docs/chains/btc/descriptor/architecture.md), [descriptor/api.md](../../../docs/chains/btc/descriptor/api.md), [descriptor/development.md](../../../docs/chains/btc/descriptor/development.md) |
 | **Taproot (BIP86/P2TR)**             | [taproot/user-guide.md](../../../docs/chains/btc/taproot/user-guide.md), [taproot/testing.md](../../../docs/chains/btc/taproot/testing.md)                                                                                          |
 | **MuSig2 multisig**                  | [musig2/architecture.md](../../../docs/chains/btc/musig2/architecture.md), [musig2/user-guide.md](../../../docs/chains/btc/musig2/user-guide.md), [musig2/security.md](../../../docs/chains/btc/musig2/security.md)                 |
-| **Testing & verification**           | [testing/README.md](../../../docs/chains/btc/testing/README.md), [testing/pattern3-verification.md](../../../docs/chains/btc/testing/pattern3-verification.md)                                                                      |
+| **Testing & verification**           | [operations/pattern3-verification.md](../../../docs/chains/btc/operations/pattern3-verification.md)                                                                                                                                  |
 
 ## Key Code Paths
 

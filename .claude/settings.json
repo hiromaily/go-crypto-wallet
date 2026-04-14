@@ -9,6 +9,26 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/prevent-generated-edit.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/prevent-generated-edit.sh"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
