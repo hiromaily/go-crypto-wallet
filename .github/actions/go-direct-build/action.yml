@@ -8,7 +8,7 @@ description: "Build Go binary and build a runtime-only Docker image (ephemeral D
 #   with:
 #     cmd_path: ${{ inputs.cmd_path }}
 #     run_twice: ${{ inputs.run_twice }}
-#     go_version: "1.25.6"
+#     go_version: "1.26.2"
 #     image_name: "myapp"
 #     # image_tag: "" # git tag or dev is used if empty
 # - name: Echo outputs
@@ -24,7 +24,7 @@ inputs:
   go_version:
     description: "Go version to use"
     required: true
-    default: "1.25.6"
+    default: "1.26.2"
   image_name:
     description: "Docker image name (without tag)"
     required: true

@@ -29,7 +29,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 
 | Tool | Version | Description |
 |------|---------|-------------|
-| Go | 1.25.6 | Programming language |
+| Go | 1.26.2 | Programming language |
 | Atlas | 1.1.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
@@ -418,7 +418,7 @@ This project provides an **optional** DevContainer configuration for a standardi
 **Key Benefits:**
 
 - ✅ **Safe AI Development**: Isolated environment protects your host system from accidental AI-generated changes
-- ✅ **Consistent Setup**: Pre-configured with Go 1.25.6, golangci-lint v2.8.0, Atlas v1.0.0, and GitHub CLI
+- ✅ **Consistent Setup**: Pre-configured with Go 1.26.2, golangci-lint v2.8.0, Atlas v1.0.0, and GitHub CLI
 - ✅ **Quick Start**: New developers can start coding in minutes
 - ✅ **Zero Impact**: Local development workflow remains completely unchanged
 

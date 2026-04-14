@@ -11,7 +11,7 @@ on:
     paths-ignore:
       - "**.mdc"
 env:
-  GO_VERSION: "1.25.6"
+  GO_VERSION: "1.26.2"
 jobs:
   # Detect which files changed to conditionally run jobs
   changes:

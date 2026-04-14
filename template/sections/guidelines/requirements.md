@@ -27,10 +27,10 @@ Using incorrect versions may cause compatibility issues or unexpected behavior.
 
 #### Go
 
-- **Required Version**: Go 1.25.6 (specified in `go.mod`)
+- **Required Version**: Go 1.26.2 (specified in `go.mod`)
 - **Check version**: `go version`
 - **Installation**: <https://go.dev/dl/>
-- **Note**: Must match the version specified in `go.mod` (currently `go 1.25.6`)
+- **Note**: Must match the version specified in `go.mod` (currently `go 1.26.2`)
 
 ### Development Tools
 

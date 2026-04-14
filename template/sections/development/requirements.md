@@ -4,7 +4,7 @@
 
 | Tool | Version | Description |
 |------|---------|-------------|
-| Go | 1.25.6 | Programming language |
+| Go | 1.26.2 | Programming language |
 | Atlas | 1.1.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |

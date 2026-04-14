@@ -88,7 +88,7 @@ docs/          → Documentation
 
 ## Key Technologies
 
-- Go 1.25.6
+- Go 1.26.2
 - btcsuite/btcd v0.25.0
 - ethereum/go-ethereum v1.16.7
 - golangci-lint v2.8.0

@@ -419,7 +419,7 @@ Go が速くなる鍵は GOCACHE（コンパイルキャッシュ） と GOMODCA
 
 ```dockerfile
 # syntax=docker/dockerfile:1
-FROM golang:1.25.6 AS build
+FROM golang:1.26.2 AS build
 WORKDIR /src
 
 ARG CMD_PATH=cmd/watch

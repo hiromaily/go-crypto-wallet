@@ -40,7 +40,7 @@ If a version manager is interfering, remove it from PATH for this session:
 ```bash
 # Remove version managers from PATH and use Homebrew Go
 export PATH=$(echo $PATH | tr ':' '\n' | grep -v 'mise' | tr '\n' ':' | sed 's/:$//')
-export GOROOT=/opt/homebrew/Cellar/go/1.25.6/libexec
+export GOROOT=/opt/homebrew/Cellar/go/1.26.2/libexec
 
 # Verify
 go version
