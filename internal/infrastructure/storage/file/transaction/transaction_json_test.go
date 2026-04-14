@@ -72,7 +72,7 @@ func TestWriteXRPJSONFile(t *testing.T) {
 						SenderAccountType:  "receipt",
 						SignatureCount:     2,
 						RequiredSignatures: 3,
-						SignedBlob:         stringPtr("120000228000000024000000016140000000000000016840"),
+						SignedBlob:         new("120000228000000024000000016140000000000000016840"),
 						IsComplete:         false,
 					},
 				},
@@ -578,6 +578,8 @@ func TestWriteXRPJSONFilePathTraversal(t *testing.T) {
 }
 
 // Helper function to create string pointer
+//
+//go:fix inline
 func stringPtr(s string) *string {
-	return &s
+	return new(s)
 }

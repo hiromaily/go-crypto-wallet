@@ -154,7 +154,7 @@ func TestXRPTransactionFile_Validate(t *testing.T) {
 						SenderAccountType:  "client",
 						SignatureCount:     0,
 						RequiredSignatures: 1,
-						SignedBlob:         stringPtr("some-blob"),
+						SignedBlob:         new("some-blob"),
 						IsComplete:         false,
 					},
 				},
@@ -182,7 +182,7 @@ func TestXRPTransactionFile_Validate(t *testing.T) {
 						SenderAccountType:  "client",
 						SignatureCount:     2,
 						RequiredSignatures: 3,
-						SignedBlob: stringPtr(
+						SignedBlob: new(
 							"1200002280000000240000000161400000000000000168400000000000000C732103AB40A0490F9B7ED8DF29" +
 								"D246BF2D6269820A0EE7742ACDD457BEA7C7D0931EDB74473045022100D184EB4AE5956FF600E7536E" +
 								"E459345C7BBCF097A84CC61A93B9AF7197EDB98702201E5C9F83C9B1F4A6E3F1E9F1E9F1E9F1E9F1E9" +
@@ -238,7 +238,7 @@ func TestXRPTransactionEntry_Validate(t *testing.T) {
 				SenderAccountType:  "client",
 				SignatureCount:     1,
 				RequiredSignatures: 1,
-				SignedBlob:         stringPtr("signed-blob-hex"),
+				SignedBlob:         new("signed-blob-hex"),
 				IsComplete:         true,
 			},
 			wantErr: false,
@@ -265,7 +265,7 @@ func TestXRPTransactionEntry_Validate(t *testing.T) {
 				SenderAccountType:  "client",
 				SignatureCount:     3,
 				RequiredSignatures: 2,
-				SignedBlob:         stringPtr("signed-blob-hex"),
+				SignedBlob:         new("signed-blob-hex"),
 				IsComplete:         true,
 			},
 			wantErr: true,
@@ -279,7 +279,7 @@ func TestXRPTransactionEntry_Validate(t *testing.T) {
 				SenderAccountType:  "client",
 				SignatureCount:     0,
 				RequiredSignatures: 1,
-				SignedBlob:         stringPtr("should-be-null"),
+				SignedBlob:         new("should-be-null"),
 				IsComplete:         false,
 			},
 			wantErr: true,
@@ -302,6 +302,8 @@ func TestXRPTransactionEntry_Validate(t *testing.T) {
 }
 
 // Helper function to create string pointer
+//
+//go:fix inline
 func stringPtr(s string) *string {
-	return &s
+	return new(s)
 }
