@@ -7,7 +7,11 @@
 command -v jq >/dev/null 2>&1 || { echo "jq required but not found — hook inactive" >&2; exit 0; }
 command -v yq >/dev/null 2>&1 || { echo "yq required but not found — hook inactive" >&2; exit 0; }
 
-FILE=$(echo "$TOOL_INPUT" | jq -r '.file_path // empty')
+if [ -z "$TOOL_INPUT" ]; then
+  exit 0
+fi
+
+FILE=$(echo "$TOOL_INPUT" | jq -r '.file_path // empty' 2>/dev/null)
 if [ -z "$FILE" ]; then
   exit 0
 fi

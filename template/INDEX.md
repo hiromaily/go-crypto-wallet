@@ -30,7 +30,7 @@
 | pages/docs/database/quick-reference.tpl.md | docs/database/quick-reference.md | 1 |
 | pages/docs/database/atlas-migration-flow.tpl.md | docs/database/atlas-migration-flow.md | 1 |
 | pages/docs/database/sqlc-code-generation-flow.tpl.md | docs/database/sqlc-code-generation-flow.md | 1 |
-| pages/docs/overview.tpl.md | docs/overview.md | 1 |
+| pages/docs/overview.tpl.md | docs/overview.md | 4 |
 | pages/docs/getting-started/installation.tpl.md | docs/getting-started/installation.md | 1 |
 | pages/docs/getting-started/commands.tpl.md | docs/getting-started/commands.md | 1 |
 
@@ -57,7 +57,7 @@
 | sections/architecture/layer-architecture.md | ARCHITECTURE |
 | sections/architecture/layer-responsibilities.md | ARCHITECTURE |
 | sections/architecture/shared-packages.md | ARCHITECTURE |
-| sections/architecture/wallet-architecture.md | ARCHITECTURE |
+| sections/architecture/wallet-architecture.md | ARCHITECTURE, overview |
 | sections/database/architecture.md | architecture |
 | sections/database/atlas-migration-flow.md | atlas-migration-flow |
 | sections/database/db-management.md | db-management |
@@ -96,8 +96,8 @@
 | sections/product/current-features.md | README |
 | sections/product/supported-coins.md | README |
 | sections/product/use-cases.md | README |
-| sections/product/wallet-types.md | README |
-| sections/product/workflow-diagram.md | README |
+| sections/product/wallet-types.md | README, overview |
+| sections/product/workflow-diagram.md | README, overview |
 | sections/project/commands.md | commands |
 | sections/project/context.md | CLAUDE |
 | sections/project/identity.md | AGENTS |

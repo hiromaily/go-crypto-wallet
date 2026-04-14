@@ -30,11 +30,11 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 | Tool | Version | Description |
 |------|---------|-------------|
 | Go | 1.26.2 | Programming language |
-| Atlas | 1.1.0 | Database schema migration |
+| Atlas | v1.0.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
 | Docker Compose | latest | Container orchestration |
-| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.10.0+ | Linter (for development) |
+| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.8.0 | Linter (for development) |
 | [protoc](https://grpc.io/docs/protoc-installation/) | 33.0+ | Protocol buffer compiler (**Edition 2024**) |
 | [buf](https://buf.build/) | latest | Protocol buffer management (lint, format) |
 
@@ -44,7 +44,7 @@ Supported databases (choose one)
 
 | Tool | Version | Description |
 |------|---------|-------------|
-| PostgreSQL | 18.2+ | Database (via Docker) |
+| PostgreSQL | 17+ | Database (via Docker) |
 | MySQL | 8.4+ | Database (via Docker) |
 | SQLite | 3.0+ | Database |
 
@@ -63,11 +63,11 @@ Supported databases (choose one)
 | Package | Version | Description |
 |---------|---------|-------------|
 | btcsuite/btcd | v0.25.0 | Bitcoin library |
-| ethereum/go-ethereum | v1.16.7 | Ethereum library |
+| ethereum/go-ethereum | v1.17.2 | Ethereum library |
 | spf13/cobra | v1.10.2 | CLI framework |
 | spf13/viper | v1.21.0 | Configuration management |
-| google.golang.org/grpc | v1.78.0 | gRPC for XRP communication |
-| golang.org/x/crypto | v0.46.0 | Cryptographic functions |
+| google.golang.org/grpc | v1.80.0 | gRPC for XRP communication |
+| golang.org/x/crypto | v0.50.0 | Cryptographic functions |
 
 ## Current development
 

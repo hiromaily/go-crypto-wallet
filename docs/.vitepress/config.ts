@@ -9,10 +9,12 @@ export default withMermaid(defineConfig({
   cleanUrls: true,
 
   srcExclude: [
-    '**/github-actions/**',
-    '**/issues/**',
-    '**/overview-ja.md',
-    '**/archive/**',
+    '**/github-actions/**', // Japanese investigation docs with GitHub Actions ${{ }} syntax
+    '**/issues/**', // Internal refactoring checklists/plans
+    '**/overview-ja.md', // Japanese-language overview (English version exists)
+    '**/archive/**', // Archived/historical BTC operation docs
+    // Note: chains/btc/keygen/improvements-2025-ja.md (Japanese) is included intentionally
+    // alongside the English version as supplementary reading for Japanese-speaking contributors.
   ],
 
   themeConfig: {

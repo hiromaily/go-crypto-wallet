@@ -98,7 +98,7 @@ Before starting work, verify all required tools are installed and at the correct
 # Essential tools
 git --version
 gh --version
-go version  # Should show go1.25.6
+go version  # Should show go1.26.2
 
 # Development tools
 golangci-lint --version  # Should show v2.8.0
