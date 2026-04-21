@@ -7,7 +7,7 @@
 | Template | Output | Sections included |
 | --- | --- | --- |
 | pages/README.tpl.md | README.md | 15 |
-| pages/CLAUDE.tpl.md | CLAUDE.md | 6 |
+| pages/CLAUDE.tpl.md | CLAUDE.md | 8 |
 | pages/AGENTS.tpl.md | AGENTS.md | 8 |
 | pages/ARCHITECTURE.tpl.md | ARCHITECTURE.md | 10 |
 | pages/CONTRIBUTING.tpl.md | CONTRIBUTING.md | 11 |
@@ -46,15 +46,10 @@
 
 | File | Referenced by |
 | --- | --- |
-| sections/ai/agent-guidelines.md | AGENTS |
-| sections/ai/ai-dlc.md | CLAUDE |
-| sections/ai/core-values.md | AGENTS |
-| sections/ai/development-guidelines.md | CLAUDE |
-| sections/ai/development-rules.md | CLAUDE |
-| sections/ai/expected-behavior.md | AGENTS |
-| sections/ai/minimal-workflow.md | CLAUDE |
-| sections/ai/ssot-structure.md | AGENTS |
-| sections/ai/steering-configuration.md | CLAUDE |
+| sections/ai/agent-guidelines.md | AGENTS, CLAUDE |
+| sections/ai/core-values.md | AGENTS, CLAUDE |
+| sections/ai/expected-behavior.md | AGENTS, CLAUDE |
+| sections/ai/ssot-structure.md | AGENTS, CLAUDE |
 | sections/architecture/architecture-overview.md | ARCHITECTURE, index |
 | sections/architecture/architecture.md | README, index |
 | sections/architecture/components.md | README, index |
@@ -216,8 +211,7 @@
 | sections/project/commands/overview.md | commands |
 | sections/project/commands/sign-wallet.md | commands |
 | sections/project/commands/watch-wallet.md | commands |
-| sections/project/context.md | CLAUDE |
-| sections/project/identity.md | AGENTS |
+| sections/project/identity.md | AGENTS, CLAUDE |
 | sections/project/installation/bitcoind-no-container.md | installation |
 | sections/project/installation/bitcoind.md | installation |
 | sections/project/installation/common-setup.md | installation |
@@ -226,12 +220,12 @@
 | sections/project/installation/overview.md | installation |
 | sections/project/installation/ripple.md | installation |
 | sections/project/overview.md | README, overview |
-| sections/reference/agents-see-also.md | AGENTS |
+| sections/reference/agents-see-also.md | AGENTS, CLAUDE |
 | sections/reference/architecture-see-also.md | ARCHITECTURE |
 | sections/reference/command-example.md | README |
-| sections/reference/documentation-map.md | AGENTS |
+| sections/reference/documentation-map.md | AGENTS, CLAUDE |
 | sections/reference/operation-example.md | README |
-| sections/reference/quick-reference.md | AGENTS |
+| sections/reference/quick-reference.md | AGENTS, CLAUDE |
 
 ## Rules
 
@@ -247,4 +241,9 @@
 
 | File | Note |
 | --- | --- |
-| (none) | All files are referenced |
+| sections/ai/ai-dlc.md | Not referenced by any template |
+| sections/ai/development-guidelines.md | Not referenced by any template |
+| sections/ai/development-rules.md | Not referenced by any template |
+| sections/ai/minimal-workflow.md | Not referenced by any template |
+| sections/ai/steering-configuration.md | Not referenced by any template |
+| sections/project/context.md | Not referenced by any template |
