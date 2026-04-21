@@ -62,8 +62,8 @@ watch --coin btc musig2 aggregate
 
 ## Related Documentation
 
-- [../taproot/](../../../../docs/chains/btc/taproot/README) - MuSig2 requires Taproot
-- [../psbt/](../../../../docs/chains/btc/psbt/README) - PSBT used for coordination
+- [../taproot/](../../../../docs/chains/btc/taproot/README.md) - MuSig2 requires Taproot
+- [../psbt/](../../../../docs/chains/btc/psbt/README.md) - PSBT used for coordination
 - [../operations/wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md) - Transaction flows
 - [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
 

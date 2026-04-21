@@ -16,5 +16,5 @@ This directory contains fundamental technical references and overview documentat
 
 ## Related Documentation
 
-- [../operations/](../../../../docs/chains/btc/operations/README) - Wallet operation guides
+- [../operations/](../../../../docs/chains/btc/operations/README.md) - Wallet operation guides
 - [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index

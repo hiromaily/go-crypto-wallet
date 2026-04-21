@@ -42,7 +42,7 @@ address_type: taproot  # Use Taproot (P2TR)
 
 ## Related Documentation
 
-- [../musig2/](../../../../docs/chains/btc/musig2/README) - MuSig2 leverages Taproot
+- [../musig2/](../../../../docs/chains/btc/musig2/README.md) - MuSig2 leverages Taproot
 - [../keygen/improvements-2025.md](../../../../docs/chains/btc/keygen/improvements-2025.md) - Taproot key generation
 - [../operations/wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md) - Transaction flows
 - [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index

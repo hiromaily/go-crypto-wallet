@@ -30,6 +30,6 @@ This directory contains guides for operating the Bitcoin wallet system.
 
 ## Related Documentation
 
-- [../psbt/](../../../../docs/chains/btc/psbt/README) - PSBT guides for offline signing
-- [../musig2/](../../../../docs/chains/btc/musig2/README) - MuSig2 multisig operations
+- [../psbt/](../../../../docs/chains/btc/psbt/README.md) - PSBT guides for offline signing
+- [../musig2/](../../../../docs/chains/btc/musig2/README.md) - MuSig2 multisig operations
 - [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index

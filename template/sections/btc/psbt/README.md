@@ -34,7 +34,7 @@ PSBT (BIP174) is the standard format for Bitcoin transactions that require offli
 ## Related Documentation
 
 - [../operations/wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md) - Transaction flow using PSBT
-- [../musig2/](../../../../docs/chains/btc/musig2/README) - MuSig2 uses PSBT for coordination
+- [../musig2/](../../../../docs/chains/btc/musig2/README.md) - MuSig2 uses PSBT for coordination
 - [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
 
 ## References

@@ -34,8 +34,8 @@ Output Descriptors are a language for describing collections of output scripts. 
 
 ## Related Documentation
 
-- [../keygen/](../../../../docs/chains/btc/keygen/README) - Key generation that uses descriptors
-- [../taproot/](../../../../docs/chains/btc/taproot/README) - Taproot descriptors
+- [../keygen/](../../../../docs/chains/btc/keygen/README.md) - Key generation that uses descriptors
+- [../taproot/](../../../../docs/chains/btc/taproot/README.md) - Taproot descriptors
 - [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
 
 ## References

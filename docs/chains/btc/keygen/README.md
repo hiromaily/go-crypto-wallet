@@ -31,7 +31,7 @@ This directory contains documentation for Bitcoin key generation design and impr
 
 ## Related Documentation
 
-- [../taproot/](../taproot/README) - Taproot implementation guides
-- [../musig2/](../musig2/README) - MuSig2 architecture
-- [../descriptor/](../descriptor/README) - Output descriptor guides
+- [../taproot/](../taproot/README.md) - Taproot implementation guides
+- [../musig2/](../musig2/README.md) - MuSig2 architecture
+- [../descriptor/](../descriptor/README.md) - Output descriptor guides
 - [../README.md](../README.md) - Main BTC documentation index

@@ -1,6 +1,6 @@
 ## Related Documents
 
-- [BTC Technical Reference](/chains/btc/operations/README) - Bitcoin technical reference
+- [BTC Technical Reference](/chains/btc/operations/README.md) - Bitcoin technical reference
 - [Taproot User Guide](/chains/btc/taproot/user-guide) - How to use Taproot
 - [MuSig2 User Guide](/chains/btc/musig2/user-guide) - How to use MuSig2
 - [Descriptor Examples](/chains/btc/descriptor/examples) - Descriptor examples

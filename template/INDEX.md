@@ -555,19 +555,4 @@
 
 | File | Note |
 | --- | --- |
-| sections/ai/ai-dlc.md | Not referenced by any template |
-| sections/ai/development-guidelines.md | Not referenced by any template |
-| sections/ai/development-rules.md | Not referenced by any template |
-| sections/ai/minimal-workflow.md | Not referenced by any template |
-| sections/ai/steering-configuration.md | Not referenced by any template |
-| sections/development/comprehensive-e2e-testing-by-chain.md | Not referenced by any template |
-| sections/development/environment.md | Not referenced by any template |
-| sections/development/installation.md | Not referenced by any template |
-| sections/development/requirements.md | Not referenced by any template |
-| sections/product/current-features.md | Not referenced by any template |
-| sections/product/supported-coins.md | Not referenced by any template |
-| sections/product/use-cases.md | Not referenced by any template |
-| sections/project/context.md | Not referenced by any template |
-| sections/project/installation/bitcoind-no-container.md | Not referenced by any template |
-| sections/reference/command-example.md | Not referenced by any template |
-| sections/reference/operation-example.md | Not referenced by any template |
+| (none) | All files are referenced |

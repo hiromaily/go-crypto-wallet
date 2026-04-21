@@ -329,4 +329,4 @@ Agent Actions:
 
 - [Multi-Chain Support](../../guidelines/multi-chain.md) - マルチチェーンアーキテクチャ詳細
 - [Architecture Guidelines](../../guidelines/architecture.md) - レイヤー構造
-- [Chain Documentation (BTC)](/chains/btc/README) - 各チェーンの詳細ドキュメント
+- [Chain Documentation (BTC)](/chains/btc/README.md) - 各チェーンの詳細ドキュメント

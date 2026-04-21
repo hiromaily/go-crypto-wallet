@@ -9,13 +9,13 @@ This directory is organized into the following categories:
 | File / Directory | Description | Audience |
 |------------------|-------------|----------|
 | [architecture.md](../../../template/sections/misc/architecture.md) | **Wallet architecture** — wallet roles, use case boundary map, Keygen vs Sign signing | Developers |
-| [overview/](../../../template/sections/misc/overview/README) | Fundamental technical references and Bitcoin basics | All |
-| [operations/](../../../template/sections/misc/operations/README) | Wallet operation guides and transaction flows | Operators |
-| [keygen/](../../../template/sections/misc/keygen/README) | Key generation design and improvements | Developers |
-| [psbt/](../../../template/sections/misc/psbt/README) | PSBT implementation and usage guides | All |
-| [descriptor/](../../../template/sections/misc/descriptor/README) | Output Descriptor implementation | Developers |
-| [taproot/](../../../template/sections/misc/taproot/README) | Taproot (BIP341/BIP86) guides | All |
-| [musig2/](../../../template/sections/misc/musig2/README) | MuSig2 multisignature implementation | All |
+| [overview/](../../../template/sections/misc/overview/README.md) | Fundamental technical references and Bitcoin basics | All |
+| [operations/](../../../template/sections/misc/operations/README.md) | Wallet operation guides and transaction flows | Operators |
+| [keygen/](../../../template/sections/misc/keygen/README.md) | Key generation design and improvements | Developers |
+| [psbt/](../../../template/sections/misc/psbt/README.md) | PSBT implementation and usage guides | All |
+| [descriptor/](../../../template/sections/misc/descriptor/README.md) | Output Descriptor implementation | Developers |
+| [taproot/](../../../template/sections/misc/taproot/README.md) | Taproot (BIP341/BIP86) guides | All |
+| [musig2/](../../../template/sections/misc/musig2/README.md) | MuSig2 multisignature implementation | All |
 | archive/ | Outdated documentation (reference only) | - |
 
 ## Quick Start
@@ -278,7 +278,7 @@ MuSig2 enables N-of-N multisig that appears as single-sig on-chain.
 - Generate fresh nonces for every transaction
 - Delete nonces after signing
 
-See [musig2/](../../../template/sections/misc/musig2/README) for detailed documentation.
+See [musig2/](../../../template/sections/misc/musig2/README.md) for detailed documentation.
 
 ---
 
@@ -308,7 +308,7 @@ PSBT (BIP174) is the standard format for offline/multi-party signing workflows.
    └── Extract broadcastable transaction
 ```
 
-See [psbt/](../../../template/sections/misc/psbt/README) for detailed documentation.
+See [psbt/](../../../template/sections/misc/psbt/README.md) for detailed documentation.
 
 ---
 
