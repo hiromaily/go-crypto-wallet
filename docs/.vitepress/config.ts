@@ -13,6 +13,7 @@ export default withMermaid(defineConfig({
     '**/issues/**', // Internal refactoring checklists/plans
     '**/overview-ja.md', // Japanese-language overview (English version exists)
     '**/archive/**', // Archived/historical BTC operation docs
+    '**/superpowers/**', // Internal AI planning docs (project-root-relative links, not VitePress-relative)
     // Note: chains/btc/keygen/improvements-2025-ja.md (Japanese) is included intentionally
     // alongside the English version as supplementary reading for Japanese-speaking contributors.
   ],
