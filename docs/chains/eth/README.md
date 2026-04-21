@@ -11,93 +11,67 @@ This document provides a comprehensive technical reference for Ethereum implemen
 
 | Document | Description |
 |----------|-------------|
-| [architecture.md](../../../template/sections/architecture/architecture.md) | **[SSOT] ETH wallet architecture** — wallet roles, use case assignments, Clean Architecture boundary maps (EOA + Safe), port interfaces, offline signing detail |
-| [multisig.md](../../../template/sections/architecture/multisig.md) | **ETH Safe multisig** — Safe v1.4.1 implementation, EIP-712 signing flow, file format, CLI commands, E2E Pattern 3 |
-| [docs/transaction-flow.md](../../../template/transaction-flow.md) | Chain-agnostic 3-wallet setup, signing, and monitoring flows |
+| [architecture.md](./architecture.md) | **[SSOT] ETH wallet architecture** — wallet roles, use case assignments, Clean Architecture boundary maps (EOA + Safe), port interfaces, offline signing detail |
+| [multisig.md](./multisig.md) | **ETH Safe multisig** — Safe v1.4.1 implementation, EIP-712 signing flow, file format, CLI commands, E2E Pattern 3 |
+| [docs/transaction-flow.md](../../transaction-flow.md) | Chain-agnostic 3-wallet setup, signing, and monitoring flows |
 
 For Ethereum-specific concerns on top of the common flow, see [ETH-Specific Flow Details](#eth-specific-flow-details) below.
 
 > **Key point:** ETH supports both single-sig EOA and Safe multisig flows.
 > For single-sig, only Watch and Keygen wallets are required.
 > For Safe multisig (E2E Pattern 3), all three wallets are used: Watch proposes and submits, Keygen and Sign wallets each sign offline.
-> See [multisig.md](../../../template/sections/architecture/multisig.md) for the Safe multisig implementation details.
+> See [multisig.md](./multisig.md) for the Safe multisig implementation details.
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Prerequisites](#prerequisites)
-3. [MuSig2 Basics](#musig2-basics)
-4. [Transaction Workflows](#transaction-workflows)
-5. [File Management](#file-management)
-6. [Address Creation](#address-creation)
-7. [Troubleshooting](#troubleshooting)
-8. [Best Practices](#best-practices)
-9. [Performance Comparison](#performance-comparison)
+2. [Core Specifications](#core-specifications)
+3. [Address Types & Key Derivation](#address-types--key-derivation)
+4. [Transaction Architecture](#transaction-architecture)
+5. [Transaction Types](#transaction-types)
+6. [Signing Mechanism](#signing-mechanism)
+7. [ERC-20 Token Support](#erc-20-token-support)
+8. [Network & Confirmation Guidelines](#network--confirmation-guidelines)
+9. [Fee Management](#fee-management)
+10. [Wallet Implementation](#wallet-implementation)
+11. [RPC & API Reference](#rpc--api-reference)
+12. [Security Considerations](#security-considerations)
+13. [Testing Resources](#testing-resources)
+14. [Official References](#official-references)
+15. [ETH-Specific Flow Details](#eth-specific-flow-details)
 
 ---
 
 ## Overview
 
-### What is MuSig2?
+### What is Ethereum?
 
-MuSig2 is a cryptographic protocol that enables multiple parties to create a **single aggregated Schnorr signature** that looks identical to a single-signature transaction on the blockchain. Unlike traditional multisig (P2SH, P2WSH) where multiple signatures are stored on-chain, MuSig2 aggregates multiple signatures into one, providing significant benefits.
+Ethereum is a decentralized platform with smart contract functionality. Unlike Bitcoin's UTXO model, Ethereum uses an **account-based model** where each account has a balance and a nonce. Transactions modify account state rather than consuming and creating outputs.
 
-### Benefits Over Traditional Multisig
+### Key Characteristics (2026)
 
-| Feature | Traditional P2WSH Multisig | MuSig2 |
-|---------|---------------------------|--------|
-| **On-Chain Appearance** | Multiple signatures visible | Single signature (looks like single-sig) |
-| **Transaction Size** | ~370-400 bytes (2-of-3) | ~200-250 bytes (30-50% smaller) |
-| **Privacy** | Multisig is visible | Indistinguishable from single-sig |
-| **Fees** | Higher (proportional to size) | 30-50% lower |
-| **Signature Algorithm** | ECDSA | Schnorr (BIP340) |
-| **Address Type** | P2WSH (bc1q...) | P2TR Taproot (bc1p...) |
-| **Compatibility** | Older standard | Modern (Bitcoin Core 22.0+) |
+| Property | Value |
+|----------|-------|
+| **Launch Date** | July 30, 2015 |
+| **Block Time** | ~12 seconds (post-Merge) |
+| **Consensus** | Proof of Stake (since September 2022 Merge) |
+| **Native Currency** | Ether (ETH) |
+| **Smallest Unit** | Wei (1 ETH = 10^18 Wei) |
+| **Cryptographic Curve** | secp256k1 |
+| **Signature Algorithm** | ECDSA |
+| **Address Length** | 20 bytes (40 hex characters) |
 
-### When to Use MuSig2
+### Protocol Upgrade Timeline
 
-- ✅ **New multisig setups** - Best privacy and efficiency
-- ✅ **High-volume operations** - Significant fee savings over time
-- ✅ **Privacy-focused applications** - Transactions look like single-sig
-- ✅ **Modern infrastructure** - Requires Bitcoin Core 22.0+ and Taproot support
-- ⚠️ **Legacy multisig** - Traditional P2WSH still supported for backward compatibility
-
-### How MuSig2 Works (Two-Round Protocol)
-
-```
-Round 1: Nonce Generation (Parallel)
-┌─────────────────────────────────────────────────────┐
-│  Keygen Wallet → Generate Nonce 1                   │
-│  Sign Wallet 1 → Generate Nonce 2  (can run in     │
-│  Sign Wallet 2 → Generate Nonce 3   parallel)      │
-└─────────────────────────────────────────────────────┘
-                        ↓
-            Exchange nonces via PSBT files
-                        ↓
-Round 2: Signing (Sequential)
-┌─────────────────────────────────────────────────────┐
-│  Keygen Wallet → Create Partial Signature 1         │
-│  Sign Wallet 1 → Create Partial Signature 2         │
-│  Sign Wallet 2 → Create Partial Signature 3         │
-└─────────────────────────────────────────────────────┘
-                        ↓
-            Collect partial signatures
-                        ↓
-Aggregation (Watch Wallet)
-┌─────────────────────────────────────────────────────┐
-│  Watch Wallet → Aggregate Partial Signatures        │
-│              → Verify Final Signature               │
-│              → Broadcast Transaction                │
-└─────────────────────────────────────────────────────┘
-```
-
-**Key Security Feature:**
-
-- Each wallet generates a **nonce** (random value) in Round 1
-- Nonces must be **unique per transaction** and **never reused**
-- Reusing nonces can leak private keys - this is critical!
+| Year | Upgrade | Key Features |
+|------|---------|--------------|
+| 2019 | **Istanbul** | EIP-1884, opcode repricing |
+| 2021 | **London (EIP-1559)** | Base fee + priority fee model |
+| 2022 | **The Merge** | Proof of Stake transition |
+| 2023 | **Shanghai** | Staking withdrawals |
+| 2024 | **Dencun** | Proto-danksharding (EIP-4844) |
 
 ---
 

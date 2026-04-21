@@ -39,7 +39,7 @@
 | pages/docs/architecture/shared-packages.tpl.md | docs/architecture/shared-packages.md | 1 |
 | pages/docs/architecture/directory-structure.tpl.md | docs/architecture/directory-structure.md | 1 |
 | pages/docs/chains/btc/README.tpl.md | docs/chains/btc/README.md | 20 |
-| pages/docs/chains/bch/README.tpl.md | docs/chains/bch/README.md | 21 |
+| pages/docs/chains/bch/README.tpl.md | docs/chains/bch/README.md | 19 |
 | pages/docs/chains/eth/README.tpl.md | docs/chains/eth/README.md | 18 |
 | pages/docs/chains/btc/musig2/architecture.tpl.md | docs/chains/btc/musig2/architecture.md | 13 |
 | pages/docs/chains/btc/musig2/user-guide.tpl.md | docs/chains/btc/musig2/user-guide.md | 13 |
@@ -50,7 +50,7 @@
 | pages/docs/chains/btc/psbt/migration.tpl.md | docs/chains/btc/psbt/migration.md | 11 |
 | pages/docs/chains/btc/psbt/user-guide.tpl.md | docs/chains/btc/psbt/user-guide.md | 12 |
 | pages/docs/chains/btc/overview/technical-reference.tpl.md | docs/chains/btc/overview/technical-reference.md | 1 |
-| pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md | docs/chains/btc/operations/e2e-transaction-patterns.md | 14 |
+| pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md | docs/chains/btc/operations/e2e-transaction-patterns.md | 12 |
 | pages/docs/chains/btc/operations/wallet-flow.tpl.md | docs/chains/btc/operations/wallet-flow.md | 1 |
 | pages/docs/chains/btc/operations/wallet-flow-improvements-2025.tpl.md | docs/chains/btc/operations/wallet-flow-improvements-2025.md | 1 |
 | pages/docs/chains/btc/taproot/user-guide.tpl.md | docs/chains/btc/taproot/user-guide.md | 1 |
@@ -379,10 +379,12 @@
 | sections/misc/bch/known-issues-and-workarounds.md | README |
 | sections/misc/bch/multisig-implementation.md | README |
 | sections/misc/bch/network-consensus-2.md | README |
+| sections/misc/bch/overview.md | README |
 | sections/misc/bch/project-documentation-2.md | README |
 | sections/misc/bch/security-considerations-2.md | README |
 | sections/misc/bch/signing-mechanisms-2.md | README |
-| sections/misc/bch/table-of-contents-2.md | README |
+| sections/misc/bch/table-of-contents-2.md | architecture |
+| sections/misc/bch/table-of-contents.md | README |
 | sections/misc/bch/wallet-implementation-2.md | README |
 | sections/misc/btc/1-library-support-validation.md | implementation |
 | sections/misc/btc/11-conclusion.md | implementation |
@@ -447,6 +449,7 @@
 | sections/misc/btc/psbt-infrastructure.md | developer-guide |
 | sections/misc/btc/psbt-migration-guide.md | migration |
 | sections/misc/btc/psbt-partially-signed-bitcoin-transactions.md | README |
+| sections/misc/btc/psbt-table-of-contents.md | user-guide |
 | sections/misc/btc/psbt-user-guide.md | user-guide |
 | sections/misc/btc/quick-start.md | README |
 | sections/misc/btc/related-documents.md | e2e-transaction-patterns |
@@ -462,14 +465,14 @@
 | sections/misc/btc/table-of-contents-5.md | migration-from-traditional |
 | sections/misc/btc/table-of-contents-6.md | developer-guide |
 | sections/misc/btc/table-of-contents-7.md | migration |
-| sections/misc/btc/table-of-contents.md | README, architecture, e2e-transaction-patterns, user-guide |
+| sections/misc/btc/table-of-contents.md | README, user-guide |
 | sections/misc/btc/threat-model.md | security |
 | sections/misc/btc/transaction-workflows-2.md | user-guide |
 | sections/misc/btc/transaction-workflows.md | user-guide |
 | sections/misc/btc/understanding-the-differences.md | migration-from-traditional |
 | sections/misc/btc/use-case-layer.md | developer-guide |
 | sections/misc/btc/wallet-implementation.md | README |
-| sections/misc/common/table-of-contents-3.md | README, user-guide |
+| sections/misc/common/table-of-contents-3.md | README |
 | sections/misc/devcontainer/additional-resources-4.md | devcontainer |
 | sections/misc/devcontainer/comparison-devcontainer-vs-local-development.md | devcontainer |
 | sections/misc/devcontainer/devcontainer-development-environment.md | devcontainer |
@@ -497,7 +500,7 @@
 | sections/product/workflow-diagram.md | overview |
 | sections/project/8-implementation-roadmap.md | implementation |
 | sections/project/btc-chain-overview.md | README |
-| sections/project/changelog.md | README, e2e-transaction-patterns |
+| sections/project/changelog.md | e2e-transaction-patterns |
 | sections/project/commands/global-flags.md | commands |
 | sections/project/commands/keygen-wallet.md | commands |
 | sections/project/commands/overview.md | commands |
@@ -512,12 +515,12 @@
 | sections/project/installation/overview.md | installation |
 | sections/project/installation/ripple.md | installation |
 | sections/project/introduction.md | migration-from-traditional |
-| sections/project/overview-2.md | README |
+| sections/project/overview-2.md | architecture |
 | sections/project/overview-3.md | README |
 | sections/project/overview-4.md | migration |
 | sections/project/overview-5.md | user-guide |
 | sections/project/overview-6.md | devcontainer |
-| sections/project/overview.md | README, architecture, e2e-transaction-patterns, overview, user-guide |
+| sections/project/overview.md | README, overview, user-guide |
 | sections/project/security-overview.md | security |
 | sections/reference/10-references.md | implementation |
 | sections/reference/agents-see-also.md | AGENTS, CLAUDE |

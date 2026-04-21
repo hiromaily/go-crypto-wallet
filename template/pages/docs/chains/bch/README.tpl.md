@@ -3,9 +3,9 @@
 Source: template/pages/docs/chains/bch/README.tpl.md · Run `make docs` to regenerate.
 -->
 
-<!-- @include: ../../../../sections/misc/bch/table-of-contents-2.md -->
+<!-- @include: ../../../../sections/misc/bch/table-of-contents.md -->
 
-<!-- @include: ../../../../sections/project/overview-2.md -->
+<!-- @include: ../../../../sections/misc/bch/overview.md -->
 
 <!-- @include: ../../../../sections/development/core-specifications-2.md -->
 
@@ -41,6 +41,4 @@ Source: template/pages/docs/chains/bch/README.tpl.md · Run `make docs` to regen
 
 <!-- @include: ../../../../sections/reference/bch-quick-reference.md -->
 
-<!-- @include: ../../../../sections/project/changelog.md -->
 
-<!-- @include: ../../../../sections/reference/bitcoin-btc-technical-reference.md -->

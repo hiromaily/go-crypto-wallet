@@ -5,9 +5,9 @@ Source: template/pages/docs/chains/btc/musig2/architecture.tpl.md · Run `make d
 
 <!-- @include: ../../../../../sections/architecture/musig2-architecture-documentation.md -->
 
-<!-- @include: ../../../../../sections/misc/btc/table-of-contents.md -->
+<!-- @include: ../../../../../sections/misc/bch/table-of-contents-2.md -->
 
-<!-- @include: ../../../../../sections/project/overview.md -->
+<!-- @include: ../../../../../sections/project/overview-2.md -->
 
 <!-- @include: ../../../../../sections/architecture/architecture-layers.md -->
 

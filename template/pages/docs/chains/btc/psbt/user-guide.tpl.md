@@ -5,7 +5,7 @@ Source: template/pages/docs/chains/btc/psbt/user-guide.tpl.md · Run `make docs`
 
 <!-- @include: ../../../../../sections/misc/btc/psbt-user-guide.md -->
 
-<!-- @include: ../../../../../sections/misc/common/table-of-contents-3.md -->
+<!-- @include: ../../../../../sections/misc/btc/psbt-table-of-contents.md -->
 
 <!-- @include: ../../../../../sections/project/overview-5.md -->
 

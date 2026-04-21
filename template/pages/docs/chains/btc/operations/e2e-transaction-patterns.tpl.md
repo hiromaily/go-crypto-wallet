@@ -5,10 +5,6 @@ Source: template/pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.m
 
 <!-- @include: ../../../../../sections/misc/btc/e2e-transaction-patterns-guide.md -->
 
-<!-- @include: ../../../../../sections/misc/btc/table-of-contents.md -->
-
-<!-- @include: ../../../../../sections/project/overview.md -->
-
 <!-- @include: ../../../../../sections/misc/btc/supported-key-types.md -->
 
 <!-- @include: ../../../../../sections/misc/btc/signature-patterns.md -->
