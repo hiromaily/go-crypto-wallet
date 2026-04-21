@@ -10,7 +10,7 @@ This document describes the BTC-specific setup procedures and transaction flow.
 
 - Transaction files use **PSBT (Partially Signed Bitcoin Transaction)** format — see [psbt/](../psbt/README)
 - Bitcoin Core descriptor wallets are used for address management — see [descriptor/](../descriptor/README)
-- Multiple address types are supported (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR) — see [E2E patterns](e2e-transaction-patterns.md)
+- Multiple address types are supported (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR) — see [E2E patterns](./e2e-transaction-patterns.md)
 
 ## Overview
 

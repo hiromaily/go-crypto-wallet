@@ -6,9 +6,9 @@ This directory contains documentation for Bitcoin key generation design and impr
 
 | Document | Description |
 |----------|-------------|
-| [improvements-2025.md](improvements-2025.md) | 2025 key generation modernization improvements |
-| [improvements-2025-ja.md](improvements-2025-ja.md) | 2025 improvements (Japanese version) |
-| [interface-design.md](interface-design.md) | Key generator interface design documentation |
+| [improvements-2025.md](./improvements-2025.md) | 2025 key generation modernization improvements |
+| [improvements-2025-ja.md](./improvements-2025-ja.md) | 2025 improvements (Japanese version) |
+| [interface-design.md](./interface-design.md) | Key generator interface design documentation |
 
 ## Audience
 

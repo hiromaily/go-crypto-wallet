@@ -6,11 +6,11 @@ This directory contains documentation for PSBT implementation and usage in the g
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](user-guide.md) | How to use PSBT for offline signing workflows | Operators |
-| [developer-guide.md](developer-guide.md) | Technical implementation details for developers | Developers |
-| [implementation.md](implementation.md) | PSBT implementation architecture | Developers |
-| [migration.md](migration.md) | Migration guide from legacy to PSBT | All |
-| [poc-example.md](poc-example.md) | Proof of concept examples | Developers |
+| [user-guide.md](./user-guide.md) | How to use PSBT for offline signing workflows | Operators |
+| [developer-guide.md](./developer-guide.md) | Technical implementation details for developers | Developers |
+| [implementation.md](./implementation.md) | PSBT implementation architecture | Developers |
+| [migration.md](./migration.md) | Migration guide from legacy to PSBT | All |
+| [poc-example.md](./poc-example.md) | Proof of concept examples | Developers |
 
 ## What is PSBT?
 

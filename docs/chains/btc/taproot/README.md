@@ -6,8 +6,8 @@ This directory contains documentation for Taproot (BIP341/BIP86) implementation.
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](user-guide.md) | How to use Taproot addresses in the wallet system | All |
-| [testing.md](testing.md) | Taproot test procedures and verification | Developers |
+| [user-guide.md](./user-guide.md) | How to use Taproot addresses in the wallet system | All |
+| [testing.md](./testing.md) | Taproot test procedures and verification | Developers |
 
 ## What is Taproot?
 

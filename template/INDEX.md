@@ -49,7 +49,77 @@
 | pages/docs/chains/btc/psbt/developer-guide.tpl.md | docs/chains/btc/psbt/developer-guide.md | 10 |
 | pages/docs/chains/btc/psbt/migration.tpl.md | docs/chains/btc/psbt/migration.md | 11 |
 | pages/docs/chains/btc/psbt/user-guide.tpl.md | docs/chains/btc/psbt/user-guide.md | 12 |
+| pages/docs/chains/btc/overview/technical-reference.tpl.md | docs/chains/btc/overview/technical-reference.md | 1 |
 | pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md | docs/chains/btc/operations/e2e-transaction-patterns.md | 14 |
+| pages/docs/chains/btc/operations/wallet-flow.tpl.md | docs/chains/btc/operations/wallet-flow.md | 1 |
+| pages/docs/chains/btc/operations/wallet-flow-improvements-2025.tpl.md | docs/chains/btc/operations/wallet-flow-improvements-2025.md | 1 |
+| pages/docs/chains/btc/taproot/user-guide.tpl.md | docs/chains/btc/taproot/user-guide.md | 1 |
+| pages/docs/chains/btc/keygen/interface-design.tpl.md | docs/chains/btc/keygen/interface-design.md | 1 |
+| pages/docs/chains/eth/architecture.tpl.md | docs/chains/eth/architecture.md | 1 |
+| pages/docs/chains/eth/multisig.tpl.md | docs/chains/eth/multisig.md | 1 |
+| pages/docs/chains/btc/overview/address-types.tpl.md | docs/chains/btc/overview/address-types.md | 1 |
+| pages/docs/chains/btc/architecture.tpl.md | docs/chains/btc/architecture.md | 1 |
+| pages/docs/chains/btc/taproot/testing.tpl.md | docs/chains/btc/taproot/testing.md | 1 |
+| pages/docs/chains/btc/psbt/poc-example.tpl.md | docs/chains/btc/psbt/poc-example.md | 1 |
+| pages/docs/chains/btc/keygen/improvements-2025.tpl.md | docs/chains/btc/keygen/improvements-2025.md | 1 |
+| pages/docs/chains/btc/keygen/improvements-2025-ja.tpl.md | docs/chains/btc/keygen/improvements-2025-ja.md | 1 |
+| pages/docs/chains/xrp/README.tpl.md | docs/chains/xrp/README.md | 1 |
+| pages/docs/chains/xrp/architecture-2026.tpl.md | docs/chains/xrp/architecture-2026.md | 1 |
+| pages/docs/chains/xrp/architecture-xrpl-grpc-server-version.tpl.md | docs/chains/xrp/architecture-xrpl-grpc-server-version.md | 1 |
+| pages/docs/chains/xrp/library-selection.tpl.md | docs/chains/xrp/library-selection.md | 1 |
+| pages/docs/chains/xrp/network-devnet.tpl.md | docs/chains/xrp/network-devnet.md | 1 |
+| pages/docs/chains/xrp/testing-strategy.tpl.md | docs/chains/xrp/testing-strategy.md | 1 |
+| pages/docs/chains/xrp/transaction-flow.tpl.md | docs/chains/xrp/transaction-flow.md | 1 |
+| pages/docs/chains/eth/solidity-development.tpl.md | docs/chains/eth/solidity-development.md | 1 |
+| pages/docs/chains/eth/transaction-patterns.tpl.md | docs/chains/eth/transaction-patterns.md | 1 |
+| pages/docs/ai/agent-skills.tpl.md | docs/ai/agent-skills.md | 1 |
+| pages/docs/ai/design.tpl.md | docs/ai/design.md | 1 |
+| pages/docs/ai/task-contexts/chain-specific.tpl.md | docs/ai/task-contexts/chain-specific.md | 1 |
+| pages/docs/ai/task-contexts/db-change.tpl.md | docs/ai/task-contexts/db-change.md | 1 |
+| pages/docs/ai/task-contexts/feature-add.tpl.md | docs/ai/task-contexts/feature-add.md | 1 |
+| pages/docs/ai/task-contexts/refactoring.tpl.md | docs/ai/task-contexts/refactoring.md | 1 |
+| pages/docs/ai/task-contexts/test.tpl.md | docs/ai/task-contexts/test.md | 1 |
+| pages/docs/design/btc-network-mode-switching.tpl.md | docs/design/btc-network-mode-switching.md | 1 |
+| pages/docs/design/pg2sqlite-alter-table-support.tpl.md | docs/design/pg2sqlite-alter-table-support.md | 1 |
+| pages/docs/design/revise-db-atlas-sqlc-flow.tpl.md | docs/design/revise-db-atlas-sqlc-flow.md | 1 |
+| pages/docs/design/superpowers-integration.tpl.md | docs/design/superpowers-integration.md | 1 |
+| pages/docs/directory-structure.tpl.md | docs/directory-structure.md | 1 |
+| pages/docs/transaction-flow.tpl.md | docs/transaction-flow.md | 1 |
+| pages/docs/guidelines/claude-best-practice.tpl.md | docs/guidelines/claude-best-practice.md | 1 |
+| pages/docs/issues/REFACTORING_CHECKLIST.tpl.md | docs/issues/REFACTORING_CHECKLIST.md | 1 |
+| pages/docs/issues/REFACTORING_PLAN.tpl.md | docs/issues/REFACTORING_PLAN.md | 1 |
+| pages/docs/github-actions/investigation-cache.tpl.md | docs/github-actions/investigation-cache.md | 1 |
+| pages/docs/ai/task-contexts/README.tpl.md | docs/ai/task-contexts/README.md | 1 |
+| pages/docs/ai/task-contexts/bug-fix.tpl.md | docs/ai/task-contexts/bug-fix.md | 1 |
+| pages/docs/ai/task-contexts/documentation.tpl.md | docs/ai/task-contexts/documentation.md | 1 |
+| pages/docs/ai/task-contexts/task-analysis.tpl.md | docs/ai/task-contexts/task-analysis.md | 1 |
+| pages/docs/ai/task-contexts/task-oriented-context.tpl.md | docs/ai/task-contexts/task-oriented-context.md | 1 |
+| pages/docs/ai/task-contexts/verification.tpl.md | docs/ai/task-contexts/verification.md | 1 |
+| pages/docs/chains/bch/interface-separation.tpl.md | docs/chains/bch/interface-separation.md | 1 |
+| pages/docs/chains/btc/archive/README.tpl.md | docs/chains/btc/archive/README.md | 1 |
+| pages/docs/chains/btc/archive/operation-example.tpl.md | docs/chains/btc/archive/operation-example.md | 1 |
+| pages/docs/chains/btc/descriptor/README.tpl.md | docs/chains/btc/descriptor/README.md | 1 |
+| pages/docs/chains/btc/descriptor/api.tpl.md | docs/chains/btc/descriptor/api.md | 1 |
+| pages/docs/chains/btc/descriptor/architecture.tpl.md | docs/chains/btc/descriptor/architecture.md | 1 |
+| pages/docs/chains/btc/descriptor/compatibility.tpl.md | docs/chains/btc/descriptor/compatibility.md | 1 |
+| pages/docs/chains/btc/descriptor/development.tpl.md | docs/chains/btc/descriptor/development.md | 1 |
+| pages/docs/chains/btc/descriptor/examples.tpl.md | docs/chains/btc/descriptor/examples.md | 1 |
+| pages/docs/chains/btc/descriptor/migration.tpl.md | docs/chains/btc/descriptor/migration.md | 1 |
+| pages/docs/chains/btc/descriptor/user-guide.tpl.md | docs/chains/btc/descriptor/user-guide.md | 1 |
+| pages/docs/chains/btc/keygen/README.tpl.md | docs/chains/btc/keygen/README.md | 1 |
+| pages/docs/chains/btc/musig2/README.tpl.md | docs/chains/btc/musig2/README.md | 1 |
+| pages/docs/chains/btc/operations/README.tpl.md | docs/chains/btc/operations/README.md | 1 |
+| pages/docs/chains/btc/operations/pattern3-verification.tpl.md | docs/chains/btc/operations/pattern3-verification.md | 1 |
+| pages/docs/chains/btc/overview/README.tpl.md | docs/chains/btc/overview/README.md | 1 |
+| pages/docs/chains/btc/psbt/README.tpl.md | docs/chains/btc/psbt/README.md | 1 |
+| pages/docs/chains/btc/taproot/README.tpl.md | docs/chains/btc/taproot/README.md | 1 |
+| pages/docs/chains/eth/json-schema.tpl.md | docs/chains/eth/json-schema.md | 1 |
+| pages/docs/chains/xrp/setup-docker-compose-standalone-xrpl.tpl.md | docs/chains/xrp/setup-docker-compose-standalone-xrpl.md | 1 |
+| pages/docs/chains/xrp/xrpl-go.tpl.md | docs/chains/xrp/xrpl-go.md | 1 |
+| pages/docs/guidelines/golangci-lint.tpl.md | docs/guidelines/golangci-lint.md | 1 |
+| pages/docs/index.tpl.md | docs/index.md | 1 |
+| pages/docs/overview-ja.tpl.md | docs/overview-ja.md | 1 |
+| pages/docs/reference/proto.tpl.md | docs/reference/proto.md | 1 |
 | pages/docs/getting-started/devcontainer.tpl.md | docs/getting-started/devcontainer.md | 14 |
 | pages/docs/overview.tpl.md | docs/overview.md | 4 |
 | pages/docs/getting-started/installation.tpl.md | docs/getting-started/installation.md | 7 |
@@ -60,9 +130,22 @@
 | File | Referenced by |
 | --- | --- |
 | sections/ai/agent-guidelines.md | AGENTS, CLAUDE |
+| sections/ai/agent-skills.md | agent-skills |
 | sections/ai/core-values.md | AGENTS, CLAUDE |
+| sections/ai/design.md | design |
 | sections/ai/expected-behavior.md | AGENTS, CLAUDE |
 | sections/ai/ssot-structure.md | AGENTS, CLAUDE |
+| sections/ai/task-contexts/README.md | README |
+| sections/ai/task-contexts/bug-fix.md | bug-fix |
+| sections/ai/task-contexts/chain-specific.md | chain-specific |
+| sections/ai/task-contexts/db-change.md | db-change |
+| sections/ai/task-contexts/documentation.md | documentation |
+| sections/ai/task-contexts/feature-add.md | feature-add |
+| sections/ai/task-contexts/refactoring.md | refactoring |
+| sections/ai/task-contexts/task-analysis.md | task-analysis |
+| sections/ai/task-contexts/task-oriented-context.md | task-oriented-context |
+| sections/ai/task-contexts/test.md | test |
+| sections/ai/task-contexts/verification.md | verification |
 | sections/architecture/2-recommended-architecture-hybrid-approach.md | implementation |
 | sections/architecture/3-infrastructure-layer-design.md | implementation |
 | sections/architecture/architecture-layers.md | architecture |
@@ -84,6 +167,35 @@
 | sections/architecture/transaction-architecture-3.md | README |
 | sections/architecture/transaction-architecture.md | README |
 | sections/architecture/wallet-architecture.md | ARCHITECTURE, overview, wallet-architecture |
+| sections/bch/interface-separation.md | interface-separation |
+| sections/btc/architecture.md | architecture |
+| sections/btc/archive/README.md | README |
+| sections/btc/archive/operation-example.md | operation-example |
+| sections/btc/descriptor/README.md | README |
+| sections/btc/descriptor/api.md | api |
+| sections/btc/descriptor/architecture.md | architecture |
+| sections/btc/descriptor/compatibility.md | compatibility |
+| sections/btc/descriptor/development.md | development |
+| sections/btc/descriptor/examples.md | examples |
+| sections/btc/descriptor/migration.md | migration |
+| sections/btc/descriptor/user-guide.md | user-guide |
+| sections/btc/keygen/README.md | README |
+| sections/btc/keygen/improvements-2025-ja.md | improvements-2025-ja |
+| sections/btc/keygen/improvements-2025.md | improvements-2025 |
+| sections/btc/keygen/interface-design.md | interface-design |
+| sections/btc/musig2/README.md | README |
+| sections/btc/operations/README.md | README |
+| sections/btc/operations/pattern3-verification.md | pattern3-verification |
+| sections/btc/operations/wallet-flow-improvements-2025.md | wallet-flow-improvements-2025 |
+| sections/btc/operations/wallet-flow.md | wallet-flow |
+| sections/btc/overview/README.md | README |
+| sections/btc/overview/address-types.md | address-types |
+| sections/btc/overview/technical-reference.md | technical-reference |
+| sections/btc/psbt/README.md | README |
+| sections/btc/psbt/poc-example.md | poc-example |
+| sections/btc/taproot/README.md | README |
+| sections/btc/taproot/testing.md | testing |
+| sections/btc/taproot/user-guide.md | user-guide |
 | sections/database/architecture/atlas-migrations.md | architecture |
 | sections/database/architecture/common-operations.md | architecture |
 | sections/database/architecture/container-setup.md | architecture |
@@ -135,6 +247,10 @@
 | sections/database/sqlc-code-generation-flow/makefile-targets.md | sqlc-code-generation-flow |
 | sections/database/sqlc-code-generation-flow/overview.md | sqlc-code-generation-flow |
 | sections/database/sqlc-code-generation-flow/schema-pipeline.md | sqlc-code-generation-flow |
+| sections/design/btc-network-mode-switching.md | btc-network-mode-switching |
+| sections/design/pg2sqlite-alter-table-support.md | pg2sqlite-alter-table-support |
+| sections/design/revise-db-atlas-sqlc-flow.md | revise-db-atlas-sqlc-flow |
+| sections/design/superpowers-integration.md | superpowers-integration |
 | sections/development/auto-generated-files.md | CONTRIBUTING |
 | sections/development/branch-naming.md | CONTRIBUTING |
 | sections/development/code-style.md | CONTRIBUTING |
@@ -163,7 +279,14 @@
 | sections/development/testing-resources.md | README |
 | sections/development/testing-strategy.md | ARCHITECTURE, developer-guide |
 | sections/development/version-information.md | README |
+| sections/eth/architecture.md | architecture |
+| sections/eth/json-schema.md | json-schema |
+| sections/eth/multisig.md | multisig |
+| sections/eth/solidity-development.md | solidity-development |
+| sections/eth/transaction-patterns.md | transaction-patterns |
+| sections/github-actions/investigation-cache.md | investigation-cache |
 | sections/guidelines/architecture.md | architecture |
+| sections/guidelines/claude-best-practice.md | claude-best-practice |
 | sections/guidelines/claude-mem/architecture.md | claude-mem |
 | sections/guidelines/claude-mem/configuration.md | claude-mem |
 | sections/guidelines/claude-mem/data-management.md | claude-mem |
@@ -197,6 +320,7 @@
 | sections/guidelines/coding-conventions/see-also.md | coding-conventions |
 | sections/guidelines/coding-conventions/testing.md | coding-conventions |
 | sections/guidelines/core.md | core |
+| sections/guidelines/golangci-lint.md | golangci-lint |
 | sections/guidelines/multi-chain/adding-support.md | multi-chain |
 | sections/guidelines/multi-chain/architecture.md | multi-chain |
 | sections/guidelines/multi-chain/blockchain-communication.md | multi-chain |
@@ -236,6 +360,8 @@
 | sections/guidelines/workflow/pull-request.md | workflow |
 | sections/guidelines/workflow/see-also.md | workflow |
 | sections/guidelines/workflow/verification.md | workflow |
+| sections/issues/REFACTORING_CHECKLIST.md | REFACTORING_CHECKLIST |
+| sections/issues/REFACTORING_PLAN.md | REFACTORING_PLAN |
 | sections/misc/1-library-support-validation.md | implementation |
 | sections/misc/11-conclusion.md | implementation |
 | sections/misc/4-data-flow.md | implementation |
@@ -394,12 +520,26 @@
 | sections/reference/documentation-map.md | AGENTS, CLAUDE |
 | sections/reference/e2e-script-reference.md | e2e-transaction-patterns |
 | sections/reference/ethereum-eth-technical-reference.md | README |
+| sections/reference/proto.md | proto |
 | sections/reference/quick-reference.md | AGENTS, CLAUDE, e2e-transaction-patterns |
 | sections/reference/quick-start.md | README |
 | sections/reference/references.md | architecture |
 | sections/reference/rpc-api-reference-2.md | README |
 | sections/reference/rpc-api-reference-3.md | README |
 | sections/reference/rpc-api-reference.md | README |
+| sections/root-docs/directory-structure.md | directory-structure |
+| sections/root-docs/index.md | index |
+| sections/root-docs/overview-ja.md | overview-ja |
+| sections/root-docs/transaction-flow.md | transaction-flow |
+| sections/xrp/README.md | README |
+| sections/xrp/architecture-2026.md | architecture-2026 |
+| sections/xrp/architecture-xrpl-grpc-server-version.md | architecture-xrpl-grpc-server-version |
+| sections/xrp/library-selection.md | library-selection |
+| sections/xrp/network-devnet.md | network-devnet |
+| sections/xrp/setup-docker-compose-standalone-xrpl.md | setup-docker-compose-standalone-xrpl |
+| sections/xrp/testing-strategy.md | testing-strategy |
+| sections/xrp/transaction-flow.md | transaction-flow |
+| sections/xrp/xrpl-go.md | xrpl-go |
 
 ## Rules
 

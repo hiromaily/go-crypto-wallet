@@ -6,10 +6,10 @@ This directory contains documentation for MuSig2 (BIP327) multisignature impleme
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](user-guide.md) | How to use MuSig2 for multisig operations | Operators |
-| [architecture.md](architecture.md) | MuSig2 system architecture and data flow | Developers |
-| [security.md](security.md) | Security considerations and nonce management | All |
-| [migration-from-traditional.md](migration-from-traditional.md) | Migration guide from traditional P2WSH multisig | All |
+| [user-guide.md](./user-guide.md) | How to use MuSig2 for multisig operations | Operators |
+| [architecture.md](./architecture.md) | MuSig2 system architecture and data flow | Developers |
+| [security.md](./security.md) | Security considerations and nonce management | All |
+| [migration-from-traditional.md](./migration-from-traditional.md) | Migration guide from traditional P2WSH multisig | All |
 
 ## What is MuSig2?
 
@@ -40,7 +40,7 @@ Round 2: Partial Signing (Sequential)
 
 - Generate fresh nonces for every transaction
 - Delete nonces immediately after signing
-- See [security.md](security.md) for details
+- See [security.md](./security.md) for details
 
 ## CLI Commands
 

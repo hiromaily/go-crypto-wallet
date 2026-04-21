@@ -6,13 +6,13 @@ This directory contains documentation for Bitcoin Output Descriptor implementati
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](user-guide.md) | How to use descriptors for address generation | Operators |
-| [architecture.md](architecture.md) | Descriptor architecture following Clean Architecture | Developers |
-| [development.md](development.md) | Development guide for descriptor features | Developers |
-| [api.md](api.md) | API reference for descriptor operations | Developers |
-| [examples.md](examples.md) | Descriptor format examples | All |
-| [compatibility.md](compatibility.md) | Bitcoin Core compatibility notes | Developers |
-| [migration.md](migration.md) | Migration guide from legacy address handling | All |
+| [user-guide.md](./user-guide.md) | How to use descriptors for address generation | Operators |
+| [architecture.md](./architecture.md) | Descriptor architecture following Clean Architecture | Developers |
+| [development.md](./development.md) | Development guide for descriptor features | Developers |
+| [api.md](./api.md) | API reference for descriptor operations | Developers |
+| [examples.md](./examples.md) | Descriptor format examples | All |
+| [compatibility.md](./compatibility.md) | Bitcoin Core compatibility notes | Developers |
+| [migration.md](./migration.md) | Migration guide from legacy address handling | All |
 
 ## What are Output Descriptors?
 

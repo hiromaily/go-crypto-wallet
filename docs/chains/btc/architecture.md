@@ -321,7 +321,7 @@ Both Keygen and Sign wallets participate in MuSig2:
 | Aggregation | Watch | `MuSig2Aggregate` — combine partial sigs into final Schnorr sig |
 
 > **Critical:** MuSig2 nonces must never be reused. Reuse leaks the private key.
-> See [docs/chains/btc/musig2/security.md](musig2/security.md) for details.
+> See [docs/chains/btc/musig2/security.md](./musig2/security.md) for details.
 
 ---
 
