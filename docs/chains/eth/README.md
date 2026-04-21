@@ -624,12 +624,12 @@ anvil --fork-url https://mainnet.infura.io/v3/<key>
 ## ETH-Specific Flow Details
 
 > The common 3-wallet setup, signing, and monitoring flows are defined in the chain-agnostic reference:
-> [docs/transaction-flow.md](../../../template/transaction-flow.md).
+> [docs/transaction-flow.md](../../transaction-flow.md).
 > This section describes Ethereum-specific concerns on top of that common flow.
 
 ### Single-Sig Flow (Ethereum)
 
-Follows the [common single-sig flow](../../../template/transaction-flow.md#single-sig-flow).
+Follows the [common single-sig flow](../../transaction-flow.md#single-sig-flow).
 
 Ethereum-specific steps:
 
@@ -658,7 +658,7 @@ The implementation uses a file-based, offline-signing workflow:
 2. Each owner (Keygen or Sign wallet) verifies the EIP-712 `safeTxHash` offline and appends a signature
 3. When the threshold is reached, Watch Wallet submits `execTransaction` on-chain
 
-See [multisig.md](../../../template/sections/development/multisig.md) for the complete reference including file format, CLI commands, EIP-712 signing details, and E2E Pattern 3 (2-of-2 Safe payment).
+See [multisig.md](./multisig.md) for the complete reference including file format, CLI commands, EIP-712 signing details, and E2E Pattern 3 (2-of-2 Safe payment).
 
 ---
 
