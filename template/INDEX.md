@@ -38,6 +38,9 @@
 | pages/docs/architecture/data-flow.tpl.md | docs/architecture/data-flow.md | 1 |
 | pages/docs/architecture/shared-packages.tpl.md | docs/architecture/shared-packages.md | 1 |
 | pages/docs/architecture/directory-structure.tpl.md | docs/architecture/directory-structure.md | 1 |
+| pages/docs/chains/btc/README.tpl.md | docs/chains/btc/README.md | 20 |
+| pages/docs/chains/bch/README.tpl.md | docs/chains/bch/README.md | 21 |
+| pages/docs/chains/eth/README.tpl.md | docs/chains/eth/README.md | 18 |
 | pages/docs/overview.tpl.md | docs/overview.md | 4 |
 | pages/docs/getting-started/installation.tpl.md | docs/getting-started/installation.md | 7 |
 | pages/docs/getting-started/commands.tpl.md | docs/getting-started/commands.md | 5 |
@@ -51,6 +54,7 @@
 | sections/ai/expected-behavior.md | AGENTS, CLAUDE |
 | sections/ai/ssot-structure.md | AGENTS, CLAUDE |
 | sections/architecture/architecture-overview.md | ARCHITECTURE, index |
+| sections/architecture/architecture-transaction-flow.md | README |
 | sections/architecture/architecture.md | index |
 | sections/architecture/components.md | index |
 | sections/architecture/data-flow.md | ARCHITECTURE, data-flow |
@@ -60,6 +64,9 @@
 | sections/architecture/layer-architecture.md | ARCHITECTURE, layers |
 | sections/architecture/layer-responsibilities.md | ARCHITECTURE, layers |
 | sections/architecture/shared-packages.md | ARCHITECTURE, shared-packages |
+| sections/architecture/transaction-architecture-2.md | README |
+| sections/architecture/transaction-architecture-3.md | README |
+| sections/architecture/transaction-architecture.md | README |
 | sections/architecture/wallet-architecture.md | ARCHITECTURE, overview, wallet-architecture |
 | sections/database/architecture/atlas-migrations.md | architecture |
 | sections/database/architecture/common-operations.md | architecture |
@@ -117,13 +124,24 @@
 | sections/development/code-style.md | CONTRIBUTING |
 | sections/development/commit-conventions.md | CONTRIBUTING |
 | sections/development/contributing-to-go-crypto-wallet.md | CONTRIBUTING |
+| sections/development/core-specifications-2.md | README |
+| sections/development/core-specifications-3.md | README |
+| sections/development/core-specifications.md | README |
 | sections/development/development-setup.md | CONTRIBUTING |
 | sections/development/documentation.md | CONTRIBUTING |
+| sections/development/eth-specific-flow-details.md | README |
 | sections/development/getting-started.md | CONTRIBUTING |
+| sections/development/official-references-2.md | README |
+| sections/development/official-references-3.md | README |
+| sections/development/official-references.md | README |
 | sections/development/pull-request-guidelines.md | CONTRIBUTING |
 | sections/development/questions.md | CONTRIBUTING |
 | sections/development/security-considerations.md | CONTRIBUTING |
+| sections/development/testing-resources-2.md | README |
+| sections/development/testing-resources-3.md | README |
+| sections/development/testing-resources.md | README |
 | sections/development/testing-strategy.md | ARCHITECTURE |
+| sections/development/version-information.md | README |
 | sections/guidelines/architecture.md | architecture |
 | sections/guidelines/claude-mem/architecture.md | claude-mem |
 | sections/guidelines/claude-mem/configuration.md | claude-mem |
@@ -197,9 +215,44 @@
 | sections/guidelines/workflow/pull-request.md | workflow |
 | sections/guidelines/workflow/see-also.md | workflow |
 | sections/guidelines/workflow/verification.md | workflow |
+| sections/misc/address-types-key-derivation-2.md | README |
+| sections/misc/address-types-key-derivation-3.md | README |
+| sections/misc/address-types-key-derivation.md | README |
+| sections/misc/differences-from-bitcoin.md | README |
+| sections/misc/documentation-structure.md | README |
+| sections/misc/e2e-transaction-patterns.md | README |
+| sections/misc/erc-20-token-support.md | README |
+| sections/misc/fee-management-2.md | README |
+| sections/misc/fee-management-3.md | README |
+| sections/misc/fee-management.md | README |
+| sections/misc/known-issues-and-workarounds.md | README |
+| sections/misc/multisig-implementation.md | README |
+| sections/misc/multisig-musig2.md | README |
+| sections/misc/network-confirmation-guidelines.md | README |
+| sections/misc/network-consensus-2.md | README |
+| sections/misc/network-consensus.md | README |
+| sections/misc/project-documentation-2.md | README |
+| sections/misc/project-documentation.md | README |
+| sections/misc/psbt-partially-signed-bitcoin-transactions.md | README |
+| sections/misc/quick-start.md | README |
+| sections/misc/security-considerations-2.md | README |
+| sections/misc/security-considerations-3.md | README |
+| sections/misc/security-considerations.md | README |
+| sections/misc/signing-mechanism.md | README |
+| sections/misc/signing-mechanisms-2.md | README |
+| sections/misc/signing-mechanisms.md | README |
+| sections/misc/table-of-contents-2.md | README |
+| sections/misc/table-of-contents-3.md | README |
+| sections/misc/table-of-contents.md | README |
+| sections/misc/transaction-types.md | README |
+| sections/misc/wallet-implementation-2.md | README |
+| sections/misc/wallet-implementation-3.md | README |
+| sections/misc/wallet-implementation.md | README |
 | sections/product/chain-coverage.md | README |
 | sections/product/wallet-types.md | overview |
 | sections/product/workflow-diagram.md | overview |
+| sections/project/btc-chain-overview.md | README |
+| sections/project/changelog.md | README |
 | sections/project/commands/global-flags.md | commands |
 | sections/project/commands/keygen-wallet.md | commands |
 | sections/project/commands/overview.md | commands |
@@ -213,13 +266,21 @@
 | sections/project/installation/ethereum.md | installation |
 | sections/project/installation/overview.md | installation |
 | sections/project/installation/ripple.md | installation |
+| sections/project/overview-2.md | README |
+| sections/project/overview-3.md | README |
 | sections/project/overview.md | README, overview |
 | sections/reference/agents-see-also.md | AGENTS, CLAUDE |
 | sections/reference/architecture-see-also.md | ARCHITECTURE |
+| sections/reference/bch-quick-reference.md | README |
+| sections/reference/bitcoin-btc-technical-reference.md | README |
 | sections/reference/documentation-links.md | README |
 | sections/reference/documentation-map.md | AGENTS, CLAUDE |
+| sections/reference/ethereum-eth-technical-reference.md | README |
 | sections/reference/quick-reference.md | AGENTS, CLAUDE |
 | sections/reference/quick-start.md | README |
+| sections/reference/rpc-api-reference-2.md | README |
+| sections/reference/rpc-api-reference-3.md | README |
+| sections/reference/rpc-api-reference.md | README |
 
 ## Rules
 

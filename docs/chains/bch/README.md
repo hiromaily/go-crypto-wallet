@@ -1,7 +1,3 @@
-# Bitcoin Cash (BCH) Technical Reference
-
-This document provides a comprehensive technical reference for Bitcoin Cash implementation in the go-crypto-wallet system. It covers specifications, protocol details, and links to official documentation to help AI agents and developers understand BCH's architecture and implement features correctly.
-
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -864,7 +860,7 @@ This workaround should be maintained until Bitcoin Cash Node fixes the `complete
 This section describes the E2E (End-to-End) transaction patterns available for Bitcoin Cash in the go-crypto-wallet system.
 
 > **Common flow reference**: The 3-wallet setup, signing, and monitoring flows are defined in
-> [docs/transaction-flow.md](../../transaction-flow.md). The patterns below describe
+> [docs/transaction-flow.md](../../../template/transaction-flow.md). The patterns below describe
 > BCH-specific address formats, signing algorithms, and protocol constraints.
 
 ### BCH Pattern Limitations vs BTC
@@ -897,7 +893,7 @@ Address Format: bitcoincash:q... (P2PKH), bchtest:q... (Testnet)
 
 **Workflow:**
 
-Follows the [common single-sig flow](../../transaction-flow.md#single-sig-flow).
+Follows the [common single-sig flow](../../../template/transaction-flow.md#single-sig-flow).
 BCH-specific signing: **ECDSA** (no Schnorr).
 
 **Characteristics:**
@@ -927,7 +923,7 @@ Address Format: bitcoincash:p... (P2SH), bchtest:p... (Testnet)
 
 **Workflow:**
 
-Follows the [common multisig flow](../../transaction-flow.md#multisig-flow-m-of-n) with M=2, N=3.
+Follows the [common multisig flow](../../../template/transaction-flow.md#multisig-flow-m-of-n) with M=2, N=3.
 Signing stops after 2 signatures (`isCompleted: true`); Sign2 is not required.
 BCH-specific signing: **ECDSA** (no Schnorr).
 
@@ -958,7 +954,7 @@ E2E Script: scripts/operation/bch/e2e-workflow.sh
 
 **Workflow:**
 
-Follows the [common multisig flow](../../transaction-flow.md#multisig-flow-m-of-n) with M=3, N=3.
+Follows the [common multisig flow](../../../template/transaction-flow.md#multisig-flow-m-of-n) with M=3, N=3.
 All 3 signatures required (Keygen + Sign1 + Sign2).
 BCH-specific signing: **ECDSA** (no Schnorr).
 
@@ -1055,9 +1051,9 @@ While not currently implemented in go-crypto-wallet, BCH has planned upgrades:
 
 | Document | Description |
 |----------|-------------|
-| [BTC E2E Transaction Patterns](../btc/operations/e2e-transaction-patterns.md) | Comprehensive BTC patterns guide |
+| [BTC E2E Transaction Patterns](../../../template/sections/btc/operations/e2e-transaction-patterns.md) | Comprehensive BTC patterns guide |
 | BTC/BCH Technical Guide (internal document) | Comprehensive BTC/BCH comparison |
-| [Bitcoin README](../btc/README.md) | Bitcoin technical reference |
+| [Bitcoin README](../../../template/sections/btc/README.md) | Bitcoin technical reference |
 | [BCH E2E Workflow](https://github.com/hiromaily/go-crypto-wallet/blob/main/scripts/operation/bch/README.md) | BCH E2E script documentation |
 
 ### Implementation Files
@@ -1100,14 +1096,6 @@ While not currently implemented in go-crypto-wallet, BCH has planned upgrades:
 - [ ] Verify replay protection is active
 - [ ] Wait for sufficient confirmations
 
----
-
-**Document Version:** 1.1
-**Last Updated:** 2026-01-17
-**Maintainer:** go-crypto-wallet team
-
----
-
 ## Changelog
 
 ### Version 1.1 (2026-01-17)
@@ -1122,3 +1110,7 @@ While not currently implemented in go-crypto-wallet, BCH has planned upgrades:
 ### Version 1.0 (2026-01-07)
 
 - Initial comprehensive BCH technical reference
+
+# Bitcoin (BTC) Technical Reference
+
+This document provides a comprehensive technical reference for Bitcoin implementation in the go-crypto-wallet system. It covers specifications, protocol details, and links to official documentation to help AI agents and developers understand Bitcoin's architecture and implement features correctly.

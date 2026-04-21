@@ -6,16 +6,16 @@ This document provides a comprehensive technical reference for Ethereum implemen
 
 | Document | Description |
 |----------|-------------|
-| [architecture.md](./architecture.md) | **[SSOT] ETH wallet architecture** — wallet roles, use case assignments, Clean Architecture boundary maps (EOA + Safe), port interfaces, offline signing detail |
-| [multisig.md](./multisig.md) | **ETH Safe multisig** — Safe v1.4.1 implementation, EIP-712 signing flow, file format, CLI commands, E2E Pattern 3 |
-| [docs/transaction-flow.md](../../transaction-flow.md) | Chain-agnostic 3-wallet setup, signing, and monitoring flows |
+| [architecture.md](../../../template/sections/architecture/architecture.md) | **[SSOT] ETH wallet architecture** — wallet roles, use case assignments, Clean Architecture boundary maps (EOA + Safe), port interfaces, offline signing detail |
+| [multisig.md](../../../template/sections/architecture/multisig.md) | **ETH Safe multisig** — Safe v1.4.1 implementation, EIP-712 signing flow, file format, CLI commands, E2E Pattern 3 |
+| [docs/transaction-flow.md](../../../template/transaction-flow.md) | Chain-agnostic 3-wallet setup, signing, and monitoring flows |
 
 For Ethereum-specific concerns on top of the common flow, see [ETH-Specific Flow Details](#eth-specific-flow-details) below.
 
 > **Key point:** ETH supports both single-sig EOA and Safe multisig flows.
 > For single-sig, only Watch and Keygen wallets are required.
 > For Safe multisig (E2E Pattern 3), all three wallets are used: Watch proposes and submits, Keygen and Sign wallets each sign offline.
-> See [multisig.md](./multisig.md) for the Safe multisig implementation details.
+> See [multisig.md](../../../template/sections/architecture/multisig.md) for the Safe multisig implementation details.
 
 ---
 
@@ -117,7 +117,7 @@ Address:      20 bytes = Keccak256(pubkey)[12:]
 
 ### Address Type
 
-This system supports **EOA (Externally Owned Account)** addresses for key generation and single-sig flows. **Safe (Gnosis Safe v1.4.1) smart contract wallets** are also supported for multisig flows — see [multisig.md](./multisig.md).
+This system supports **EOA (Externally Owned Account)** addresses for key generation and single-sig flows. **Safe (Gnosis Safe v1.4.1) smart contract wallets** are also supported for multisig flows — see [multisig.md](../../../template/sections/misc/multisig.md).
 
 EOA addresses:
 
@@ -430,7 +430,7 @@ recipientReceives = amount
 
 ## Wallet Implementation
 
-> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](./architecture.md). This section provides a quick-reference summary only.
+> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](../../../template/sections/misc/architecture.md). This section provides a quick-reference summary only.
 
 ### Wallet Roles (Summary)
 
@@ -440,7 +440,7 @@ recipientReceives = amount
 | **Keygen** | Generate keys, sign transactions | Generate keys, sign as Safe owner 1 | Offline (air-gapped) |
 | **Sign** | Not used | Sign as Safe owner 2…n | Offline (air-gapped) |
 
-See [architecture.md](./architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
+See [architecture.md](../../../template/sections/misc/architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
 
 ### Database Schema (ETH-specific tables)
 
@@ -619,12 +619,12 @@ anvil --fork-url https://mainnet.infura.io/v3/<key>
 ## ETH-Specific Flow Details
 
 > The common 3-wallet setup, signing, and monitoring flows are defined in the chain-agnostic reference:
-> [docs/transaction-flow.md](../../transaction-flow.md).
+> [docs/transaction-flow.md](../../../template/transaction-flow.md).
 > This section describes Ethereum-specific concerns on top of that common flow.
 
 ### Single-Sig Flow (Ethereum)
 
-Follows the [common single-sig flow](../../transaction-flow.md#single-sig-flow).
+Follows the [common single-sig flow](../../../template/transaction-flow.md#single-sig-flow).
 
 Ethereum-specific steps:
 
@@ -653,7 +653,7 @@ The implementation uses a file-based, offline-signing workflow:
 2. Each owner (Keygen or Sign wallet) verifies the EIP-712 `safeTxHash` offline and appends a signature
 3. When the threshold is reached, Watch Wallet submits `execTransaction` on-chain
 
-See [multisig.md](./multisig.md) for the complete reference including file format, CLI commands, EIP-712 signing details, and E2E Pattern 3 (2-of-2 Safe payment).
+See [multisig.md](../../../template/sections/development/multisig.md) for the complete reference including file format, CLI commands, EIP-712 signing details, and E2E Pattern 3 (2-of-2 Safe payment).
 
 ---
 
