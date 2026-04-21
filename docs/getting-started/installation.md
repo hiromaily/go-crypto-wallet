@@ -1,176 +1,162 @@
 # Installation
 
-This installation expects MacOS environment.
+This guide covers setting up the development environment on macOS.
 
 ## Requirements
 
-- Golang 1.25+
-- [Docker](https://www.docker.com/get-started)
-## Common Setup
+| Tool | Version | Purpose |
+|------|---------|---------|
+| [Go](https://go.dev/dl/) | 1.26.2+ | Build the wallet binaries |
+| [Docker](https://www.docker.com/get-started) | latest | Blockchain nodes and databases |
+| Docker Compose | latest | Container orchestration |
+| [Foundry](https://getfoundry.sh/) | latest | ETH E2E only: deploy ERC-20 and Safe contracts (P2, P3), cast for MPC-TSS (P4) |
 
-1. install Golang, Docker
-2. build `watch`, `keygen`, `auth` wallets
+> **For E2E tests (recommended entry point):** Go, Docker, and Docker Compose are sufficient for BTC, BCH, and XRP. ETH E2E patterns P2, P3, and P4 additionally require Foundry.
 
-- only each sign wallet includes corresponding account name as `authName` into binary
+Install Foundry (macOS/Linux):
 
-```sh
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+## Build the Wallets
+
+Build all three wallet binaries:
+
+```bash
 make build
- or
-go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
+```
+
+This produces `watch`, `keygen`, and `sign` binaries. The sign binary embeds the authorizer name at build time:
+
+```bash
+# Manual build (equivalent to make build)
+go build -v -o ${GOPATH}/bin/watch  ./cmd/watch/
 go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 ```
 
-1. configure config files in [./config/wallet/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/main/config/wallet)
-2. run Database containers
+Configuration files are in [`./config/wallet/*.toml`](https://github.com/hiromaily/go-crypto-wallet/tree/main/config/wallet).
+## E2E Test Setup
 
+E2E tests are **self-contained**: each script starts and stops the required blockchain node containers automatically. You do not need to manually start nodes or configure databases before running an E2E test.
+
+**Default database:** SQLite — no Docker database container required.
+
+```bash
+# BTC: build wallets, start regtest node, run full flow, stop node
+make btc-e2e P=1
+
+# ETH (Anvil): build wallets, start Anvil container, run full flow, stop container
+make eth-e2e-p1
+
+# XRP: build wallets, start rippled container, run full flow, stop container
+make xrp-e2e-p1
 ```
-docker compose up wallet-mysql
+
+### ETH-specific: Foundry required for P2, P3, P4
+
+| Pattern | Reason |
+|---------|--------|
+| P2 (ERC-20 HYT) | `forge` deploys the HYT ERC-20 contract onto Anvil |
+| P3 (Safe multisig) | `forge` deploys the Safe v1.4.1 proxy contract onto Anvil |
+| P4 (MPC-TSS) | `cast` is used to verify on-chain balances |
+
+Install Foundry before running ETH P2, P3, or P4:
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash && foundryup
 ```
-## Bitcoind Setup
 
-At least, one bitcoin core server and 1 database (with 3 schemas: watch, keygen, sign) are required.
+### Database options
 
-1. copy `bitcoin.conf` from ./config/blockchain/bitcoind/ to ./docker/nodes/btc/watch, keygen, sign1 directory respectively.
+All E2E tests default to SQLite. To use PostgreSQL or MySQL, pass `DB=`:
 
-- I recommend signet network.
-
-1. run bitcoind node containers
-
+```bash
+make btc-e2e P=1 DB=postgres   # requires Docker PostgreSQL container
+make btc-e2e P=1 DB=mysql      # requires Docker MySQL container
 ```
+## Bitcoin / Bitcoin Cash Node Setup (Manual Operation)
+
+> **For E2E tests:** Node startup is handled automatically by the E2E scripts. This section is only needed for manual operation workflows.
+
+Run BTC node containers via Docker Compose:
+
+```bash
 docker compose -f compose.btc.yaml up btc-watch btc-keygen btc-sign
 ```
 
-1. setup `bitcoin-cli` using docker
-    - after running `btc-watch` container, set alias on shell
+Set up `bitcoin-cli` aliases:
 
-   ```zsh
-   alias bitcoin-cli-watch='docker exec -it btc-watch bitcoin-cli'
-   alias bitcoin-cli-keygen='docker exec -it btc-keygen bitcoin-cli'
-   alias bitcoin-cli-sign='docker exec -it btc-sign bitcoin-cli'
-   ```
-
-2. create wallets on bitcoind respectively
-
-   ```
-   ./scripts/operation/create-bitcoind-wallet.sh
-     or
-   bitcoin-cli-watch createwallet watch
-   bitcoin-cli-keygen createwallet keygen
-   bitcoin-cli-sign createwallet sign1
-   bitcoin-cli-sign createwallet sign2
-   bitcoin-cli-sign createwallet sign3
-   bitcoin-cli-sign createwallet sign4
-   bitcoin-cli-sign createwallet sign5
-   ```
-
-3. load wallet (required if btc containers restarted)
-
-   ```
-   ./scripts/operation/load-bitcoind-wallet.sh
-     or
-   bitcoin-cli-watch loadwallet watch
-   bitcoin-cli-keygen loadwallet keygen
-   bitcoin-cli-sign loadwallet sign1
-   bitcoin-cli-sign loadwallet sign2
-   bitcoin-cli-sign loadwallet sign3
-   bitcoin-cli-sign loadwallet sign4
-   bitcoin-cli-sign loadwallet sign5
-   ```
-
-4. operation
-
-- see [Operation Example](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/btc/OperationExample.md)
-## Bitcoind Setup without container
-
-1. install `bitcoind` on macOS directly if needed
-
-- see [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
-
-1. run bitcoind `$ bitcoind`
-2. create wallets separately (if only one node used)
-
-    ```
-    $ bitcoin-cli createwallet watch
-    $ bitcoin-cli createwallet keygen
-    $ bitcoin-cli createwallet sign1
-    $ bitcoin-cli createwallet sign2
-    $ bitcoin-cli createwallet sign3
-    $ bitcoin-cli createwallet sign4
-    $ bitcoin-cli createwallet sign5
-    $ bitcoin-cli listwallets
-    [
-      "",
-      "watch",
-      "keygen",
-      "sign1",
-      "sign2",
-      "sign3",
-      "sign4",
-      "sign5"
-    ]
-    ```
-## Ethereum Setup
-
-It depends on which node you choose
-
-### A. go-ethereum
-
-- run node by docker compose
-
+```bash
+alias bitcoin-cli-watch='docker exec -it btc-watch bitcoin-cli'
+alias bitcoin-cli-keygen='docker exec -it btc-keygen bitcoin-cli'
+alias bitcoin-cli-sign='docker exec -it btc-sign bitcoin-cli'
 ```
-make up-docker-geth
- or
+
+Create and load wallets:
+
+```bash
+# Create wallets (first time only)
+./scripts/operation/create-bitcoind-wallet.sh
+
+# Load wallets (required after container restart)
+./scripts/operation/load-bitcoind-wallet.sh
+```
+## Ethereum Node Setup (Manual Operation)
+
+> **For E2E tests:** Node startup is handled automatically by the E2E scripts. This section is only needed for manual operation workflows.
+
+Two node options are supported:
+
+### A. Anvil (default for E2E and local development)
+
+[Anvil](https://getfoundry.sh/anvil/overview/) is part of Foundry and is the default node for all ETH E2E patterns.
+
+```bash
+docker compose -f compose.eth.yaml up anvil
+```
+
+### B. go-ethereum (Geth)
+
+```bash
 docker compose -f compose.eth.yaml up geth
+# or
+make up-docker-geth
 ```
 
-- If you have exported data, run `make import-geth-data` after tweaking parameters before running `make up-docker-geth`.
+Pass `NODE_TYPE=geth` to E2E scripts to use Geth instead of Anvil:
 
-#### [WIP] Call API => move to operation example
-
-1. `watch -coin eth api clientversion`
-
+```bash
+make eth-e2e-p1 NODE_TYPE=geth
 ```
-client version: Geth/v1.10.15-stable-8be800ff/linux-amd64/go1.17.5
-```
+## ERC-20 Contract Deployment
 
-1. `watch -coin eth api nodeinfo`
-2. `watch -coin eth api syncing`
-3. `watch -coin eth api netversion`
+The HYT ERC-20 contract is deployed automatically by `make eth-e2e-p2` using Foundry (`forge`). No manual deployment step is required for E2E testing.
 
-### B. Ganache
+For manual deployment (advanced use):
 
-- run node by docker compose
-
-```
-docker compose -f compose.eth.yaml up ganache
+```bash
+cd ./apps/eth-contracts
+forge build
+forge script script/DeployHYT.s.sol --broadcast --rpc-url http://localhost:8546
 ```
 
-- prepare sql file if you choose Ganache.
-  But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/eth/Ganache.md)
-## ERC20 Token Setup
+Requires Foundry to be installed (`curl -L https://foundry.paradigm.xyz | bash && foundryup`).
+## XRP Ledger Node Setup (Manual Operation)
 
-- deploy ERC-20 token contract if needed
-- Original ERC-20 token is [here](https://github.com/hiromaily/go-crypto-wallet/tree/main/web/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/main/scripts/operation/deploy-token.sh)
+> **For E2E tests:** Node startup is handled automatically by the E2E scripts. This section is only needed for manual operation workflows.
 
-```
-cd ./web/erc20-token
-yarn install
+Run a local `rippled` node in standalone mode (equivalent to regtest):
 
-# deploy contract to current network
-yarn run deploy       # using 7545 port
- or
-yarn run deploy-dev2  # using 8545 port
+```bash
+docker compose -f compose.xrp.yaml up rippled
 ```
 
-- copy `contract address` in console and modify `contract_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
-- copy `account` in console and modify `master_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
+The standalone mode allows manual ledger advancement:
 
+```bash
+# Advance the ledger (equivalent to mining a block)
+./scripts/operation/xrp/ledger-accept.sh
 ```
-# check balance
-yarn ts-node src/web3.ts --mode balance --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# transfer to specific address
-yarn ts-node src/web3.ts --mode transfer --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --amount 100
-```
-## Ripple Setup

@@ -1,38 +1,27 @@
-### Ethereum Setup
+### Ethereum Node Setup (Manual Operation)
 
-It depends on which node you choose
+> **For E2E tests:** Node startup is handled automatically by the E2E scripts. This section is only needed for manual operation workflows.
 
-#### A. go-ethereum
+Two node options are supported:
 
-- run node by docker compose
+#### A. Anvil (default for E2E and local development)
 
+[Anvil](https://getfoundry.sh/anvil/overview/) is part of Foundry and is the default node for all ETH E2E patterns.
+
+```bash
+docker compose -f compose.eth.yaml up anvil
 ```
-make up-docker-geth
- or
+
+#### B. go-ethereum (Geth)
+
+```bash
 docker compose -f compose.eth.yaml up geth
+# or
+make up-docker-geth
 ```
 
-- If you have exported data, run `make import-geth-data` after tweaking parameters before running `make up-docker-geth`.
+Pass `NODE_TYPE=geth` to E2E scripts to use Geth instead of Anvil:
 
-##### [WIP] Call API => move to operation example
-
-1. `watch -coin eth api clientversion`
-
+```bash
+make eth-e2e-p1 NODE_TYPE=geth
 ```
-client version: Geth/v1.10.15-stable-8be800ff/linux-amd64/go1.17.5
-```
-
-1. `watch -coin eth api nodeinfo`
-2. `watch -coin eth api syncing`
-3. `watch -coin eth api netversion`
-
-#### B. Ganache
-
-- run node by docker compose
-
-```
-docker compose -f compose.eth.yaml up ganache
-```
-
-- prepare sql file if you choose Ganache.
-  But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/eth/Ganache.md)

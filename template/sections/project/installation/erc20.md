@@ -1,24 +1,13 @@
-### ERC20 Token Setup
+### ERC-20 Contract Deployment
 
-- deploy ERC-20 token contract if needed
-- Original ERC-20 token is [here](https://github.com/hiromaily/go-crypto-wallet/tree/main/web/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/main/scripts/operation/deploy-token.sh)
+The HYT ERC-20 contract is deployed automatically by `make eth-e2e-p2` using Foundry (`forge`). No manual deployment step is required for E2E testing.
 
-```
-cd ./web/erc20-token
-yarn install
+For manual deployment (advanced use):
 
-# deploy contract to current network
-yarn run deploy       # using 7545 port
- or
-yarn run deploy-dev2  # using 8545 port
+```bash
+cd ./apps/eth-contracts
+forge build
+forge script script/DeployHYT.s.sol --broadcast --rpc-url http://localhost:8546
 ```
 
-- copy `contract address` in console and modify `contract_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
-- copy `account` in console and modify `master_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
-
-```
-# check balance
-yarn ts-node src/web3.ts --mode balance --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# transfer to specific address
-yarn ts-node src/web3.ts --mode transfer --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --amount 100
-```
+Requires Foundry to be installed (`curl -L https://foundry.paradigm.xyz | bash && foundryup`).

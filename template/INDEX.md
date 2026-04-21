@@ -206,9 +206,9 @@
 | sections/project/commands/sign-wallet.md | commands |
 | sections/project/commands/watch-wallet.md | commands |
 | sections/project/identity.md | AGENTS, CLAUDE |
-| sections/project/installation/bitcoind-no-container.md | installation |
 | sections/project/installation/bitcoind.md | installation |
 | sections/project/installation/common-setup.md | installation |
+| sections/project/installation/e2e-setup.md | installation |
 | sections/project/installation/erc20.md | installation |
 | sections/project/installation/ethereum.md | installation |
 | sections/project/installation/overview.md | installation |
@@ -248,5 +248,6 @@
 | sections/product/supported-coins.md | Not referenced by any template |
 | sections/product/use-cases.md | Not referenced by any template |
 | sections/project/context.md | Not referenced by any template |
+| sections/project/installation/bitcoind-no-container.md | Not referenced by any template |
 | sections/reference/command-example.md | Not referenced by any template |
 | sections/reference/operation-example.md | Not referenced by any template |
