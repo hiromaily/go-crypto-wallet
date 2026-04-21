@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/taproot/user-guide.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Taproot User Guide
 
 This guide explains how to use Taproot (BIP341/BIP86) addresses in the go-crypto-wallet system.

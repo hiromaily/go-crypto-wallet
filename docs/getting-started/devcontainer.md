@@ -1,4 +1,11 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/getting-started/devcontainer.tpl.md · Run `make docs` to regenerate.
+-->
+
 # DevContainer Development Environment
+
+
 
 ## Table of Contents
 

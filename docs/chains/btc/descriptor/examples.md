@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/examples.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Descriptor Examples
 
 This page collects runnable examples for descriptor workflows.

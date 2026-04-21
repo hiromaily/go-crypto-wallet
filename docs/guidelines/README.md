@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/overview.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Project Guidelines
 
 This directory contains project guidelines, standards, and the Single Source of Truth (SSOT) documents.

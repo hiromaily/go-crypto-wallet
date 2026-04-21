@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/testing-strategy.tpl.md · Run `make docs` to regenerate.
+-->
+
 # XRPL Development & Testing Strategy (2026 Edition)
 
 ## Context

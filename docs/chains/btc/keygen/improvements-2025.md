@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/keygen/improvements-2025.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin Key Generation Modernization Improvements (End of 2025)
 
 This document summarizes improvements for modernizing Bitcoin key generation as of the end of 2025.

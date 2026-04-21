@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/design/revise-db-atlas-sqlc-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Design Document: Revise DB Tooling (Atlas Migration + SQLC Code Generation Flow)
 
 ## Overview

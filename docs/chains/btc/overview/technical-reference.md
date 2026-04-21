@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/overview/technical-reference.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin and Bitcoin Cash Technical Guide for AI Agents (2025)
 
 This document provides a comprehensive technical reference for AI Agents working with Bitcoin (BTC) and Bitcoin Cash (BCH) transaction systems, covering address types, multisig mechanisms, and transaction sending workflows.

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/AGENTS.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Agent Guidelines for go-crypto-wallet
 
 This document defines the **behavior and values** for AI agents working on this project.
@@ -92,23 +97,33 @@ For detailed documentation, see [llms.txt](./llms.txt) and [ARCHITECTURE.md](./A
 
 ## Quick Reference
 
-### Verification Commands
+### Identifying BTC Address Types
 
-| Language | Lint | Build | Test |
-|----------|------|-------|------|
-| Go | `make go-lint` | `make check-build` | `make go-test` |
-| TypeScript | `npm run lint` | `npm run build` | `npm test` |
-| Shell | `make shfmt` | - | - |
+| Prefix | Type | BIP | SegWit |
+|--------|------|-----|--------|
+| `1...` | P2PKH | BIP44 | ❌ |
+| `3...` | P2SH or P2SH-P2WPKH | BIP16/BIP49 | △ |
+| `bc1q...` | P2WPKH or P2WSH | BIP84 | ✅ |
+| `bc1p...` | P2TR (Taproot) | BIP86 | ✅ |
 
-### Git Operations
+### Identifying BCH Address Types
 
-```bash
-# Allowed
-git add, git commit, git push
+| Prefix | Type | Multisig |
+|--------|------|----------|
+| `bitcoincash:q...` | P2PKH | ❌ |
+| `bitcoincash:p...` | P2SH | ✅ |
 
-# NOT Allowed
-git merge, gh pr merge, push to main
-```
+### Transaction Size Comparison
+
+| Pattern | Weight | vBytes | Notes |
+|---------|--------|--------|-------|
+| P2PKH Single-sig (1-in, 2-out) | ~680 | ~170 | Legacy |
+| P2WPKH Single-sig (1-in, 2-out) | ~440 | ~110 | Native SegWit |
+| P2TR Single-sig (1-in, 2-out) | ~396 | ~99 | Taproot |
+| 2-of-3 P2WSH Multisig | ~1,100 | ~275 | Traditional Multisig |
+| 2-of-3 MuSig2 (P2TR) | ~560 | ~140 | Signature Aggregation |
+
+---
 
 ## See Also
 

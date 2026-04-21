@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/task-analysis.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Task Pattern Analysis
 
 このドキュメントは、GitHub Issues と Commit 履歴から分析したタスクパターンをまとめています。

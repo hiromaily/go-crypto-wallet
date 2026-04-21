@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/developer-guide.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT Developer Guide
 
 This guide provides technical documentation for developers working with the PSBT (Partially Signed Bitcoin Transaction) implementation in go-crypto-wallet.

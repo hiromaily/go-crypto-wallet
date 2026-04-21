@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/design/superpowers-integration.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Superpowers Integration Design
 
 This document describes the plan to integrate [obra/superpowers](https://github.com/obra/superpowers) into this project's AI agent instruction system.

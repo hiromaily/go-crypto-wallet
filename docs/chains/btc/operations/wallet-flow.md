@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/operations/wallet-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Flow for BTC
 
 This document describes the BTC-specific setup procedures and transaction flow.
@@ -8,9 +13,9 @@ This document describes the BTC-specific setup procedures and transaction flow.
 
 ## BTC-Specific Notes
 
-- Transaction files use **PSBT (Partially Signed Bitcoin Transaction)** format — see [psbt/](../psbt/README)
-- Bitcoin Core descriptor wallets are used for address management — see [descriptor/](../descriptor/README)
-- Multiple address types are supported (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR) — see [E2E patterns](e2e-transaction-patterns.md)
+- Transaction files use **PSBT (Partially Signed Bitcoin Transaction)** format — see [psbt/](../psbt/README.md)
+- Bitcoin Core descriptor wallets are used for address management — see [descriptor/](../descriptor/README.md)
+- Multiple address types are supported (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR) — see [E2E patterns](./e2e-transaction-patterns.md)
 
 ## Overview
 

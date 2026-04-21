@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/directory-structure.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Directory Structure
 
 This document describes the current directory structure and dependency relationships of the go-crypto-wallet project.

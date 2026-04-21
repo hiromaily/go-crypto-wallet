@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/xrpl-go.tpl.md · Run `make docs` to regenerate.
+-->
+
 # About [xrpscan/xrpl-go](https://github.com/xrpscan/xrpl-go)
 
 > **Note**: This document covers **xrpscan/xrpl-go** specifically. For the overall library selection strategy (why we use both xrpscan and Peersyst), see [library-selection.md](./library-selection.md).

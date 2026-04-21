@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/keygen/improvements-2025-ja.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin鍵生成の最新化改善点 (2025年末時点)
 
 このドキュメントは、2025年末時点でBitcoinの鍵生成を最新化する際の改善点をまとめたものです。

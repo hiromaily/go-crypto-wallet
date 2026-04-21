@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/architecture.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin (BTC) Wallet Architecture
 
 This document is the authoritative reference for the BTC module's wallet architecture within go-crypto-wallet's Clean Architecture + 3-wallet security model (Watch / Keygen / Sign).
@@ -321,7 +326,7 @@ Both Keygen and Sign wallets participate in MuSig2:
 | Aggregation | Watch | `MuSig2Aggregate` — combine partial sigs into final Schnorr sig |
 
 > **Critical:** MuSig2 nonces must never be reused. Reuse leaks the private key.
-> See [docs/chains/btc/musig2/security.md](musig2/security.md) for details.
+> See [docs/chains/btc/musig2/security.md](./musig2/security.md) for details.
 
 ---
 

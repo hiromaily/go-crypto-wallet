@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/db-management.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Database Management
 
 This document provides a quick reference for database schema management and SQLC code generation in the go-crypto-wallet project.

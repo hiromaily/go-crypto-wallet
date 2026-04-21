@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/transaction-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # XRP Transaction Flow (Current Implementation)
 
 This document describes the **as-built** transaction flow for the XRP integration as of PR #635.

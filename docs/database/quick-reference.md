@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/quick-reference.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Database Quick Reference Card
 
 Quick reference for common database operations in go-crypto-wallet project.

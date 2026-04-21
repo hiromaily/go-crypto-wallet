@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/feature-add.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: feature-add
 description: 新機能追加タスク用のコンテキスト

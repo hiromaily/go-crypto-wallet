@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/compatibility.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Descriptor Compatibility with Bitcoin Core
 
 This guide describes how to validate descriptor compatibility between this wallet and Bitcoin Core.

@@ -1,6 +1,7 @@
-# Bitcoin Cash (BCH) Technical Reference
-
-This document provides a comprehensive technical reference for Bitcoin Cash implementation in the go-crypto-wallet system. It covers specifications, protocol details, and links to official documentation to help AI agents and developers understand BCH's architecture and implement features correctly.
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/bch/README.tpl.md · Run `make docs` to regenerate.
+-->
 
 ## Table of Contents
 
@@ -1100,25 +1101,4 @@ While not currently implemented in go-crypto-wallet, BCH has planned upgrades:
 - [ ] Verify replay protection is active
 - [ ] Wait for sufficient confirmations
 
----
 
-**Document Version:** 1.1
-**Last Updated:** 2026-01-17
-**Maintainer:** go-crypto-wallet team
-
----
-
-## Changelog
-
-### Version 1.1 (2026-01-17)
-
-- Added comprehensive E2E Transaction Patterns section
-- Documented BCH Pattern 1 (Single-sig), Pattern 2 (2-of-3), Pattern 3 (3-of-3)
-- Added BCH vs BTC pattern comparison
-- Added account type recommendations
-- Added future BCH upgrade notes (CashTokens, VM Limits, etc.)
-- Updated related documentation links
-
-### Version 1.0 (2026-01-07)
-
-- Initial comprehensive BCH technical reference

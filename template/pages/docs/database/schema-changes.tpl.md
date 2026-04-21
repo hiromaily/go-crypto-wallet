@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/schema-changes.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/database/schema-changes/overview.md level=-1 -->
 
 <!-- @include: ../../../sections/database/schema-changes/quick-reference.md level=-1 -->

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/architecture/dependency-injection.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Dependency Injection
 
 The `internal/di/` package wires together all dependencies:

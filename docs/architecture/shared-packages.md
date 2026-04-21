@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/architecture/shared-packages.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Shared Packages (`pkg/`)
 
 The `pkg/` directory contains reusable utilities that can be used across the application:

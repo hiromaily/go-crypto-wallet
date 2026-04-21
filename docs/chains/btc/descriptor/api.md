@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/api.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Descriptor API (CLI Surface)
 
 Descriptor functionality is exposed through CLI commands for keygen (offline) and watch (online) wallets.

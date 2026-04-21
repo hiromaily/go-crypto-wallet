@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/CONTRIBUTING.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../sections/development/contributing-to-go-crypto-wallet.md -->
 
 <!-- @include: ../sections/development/getting-started.md -->

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/core.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Core Principles
 
 This document contains immutable core principles that apply across all domains of the go-crypto-wallet project.

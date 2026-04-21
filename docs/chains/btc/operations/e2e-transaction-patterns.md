@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md · Run `make docs` to regenerate.
+-->
+
 # E2E Transaction Patterns Guide
 
 This document explains transaction combination patterns for Bitcoin/Bitcoin Cash. Various E2E workflow patterns exist depending on key types and whether multisig is used.
@@ -912,7 +917,7 @@ No additional E2E scripts planned at this time. All 11 Bitcoin patterns are impl
 
 ## Related Documents
 
-- [BTC Technical Reference](/chains/btc/operations/README) - Bitcoin technical reference
+- [BTC Technical Reference](/chains/btc/operations/README.md) - Bitcoin technical reference
 - [Taproot User Guide](/chains/btc/taproot/user-guide) - How to use Taproot
 - [MuSig2 User Guide](/chains/btc/musig2/user-guide) - How to use MuSig2
 - [Descriptor Examples](/chains/btc/descriptor/examples) - Descriptor examples

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/bug-fix.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: bug-fix
 description: バグ修正・Issue対応タスク用のコンテキスト

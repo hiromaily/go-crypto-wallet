@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/operations/wallet-flow-improvements-2025.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin Wallet Flow Improvements (2025)
 
 This document outlines improvements for the Bitcoin wallet flow, including the roles of Keygen Wallet, Sign Wallet, and Watch Wallet, with a focus on modern key technologies (Taproot, MuSig2, etc.).

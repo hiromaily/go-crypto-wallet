@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/eth/transaction-patterns.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Ethereum Raw Transaction Patterns (2026)
 
 ## 1. Transaction Types (Protocol Level)

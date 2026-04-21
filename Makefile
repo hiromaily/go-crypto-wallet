@@ -15,6 +15,7 @@
 # - release.mk:      Release and versioning targets
 # - db.mk:           Database-specific targets
 # - ai.mk:           AI-related targets
+# - docs.mk:         docs-ssot tool related targets
 # - wallet/btc.mk:   Bitcoin-specific targets
 # - wallet/bch.mk:   Bitcoin Cash-specific targets
 # - wallet/eth.mk:   Ethereum-specific targets
@@ -47,6 +48,7 @@ include make/test.mk
 include make/codegen.mk
 include make/lint.mk
 include make/release.mk
+include make/docs.mk
 
 # 3. Blockchain-specific
 include make/wallet/btc.mk

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/operations/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Wallet Operations
 
 This directory contains guides for operating the Bitcoin wallet system.
@@ -6,9 +11,9 @@ This directory contains guides for operating the Bitcoin wallet system.
 
 | Document | Description |
 |----------|-------------|
-| [wallet-flow.md](wallet-flow.md) | Setup procedures and transaction flow for Watch/Keygen/Sign wallets |
-| [e2e-transaction-patterns.md](e2e-transaction-patterns.md) | E2E test patterns for various key types and signature schemes |
-| [wallet-flow-improvements-2025.md](wallet-flow-improvements-2025.md) | 2025 workflow enhancement plans |
+| [wallet-flow.md](./wallet-flow.md) | Setup procedures and transaction flow for Watch/Keygen/Sign wallets |
+| [e2e-transaction-patterns.md](./e2e-transaction-patterns.md) | E2E test patterns for various key types and signature schemes |
+| [wallet-flow-improvements-2025.md](./wallet-flow-improvements-2025.md) | 2025 workflow enhancement plans |
 
 ## Audience
 
@@ -30,6 +35,6 @@ This directory contains guides for operating the Bitcoin wallet system.
 
 ## Related Documentation
 
-- [../psbt/](../psbt/README) - PSBT guides for offline signing
-- [../musig2/](../musig2/README) - MuSig2 multisig operations
+- [../psbt/](../psbt/README.md) - PSBT guides for offline signing
+- [../musig2/](../musig2/README.md) - MuSig2 multisig operations
 - [../README.md](../README.md) - Main BTC documentation index

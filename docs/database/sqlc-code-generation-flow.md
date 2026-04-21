@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/sqlc-code-generation-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # SQLC Code Generation Flow
 
 This document describes the SQLC code generation pipeline for the three databases (`watch / keygen / sign`) across **PostgreSQL**, **MySQL**, and **SQLite** dialects.

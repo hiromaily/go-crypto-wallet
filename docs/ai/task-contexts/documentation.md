@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/documentation.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: documentation
 description: ドキュメント整備タスク用のコンテキスト

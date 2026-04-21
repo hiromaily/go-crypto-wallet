@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/architecture.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Descriptor Architecture
 
 Descriptor functionality follows the project's Clean Architecture pattern.

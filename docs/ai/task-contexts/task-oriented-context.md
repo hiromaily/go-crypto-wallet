@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/task-oriented-context.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Task-Oriented Context Management
 
 ## Overview
@@ -225,7 +230,7 @@ Command Behavior:
 ## Related Documents
 
 - `AGENTS.md` - プロジェクトガイドライン
-- [Agent Skills](../../ai/agent-skills.md) - Agent Skills使用ガイド
+- [Agent Skills](../agent-skills.md) - Agent Skills使用ガイド
 - [Task Contexts](./README.md) - タスクコンテキスト一覧
 - [Task Analysis](./task-analysis.md) - Issue/Commit パターン分析
 - [Verification Matrix](./verification.md) - ファイルタイプ別検証コマンド

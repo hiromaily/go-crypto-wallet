@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Task Contexts
 
 このディレクトリには、タスクタイプ別のコンテキスト定義ファイルが含まれています。

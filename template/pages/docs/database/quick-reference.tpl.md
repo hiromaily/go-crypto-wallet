@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/quick-reference.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/database/quick-reference/overview.md level=-1 -->
 <!-- @include: ../../../sections/database/quick-reference/workflows.md level=-1 -->
 <!-- @include: ../../../sections/database/quick-reference/file-locations.md level=-1 -->

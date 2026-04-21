@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/requirements.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Required Tools and Versions
 
 This document lists all required tools and their versions for the go-crypto-wallet project.

@@ -69,6 +69,205 @@ targets:
     output: docs/architecture/shared-packages.md
   - input: template/pages/docs/architecture/directory-structure.tpl.md
     output: docs/architecture/directory-structure.md
+  # docs/chains/
+  - input: template/pages/docs/chains/btc/README.tpl.md
+    output: docs/chains/btc/README.md
+  - input: template/pages/docs/chains/bch/README.tpl.md
+    output: docs/chains/bch/README.md
+  - input: template/pages/docs/chains/eth/README.tpl.md
+    output: docs/chains/eth/README.md
+  # docs/chains/btc/musig2/
+  - input: template/pages/docs/chains/btc/musig2/architecture.tpl.md
+    output: docs/chains/btc/musig2/architecture.md
+  - input: template/pages/docs/chains/btc/musig2/user-guide.tpl.md
+    output: docs/chains/btc/musig2/user-guide.md
+  - input: template/pages/docs/chains/btc/musig2/security.tpl.md
+    output: docs/chains/btc/musig2/security.md
+  - input: template/pages/docs/chains/btc/musig2/migration-from-traditional.tpl.md
+    output: docs/chains/btc/musig2/migration-from-traditional.md
+  # docs/chains/btc/psbt/
+  - input: template/pages/docs/chains/btc/psbt/implementation.tpl.md
+    output: docs/chains/btc/psbt/implementation.md
+  - input: template/pages/docs/chains/btc/psbt/developer-guide.tpl.md
+    output: docs/chains/btc/psbt/developer-guide.md
+  - input: template/pages/docs/chains/btc/psbt/migration.tpl.md
+    output: docs/chains/btc/psbt/migration.md
+  - input: template/pages/docs/chains/btc/psbt/user-guide.tpl.md
+    output: docs/chains/btc/psbt/user-guide.md
+  # docs/chains/btc/overview/
+  - input: template/pages/docs/chains/btc/overview/technical-reference.tpl.md
+    output: docs/chains/btc/overview/technical-reference.md
+  # docs/chains/btc/operations/
+  - input: template/pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md
+    output: docs/chains/btc/operations/e2e-transaction-patterns.md
+  - input: template/pages/docs/chains/btc/operations/wallet-flow.tpl.md
+    output: docs/chains/btc/operations/wallet-flow.md
+  - input: template/pages/docs/chains/btc/operations/wallet-flow-improvements-2025.tpl.md
+    output: docs/chains/btc/operations/wallet-flow-improvements-2025.md
+  # docs/chains/btc/taproot/
+  - input: template/pages/docs/chains/btc/taproot/user-guide.tpl.md
+    output: docs/chains/btc/taproot/user-guide.md
+  # docs/chains/btc/keygen/
+  - input: template/pages/docs/chains/btc/keygen/interface-design.tpl.md
+    output: docs/chains/btc/keygen/interface-design.md
+  # docs/chains/eth/ (additional)
+  - input: template/pages/docs/chains/eth/architecture.tpl.md
+    output: docs/chains/eth/architecture.md
+  - input: template/pages/docs/chains/eth/multisig.tpl.md
+    output: docs/chains/eth/multisig.md
+  # docs/chains/btc/overview/ (additional)
+  - input: template/pages/docs/chains/btc/overview/address-types.tpl.md
+    output: docs/chains/btc/overview/address-types.md
+  # docs/chains/btc/ (additional)
+  - input: template/pages/docs/chains/btc/architecture.tpl.md
+    output: docs/chains/btc/architecture.md
+  # docs/chains/btc/taproot/
+  - input: template/pages/docs/chains/btc/taproot/testing.tpl.md
+    output: docs/chains/btc/taproot/testing.md
+  # docs/chains/btc/psbt/ (additional)
+  - input: template/pages/docs/chains/btc/psbt/poc-example.tpl.md
+    output: docs/chains/btc/psbt/poc-example.md
+  # docs/chains/btc/keygen/ (additional)
+  - input: template/pages/docs/chains/btc/keygen/improvements-2025.tpl.md
+    output: docs/chains/btc/keygen/improvements-2025.md
+  - input: template/pages/docs/chains/btc/keygen/improvements-2025-ja.tpl.md
+    output: docs/chains/btc/keygen/improvements-2025-ja.md
+  # docs/chains/xrp/
+  - input: template/pages/docs/chains/xrp/README.tpl.md
+    output: docs/chains/xrp/README.md
+  - input: template/pages/docs/chains/xrp/architecture-2026.tpl.md
+    output: docs/chains/xrp/architecture-2026.md
+  - input: template/pages/docs/chains/xrp/architecture-xrpl-grpc-server-version.tpl.md
+    output: docs/chains/xrp/architecture-xrpl-grpc-server-version.md
+  - input: template/pages/docs/chains/xrp/library-selection.tpl.md
+    output: docs/chains/xrp/library-selection.md
+  - input: template/pages/docs/chains/xrp/network-devnet.tpl.md
+    output: docs/chains/xrp/network-devnet.md
+  - input: template/pages/docs/chains/xrp/testing-strategy.tpl.md
+    output: docs/chains/xrp/testing-strategy.md
+  - input: template/pages/docs/chains/xrp/transaction-flow.tpl.md
+    output: docs/chains/xrp/transaction-flow.md
+  # docs/chains/eth/ (additional)
+  - input: template/pages/docs/chains/eth/solidity-development.tpl.md
+    output: docs/chains/eth/solidity-development.md
+  - input: template/pages/docs/chains/eth/transaction-patterns.tpl.md
+    output: docs/chains/eth/transaction-patterns.md
+  # docs/ai/
+  - input: template/pages/docs/ai/agent-skills.tpl.md
+    output: docs/ai/agent-skills.md
+  - input: template/pages/docs/ai/design.tpl.md
+    output: docs/ai/design.md
+  # docs/ai/task-contexts/
+  - input: template/pages/docs/ai/task-contexts/chain-specific.tpl.md
+    output: docs/ai/task-contexts/chain-specific.md
+  - input: template/pages/docs/ai/task-contexts/db-change.tpl.md
+    output: docs/ai/task-contexts/db-change.md
+  - input: template/pages/docs/ai/task-contexts/feature-add.tpl.md
+    output: docs/ai/task-contexts/feature-add.md
+  - input: template/pages/docs/ai/task-contexts/refactoring.tpl.md
+    output: docs/ai/task-contexts/refactoring.md
+  - input: template/pages/docs/ai/task-contexts/test.tpl.md
+    output: docs/ai/task-contexts/test.md
+  # docs/design/
+  - input: template/pages/docs/design/btc-network-mode-switching.tpl.md
+    output: docs/design/btc-network-mode-switching.md
+  - input: template/pages/docs/design/pg2sqlite-alter-table-support.tpl.md
+    output: docs/design/pg2sqlite-alter-table-support.md
+  - input: template/pages/docs/design/revise-db-atlas-sqlc-flow.tpl.md
+    output: docs/design/revise-db-atlas-sqlc-flow.md
+  - input: template/pages/docs/design/superpowers-integration.tpl.md
+    output: docs/design/superpowers-integration.md
+  # docs/ root pages (additional)
+  - input: template/pages/docs/directory-structure.tpl.md
+    output: docs/directory-structure.md
+  - input: template/pages/docs/transaction-flow.tpl.md
+    output: docs/transaction-flow.md
+  # docs/guidelines/ (additional)
+  - input: template/pages/docs/guidelines/claude-best-practice.tpl.md
+    output: docs/guidelines/claude-best-practice.md
+  # docs/issues/
+  - input: template/pages/docs/issues/REFACTORING_CHECKLIST.tpl.md
+    output: docs/issues/REFACTORING_CHECKLIST.md
+  - input: template/pages/docs/issues/REFACTORING_PLAN.tpl.md
+    output: docs/issues/REFACTORING_PLAN.md
+  # docs/github-actions/
+  - input: template/pages/docs/github-actions/investigation-cache.tpl.md
+    output: docs/github-actions/investigation-cache.md
+  # docs/ai/task-contexts/ (additional)
+  - input: template/pages/docs/ai/task-contexts/README.tpl.md
+    output: docs/ai/task-contexts/README.md
+  - input: template/pages/docs/ai/task-contexts/bug-fix.tpl.md
+    output: docs/ai/task-contexts/bug-fix.md
+  - input: template/pages/docs/ai/task-contexts/documentation.tpl.md
+    output: docs/ai/task-contexts/documentation.md
+  - input: template/pages/docs/ai/task-contexts/task-analysis.tpl.md
+    output: docs/ai/task-contexts/task-analysis.md
+  - input: template/pages/docs/ai/task-contexts/task-oriented-context.tpl.md
+    output: docs/ai/task-contexts/task-oriented-context.md
+  - input: template/pages/docs/ai/task-contexts/verification.tpl.md
+    output: docs/ai/task-contexts/verification.md
+  # docs/chains/bch/ (additional)
+  - input: template/pages/docs/chains/bch/interface-separation.tpl.md
+    output: docs/chains/bch/interface-separation.md
+  # docs/chains/btc/archive/
+  - input: template/pages/docs/chains/btc/archive/README.tpl.md
+    output: docs/chains/btc/archive/README.md
+  - input: template/pages/docs/chains/btc/archive/operation-example.tpl.md
+    output: docs/chains/btc/archive/operation-example.md
+  # docs/chains/btc/descriptor/
+  - input: template/pages/docs/chains/btc/descriptor/README.tpl.md
+    output: docs/chains/btc/descriptor/README.md
+  - input: template/pages/docs/chains/btc/descriptor/api.tpl.md
+    output: docs/chains/btc/descriptor/api.md
+  - input: template/pages/docs/chains/btc/descriptor/architecture.tpl.md
+    output: docs/chains/btc/descriptor/architecture.md
+  - input: template/pages/docs/chains/btc/descriptor/compatibility.tpl.md
+    output: docs/chains/btc/descriptor/compatibility.md
+  - input: template/pages/docs/chains/btc/descriptor/development.tpl.md
+    output: docs/chains/btc/descriptor/development.md
+  - input: template/pages/docs/chains/btc/descriptor/examples.tpl.md
+    output: docs/chains/btc/descriptor/examples.md
+  - input: template/pages/docs/chains/btc/descriptor/migration.tpl.md
+    output: docs/chains/btc/descriptor/migration.md
+  - input: template/pages/docs/chains/btc/descriptor/user-guide.tpl.md
+    output: docs/chains/btc/descriptor/user-guide.md
+  # docs/chains/btc/ subdirectory READMEs
+  - input: template/pages/docs/chains/btc/keygen/README.tpl.md
+    output: docs/chains/btc/keygen/README.md
+  - input: template/pages/docs/chains/btc/musig2/README.tpl.md
+    output: docs/chains/btc/musig2/README.md
+  - input: template/pages/docs/chains/btc/operations/README.tpl.md
+    output: docs/chains/btc/operations/README.md
+  - input: template/pages/docs/chains/btc/operations/pattern3-verification.tpl.md
+    output: docs/chains/btc/operations/pattern3-verification.md
+  - input: template/pages/docs/chains/btc/overview/README.tpl.md
+    output: docs/chains/btc/overview/README.md
+  - input: template/pages/docs/chains/btc/psbt/README.tpl.md
+    output: docs/chains/btc/psbt/README.md
+  - input: template/pages/docs/chains/btc/taproot/README.tpl.md
+    output: docs/chains/btc/taproot/README.md
+  # docs/chains/eth/ (additional)
+  - input: template/pages/docs/chains/eth/json-schema.tpl.md
+    output: docs/chains/eth/json-schema.md
+  # docs/chains/xrp/ (additional)
+  - input: template/pages/docs/chains/xrp/setup-docker-compose-standalone-xrpl.tpl.md
+    output: docs/chains/xrp/setup-docker-compose-standalone-xrpl.md
+  - input: template/pages/docs/chains/xrp/xrpl-go.tpl.md
+    output: docs/chains/xrp/xrpl-go.md
+  # docs/guidelines/ (additional)
+  - input: template/pages/docs/guidelines/golangci-lint.tpl.md
+    output: docs/guidelines/golangci-lint.md
+  # docs/ root pages (additional)
+  - input: template/pages/docs/index.tpl.md
+    output: docs/index.md
+  - input: template/pages/docs/overview-ja.tpl.md
+    output: docs/overview-ja.md
+  # docs/reference/
+  - input: template/pages/docs/reference/proto.tpl.md
+    output: docs/reference/proto.md
+  # docs/getting-started/
+  - input: template/pages/docs/getting-started/devcontainer.tpl.md
+    output: docs/getting-started/devcontainer.md
   # docs/ root pages
   - input: template/pages/docs/overview.tpl.md
     output: docs/overview.md

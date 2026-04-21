@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/refactoring.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: refactoring
 description: リファクタリングタスク用のコンテキスト

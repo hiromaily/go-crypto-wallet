@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT (Partially Signed Bitcoin Transactions)
 
 This directory contains documentation for PSBT implementation and usage in the go-crypto-wallet system.
@@ -6,11 +11,11 @@ This directory contains documentation for PSBT implementation and usage in the g
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](user-guide.md) | How to use PSBT for offline signing workflows | Operators |
-| [developer-guide.md](developer-guide.md) | Technical implementation details for developers | Developers |
-| [implementation.md](implementation.md) | PSBT implementation architecture | Developers |
-| [migration.md](migration.md) | Migration guide from legacy to PSBT | All |
-| [poc-example.md](poc-example.md) | Proof of concept examples | Developers |
+| [user-guide.md](./user-guide.md) | How to use PSBT for offline signing workflows | Operators |
+| [developer-guide.md](./developer-guide.md) | Technical implementation details for developers | Developers |
+| [implementation.md](./implementation.md) | PSBT implementation architecture | Developers |
+| [migration.md](./migration.md) | Migration guide from legacy to PSBT | All |
+| [poc-example.md](./poc-example.md) | Proof of concept examples | Developers |
 
 ## What is PSBT?
 
@@ -34,7 +39,7 @@ PSBT (BIP174) is the standard format for Bitcoin transactions that require offli
 ## Related Documentation
 
 - [../operations/wallet-flow.md](../operations/wallet-flow.md) - Transaction flow using PSBT
-- [../musig2/](../musig2/README) - MuSig2 uses PSBT for coordination
+- [../musig2/](../musig2/README.md) - MuSig2 uses PSBT for coordination
 - [../README.md](../README.md) - Main BTC documentation index
 
 ## References

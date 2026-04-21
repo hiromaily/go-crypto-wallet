@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/transaction-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Transaction Flow
 
 This document describes the common transaction flow that applies across all supported chains (BTC, BCH, ETH, XRP).
@@ -264,7 +269,7 @@ sequenceDiagram
     Watch-->>User: Return: txHash
 ```
 
-For full details see [`docs/chains/eth/multisig.md`](chains/eth/multisig.md).
+For full details see [`docs/chains/eth/multisig.md`](./chains/eth/multisig.md).
 
 ### ETH MPC-TSS Flow (Pattern 4: 2-of-3 Threshold Signing)
 
@@ -326,7 +331,7 @@ sequenceDiagram
     Watch-->>User: Return: txHash
 ```
 
-For full details see [`docs/chains/eth/transaction-patterns.md`](chains/eth/transaction-patterns.md).
+For full details see [`docs/chains/eth/transaction-patterns.md`](./chains/eth/transaction-patterns.md).
 
 ---
 
@@ -397,7 +402,7 @@ For chain-specific details (address formats, transaction formats, signing algori
 
 | Chain | Documentation |
 |-------|---------------|
-| Bitcoin (BTC) | [`docs/chains/btc/operations/wallet-flow.md`](chains/btc/operations/wallet-flow.md) |
-| Bitcoin Cash (BCH) | [`docs/chains/bch/README.md`](chains/bch/README.md) |
-| Ethereum (ETH) | [`docs/chains/eth/README.md`](chains/eth/README.md) |
-| Ripple (XRP) | [`docs/chains/xrp/README.md`](chains/xrp/README.md) |
+| Bitcoin (BTC) | [`docs/chains/btc/operations/wallet-flow.md`](./chains/btc/operations/wallet-flow.md) |
+| Bitcoin Cash (BCH) | [`docs/chains/bch/README.md`](./chains/bch/README.md) |
+| Ethereum (ETH) | [`docs/chains/eth/README.md`](./chains/eth/README.md) |
+| Ripple (XRP) | [`docs/chains/xrp/README.md`](./chains/xrp/README.md) |

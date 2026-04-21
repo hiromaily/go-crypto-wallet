@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/atlas-migration-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/database/atlas-migration-flow/overview.md level=-1 -->
 
 <!-- @include: ../../../sections/database/atlas-migration-flow/environments.md level=-1 -->

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Output Descriptors
 
 This directory contains documentation for Bitcoin Output Descriptor implementation.
@@ -6,13 +11,13 @@ This directory contains documentation for Bitcoin Output Descriptor implementati
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](user-guide.md) | How to use descriptors for address generation | Operators |
-| [architecture.md](architecture.md) | Descriptor architecture following Clean Architecture | Developers |
-| [development.md](development.md) | Development guide for descriptor features | Developers |
-| [api.md](api.md) | API reference for descriptor operations | Developers |
-| [examples.md](examples.md) | Descriptor format examples | All |
-| [compatibility.md](compatibility.md) | Bitcoin Core compatibility notes | Developers |
-| [migration.md](migration.md) | Migration guide from legacy address handling | All |
+| [user-guide.md](./user-guide.md) | How to use descriptors for address generation | Operators |
+| [architecture.md](./architecture.md) | Descriptor architecture following Clean Architecture | Developers |
+| [development.md](./development.md) | Development guide for descriptor features | Developers |
+| [api.md](./api.md) | API reference for descriptor operations | Developers |
+| [examples.md](./examples.md) | Descriptor format examples | All |
+| [compatibility.md](./compatibility.md) | Bitcoin Core compatibility notes | Developers |
+| [migration.md](./migration.md) | Migration guide from legacy address handling | All |
 
 ## What are Output Descriptors?
 
@@ -34,8 +39,8 @@ Output Descriptors are a language for describing collections of output scripts. 
 
 ## Related Documentation
 
-- [../keygen/](../keygen/README) - Key generation that uses descriptors
-- [../taproot/](../taproot/README) - Taproot descriptors
+- [../keygen/](../keygen/README.md) - Key generation that uses descriptors
+- [../taproot/](../taproot/README.md) - Taproot descriptors
 - [../README.md](../README.md) - Main BTC documentation index
 
 ## References

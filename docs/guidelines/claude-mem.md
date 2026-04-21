@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/claude-mem.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Claude-Mem: Persistent Memory for Claude Code
 
 ## Overview

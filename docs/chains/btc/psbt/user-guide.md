@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/user-guide.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT User Guide
 
 This guide explains how to use Partially Signed Bitcoin Transactions (PSBT) in go-crypto-wallet for creating, signing, and broadcasting Bitcoin transactions.
@@ -47,9 +52,19 @@ PSBT (Partially Signed Bitcoin Transaction) is a Bitcoin standard (BIP 174) that
 
 ### System Requirements
 
-See [MuSig2 User Guide — Prerequisites](../musig2/user-guide.md#prerequisites) for the common system requirements (wallet types, Go version, Bitcoin Core version).
+- **Watch Wallet** (online): Bitcoin Core node v22.0+ with Taproot support
+- **Keygen Wallet** (offline): Isolated system for key generation and first signature
+- **Sign Wallet** (offline): Isolated system for additional signatures
+- **Go version**: 1.21 or higher
+- **Bitcoin Core**: v22.0 or higher (for Taproot/Schnorr support)
 
-PSBT-specific requirement: **Bitcoin Core v22.0+** with PSBT (BIP174) support enabled.
+### Required Features
+
+MuSig2 builds on top of existing wallet features:
+
+- ✅ **Phase 1**: Taproot support (BIP340 Schnorr signatures)
+- ✅ **Phase 2**: PSBT support (BIP174)
+- ✅ **Phase 3**: MuSig2 implementation (current)
 
 ### Wallet Configuration
 
@@ -70,7 +85,7 @@ config/wallet/btc/sign1.yaml
 
 ```bash
 # Example usage
-./watch --config config/wallet/btc/watch.yaml --coin btc create deposit
+./watch --config config/wallet/btc/watch.yaml --coin btc create payment
 ./keygen --config config/wallet/btc/keygen.yaml --coin btc sign --file tx.psbt
 ./sign1 --config config/wallet/btc/sign1.yaml --coin btc sign --file tx.psbt
 ```
@@ -726,24 +741,24 @@ bitcoin-cli getrawtransaction <txid> 1
 
 ### Documentation
 
-- [PSBT Implementation Details](./implementation)
-- [PSBT Migration Guide](./migration)
-- [PSBT Developer Guide](./developer-guide)
-- [Wallet Flow](/chains/btc/operations/wallet-flow)
+- [PSBT User Guide](/chains/btc/psbt/user-guide) - Prerequisite for MuSig2
+- [Taproot Guide](/chains/btc/taproot/user-guide) - Understanding Taproot addresses
+- [Wallet Flow](/chains/btc/operations/wallet-flow) - Wallet setup and configuration
+- [MuSig2 Architecture](/chains/btc/musig2/architecture) - For developers
 
-### Standards
+### Standards and Specifications
 
-- [BIP 174: PSBT Specification](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)
+- [BIP 327: MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki)
 - [BIP 340: Schnorr Signatures](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki)
 - [BIP 341: Taproot](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)
-- [BIP 86: Key Derivation for Taproot](https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki)
+- [BIP 174: PSBT Specification](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)
+- [MuSig2 Paper](https://eprint.iacr.org/2020/1261) - Academic research paper
 
 ### Tools
 
-- [Bitcoin Core](https://bitcoincore.org/) - Reference implementation with PSBT support
+- [Bitcoin Core](https://bitcoincore.org/) - Reference implementation (v22.0+ required)
 - [btcd](https://github.com/btcsuite/btcd) - Go Bitcoin implementation (used by go-crypto-wallet)
-- [Electrum](https://electrum.org/) - Desktop wallet with PSBT support
-- [Sparrow Wallet](https://sparrowwallet.com/) - Modern wallet with excellent PSBT features
+- [Sparrow Wallet](https://sparrowwallet.com/) - Desktop wallet with Taproot support
 
 ### Support
 

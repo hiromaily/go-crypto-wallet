@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/release.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Release Guide
 
 This document describes how to create a new release for go-crypto-wallet.

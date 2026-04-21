@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/keygen/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Key Generation
 
 This directory contains documentation for Bitcoin key generation design and improvements.
@@ -6,9 +11,9 @@ This directory contains documentation for Bitcoin key generation design and impr
 
 | Document | Description |
 |----------|-------------|
-| [improvements-2025.md](improvements-2025.md) | 2025 key generation modernization improvements |
-| [improvements-2025-ja.md](improvements-2025-ja.md) | 2025 improvements (Japanese version) |
-| [interface-design.md](interface-design.md) | Key generator interface design documentation |
+| [improvements-2025.md](./improvements-2025.md) | 2025 key generation modernization improvements |
+| [improvements-2025-ja.md](./improvements-2025-ja.md) | 2025 improvements (Japanese version) |
+| [interface-design.md](./interface-design.md) | Key generator interface design documentation |
 
 ## Audience
 
@@ -31,7 +36,7 @@ This directory contains documentation for Bitcoin key generation design and impr
 
 ## Related Documentation
 
-- [../taproot/](../taproot/README) - Taproot implementation guides
-- [../musig2/](../musig2/README) - MuSig2 architecture
-- [../descriptor/](../descriptor/README) - Output descriptor guides
+- [../taproot/](../taproot/README.md) - Taproot implementation guides
+- [../musig2/](../musig2/README.md) - MuSig2 architecture
+- [../descriptor/](../descriptor/README.md) - Output descriptor guides
 - [../README.md](../README.md) - Main BTC documentation index

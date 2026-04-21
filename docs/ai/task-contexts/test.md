@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/test.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: test
 description: Context for test addition and modification tasks

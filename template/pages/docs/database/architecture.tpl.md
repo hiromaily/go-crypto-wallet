@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/architecture.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/database/architecture/overview.md level=-1 -->
 
 <!-- @include: ../../../sections/database/architecture/supported-databases.md level=-1 -->

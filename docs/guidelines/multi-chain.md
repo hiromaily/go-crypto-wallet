@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/multi-chain.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Multi-Chain Support
 
 This document describes the multi-chain cryptocurrency support in the go-crypto-wallet project.

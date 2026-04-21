@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/architecture/data-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Data Flow Examples
 
 ## Creating and Signing a Transaction

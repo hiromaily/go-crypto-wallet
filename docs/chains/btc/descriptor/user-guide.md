@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/user-guide.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Descriptor Wallet User Guide
 
 This guide explains how to generate, export, and import Bitcoin descriptor wallets using the CLI tools in this repository. It targets operators of the keygen (offline) and watch (online) wallets.
