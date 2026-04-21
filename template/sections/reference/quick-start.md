@@ -1,6 +1,6 @@
 ## Quick Start
 
-Requires Docker. See the [Installation Guide](./docs/getting-started/installation.md) for full setup.
+Requires Docker. See the [Installation Guide](../../../docs/getting-started/installation.md) for full setup.
 
 ```bash
 # Bitcoin (BTC) — 11 patterns from P2PKH to Taproot
@@ -21,4 +21,4 @@ make xrp-e2e-p1     # Single-sig payment
 make xrp-e2e-p2     # 2-of-2 multisig payment
 ```
 
-See the [E2E Transaction Patterns Guide](./docs/chains/btc/operations/e2e-transaction-patterns.md) for all patterns, CI mode (`make btc-e2e-ci P=1`), and reset options.
+See the [E2E Transaction Patterns Guide](../../../docs/chains/btc/operations/e2e-transaction-patterns.md) for all patterns, CI mode (`make btc-e2e-ci P=1`), and reset options.

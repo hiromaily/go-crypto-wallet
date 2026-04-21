@@ -6,7 +6,7 @@
 
 | Template | Output | Sections included |
 | --- | --- | --- |
-| pages/README.tpl.md | README.md | 15 |
+| pages/README.tpl.md | README.md | 4 |
 | pages/CLAUDE.tpl.md | CLAUDE.md | 8 |
 | pages/AGENTS.tpl.md | AGENTS.md | 8 |
 | pages/ARCHITECTURE.tpl.md | ARCHITECTURE.md | 10 |
@@ -51,12 +51,12 @@
 | sections/ai/expected-behavior.md | AGENTS, CLAUDE |
 | sections/ai/ssot-structure.md | AGENTS, CLAUDE |
 | sections/architecture/architecture-overview.md | ARCHITECTURE, index |
-| sections/architecture/architecture.md | README, index |
-| sections/architecture/components.md | README, index |
+| sections/architecture/architecture.md | index |
+| sections/architecture/components.md | index |
 | sections/architecture/data-flow.md | ARCHITECTURE, data-flow |
 | sections/architecture/dependency-injection.md | ARCHITECTURE, dependency-injection |
 | sections/architecture/design-philosophy.md | ARCHITECTURE, design-philosophy |
-| sections/architecture/directory-structure.md | README, directory-structure |
+| sections/architecture/directory-structure.md | directory-structure |
 | sections/architecture/layer-architecture.md | ARCHITECTURE, layers |
 | sections/architecture/layer-responsibilities.md | ARCHITECTURE, layers |
 | sections/architecture/shared-packages.md | ARCHITECTURE, shared-packages |
@@ -116,16 +116,12 @@
 | sections/development/branch-naming.md | CONTRIBUTING |
 | sections/development/code-style.md | CONTRIBUTING |
 | sections/development/commit-conventions.md | CONTRIBUTING |
-| sections/development/comprehensive-e2e-testing-by-chain.md | README |
 | sections/development/contributing-to-go-crypto-wallet.md | CONTRIBUTING |
 | sections/development/development-setup.md | CONTRIBUTING |
 | sections/development/documentation.md | CONTRIBUTING |
-| sections/development/environment.md | README |
 | sections/development/getting-started.md | CONTRIBUTING |
-| sections/development/installation.md | README |
 | sections/development/pull-request-guidelines.md | CONTRIBUTING |
 | sections/development/questions.md | CONTRIBUTING |
-| sections/development/requirements.md | README |
 | sections/development/security-considerations.md | CONTRIBUTING |
 | sections/development/testing-strategy.md | ARCHITECTURE |
 | sections/guidelines/architecture.md | architecture |
@@ -201,11 +197,9 @@
 | sections/guidelines/workflow/pull-request.md | workflow |
 | sections/guidelines/workflow/see-also.md | workflow |
 | sections/guidelines/workflow/verification.md | workflow |
-| sections/product/current-features.md | README |
-| sections/product/supported-coins.md | README |
-| sections/product/use-cases.md | README |
-| sections/product/wallet-types.md | README, overview |
-| sections/product/workflow-diagram.md | README, overview |
+| sections/product/chain-coverage.md | README |
+| sections/product/wallet-types.md | overview |
+| sections/product/workflow-diagram.md | overview |
 | sections/project/commands/global-flags.md | commands |
 | sections/project/commands/keygen-wallet.md | commands |
 | sections/project/commands/overview.md | commands |
@@ -222,10 +216,10 @@
 | sections/project/overview.md | README, overview |
 | sections/reference/agents-see-also.md | AGENTS, CLAUDE |
 | sections/reference/architecture-see-also.md | ARCHITECTURE |
-| sections/reference/command-example.md | README |
+| sections/reference/documentation-links.md | README |
 | sections/reference/documentation-map.md | AGENTS, CLAUDE |
-| sections/reference/operation-example.md | README |
 | sections/reference/quick-reference.md | AGENTS, CLAUDE |
+| sections/reference/quick-start.md | README |
 
 ## Rules
 
@@ -246,4 +240,13 @@
 | sections/ai/development-rules.md | Not referenced by any template |
 | sections/ai/minimal-workflow.md | Not referenced by any template |
 | sections/ai/steering-configuration.md | Not referenced by any template |
+| sections/development/comprehensive-e2e-testing-by-chain.md | Not referenced by any template |
+| sections/development/environment.md | Not referenced by any template |
+| sections/development/installation.md | Not referenced by any template |
+| sections/development/requirements.md | Not referenced by any template |
+| sections/product/current-features.md | Not referenced by any template |
+| sections/product/supported-coins.md | Not referenced by any template |
+| sections/product/use-cases.md | Not referenced by any template |
 | sections/project/context.md | Not referenced by any template |
+| sections/reference/command-example.md | Not referenced by any template |
+| sections/reference/operation-example.md | Not referenced by any template |

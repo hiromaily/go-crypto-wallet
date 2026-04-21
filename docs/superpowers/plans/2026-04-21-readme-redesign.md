@@ -1,3 +1,38 @@
+# README Redesign Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Replace the 400-line README with a lean landing page (4 sections) that leads with multi-chain breadth, shows E2E quick-start commands, and links to the docs site for all detail.
+
+**Architecture:** Rewrite `template/sections/project/overview.md`, create three new section files (`chain-coverage.md`, `quick-start.md`, `documentation-links.md`), update `template/pages/README.tpl.md` to include only those four sections, then rebuild with `docs-ssot build`.
+
+**Tech Stack:** docs-ssot (Markdown template engine), GitHub Flavored Markdown
+
+---
+
+## File Map
+
+| Action | File |
+|--------|------|
+| Modify | `template/sections/project/overview.md` |
+| Create | `template/sections/product/chain-coverage.md` |
+| Create | `template/sections/reference/quick-start.md` |
+| Create | `template/sections/reference/documentation-links.md` |
+| Modify | `template/pages/README.tpl.md` |
+| Generated (do not edit) | `README.md` |
+
+---
+
+## Task 1: Rewrite `template/sections/project/overview.md`
+
+**Files:**
+- Modify: `template/sections/project/overview.md`
+
+- [ ] **Step 1: Write the new overview section**
+
+Replace the entire file with:
+
+```markdown
 <!--
 ⚠️ AUTO-GENERATED FILE — DO NOT EDIT
 Source: template/pages/README.tpl.md · Run `make docs` to regenerate.
@@ -51,7 +86,34 @@ go-crypto-wallet resolves this with a **three-wallet architecture**: an offline 
 Every transaction pattern — from legacy P2PKH to Taproot MuSig2 and MPC-TSS — is implemented in Go and verified end-to-end against real local nodes.
 
 ---
+```
 
+- [ ] **Step 2: Validate includes**
+
+```bash
+cd /Users/hiroki.yasui/go/src/github.com/hiromaily/go-crypto-wallet
+docs-ssot validate
+```
+
+Expected: `OK`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add template/sections/project/overview.md
+git commit -m "docs: rewrite overview section for 2026 README redesign"
+```
+
+---
+
+## Task 2: Create `template/sections/product/chain-coverage.md`
+
+**Files:**
+- Create: `template/sections/product/chain-coverage.md`
+
+- [ ] **Step 1: Create the chain coverage section**
+
+```markdown
 ## Supported Chains
 
 | Chain | Address Types | Highlights | E2E Patterns |
@@ -62,7 +124,33 @@ Every transaction pattern — from legacy P2PKH to Taproot MuSig2 and MPC-TSS �
 | **[XRP](./docs/chains/xrp/README.md)** | Classic `r...` | Ed25519 / secp256k1, multisig, offline keygen | 2 patterns |
 
 Each pattern is implemented in Go and verified through real transactions on regtest or a local node — not mocks.
+```
 
+- [ ] **Step 2: Validate**
+
+```bash
+docs-ssot validate
+```
+
+Expected: `OK`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add template/sections/product/chain-coverage.md
+git commit -m "docs: add chain-coverage section for README redesign"
+```
+
+---
+
+## Task 3: Create `template/sections/reference/quick-start.md`
+
+**Files:**
+- Create: `template/sections/reference/quick-start.md`
+
+- [ ] **Step 1: Create the quick-start section**
+
+```markdown
 ## Quick Start
 
 Requires Docker. See the [Installation Guide](./docs/getting-started/installation.md) for full setup.
@@ -87,7 +175,33 @@ make xrp-e2e-p2     # 2-of-2 multisig payment
 ```
 
 See the [E2E Transaction Patterns Guide](./docs/chains/btc/operations/e2e-transaction-patterns.md) for all patterns, CI mode (`make btc-e2e-ci P=1`), and reset options.
+```
 
+- [ ] **Step 2: Validate**
+
+```bash
+docs-ssot validate
+```
+
+Expected: `OK`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add template/sections/reference/quick-start.md
+git commit -m "docs: add quick-start section for README redesign"
+```
+
+---
+
+## Task 4: Create `template/sections/reference/documentation-links.md`
+
+**Files:**
+- Create: `template/sections/reference/documentation-links.md`
+
+- [ ] **Step 1: Create the documentation links section**
+
+```markdown
 ## Documentation
 
 | Topic | Link |
@@ -101,3 +215,95 @@ See the [E2E Transaction Patterns Guide](./docs/chains/btc/operations/e2e-transa
 | XRP Guide | [XRP Ledger](./docs/chains/xrp/README.md) |
 | E2E Patterns | [Transaction Pattern Guide](./docs/chains/btc/operations/e2e-transaction-patterns.md) |
 | Full Docs | [Documentation Site](https://hiromaily.github.io/go-crypto-wallet/) |
+```
+
+- [ ] **Step 2: Validate**
+
+```bash
+docs-ssot validate
+```
+
+Expected: `OK`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add template/sections/reference/documentation-links.md
+git commit -m "docs: add documentation-links section for README redesign"
+```
+
+---
+
+## Task 5: Update `template/pages/README.tpl.md`
+
+**Files:**
+- Modify: `template/pages/README.tpl.md`
+
+- [ ] **Step 1: Replace the template with the 4-section structure**
+
+Replace the entire file with:
+
+```markdown
+<!-- @include: ../sections/project/overview.md -->
+
+<!-- @include: ../sections/product/chain-coverage.md -->
+
+<!-- @include: ../sections/reference/quick-start.md -->
+
+<!-- @include: ../sections/reference/documentation-links.md -->
+```
+
+- [ ] **Step 2: Validate all includes resolve**
+
+```bash
+docs-ssot validate
+```
+
+Expected: `OK`
+
+- [ ] **Step 3: Build and inspect output**
+
+```bash
+docs-ssot build
+git diff README.md
+```
+
+Expected: README.md is regenerated. Visually verify:
+- Auto-generated comment at top
+- Center-aligned images
+- Bold tagline
+- ASCII diagram
+- Narrative prose with `---` separators
+- Chain coverage table
+- Quick start code block
+- Documentation link table
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add template/pages/README.tpl.md README.md template/INDEX.md
+git commit -m "docs: update README template and regenerate lean landing page"
+```
+
+---
+
+## Self-Review
+
+**Spec coverage check:**
+
+| Spec requirement | Task |
+|-----------------|------|
+| Auto-generated comment at top | Task 1 |
+| Center-aligned hero images | Task 1 |
+| Bold one-liner tagline | Task 1 |
+| ASCII security model diagram | Task 1 |
+| Narrative prose with `---` separators | Task 1 |
+| Chain coverage table (BTC/BCH/ETH/XRP) | Task 2 |
+| E2E quick-start commands by chain | Task 3 |
+| Documentation link grid | Task 4 |
+| README.tpl.md reduced to 4 includes | Task 5 |
+| `docs-ssot build` produces clean output | Task 5 |
+
+**Placeholder scan:** None — all section file content is written in full in each task.
+
+**No broken references:** Removed sections (requirements, wallet-types, directory-structure, etc.) still exist as section files and continue to be used by other templates. Only `README.tpl.md` no longer includes them.
