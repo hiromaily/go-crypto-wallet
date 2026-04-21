@@ -88,7 +88,7 @@ jobs:
         # v9 uses node24 runtime (node20 deprecated by GitHub)
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.10.1
+          version: v2.11.4
           working-directory: ./
           # --fast-only: run only fast linters on PR for quick feedback
           args: --fast-only
