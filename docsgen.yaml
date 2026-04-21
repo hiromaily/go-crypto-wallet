@@ -76,6 +76,30 @@ targets:
     output: docs/chains/bch/README.md
   - input: template/pages/docs/chains/eth/README.tpl.md
     output: docs/chains/eth/README.md
+  # docs/chains/btc/musig2/
+  - input: template/pages/docs/chains/btc/musig2/architecture.tpl.md
+    output: docs/chains/btc/musig2/architecture.md
+  - input: template/pages/docs/chains/btc/musig2/user-guide.tpl.md
+    output: docs/chains/btc/musig2/user-guide.md
+  - input: template/pages/docs/chains/btc/musig2/security.tpl.md
+    output: docs/chains/btc/musig2/security.md
+  - input: template/pages/docs/chains/btc/musig2/migration-from-traditional.tpl.md
+    output: docs/chains/btc/musig2/migration-from-traditional.md
+  # docs/chains/btc/psbt/
+  - input: template/pages/docs/chains/btc/psbt/implementation.tpl.md
+    output: docs/chains/btc/psbt/implementation.md
+  - input: template/pages/docs/chains/btc/psbt/developer-guide.tpl.md
+    output: docs/chains/btc/psbt/developer-guide.md
+  - input: template/pages/docs/chains/btc/psbt/migration.tpl.md
+    output: docs/chains/btc/psbt/migration.md
+  - input: template/pages/docs/chains/btc/psbt/user-guide.tpl.md
+    output: docs/chains/btc/psbt/user-guide.md
+  # docs/chains/btc/operations/
+  - input: template/pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md
+    output: docs/chains/btc/operations/e2e-transaction-patterns.md
+  # docs/getting-started/
+  - input: template/pages/docs/getting-started/devcontainer.tpl.md
+    output: docs/getting-started/devcontainer.md
   # docs/ root pages
   - input: template/pages/docs/overview.tpl.md
     output: docs/overview.md

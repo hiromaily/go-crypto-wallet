@@ -1,19 +1,13 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Core Specifications](#core-specifications)
-3. [Address Types & Key Derivation](#address-types--key-derivation)
-4. [Transaction Architecture](#transaction-architecture)
-5. [Transaction Types](#transaction-types)
-6. [Signing Mechanism](#signing-mechanism)
-7. [ERC-20 Token Support](#erc-20-token-support)
-8. [Network & Confirmation Guidelines](#network--confirmation-guidelines)
-9. [Fee Management](#fee-management)
-10. [Wallet Implementation](#wallet-implementation)
-11. [RPC & API Reference](#rpc--api-reference)
-12. [Security Considerations](#security-considerations)
-13. [Testing Resources](#testing-resources)
-14. [Official References](#official-references)
-15. [ETH-Specific Flow Details](#eth-specific-flow-details)
+2. [Prerequisites](#prerequisites)
+3. [MuSig2 Basics](#musig2-basics)
+4. [Transaction Workflows](#transaction-workflows)
+5. [File Management](#file-management)
+6. [Address Creation](#address-creation)
+7. [Troubleshooting](#troubleshooting)
+8. [Best Practices](#best-practices)
+9. [Performance Comparison](#performance-comparison)
 
 ---

@@ -1,71 +1,74 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Core Specifications](#core-specifications)
-3. [Address Types & Key Derivation](#address-types--key-derivation)
-4. [Transaction Architecture](#transaction-architecture)
-5. [Signing Mechanisms](#signing-mechanisms)
-6. [Multisig Implementation](#multisig-implementation)
-7. [Network & Consensus](#network--consensus)
-8. [Fee Management](#fee-management)
-9. [Wallet Implementation](#wallet-implementation)
-10. [RPC & API Reference](#rpc--api-reference)
-11. [Differences from Bitcoin](#differences-from-bitcoin)
-12. [Security Considerations](#security-considerations)
-13. [Known Issues and Workarounds](#known-issues-and-workarounds)
-14. [Testing Resources](#testing-resources)
-15. [Official References](#official-references)
-16. [Project Documentation](#project-documentation)
+2. [Architecture Layers](#architecture-layers)
+3. [Component Interactions](#component-interactions)
+4. [Data Flow](#data-flow)
+5. [Security Architecture](#security-architecture)
+6. [Database Schema](#database-schema)
+7. [API Reference](#api-reference)
+8. [Implementation Notes](#implementation-notes)
 
 ---
 
 ## Overview
 
-### What is Bitcoin Cash?
+### What is MuSig2?
 
-Bitcoin Cash (BCH) is a cryptocurrency that forked from Bitcoin (BTC) on August 1, 2017 (block 478,558). The fork was primarily motivated by the desire for larger block sizes to increase transaction throughput. BCH focuses on being a peer-to-peer electronic cash system, prioritizing low fees and fast confirmations.
+MuSig2 is a two-round Schnorr multisignature protocol (BIP327) that enables multiple parties to create a single aggregated signature that is indistinguishable from a standard single-signature transaction on the blockchain. This provides:
 
-### Key Characteristics (2026)
+- **Smaller transactions**: 30-50% size reduction compared to traditional P2WSH multisig
+- **Lower fees**: Proportional to transaction size reduction
+- **Better privacy**: Multisig transactions look like single-sig on-chain
+- **Schnorr signatures**: Uses BIP340 Schnorr signatures via Taproot (P2TR)
 
-| Property | Value |
-|----------|-------|
-| **Fork Date** | August 1, 2017 (Block 478,558) |
-| **Block Time** | ~10 minutes |
-| **Block Size** | 32 MB |
-| **Total Supply** | 21,000,000 BCH |
-| **Current Block Reward** | 3.125 BCH (post-2024 halving) |
-| **Next Halving** | ~2028 |
-| **Consensus Algorithm** | SHA-256 Proof of Work |
-| **Cryptographic Curve** | secp256k1 |
-| **Signature Algorithm** | ECDSA only (no Schnorr) |
-| **SegWit Support** | ❌ No |
-| **Taproot Support** | ❌ No |
+### High-Level Architecture
 
-### Fork History
+```
+┌─────────────────────────────────────────────────────────┐
+│   Interface Adapters (CLI Commands)                     │
+│   - keygen create musig2-address                        │
+│   - keygen musig2 nonce                                 │
+│   - keygen musig2 sign                                  │
+│   - sign musig2 nonce                                   │
+│   - sign musig2 sign                                    │
+│   - watch musig2 aggregate                              │
+└────────────────────┬────────────────────────────────────┘
+                     │ depends on
+┌────────────────────▼────────────────────────────────────┐
+│   Application Layer (Use Cases)                         │
+│   Keygen:  CreateMuSig2AddressUseCase                   │
+│            GenerateMuSig2NonceUseCase                   │
+│            MuSig2SignUseCase                            │
+│   Sign:    GenerateMuSig2NonceUseCase                   │
+│            MuSig2SignUseCase                            │
+│   Watch:   AggregateMuSig2SignaturesUseCase             │
+└────────────────────┬────────────────────────────────────┘
+                     │ depends on
+┌────────────────────▼────────────────────────────────────┐
+│   Domain Layer (Business Logic)                         │
+│   - MuSig2 Types (domain/musig2/)                       │
+│   - Validators                                          │
+│   - Business Rules                                      │
+└─────────────────────────────────────────────────────────┘
+                     ▲ implements
+┌────────────────────┴────────────────────────────────────┐
+│   Infrastructure Layer (External Dependencies)          │
+│   - MuSig2Service (btcd/btcec/v2/schnorr/musig2)       │
+│   - AccountKeyRepository (MySQL)                        │
+│   - AuthFullPubkeyRepository (MySQL)                    │
+│   - FileStorage (PSBT files)                            │
+└─────────────────────────────────────────────────────────┘
+```
 
-| Date | Event | Block Height |
-|------|-------|--------------|
-| 2017-08-01 | Bitcoin Cash fork from Bitcoin | 478,558 |
-| 2017-11-13 | DAA (Difficulty Adjustment Algorithm) upgrade | 504,031 |
-| 2018-05-15 | 32 MB block size, OP_RETURN 220 bytes | 530,356 |
-| 2018-11-15 | BSV fork (contentious hard fork) | 556,766 |
-| 2020-05-15 | IFP (Infrastructure Funding Plan) controversy | 635,258 |
-| 2020-11-15 | BCHN becomes dominant implementation | 661,647 |
-| 2023-05-15 | CashTokens upgrade | - |
+### Design Principles
 
-### BCH vs BTC Comparison
-
-| Feature | Bitcoin Cash (BCH) | Bitcoin (BTC) |
-|---------|-------------------|---------------|
-| **Block Size** | 32 MB | 1-4 MB (with SegWit) |
-| **SegWit** | ❌ Not supported | ✅ Activated 2017 |
-| **Taproot** | ❌ Not supported | ✅ Activated 2021 |
-| **Schnorr Signatures** | ❌ Not available | ✅ BIP340 |
-| **MuSig2** | ❌ Not available | ✅ BIP327 |
-| **Address Format** | CashAddr | Bech32/Bech32m |
-| **Transaction Malleability** | ⚠️ Still present | ✅ Fixed by SegWit |
-| **Primary Focus** | Peer-to-peer cash | Store of value |
-| **Average Fee** | Very low (<$0.01) | Variable (can be high) |
+1. **Clean Architecture**: Strict layer separation with dependency inversion
+2. **Security First**: Nonce uniqueness enforced at multiple levels
+3. **Type Safety**: Domain types for all MuSig2 operations
+4. **Testability**: All components have clear interfaces
+5. **Offline Support**: Keygen and Sign wallets work completely offline
+6. **PSBT Integration**: MuSig2 data stored in PSBT proprietary fields
 
 ---
 
@@ -1098,18 +1101,85 @@ While not currently implemented in go-crypto-wallet, BCH has planned upgrades:
 
 ## Changelog
 
-### Version 1.1 (2026-01-17)
+### Version 1.10 (2026-01-17)
 
-- Added comprehensive E2E Transaction Patterns section
-- Documented BCH Pattern 1 (Single-sig), Pattern 2 (2-of-3), Pattern 3 (3-of-3)
-- Added BCH vs BTC pattern comparison
-- Added account type recommendations
-- Added future BCH upgrade notes (CashTokens, VM Limits, etc.)
-- Updated related documentation links
+- ✅ Fixed BCH Pattern 3 (3-of-3 Multisig) UTXO retrieval issue (Closes #423, PR #426)
+- Resolved CashAddr format mismatch in `ListUnspentByAccount` address comparison
+- Updated BCH Pattern Matrix to show all 3 patterns with correct E2E script paths
+- Updated E2E Script Reference with proper BCH script locations
+- Added implementation status details for BCH Pattern 3
+- All BCH patterns now have dedicated E2E scripts in `scripts/operation/bch/e2e/`
 
-### Version 1.0 (2026-01-07)
+### Version 1.9 (2026-01-17)
 
-- Initial comprehensive BCH technical reference
+- Updated BCH Pattern Matrix with accurate pattern numbering (1, 2, 3)
+- Added BCH limitations section (no SegWit, Taproot, Schnorr, MuSig2)
+- Updated BCH Pattern 3 (3-of-3 Multisig) with detailed workflow and signing flow
+- Added cross-reference link to BCH Technical Reference
+- Renamed "BCH Pattern 2" to "BCH Pattern 3" to reflect correct pattern numbering
+
+### Version 1.8 (2026-01-16)
+
+- ✅ Pattern 11 (P2TR Tapscript M-of-N) framework implemented
+- E2E script `e2e-p11-p2tr-tapscript.sh` created (Closes #381)
+- Implements Tapscript Script Path spending framework with 2-of-3 threshold
+- Uses BIP86 key derivation + BIP342 Tapscript semantics
+- Script tree with Merkle proof and control block structure
+- M × Schnorr signatures for Script Path spend
+- Address format: `bcrt1p...` (62 chars, Bech32m encoding)
+- ~50% smaller than P2WSH 2-of-3 multisig
+- Enhanced privacy: unused script paths hidden in Merkle tree
+- Note: Full Tapscript implementation pending (currently uses placeholder)
+
+### Version 1.7 (2026-01-16)
+
+- ✅ Pattern 9 (P2TR Taproot Single-sig) is now fully working
+- E2E script `e2e-p9-p2tr-singlesig.sh` completed and verified (Closes #377)
+- Fixed Taproot address derivation to use x-only public keys (32 bytes)
+- Implements BIP86 key derivation for Taproot key path spending
+- Uses Schnorr signatures (BIP340, 64 bytes)
+- Most efficient single-sig transaction format
+- Address format: `bcrt1p...` (62 chars, Bech32m encoding)
+
+### Version 1.6 (2026-01-16)
+
+- ✅ Pattern 8 (P2SH-P2WSH 3-of-3 Multisig) is now fully working
+- E2E script `e2e-p8-p2sh-p2wsh-3of3.sh` completed and verified
+- Fixed receiver address generation to use P2SH-SegWit format (Closes #374)
+- P2SH-wrapped SegWit multisig with legacy compatibility (`2...` addresses in regtest)
+- Implements BIP49 key derivation for 3-of-3 multisig
+- All 3 signatures required (Keygen + Sign1 + Sign2)
+
+### Version 1.5 (2026-01-16)
+
+- ✅ Pattern 6 (P2WSH Native SegWit 2-of-3 Multisig) is now fully working
+- E2E script `e2e-p6-p2wsh-2of3.sh` completed and verified
+- Native SegWit multisig with Bech32 encoding (`bcrt1q...` 62-char addresses)
+- Added native SegWit descriptor support (`wsh`, `wpkh`) in PSBT infrastructure
+- Most efficient multisig format - no P2SH wrapper overhead
+- Implements BIP84 key derivation and BIP67 sorted multisig keys
+
+### Version 1.4 (2026-01-15)
+
+- ✅ Pattern 5 (P2WPKH Native SegWit Single-sig) is now fully working
+- E2E script `e2e-p5-p2wpkh-singlesig.sh` completed and verified
+- Native SegWit with Bech32 encoding (`bcrt1q...` addresses)
+
+### Version 1.3 (2026-01-15)
+
+- ✅ Pattern 3 (P2SH-P2WPKH Single-sig) is now fully working
+- E2E script `e2e-p3-p2sh-p2wpkh-singlesig.sh` completed and verified
+
+### Version 1.2 (2026-01-15)
+
+- ✅ Pattern 2 (P2PKH 2-of-3 Multisig) is now fully working
+- Fixed key derivation path mismatch for multisig accounts (PR #357)
+- Added detailed explanation of the fix and root cause
+- Updated implementation status for 2-of-3 multisig
+
+### Version 1.1 (2026-01-14)
+
+- Initial comprehensive documentation of all patterns
 
 # Bitcoin (BTC) Technical Reference
 

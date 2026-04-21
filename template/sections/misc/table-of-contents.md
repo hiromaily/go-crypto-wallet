@@ -1,19 +1,13 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Core Specifications](#core-specifications)
-3. [Address Types & Key Derivation](#address-types--key-derivation)
-4. [Transaction Architecture](#transaction-architecture)
-5. [Signing Mechanisms](#signing-mechanisms)
-6. [Multisig & MuSig2](#multisig--musig2)
-7. [PSBT (Partially Signed Bitcoin Transactions)](#psbt-partially-signed-bitcoin-transactions)
-8. [Network & Consensus](#network--consensus)
-9. [Fee Management](#fee-management)
-10. [Wallet Implementation](#wallet-implementation)
-11. [RPC & API Reference](#rpc--api-reference)
-12. [Security Considerations](#security-considerations)
-13. [Testing Resources](#testing-resources)
-14. [Official References](#official-references)
-15. [Project Documentation](#project-documentation)
+2. [Prerequisites](#prerequisites)
+3. [MuSig2 Basics](#musig2-basics)
+4. [Transaction Workflows](#transaction-workflows)
+5. [File Management](#file-management)
+6. [Address Creation](#address-creation)
+7. [Troubleshooting](#troubleshooting)
+8. [Best Practices](#best-practices)
+9. [Performance Comparison](#performance-comparison)
 
 ---

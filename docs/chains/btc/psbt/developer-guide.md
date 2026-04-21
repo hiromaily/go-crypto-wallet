@@ -881,8 +881,8 @@ bitcoin-cli decodepsbt "$(cat "$PSBT_FILE")"
 
 - [BIP 174: PSBT Specification](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)
 - [btcd PSBT Package](https://pkg.go.dev/github.com/btcsuite/btcd/btcutil/psbt)
-- [PSBT Implementation Details](./implementation)
-- [PSBT User Guide](./user-guide)
+- [PSBT Implementation Details](../../../../template/sections/misc/implementation)
+- [PSBT User Guide](../../../../template/sections/misc/user-guide)
 
 ### Code References
 

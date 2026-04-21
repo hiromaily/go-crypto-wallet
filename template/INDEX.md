@@ -41,6 +41,16 @@
 | pages/docs/chains/btc/README.tpl.md | docs/chains/btc/README.md | 20 |
 | pages/docs/chains/bch/README.tpl.md | docs/chains/bch/README.md | 21 |
 | pages/docs/chains/eth/README.tpl.md | docs/chains/eth/README.md | 18 |
+| pages/docs/chains/btc/musig2/architecture.tpl.md | docs/chains/btc/musig2/architecture.md | 13 |
+| pages/docs/chains/btc/musig2/user-guide.tpl.md | docs/chains/btc/musig2/user-guide.md | 13 |
+| pages/docs/chains/btc/musig2/security.tpl.md | docs/chains/btc/musig2/security.md | 11 |
+| pages/docs/chains/btc/musig2/migration-from-traditional.tpl.md | docs/chains/btc/musig2/migration-from-traditional.md | 12 |
+| pages/docs/chains/btc/psbt/implementation.tpl.md | docs/chains/btc/psbt/implementation.md | 13 |
+| pages/docs/chains/btc/psbt/developer-guide.tpl.md | docs/chains/btc/psbt/developer-guide.md | 10 |
+| pages/docs/chains/btc/psbt/migration.tpl.md | docs/chains/btc/psbt/migration.md | 11 |
+| pages/docs/chains/btc/psbt/user-guide.tpl.md | docs/chains/btc/psbt/user-guide.md | 12 |
+| pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md | docs/chains/btc/operations/e2e-transaction-patterns.md | 14 |
+| pages/docs/getting-started/devcontainer.tpl.md | docs/getting-started/devcontainer.md | 14 |
 | pages/docs/overview.tpl.md | docs/overview.md | 4 |
 | pages/docs/getting-started/installation.tpl.md | docs/getting-started/installation.md | 7 |
 | pages/docs/getting-started/commands.tpl.md | docs/getting-started/commands.md | 5 |
@@ -53,7 +63,10 @@
 | sections/ai/core-values.md | AGENTS, CLAUDE |
 | sections/ai/expected-behavior.md | AGENTS, CLAUDE |
 | sections/ai/ssot-structure.md | AGENTS, CLAUDE |
-| sections/architecture/architecture-overview.md | ARCHITECTURE, index |
+| sections/architecture/2-recommended-architecture-hybrid-approach.md | implementation |
+| sections/architecture/3-infrastructure-layer-design.md | implementation |
+| sections/architecture/architecture-layers.md | architecture |
+| sections/architecture/architecture-overview.md | ARCHITECTURE, developer-guide, index |
 | sections/architecture/architecture-transaction-flow.md | README |
 | sections/architecture/architecture.md | index |
 | sections/architecture/components.md | index |
@@ -63,6 +76,9 @@
 | sections/architecture/directory-structure.md | directory-structure |
 | sections/architecture/layer-architecture.md | ARCHITECTURE, layers |
 | sections/architecture/layer-responsibilities.md | ARCHITECTURE, layers |
+| sections/architecture/musig2-architecture-documentation.md | architecture |
+| sections/architecture/psbt-implementation-technical-design.md | implementation |
+| sections/architecture/security-architecture.md | architecture |
 | sections/architecture/shared-packages.md | ARCHITECTURE, shared-packages |
 | sections/architecture/transaction-architecture-2.md | README |
 | sections/architecture/transaction-architecture-3.md | README |
@@ -124,23 +140,28 @@
 | sections/development/code-style.md | CONTRIBUTING |
 | sections/development/commit-conventions.md | CONTRIBUTING |
 | sections/development/contributing-to-go-crypto-wallet.md | CONTRIBUTING |
+| sections/development/contributing.md | devcontainer |
 | sections/development/core-specifications-2.md | README |
 | sections/development/core-specifications-3.md | README |
 | sections/development/core-specifications.md | README |
 | sections/development/development-setup.md | CONTRIBUTING |
 | sections/development/documentation.md | CONTRIBUTING |
 | sections/development/eth-specific-flow-details.md | README |
-| sections/development/getting-started.md | CONTRIBUTING |
+| sections/development/getting-started.md | CONTRIBUTING, devcontainer |
+| sections/development/incident-response.md | security |
 | sections/development/official-references-2.md | README |
 | sections/development/official-references-3.md | README |
 | sections/development/official-references.md | README |
+| sections/development/prerequisites-2.md | migration-from-traditional |
+| sections/development/prerequisites-4.md | devcontainer |
+| sections/development/prerequisites.md | user-guide |
 | sections/development/pull-request-guidelines.md | CONTRIBUTING |
 | sections/development/questions.md | CONTRIBUTING |
 | sections/development/security-considerations.md | CONTRIBUTING |
 | sections/development/testing-resources-2.md | README |
 | sections/development/testing-resources-3.md | README |
 | sections/development/testing-resources.md | README |
-| sections/development/testing-strategy.md | ARCHITECTURE |
+| sections/development/testing-strategy.md | ARCHITECTURE, developer-guide |
 | sections/development/version-information.md | README |
 | sections/guidelines/architecture.md | architecture |
 | sections/guidelines/claude-mem/architecture.md | claude-mem |
@@ -215,44 +236,133 @@
 | sections/guidelines/workflow/pull-request.md | workflow |
 | sections/guidelines/workflow/see-also.md | workflow |
 | sections/guidelines/workflow/verification.md | workflow |
+| sections/misc/1-library-support-validation.md | implementation |
+| sections/misc/11-conclusion.md | implementation |
+| sections/misc/4-data-flow.md | implementation |
+| sections/misc/5-migration-strategy.md | implementation |
+| sections/misc/6-validation-offline-wallet-requirements.md | implementation |
+| sections/misc/7-risk-assessment-and-mitigation.md | implementation |
+| sections/misc/9-success-criteria.md | implementation |
+| sections/misc/account-types-and-signing-requirements.md | e2e-transaction-patterns |
+| sections/misc/adding-new-features.md | developer-guide |
+| sections/misc/additional-resources-2.md | developer-guide |
+| sections/misc/additional-resources-4.md | devcontainer |
+| sections/misc/additional-resources.md | user-guide |
+| sections/misc/address-creation.md | user-guide |
 | sections/misc/address-types-key-derivation-2.md | README |
 | sections/misc/address-types-key-derivation-3.md | README |
 | sections/misc/address-types-key-derivation.md | README |
+| sections/misc/address-types.md | user-guide |
+| sections/misc/appendices.md | migration |
+| sections/misc/appendix-attack-scenarios.md | security |
+| sections/misc/best-practices-2.md | user-guide |
+| sections/misc/best-practices.md | user-guide |
+| sections/misc/coexistence-strategy.md | migration-from-traditional |
+| sections/misc/comparison-devcontainer-vs-local-development.md | devcontainer |
+| sections/misc/compatibility-considerations.md | migration-from-traditional |
+| sections/misc/component-interactions.md | architecture |
+| sections/misc/conclusion-2.md | migration-from-traditional |
+| sections/misc/conclusion.md | security |
+| sections/misc/data-flow.md | architecture |
+| sections/misc/database-schema.md | architecture |
+| sections/misc/debugging.md | developer-guide |
+| sections/misc/details-of-each-pattern-for-bch.md | e2e-transaction-patterns |
+| sections/misc/details-of-each-pattern-for-btc.md | e2e-transaction-patterns |
+| sections/misc/devcontainer-development-environment.md | devcontainer |
+| sections/misc/development-workflow.md | devcontainer |
 | sections/misc/differences-from-bitcoin.md | README |
 | sections/misc/documentation-structure.md | README |
+| sections/misc/e2e-transaction-patterns-guide.md | e2e-transaction-patterns |
 | sections/misc/e2e-transaction-patterns.md | README |
+| sections/misc/e2e-workflow-matrix.md | e2e-transaction-patterns |
 | sections/misc/erc-20-token-support.md | README |
+| sections/misc/executive-summary.md | implementation |
+| sections/misc/features.md | devcontainer |
 | sections/misc/fee-management-2.md | README |
 | sections/misc/fee-management-3.md | README |
 | sections/misc/fee-management.md | README |
+| sections/misc/file-management-2.md | user-guide |
+| sections/misc/file-management.md | user-guide |
+| sections/misc/glossary-2.md | user-guide |
+| sections/misc/glossary.md | user-guide |
+| sections/misc/implementation-notes.md | architecture |
+| sections/misc/implementation-status.md | e2e-transaction-patterns |
+| sections/misc/key-security.md | security |
 | sections/misc/known-issues-and-workarounds.md | README |
+| sections/misc/migration-from-traditional-multisig.md | architecture |
+| sections/misc/migration-guide-traditional-multisig-to-musig2.md | migration-from-traditional |
+| sections/misc/migration-process-2.md | migration |
+| sections/misc/migration-process.md | migration-from-traditional |
+| sections/misc/migration-support.md | migration |
+| sections/misc/migration-timeline.md | migration |
 | sections/misc/multisig-implementation.md | README |
 | sections/misc/multisig-musig2.md | README |
+| sections/misc/musig2-basics.md | user-guide |
+| sections/misc/musig2-security-documentation.md | security |
+| sections/misc/musig2-user-guide.md | user-guide |
 | sections/misc/network-confirmation-guidelines.md | README |
 | sections/misc/network-consensus-2.md | README |
 | sections/misc/network-consensus.md | README |
+| sections/misc/nonce-security.md | security |
+| sections/misc/operational-security.md | security |
+| sections/misc/performance-comparison.md | user-guide |
+| sections/misc/performance-considerations-2.md | developer-guide |
+| sections/misc/performance-considerations.md | architecture |
+| sections/misc/post-migration-verification.md | migration |
+| sections/misc/pre-migration-preparation.md | migration |
 | sections/misc/project-documentation-2.md | README |
 | sections/misc/project-documentation.md | README |
+| sections/misc/psbt-basics.md | user-guide |
+| sections/misc/psbt-developer-guide.md | developer-guide |
+| sections/misc/psbt-infrastructure.md | developer-guide |
+| sections/misc/psbt-migration-guide.md | migration |
 | sections/misc/psbt-partially-signed-bitcoin-transactions.md | README |
+| sections/misc/psbt-user-guide.md | user-guide |
 | sections/misc/quick-start.md | README |
+| sections/misc/related-documents.md | e2e-transaction-patterns |
+| sections/misc/rollback-procedure.md | migration |
+| sections/misc/rollback-procedures.md | migration-from-traditional |
+| sections/misc/security-checklist.md | security |
 | sections/misc/security-considerations-2.md | README |
 | sections/misc/security-considerations-3.md | README |
 | sections/misc/security-considerations.md | README |
+| sections/misc/should-you-migrate.md | migration-from-traditional |
+| sections/misc/signature-patterns.md | e2e-transaction-patterns |
 | sections/misc/signing-mechanism.md | README |
 | sections/misc/signing-mechanisms-2.md | README |
 | sections/misc/signing-mechanisms.md | README |
+| sections/misc/supported-key-types.md | e2e-transaction-patterns |
 | sections/misc/table-of-contents-2.md | README |
-| sections/misc/table-of-contents-3.md | README |
-| sections/misc/table-of-contents.md | README |
+| sections/misc/table-of-contents-3.md | README, user-guide |
+| sections/misc/table-of-contents-4.md | security |
+| sections/misc/table-of-contents-5.md | migration-from-traditional |
+| sections/misc/table-of-contents-6.md | developer-guide |
+| sections/misc/table-of-contents-7.md | migration |
+| sections/misc/table-of-contents-9.md | devcontainer |
+| sections/misc/table-of-contents.md | README, architecture, e2e-transaction-patterns, user-guide |
+| sections/misc/threat-model.md | security |
 | sections/misc/transaction-types.md | README |
+| sections/misc/transaction-workflows-2.md | user-guide |
+| sections/misc/transaction-workflows.md | user-guide |
+| sections/misc/understanding-the-differences.md | migration-from-traditional |
+| sections/misc/use-case-layer.md | developer-guide |
+| sections/misc/using-with-ai-tools.md | devcontainer |
 | sections/misc/wallet-implementation-2.md | README |
 | sections/misc/wallet-implementation-3.md | README |
 | sections/misc/wallet-implementation.md | README |
+| sections/misc/why-devcontainer.md | devcontainer |
 | sections/product/chain-coverage.md | README |
+| sections/product/faq-2.md | migration |
+| sections/product/faq-3.md | devcontainer |
+| sections/product/faq.md | migration-from-traditional |
+| sections/product/troubleshooting-2.md | user-guide |
+| sections/product/troubleshooting-3.md | devcontainer |
+| sections/product/troubleshooting.md | user-guide |
 | sections/product/wallet-types.md | overview |
 | sections/product/workflow-diagram.md | overview |
+| sections/project/8-implementation-roadmap.md | implementation |
 | sections/project/btc-chain-overview.md | README |
-| sections/project/changelog.md | README |
+| sections/project/changelog.md | README, e2e-transaction-patterns |
 | sections/project/commands/global-flags.md | commands |
 | sections/project/commands/keygen-wallet.md | commands |
 | sections/project/commands/overview.md | commands |
@@ -266,18 +376,27 @@
 | sections/project/installation/ethereum.md | installation |
 | sections/project/installation/overview.md | installation |
 | sections/project/installation/ripple.md | installation |
+| sections/project/introduction.md | migration-from-traditional |
 | sections/project/overview-2.md | README |
 | sections/project/overview-3.md | README |
-| sections/project/overview.md | README, overview |
+| sections/project/overview-4.md | migration |
+| sections/project/overview-5.md | user-guide |
+| sections/project/overview-6.md | devcontainer |
+| sections/project/overview.md | README, architecture, e2e-transaction-patterns, overview, user-guide |
+| sections/project/security-overview.md | security |
+| sections/reference/10-references.md | implementation |
 | sections/reference/agents-see-also.md | AGENTS, CLAUDE |
+| sections/reference/api-reference.md | architecture |
 | sections/reference/architecture-see-also.md | ARCHITECTURE |
 | sections/reference/bch-quick-reference.md | README |
 | sections/reference/bitcoin-btc-technical-reference.md | README |
 | sections/reference/documentation-links.md | README |
 | sections/reference/documentation-map.md | AGENTS, CLAUDE |
+| sections/reference/e2e-script-reference.md | e2e-transaction-patterns |
 | sections/reference/ethereum-eth-technical-reference.md | README |
-| sections/reference/quick-reference.md | AGENTS, CLAUDE |
+| sections/reference/quick-reference.md | AGENTS, CLAUDE, e2e-transaction-patterns |
 | sections/reference/quick-start.md | README |
+| sections/reference/references.md | architecture |
 | sections/reference/rpc-api-reference-2.md | README |
 | sections/reference/rpc-api-reference-3.md | README |
 | sections/reference/rpc-api-reference.md | README |

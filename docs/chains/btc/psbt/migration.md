@@ -739,9 +739,9 @@ A: No, never edit PSBT files manually. They are base64-encoded binary data. Use 
 
 **Documentation:**
 
-- [PSBT User Guide](./user-guide)
-- [PSBT Developer Guide](./developer-guide)
-- [PSBT Implementation](./implementation)
+- [PSBT User Guide](../../../../template/sections/misc/user-guide)
+- [PSBT Developer Guide](../../../../template/sections/misc/developer-guide)
+- [PSBT Implementation](../../../../template/sections/misc/implementation)
 
 **Testing:**
 

@@ -5,13 +5,14 @@ This document describes the architecture and implementation of MuSig2 (Simple Tw
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Architecture Layers](#architecture-layers)
-3. [Component Interactions](#component-interactions)
-4. [Data Flow](#data-flow)
-5. [Security Architecture](#security-architecture)
-6. [Database Schema](#database-schema)
-7. [API Reference](#api-reference)
-8. [Implementation Notes](#implementation-notes)
+2. [Prerequisites](#prerequisites)
+3. [MuSig2 Basics](#musig2-basics)
+4. [Transaction Workflows](#transaction-workflows)
+5. [File Management](#file-management)
+6. [Address Creation](#address-creation)
+7. [Troubleshooting](#troubleshooting)
+8. [Best Practices](#best-practices)
+9. [Performance Comparison](#performance-comparison)
 
 ---
 
@@ -19,60 +20,62 @@ This document describes the architecture and implementation of MuSig2 (Simple Tw
 
 ### What is MuSig2?
 
-MuSig2 is a two-round Schnorr multisignature protocol (BIP327) that enables multiple parties to create a single aggregated signature that is indistinguishable from a standard single-signature transaction on the blockchain. This provides:
+MuSig2 is a cryptographic protocol that enables multiple parties to create a **single aggregated Schnorr signature** that looks identical to a single-signature transaction on the blockchain. Unlike traditional multisig (P2SH, P2WSH) where multiple signatures are stored on-chain, MuSig2 aggregates multiple signatures into one, providing significant benefits.
 
-- **Smaller transactions**: 30-50% size reduction compared to traditional P2WSH multisig
-- **Lower fees**: Proportional to transaction size reduction
-- **Better privacy**: Multisig transactions look like single-sig on-chain
-- **Schnorr signatures**: Uses BIP340 Schnorr signatures via Taproot (P2TR)
+### Benefits Over Traditional Multisig
 
-### High-Level Architecture
+| Feature | Traditional P2WSH Multisig | MuSig2 |
+|---------|---------------------------|--------|
+| **On-Chain Appearance** | Multiple signatures visible | Single signature (looks like single-sig) |
+| **Transaction Size** | ~370-400 bytes (2-of-3) | ~200-250 bytes (30-50% smaller) |
+| **Privacy** | Multisig is visible | Indistinguishable from single-sig |
+| **Fees** | Higher (proportional to size) | 30-50% lower |
+| **Signature Algorithm** | ECDSA | Schnorr (BIP340) |
+| **Address Type** | P2WSH (bc1q...) | P2TR Taproot (bc1p...) |
+| **Compatibility** | Older standard | Modern (Bitcoin Core 22.0+) |
+
+### When to Use MuSig2
+
+- ✅ **New multisig setups** - Best privacy and efficiency
+- ✅ **High-volume operations** - Significant fee savings over time
+- ✅ **Privacy-focused applications** - Transactions look like single-sig
+- ✅ **Modern infrastructure** - Requires Bitcoin Core 22.0+ and Taproot support
+- ⚠️ **Legacy multisig** - Traditional P2WSH still supported for backward compatibility
+
+### How MuSig2 Works (Two-Round Protocol)
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│   Interface Adapters (CLI Commands)                     │
-│   - keygen create musig2-address                        │
-│   - keygen musig2 nonce                                 │
-│   - keygen musig2 sign                                  │
-│   - sign musig2 nonce                                   │
-│   - sign musig2 sign                                    │
-│   - watch musig2 aggregate                              │
-└────────────────────┬────────────────────────────────────┘
-                     │ depends on
-┌────────────────────▼────────────────────────────────────┐
-│   Application Layer (Use Cases)                         │
-│   Keygen:  CreateMuSig2AddressUseCase                   │
-│            GenerateMuSig2NonceUseCase                   │
-│            MuSig2SignUseCase                            │
-│   Sign:    GenerateMuSig2NonceUseCase                   │
-│            MuSig2SignUseCase                            │
-│   Watch:   AggregateMuSig2SignaturesUseCase             │
-└────────────────────┬────────────────────────────────────┘
-                     │ depends on
-┌────────────────────▼────────────────────────────────────┐
-│   Domain Layer (Business Logic)                         │
-│   - MuSig2 Types (domain/musig2/)                       │
-│   - Validators                                          │
-│   - Business Rules                                      │
-└─────────────────────────────────────────────────────────┘
-                     ▲ implements
-┌────────────────────┴────────────────────────────────────┐
-│   Infrastructure Layer (External Dependencies)          │
-│   - MuSig2Service (btcd/btcec/v2/schnorr/musig2)       │
-│   - AccountKeyRepository (MySQL)                        │
-│   - AuthFullPubkeyRepository (MySQL)                    │
-│   - FileStorage (PSBT files)                            │
-└─────────────────────────────────────────────────────────┘
+Round 1: Nonce Generation (Parallel)
+┌─────────────────────────────────────────────────────┐
+│  Keygen Wallet → Generate Nonce 1                   │
+│  Sign Wallet 1 → Generate Nonce 2  (can run in     │
+│  Sign Wallet 2 → Generate Nonce 3   parallel)      │
+└─────────────────────────────────────────────────────┘
+                        ↓
+            Exchange nonces via PSBT files
+                        ↓
+Round 2: Signing (Sequential)
+┌─────────────────────────────────────────────────────┐
+│  Keygen Wallet → Create Partial Signature 1         │
+│  Sign Wallet 1 → Create Partial Signature 2         │
+│  Sign Wallet 2 → Create Partial Signature 3         │
+└─────────────────────────────────────────────────────┘
+                        ↓
+            Collect partial signatures
+                        ↓
+Aggregation (Watch Wallet)
+┌─────────────────────────────────────────────────────┐
+│  Watch Wallet → Aggregate Partial Signatures        │
+│              → Verify Final Signature               │
+│              → Broadcast Transaction                │
+└─────────────────────────────────────────────────────┘
 ```
 
-### Design Principles
+**Key Security Feature:**
 
-1. **Clean Architecture**: Strict layer separation with dependency inversion
-2. **Security First**: Nonce uniqueness enforced at multiple levels
-3. **Type Safety**: Domain types for all MuSig2 operations
-4. **Testability**: All components have clear interfaces
-5. **Offline Support**: Keygen and Sign wallets work completely offline
-6. **PSBT Integration**: MuSig2 data stored in PSBT proprietary fields
+- Each wallet generates a **nonce** (random value) in Round 1
+- Nonces must be **unique per transaction** and **never reused**
+- Reusing nonces can leak private keys - this is critical!
 
 ---
 
