@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/taproot/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Taproot
 
 This directory contains documentation for Taproot (BIP341/BIP86) implementation.

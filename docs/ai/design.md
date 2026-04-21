@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/design.tpl.md · Run `make docs` to regenerate.
+-->
+
 # AI Agent Instruction System Design
 
 This document describes the design philosophy and structure of the AI agent instruction system in this project.

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/testing.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Testing Guidelines
 
 This document describes the testing strategy and requirements for the go-crypto-wallet project.

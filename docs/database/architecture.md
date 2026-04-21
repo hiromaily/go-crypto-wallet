@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/architecture.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Database Architecture
 
 This document describes the database architecture and operations for the go-crypto-wallet project.

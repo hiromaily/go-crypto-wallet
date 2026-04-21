@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/design/btc-network-mode-switching.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Design Document: Bitcoin Network Mode Switching (regtest ↔ signet)
 
 ## Overview

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/atlas-migration-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Atlas Migration Flow (`atlas migrate diff/apply`)
 
 This document describes the versioned migration workflow using **Atlas v1.1.0** (`atlas migrate diff/apply`) for

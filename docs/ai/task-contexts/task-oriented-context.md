@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/task-oriented-context.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Task-Oriented Context Management
 
 ## Overview

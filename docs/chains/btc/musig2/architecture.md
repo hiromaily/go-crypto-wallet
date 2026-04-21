@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/musig2/architecture.tpl.md · Run `make docs` to regenerate.
+-->
+
 # MuSig2 Architecture Documentation
 
 This document describes the architecture and implementation of MuSig2 (Simple Two-Round Schnorr Multisignatures) support in the go-crypto-wallet project, following Clean Architecture principles.
@@ -15,11 +20,6 @@ This document describes the architecture and implementation of MuSig2 (Simple Tw
 9. [Performance Comparison](#performance-comparison)
 
 ---
-
-<!--
-⚠️ AUTO-GENERATED FILE — DO NOT EDIT
-Source: template/pages/README.tpl.md · Run `make docs` to regenerate.
--->
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true" alt="Bitcoin" width="140px">

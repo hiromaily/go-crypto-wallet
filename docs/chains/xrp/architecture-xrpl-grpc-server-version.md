@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/architecture-xrpl-grpc-server-version.tpl.md · Run `make docs` to regenerate.
+-->
+
 # XRPL (XRP Ledger) Architecture for go-crypto-wallet (OBSOLETE)
 
 > **⚠️ OBSOLETE: This document is no longer valid and contradicts the current project direction.**

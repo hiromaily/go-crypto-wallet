@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/AGENTS.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../sections/ai/agent-guidelines.md -->
 
 <!-- @include: ../sections/project/identity.md -->

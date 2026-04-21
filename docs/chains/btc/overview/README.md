@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/overview/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin Overview
 
 This directory contains fundamental technical references and overview documentation for Bitcoin.

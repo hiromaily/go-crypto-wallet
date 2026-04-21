@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/design/pg2sqlite-alter-table-support.tpl.md · Run `make docs` to regenerate.
+-->
+
 # pg2sqlite: ALTER TABLE & PRIMARY KEY Support
 
 ## Requirements & Design Specification

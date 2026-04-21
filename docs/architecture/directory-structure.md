@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/architecture/directory-structure.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Directory Structure
 
 The project follows **Clean Architecture** principles with clear layer separation.

@@ -1,1 +1,6 @@
-<!-- @include: ../../../../sections/xrp/README.md -->
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/README.tpl.md · Run `make docs` to regenerate.
+-->
+
+<!-- @include: ../../../../sections/chains/xrp/README.md -->

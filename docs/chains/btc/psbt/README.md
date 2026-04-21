@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT (Partially Signed Bitcoin Transactions)
 
 This directory contains documentation for PSBT implementation and usage in the go-crypto-wallet system.

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/schema-changes.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Database Schema Change Workflow
 
 This document provides a comprehensive guide for modifying or adding database columns and schemas in the go-crypto-wallet project, which supports multiple database backends.

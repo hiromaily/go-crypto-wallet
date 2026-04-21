@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/musig2/migration-from-traditional.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Migration Guide: Traditional Multisig to MuSig2
 
 This guide provides a comprehensive strategy for migrating from traditional P2WSH multisig to MuSig2 Taproot addresses in go-crypto-wallet.

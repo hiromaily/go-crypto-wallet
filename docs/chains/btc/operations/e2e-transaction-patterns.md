@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/operations/e2e-transaction-patterns.tpl.md · Run `make docs` to regenerate.
+-->
+
 # E2E Transaction Patterns Guide
 
 This document explains transaction combination patterns for Bitcoin/Bitcoin Cash. Various E2E workflow patterns exist depending on key types and whether multisig is used.
@@ -15,11 +20,6 @@ This document explains transaction combination patterns for Bitcoin/Bitcoin Cash
 9. [Performance Comparison](#performance-comparison)
 
 ---
-
-<!--
-⚠️ AUTO-GENERATED FILE — DO NOT EDIT
-Source: template/pages/README.tpl.md · Run `make docs` to regenerate.
--->
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true" alt="Bitcoin" width="140px">
@@ -72,7 +72,7 @@ Every transaction pattern — from legacy P2PKH to Taproot MuSig2 and MPC-TSS �
 
 ## Supported Key Types
 
-See [BTC Technical Reference — Address Types & Key Derivation](../../../../template/sections/README.md#address-types--key-derivation) for the full address type table and BIP derivation paths.
+See [BTC Technical Reference — Address Types & Key Derivation](../README.md#address-types--key-derivation) for the full address type table and BIP derivation paths.
 
 ---
 
@@ -219,7 +219,7 @@ BCH supports **fewer patterns** than BTC due to lack of SegWit, Taproot, and Sch
 - ❌ No BIP49/84/86 derivation paths (BIP44 only)
 - ⚠️ Fee unit: sat/Byte (not sat/vByte - no witness discount)
 
-For detailed BCH patterns, see [BCH Technical Reference](../../../../template/bch/README.md#e2e-transaction-patterns).
+For detailed BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-transaction-patterns).
 
 ---
 
@@ -851,7 +851,7 @@ Watch Wallet (broadcast)
 
 **Note:** Unlike BTC's SegWit patterns, BCH transactions don't benefit from witness data separation, resulting in larger transaction sizes. BCH compensates with very low fees (~1 sat/byte).
 
-For more BCH patterns, see [BCH Technical Reference](../../../../template/bch/README.md#e2e-transaction-patterns)
+For more BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-transaction-patterns)
 
 ---
 

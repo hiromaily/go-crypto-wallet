@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/architecture-2026.tpl.md · Run `make docs` to regenerate.
+-->
+
 # XRPL (XRP Ledger) Architecture (2026)
 
 This document proposes an XRP Ledger (XRPL) module architecture aligned with **go-crypto-wallet’s Clean Architecture + 3-wallet security model** (Watch / Keygen / Sign).

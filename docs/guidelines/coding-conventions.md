@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/coding-conventions.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Coding Conventions
 
 This document describes the coding standards and conventions for the go-crypto-wallet project.

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/overview/address-types.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin Address Types vs Address Formats - Reference Guide
 
 **CRITICAL REFERENCE**: This document clarifies the distinction between address types and address formats to prevent common AI agent and developer confusion.

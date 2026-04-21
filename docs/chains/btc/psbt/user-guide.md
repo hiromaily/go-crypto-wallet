@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/user-guide.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT User Guide
 
 This guide explains how to use Partially Signed Bitcoin Transactions (PSBT) in go-crypto-wallet for creating, signing, and broadcasting Bitcoin transactions.
@@ -663,7 +668,7 @@ bitcoin-cli getrawtransaction <txid> 1
 
 ### Security
 
-> For general offline wallet security (air-gapped signing, file transfer security), see [MuSig2 Best Practices](../../../../template/sections/musig2/user-guide.md#best-practices).
+> For general offline wallet security (air-gapped signing, file transfer security), see [MuSig2 Best Practices](../musig2/user-guide.md#best-practices).
 
 1. **Private Key Protection**
    - ✅ Store seeds and private keys in secure offline storage

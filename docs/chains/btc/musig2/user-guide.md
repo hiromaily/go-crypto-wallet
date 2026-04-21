@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/musig2/user-guide.tpl.md · Run `make docs` to regenerate.
+-->
+
 # MuSig2 User Guide
 
 This guide explains how to use MuSig2 (Simple Two-Round Schnorr Multisignatures) in go-crypto-wallet for creating efficient, private multisig transactions with reduced fees and improved privacy.
@@ -15,11 +20,6 @@ This guide explains how to use MuSig2 (Simple Two-Round Schnorr Multisignatures)
 9. [Performance Comparison](#performance-comparison)
 
 ---
-
-<!--
-⚠️ AUTO-GENERATED FILE — DO NOT EDIT
-Source: template/pages/README.tpl.md · Run `make docs` to regenerate.
--->
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true" alt="Bitcoin" width="140px">

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/getting-started/installation.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Installation
 
 This guide covers setting up the development environment on macOS.

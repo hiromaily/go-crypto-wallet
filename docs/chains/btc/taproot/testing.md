@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/taproot/testing.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Taproot Testing Guide
 
 This document describes the comprehensive test suite for Taproot (BIP341/BIP86) support in the go-crypto-wallet project.

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/operations/wallet-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Flow for BTC
 
 This document describes the BTC-specific setup procedures and transaction flow.

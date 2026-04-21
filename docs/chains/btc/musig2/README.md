@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/musig2/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # MuSig2
 
 This directory contains documentation for MuSig2 (BIP327) multisignature implementation.

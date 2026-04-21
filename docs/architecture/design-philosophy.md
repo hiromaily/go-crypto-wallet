@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/architecture/design-philosophy.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Design Philosophy
 
 ## Why Clean Architecture?

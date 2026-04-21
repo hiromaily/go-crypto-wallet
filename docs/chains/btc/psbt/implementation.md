@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/implementation.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT Implementation Technical Design
 
 **Status**: Research Phase Complete ✅

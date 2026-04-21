@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/overview-ja.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Overview (日本語)
 
 このリポジトリは、Bitcoin、Bitcoin Cash、Ethereum、ERC-20 Token、Rippleなどの暗号通貨を扱うウォレットシステムです。

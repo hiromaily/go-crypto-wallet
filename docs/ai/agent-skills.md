@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/agent-skills.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Agent Skills Documentation
 
 ## Overview

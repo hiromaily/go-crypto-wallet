@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/archive/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Archive
 
 This directory contains outdated or deprecated documentation kept for historical reference.

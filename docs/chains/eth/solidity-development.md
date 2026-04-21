@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/eth/solidity-development.tpl.md · Run `make docs` to regenerate.
+-->
+
 # HYC Token (ERC-20) Smart Contract + Deployment Environment
 
 ## 1. Objective

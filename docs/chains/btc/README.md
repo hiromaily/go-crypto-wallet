@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Bitcoin (BTC) Technical Reference
 
 This document provides a comprehensive technical reference for Bitcoin implementation in the go-crypto-wallet system. It covers specifications, protocol details, and links to official documentation to help AI agents and developers understand Bitcoin's architecture and implement features correctly.
@@ -8,30 +13,30 @@ This directory is organized into the following categories:
 
 | File / Directory | Description | Audience |
 |------------------|-------------|----------|
-| [architecture.md](../../../template/sections/misc/architecture.md) | **Wallet architecture** — wallet roles, use case boundary map, Keygen vs Sign signing | Developers |
-| [overview/](../../../template/sections/misc/overview/README.md) | Fundamental technical references and Bitcoin basics | All |
-| [operations/](../../../template/sections/misc/operations/README.md) | Wallet operation guides and transaction flows | Operators |
-| [keygen/](../../../template/sections/misc/keygen/README.md) | Key generation design and improvements | Developers |
-| [psbt/](../../../template/sections/misc/psbt/README.md) | PSBT implementation and usage guides | All |
-| [descriptor/](../../../template/sections/misc/descriptor/README.md) | Output Descriptor implementation | Developers |
-| [taproot/](../../../template/sections/misc/taproot/README.md) | Taproot (BIP341/BIP86) guides | All |
-| [musig2/](../../../template/sections/misc/musig2/README.md) | MuSig2 multisignature implementation | All |
+| [architecture.md](./architecture.md) | **Wallet architecture** — wallet roles, use case boundary map, Keygen vs Sign signing | Developers |
+| [overview/](./overview/README.md) | Fundamental technical references and Bitcoin basics | All |
+| [operations/](./operations/README.md) | Wallet operation guides and transaction flows | Operators |
+| [keygen/](./keygen/README.md) | Key generation design and improvements | Developers |
+| [psbt/](./psbt/README.md) | PSBT implementation and usage guides | All |
+| [descriptor/](./descriptor/README.md) | Output Descriptor implementation | Developers |
+| [taproot/](./taproot/README.md) | Taproot (BIP341/BIP86) guides | All |
+| [musig2/](./musig2/README.md) | MuSig2 multisignature implementation | All |
 | archive/ | Outdated documentation (reference only) | - |
 
 ## Quick Start
 
 ### For Operators
 
-1. Start with [operations/wallet-flow.md](../../../template/sections/misc/operations/wallet-flow.md) for wallet setup and transaction flows
-2. Review [operations/e2e-transaction-patterns.md](../../../template/sections/misc/operations/e2e-transaction-patterns.md) for transaction types
-3. See [psbt/user-guide.md](../../../template/sections/misc/psbt/user-guide.md) for offline signing workflows
+1. Start with [operations/wallet-flow.md](./operations/wallet-flow.md) for wallet setup and transaction flows
+2. Review [operations/e2e-transaction-patterns.md](./operations/e2e-transaction-patterns.md) for transaction types
+3. See [psbt/user-guide.md](./psbt/user-guide.md) for offline signing workflows
 
 ### For Developers
 
-1. Read [architecture.md](../../../template/sections/misc/architecture.md) for the wallet boundary map and use case assignments
-2. Read [overview/technical-reference.md](../../../template/sections/misc/overview/technical-reference.md) for Bitcoin protocol fundamentals
-3. Review feature-specific architecture docs: [descriptor/architecture.md](../../../template/sections/misc/descriptor/architecture.md), [musig2/architecture.md](../../../template/sections/misc/musig2/architecture.md)
-4. Check [psbt/developer-guide.md](../../../template/sections/misc/psbt/developer-guide.md) for PSBT implementation details
+1. Read [architecture.md](./architecture.md) for the wallet boundary map and use case assignments
+2. Read [overview/technical-reference.md](./overview/technical-reference.md) for Bitcoin protocol fundamentals
+3. Review feature-specific architecture docs: [descriptor/architecture.md](./descriptor/architecture.md), [musig2/architecture.md](./musig2/architecture.md)
+4. Check [psbt/developer-guide.md](./psbt/developer-guide.md) for PSBT implementation details
 
 ---
 
@@ -137,7 +142,7 @@ Curve Parameters:
 | **P2WSH** | BIP141 | `bc1q` | `tb1q` | SegWit Script Hash |
 | **P2TR** | BIP86 | `bc1p` | `tb1p` | Taproot (recommended) |
 
-See [overview/address-types.md](../../../template/sections/misc/overview/address-types.md) for detailed comparison.
+See [overview/address-types.md](./overview/address-types.md) for detailed comparison.
 
 ### HD Wallet Derivation Paths
 
@@ -247,7 +252,7 @@ Used for P2TR transactions. Introduced with Taproot (BIP340).
 - Provably secure under standard assumptions
 - Batch verification is faster
 
-See [taproot/user-guide.md](../../../template/sections/misc/taproot/user-guide.md) for details.
+See [taproot/user-guide.md](./taproot/user-guide.md) for details.
 
 ---
 
@@ -278,7 +283,7 @@ MuSig2 enables N-of-N multisig that appears as single-sig on-chain.
 - Generate fresh nonces for every transaction
 - Delete nonces after signing
 
-See [musig2/](../../../template/sections/misc/musig2/README.md) for detailed documentation.
+See [musig2/](./musig2/README.md) for detailed documentation.
 
 ---
 
@@ -308,7 +313,7 @@ PSBT (BIP174) is the standard format for offline/multi-party signing workflows.
    └── Extract broadcastable transaction
 ```
 
-See [psbt/](../../../template/sections/misc/psbt/README.md) for detailed documentation.
+See [psbt/](./psbt/README.md) for detailed documentation.
 
 ---
 
@@ -384,8 +389,8 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 | **payment** | Outgoing payments | Yes (2-of-3 or 3-of-3) |
 | **stored** | Cold storage | Yes |
 
-For the common 3-wallet transaction flow (chain-agnostic), see [docs/transaction-flow.md](../../../template/transaction-flow.md).
-For BTC-specific procedures and Mermaid diagrams, see [operations/wallet-flow.md](../../../template/sections/misc/operations/wallet-flow.md).
+For the common 3-wallet transaction flow (chain-agnostic), see [docs/transaction-flow.md](../../transaction-flow.md).
+For BTC-specific procedures and Mermaid diagrams, see [operations/wallet-flow.md](./operations/wallet-flow.md).
 
 ---
 
@@ -447,7 +452,7 @@ For BTC-specific procedures and Mermaid diagrams, see [operations/wallet-flow.md
 - Generate cryptographically secure random nonces
 - Delete nonces immediately after signing
 
-See [musig2/security.md](../../../template/sections/misc/musig2/security.md) for details.
+See [musig2/security.md](./musig2/security.md) for details.
 
 ---
 
@@ -548,22 +553,22 @@ See [musig2/security.md](../../../template/sections/misc/musig2/security.md) for
 
 | Category | Documents |
 |----------|-----------|
-| **Overview** | [technical-reference.md](../../../template/sections/misc/overview/technical-reference.md), [address-types.md](../../../template/sections/misc/overview/address-types.md) |
-| **Operations** | [wallet-flow.md](../../../template/sections/misc/operations/wallet-flow.md), [e2e-transaction-patterns.md](../../../template/sections/misc/operations/e2e-transaction-patterns.md), [wallet-flow-improvements-2025.md](../../../template/sections/misc/operations/wallet-flow-improvements-2025.md) |
-| **Key Generation** | [improvements-2025.md](../../../template/sections/misc/keygen/improvements-2025.md), [interface-design.md](../../../template/sections/misc/keygen/interface-design.md) |
-| **PSBT** | [user-guide.md](../../../template/sections/misc/psbt/user-guide.md), [developer-guide.md](../../../template/sections/misc/psbt/developer-guide.md), [implementation.md](../../../template/sections/misc/psbt/implementation.md) |
-| **Descriptor** | [user-guide.md](../../../template/sections/misc/descriptor/user-guide.md), [architecture.md](../../../template/sections/misc/descriptor/architecture.md), [api.md](../../../template/sections/misc/descriptor/api.md) |
-| **Taproot** | [user-guide.md](../../../template/sections/misc/taproot/user-guide.md), [testing.md](../../../template/sections/misc/taproot/testing.md) |
-| **MuSig2** | [user-guide.md](../../../template/sections/misc/musig2/user-guide.md), [architecture.md](../../../template/sections/misc/musig2/architecture.md), [security.md](../../../template/sections/misc/musig2/security.md) |
-| **Testing** | [pattern3-verification.md](../../../template/sections/misc/operations/pattern3-verification.md) |
+| **Overview** | [technical-reference.md](./overview/technical-reference.md), [address-types.md](./overview/address-types.md) |
+| **Operations** | [wallet-flow.md](./operations/wallet-flow.md), [e2e-transaction-patterns.md](./operations/e2e-transaction-patterns.md), [wallet-flow-improvements-2025.md](./operations/wallet-flow-improvements-2025.md) |
+| **Key Generation** | [improvements-2025.md](./keygen/improvements-2025.md), [interface-design.md](./keygen/interface-design.md) |
+| **PSBT** | [user-guide.md](./psbt/user-guide.md), [developer-guide.md](./psbt/developer-guide.md), [implementation.md](./psbt/implementation.md) |
+| **Descriptor** | [user-guide.md](./descriptor/user-guide.md), [architecture.md](./descriptor/architecture.md), [api.md](./descriptor/api.md) |
+| **Taproot** | [user-guide.md](./taproot/user-guide.md), [testing.md](./taproot/testing.md) |
+| **MuSig2** | [user-guide.md](./musig2/user-guide.md), [architecture.md](./musig2/architecture.md), [security.md](./musig2/security.md) |
+| **Testing** | [pattern3-verification.md](./operations/pattern3-verification.md) |
 
 ### Related Resources
 
 | Resource | Location |
 |----------|----------|
 | E2E Test Scripts | [scripts/operation/btc/e2e/](https://github.com/hiromaily/go-crypto-wallet/tree/main/scripts/operation/btc/e2e) |
-| Project Testing Standards | [docs/guidelines/testing.md](../../../template/guidelines/testing.md) |
-| Security Standards | [docs/guidelines/security.md](../../../template/guidelines/security.md) |
+| Project Testing Standards | [docs/guidelines/testing.md](../../guidelines/testing.md) |
+| Security Standards | [docs/guidelines/security.md](../../guidelines/security.md) |
 
 ---
 

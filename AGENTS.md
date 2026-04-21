@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/AGENTS.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Agent Guidelines for go-crypto-wallet
 
 This document defines the **behavior and values** for AI agents working on this project.

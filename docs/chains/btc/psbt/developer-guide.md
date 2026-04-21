@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/developer-guide.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT Developer Guide
 
 This guide provides technical documentation for developers working with the PSBT (Partially Signed Bitcoin Transaction) implementation in go-crypto-wallet.
@@ -881,8 +886,8 @@ bitcoin-cli decodepsbt "$(cat "$PSBT_FILE")"
 
 - [BIP 174: PSBT Specification](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)
 - [btcd PSBT Package](https://pkg.go.dev/github.com/btcsuite/btcd/btcutil/psbt)
-- [PSBT Implementation Details](../../../../template/sections/misc/implementation)
-- [PSBT User Guide](../../../../template/sections/misc/user-guide)
+- [PSBT Implementation Details](./implementation)
+- [PSBT User Guide](./user-guide)
 
 ### Code References
 

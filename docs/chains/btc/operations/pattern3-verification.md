@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/operations/pattern3-verification.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Pattern 3 (P2SH-P2WPKH) Verification Report
 
 ## Overview

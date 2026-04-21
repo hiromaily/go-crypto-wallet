@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/migration.tpl.md · Run `make docs` to regenerate.
+-->
+
 # PSBT Migration Guide
 
 This guide provides step-by-step instructions for migrating from the legacy CSV transaction format to the PSBT (Partially Signed Bitcoin Transaction) format in go-crypto-wallet.
@@ -739,9 +744,9 @@ A: No, never edit PSBT files manually. They are base64-encoded binary data. Use 
 
 **Documentation:**
 
-- [PSBT User Guide](../../../../template/sections/misc/user-guide)
-- [PSBT Developer Guide](../../../../template/sections/misc/developer-guide)
-- [PSBT Implementation](../../../../template/sections/misc/implementation)
+- [PSBT User Guide](./user-guide)
+- [PSBT Developer Guide](./developer-guide)
+- [PSBT Implementation](./implementation)
 
 **Testing:**
 

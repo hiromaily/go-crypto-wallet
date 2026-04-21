@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/claude-best-practice.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Claude Code Best Practices Applied to go-crypto-wallet
 
 > Based on [Claude Code Best Practices](https://code.claude.com/docs/en/best-practices)

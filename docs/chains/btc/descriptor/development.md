@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/development.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Descriptor Development Guide
 
 Guidance for contributors extending descriptor functionality.

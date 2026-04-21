@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/code-generation.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Code Generation
 
 This document describes all code generation tools used in the go-crypto-wallet project.

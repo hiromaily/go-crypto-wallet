@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/architecture.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Architecture Guidelines
 
 This document describes the Clean Architecture principles and layer guidelines for the go-crypto-wallet project.

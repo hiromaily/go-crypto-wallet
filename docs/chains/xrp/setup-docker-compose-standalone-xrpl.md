@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/setup-docker-compose-standalone-xrpl.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Docker Compose setup to run a Standalone XRPL `rippled` node
 
 ## 1. `compose.yaml` (Standalone `rippled`)

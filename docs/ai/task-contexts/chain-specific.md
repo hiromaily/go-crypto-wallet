@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/chain-specific.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: chain-specific
 description: 暗号通貨固有のタスク処理用コンテキスト

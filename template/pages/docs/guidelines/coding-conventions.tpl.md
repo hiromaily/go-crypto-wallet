@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/coding-conventions.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/guidelines/coding-conventions/overview.md level=-1 -->
 
 <!-- @include: ../../../sections/guidelines/coding-conventions/quick-verification.md level=-1 -->

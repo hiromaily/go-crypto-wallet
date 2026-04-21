@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/keygen/interface-design.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Key Generator Interface Design
 
 This document proposes an interface-based design for key generation that allows for easy extension to support new key types (Taproot, MuSig2, etc.) as they evolve.

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/release.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/guidelines/release/overview.md level=-1 -->
 
 <!-- @include: ../../../sections/guidelines/release/detailed-process.md level=-1 -->

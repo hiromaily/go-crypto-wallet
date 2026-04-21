@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/psbt/poc-example.tpl.md · Run `make docs` to regenerate.
+-->
+
 // Package main provides a proof-of-concept example for PSBT operations
 // This file demonstrates how to use btcd's PSBT package for offline signing
 // NOTE: This is an example only, not production code

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/library-selection.tpl.md · Run `make docs` to regenerate.
+-->
+
 # XRP Library Selection: Dual xrpl-go Architecture
 
 This document explains why go-crypto-wallet uses **two** different `xrpl-go` libraries and the rationale behind this architectural decision.

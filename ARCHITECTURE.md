@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/ARCHITECTURE.tpl.md · Run `make docs` to regenerate.
+-->
+
 ## Architecture Overview
 
 ### Clean Architecture Layers

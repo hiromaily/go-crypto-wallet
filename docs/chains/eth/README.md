@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/eth/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Ethereum (ETH) Technical Reference
 
 This document provides a comprehensive technical reference for Ethereum implementation in the go-crypto-wallet system. It covers specifications, protocol details, and implementation notes to help AI agents and developers understand Ethereum's architecture and implement features correctly.
@@ -143,7 +148,7 @@ Address:      20 bytes = Keccak256(pubkey)[12:]
 
 ### Address Type
 
-This system supports **EOA (Externally Owned Account)** addresses for key generation and single-sig flows. **Safe (Gnosis Safe v1.4.1) smart contract wallets** are also supported for multisig flows — see [multisig.md](../../../template/sections/misc/multisig.md).
+This system supports **EOA (Externally Owned Account)** addresses for key generation and single-sig flows. **Safe (Gnosis Safe v1.4.1) smart contract wallets** are also supported for multisig flows — see [multisig.md](./multisig.md).
 
 EOA addresses:
 
@@ -456,7 +461,7 @@ recipientReceives = amount
 
 ## Wallet Implementation
 
-> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](../../../template/sections/misc/architecture.md). This section provides a quick-reference summary only.
+> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](./architecture.md). This section provides a quick-reference summary only.
 
 ### Wallet Roles (Summary)
 
@@ -466,7 +471,7 @@ recipientReceives = amount
 | **Keygen** | Generate keys, sign transactions | Generate keys, sign as Safe owner 1 | Offline (air-gapped) |
 | **Sign** | Not used | Sign as Safe owner 2…n | Offline (air-gapped) |
 
-See [architecture.md](../../../template/sections/misc/architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
+See [architecture.md](./architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
 
 ### Database Schema (ETH-specific tables)
 

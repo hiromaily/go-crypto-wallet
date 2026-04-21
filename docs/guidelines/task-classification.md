@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/task-classification.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Task Classification (SSOT)
 
 This document is the **Single Source of Truth (SSOT)** for task classification in this project.

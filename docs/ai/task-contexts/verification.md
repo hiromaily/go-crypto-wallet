@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/verification.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: verification
 description: ファイルタイプ別の検証コマンドマトリックス

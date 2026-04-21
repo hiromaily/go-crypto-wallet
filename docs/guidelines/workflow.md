@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/workflow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Workflow Guidelines
 
 This document describes development workflow, dependency management, and git operations for the go-crypto-wallet project.

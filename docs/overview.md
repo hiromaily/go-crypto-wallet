@@ -1,6 +1,6 @@
 <!--
 ⚠️ AUTO-GENERATED FILE — DO NOT EDIT
-Source: template/pages/README.tpl.md · Run `make docs` to regenerate.
+Source: template/pages/docs/overview.tpl.md · Run `make docs` to regenerate.
 -->
 
 <p align="center">

@@ -1,8 +1,3 @@
-<!--
-⚠️ AUTO-GENERATED FILE — DO NOT EDIT
-Source: template/pages/README.tpl.md · Run `make docs` to regenerate.
--->
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true" alt="Bitcoin" width="140px">
   <img src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/ethereum-img.png?raw=true" alt="Ethereum" width="140px">

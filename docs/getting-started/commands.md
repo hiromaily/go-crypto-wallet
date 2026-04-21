@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/getting-started/commands.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Commands
 
 > **Command tree overview**: [`internal/interface-adapters/cli/README.md`](https://github.com/hiromaily/go-crypto-wallet/blob/main/internal/interface-adapters/cli/README.md)

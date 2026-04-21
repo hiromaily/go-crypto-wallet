@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/network-devnet.tpl.md · Run `make docs` to regenerate.
+-->
+
 Below is a **Devnet-focused design document** written for an AI Agent.
 
 # XRPL Devnet Usage Guide (2026 Edition)

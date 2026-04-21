@@ -1,1 +1,6 @@
-<!-- @include: ../../../../sections/xrp/transaction-flow.md -->
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/transaction-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
+<!-- @include: ../../../../sections/chains/xrp/transaction-flow.md -->

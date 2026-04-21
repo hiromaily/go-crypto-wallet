@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/eth/multisig.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Ethereum Safe Multisig Reference
 
 This document covers the Safe (Gnosis Safe v1.4.1) multisig implementation for Ethereum in go-crypto-wallet. It explains the architecture, EIP-712 signing flow, file exchange format, CLI commands, and E2E Pattern 3 workflow.

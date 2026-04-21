@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/claude-mem.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/guidelines/claude-mem/overview.md level=-1 -->
 
 <!-- @include: ../../../sections/guidelines/claude-mem/installation.md level=-1 -->

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/transaction-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Transaction Flow
 
 This document describes the common transaction flow that applies across all supported chains (BTC, BCH, ETH, XRP).

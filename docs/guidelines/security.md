@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/security.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Security Standards
 
 Security requirements for go-crypto-wallet. **Security is non-negotiable** in this financial project.

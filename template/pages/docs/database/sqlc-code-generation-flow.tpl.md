@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/database/sqlc-code-generation-flow.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/database/sqlc-code-generation-flow/overview.md level=-1 -->
 
 <!-- @include: ../../../sections/database/sqlc-code-generation-flow/flowchart.md level=-1 -->

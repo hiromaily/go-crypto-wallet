@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/ai/task-contexts/db-change.tpl.md · Run `make docs` to regenerate.
+-->
+
 ---
 task_type: db-change
 description: データベーススキーマ変更タスク用のコンテキスト

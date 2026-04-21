@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/guidelines/code-generation.tpl.md · Run `make docs` to regenerate.
+-->
+
 <!-- @include: ../../../sections/guidelines/code-generation/overview.md level=-1 -->
 <!-- @include: ../../../sections/guidelines/code-generation/atlas.md level=-1 -->
 <!-- @include: ../../../sections/guidelines/code-generation/sqlc-schemas.md level=-1 -->

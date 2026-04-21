@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/descriptor/migration.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Migrating to Descriptor Wallets
 
 This guide outlines how to move from legacy address management to descriptor-based wallets without disrupting existing operations.

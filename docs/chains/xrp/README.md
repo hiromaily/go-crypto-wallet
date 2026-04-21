@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/xrp/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # XRP Ledger (XRP) Technical Reference
 
 This document provides a technical reference for XRP Ledger implementation in the go-crypto-wallet system.

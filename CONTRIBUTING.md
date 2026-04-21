@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/CONTRIBUTING.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Contributing to go-crypto-wallet
 
 Thank you for your interest in contributing to go-crypto-wallet!

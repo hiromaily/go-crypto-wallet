@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/btc/keygen/README.tpl.md · Run `make docs` to regenerate.
+-->
+
 # Key Generation
 
 This directory contains documentation for Bitcoin key generation design and improvements.

@@ -1,3 +1,8 @@
+<!--
+⚠️ AUTO-GENERATED FILE — DO NOT EDIT
+Source: template/pages/docs/chains/bch/interface-separation.tpl.md · Run `make docs` to regenerate.
+-->
+
 # BCH: Interface Separation Requirements
 
 ## Overview
