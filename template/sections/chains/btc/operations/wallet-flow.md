@@ -3,14 +3,14 @@
 This document describes the BTC-specific setup procedures and transaction flow.
 
 > **Common flow**: The 3-wallet architecture, setup flow, signing flow, and monitoring flow are
-> defined in the chain-agnostic reference: [docs/transaction-flow.md](../../../../docs/transaction-flow.md).
+> defined in the chain-agnostic reference: [docs/transaction-flow.md](../../../../../docs/transaction-flow.md).
 > This document covers BTC-specific details only.
 
 ## BTC-Specific Notes
 
-- Transaction files use **PSBT (Partially Signed Bitcoin Transaction)** format — see [psbt/](../../../../docs/chains/btc/psbt/README.md)
-- Bitcoin Core descriptor wallets are used for address management — see [descriptor/](../../../../docs/chains/btc/descriptor/README.md)
-- Multiple address types are supported (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR) — see [E2E patterns](../../../../docs/chains/btc/operations/e2e-transaction-patterns.md)
+- Transaction files use **PSBT (Partially Signed Bitcoin Transaction)** format — see [psbt/](../../../../../docs/chains/btc/psbt/README.md)
+- Bitcoin Core descriptor wallets are used for address management — see [descriptor/](../../../../../docs/chains/btc/descriptor/README.md)
+- Multiple address types are supported (P2PKH, P2SH-P2WPKH, P2WPKH, P2TR) — see [E2E patterns](../../../../../docs/chains/btc/operations/e2e-transaction-patterns.md)
 
 ## Overview
 

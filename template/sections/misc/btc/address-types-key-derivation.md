@@ -11,7 +11,7 @@
 | **P2WSH** | BIP141 | `bc1q` | `tb1q` | SegWit Script Hash |
 | **P2TR** | BIP86 | `bc1p` | `tb1p` | Taproot (recommended) |
 
-See [overview/address-types.md](overview/address-types.md) for detailed comparison.
+See [overview/address-types.md](../../../../docs/chains/btc/overview/address-types.md) for detailed comparison.
 
 ### HD Wallet Derivation Paths
 

@@ -249,12 +249,12 @@ make xrp-e2e-p1-ci        # CI mode (non-interactive)
 
 | Document | Description |
 |----------|-------------|
-| [testing-strategy.md](../../../docs/chains/xrp/testing-strategy.md) | CI/E2E node strategy, standalone mode rationale |
-| [setup-docker-compose-standalone-xrpl.md](../../../docs/chains/xrp/setup-docker-compose-standalone-xrpl.md) | Docker Compose setup for local rippled |
-| [transaction-flow.md](../../../docs/chains/xrp/transaction-flow.md) | XRP transaction flow details |
-| [architecture-2026.md](../../../docs/chains/xrp/architecture-2026.md) | Current architecture overview |
-| [xrpl-go.md](../../../docs/chains/xrp/xrpl-go.md) | xrpl-go library usage |
-| [network-devnet.md](../../../docs/chains/xrp/network-devnet.md) | Devnet configuration |
+| [testing-strategy.md](../../../../docs/chains/xrp/testing-strategy.md) | CI/E2E node strategy, standalone mode rationale |
+| [setup-docker-compose-standalone-xrpl.md](../../../../docs/chains/xrp/setup-docker-compose-standalone-xrpl.md) | Docker Compose setup for local rippled |
+| [transaction-flow.md](../../../../docs/chains/xrp/transaction-flow.md) | XRP transaction flow details |
+| [architecture-2026.md](../../../../docs/chains/xrp/architecture-2026.md) | Current architecture overview |
+| [xrpl-go.md](../../../../docs/chains/xrp/xrpl-go.md) | xrpl-go library usage |
+| [network-devnet.md](../../../../docs/chains/xrp/network-devnet.md) | Devnet configuration |
 
 ---
 

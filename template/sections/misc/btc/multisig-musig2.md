@@ -25,6 +25,6 @@ MuSig2 enables N-of-N multisig that appears as single-sig on-chain.
 - Generate fresh nonces for every transaction
 - Delete nonces after signing
 
-See [musig2/](musig2/README.md) for detailed documentation.
+See [musig2/](../../../../docs/chains/btc/musig2/README.md) for detailed documentation.
 
 ---

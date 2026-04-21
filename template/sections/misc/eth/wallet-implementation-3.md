@@ -1,6 +1,6 @@
 ## Wallet Implementation
 
-> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](./architecture.md). This section provides a quick-reference summary only.
+> **Architecture SSOT:** Wallet roles, use case assignments, Clean Architecture boundary map, and signing flows are documented in [architecture.md](../../../../docs/chains/eth/architecture.md). This section provides a quick-reference summary only.
 
 ### Wallet Roles (Summary)
 
@@ -10,7 +10,7 @@
 | **Keygen** | Generate keys, sign transactions | Generate keys, sign as Safe owner 1 | Offline (air-gapped) |
 | **Sign** | Not used | Sign as Safe owner 2…n | Offline (air-gapped) |
 
-See [architecture.md](./architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
+See [architecture.md](../../../../docs/chains/eth/architecture.md) for the complete use case assignment table, architecture boundary map, and offline signing detail.
 
 ### Database Schema (ETH-specific tables)
 

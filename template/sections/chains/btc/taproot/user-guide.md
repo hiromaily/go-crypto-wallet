@@ -672,7 +672,7 @@ If you encounter issues not covered here:
 
 ### Documentation
 
-- [Taproot Testing Guide](../../../../docs/chains/btc/taproot/testing.md) - For developers running tests
+- [Taproot Testing Guide](../../../../../docs/chains/btc/taproot/testing.md) - For developers running tests
 - [BIP341 - Taproot](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki) - Technical specification
 - [BIP86 - Key Derivation](https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki) - Derivation path standard
 - [BIP340 - Schnorr Signatures](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki) - Signature scheme

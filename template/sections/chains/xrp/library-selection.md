@@ -349,8 +349,8 @@ Submit:   ~4s     (broadcast + validation via xrpscan)
 
 ### Internal Documentation
 
-- [xrpl-go.md](../../../docs/chains/xrp/xrpl-go.md) - xrpscan/xrpl-go capabilities
-- [architecture-2026.md](../../../docs/chains/xrp/architecture-2026.md) - Overall XRP architecture
+- [xrpl-go.md](../../../../docs/chains/xrp/xrpl-go.md) - xrpscan/xrpl-go capabilities
+- [architecture-2026.md](../../../../docs/chains/xrp/architecture-2026.md) - Overall XRP architecture
 - `.kiro/specs/xrp-transaction-flow-alignment/design.md` - Transaction flow design
 
 ---

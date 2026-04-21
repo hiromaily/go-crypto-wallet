@@ -6,11 +6,11 @@ This directory contains documentation for PSBT implementation and usage in the g
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](../../../../docs/chains/btc/psbt/user-guide.md) | How to use PSBT for offline signing workflows | Operators |
-| [developer-guide.md](../../../../docs/chains/btc/psbt/developer-guide.md) | Technical implementation details for developers | Developers |
-| [implementation.md](../../../../docs/chains/btc/psbt/implementation.md) | PSBT implementation architecture | Developers |
-| [migration.md](../../../../docs/chains/btc/psbt/migration.md) | Migration guide from legacy to PSBT | All |
-| [poc-example.md](../../../../docs/chains/btc/psbt/poc-example.md) | Proof of concept examples | Developers |
+| [user-guide.md](../../../../../docs/chains/btc/psbt/user-guide.md) | How to use PSBT for offline signing workflows | Operators |
+| [developer-guide.md](../../../../../docs/chains/btc/psbt/developer-guide.md) | Technical implementation details for developers | Developers |
+| [implementation.md](../../../../../docs/chains/btc/psbt/implementation.md) | PSBT implementation architecture | Developers |
+| [migration.md](../../../../../docs/chains/btc/psbt/migration.md) | Migration guide from legacy to PSBT | All |
+| [poc-example.md](../../../../../docs/chains/btc/psbt/poc-example.md) | Proof of concept examples | Developers |
 
 ## What is PSBT?
 
@@ -33,9 +33,9 @@ PSBT (BIP174) is the standard format for Bitcoin transactions that require offli
 
 ## Related Documentation
 
-- [../operations/wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md) - Transaction flow using PSBT
-- [../musig2/](../../../../docs/chains/btc/musig2/README.md) - MuSig2 uses PSBT for coordination
-- [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
+- [../operations/wallet-flow.md](../../../../../docs/chains/btc/operations/wallet-flow.md) - Transaction flow using PSBT
+- [../musig2/](../../../../../docs/chains/btc/musig2/README.md) - MuSig2 uses PSBT for coordination
+- [../README.md](../../../../../docs/chains/btc/README.md) - Main BTC documentation index
 
 ## References
 

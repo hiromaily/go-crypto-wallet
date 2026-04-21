@@ -48,6 +48,7 @@ include make/test.mk
 include make/codegen.mk
 include make/lint.mk
 include make/release.mk
+include make/docs.mk
 
 # 3. Blockchain-specific
 include make/wallet/btc.mk

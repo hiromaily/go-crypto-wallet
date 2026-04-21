@@ -2,7 +2,7 @@
 
 ### Address Type
 
-This system supports **EOA (Externally Owned Account)** addresses for key generation and single-sig flows. **Safe (Gnosis Safe v1.4.1) smart contract wallets** are also supported for multisig flows — see [multisig.md](./multisig.md).
+This system supports **EOA (Externally Owned Account)** addresses for key generation and single-sig flows. **Safe (Gnosis Safe v1.4.1) smart contract wallets** are also supported for multisig flows — see [multisig.md](../../../../docs/chains/eth/multisig.md).
 
 EOA addresses:
 

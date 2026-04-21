@@ -6,9 +6,9 @@ This directory contains guides for operating the Bitcoin wallet system.
 
 | Document | Description |
 |----------|-------------|
-| [wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md) | Setup procedures and transaction flow for Watch/Keygen/Sign wallets |
-| [e2e-transaction-patterns.md](../../../../docs/chains/btc/operations/e2e-transaction-patterns.md) | E2E test patterns for various key types and signature schemes |
-| [wallet-flow-improvements-2025.md](../../../../docs/chains/btc/operations/wallet-flow-improvements-2025.md) | 2025 workflow enhancement plans |
+| [wallet-flow.md](../../../../../docs/chains/btc/operations/wallet-flow.md) | Setup procedures and transaction flow for Watch/Keygen/Sign wallets |
+| [e2e-transaction-patterns.md](../../../../../docs/chains/btc/operations/e2e-transaction-patterns.md) | E2E test patterns for various key types and signature schemes |
+| [wallet-flow-improvements-2025.md](../../../../../docs/chains/btc/operations/wallet-flow-improvements-2025.md) | 2025 workflow enhancement plans |
 
 ## Audience
 
@@ -30,6 +30,6 @@ This directory contains guides for operating the Bitcoin wallet system.
 
 ## Related Documentation
 
-- [../psbt/](../../../../docs/chains/btc/psbt/README.md) - PSBT guides for offline signing
-- [../musig2/](../../../../docs/chains/btc/musig2/README.md) - MuSig2 multisig operations
-- [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
+- [../psbt/](../../../../../docs/chains/btc/psbt/README.md) - PSBT guides for offline signing
+- [../musig2/](../../../../../docs/chains/btc/musig2/README.md) - MuSig2 multisig operations
+- [../README.md](../../../../../docs/chains/btc/README.md) - Main BTC documentation index

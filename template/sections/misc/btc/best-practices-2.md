@@ -2,7 +2,7 @@
 
 ### Security
 
-> For general offline wallet security (air-gapped signing, file transfer security), see [MuSig2 Best Practices](../musig2/user-guide.md#best-practices).
+> For general offline wallet security (air-gapped signing, file transfer security), see [MuSig2 Best Practices](../../../../docs/chains/btc/musig2/user-guide.md#best-practices).
 
 1. **Private Key Protection**
    - ✅ Store seeds and private keys in secure offline storage

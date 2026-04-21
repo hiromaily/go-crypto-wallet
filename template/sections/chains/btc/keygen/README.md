@@ -6,9 +6,9 @@ This directory contains documentation for Bitcoin key generation design and impr
 
 | Document | Description |
 |----------|-------------|
-| [improvements-2025.md](../../../../docs/chains/btc/keygen/improvements-2025.md) | 2025 key generation modernization improvements |
-| [improvements-2025-ja.md](../../../../docs/chains/btc/keygen/improvements-2025-ja.md) | 2025 improvements (Japanese version) |
-| [interface-design.md](../../../../docs/chains/btc/keygen/interface-design.md) | Key generator interface design documentation |
+| [improvements-2025.md](../../../../../docs/chains/btc/keygen/improvements-2025.md) | 2025 key generation modernization improvements |
+| [improvements-2025-ja.md](../../../../../docs/chains/btc/keygen/improvements-2025-ja.md) | 2025 improvements (Japanese version) |
+| [interface-design.md](../../../../../docs/chains/btc/keygen/interface-design.md) | Key generator interface design documentation |
 
 ## Audience
 
@@ -31,7 +31,7 @@ This directory contains documentation for Bitcoin key generation design and impr
 
 ## Related Documentation
 
-- [../taproot/](../../../../docs/chains/btc/taproot/README.md) - Taproot implementation guides
-- [../musig2/](../../../../docs/chains/btc/musig2/README.md) - MuSig2 architecture
-- [../descriptor/](../../../../docs/chains/btc/descriptor/README.md) - Output descriptor guides
-- [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
+- [../taproot/](../../../../../docs/chains/btc/taproot/README.md) - Taproot implementation guides
+- [../musig2/](../../../../../docs/chains/btc/musig2/README.md) - MuSig2 architecture
+- [../descriptor/](../../../../../docs/chains/btc/descriptor/README.md) - Output descriptor guides
+- [../README.md](../../../../../docs/chains/btc/README.md) - Main BTC documentation index

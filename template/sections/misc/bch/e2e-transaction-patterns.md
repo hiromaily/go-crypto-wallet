@@ -3,7 +3,7 @@
 This section describes the E2E (End-to-End) transaction patterns available for Bitcoin Cash in the go-crypto-wallet system.
 
 > **Common flow reference**: The 3-wallet setup, signing, and monitoring flows are defined in
-> [docs/transaction-flow.md](../../transaction-flow.md). The patterns below describe
+> [docs/transaction-flow.md](../../../../docs/transaction-flow.md). The patterns below describe
 > BCH-specific address formats, signing algorithms, and protocol constraints.
 
 ### BCH Pattern Limitations vs BTC
@@ -36,7 +36,7 @@ Address Format: bitcoincash:q... (P2PKH), bchtest:q... (Testnet)
 
 **Workflow:**
 
-Follows the [common single-sig flow](../../transaction-flow.md#single-sig-flow).
+Follows the [common single-sig flow](../../../../docs/transaction-flow.md#single-sig-flow).
 BCH-specific signing: **ECDSA** (no Schnorr).
 
 **Characteristics:**
@@ -66,7 +66,7 @@ Address Format: bitcoincash:p... (P2SH), bchtest:p... (Testnet)
 
 **Workflow:**
 
-Follows the [common multisig flow](../../transaction-flow.md#multisig-flow-m-of-n) with M=2, N=3.
+Follows the [common multisig flow](../../../../docs/transaction-flow.md#multisig-flow-m-of-n) with M=2, N=3.
 Signing stops after 2 signatures (`isCompleted: true`); Sign2 is not required.
 BCH-specific signing: **ECDSA** (no Schnorr).
 
@@ -97,7 +97,7 @@ E2E Script: scripts/operation/bch/e2e-workflow.sh
 
 **Workflow:**
 
-Follows the [common multisig flow](../../transaction-flow.md#multisig-flow-m-of-n) with M=3, N=3.
+Follows the [common multisig flow](../../../../docs/transaction-flow.md#multisig-flow-m-of-n) with M=3, N=3.
 All 3 signatures required (Keygen + Sign1 + Sign2).
 BCH-specific signing: **ECDSA** (no Schnorr).
 

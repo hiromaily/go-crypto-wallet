@@ -4,9 +4,9 @@
 
 **Documentation:**
 
-- [PSBT User Guide](./user-guide)
-- [PSBT Developer Guide](./developer-guide)
-- [PSBT Implementation](./implementation)
+- [PSBT User Guide](../../../../docs/chains/btc/psbt/user-guide)
+- [PSBT Developer Guide](../../../../docs/chains/btc/psbt/developer-guide)
+- [PSBT Implementation](../../../../docs/chains/btc/psbt/implementation)
 
 **Testing:**
 

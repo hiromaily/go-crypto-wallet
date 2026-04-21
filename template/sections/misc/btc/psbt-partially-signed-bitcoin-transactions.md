@@ -24,6 +24,6 @@ PSBT (BIP174) is the standard format for offline/multi-party signing workflows.
    └── Extract broadcastable transaction
 ```
 
-See [psbt/](psbt/README.md) for detailed documentation.
+See [psbt/](../../../../docs/chains/btc/psbt/README.md) for detailed documentation.
 
 ---

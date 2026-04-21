@@ -84,7 +84,7 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 
 1. Recreate `payment_request` table as needed
 
-- target sql is [here](../../../../docs/chains/btc/archive/[this sql](https:/github.com/hiromaily/go-crypto-wallet/blob/main/docker/mysql/sqls/payment_request.sql))
+- target sql is [here](../../../../../docs/chains/btc/archive/[this sql](https:/github.com/hiromaily/go-crypto-wallet/blob/main/docker/mysql/sqls/payment_request.sql))
 - modify as needed as restart container (recreate table)
 - As default, receiver adderesses are for Signet. If network is different, address must be changed.
 

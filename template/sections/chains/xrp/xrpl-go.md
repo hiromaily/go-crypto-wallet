@@ -1,6 +1,6 @@
 # About [xrpscan/xrpl-go](https://github.com/xrpscan/xrpl-go)
 
-> **Note**: This document covers **xrpscan/xrpl-go** specifically. For the overall library selection strategy (why we use both xrpscan and Peersyst), see [library-selection.md](../../../docs/chains/xrp/library-selection.md).
+> **Note**: This document covers **xrpscan/xrpl-go** specifically. For the overall library selection strategy (why we use both xrpscan and Peersyst), see [library-selection.md](../../../../docs/chains/xrp/library-selection.md).
 
 [xrpscan/xrpl-go](https://github.com/xrpscan/xrpl-go) does *not* provide full offline transaction building/signing + submission without network access. It *can* do some offline work (keypairs, serialization, signing), but **most useful functionality still assumes a connection to an XRPL node (via WebSocket or RPC)** to query ledger state and submit transactions.
 
@@ -93,4 +93,4 @@ So **`xrpl-go` does not replace the need to talk to XRPL nodes** — it is a lib
 └─────────────────────────────────────┘
 ```
 
-**For the complete rationale**, see [library-selection.md](../../../docs/chains/xrp/library-selection.md).
+**For the complete rationale**, see [library-selection.md](../../../../docs/chains/xrp/library-selection.md).

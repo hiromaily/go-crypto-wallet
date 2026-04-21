@@ -11,9 +11,9 @@ It covers:
 - **MuSig2 note**: where MuSig2 nonce and partial signing fit
 
 > **Related documents:**
-> - Chain-agnostic 3-wallet flow: [docs/transaction-flow.md](../../../docs/transaction-flow.md)
-> - BTC protocol specifications: [docs/chains/btc/README.md](../../../docs/chains/btc/README.md)
-> - ETH reference implementation (single-sig comparison): [docs/chains/eth/architecture.md](../../../docs/chains/eth/architecture.md)
+> - Chain-agnostic 3-wallet flow: [docs/transaction-flow.md](../../../../docs/transaction-flow.md)
+> - BTC protocol specifications: [docs/chains/btc/README.md](../../../../docs/chains/btc/README.md)
+> - ETH reference implementation (single-sig comparison): [docs/chains/eth/architecture.md](../../../../docs/chains/eth/architecture.md)
 
 ---
 
@@ -28,7 +28,7 @@ BTC supports both single-sig and multisig (P2WSH, MuSig2/P2TR). The Sign Wallet 
 | **Sign** | Offline (air-gapped) | Generate auth keys, export pubkeys (for Keygen multisig setup), **additional signatures on PSBT** |
 
 > For single-sig: only Watch + Keygen are needed. Sign Wallet participates only in multisig flows.
-> See [docs/transaction-flow.md](../../../docs/transaction-flow.md) for the full single-sig vs multisig comparison.
+> See [docs/transaction-flow.md](../../../../docs/transaction-flow.md) for the full single-sig vs multisig comparison.
 
 ---
 
@@ -321,7 +321,7 @@ Both Keygen and Sign wallets participate in MuSig2:
 | Aggregation | Watch | `MuSig2Aggregate` — combine partial sigs into final Schnorr sig |
 
 > **Critical:** MuSig2 nonces must never be reused. Reuse leaks the private key.
-> See [docs/chains/btc/musig2/security.md](../../../docs/chains/btc/musig2/security.md) for details.
+> See [docs/chains/btc/musig2/security.md](../../../../docs/chains/btc/musig2/security.md) for details.
 
 ---
 

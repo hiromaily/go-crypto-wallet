@@ -6,13 +6,13 @@ This directory contains documentation for Bitcoin Output Descriptor implementati
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](../../../../docs/chains/btc/descriptor/user-guide.md) | How to use descriptors for address generation | Operators |
-| [architecture.md](../../../../docs/chains/btc/descriptor/architecture.md) | Descriptor architecture following Clean Architecture | Developers |
-| [development.md](../../../../docs/chains/btc/descriptor/development.md) | Development guide for descriptor features | Developers |
-| [api.md](../../../../docs/chains/btc/descriptor/api.md) | API reference for descriptor operations | Developers |
-| [examples.md](../../../../docs/chains/btc/descriptor/examples.md) | Descriptor format examples | All |
-| [compatibility.md](../../../../docs/chains/btc/descriptor/compatibility.md) | Bitcoin Core compatibility notes | Developers |
-| [migration.md](../../../../docs/chains/btc/descriptor/migration.md) | Migration guide from legacy address handling | All |
+| [user-guide.md](../../../../../docs/chains/btc/descriptor/user-guide.md) | How to use descriptors for address generation | Operators |
+| [architecture.md](../../../../../docs/chains/btc/descriptor/architecture.md) | Descriptor architecture following Clean Architecture | Developers |
+| [development.md](../../../../../docs/chains/btc/descriptor/development.md) | Development guide for descriptor features | Developers |
+| [api.md](../../../../../docs/chains/btc/descriptor/api.md) | API reference for descriptor operations | Developers |
+| [examples.md](../../../../../docs/chains/btc/descriptor/examples.md) | Descriptor format examples | All |
+| [compatibility.md](../../../../../docs/chains/btc/descriptor/compatibility.md) | Bitcoin Core compatibility notes | Developers |
+| [migration.md](../../../../../docs/chains/btc/descriptor/migration.md) | Migration guide from legacy address handling | All |
 
 ## What are Output Descriptors?
 
@@ -34,9 +34,9 @@ Output Descriptors are a language for describing collections of output scripts. 
 
 ## Related Documentation
 
-- [../keygen/](../../../../docs/chains/btc/keygen/README.md) - Key generation that uses descriptors
-- [../taproot/](../../../../docs/chains/btc/taproot/README.md) - Taproot descriptors
-- [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
+- [../keygen/](../../../../../docs/chains/btc/keygen/README.md) - Key generation that uses descriptors
+- [../taproot/](../../../../../docs/chains/btc/taproot/README.md) - Taproot descriptors
+- [../README.md](../../../../../docs/chains/btc/README.md) - Main BTC documentation index
 
 ## References
 

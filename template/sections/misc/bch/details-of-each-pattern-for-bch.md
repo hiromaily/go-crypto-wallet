@@ -50,6 +50,6 @@ Watch Wallet (broadcast)
 
 **Note:** Unlike BTC's SegWit patterns, BCH transactions don't benefit from witness data separation, resulting in larger transaction sizes. BCH compensates with very low fees (~1 sat/byte).
 
-For more BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-transaction-patterns)
+For more BCH patterns, see [BCH Technical Reference](../../../../docs/chains/bch/README.md#e2e-transaction-patterns)
 
 ---

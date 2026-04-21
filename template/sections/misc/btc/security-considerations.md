@@ -20,6 +20,6 @@
 - Generate cryptographically secure random nonces
 - Delete nonces immediately after signing
 
-See [musig2/security.md](musig2/security.md) for details.
+See [musig2/security.md](../../../../docs/chains/btc/musig2/security.md) for details.
 
 ---

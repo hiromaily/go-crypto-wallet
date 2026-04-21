@@ -24,6 +24,6 @@ Used for P2TR transactions. Introduced with Taproot (BIP340).
 - Provably secure under standard assumptions
 - Batch verification is faster
 
-See [taproot/user-guide.md](taproot/user-guide.md) for details.
+See [taproot/user-guide.md](../../../../docs/chains/btc/taproot/user-guide.md) for details.
 
 ---

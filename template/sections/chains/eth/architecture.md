@@ -10,10 +10,10 @@ It covers:
 - **Key differences from BTC**: account model, EIP-1559, Safe multisig
 
 > **Related documents:**
-> - Chain-agnostic 3-wallet flow: [docs/transaction-flow.md](../../../docs/transaction-flow.md)
-> - ETH protocol specifications: [docs/chains/eth/README.md](../../../docs/chains/eth/README.md)
-> - ETH Safe multisig details: [docs/chains/eth/multisig.md](../../../docs/chains/eth/multisig.md)
-> - BTC reference implementation: [docs/chains/btc/README.md](../../../docs/chains/btc/README.md)
+> - Chain-agnostic 3-wallet flow: [docs/transaction-flow.md](../../../../docs/transaction-flow.md)
+> - ETH protocol specifications: [docs/chains/eth/README.md](../../../../docs/chains/eth/README.md)
+> - ETH Safe multisig details: [docs/chains/eth/multisig.md](../../../../docs/chains/eth/multisig.md)
+> - BTC reference implementation: [docs/chains/btc/README.md](../../../../docs/chains/btc/README.md)
 
 ---
 

@@ -3,7 +3,7 @@
 This document proposes an XRP Ledger (XRPL) module architecture aligned with **go-crypto-wallet’s Clean Architecture + 3-wallet security model** (Watch / Keygen / Sign).
 
 > **As-built reference**: For the current implementation details (post PR #632), see
-> [transaction-flow.md](../../../docs/chains/xrp/transaction-flow.md).
+> [transaction-flow.md](../../../../docs/chains/xrp/transaction-flow.md).
 
 It focuses on:
 
@@ -171,12 +171,12 @@ Keys must be generated only on trusted devices.
 # 5. Wallet-Level Flows
 
 > The common 3-wallet setup, signing, and monitoring flows are defined in the chain-agnostic reference:
-> [docs/transaction-flow.md](../../../docs/transaction-flow.md).
+> [docs/transaction-flow.md](../../../../docs/transaction-flow.md).
 > This section describes XRPL-specific concerns on top of that common flow.
 
 ## 5.1 Single-Sig Flow (XRPL)
 
-Follows the [common single-sig flow](../../../docs/transaction-flow.md#single-sig-flow).
+Follows the [common single-sig flow](../../../../docs/transaction-flow.md#single-sig-flow).
 
 XRPL-specific steps:
 - Watch Wallet fetches `Sequence` and decides `Fee` / `LastLedgerSequence` before building the unsigned tx
@@ -185,7 +185,7 @@ XRPL-specific steps:
 
 ## 5.2 Multisig Flow (XRPL)
 
-Follows the [common multisig flow](../../../docs/transaction-flow.md#multisig-flow-m-of-n).
+Follows the [common multisig flow](../../../../docs/transaction-flow.md#multisig-flow-m-of-n).
 
 XRPL-specific steps:
 - Each signer produces a `Signer` entry appended to the transaction (rather than replacing it)
@@ -379,7 +379,7 @@ Suggested Use Cases:
 
 > **Deprecated (do not use)**: The xrpl-grpc-server gRPC adapter has been retired.
 > The wallet connects directly to rippled via WebSocket on port 6006.
-> See [library-selection.md](../../../docs/chains/xrp/library-selection.md) for the dual-library architecture.
+> See [library-selection.md](../../../../docs/chains/xrp/library-selection.md) for the dual-library architecture.
 
 ---
 

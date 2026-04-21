@@ -38,6 +38,6 @@ BCH supports **fewer patterns** than BTC due to lack of SegWit, Taproot, and Sch
 - ❌ No BIP49/84/86 derivation paths (BIP44 only)
 - ⚠️ Fee unit: sat/Byte (not sat/vByte - no witness discount)
 
-For detailed BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-transaction-patterns).
+For detailed BCH patterns, see [BCH Technical Reference](../../../../docs/chains/bch/README.md#e2e-transaction-patterns).
 
 ---

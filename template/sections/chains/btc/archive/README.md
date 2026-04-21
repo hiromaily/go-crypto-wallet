@@ -8,7 +8,7 @@ This directory contains outdated or deprecated documentation kept for historical
 
 | Document | Status | Replacement |
 |----------|--------|-------------|
-| [operation-example.md](../../../../docs/chains/btc/archive/operation-example.md) | Outdated | See [../operations/wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md) |
+| [operation-example.md](../../../../../docs/chains/btc/archive/operation-example.md) | Outdated | See [../operations/wallet-flow.md](../../../../../docs/chains/btc/operations/wallet-flow.md) |
 
 ## Why Keep Archived Documents?
 
@@ -18,5 +18,5 @@ This directory contains outdated or deprecated documentation kept for historical
 
 ## Related Documentation
 
-- [../operations/](../../../../docs/chains/btc/operations) - Current operation guides
-- [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
+- [../operations/](../../../../../docs/chains/btc/operations) - Current operation guides
+- [../README.md](../../../../../docs/chains/btc/README.md) - Main BTC documentation index

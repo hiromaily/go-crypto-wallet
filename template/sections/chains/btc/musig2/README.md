@@ -6,10 +6,10 @@ This directory contains documentation for MuSig2 (BIP327) multisignature impleme
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [user-guide.md](../../../../docs/chains/btc/musig2/user-guide.md) | How to use MuSig2 for multisig operations | Operators |
-| [architecture.md](../../../../docs/chains/btc/musig2/architecture.md) | MuSig2 system architecture and data flow | Developers |
-| [security.md](../../../../docs/chains/btc/musig2/security.md) | Security considerations and nonce management | All |
-| [migration-from-traditional.md](../../../../docs/chains/btc/musig2/migration-from-traditional.md) | Migration guide from traditional P2WSH multisig | All |
+| [user-guide.md](../../../../../docs/chains/btc/musig2/user-guide.md) | How to use MuSig2 for multisig operations | Operators |
+| [architecture.md](../../../../../docs/chains/btc/musig2/architecture.md) | MuSig2 system architecture and data flow | Developers |
+| [security.md](../../../../../docs/chains/btc/musig2/security.md) | Security considerations and nonce management | All |
+| [migration-from-traditional.md](../../../../../docs/chains/btc/musig2/migration-from-traditional.md) | Migration guide from traditional P2WSH multisig | All |
 
 ## What is MuSig2?
 
@@ -40,7 +40,7 @@ Round 2: Partial Signing (Sequential)
 
 - Generate fresh nonces for every transaction
 - Delete nonces immediately after signing
-- See [security.md](../../../../docs/chains/btc/musig2/security.md) for details
+- See [security.md](../../../../../docs/chains/btc/musig2/security.md) for details
 
 ## CLI Commands
 
@@ -62,10 +62,10 @@ watch --coin btc musig2 aggregate
 
 ## Related Documentation
 
-- [../taproot/](../../../../docs/chains/btc/taproot/README.md) - MuSig2 requires Taproot
-- [../psbt/](../../../../docs/chains/btc/psbt/README.md) - PSBT used for coordination
-- [../operations/wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md) - Transaction flows
-- [../README.md](../../../../docs/chains/btc/README.md) - Main BTC documentation index
+- [../taproot/](../../../../../docs/chains/btc/taproot/README.md) - MuSig2 requires Taproot
+- [../psbt/](../../../../../docs/chains/btc/psbt/README.md) - PSBT used for coordination
+- [../operations/wallet-flow.md](../../../../../docs/chains/btc/operations/wallet-flow.md) - Transaction flows
+- [../README.md](../../../../../docs/chains/btc/README.md) - Main BTC documentation index
 
 ## References
 

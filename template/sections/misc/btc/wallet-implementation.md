@@ -17,7 +17,7 @@
 | **payment** | Outgoing payments | Yes (2-of-3 or 3-of-3) |
 | **stored** | Cold storage | Yes |
 
-For the common 3-wallet transaction flow (chain-agnostic), see [docs/transaction-flow.md](../../transaction-flow.md).
-For BTC-specific procedures and Mermaid diagrams, see [operations/wallet-flow.md](operations/wallet-flow.md).
+For the common 3-wallet transaction flow (chain-agnostic), see [docs/transaction-flow.md](../../../../docs/transaction-flow.md).
+For BTC-specific procedures and Mermaid diagrams, see [operations/wallet-flow.md](../../../../docs/chains/btc/operations/wallet-flow.md).
 
 ---

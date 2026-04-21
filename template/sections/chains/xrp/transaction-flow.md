@@ -4,8 +4,8 @@ This document describes the **as-built** transaction flow for the XRP integratio
 It maps each step to the concrete Go files and interfaces that implement it.
 
 For the common multi-wallet architecture shared across all chains, see
-[docs/transaction-flow.md](../../../docs/transaction-flow.md).
-For the future architecture proposal, see [architecture-2026.md](../../../docs/chains/xrp/architecture-2026.md).
+[docs/transaction-flow.md](../../../../docs/transaction-flow.md).
+For the future architecture proposal, see [architecture-2026.md](../../../../docs/chains/xrp/architecture-2026.md).
 
 ---
 
