@@ -300,10 +300,3 @@ func TestXRPTransactionEntry_Validate(t *testing.T) {
 		})
 	}
 }
-
-// Helper function to create string pointer
-//
-//go:fix inline
-func stringPtr(s string) *string {
-	return new(s)
-}

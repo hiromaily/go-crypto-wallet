@@ -549,7 +549,8 @@ func orderSignaturesByPubKeyOrder(
 // buildSegWitMultisigFinalScripts builds final scripts for P2SH-P2WSH (SegWit) multisig.
 func buildSegWitMultisigFinalScripts(input *psbt.PInput, sigs [][]byte, inputIndex int) error {
 	// Build witness stack: [OP_0, sig1, sig2, ..., witnessScript]
-	witness := wire.TxWitness{[]byte{}} // OP_0 (required for CHECKMULTISIG bug)
+	witness := make(wire.TxWitness, 0, 1+len(sigs)+1)
+	witness = append(witness, []byte{}) // OP_0 (required for CHECKMULTISIG bug)
 	for _, sig := range sigs {
 		witness = append(witness, sig)
 	}
